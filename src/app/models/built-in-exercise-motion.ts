@@ -82,6 +82,20 @@ const ON_INCLINE = {
 /** Lying on its back on the floor, head to the left. */
 const ON_FLOOR = { hips: [0, -13], torso: -90 } as const;
 
+/**
+ * Sitting on the floor leaning back, the feet off it, in a V, the hands together in front of
+ * the belly.
+ */
+const V_SIT = {
+    hips: [0, -12],
+    torso: 215,
+    head: 200,
+    arms: both(touch(40, -26, 'cw')),
+    legs: both(angles(130, 60)),
+    feet: [115, 115],
+    handsApart: 4,
+} as const;
+
 /** A bar to hang from, end on, on its frame. */
 const PULL_UP_BAR: Kit[] = [
     { kind: 'frame', from: [40, 0], to: [40, -232] },
@@ -1165,30 +1179,22 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
         ],
     },
     // From the front, sitting back with the knees up towards you, so the legs drawn short
+    // Turning the shoulders, which only the 3D figure shows: flat, the hands stay in front
     'builtin:russian-twist': {
-        view: 'front',
+        view: 'side',
+        seenFrom: 20,
         frames: [
             {
                 label: 'Hands to one side',
                 hold: 150,
                 ms: 900,
-                pose: {
-                    hips: [0, -14],
-                    torso: 180,
-                    arms: [reach(-30, -38, 'ccw'), reach(-22, -36, 'cw')],
-                    legs: [angles(-170, -5, [0.35, 0.4]), angles(170, 5, [0.35, 0.4])],
-                },
+                pose: { ...V_SIT, twist: 50 },
             },
             {
                 label: 'Then the other',
                 hold: 150,
                 ms: 900,
-                pose: {
-                    hips: [0, -14],
-                    torso: 180,
-                    arms: [reach(22, -36, 'ccw'), reach(30, -38, 'cw')],
-                    legs: [angles(-170, -5, [0.35, 0.4]), angles(170, 5, [0.35, 0.4])],
-                },
+                pose: { ...V_SIT, twist: -50 },
             },
         ],
     },

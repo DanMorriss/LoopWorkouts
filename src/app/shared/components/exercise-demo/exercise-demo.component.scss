@@ -1,12 +1,22 @@
 :host {
-    display: block;
-}
-
-.demo__stage {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
     gap: 0.25rem;
+}
+
+.demo__controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+// Where the figure goes while three.js loads, so what's under it doesn't jump far
+.demo__waiting {
+    height: 15rem;
+
+    &--still {
+        height: 11rem;
+    }
 }
 
 .demo__figure {

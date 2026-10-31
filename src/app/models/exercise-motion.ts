@@ -55,6 +55,17 @@ export interface Pose {
     readonly feet?: readonly [near: number, far: number];
     /** How far the shoulders are drawn up, as in a shrug: the arms rise with them. */
     readonly shrug?: number;
+    /**
+     * Only for the 3D figure, which can show what a flat drawing can't: how far the shoulders
+     * turn about the back, in degrees, positive to the figure's left (as in a Russian twist).
+     * The arms and head turn with them.
+     */
+    readonly twist?: number;
+    /**
+     * Only for the 3D figure: how far apart the hands are, side to side, when they're held
+     * closer than the shoulders (hands together, say). From the side only.
+     */
+    readonly handsApart?: number;
 }
 
 /**
@@ -99,6 +110,12 @@ export interface MotionFrame {
 
 export interface ExerciseMotion {
     readonly view: MotionView;
+    /**
+     * In 3D, how far round from its front the figure is first seen, in degrees, towards its
+     * right: 0 from the front, 90 from the side. If not given, 60 for a motion drawn from the
+     * side and 25 from the front.
+     */
+    readonly seenFrom?: number;
     readonly props?: readonly Prop[];
     readonly kit?: readonly Kit[];
     readonly frames: readonly MotionFrame[];
@@ -113,6 +130,9 @@ export const BODY = {
     thigh: 44,
     shin: 44,
 } as const;
+
+/** How far apart the hands are, side to side, unless a pose says (from the shoulders). */
+export const HANDS_APART = 34;
 
 /** How the figure is put together from each view. */
 const VIEWS = {
@@ -256,18 +276,77 @@ export function solveLimb(
     return [add(root, scale(turned, upper)), add(root, scale(along, reach))];
 }
 
+/** An arm or a leg placed: where it hangs from, its elbow or knee, and its hand or ankle. */
+export interface SolvedLimb {
+    readonly root: Point;
+    readonly mid: Point;
+    readonly end: Point;
+    /** How much of each part's length shows (see `Limb`). */
+    readonly upperScale: number;
+    readonly lowerScale: number;
+}
+
+/** Where the figure's joints are in `pose`, as drawn from the motion's view. */
+export interface SolvedPose {
+    /** The way the back points, from the hips to the shoulders. */
+    readonly up: Point;
+    /** Square to the torso: forwards from the side, to your right from the front. */
+    readonly across: Point;
+    readonly shoulders: Point;
+    /** Where a barbell on the back sits. */
+    readonly bar: Point;
+    readonly arms: readonly [near: SolvedLimb, far: SolvedLimb];
+    readonly legs: readonly [near: SolvedLimb, far: SolvedLimb];
+}
+
+export function solvePose(pose: Pose, view: MotionView): SolvedPose {
+    const spread = VIEWS[view];
+    const side = view === 'side';
+    const up = dir(pose.torso);
+    const across: Point = [-up[1], up[0]];
+    const shoulders = add(pose.hips, scale(up, BODY.torso));
+    const sideOf = (point: Point, by: number): Point => add(point, scale(across, by));
+    const bar = side ? add(sideOf(shoulders, -11), scale(up, -2)) : add(shoulders, scale(up, -2));
+    const solve = (limbs: 'arms' | 'legs', index: 0 | 1): SolvedLimb => {
+        const legs = limbs === 'legs';
+        const root = legs
+            ? sideOf(pose.hips, spread.hipSpread * (index === 0 ? -1 : 1))
+            : add(
+                  sideOf(shoulders, spread.shoulderSpread * (index === 0 ? -1 : 1)),
+                  scale(up, (pose.shrug ?? 0) - 4)
+              );
+        const given = pose[limbs][index];
+        const limb =
+            'touch' in given
+                ? {
+                      reach: add(sideOf(shoulders, given.touch[0]), scale(up, given.touch[1])),
+                      bend: given.bend,
+                  }
+                : given;
+        const [mid, end] = legs
+            ? solveLimb(root, limb, BODY.thigh, BODY.shin, bar)
+            : solveLimb(root, limb, BODY.upperArm, BODY.forearm, bar);
+        const [upperScale, lowerScale] = ('angles' in limb && limb.scale) || [1, 1];
+        return { root, mid, end, upperScale, lowerScale };
+    };
+    return {
+        up,
+        across,
+        shoulders,
+        bar,
+        arms: [solve('arms', 0), solve('arms', 1)],
+        legs: [solve('legs', 0), solve('legs', 1)],
+    };
+}
+
 /** The figure in `pose`: its parts placed, and its kit, in drawing order. */
 export function drawFigure(pose: Pose, motion: ExerciseMotion): FigureLayers {
     const view = VIEWS[motion.view];
     const art = FIGURE_ART[motion.view];
     const side = motion.view === 'side';
     const props = new Set(motion.props ?? []);
-    const up = dir(pose.torso);
-    // Square to the torso: forwards from the side, to your right from the front
-    const across: Point = [-up[1], up[0]];
-    const shoulders = add(pose.hips, scale(up, BODY.torso));
-    const sideOf = (point: Point, by: number): Point => add(point, scale(across, by));
-    const bar = side ? add(sideOf(shoulders, -11), scale(up, -2)) : add(shoulders, scale(up, -2));
+    const { up, across, shoulders, bar, arms, legs } = solvePose(pose, motion.view);
+    const hands = [arms[0].end, arms[1].end] as const;
     const place = (
         name: PartName,
         at: Point,
@@ -307,32 +386,6 @@ export function drawFigure(pose: Pose, motion: ExerciseMotion): FigureLayers {
             tone: 'plate',
         };
     };
-
-    const solve = (limbs: 'arms' | 'legs', index: 0 | 1) => {
-        const legs = limbs === 'legs';
-        const root = legs
-            ? sideOf(pose.hips, view.hipSpread * (index === 0 ? -1 : 1))
-            : add(
-                  sideOf(shoulders, view.shoulderSpread * (index === 0 ? -1 : 1)),
-                  scale(up, (pose.shrug ?? 0) - 4)
-              );
-        const given = pose[limbs][index];
-        const limb =
-            'touch' in given
-                ? {
-                      reach: add(sideOf(shoulders, given.touch[0]), scale(up, given.touch[1])),
-                      bend: given.bend,
-                  }
-                : given;
-        const [mid, end] = legs
-            ? solveLimb(root, limb, BODY.thigh, BODY.shin, bar)
-            : solveLimb(root, limb, BODY.upperArm, BODY.forearm, bar);
-        const [upperScale, lowerScale] = ('angles' in limb && limb.scale) || [1, 1];
-        return { root, mid, end, upperScale, lowerScale };
-    };
-    const arms = [solve('arms', 0), solve('arms', 1)] as const;
-    const legs = [solve('legs', 0), solve('legs', 1)] as const;
-    const hands = [arms[0].end, arms[1].end] as const;
 
     const kit: FigureItem[] = [];
     const far: FigureItem[] = [];
@@ -525,6 +578,12 @@ export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
         legs: [lerpLimb(a.legs[0], b.legs[0], t), lerpLimb(a.legs[1], b.legs[1], t)],
         feet: [lerp(feetA[0], feetB[0], t), lerp(feetA[1], feetB[1], t)],
         ...(a.shrug || b.shrug ? { shrug: lerp(a.shrug ?? 0, b.shrug ?? 0, t) } : {}),
+        ...(a.twist || b.twist ? { twist: lerp(a.twist ?? 0, b.twist ?? 0, t) } : {}),
+        ...(a.handsApart !== undefined || b.handsApart !== undefined
+            ? {
+                  handsApart: lerp(a.handsApart ?? HANDS_APART, b.handsApart ?? HANDS_APART, t),
+              }
+            : {}),
     };
 }
 

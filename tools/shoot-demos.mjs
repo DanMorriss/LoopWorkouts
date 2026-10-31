@@ -1,6 +1,6 @@
 // Screenshots exercise demos (EXR-13) from a running `ng serve --port 4300`, to check the 3D
 // figure by eye. Ids are as in the page's address (back-squat, not builtin:back-squat).
-// Usage: node tools/shoot-demos.mjs <out-dir> <id>... [--theme=light] [--turns=2] [--at=500]
+// Usage: node tools/shoot-demos.mjs <out-dir> <id>... [--theme=light] [--turns=2] [--at=500] [--figure=female]
 //   --turns: presses Turn that many times first (45° each); --at: waits that many ms more
 import { chromium } from 'playwright';
 
@@ -8,6 +8,7 @@ const [out, ...rest] = process.argv.slice(2);
 const ids = rest.filter((arg) => !arg.startsWith('--'));
 const theme = rest.find((arg) => arg.startsWith('--theme='))?.slice(8) ?? 'dark';
 const turns = Number(rest.find((arg) => arg.startsWith('--turns='))?.slice(8) ?? 0);
+const figure = rest.find((arg) => arg.startsWith('--figure='))?.slice(9) ?? 'male';
 const at = Number(rest.find((arg) => arg.startsWith('--at='))?.slice(5) ?? 0);
 
 const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader'] });
@@ -18,10 +19,13 @@ page.on('console', (message) => {
     }
 });
 await page.goto('http://localhost:4300/home');
-await page.evaluate((theme) => {
-    localStorage.setItem('welcomed', 'guest');
-    localStorage.setItem('settings', JSON.stringify({ theme }));
-}, theme);
+await page.evaluate(
+    ([theme, bodyFigure]) => {
+        localStorage.setItem('welcomed', 'guest');
+        localStorage.setItem('settings', JSON.stringify({ theme, bodyFigure }));
+    },
+    [theme, figure]
+);
 for (const id of ids) {
     await page.goto(`http://localhost:4300/exercises/${id}`);
     const demo = page.locator('app-exercise-demo');

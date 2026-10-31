@@ -15,6 +15,7 @@ import { Exercise } from '../../../models/exercise';
 import { poseAt } from '../../../models/exercise-motion';
 import { injectPrefersReducedMotion } from '../../reduced-motion';
 import { ExerciseStore } from '../../state/exercise-store.service';
+import { SettingsStore } from '../../state/settings-store.service';
 import { ThemeService } from '../../theme/theme.service';
 import { ExerciseFigure3dComponent } from './exercise-figure-3d.component';
 import { ExerciseFigureComponent } from './exercise-figure.component';
@@ -47,6 +48,7 @@ export class ExerciseDemoComponent {
 
     private readonly exercises = inject(ExerciseStore);
     private readonly theme = inject(ThemeService);
+    private readonly settings = inject(SettingsStore);
     private readonly host: HTMLElement = inject(ElementRef).nativeElement;
     protected readonly motion = computed(() => this.exercises.motionOf(this.exercise()));
     protected readonly reduced = injectPrefersReducedMotion();
@@ -105,7 +107,8 @@ export class ExerciseDemoComponent {
             if (!module || !motion) {
                 return;
             }
-            const scene = new module.FigureScene(motion);
+            // Drawn as the body map's figure is, the one picked in Profile (SET-5)
+            const scene = new module.FigureScene(motion, this.settings.bodyFigure());
             this.scene.set(scene);
             onCleanup(() => {
                 this.scene.set(null);
@@ -185,27 +188,15 @@ export class ExerciseDemoComponent {
     /** The theme's colours for the figure, as the body map shades its muscles. */
     private colors(): FigureColors {
         const style = getComputedStyle(this.host);
-        const css = (name: string) => solid(style.getPropertyValue(name).trim());
+        const css = (name: string) => style.getPropertyValue(name).trim() || '#808080';
         return {
             main: css('--muscle-main'),
             supporting: css('--muscle-supporting'),
             idle: css('--muscle-idle'),
             other: css('--muscle-other'),
             outline: css('--muscle-outline'),
+            page: css('--page-bg'),
             metal: css('--text-muted'),
-            floor: css('--border'),
         };
     }
-}
-
-/** A CSS colour as plain rgb(), its see-through part dropped, as three.js reads colours. */
-function solid(color: string): string {
-    const context = document.createElement('canvas').getContext('2d');
-    if (!context || !color) {
-        return color || '#808080';
-    }
-    context.fillStyle = color;
-    context.fillRect(0, 0, 1, 1);
-    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
-    return `rgb(${r}, ${g}, ${b})`;
 }

@@ -1,42 +1,33 @@
 import {
-    AmbientLight,
+    BackSide,
     BoxGeometry,
-    BufferAttribute,
     BufferGeometry,
-    CircleGeometry,
+    CanvasTexture,
     Color,
     CylinderGeometry,
     DirectionalLight,
     Group,
-    HemisphereLight,
-    LatheGeometry,
     Material,
     Matrix4,
     Mesh,
     MeshBasicMaterial,
-    MeshStandardMaterial,
     Object3D,
-    CanvasTexture,
     PCFShadowMap,
     PerspectiveCamera,
     Quaternion,
+    RingGeometry,
     Scene,
+    ShaderMaterial,
     ShadowMaterial,
     SphereGeometry,
     SRGBColorSpace,
     TorusGeometry,
-    Vector2,
     Vector3,
     WebGLRenderer,
 } from 'three';
-import { MuscleGroup } from '../../../models/exercise';
-import {
-    BODY,
-    ExerciseMotion,
-    muscleTone,
-    MuscleTone,
-    Pose,
-} from '../../../models/exercise-motion';
+import { BodyModel } from '../../../models/body-model';
+import { BodyFigure, MuscleGroup } from '../../../models/exercise';
+import { BODY, ExerciseMotion, muscleTone, Pose } from '../../../models/exercise-motion';
 import {
     add3,
     cross3,
@@ -47,33 +38,36 @@ import {
     normalize3,
     rotateAbout,
     scale3,
+    SHOULDER_SPREAD,
     Skeleton,
     skeletonOf,
     sub3,
     Vec3,
 } from '../../../models/exercise-skeleton';
+import { Body, buildBody, frame, paintDrawings, restHand, restJoint } from './figure-body';
 
 /**
- * The 3D figure of an exercise's demo (EXR-13), drawn with three.js: a smooth jointed body,
- * each muscle on it shaded as on the body map, with its kit, on a floor. Loaded only when a
- * demo is shown. See `exercise-skeleton.ts` for how it's posed.
+ * The 3D figure of an exercise's demo (EXR-13), drawn with three.js to look as the body map
+ * does: the body map's figure, painted with its own drawings (see `figure-body.ts`), flat and
+ * outlined, with its kit, on a floor. Loaded only when a demo is shown. See
+ * `exercise-skeleton.ts` for how it's posed.
  */
 
-/** The page's colours to draw with, as CSS colours. */
+/** The page's colours to draw with, as CSS colours, as the body map uses them. */
 export interface FigureColors {
     readonly main: string;
     readonly supporting: string;
     readonly idle: string;
     readonly other: string;
-    /** The body map's outline, mixed into the unworked muscles so the figure stands out. */
+    /** The body map's lines: see-through, over the page. */
     readonly outline: string;
+    readonly page: string;
     /** Bars and other metal. */
     readonly metal: string;
-    readonly floor: string;
 }
 
-/** Where muscle groups are on each part, by which way its surface faces. */
-type Classify = (normal: Vector3, at: Vector3) => MuscleGroup | null;
+/** How thick the outline round the figure and its kit is, in CSS pixels, as the body map's. */
+const OUTLINE_PX = 1.5;
 
 let renderer: WebGLRenderer | null | undefined;
 
@@ -111,161 +105,75 @@ function square(way: Vec3, along: Vec3, fallback: Vec3): Vec3 {
 function orient(object: Object3D, y: Vec3, z: Vec3) {
     const yAxis = normalize3(y);
     const zAxis = square(z, yAxis, square([1, 0, 0], yAxis, [0, 0, 1]));
-    const xAxis = cross3(yAxis, zAxis);
+    const xAxis: Vec3 = [
+        yAxis[1] * zAxis[2] - yAxis[2] * zAxis[1],
+        yAxis[2] * zAxis[0] - yAxis[0] * zAxis[2],
+        yAxis[0] * zAxis[1] - yAxis[1] * zAxis[0],
+    ];
     object.quaternion.setFromRotationMatrix(new Matrix4().makeBasis(v(xAxis), v(yAxis), v(zAxis)));
 }
 
-/**
- * A body part's shape, with which muscle each face of it is, so it can be shaded face by face
- * with crisp edges between muscles.
- */
-class PartGeometry {
-    readonly geometry: BufferGeometry;
-    private readonly muscles: (MuscleGroup | null)[] = [];
+/** `front` turned by the least turn that takes `from` to `to`. */
+function carry(from: Vec3, to: Vec3, front: Vec3): Vec3 {
+    const turned = v(front).applyQuaternion(new Quaternion().setFromUnitVectors(v(from), v(to)));
+    return [turned.x, turned.y, turned.z];
+}
 
-    constructor(shape: BufferGeometry, classify: Classify) {
-        shape.computeVertexNormals();
-        const geometry = shape.index ? shape.toNonIndexed() : shape;
-        const position = geometry.getAttribute('position');
-        const normal = geometry.getAttribute('normal');
-        const centre = new Vector3();
-        const facing = new Vector3();
-        for (let face = 0; face < position.count / 3; face++) {
-            centre.set(0, 0, 0);
-            facing.set(0, 0, 0);
-            for (let corner = 0; corner < 3; corner++) {
-                const i = face * 3 + corner;
-                centre.add(new Vector3().fromBufferAttribute(position, i));
-                facing.add(new Vector3().fromBufferAttribute(normal, i));
+/** A matrix taking a part from rest (`restAt`, facing `rest`) to `at`, facing `posed`, stretched `stretch` along its y. */
+function moveMatrix(
+    restAt: Vec3,
+    rest: [Vec3, Vec3, Vec3],
+    at: Vec3,
+    posed: [Vec3, Vec3, Vec3],
+    stretch: readonly [number, number, number] = [1, 1, 1]
+): Matrix4 {
+    const restBasis = new Matrix4().makeBasis(v(rest[0]), v(rest[1]), v(rest[2]));
+    const posedBasis = new Matrix4().makeBasis(v(posed[0]), v(posed[1]), v(posed[2]));
+    return new Matrix4()
+        .makeTranslation(at[0], at[1], at[2])
+        .multiply(posedBasis)
+        .multiply(new Matrix4().makeScale(...stretch))
+        .multiply(restBasis.transpose())
+        .multiply(new Matrix4().makeTranslation(-restAt[0], -restAt[1], -restAt[2]));
+}
+
+/**
+ * The outline drawn round a mesh: its back faces, pushed out along their normals by
+ * `thickness` and filled with the outline's colour, show round its edges.
+ */
+function outlineMaterial() {
+    return new ShaderMaterial({
+        uniforms: { thickness: { value: 1 }, color: { value: new Color() } },
+        vertexShader: `
+            uniform float thickness;
+            void main() {
+                vec3 pushed = position + normalize(normal) * thickness;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(pushed, 1.0);
             }
-            this.muscles.push(classify(facing.normalize(), centre.divideScalar(3)));
-        }
-        geometry.setAttribute(
-            'color',
-            new BufferAttribute(new Float32Array(position.count * 3), 3)
-        );
-        this.geometry = geometry;
-    }
-
-    paint(colourOf: (muscle: MuscleGroup | null) => Color) {
-        const colour = this.geometry.getAttribute('color') as BufferAttribute;
-        this.muscles.forEach((muscle, face) => {
-            const { r, g, b } = colourOf(muscle);
-            for (let corner = 0; corner < 3; corner++) {
-                colour.setXYZ(face * 3 + corner, r, g, b);
+        `,
+        fragmentShader: `
+            uniform vec3 color;
+            void main() {
+                gl_FragColor = vec4(color, 1.0);
+                #include <colorspace_fragment>
             }
-        });
-        colour.needsUpdate = true;
-    }
+        `,
+        side: BackSide,
+    });
 }
 
-/**
- * A limb's part, along +y from its joint (0) to `length`, rounded at each end, `from` thick at
- * the joint and `to` at the other end. Its front faces +z.
- */
-function limbShape(length: number, from: number, to: number): BufferGeometry {
-    const points: Vector2[] = [];
-    const steps = 6;
-    for (let i = 0; i <= steps; i++) {
-        const angle = -Math.PI / 2 + (i / steps) * (Math.PI / 2);
-        points.push(new Vector2(from * Math.cos(angle) + 1e-3, from * Math.sin(angle)));
+/** A CSS colour as it shows over `under`, so a see-through one can be drawn solid. */
+function over(color: string, under: string): Color {
+    const context = document.createElement('canvas').getContext('2d');
+    if (!context) {
+        return new Color(0x808080);
     }
-    const rows = Math.ceil(length / 2);
-    for (let i = 1; i < rows; i++) {
-        const t = i / rows;
-        points.push(new Vector2(from + (to - from) * t, length * t));
-    }
-    for (let i = 0; i <= steps; i++) {
-        const angle = (i / steps) * (Math.PI / 2);
-        points.push(new Vector2(to * Math.cos(angle) + 1e-3, length + to * Math.sin(angle)));
-    }
-    return new LatheGeometry(points, 32);
-}
-
-/** An egg shape, `x` by `y` by `z` across (its half-widths). */
-function ellipsoid(x: number, y: number, z: number): BufferGeometry {
-    return new SphereGeometry(1, 40, 28).scale(x, y, z);
-}
-
-/**
- * How far round a limb a face is, from its front (0) towards its outer side (90) or its inner
- * side (-90), to its back (±180). `outward` is +1 when the limb's +x is its outer side.
- */
-const roundLimb = (normal: Vector3, outward: number) =>
-    (Math.atan2(normal.x * outward, normal.z) * 180) / Math.PI;
-
-// Each limb part's muscles. A limb's +z is its front (where a thigh's quads are), and +x is its
-// outer side on the right, its inner side on the left
-const thigh =
-    (outward: number): Classify =>
-    (normal, at) => {
-        const round = roundLimb(normal, outward);
-        const t = at.y / BODY.thigh;
-        if (t > 0.94) {
-            return null; // the knee
-        }
-        if (Math.abs(round) < 55) {
-            return 'quads';
-        }
-        if (Math.abs(round) > 125) {
-            return t < 0.12 ? 'glutes' : 'hamstrings';
-        }
-        return round > 0 ? (t < 0.22 ? 'abductors' : 'quads') : 'adductors';
-    };
-const shin =
-    (outward: number): Classify =>
-    (normal, at) => {
-        if (at.y < 1) {
-            return null; // the knee
-        }
-        return Math.abs(roundLimb(normal, outward)) < 70 ? 'shins' : 'calves';
-    };
-const upperArm =
-    (outward: number): Classify =>
-    (normal, at) => {
-        if (at.y < 5 && roundLimb(normal, outward) > -60) {
-            return 'shoulders';
-        }
-        return Math.abs(roundLimb(normal, outward)) < 90 ? 'biceps' : 'triceps';
-    };
-const forearm: Classify = () => 'forearms';
-const never: Classify = () => null;
-
-// The torso's muscles. Its parts are in the body's axes: +x forwards, +y up the back, +z right
-const chest: Classify = (normal, at) => {
-    if (normal.x > 0.35) {
-        return at.y > -7 ? 'chest' : 'abs';
-    }
-    if (normal.y > 0.55 || (normal.x < -0.3 && at.y > 8 && Math.abs(normal.z) < 0.5)) {
-        return 'traps';
-    }
-    return 'upper-back';
-};
-const belly: Classify = (normal) =>
-    normal.x > 0.45 ? 'abs' : normal.x < -0.35 ? 'lower-back' : 'obliques';
-const pelvis: Classify = (normal, at) => {
-    if (normal.x < -0.15) {
-        return 'glutes';
-    }
-    if (Math.abs(normal.z) > 0.8 && at.y > -3) {
-        return 'abductors';
-    }
-    return null;
-};
-const neck: Classify = (normal) => (normal.x < -0.4 ? 'traps' : 'neck');
-
-/** The torso's three parts, up its back from the hips: their middles and half-widths. */
-const PELVIS = { at: 4, size: [11, 11, 16] } as const;
-const BELLY = { at: 20, size: [10, 12, 13.5] } as const;
-const CHEST = { at: 37, size: [11.5, 16, 17] } as const;
-/** From the elbow to the wrist; the hand fills the rest of the forearm's length. */
-const WRIST = BODY.forearm - 4;
-
-/** A limb's parts, the way the front of each faces carried along from the body's front. */
-interface LimbMeshes {
-    readonly upper: Mesh;
-    readonly lower: Mesh;
-    readonly end: Mesh;
+    context.fillStyle = under;
+    context.fillRect(0, 0, 1, 1);
+    context.fillStyle = color;
+    context.fillRect(0, 0, 1, 1);
+    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+    return new Color(`rgb(${r}, ${g}, ${b})`);
 }
 
 /** One exercise's figure, its kit and floor, to draw in any pose from any way round. */
@@ -279,72 +187,70 @@ export class FigureScene {
     /** How far the figure and its kit reach round the upright line through `target`. */
     private readonly radius: number;
     private readonly height: number;
-    private readonly parts: PartGeometry[] = [];
-    private readonly bodyMaterial = new MeshStandardMaterial({
-        vertexColors: true,
-        roughness: 0.7,
-        metalness: 0,
-    });
-    private readonly kitMaterial = new MeshStandardMaterial({ roughness: 0.6, metalness: 0.05 });
-    private readonly metalMaterial = new MeshStandardMaterial({ roughness: 0.35, metalness: 0.6 });
-    private readonly floorMaterial = new MeshBasicMaterial({
-        transparent: true,
-        opacity: 0.3,
-        depthWrite: false,
-    });
-    private readonly shadowMaterial = new ShadowMaterial({ opacity: 0.3 });
+
+    private readonly body: Body;
+    private readonly model: BodyModel;
+    private readonly painting = document.createElement('canvas');
+    private readonly texture = new CanvasTexture(this.painting);
+    private readonly bodyMaterial = new MeshBasicMaterial({ map: this.texture });
+    private readonly kitMaterial = new MeshBasicMaterial();
+    private readonly metalMaterial = new MeshBasicMaterial();
+    private readonly outline = outlineMaterial();
+    private readonly floorMaterial = new MeshBasicMaterial();
+    private readonly shadowMaterial = new ShadowMaterial({ opacity: 0.18 });
     /** Geometry and textures made for it, to free with it. */
     private readonly owned: { dispose(): void }[] = [];
 
-    private readonly torso: { pelvis: Mesh; belly: Mesh; chest: Mesh };
-    private readonly neckMesh: Mesh;
-    private readonly head: Mesh;
-    private readonly nose: Mesh;
-    private readonly shoulders: readonly [Mesh, Mesh];
-    private readonly arms: readonly [LimbMeshes, LimbMeshes];
-    private readonly legs: readonly [LimbMeshes, LimbMeshes];
+    private readonly parts: {
+        readonly torso: Mesh;
+        readonly neck: Mesh;
+        readonly head: Mesh;
+        readonly upperArms: readonly Mesh[];
+        readonly forearms: readonly Mesh[];
+        readonly hands: readonly Mesh[];
+        readonly thighs: readonly Mesh[];
+        readonly shins: readonly Mesh[];
+        readonly feet: readonly Mesh[];
+    };
+    /** The torso as made, to turn it a little more up the back for a twist. */
+    private readonly torsoRest: { position: Float32Array; normal: Float32Array };
+    private torsoTwist = 0;
     /** Kit that moves with the figure, placed each frame. */
     private readonly carried: ((skeleton: Skeleton) => void)[] = [];
 
     private main: readonly MuscleGroup[] = [];
     private supporting: readonly MuscleGroup[] = [];
-    private colors: Record<MuscleTone, Color> | null = null;
+    private colors: FigureColors | null = null;
 
-    constructor(private readonly motion: ExerciseMotion) {
-        const part = (shape: BufferGeometry, classify: Classify) => {
-            const made = new PartGeometry(shape, classify);
-            this.parts.push(made);
-            this.owned.push(made.geometry);
-            const mesh = new Mesh(made.geometry, this.bodyMaterial);
-            mesh.castShadow = true;
-            this.scene.add(mesh);
+    constructor(
+        private readonly motion: ExerciseMotion,
+        private readonly figure: BodyFigure
+    ) {
+        this.texture.colorSpace = SRGBColorSpace;
+        this.texture.anisotropy = 4;
+        this.body = buildBody(figure);
+        this.model = this.body.model;
+        const part = (geometry: BufferGeometry) => {
+            const mesh = this.mesh(geometry, this.bodyMaterial);
+            mesh.matrixAutoUpdate = false;
             return mesh;
         };
-        this.torso = {
-            pelvis: part(ellipsoid(...PELVIS.size), pelvis),
-            belly: part(ellipsoid(...BELLY.size), belly),
-            chest: part(ellipsoid(...CHEST.size), chest),
+        const body = this.body;
+        this.parts = {
+            torso: part(body.torso),
+            neck: part(body.neck),
+            head: part(body.head),
+            upperArms: body.upperArms.map(part),
+            forearms: body.forearms.map(part),
+            hands: body.hands.map(part),
+            thighs: body.thighs.map(part),
+            shins: body.shins.map(part),
+            feet: body.feet.map(part),
         };
-        this.neckMesh = part(limbShape(12, 5.5, 5), neck);
-        this.head = part(ellipsoid(9.5, 11.5, 8.5), never);
-        this.nose = part(ellipsoid(2, 2.6, 1.8), never);
-        this.shoulders = [
-            part(ellipsoid(7, 7, 7), () => 'shoulders'),
-            part(ellipsoid(7, 7, 7), () => 'shoulders'),
-        ];
-        // Index 0 is the figure's right, whose +x (outer side) is out; the left's is in
-        const arm = (outward: number): LimbMeshes => ({
-            upper: part(limbShape(BODY.upperArm, 5, 4), upperArm(outward)),
-            lower: part(limbShape(WRIST, 4, 2.8), forearm),
-            end: part(ellipsoid(2.4, 5, 4), never),
-        });
-        const leg = (outward: number): LimbMeshes => ({
-            upper: part(limbShape(BODY.thigh, 8, 5.5), thigh(outward)),
-            lower: part(limbShape(BODY.shin, 5.5, 3.6), shin(outward)),
-            end: part(ellipsoid(4.6, 3.6, 13), never),
-        });
-        this.arms = [arm(1), arm(-1)];
-        this.legs = [leg(1), leg(-1)];
+        this.torsoRest = {
+            position: (body.torso.getAttribute('position').array as Float32Array).slice(),
+            normal: (body.torso.getAttribute('normal').array as Float32Array).slice(),
+        };
 
         const joints = motionJoints(motion);
         const kitPoints = this.buildKit();
@@ -362,7 +268,7 @@ export class FigureScene {
         const radius =
             Math.max(
                 ...all.map((point) => Math.hypot(point[0] - middle[0], point[2] - middle[2]))
-            ) + 6;
+            ) + 8;
         const height = maxY - minY + 12;
         this.aspect = Math.min(2, Math.max(0.8, (2 * radius) / height));
         this.target = v(middle);
@@ -383,18 +289,12 @@ export class FigureScene {
     }
 
     setColors(colors: FigureColors) {
-        // Unworked, as near the page as the body map's are, they'd be lost without its
-        // outlines, so they're mixed part way to the outline
-        const outline = new Color(colors.outline);
-        this.colors = {
-            main: new Color(colors.main),
-            supporting: new Color(colors.supporting),
-            idle: new Color(colors.idle).lerp(outline, 0.45),
-            other: new Color(colors.other).lerp(outline, 0.35),
-        };
-        this.kitMaterial.color = new Color(colors.other).lerp(outline, 0.2);
-        this.metalMaterial.color = new Color(colors.metal);
-        this.floorMaterial.color = new Color(colors.floor);
+        this.colors = colors;
+        const outline = over(colors.outline, colors.page);
+        (this.outline.uniforms['color'].value as Color).copy(outline);
+        this.kitMaterial.color = over(colors.other, colors.page);
+        this.metalMaterial.color = over(colors.metal, colors.page);
+        this.floorMaterial.color = outline;
         this.paint();
     }
 
@@ -409,7 +309,12 @@ export class FigureScene {
             return false;
         }
         this.place(skeletonOf(pose, this.motion));
-        this.aim(yaw, canvas.width / canvas.height);
+        const distance = this.aim(yaw, canvas.width / canvas.height);
+        // The outline as thick as the body map's lines, however big the canvas is
+        const visible = 2 * distance * Math.tan(((this.camera.fov / 2) * Math.PI) / 180);
+        const pixelsPerCm = canvas.height / visible;
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        this.outline.uniforms['thickness'].value = (OUTLINE_PX * ratio) / pixelsPerCm;
         gl.setSize(canvas.width, canvas.height, false);
         gl.render(this.scene, this.camera);
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -419,35 +324,39 @@ export class FigureScene {
 
     dispose() {
         this.owned.forEach((thing) => thing.dispose());
+        this.texture.dispose();
         [
             this.bodyMaterial,
             this.kitMaterial,
             this.metalMaterial,
+            this.outline,
             this.floorMaterial,
             this.shadowMaterial,
         ].forEach((material) => material.dispose());
     }
 
+    /** Paints the body map's drawings onto the figure, its muscles shaded for this exercise. */
     private paint() {
         const colors = this.colors;
         if (!colors) {
             return;
         }
-        const colourOf = (muscle: MuscleGroup | null) =>
-            colors[muscleTone(muscle, this.main, this.supporting)];
-        this.parts.forEach((part) => part.paint(colourOf));
+        paintDrawings(this.painting, this.figure, colors, (muscle) =>
+            muscleTone(muscle, this.main, this.supporting)
+        );
+        this.texture.needsUpdate = true;
     }
 
     /**
      * Where the camera is: as the motion says (`seenFrom`), turned `yaw` further, looking a
-     * little down.
+     * little down. Returns how far it is from what it looks at.
      */
-    private aim(yaw: number, aspect: number) {
+    private aim(yaw: number, aspect: number): number {
         // Near enough to fill the canvas, whichever way round it's turned
         const camera = this.camera;
         const tan = Math.tan(((camera.fov / 2) * Math.PI) / 180);
         const distance =
-            Math.max(this.height / 2 / tan, this.radius / (tan * aspect)) + this.radius * 0.6;
+            Math.max(this.height / 2 / tan, this.radius / (tan * aspect)) + this.radius * 0.25;
         camera.aspect = aspect;
         camera.far = distance * 4;
         camera.updateProjectionMatrix();
@@ -459,17 +368,15 @@ export class FigureScene {
             Math.sin(down),
             Math.sin(round) * Math.cos(down)
         ).multiplyScalar(distance);
-        this.camera.position.copy(this.target).add(offset);
-        this.camera.lookAt(this.target);
+        camera.position.copy(this.target).add(offset);
+        camera.lookAt(this.target);
+        return distance;
     }
 
+    /** A light from above, only to cast a soft shadow: the figure itself is flat, as the body map is. */
     private light(radius: number) {
-        this.scene.add(
-            new HemisphereLight(0xffffff, 0x8090a0, 1.5),
-            new AmbientLight(0xffffff, 0.35)
-        );
-        const key = new DirectionalLight(0xffffff, 2.2);
-        key.position.copy(this.target).add(new Vector3(90, 400, 130));
+        const key = new DirectionalLight(0xffffff, 1);
+        key.position.copy(this.target).add(new Vector3(60, 400, 90));
         key.target.position.copy(this.target);
         key.castShadow = true;
         key.shadow.mapSize.set(1024, 1024);
@@ -482,49 +389,39 @@ export class FigureScene {
         });
         key.shadow.camera.far = 800;
         key.shadow.bias = -0.0005;
-        key.shadow.radius = 4;
         this.scene.add(key, key.target);
-        const back = new DirectionalLight(0xffffff, 0.8);
-        back.position.copy(this.target).add(new Vector3(-150, 120, -120));
-        this.scene.add(back);
     }
 
+    /** A floor line round the figure, as the flat demo's, and its shadow on it. */
     private buildFloor(middle: Vec3, radius: number) {
-        const disc = new CircleGeometry(radius + 25, 64).rotateX(-Math.PI / 2);
+        const ring = new RingGeometry(radius + 10, radius + 10.6, 96).rotateX(-Math.PI / 2);
+        this.owned.push(ring);
+        const floor = new Mesh(ring, this.floorMaterial);
+        floor.position.set(middle[0], 0, middle[2]);
+        const disc = new RingGeometry(0, radius + 10, 96).rotateX(-Math.PI / 2);
         this.owned.push(disc);
-        // Fading out towards its edge, so there's no hard edge to it
-        const fade = document.createElement('canvas');
-        fade.width = fade.height = 128;
-        const context = fade.getContext('2d');
-        if (context) {
-            const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.6)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            context.fillStyle = gradient;
-            context.fillRect(0, 0, 128, 128);
-        }
-        const texture = new CanvasTexture(fade);
-        this.floorMaterial.map = texture;
-        this.floorMaterial.alphaMap = texture;
-        this.owned.push(texture);
-        const floor = new Mesh(disc, this.floorMaterial);
-        floor.position.set(middle[0], -0.2, middle[2]);
-        // Wider than the floor, so no shadow is cut off at its edge
-        const wide = new CircleGeometry(radius + 80, 64).rotateX(-Math.PI / 2);
-        this.owned.push(wide);
-        const shadow = new Mesh(wide, this.shadowMaterial);
-        shadow.position.set(middle[0], 0, middle[2]);
+        const shadow = new Mesh(disc, this.shadowMaterial);
+        shadow.position.set(middle[0], 0.05, middle[2]);
         shadow.receiveShadow = true;
         this.scene.add(floor, shadow);
     }
 
-    /** A mesh of `geometry`, kept to be disposed of, in the scene or in `into`. */
-    private mesh(geometry: BufferGeometry, material: Material, into: Object3D = this.scene) {
+    /**
+     * A mesh of `geometry`, kept to be disposed of, in the scene or in `into`, outlined as the
+     * body map's shapes are unless it's a thin rod or cable.
+     */
+    private mesh(
+        geometry: BufferGeometry,
+        material: Material,
+        into: Object3D = this.scene,
+        outlined = material !== this.metalMaterial
+    ) {
         this.owned.push(geometry);
         const mesh = new Mesh(geometry, material);
         mesh.castShadow = true;
-        mesh.receiveShadow = true;
+        if (outlined) {
+            mesh.add(new Mesh(geometry, this.outline));
+        }
         into.add(mesh);
         return mesh;
     }
@@ -761,81 +658,163 @@ export class FigureScene {
 
     /** Puts every part where the skeleton says. */
     private place(skeleton: Skeleton) {
+        const model = this.model;
         const { up, hips } = skeleton;
-        // The torso turns progressively up the back, by all of the twist at the chest
-        const unturned = (way: Vec3) => rotateAbout(way, [0, 0, 0], up, -skeleton.twist);
-        const bodyForward = unturned(skeleton.forward);
-        const halfway = rotateAbout(bodyForward, [0, 0, 0], up, skeleton.twist / 2);
-        const centre = (along: number) => v(add3(hips, scale3(up, along)));
-        this.torso.pelvis.position.copy(centre(PELVIS.at));
-        orient(this.torso.pelvis, up, cross3(bodyForward, up));
-        this.torso.belly.position.copy(centre(BELLY.at));
-        orient(this.torso.belly, up, cross3(halfway, up));
-        this.torso.chest.position.copy(centre(CHEST.at));
-        orient(this.torso.chest, up, skeleton.right);
+        const parts = this.parts;
+        // The hips and legs face the way the body does; the chest, arms and head turn with a twist
+        const bodyForward = rotateAbout(skeleton.forward, [0, 0, 0], up, -skeleton.twist);
+        const bodyRight = rotateAbout(skeleton.right, [0, 0, 0], up, -skeleton.twist);
+        const still: [Vec3, Vec3, Vec3] = [
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+        ];
 
-        const neckBase = add3(skeleton.shoulders, scale3(up, -3));
-        this.neckMesh.position.copy(v(neckBase));
-        orient(this.neckMesh, sub3(skeleton.neck, neckBase), skeleton.forward);
-        const headAt = add3(skeleton.neck, scale3(skeleton.headUp, 8));
-        const face = square(skeleton.forward, skeleton.headUp, skeleton.forward);
-        this.head.position.copy(v(headAt));
-        orient(this.head, skeleton.headUp, cross3(face, skeleton.headUp));
-        this.nose.position.copy(
-            v(add3(add3(headAt, scale3(face, 9.2)), scale3(skeleton.headUp, -1)))
+        // The torso, stretched so its shoulders are where the skeleton's arms hang from
+        const restHipY = model.joints.hip[1];
+        const [shoulderZ, shoulderY] = model.joints.shoulder;
+        const tall = (BODY.torso - 4) / (shoulderY - restHipY);
+        this.twistTorso(skeleton.twist, restHipY, model.levels.armpit);
+        parts.torso.matrix.copy(
+            moveMatrix(
+                [0, restHipY, 0],
+                still,
+                hips,
+                [bodyForward, up, bodyRight],
+                [1, tall, SHOULDER_SPREAD / shoulderZ]
+            )
         );
-        orient(this.nose, skeleton.headUp, cross3(face, skeleton.headUp));
+
+        const face = square(skeleton.forward, skeleton.headUp, skeleton.forward);
+        const headFrame = frame(skeleton.headUp, face);
+        const neckAt = add3(hips, scale3(up, (model.levels.neckBase - restHipY) * tall));
+        parts.neck.matrix.copy(moveMatrix([0, model.levels.neckBase, 0], still, neckAt, headFrame));
+        const headAt = add3(
+            neckAt,
+            scale3(skeleton.headUp, model.levels.chin - model.levels.neckBase)
+        );
+        parts.head.matrix.copy(moveMatrix([0, model.levels.chin, 0], still, headAt, headFrame));
 
         skeleton.arms.forEach((arm, i) => {
-            this.shoulders[i].position.copy(v(arm.root));
-            orient(this.shoulders[i], up, skeleton.right);
-            // At rest an arm hangs a little forwards and out, its front facing forwards
-            const rest = normalize3(
-                add3(
-                    add3(scale3(up, -1), scale3(skeleton.forward, 0.5)),
-                    scale3(skeleton.right, 0.25 * arm.side)
-                )
+            const { forward, right } = skeleton;
+            // At rest an arm hangs a little forwards and out, its front facing forwards: carried
+            // from there, its front never flips over, short of reaching up behind the back
+            const pivot = normalize3(
+                add3(add3(scale3(up, -1), scale3(forward, 0.5)), scale3(right, 0.25 * arm.side))
             );
-            const front = this.placeLimb(
-                this.arms[i],
+            const shoulder = restJoint(model, 'shoulder', arm.side);
+            const elbow = restJoint(model, 'elbow', arm.side);
+            const hand = restHand(model, arm.side);
+            this.placeLimb(
+                [parts.upperArms[i], parts.forearms[i], parts.hands[i]],
+                [shoulder, elbow, hand],
                 arm,
-                rest,
-                square(skeleton.forward, rest, skeleton.forward)
+                [BODY.upperArm, BODY.forearm],
+                { forward, up, right },
+                pivot
             );
-            this.arms[i].end.position.copy(v(arm.end));
-            orient(this.arms[i].end, sub3(arm.end, arm.mid), front);
         });
         skeleton.legs.forEach((leg, i) => {
-            const rest = normalize3(add3(scale3(up, -1), scale3(bodyForward, 0.3)));
-            this.placeLimb(this.legs[i], leg, rest, square(bodyForward, rest, bodyForward));
+            const pivot = normalize3(add3(scale3(up, -1), scale3(bodyForward, 0.3)));
+            const side = leg.side;
+            this.placeLimb(
+                [parts.thighs[i], parts.shins[i]],
+                [
+                    restJoint(model, 'hip', side),
+                    restJoint(model, 'knee', side),
+                    restJoint(model, 'ankle', side),
+                ],
+                leg,
+                [BODY.thigh, BODY.shin],
+                { forward: bodyForward, up, right: bodyRight },
+                pivot
+            );
             const foot = skeleton.feet[i];
-            const sole = square(sub3(leg.end, leg.mid), foot, [0, -1, 0]);
-            const footMesh = this.legs[i].end;
-            footMesh.position.copy(v(add3(add3(leg.end, scale3(foot, 8)), scale3(sole, 2))));
-            orient(footMesh, scale3(sole, -1), foot);
+            const top = square(sub3(leg.mid, leg.end), foot, up);
+            parts.feet[i].matrix.copy(
+                moveMatrix([0, 0, 0], still, leg.end, [foot, top, cross3(foot, top)])
+            );
         });
         this.carried.forEach((placeIt) => placeIt(skeleton));
     }
 
     /**
-     * Places a limb's parts, returning the way the front of its lower part faces. The way each part's front faces is carried from `rest` (where the
-     * limb's front faces `restFront`) by the least turn to where it points, so it never flips
-     * over as the limb moves, short of pointing the opposite way to `rest`.
+     * Places a limb's parts from where they are at rest (`rest`: its three joints) onto the
+     * skeleton's, each stretched to the skeleton's length. The way each part's front faces is
+     * carried, by the least turn, from where the limb points at `pivot`, so it never flips
+     * over as the limb moves, short of pointing the opposite way to `pivot`.
      */
-    private placeLimb(meshes: LimbMeshes, limb: Limb3, rest: Vec3, restFront: Vec3): Vec3 {
+    private placeLimb(
+        meshes: readonly Mesh[],
+        rest: readonly [Vec3, Vec3, Vec3],
+        limb: Limb3,
+        [upperLength, lowerLength]: readonly [number, number],
+        axes: { forward: Vec3; up: Vec3; right: Vec3 },
+        pivot: Vec3
+    ) {
+        const [restRoot, restMid, restEnd] = rest;
+        const restUpper = normalize3(sub3(restMid, restRoot));
+        const restLower = normalize3(sub3(restEnd, restMid));
+        const forwards: Vec3 = [1, 0, 0];
+        const restLowerFront = carry(restUpper, restLower, forwards);
+        // Where the limb points at rest, on the body as it is now
+        const onBody = (way: Vec3) =>
+            add3(
+                add3(scale3(axes.forward, way[0]), scale3(axes.up, way[1])),
+                scale3(axes.right, way[2])
+            );
+        const pivotFront = carry(onBody(restUpper), pivot, axes.forward);
+
         const upperWay = normalize3(sub3(limb.mid, limb.root));
         const lowerWay = normalize3(sub3(limb.end, limb.mid));
-        const carry = (from: Vec3, to: Vec3, front: Vec3): Vec3 => {
-            const turn = new Quaternion().setFromUnitVectors(v(from), v(to));
-            const turned = v(front).applyQuaternion(turn);
-            return [turned.x, turned.y, turned.z];
-        };
-        const upperFront = carry(rest, upperWay, restFront);
+        const upperFront = carry(pivot, upperWay, pivotFront);
         const lowerFront = carry(upperWay, lowerWay, upperFront);
-        meshes.upper.position.copy(v(limb.root));
-        orient(meshes.upper, upperWay, upperFront);
-        meshes.lower.position.copy(v(limb.mid));
-        orient(meshes.lower, lowerWay, lowerFront);
-        return lowerFront;
+        meshes[0].matrix.copy(
+            moveMatrix(
+                restRoot,
+                frame(restUpper, forwards),
+                limb.root,
+                frame(upperWay, upperFront),
+                [1, upperLength / length3(sub3(restMid, restRoot)), 1]
+            )
+        );
+        const lower = moveMatrix(
+            restMid,
+            frame(restLower, restLowerFront),
+            limb.mid,
+            frame(lowerWay, lowerFront),
+            [1, lowerLength / length3(sub3(restEnd, restMid)), 1]
+        );
+        // The hand goes with the forearm
+        meshes.slice(1).forEach((mesh) => mesh.matrix.copy(lower));
+    }
+
+    /**
+     * Turns the torso by `twist` degrees about its middle line, none at the hips and all of it
+     * from the armpits up, as a back twists.
+     */
+    private twistTorso(twist: number, hipY: number, armpitY: number) {
+        if (twist === this.torsoTwist) {
+            return;
+        }
+        this.torsoTwist = twist;
+        const geometry = this.parts.torso.geometry;
+        const position = geometry.getAttribute('position');
+        const normal = geometry.getAttribute('normal');
+        const { position: restPosition, normal: restNormal } = this.torsoRest;
+        for (let i = 0; i < position.count; i++) {
+            const y = restPosition[i * 3 + 1];
+            const t = Math.min(1, Math.max(0, (y - hipY) / (armpitY - hipY)));
+            const angle = (twist * t * t * (3 - 2 * t) * Math.PI) / 180;
+            const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+            const turn = (from: Float32Array, to: typeof position) => {
+                const [x, z] = [from[i * 3], from[i * 3 + 2]];
+                to.setXYZ(i, x * cos + z * sin, from[i * 3 + 1], -x * sin + z * cos);
+            };
+            turn(restPosition, position);
+            turn(restNormal, normal);
+        }
+        position.needsUpdate = true;
+        normal.needsUpdate = true;
     }
 }

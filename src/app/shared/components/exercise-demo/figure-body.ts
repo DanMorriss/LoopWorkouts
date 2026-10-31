@@ -99,7 +99,9 @@ interface Ring {
     readonly across: Vec3;
     readonly ahead: Vec3;
     readonly half: number;
+    /** How far it reaches forwards, and backwards if that's different. */
     readonly depth: number;
+    readonly depthBack?: number;
 }
 
 /**
@@ -138,7 +140,11 @@ function tube(
                     ring.centre,
                     add3(
                         scale3(ring.across, Math.sin(angle) * ring.half),
-                        scale3(ring.ahead, Math.cos(angle) * ring.depth)
+                        scale3(
+                            ring.ahead,
+                            Math.cos(angle) *
+                                (Math.cos(angle) >= 0 ? ring.depth : (ring.depthBack ?? ring.depth))
+                        )
                     )
                 )
             );
@@ -223,8 +229,49 @@ const DEPTH = {
     thigh: 1.05,
     shin: 1,
 } as const;
-/** The torso: shallower across the shoulders than at the chest and belly. */
-const torsoDepth = (y: number, model: BodyModel) => (y > model.levels.armpit + 3 ? 0.55 : 0.7);
+/** A value read off a table of [where, value] pairs, in a straight line between them. */
+function lookUp(table: readonly (readonly [number, number])[], at: number): number {
+    if (at <= table[0][0]) {
+        return table[0][1];
+    }
+    for (let i = 1; i < table.length; i++) {
+        const [x1, y1] = table[i];
+        if (at <= x1) {
+            const [x0, y0] = table[i - 1];
+            return y0 + ((y1 - y0) * (at - x0)) / (x1 - x0);
+        }
+    }
+    return table[table.length - 1][1];
+}
+
+/**
+ * How far the torso reaches forwards and backwards from its middle line, in cm on the male
+ * figure, from the crotch (0) up to the base of the neck (1): the drawings only show its width.
+ * The chest stands out further than the belly, the seat rounds out behind the hips, the lower
+ * back curves in, and the traps rise behind the neck.
+ */
+const TORSO_FRONT = [
+    [0, 7.5],
+    [0.15, 8.5],
+    [0.35, 9],
+    [0.5, 8.6],
+    [0.62, 9.6],
+    [0.72, 11.2],
+    [0.82, 11.2],
+    [0.92, 8.6],
+    [1, 5.5],
+] as const;
+const TORSO_BACK = [
+    [0, 9.5],
+    [0.1, 11.5],
+    [0.2, 11.5],
+    [0.32, 8.4],
+    [0.5, 8.4],
+    [0.68, 9.4],
+    [0.82, 10],
+    [0.92, 9.6],
+    [1, 7.5],
+] as const;
 
 /** A joint at rest, on the figure's right (1) or left (-1). */
 export const restJoint = (
@@ -248,7 +295,8 @@ function limbPart(
     part: 'upperArm' | 'forearm' | 'hand' | 'thigh' | 'shin',
     from: Vec3,
     to: Vec3,
-    side: 1 | -1
+    side: 1 | -1,
+    rows: readonly (readonly [number, number, number])[] = model[part].rows
 ) {
     const along = sub3(to, from);
     const way = normalize3(along);
@@ -256,7 +304,7 @@ function limbPart(
     const across: Vec3 = normalize3([0, way[2], -way[1]]);
     return tube(
         model,
-        model[part].rows.map(([t, offset, half]) => ({
+        rows.map(([t, offset, half]) => ({
             centre: add3(add3(from, scale3(along, t)), scale3(across, offset * side)),
             across,
             ahead: FORWARDS,
@@ -264,6 +312,71 @@ function limbPart(
             depth: Math.max(half, 0.6) * DEPTH[part],
         }))
     );
+}
+
+/**
+ * The torso at rest, from the measured rows across it: rounded off below the seat and at the
+ * top, where the neck meets the shoulders, rather than ending flat.
+ */
+function torsoPart(model: BodyModel) {
+    const { crotch, neckBase } = model.levels;
+    // The female figure is smaller all round
+    const size = model.joints.shoulder[0] / 17.3;
+    const depths = (y: number) => {
+        const h = (y - crotch) / (neckBase - crotch);
+        return [lookUp(TORSO_FRONT, h) * size, lookUp(TORSO_BACK, h) * size] as const;
+    };
+    // The measured rows, top down, without the gap between the legs at the bottom
+    const rows = model.torso.filter(([, half]) => half > 3);
+    const [topY, topHalf] = rows[0];
+    const [bottomY, bottomHalf] = rows[rows.length - 1];
+    const ring = (y: number, half: number, shrink = 1): Ring => {
+        const [front, back] = depths(y);
+        return {
+            centre: [0, y, 0],
+            across: RIGHT,
+            ahead: FORWARDS,
+            half: Math.max(half, 0.6),
+            depth: Math.max(front * shrink, 0.6),
+            depthBack: Math.max(back * shrink, 0.6),
+        };
+    };
+    const round = (degrees: number) => (degrees * Math.PI) / 180;
+    return tube(model, [
+        ...[75, 50, 25].map((degrees) =>
+            ring(
+                topY + 3 * Math.sin(round(degrees)),
+                topHalf * Math.cos(round(degrees)),
+                Math.cos(round(degrees))
+            )
+        ),
+        ...rows.map(([y, half]) => ring(y, half)),
+        ...[20, 40, 58, 74, 86].map((degrees) => {
+            const shrink = Math.cos(round(degrees));
+            return {
+                ...ring(bottomY, bottomHalf * shrink, shrink),
+                centre: [0, bottomY - 7 * size * Math.sin(round(degrees)), 0] as Vec3,
+            };
+        }),
+    ]);
+}
+
+/**
+ * A hand at rest, as a mitten: the drawings spread the fingers, which measured one by one
+ * would leave one finger standing up, so past the palm it narrows to a rounded end.
+ */
+function handPart(model: BodyModel, from: Vec3, to: Vec3, side: 1 | -1) {
+    const palm = model.hand.rows.filter(([t]) => t <= 0.5);
+    const width = Math.max(...palm.map(([, , half]) => half));
+    const [, offset] = palm[palm.length - 1];
+    const mitten = [
+        [0.6, 0.95],
+        [0.72, 0.86],
+        [0.83, 0.7],
+        [0.92, 0.48],
+        [0.98, 0.22],
+    ].map(([t, share]) => [t, offset, width * share] as const);
+    return limbPart(model, 'hand', from, to, side, [...palm, ...mitten]);
 }
 
 /** The head, neck or torso at rest, from the measured rows across it. */
@@ -293,24 +406,45 @@ export const ANKLE_HEIGHT = 5;
  */
 function footPart(model: BodyModel, side: 1 | -1) {
     const ankle = restJoint(model, 'ankle', side);
-    // Heel to toes: how far along, half its width and height, from the drawings' feet
-    const profile = [
-        [-8, 3.2, 3.2],
-        [-6.5, 3.8, 4],
-        [-3, 4.2, 4.2],
-        [3, 4.6, 3.6],
-        [10, 5, 2.8],
-        [16, 4.6, 2],
-        [19, 3.6, 1.5],
-    ] as const;
+    // Heel to toes: how far along, half its width and its height, the heel only a little behind
+    // the calf, as a foot is, and the ends rounded off
+    const steps = 16;
+    const profile = Array.from({ length: steps + 1 }, (_, i) => {
+        const t = i / steps;
+        const x = -5.5 + 24.5 * t;
+        const round = Math.pow(Math.sin(Math.PI * Math.min(1, Math.max(0.02, t))), 0.45);
+        const half = lookUp(
+            [
+                [-5.5, 3],
+                [-1, 3.6],
+                [6, 4.1],
+                [12, 4.6],
+                [19, 3.8],
+            ],
+            x
+        );
+        const height = lookUp(
+            [
+                [-5.5, 3.4],
+                [0, 4.4],
+                [6, 3.4],
+                [12, 2.2],
+                [19, 1.6],
+            ],
+            x
+        );
+        return [x, half * round, height * round, height] as const;
+    });
     return tube(
         model,
-        profile.map(([x, half, height]) => ({
-            centre: [x, -ANKLE_HEIGHT + height, 0] as Vec3,
+        profile.map(([x, half, height, full]) => ({
+            // The sole stays flat on the floor; the top comes down towards the ends
+            centre: [x, -ANKLE_HEIGHT + full, 0] as Vec3,
             across: RIGHT,
             ahead: [0, 1, 0] as Vec3,
             half,
             depth: height,
+            depthBack: Math.min(height, full * 0.98),
         })),
         // On the drawings the feet are seen end on, below the ankles
         ([x, y, z]) => [
@@ -341,7 +475,7 @@ export function buildBody(figure: BodyFigure) {
     const sides = [1, -1] as const;
     return {
         model,
-        torso: levelPart(model, model.torso, (y) => torsoDepth(y, model)),
+        torso: torsoPart(model),
         neck: levelPart(model, model.neck, () => DEPTH.neck),
         head: levelPart(model, [...dome(model.head[0]), ...model.head], () => DEPTH.head),
         upperArms: sides.map((side) =>
@@ -363,9 +497,8 @@ export function buildBody(figure: BodyFigure) {
             )
         ),
         hands: sides.map((side) =>
-            limbPart(
+            handPart(
                 model,
-                'hand',
                 restJoint(model, 'wrist', side),
                 restJoint(model, 'fingertip', side),
                 side

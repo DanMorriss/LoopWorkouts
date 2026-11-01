@@ -399,9 +399,9 @@ export class WorkoutStore {
      * Done on a rep step: the workout moves on to the next step. `waitedMs` is how long the
      * clock ran on past the rep step while it was being done; the start time moves forward
      * by that much, so the countdown picks up exactly where the rep step began. `set` is
-     * what was done, logged for the history.
+     * what was done, logged for the history; none for a rep step skipped (RUN-12).
      */
-    finishRepStep(waitedMs: number, set: RepSet) {
+    finishRepStep(waitedMs: number, set?: RepSet) {
         const startedAt = this._activeWorkoutStartedAt();
         if (!this._activeWorkout() || startedAt === null) {
             return;
@@ -416,8 +416,10 @@ export class WorkoutStore {
         sessionStorage.setItem('activeWorkoutStartedAt', String(movedStart));
         sessionStorage.setItem('activeRepStepsDone', String(this._activeRepStepsDone()));
         sessionStorage.setItem('activeRepMs', String(this._activeRepMs()));
-        this._activeSets.update((sets) => [...sets, set]);
-        sessionStorage.setItem('activeSets', JSON.stringify(this._activeSets()));
+        if (set) {
+            this._activeSets.update((sets) => [...sets, set]);
+            sessionStorage.setItem('activeSets', JSON.stringify(this._activeSets()));
+        }
     }
 
     /**

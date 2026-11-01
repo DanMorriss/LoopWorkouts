@@ -347,13 +347,19 @@ export class ActiveRunService {
     }
 
     /**
-     * Skip on a timed step or rest (RUN-12): on to the next step, from its full time, as Done
-     * on a rep step. What was left of it is added to the clock, so a time limit still runs
-     * out on time, with more rounds in it. A skipped exercise is logged with the time it ran.
+     * Skip (RUN-12): on to the next step, from its full time, as Done does. A rep step skipped
+     * is Done without its set, so it isn't logged. Of a timed step or rest, what was left is
+     * added to the clock, so a time limit still runs out on time, with more rounds in it; a
+     * skipped timed exercise is logged with the time it ran.
      */
     skipStep() {
         this.sync();
         const state = this.state();
+        if (state?.phase === 'reps') {
+            this.store.finishRepStep(state.phaseElapsedMs);
+            this.sync();
+            return;
+        }
         if (state?.phase !== 'work' && state?.phase !== 'rest') {
             return;
         }

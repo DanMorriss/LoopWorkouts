@@ -1667,10 +1667,6 @@ describe('WorkoutComponent', () => {
             fixture.nativeElement.querySelector(
                 '.workout-control--skip button'
             ) as HTMLButtonElement | null;
-        const mainButton = () =>
-            fixture.nativeElement.querySelector(
-                '.workout-control--main button'
-            ) as HTMLButtonElement;
         const entries = () => TestBed.inject(HistoryStore).entries();
 
         function pressSkip() {
@@ -1678,7 +1674,7 @@ describe('WorkoutComponent', () => {
             fixture.detectChanges();
         }
 
-        it('is beside Pause on a timed step or rest, but not on a rep step, which has Done', () => {
+        it('is beside Pause on every kind of step', () => {
             start(makeWorkout({ steps: [work(3), rest(2), reps(10, 'Push-ups')], repeats: 1 }));
 
             expect(skipButton()!.getAttribute('aria-label')).toBe('Skip step');
@@ -1686,7 +1682,7 @@ describe('WorkoutComponent', () => {
             expect(skipButton()!.getAttribute('aria-label')).toBe('Skip rest');
             advance(2000);
             expect(component.isRepsActive()).toBe(true);
-            expect(skipButton()).toBeNull();
+            expect(skipButton()!.getAttribute('aria-label')).toBe('Skip step');
             fixture.destroy();
         });
 
@@ -1778,15 +1774,17 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('moves focus to Pause when Skip goes, rather than losing it', async () => {
-            start(makeWorkout({ steps: [work(3), reps(10, 'Push-ups')], repeats: 1 }));
-            skipButton()!.focus();
+        it('moves on from a rep step without logging its set, counting the time spent', () => {
+            start(makeWorkout({ steps: [work(3), reps(10, 'Push-ups'), rest(2)], repeats: 2 }));
+            advance(3000 + 8000); // 8s on the push-ups
 
             pressSkip();
-            await fixture.whenStable();
 
-            expect(component.isRepsActive()).toBe(true);
-            expect(document.activeElement).toBe(mainButton());
+            expect(component.isRestActive()).toBe(true);
+            expect(text()).toContain('00:02');
+            endWorkout();
+            expect(entries()[0].sets).toBeUndefined();
+            expect(entries()[0].activeSeconds).toBe(11);
             fixture.destroy();
         });
     });

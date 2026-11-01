@@ -154,10 +154,6 @@ export class WorkoutComponent {
     isWorkActive = computed(() => this.state()?.phase === 'work');
     isRestActive = computed(() => this.state()?.phase === 'rest');
     isRepsActive = computed(() => this.state()?.phase === 'reps');
-    /** Skip is for a timed step or rest (RUN-12); a rep step has Done instead. */
-    protected readonly canSkip = computed(
-        () => this.state()?.phase === 'work' || this.isRestActive()
-    );
     isComplete = computed(() => this.state()?.phase === 'complete');
     /** The rep step's count, e.g. 20, or 0 when it isn't a rep step. */
     reps = computed(() => {
@@ -780,7 +776,6 @@ export class WorkoutComponent {
 
     private readonly mainButton = viewChild<ElementRef<HTMLButtonElement>>('mainButton');
     private readonly doneButton = viewChild<ElementRef<HTMLButtonElement>>('doneButton');
-    private readonly skipButton = viewChild<ElementRef<HTMLButtonElement>>('skipButton');
     private readonly resumeButton = viewChild<ElementRef<HTMLButtonElement>>('resumeButton');
     private readonly ring = viewChild(WorkoutRingComponent);
     private readonly reducedMotion = injectPrefersReducedMotion();
@@ -950,22 +945,11 @@ export class WorkoutComponent {
     }
 
     /**
-     * Skip: on to the next step, from its full time (RUN-12). Skip stays put for another timed
-     * step or rest; otherwise it's gone, so focus moves to Pause rather than being lost.
+     * Skip: on to the next step, from its full time (RUN-12). A skipped rep step isn't logged,
+     * so unlike Done, its ring doesn't fill.
      */
     protected skip() {
-        const hadFocus = this.skipButton()?.nativeElement === document.activeElement;
         this.run.skipStep();
-        if (hadFocus) {
-            afterNextRender(
-                () => {
-                    if (!this.skipButton()) {
-                        this.mainButton()?.nativeElement.focus();
-                    }
-                },
-                { injector: this.injector }
-            );
-        }
     }
 
     /** Space pauses and resumes, like most media players, or presses Done on a rep step. */

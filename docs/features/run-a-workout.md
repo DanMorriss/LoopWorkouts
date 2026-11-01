@@ -13,7 +13,7 @@
 - **RUN-9** As a user I want to check how a step's exercise is done, mid-workout, without leaving it.
 - **RUN-10** As a user I want the workout to show which set, side or round I'm on, and the section I'm in, so I know where I am in a long gym workout.
 - **RUN-11** As a user I want to swap an exercise for something equivalent mid-workout, e.g. when someone's on the machine, so I can still work those muscles.
-- **RUN-12** As a user I want to skip a timed step or rest, e.g. a warm-up I've done already or a rest I'm ready to cut short, and carry on from the next step.
+- **RUN-12** As a user I want to skip any step, e.g. a warm-up I've done already, a rest I'm ready to cut short or a set I'm leaving out, and carry on from the next step without it logged as done.
 
 ## Rules
 
@@ -46,10 +46,10 @@
 
 ### Skipping a step (RUN-12)
 
-- **Skip** (⏭, captioned "Skip") is beside Pause, to its right, on a timed step or rest, like a media player's: for a warm-up you've done already, say, or a rest you're ready to cut short. It moves on to the next step, which starts from its **full time**, as Done does on a rep step. Not on a rep step, which has Done; not while paused, when the controls under the ring go.
-- Screen readers hear "Skip step", or "Skip rest" on a rest. If Skip had focus and the next step is a rep step (so Skip goes), focus moves to Pause.
+- **Skip** (⏭, captioned "Skip") is beside Pause, to its right, on **every kind of step**, like a media player's: for a warm-up you've done already, say, a rest you're ready to cut short, or a set you're leaving out. It moves on to the next step, which starts from its **full time**, as Done does on a rep step. Not while paused, when the controls under the ring go.
+- Screen readers hear "Skip step", or "Skip rest" on a rest.
 - The next step's alarm sounds and the phone vibrates at once, as the step starts; the skipped step's countdown beeps don't.
-- A skipped **timed exercise** is logged with the time it actually ran, in whole seconds (none if under a second). A skipped **rest** isn't logged, as rests never are.
+- A skipped **rep step** isn't logged: it's Done without its set, so its ring doesn't fill, and the time spent on it still counts, as on any rep step. A skipped **timed exercise** is logged with the time it actually ran, in whole seconds (none if under a second), not its full length. A skipped **rest** isn't logged, as rests never are.
 - What's skipped doesn't count as time spent in the history. With a **time limit**, it doesn't count towards the limit either, so the time saved goes to more rounds. Skipping the last step of the last round finishes the workout.
 
 ### What's on screen
@@ -199,7 +199,7 @@
 - Given a rest skipped part-way, then no set is logged for it.
 - Given work 0:03, rest 0:02 and a time limit of 0:20, when I skip the work 1s in and then the rest, then "00:19 left" shows, and time's up at "4 rounds + 1".
 - Given work 0:12 with countdown beeps, when I press Skip 2s in, then the rest's alarm sounds at once and none of the work's countdown ticks do.
-- Given work then push-ups, when I press Skip on the work, then the workout waits on the push-ups, with no Skip and focus on Pause.
+- Given work 0:03, push-ups, then rest, when I press Skip 8s into the push-ups, then the rest starts from its full time, no push-ups are logged, and the time spent counts the 8s.
 
 ## Platform notes
 

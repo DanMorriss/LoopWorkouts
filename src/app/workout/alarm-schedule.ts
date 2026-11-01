@@ -40,8 +40,9 @@ export const STEP_COUNTDOWN_MIN_SECONDS = 10;
  *
  * With a time limit, steps stop where time runs out, with a countdown beep before it
  * (`TIME_LIMIT_COUNTDOWN`) and the finish as it does. That moment is known even while a rep
- * step is waited on: `startedAt` plus the limit, less `repMs`, the time on rep steps already
- * done, as Done moves `startedAt` on by just what it adds to `repMs`.
+ * step is waited on: `startedAt` plus the limit, less `repMs`, the time off the clock (the
+ * time on rep steps already done, less any skipped), as Done moves `startedAt` on by just
+ * what it adds to `repMs`, and Skip moves it back by just what it takes off.
  *
  * With `stepCountdown`, each timed step and rest of `STEP_COUNTDOWN_MIN_SECONDS` or more
  * counts down to its end (`STEP_COUNTDOWN`) with the same beep. With a time limit, the

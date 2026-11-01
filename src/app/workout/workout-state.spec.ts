@@ -357,6 +357,21 @@ describe('setsDone', () => {
 
         expect(setsDone(unnamed, workoutStateAt(unnamed, 100_000), [])).toEqual([]);
     });
+
+    it('logs a skipped timed step with the time it ran (RUN-12)', () => {
+        // Skipped 30.5s into the plank: 14.5s left, which moved the clock to its end
+        const skip = { round: 0, stepIndex: 0, skippedMs: 14_500 };
+
+        expect(setsDone(workout, workoutStateAt(workout, 45_000), [], [], [skip])).toEqual([
+            { ...timed(0), seconds: 30 },
+        ]);
+    });
+
+    it("doesn't log a timed step skipped before its first second", () => {
+        const skip = { round: 0, stepIndex: 0, skippedMs: 44_500 };
+
+        expect(setsDone(workout, workoutStateAt(workout, 45_000), [], [], [skip])).toEqual([]);
+    });
 });
 
 describe('a time limit', () => {

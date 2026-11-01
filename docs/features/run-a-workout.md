@@ -13,6 +13,7 @@
 - **RUN-9** As a user I want to check how a step's exercise is done, mid-workout, without leaving it.
 - **RUN-10** As a user I want the workout to show which set, side or round I'm on, and the section I'm in, so I know where I am in a long gym workout.
 - **RUN-11** As a user I want to swap an exercise for something equivalent mid-workout, e.g. when someone's on the machine, so I can still work those muscles.
+- **RUN-12** As a user I want to skip a timed step or rest, e.g. a warm-up I've done already or a rest I'm ready to cut short, and carry on from the next step.
 
 ## Rules
 
@@ -29,7 +30,7 @@
 
 ### A time limit (RUN-8)
 
-- Rounds go on one after another, **as many as fit**. Time's up when the countdown plus the time spent on rep steps reaches the limit: **reps and rests count**, pauses don't.
+- Rounds go on one after another, **as many as fit**. Time's up when the countdown plus the time spent on rep steps, less any time skipped, reaches the limit: **reps and rests count**, pauses don't, and the time a skip saves goes to **more rounds** (RUN-12).
 - When time's up the workout **finishes at once**, part-way through a step or not, as if it ran to its end: "Time's up" on the summary, the finish alarm, and logged as finished.
 - **The score** is the full rounds done, and the steps done of the round it ran out in, rests left out: "7 rounds + 3". The step it ran out in isn't done, so a timed set of it isn't logged.
 - **Alarms**: the steps' alarms as usual, up to the end; a short tick (see [alarms](alarms.md)) at 10 seconds left, and at 3, 2 and 1; then the finish. The end is known even while a rep step is waited on, so it's booked then too.
@@ -42,6 +43,14 @@
 - As a rep step comes round, **Done swells once**, as it's the user's move now (not with reduced motion). The phone vibrates with the step's alarm, as for any step.
 - **Pressing Done** finishes the set: the full ring stays a moment over the next step's, swelling out as it fades (not with reduced motion), in the same frame as the next step's beep and vibration.
 - The time spent on reps doesn't come off any countdown, but it **counts as time spent** in the history.
+
+### Skipping a step (RUN-12)
+
+- **Skip** (⏭, captioned "Skip") is beside Pause, to its right, on a timed step or rest, like a media player's: for a warm-up you've done already, say, or a rest you're ready to cut short. It moves on to the next step, which starts from its **full time**, as Done does on a rep step. Not on a rep step, which has Done; not while paused, when the controls under the ring go.
+- Screen readers hear "Skip step", or "Skip rest" on a rest. If Skip had focus and the next step is a rep step (so Skip goes), focus moves to Pause.
+- The next step's alarm sounds and the phone vibrates at once, as the step starts; the skipped step's countdown beeps don't.
+- A skipped **timed exercise** is logged with the time it actually ran, in whole seconds (none if under a second). A skipped **rest** isn't logged, as rests never are.
+- What's skipped doesn't count as time spent in the history. With a **time limit**, it doesn't count towards the limit either, so the time saved goes to more rounds. Skipping the last step of the last round finishes the workout.
 
 ### What's on screen
 
@@ -185,9 +194,15 @@
 - Given a timed step swapped part-way through a workout, then its sets before the swap are logged under the old exercise and those after under the new one.
 - Given a swapped step at the summary, when I press Yes, use next time, then the saved workout's step is the new exercise at its weight; when I press No, just this time, then it's unchanged. Either way there's no Next time step-up for it.
 - Given a run with a swap, when the page reloads, then the step is still swapped.
+- Given work 0:30 then rest 0:10, when I press Skip 5s in, then the rest starts from 00:10; Skip there starts round 2.
+- Given a 0:45 plank (the Plank exercise) then rest, once, when I press Skip 20s in, then the workout finishes and the history has the plank for 20 seconds and 20 seconds spent.
+- Given a rest skipped part-way, then no set is logged for it.
+- Given work 0:03, rest 0:02 and a time limit of 0:20, when I skip the work 1s in and then the rest, then "00:19 left" shows, and time's up at "4 rounds + 1".
+- Given work 0:12 with countdown beeps, when I press Skip 2s in, then the rest's alarm sounds at once and none of the work's countdown ticks do.
+- Given work then push-ups, when I press Skip on the work, then the workout waits on the push-ups, with no Skip and focus on Pause.
 
 ## Platform notes
 
-- **Web:** the maths is pure and has no Angular in it, so it can be ported line for line: `workoutStateAt()` in `src/app/workout/workout-state.ts` (where a workout is after so many ms, given the rep steps done and, for a time limit, the time they took; `stepsIntoRound()` gives the score's steps) and the helpers in `src/app/models/workout.ts`. The run itself is `ActiveRunService` (`src/app/shared/run/`), and the page is `WorkoutComponent` (`src/app/workout/`), with each kind of step's look and motion in `workout-steps.scss` and `workout-motion.scss`, the step strip in `step-strip/`, an exercise's details in the shared `ExerciseDetailsDialogComponent` (RUN-9), and long names fitted to the face by `fitName()` (`fit-name.ts`), which measures the text rather than counting letters.
+- **Web:** the maths is pure and has no Angular in it, so it can be ported line for line: `workoutStateAt()` in `src/app/workout/workout-state.ts` (where a workout is after so many ms, given the rep steps done and, for a time limit, the time off the clock: the time rep steps took, less any time skipped; `stepsIntoRound()` gives the score's steps) and the helpers in `src/app/models/workout.ts`. The run itself is `ActiveRunService` (`src/app/shared/run/`), and the page is `WorkoutComponent` (`src/app/workout/`), with each kind of step's look and motion in `workout-steps.scss` and `workout-motion.scss`, the step strip in `step-strip/`, an exercise's details in the shared `ExerciseDetailsDialogComponent` (RUN-9), and long names fitted to the face by `fitName()` (`fit-name.ts`), which measures the text rather than counting letters.
 - **Web:** the summary is `WorkoutSummaryComponent` (`src/app/workout/workout-summary/`), with its sets in `SummarySetsComponent` and Next time in `SummaryStepUpsComponent`. Swapped is `SummarySwapsComponent`. Its host is a grid whose one cell is the screen (`grid-template: minmax(0, 1fr) / minmax(0, 1fr)`): an auto row grows to the content, and the sheet then runs off the screen once the summary is long.
-- **iOS:** keep the same "work it out from the clock" design: store when the run started (moved on by pauses and rep steps) and derive everything else. That's also what makes a relaunch carry on correctly (see [pause-and-stop](pause-and-stop.md)). A `TimelineView` or a display-link tick only needs to redraw. The face's drum is a `rotation3DEffect` about the x axis (the y axis for a new round) with an anchor behind the face; a long name can use `ViewThatFits`, or `lineLimit(3)` with `minimumScaleFactor(0.7)`. The (i) by an exercise's name (RUN-9) can open its details as a `.sheet` with medium and large detents, so the ring stays in sight above it.
+- **iOS:** keep the same "work it out from the clock" design: store when the run started (moved on by pauses and rep steps, back by skips) and derive everything else. That's also what makes a relaunch carry on correctly (see [pause-and-stop](pause-and-stop.md)). A `TimelineView` or a display-link tick only needs to redraw. The face's drum is a `rotation3DEffect` about the x axis (the y axis for a new round) with an anchor behind the face; a long name can use `ViewThatFits`, or `lineLimit(3)` with `minimumScaleFactor(0.7)`. The (i) by an exercise's name (RUN-9) can open its details as a `.sheet` with medium and large detents, so the ring stays in sight above it.

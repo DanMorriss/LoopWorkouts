@@ -635,10 +635,10 @@ describe('WorkoutComponent', () => {
             fixture.detectChanges();
         }
 
-        it('offers just Pause while running, so the workout is never ended by mistake', () => {
+        it('offers just Pause and Skip while running, so the workout is never ended by mistake', () => {
             start(makeWorkout());
 
-            expect(buttons().map(name)).toEqual(['Pause']);
+            expect(buttons().map(name)).toEqual(['Pause', 'Skip step']);
             fixture.destroy();
         });
 
@@ -1507,9 +1507,9 @@ describe('WorkoutComponent', () => {
 
             expect(component.isComplete()).toBe(false);
             expect(text()).toContain('round 721 of ∞');
-            expect(fixture.nativeElement.querySelectorAll('.workout-controls button')).toHaveLength(
-                1
-            );
+            expect(
+                fixture.nativeElement.querySelector('.workout-control--main button')
+            ).not.toBeNull();
             fixture.destroy();
         });
 
@@ -1649,6 +1649,144 @@ describe('WorkoutComponent', () => {
 
             expect(summaryText()).toContain('Personal bests');
             expect(summaryText()).toContain('Most rounds: 12 rounds + 1');
+            fixture.destroy();
+        });
+    });
+
+    describe('skipping a step (RUN-12)', () => {
+        beforeEach(() => localStorage.clear());
+        afterEach(() => localStorage.clear());
+
+        const plank: Step = {
+            kind: 'work',
+            seconds: 45,
+            name: 'Plank',
+            exerciseId: 'builtin:plank',
+        };
+        const skipButton = () =>
+            fixture.nativeElement.querySelector(
+                '.workout-control--skip button'
+            ) as HTMLButtonElement | null;
+        const mainButton = () =>
+            fixture.nativeElement.querySelector(
+                '.workout-control--main button'
+            ) as HTMLButtonElement;
+        const entries = () => TestBed.inject(HistoryStore).entries();
+
+        function pressSkip() {
+            skipButton()!.click();
+            fixture.detectChanges();
+        }
+
+        it('is beside Pause on a timed step or rest, but not on a rep step, which has Done', () => {
+            start(makeWorkout({ steps: [work(3), rest(2), reps(10, 'Push-ups')], repeats: 1 }));
+
+            expect(skipButton()!.getAttribute('aria-label')).toBe('Skip step');
+            advance(3000);
+            expect(skipButton()!.getAttribute('aria-label')).toBe('Skip rest');
+            advance(2000);
+            expect(component.isRepsActive()).toBe(true);
+            expect(skipButton()).toBeNull();
+            fixture.destroy();
+        });
+
+        it('moves on to the next step, from its full time', () => {
+            start(makeWorkout({ workSeconds: 30, restSeconds: 10, repeats: 2 }));
+            advance(5000);
+
+            pressSkip();
+
+            expect(component.isRestActive()).toBe(true);
+            expect(text()).toContain('00:10');
+            pressSkip();
+            expect(component.isWorkActive()).toBe(true);
+            expect(component.roundNumber()).toBe(2);
+            fixture.destroy();
+        });
+
+        it('logs a skipped exercise with the time done, the run with the time spent', () => {
+            start(makeWorkout({ steps: [plank, rest(30)], repeats: 1 }));
+            advance(20_000);
+
+            pressSkip(); // 20s of the plank; the rest at the end of the last round is skipped
+
+            expect(component.isComplete()).toBe(true);
+            expect(entries()[0]).toEqual(
+                expect.objectContaining({
+                    outcome: 'finished',
+                    activeSeconds: 20,
+                    sets: [expect.objectContaining({ name: 'Plank', seconds: 20 })],
+                })
+            );
+            fixture.destroy();
+        });
+
+        it('logs no set for a skipped rest', () => {
+            start(makeWorkout({ steps: [plank, rest(30)], repeats: 2 }));
+            advance(45_000 + 5000);
+
+            pressSkip();
+            endWorkout();
+
+            expect(entries()[0].sets).toEqual([expect.objectContaining({ seconds: 45 })]);
+            expect(entries()[0].activeSeconds).toBe(50);
+            fixture.destroy();
+        });
+
+        it('gives the time saved to more rounds of a time limit', () => {
+            // 3s work, 2s rest, as many rounds as fit in 0:20
+            start(makeWorkout({ workSeconds: 3, restSeconds: 2, timeLimitSeconds: 20 }));
+            advance(1000);
+
+            pressSkip(); // 2s of work skipped
+            pressSkip(); // and all 2s of the rest
+
+            expect(text()).toContain('00:19 left');
+            advance(19_000);
+            expect(component.isComplete()).toBe(true);
+            // 20s of time is 4 rounds; the 4s saved are the 5th round's work as well
+            expect(entries()[0]).toEqual(
+                expect.objectContaining({
+                    roundsCompleted: 4,
+                    stepsIntoRound: 1,
+                    activeSeconds: 20,
+                })
+            );
+            fixture.destroy();
+        });
+
+        it("sounds the next step's alarm at once, and none of the skipped one's countdown", () => {
+            // 12s work, 2s rest, twice: a countdown at the end of each work step
+            start(makeWorkout({ workSeconds: 12, restSeconds: 2, repeats: 2 }));
+            TestBed.inject(AlarmService).unlock();
+            advance(2000);
+
+            pressSkip();
+
+            // The rest starts now, 2s in, then round 2's work and its countdown
+            expect(audio.scheduledNotes()).toEqual([
+                '440@2',
+                '880@4',
+                '880@4.25',
+                '660@13',
+                '660@14',
+                '660@15',
+                '523.25@16',
+                '659.25@16.2',
+                '783.99@16.4',
+            ]);
+            fixture.destroy();
+        });
+
+        it('moves focus to Pause when Skip goes, rather than losing it', async () => {
+            start(makeWorkout({ steps: [work(3), reps(10, 'Push-ups')], repeats: 1 }));
+            skipButton()!.focus();
+
+            pressSkip();
+            await fixture.whenStable();
+
+            expect(component.isRepsActive()).toBe(true);
+            expect(document.activeElement).toBe(mainButton());
             fixture.destroy();
         });
     });

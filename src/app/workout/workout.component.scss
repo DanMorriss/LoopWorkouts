@@ -262,11 +262,25 @@
     }
 }
 
-// The big button, centred under the ring
+// The big button, centred under the ring, with Skip to its right
 .workout-controls {
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     margin: 1.5rem auto 0;
+}
+
+.workout-control--main {
+    grid-column: 2;
+}
+
+.workout-control--skip {
+    justify-self: start;
+    margin-left: 1.5rem;
+}
+
+.workout-control__skip {
+    width: 56px;
+    height: 56px;
 }
 
 .workout-control {

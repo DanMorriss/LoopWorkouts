@@ -26,6 +26,7 @@ import {
 import { MAX_WEIGHT_KG } from '../../models/weight';
 import { isLoggedSet, isTimedSet, RepSet } from '../../models/history';
 import { StepSwap } from '../../models/step-swap';
+import { StepSkip } from '../../workout/workout-state';
 import { Deletion, inOrder, LibraryOrder, mergeRecords, newId } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { SyncClock } from './sync-clock.service';
@@ -49,6 +50,7 @@ export class WorkoutStore {
     private _activeSets = signal<RepSet[]>([]);
     private _activeSides = signal<RunSides>(DEFAULT_RUN_SIDES);
     private _activeSwaps = signal<StepSwap[]>([]);
+    private _activeSkips = signal<StepSkip[]>([]);
 
     readonly workouts = computed(() => this._workouts());
     /** The library's order, to sync with other copies (see `mergeLibraryOrder()`). */
@@ -74,6 +76,19 @@ export class WorkoutStore {
      * (see `finishRepStep()`), so the history adds it back to the time spent.
      */
     readonly activeRepMs = computed(() => this._activeRepMs());
+    /** Timed steps and rests skipped part-way in the current run (RUN-12), in order. */
+    readonly activeSkips = computed(() => this._activeSkips());
+    /**
+     * The run's real time less its clock, in ms: the time on rep steps done, which Done takes
+     * off the clock, less the time skipped, which Skip adds to it. Negative when more was
+     * skipped. A time limit counts the clock plus this, so the time a skip saves is more
+     * rounds.
+     */
+    readonly activeOffClockMs = computed(
+        () =>
+            this._activeRepMs() -
+            this._activeSkips().reduce((total, skip) => total + skip.skippedMs, 0)
+    );
     /**
      * The sets of rep steps done so far in the current run, in order. Its timed sets are
      * worked out from the clock (see `ActiveRunService.sets`).
@@ -110,6 +125,7 @@ export class WorkoutStore {
             this._activeSets.set(readSets(sessionStorage.getItem('activeSets')));
             this._activeSides.set(readSides(sessionStorage.getItem('activeSides')));
             this._activeSwaps.set(readSwaps(sessionStorage.getItem('activeSwaps')));
+            this._activeSkips.set(readSkips(sessionStorage.getItem('activeSkips')));
         }
     }
 
@@ -347,7 +363,7 @@ export class WorkoutStore {
         this._activeRunStartedAt.set(startedAt);
         sessionStorage.setItem('activeRunStartedAt', String(startedAt));
         sessionStorage.removeItem('activeWorkoutPausedAt');
-        this.clearRepSteps();
+        this.clearStepsDone();
         this.setSwaps([]);
     }
 
@@ -404,6 +420,23 @@ export class WorkoutStore {
         sessionStorage.setItem('activeSets', JSON.stringify(this._activeSets()));
     }
 
+    /**
+     * Skip on a timed step or rest (RUN-12): the workout moves on to the next step. The start
+     * time moves back by what was left of it, so the clock is at its end.
+     */
+    skipStep(skip: StepSkip) {
+        const startedAt = this._activeWorkoutStartedAt();
+        if (!this._activeWorkout() || startedAt === null || skip.skippedMs <= 0) {
+            return;
+        }
+        this.resume();
+        const movedStart = this._activeWorkoutStartedAt()! - skip.skippedMs;
+        this._activeWorkoutStartedAt.set(movedStart);
+        sessionStorage.setItem('activeWorkoutStartedAt', String(movedStart));
+        this._activeSkips.update((skips) => [...skips, skip]);
+        sessionStorage.setItem('activeSkips', JSON.stringify(this._activeSkips()));
+    }
+
     /** Adds a set without moving the workout on, e.g. the one time ran out in. */
     addActiveSet(set: RepSet) {
         if (!this._activeWorkout()) {
@@ -424,13 +457,15 @@ export class WorkoutStore {
         sessionStorage.setItem('activeSets', JSON.stringify(this._activeSets()));
     }
 
-    private clearRepSteps() {
+    private clearStepsDone() {
         this._activeRepStepsDone.set(0);
         this._activeRepMs.set(0);
         this._activeSets.set([]);
+        this._activeSkips.set([]);
         sessionStorage.removeItem('activeRepStepsDone');
         sessionStorage.removeItem('activeRepMs');
         sessionStorage.removeItem('activeSets');
+        sessionStorage.removeItem('activeSkips');
     }
 
     /**
@@ -499,7 +534,7 @@ export class WorkoutStore {
         sessionStorage.removeItem('activeWorkoutPausedAt');
         sessionStorage.removeItem('activeRunStartedAt');
         sessionStorage.removeItem('activeSides');
-        this.clearRepSteps();
+        this.clearStepsDone();
         this.setSwaps([]);
     }
 
@@ -802,6 +837,28 @@ function readSwaps(saved: string | null): StepSwap[] {
     } catch {
         return [];
     }
+}
+
+/** The saved skips of the run in progress; anything broken is dropped. */
+function readSkips(saved: string | null): StepSkip[] {
+    try {
+        const parsed: unknown = JSON.parse(saved ?? '[]');
+        return Array.isArray(parsed) ? parsed.filter(isSkip) : [];
+    } catch {
+        return [];
+    }
+}
+
+function isSkip(value: unknown): value is StepSkip {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+    const skip = value as Record<string, unknown>;
+    return (
+        isWholeNumber(skip['round'], 0) &&
+        isWholeNumber(skip['stepIndex'], 0) &&
+        isWholeNumber(skip['skippedMs'], 1)
+    );
 }
 
 function isSwap(value: unknown): value is StepSwap {

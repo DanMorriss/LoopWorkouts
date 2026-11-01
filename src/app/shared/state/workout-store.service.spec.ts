@@ -1200,6 +1200,66 @@ describe('WorkoutStore', () => {
             expect(store.activeRepStepsDone()).toBe(0);
         });
 
+        describe('skipping a step (RUN-12)', () => {
+            const SKIP = { round: 0, stepIndex: 0, skippedMs: 6000 };
+
+            it('moves the start back by the time left, which comes off the time off the clock', () => {
+                const store = startWorkout();
+                vi.advanceTimersByTime(4000);
+
+                store.skipStep(SKIP);
+
+                expect(store.activeWorkoutStartedAt()).toBe(994_000);
+                expect(store.activeSkips()).toEqual([SKIP]);
+                store.finishRepStep(30_000, SET);
+                expect(store.activeOffClockMs()).toBe(24_000);
+                expect(store.activeRunStartedAt()).toBe(1_000_000);
+            });
+
+            it('remembers them across a refresh, dropping broken ones', () => {
+                const store = startWorkout();
+                store.skipStep(SKIP);
+                const saved = JSON.parse(sessionStorage.getItem('activeSkips')!);
+                sessionStorage.setItem(
+                    'activeSkips',
+                    JSON.stringify([...saved, { ...SKIP, skippedMs: -5 }, 'skip'])
+                );
+
+                TestBed.resetTestingModule();
+                const reloaded = createStore();
+
+                expect(reloaded.activeWorkoutStartedAt()).toBe(994_000);
+                expect(reloaded.activeSkips()).toEqual([SKIP]);
+                expect(reloaded.activeOffClockMs()).toBe(-6000);
+            });
+
+            it('carries on running when skipped while paused', () => {
+                const store = startWorkout();
+                vi.advanceTimersByTime(4000);
+                store.pause();
+                vi.advanceTimersByTime(60_000);
+
+                store.skipStep(SKIP);
+
+                expect(store.isPaused()).toBe(false);
+                // 60s paused, then 6s skipped
+                expect(store.activeWorkoutStartedAt()).toBe(1_054_000);
+            });
+
+            it('starts again from none skipped for a new run, or after stopping', () => {
+                const store = startWorkout();
+                store.skipStep(SKIP);
+
+                store.setActiveWorkout(store.workouts()[0]);
+                expect(store.activeSkips()).toEqual([]);
+
+                store.skipStep(SKIP);
+                store.stop();
+                expect(store.activeSkips()).toEqual([]);
+                expect(sessionStorage.getItem('activeSkips')).toBeNull();
+            });
+        });
+
         it('changes a step of the running workout, and of the saved one', () => {
             const store = startWorkout();
             const heavier = { kind: 'reps' as const, reps: 12, name: '', weight: 60 };

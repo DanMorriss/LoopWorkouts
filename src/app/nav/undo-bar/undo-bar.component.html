@@ -1,33 +1,51 @@
-<!-- Always there, so what's offered is read out as it appears -->
-<div role="status">
+<!-- Always there, so what's offered is read out as it appears, unless its page has said it
+     already (a quiet notice) -->
+<p class="sr-only" role="status">
     @if (undo.offer(); as offer) {
-        <div
-            class="undo-bar"
-            [class.undo-bar--notice]="!offer.undo"
-            animate.leave="undo-bar--leaving"
-            (keydown.escape)="undo.dismiss()"
-        >
-            <span class="undo-bar__message" id="undo-bar-message">{{ offer.message }}.</span>
-            <!-- A notice only says what happened -->
-            @if (offer.undo) {
-                <button
-                    #undoButton
-                    type="button"
-                    class="undo-bar__undo"
-                    aria-describedby="undo-bar-message"
-                    (click)="undo.undo()"
-                >
-                    Undo
-                </button>
-            }
-            <button
-                type="button"
-                class="btn-icon undo-bar__close"
-                aria-label="Close"
-                (click)="undo.dismiss()"
-            >
-                <mat-icon aria-hidden="true">close</mat-icon>
-            </button>
-        </div>
+        @if (!offer.quiet) {
+            {{ sentence(offer.message) }}
+        }
     }
-</div>
+</p>
+@if (undo.offer(); as offer) {
+    <div
+        class="undo-bar"
+        [class.undo-bar--notice]="!offer.undo"
+        animate.leave="undo-bar--leaving"
+        (keydown.escape)="undo.dismiss()"
+    >
+        <!-- Hidden from screen readers when it's been read out above, so it isn't heard twice;
+             it still describes Undo -->
+        <span
+            class="undo-bar__message"
+            id="undo-bar-message"
+            [attr.aria-hidden]="offer.quiet ? null : 'true'"
+            >{{ sentence(offer.message) }}</span
+        >
+        <!-- A notice only says what happened -->
+        @if (offer.undo) {
+            <button
+                #undoButton
+                type="button"
+                class="undo-bar__action"
+                aria-describedby="undo-bar-message"
+                (click)="undo.undo()"
+            >
+                Undo
+            </button>
+        }
+        @if (offer.link; as link) {
+            <a class="undo-bar__action" aria-describedby="undo-bar-message" [routerLink]="link.url">
+                {{ link.label }}
+            </a>
+        }
+        <button
+            type="button"
+            class="btn-icon undo-bar__close"
+            aria-label="Close"
+            (click)="undo.dismiss()"
+        >
+            <mat-icon aria-hidden="true">close</mat-icon>
+        </button>
+    </div>
+}

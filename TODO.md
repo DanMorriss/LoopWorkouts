@@ -41,7 +41,6 @@ Ten ready-made workouts are in the library's Ready-made workouts page (see `docs
 
 ### From using it (Tom, 2026-10-31; Dan, 2026-11-01)
 
-- [ ] **Show what an import did where it's seen:** Import backup's result ("Added 2 workouts…") is a line under the buttons in Account → Your data, easy to miss on a phone. Show it in the bar at the bottom too (as Add to library's Undo bar does), perhaps with a View library button, keeping the line for screen readers.
 - [ ] **Swap an exercise, next steps (RUN-11, BLD-14):** swapping is built, mid-workout and in Create (see Swapping an exercise in `docs/features/run-a-workout.md`). Still to do: swap the next exercise during the rest before it (the likeliest moment to find the machine taken), which today needs waiting until it starts; and tag each built-in exercise with its movement (squat, hinge, horizontal push, vertical pull, …) to rank suggestions by it as well as by muscles, as muscles alone are rough (Front squat suggests Burpee, as both work the quads).
 
 ### Alarms (any time)

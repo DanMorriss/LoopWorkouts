@@ -90,7 +90,7 @@ src/app/
     components/wheel-picker/        iPhone-style number wheel (a Signal Forms control)
     components/infinity-switch/     The ∞ (until stopped) switch in setup
     components/toggle-switch/       On/off switch used in settings
-    undo/undo.service.ts            Undo after a delete, shown in the Undo bar (nav/undo-bar/)
+    undo/undo.service.ts            Undo after a delete, and notices, shown in the Undo bar (nav/undo-bar/)
     reduced-motion.ts               Follows the system reduced-motion setting
     spring.ts, gesture.ts           Springs (as CSS easings, or frame by frame), and flick projection, rubber-banding and speed for drags
     layout-change.ts                Slides a list's items to their new places when one is deleted, put back, opened or closed

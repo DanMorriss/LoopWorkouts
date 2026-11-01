@@ -32,7 +32,7 @@ Export and import (SYN-1, SYN-2) are built, with a prompt for having an AI turn 
     - **Settings** in the file are left out: theme, sound, your equipment and so on are a choice for each device.
     - Workouts and history entries in the file that aren't usable are left out, the same as when the app loads its own data, and older workout formats convert.
     - **A version 1 file** (from before ids were random) has no dates or deletions, and its workout ids were only unique on its device. Its workouts are matched by what they are instead (title, steps and rounds): one the same as a workout here is skipped, any other is added with a new id. So a workout changed since that backup was made is kept, and the backup's version is added alongside it. Its workouts merge by run id as above.
-- What happened is shown under the buttons, and read out by screen readers:
+- What happened is shown under the buttons, and read out by screen readers. It shows in the **bar at the bottom** too (as the Undo bar shows things, with no Undo), where it's seen on a phone, with a button to see what came in: **View library** if any workouts were added or updated, else **View exercises** for exercises, else **View history** for history entries (none when nothing came in, or the file was turned down). The bar isn't read out, as the line under the buttons is:
     - "Added 2 workouts, 3 exercises and 14 history entries." (or just the parts that apply)
     - "Updated 1 workout and 2 history entries." when newer copies were taken (exercises count too)
     - "Removed 3 items deleted since on the other device."
@@ -158,6 +158,7 @@ Compared on 2026-10-27, for cost, how it fits the device-first design above, sig
 - Given workouts, history and settings here, and a workout going, when I press Clear this device and then Clear everything, then the app starts again with none of them, and the workout isn't in the history.
 - Given the app open in two tabs, with a workout going in the other, when I clear this device in one, then the other starts again empty too, and the workout isn't in the history.
 - Given I press Clear this device, then nothing is cleared until I press Clear everything; when I press Cancel, then nothing changes and focus is back on Clear this device.
+- Given a backup with 2 workouts not here, when I import it, then "Added 2 workouts." shows under the buttons and in the bar at the bottom, with View library; when I press View library, then the library opens and the bar goes.
 - Given a file that isn't a backup, or is from a newer version, when I import it, then nothing changes and I'm told why.
 - Given a backup with a broken workout and two broken history entries, when I import it, then the rest are added and "3 items in it couldn't be read" is shown.
 - Given I press Copy AI prompt, then the prompt is on the clipboard and I'm told so.

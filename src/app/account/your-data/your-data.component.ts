@@ -2,6 +2,7 @@ import { Component, inject, input, signal } from '@angular/core';
 import { BackupService, ImportResult } from '../../shared/backup/backup.service';
 import { planPrompt } from '../../shared/backup/plan-prompt';
 import { ClearDeviceComponent } from '../../shared/components/clear-device/clear-device.component';
+import { UndoOffer, UndoService } from '../../shared/undo/undo.service';
 
 /**
  * Account → Your data: Export backup and Import backup (SYN-1, SYN-2), Copy AI prompt for
@@ -18,6 +19,7 @@ export class YourDataComponent {
     readonly signedIn = input(false);
 
     private readonly backup = inject(BackupService);
+    private readonly undo = inject(UndoService);
 
     /** What the last export or import did, read out as it changes. */
     protected readonly status = signal('');
@@ -33,7 +35,11 @@ export class YourDataComponent {
         if (!file) {
             return;
         }
-        this.status.set(importMessage(await this.backup.import(file)));
+        const result = await this.backup.import(file);
+        const message = importMessage(result);
+        this.status.set(message);
+        // In the bar at the bottom too, where it's seen on a phone; the line above reads it out
+        this.undo.notify(message, { quiet: true, link: importLink(result) });
     }
 
     /** Copies the prompt for turning a plan into a file to import (see `planPrompt()`). */
@@ -61,6 +67,23 @@ function listOf(workouts: number, exercises: number, entries: number): string {
     return items.length > 1
         ? `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`
         : (items[0] ?? '');
+}
+
+/** Where to see what an import brought in: workouts first, then exercises, then history. */
+export function importLink(result: ImportResult): UndoOffer['link'] {
+    if (!result.ok) {
+        return undefined;
+    }
+    if (result.workoutsAdded + result.workoutsUpdated > 0) {
+        return { label: 'View library', url: '/library' };
+    }
+    if (result.exercisesAdded + result.exercisesUpdated > 0) {
+        return { label: 'View exercises', url: '/exercises' };
+    }
+    if (result.entriesAdded + result.entriesUpdated > 0) {
+        return { label: 'View history', url: '/history' };
+    }
+    return undefined;
 }
 
 /** e.g. "Added 2 workouts and 14 history entries. Updated 1 workout." */

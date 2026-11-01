@@ -1,6 +1,7 @@
 // Screenshots exercise demos (EXR-13) from a running `ng serve --port 4300`, to check the 3D
 // figure by eye. Ids are as in the page's address (back-squat, not builtin:back-squat).
-// Usage: node tools/shoot-demos.mjs <out-dir> <id>... [--theme=light] [--turns=2] [--at=500] [--figure=female] [--big] [--drag=50]
+// Usage: node tools/shoot-demos.mjs <out-dir> <id>... [--theme=light] [--turns=2] [--at=500] [--figure=female] [--big]
+//   --figure: the Sex setting; the 3D figure is always male for now [--drag=50]
 //   --turns: presses Turn that many times first (45° each); --at: waits that many ms more
 import { chromium } from 'playwright';
 

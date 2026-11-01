@@ -15,7 +15,6 @@ import { Exercise } from '../../../models/exercise';
 import { poseAt } from '../../../models/exercise-motion';
 import { injectPrefersReducedMotion } from '../../reduced-motion';
 import { ExerciseStore } from '../../state/exercise-store.service';
-import { SettingsStore } from '../../state/settings-store.service';
 import { ThemeService } from '../../theme/theme.service';
 import { ExerciseFigure3dComponent } from './exercise-figure-3d.component';
 import { ExerciseFigureComponent } from './exercise-figure.component';
@@ -48,7 +47,6 @@ export class ExerciseDemoComponent {
 
     private readonly exercises = inject(ExerciseStore);
     private readonly theme = inject(ThemeService);
-    private readonly settings = inject(SettingsStore);
     private readonly host: HTMLElement = inject(ElementRef).nativeElement;
     protected readonly motion = computed(() => this.exercises.motionOf(this.exercise()));
     protected readonly reduced = injectPrefersReducedMotion();
@@ -107,8 +105,9 @@ export class ExerciseDemoComponent {
             if (!module || !motion) {
                 return;
             }
-            // Drawn as the body map's figure is, the one picked in Profile (SET-5)
-            const scene = new module.FigureScene(motion, this.settings.bodyFigure());
+            // The male figure, whichever is picked in Profile: the female one isn't right in 3D
+            // yet (see TODO.md). The body map still draws the one picked
+            const scene = new module.FigureScene(motion, 'male');
             this.scene.set(scene);
             onCleanup(() => {
                 this.scene.set(null);

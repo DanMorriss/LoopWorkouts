@@ -859,6 +859,20 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
+            it('paused on an exercise, with its name and (i) over the ring', async () => {
+                store.setActiveWorkout(
+                    store.addWorkout(
+                        makeWorkout({
+                            steps: [{ ...reps(20, 'Push-ups'), exerciseId: 'builtin:push-up' }],
+                        })
+                    )
+                );
+                store.pause();
+                await open('/workout');
+                expect(fixture.nativeElement.querySelector('.workout-paused__info')).not.toBeNull();
+                await expectNoViolations();
+            });
+
             it('ended, with its sets being changed and the next-time question', async () => {
                 store.setActiveWorkout(
                     store.addWorkout(

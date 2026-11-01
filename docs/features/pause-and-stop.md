@@ -18,7 +18,7 @@
 ### Pause
 
 - Pausing **freezes** the countdown and the ring where they are, and stops the last-seconds pulse. However long it's paused, it doesn't move on.
-- The ring **greys out**, and the round line, your note and Next turn the muted text colour. In the middle of the ring the face shows "**Paused · 00:23**" (or "Paused · 20 reps" on a rep step), a big **Resume** button, and **End workout** under it. The controls under the ring go while paused.
+- The ring **greys out**, and the round line, your note and Next turn the muted text colour. In the middle of the ring the face shows the step's name in the muted colour, on one line (cut short with "…" if it's long), with the **(i)** for its exercise's details beside it if it is one (RUN-9); then "**Paused · 00:23**" (or "Paused · 20 reps" on a rep step), a big **Resume** button, and **End workout** under it. Pausing to read how an exercise is done is common, so the (i) stays; the details open over the paused workout, and closing them goes back to the (i), still paused. Unnamed work shows no name; unnamed rest and reps say "Rest" and "Reps", as on the face. The controls under the ring go while paused.
 - Focus moves to Resume on pause, and back to Pause on resume, as the button just pressed has gone.
 - **Pause becomes Resume**: the button glides up from where Pause was into the middle of the ring as Resume, and back down again on resume, along the same path (from the smaller Pause beside Done on a rep step). It moves on a spring with no bounce (Apple's 0.4s response) and is a real button the whole way, so it can be pressed mid-glide, and it turns straight round from wherever it is. With reduced motion it's just swapped.
 - Resuming carries on from exactly where it was. The time spent paused **doesn't count** as time spent in the history.
@@ -45,6 +45,7 @@
 - Given a run paused, when the app reloads, then it's still paused at the same point.
 - Given a run 4.5s in, when the app reloads, then it carries on from 4.5s, and only alarms still to come are booked.
 - Given a run going, then the only control is Pause; when paused, then Resume and End workout show over the greyed ring, and Escape resumes.
+- Given a run paused on Push-ups (the Push-up exercise), then "Push-ups" and an (i) named "Details of Push-up" show above "Paused"; the (i) opens its details, and closing them leaves the run paused with focus on the (i). Paused on Jog (just a name), then "Jog" shows with no (i).
 - Given a run going, when I press Pause, then Resume glides from Pause's place up into the ring; when I press Resume before it gets there, then Pause glides back from where Resume was.
 - Given a run on its first step, when I end it, then nothing is logged, and the summary says "Nothing to log".
 - Given a run, on another page, when I swipe its bar right past halfway, then it ends as End workout does, and its summary opens (see [home-and-navigation](home-and-navigation.md)).

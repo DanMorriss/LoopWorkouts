@@ -187,3 +187,29 @@
         transform: scale(1.015);
     }
 }
+
+// While paused, the step's name and its (i) over the greyed ring, above "Paused · 00:23": one
+// line, cut short with "…", so Resume and End workout still fit inside the circle
+.workout-paused__name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    max-width: 70%;
+    margin-bottom: -0.5rem;
+    animation: paused-in 0.2s ease-out;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
+
+.workout-paused__step {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    color: $face-muted;
+    font-size: 1.125rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

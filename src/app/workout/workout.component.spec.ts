@@ -2076,6 +2076,51 @@ describe('WorkoutComponent', () => {
                 expect(component.isRepsActive()).toBe(true);
             });
 
+            describe('while paused', () => {
+                const pausedInfo = () => el('.workout-paused__info') as HTMLButtonElement | null;
+
+                function pause() {
+                    (el('.workout-controls button[aria-label="Pause"]') as HTMLElement).click();
+                    fixture.detectChanges();
+                }
+
+                it("says which step it's paused on, with the (i) still there", () => {
+                    advance(3000);
+                    pause();
+
+                    expect(el('.workout-paused__step')!.textContent!.trim()).toBe('Push-ups');
+                    expect(pausedInfo()!.getAttribute('aria-label')).toBe('Details of Push-up');
+                });
+
+                it('names a step that is no exercise, with no (i)', () => {
+                    pause();
+
+                    expect(el('.workout-paused__step')!.textContent!.trim()).toBe('Jog');
+                    expect(pausedInfo()).toBeNull();
+                });
+
+                it('opens the details over the paused workout, and goes back to the (i)', async () => {
+                    advance(3000);
+                    pause();
+                    pausedInfo()!.focus();
+                    pausedInfo()!.click();
+                    fixture.detectChanges();
+
+                    const dialog = el('app-exercise-details-dialog [role="dialog"]')!;
+                    expect(dialog.querySelector('.details__title')!.textContent!.trim()).toBe(
+                        'Push-up'
+                    );
+
+                    (dialog.querySelector('.details__done') as HTMLElement).click();
+                    fixture.detectChanges();
+                    await fixture.whenStable();
+
+                    expect(el('app-exercise-details-dialog')).toBeNull();
+                    expect(document.activeElement).toBe(pausedInfo());
+                    expect(component.isPaused()).toBe(true);
+                });
+            });
+
             it("leaves Space to the dialog while it's open", () => {
                 advance(3000);
                 info()!.click();

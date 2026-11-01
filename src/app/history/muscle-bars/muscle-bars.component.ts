@@ -12,7 +12,9 @@ const statusText = (status: MuscleStatus, { low, high }: WeeklyAim) =>
 /**
  * A bar per muscle group for this week's sets, against the sets a week it aims for, shaded as
  * a band on its track: short of it is under, past it is over. Small muscles aim lower, and
- * every muscle lower when training for fitness.
+ * every muscle lower when training for fitness. The band's edges are drawn over the fill, so
+ * the aim still shows once the bar has passed it: a line on the track, or a notch cut in the
+ * fill where the fill covers it.
  */
 @Component({
     selector: 'app-muscle-bars',
@@ -40,6 +42,11 @@ export class MuscleBarsComponent {
                 band: {
                     left: (aim.low / this.scale()) * 100,
                     width: ((aim.high - aim.low) / this.scale()) * 100,
+                    right: (aim.high / this.scale()) * 100,
+                    // Each edge lies just inside the band, so a bar that ends on the aim's
+                    // low edge leaves it on the track, and one that ends on its high edge covers it
+                    lowCovered: sets > aim.low,
+                    highCovered: sets >= aim.high,
                 },
                 description: `${count} ${sets === 1 ? 'set' : 'sets'}, ${statusText(status, aim)}`,
             };

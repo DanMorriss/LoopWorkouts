@@ -34,11 +34,11 @@
     background: var(--muscle-idle);
 }
 
-// The sets this muscle aims for, lower for small muscles
+// The sets this muscle aims for, lower for small muscles: tinted under the fill, with its edges
+// (below) over it
 .bars__band {
     position: absolute;
     inset-block: 0;
-    border-inline: 1px solid var(--balance-band-edge);
     background: var(--balance-band);
 }
 
@@ -55,6 +55,24 @@
 
     .bars__row--over & {
         background: var(--balance-over);
+    }
+}
+
+// An edge of the band, just inside it, drawn over the fill so the aim shows past a full bar.
+// No one colour stands out on both the track and the fills, so on the track it's a line, and
+// where the fill covers it a notch in the track's colour (which stands out on every fill)
+.bars__edge {
+    position: absolute;
+    inset-block: 0;
+    width: 2px;
+    background: var(--balance-band-edge);
+
+    &--high {
+        transform: translateX(-100%);
+    }
+
+    &--covered {
+        background: var(--muscle-idle);
     }
 }
 
@@ -77,6 +95,6 @@
     flex: none;
     width: 1.25rem;
     height: 0.6rem;
-    border-inline: 1px solid var(--balance-band-edge);
+    border-inline: 2px solid var(--balance-band-edge);
     background: var(--balance-band);
 }

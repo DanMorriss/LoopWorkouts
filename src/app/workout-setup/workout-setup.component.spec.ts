@@ -364,6 +364,38 @@ describe('WorkoutSetupComponent', () => {
             expect(unlinked(allSteps(store.workouts()[0]))).toEqual([work(30)]);
         });
 
+        describe('Save, without starting (BLD-15)', () => {
+            it('sits beside Start, which stays the main button', () => {
+                expect(button('Save').type).toBe('button');
+                expect(button('Save').classList).toContain('btn-pill');
+                expect(submitButton().classList).toContain('btn-main');
+            });
+
+            it('saves the workout without starting it, and goes back to the library with it highlighted', async () => {
+                typeTitle('Sprints');
+                chooseTime(0, 'seconds', '30');
+
+                await press('Save');
+
+                expect(store.workouts().map((workout) => workout.title)).toEqual(['Sprints']);
+                expect(store.activeWorkout()).toBeNull();
+                expect(navigate).toHaveBeenCalledWith(['/library'], {
+                    queryParams: { saved: store.workouts()[0].id },
+                });
+                expect(shown()).toEqual({ title: '', steps: [blankStep], repeats: '1' });
+            });
+
+            it("can't save a workout with no work time, as Start can't", async () => {
+                chooseTime(1, 'seconds', '30'); // only rest
+
+                expect(button('Save').disabled).toBe(true);
+                await fixture.componentInstance['saveOnly']();
+
+                expect(store.workouts()).toEqual([]);
+                expect(navigate).not.toHaveBeenCalled();
+            });
+        });
+
         it('resets the form after saving', async () => {
             typeTitle('Sprints');
             chooseTime(0, 'seconds', '30');
@@ -2325,6 +2357,22 @@ describe('WorkoutSetupComponent', () => {
             });
             expect(store.activeWorkout()?.id).toBe('workout-1');
             expect(navigate).toHaveBeenCalledWith(['/workout']);
+        });
+
+        it('saves the changes with Save, without starting it, and goes back to the library', async () => {
+            await setup({ editId: 'workout-1' });
+            store.addWorkout(savedWorkout);
+            await create();
+
+            typeTitle('Renamed');
+            await press('Save');
+
+            expect(store.workouts()).toHaveLength(1);
+            expect(store.workouts()[0]).toMatchObject({ id: 'workout-1', title: 'Renamed' });
+            expect(store.activeWorkout()).toBeNull();
+            expect(navigate).toHaveBeenCalledWith(['/library'], {
+                queryParams: { saved: 'workout-1' },
+            });
         });
 
         it('empties the form for a new workout when the editId goes, as Create from the menu does', async () => {

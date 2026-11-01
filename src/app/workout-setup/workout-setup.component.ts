@@ -9,7 +9,15 @@ import {
     Injector,
     signal,
 } from '@angular/core';
-import { applyEach, form, FormField, FormRoot, maxLength, validate } from '@angular/forms/signals';
+import {
+    applyEach,
+    form,
+    FormField,
+    FormRoot,
+    maxLength,
+    submit,
+    validate,
+} from '@angular/forms/signals';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -1311,7 +1319,29 @@ export class WorkoutSetupComponent {
         return editId ? this.workoutStore.findWorkoutById(editId) : null;
     }
 
+    /** Start (the form's submit): saves the workout, starts it and opens the workout page. */
     private async saveAndStart(): Promise<void> {
+        const savedWorkout = this.save();
+        this.load(null);
+        this.run.start(savedWorkout);
+        await this.router.navigate(['/workout']);
+    }
+
+    /**
+     * Save (BLD-15), checked as Start is: saves the workout without starting it, and goes back
+     * to the library with it highlighted.
+     */
+    protected async saveOnly(): Promise<void> {
+        await submit(this.workoutForm, async () => {
+            const savedWorkout = this.save();
+            this.load(null);
+            await this.router.navigate(['/library'], { queryParams: { saved: savedWorkout.id } });
+            return undefined;
+        });
+    }
+
+    /** Saves the form to the library, as a new workout or over the one being edited. */
+    private save(): Workout {
         const setup = this.model();
         const { title, steps } = setup;
         // A time limit runs as many rounds as fit, so its rounds are UNTIL_STOPPED
@@ -1330,14 +1360,10 @@ export class WorkoutSetupComponent {
                   };
 
         const editingId = this.editingWorkoutId();
-        const savedWorkout = editingId
+        return editingId
             ? (this.workoutStore.updateWorkout(editingId, workout) ??
-              this.workoutStore.addWorkout(workout))
+                  this.workoutStore.addWorkout(workout))
             : this.workoutStore.addWorkout(workout);
-
-        this.load(null);
-        this.run.start(savedWorkout);
-        await this.router.navigate(['/workout']);
     }
 }
 

@@ -11,7 +11,7 @@ import {
     signal,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MUSCLE_LABELS, MuscleGroup } from '../models/exercise';
 import { Workout } from '../models/workout';
 import { musclesMissed, musclesWorked } from '../models/workout-muscles';
@@ -19,10 +19,15 @@ import { HOLD_MS, WorkoutCardComponent } from './workout-card/workout-card.compo
 import { WorkoutDetailsDialogComponent } from './workout-details/workout-details-dialog.component';
 import { changeSmoothly } from '../shared/layout-change';
 import { ActiveRunService } from '../shared/run/active-run.service';
+import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 
+/**
+ * The user's workouts. Arriving from Create's Save, `?saved=<id>` highlights that workout and
+ * brings it into view (BLD-15).
+ */
 @Component({
     selector: 'app-workout-library',
     templateUrl: './workout-library.component.html',
@@ -57,6 +62,18 @@ export class WorkoutLibraryComponent {
     protected readonly holdMs = HOLD_MS;
     /** A card let go settles into its place at the finger's speed. */
     protected readonly drop = new DropSpring();
+    private readonly reducedMotion = injectPrefersReducedMotion();
+    /** The workout just saved in Create, if arriving from there. */
+    protected readonly highlightedId = signal<string | null>(null);
+
+    constructor() {
+        const saved = inject(ActivatedRoute).snapshot.queryParamMap.get('saved');
+        const workout = saved ? this.workoutStore.findWorkoutById(saved) : null;
+        if (workout) {
+            this.highlightedId.set(workout.id);
+            this.bringIntoView(workout.id, `Saved ${workout.title.trim() || 'Untitled workout'}`);
+        }
+    }
 
     protected isExistingWorkouts = computed(() => this.workoutStore.workouts().length > 0);
 
@@ -166,6 +183,29 @@ export class WorkoutLibraryComponent {
     /** Makes a change to the list, with the cards sliding to their new places. */
     private smoothChange(change: () => void) {
         changeSmoothly(this.host.nativeElement, '.workout-card', this.injector, change);
+    }
+
+    /**
+     * Scrolls a workout to the middle of the screen, with focus on its card to start it, and
+     * says so: once the live region is on the page, as one filled before it isn't heard.
+     */
+    private bringIntoView(id: string, announcement: string) {
+        afterNextRender(
+            () => {
+                const card = this.host.nativeElement.querySelector<HTMLElement>(
+                    `[data-workout="${id}"]`
+                );
+                card?.scrollIntoView({
+                    block: 'center',
+                    behavior: this.reducedMotion() ? 'auto' : 'smooth',
+                });
+                card?.querySelector<HTMLElement>('.workout-card__start')?.focus({
+                    preventScroll: true,
+                });
+                this.announcement.set(announcement);
+            },
+            { injector: this.injector }
+        );
     }
 
     // The element that had focus is removed when a menu or dialog closes,

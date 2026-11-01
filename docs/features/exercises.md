@@ -121,7 +121,7 @@ The flat figure, which the 3D one is posed from:
 - **Add to workout** on the page opens a dialog, "Add Back squat to", saying "It goes at the end with 3 sets, to change before you save." Under it, **New workout**, then each workout in the library in the library's order, with how many steps it has beside it ("6 steps"; a blank title is "Untitled workout"). Focus starts on New workout. ✕, Escape or a tap outside close it, with focus back on Add to workout; swiping back is off while it's open.
 - A workout already at the most steps (20) says "Full, 20 steps" and can't be picked.
 - Picking a workout opens it in **Create** with the exercise added at the end, linked to it, as the only step open and focused, and screen readers hear "Added Back squat, step 7". **New workout** opens Create with it as the only step (in place of the empty one a new workout starts with).
-- It's added as **3 sets with 1:00 rest**: of 10 reps for a rep exercise, or of 0:30 for a timed one, with no weight. Nothing is saved until Save & start; leaving Create leaves the workout as it was.
+- It's added as **3 sets with 1:00 rest**: of 10 reps for a rep exercise, or of 0:30 for a timed one, with no weight. Nothing is saved until Save or Save & start; leaving Create leaves the workout as it was.
 - Reloading Create, or coming back to it, doesn't add it again.
 
 ### Hiding and deleting

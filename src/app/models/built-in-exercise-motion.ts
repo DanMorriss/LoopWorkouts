@@ -2163,13 +2163,15 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 label: 'Arms long',
                 hold: 200,
                 ms: 1000,
-                pose: { ...STANDING, arms: both(reach(52, -150, 'ccw')) },
+                // Elbows bending down, as elbows do; in 3D they swing out to the sides as the
+                // rope comes to the face
+                pose: { ...STANDING, arms: both(reach(52, -150, 'cw')) },
             },
             {
                 label: 'Rope to the face',
                 hold: 400,
                 ms: 1200,
-                pose: { ...STANDING, arms: both(reach(18, -160, 'ccw')), elbowsOut: 1 },
+                pose: { ...STANDING, arms: both(reach(18, -160, 'cw')), elbowsOut: 1 },
             },
         ],
     },

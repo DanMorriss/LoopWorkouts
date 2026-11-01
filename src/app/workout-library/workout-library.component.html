@@ -69,6 +69,7 @@
                 [attr.data-workout]="workout.id"
                 [workout]="workout"
                 [menuOpen]="openWorkoutMenuId() === workout.id"
+                [highlighted]="highlightedId() === workout.id"
                 [first]="first"
                 [last]="last"
                 (cdkDragStarted)="closeWorkoutMenus()"

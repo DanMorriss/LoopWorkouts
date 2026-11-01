@@ -2,7 +2,7 @@ import type { Mock } from 'vitest';
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Router, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { HistoryEntry } from '../models/history';
 import { Workout } from '../models/workout';
 import { HistoryStore } from '../shared/state/history-store.service';
@@ -236,6 +236,38 @@ describe('WorkoutLibraryComponent', () => {
 
         it('says nothing of muscles while no step is an exercise', () => {
             expect(el('.library__muscles')).toBeNull();
+        });
+
+        describe('arriving from Save in Create (BLD-15)', () => {
+            async function arriveFrom(saved: string) {
+                fixture.destroy();
+                // The snapshot keeps the map it made for the first render, so replace it
+                Object.defineProperty(TestBed.inject(ActivatedRoute).snapshot, 'queryParamMap', {
+                    value: convertToParamMap({ saved }),
+                });
+                create();
+                await settle();
+            }
+
+            it('highlights the saved workout, with focus on it, and says it was saved', async () => {
+                await arriveFrom(second.id);
+
+                expect(card(1).classList).toContain('workout-card--highlighted');
+                expect(card(0).classList).not.toContain('workout-card--highlighted');
+                expect(document.activeElement).toBe(card(1).querySelector('.workout-card__start'));
+                expect(el('[aria-live]')?.textContent).toContain('Saved Untitled workout');
+            });
+
+            it('highlights nothing for a workout no longer in the library', async () => {
+                await arriveFrom('gone');
+
+                expect(all('.workout-card--highlighted')).toHaveLength(0);
+                expect(el('[aria-live]')?.textContent?.trim()).toBe('');
+            });
+
+            it('highlights nothing arriving any other way', () => {
+                expect(all('.workout-card--highlighted')).toHaveLength(0);
+            });
         });
 
         describe('starting a workout', () => {

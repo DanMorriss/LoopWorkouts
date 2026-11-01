@@ -42,12 +42,15 @@ import { criticallyDampedSpring } from '../../shared/spring';
         class: 'workout-card',
         '[class.workout-card--menu-open]': 'menuOpen()',
         '[class.workout-card--lifted]': 'lifted()',
+        '[class.workout-card--highlighted]': 'highlighted()',
     },
 })
 export class WorkoutCardComponent {
     readonly workout = input.required<Workout>();
     /** Whether this card's options are open. */
     readonly menuOpen = input(false);
+    /** Whether it's the workout just saved in Create, which the library points out. */
+    readonly highlighted = input(false);
     /** Whether it's first or last in the library, so it can't move up or down. */
     readonly first = input(false);
     readonly last = input(false);

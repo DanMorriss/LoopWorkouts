@@ -442,6 +442,16 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
+            it('with a workout just saved in Create highlighted (BLD-15)', async () => {
+                store.addWorkout(sprints);
+                const saved = store.addWorkout(untitled);
+                await open(`/library?saved=${saved.id}`);
+                expect(
+                    fixture.nativeElement.querySelector('.workout-card--highlighted')
+                ).not.toBeNull();
+                await expectNoViolations();
+            });
+
             it('with a card selected and its options open', async () => {
                 store.addWorkout(sprints);
                 await open('/library');

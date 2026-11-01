@@ -16,6 +16,7 @@
 - **BLD-12** As a user I want a superset (or, of three or more, a giant set): exercises done one after another, then a rest, for a number of rounds.
 - **BLD-13** As a user I want to add headings to a workout (e.g. "Warmup", "Upper body"), so a long workout is easy to follow.
 - **BLD-14** As a user I want to swap a step's exercise for another that works the same muscles while setting a workout up, so I can fit it to the equipment I have. (Its rules are with the exercise picker in [exercises](exercises.md).)
+- **BLD-15** As a user I want to save a workout without starting it, so I can build one now and do it another day.
 
 ## Rules
 
@@ -129,7 +130,8 @@
 
 ### Saving
 
-- The button says **Start workout** for a new workout and **Save & start workout** when editing. It saves the workout to the library, starts it, and opens the workout page. There's no save without starting.
+- The main button says **Start workout** for a new workout and **Save & start workout** when editing. It saves the workout to the library, starts it, and opens the workout page.
+- **Save** (BLD-15) sits to its left, a smaller pill, so Start stays the main one. It saves the workout as Start does, without starting it, empties the form and goes back to the library, with the workout highlighted, in view and focused, and screen readers hear "Saved Sprints" (see [library](library.md)). It's held back by the same checks as Start.
 - Saving a new workout gives it the next id (one more than the highest saved).
 - Editing replaces the saved workout, keeping its id. If it's been deleted meanwhile, it's saved as a new one.
 
@@ -165,8 +167,11 @@
 - Given a rep step of 10 reps at 22.5 kg, when I start, then it's saved with weight 22.5; given one left at –, then it's saved with no weight.
 - Given weights in lb, when I pick 135, then it's saved as 61.235 kg, and shows as 135 lb.
 - Given a step saved at 20.412 kg (45 lb), when I edit only the title, then the weight stays 20.412.
+- Given a new workout "Sprints" with a timed step of 0:30, when I press Save, then it's in the library, nothing is running, and the library opens with Sprints highlighted and focused.
+- Given a saved workout being edited, when I rename it and press Save, then the library still has one of it, renamed, and nothing is running.
+- Given only a rest step, then Save is disabled, as Start is.
 
 ## Platform notes
 
 - **Web:** the form is `WorkoutSetupComponent` (`src/app/workout-setup/`), at `/setup`, or `/setup?editId=<id>` to edit; `&add=<exercise id>` (or `/setup?add=<id>` for a new workout) adds that exercise at the end (EXR-12, from its page), then takes `add` off the address so it isn't added again. The wheels are `WheelPickerComponent`. Opening and closing steps slide with `captureLayout()` (`src/app/shared/layout-change.ts`), moving only transforms rather than animating heights. Rounds or Time limit is the shared segmented control (`src/styles/_segmented.scss`, also settings' theme). Rules for what counts as a valid workout are in `src/app/models/workout.ts`. The form keeps one flat list of rows: a superset is a row of its own (kind `superset`, its rounds as its `sets`) followed by its steps, each with the superset's key as its `group`; `moved()`, `wellFormed()` and `lonelyStepsOut()` keep them together. A superset's hidden steps are shrunk to nothing in place (`.step--hidden`), not `display: none`: the CDK drag orders the rows by where they are on screen, and a `display: none` row measures at the top, which put the indexes out. Dragging a superset hides its steps from the handle's `pointerdown` (`heldSuperset`), before the drag measures the list, and `movedRow()` takes its steps with it on the drop.
-- **iOS:** the kind pill maps onto a `Menu` (or a `Picker` with `.menu` style) labelled with the kind; the Steps tip onto a `.popover` or `.help()` on an `info.circle` button. The wheels map directly onto `Picker` with `.wheel` style. Drag to reorder maps onto `List` with `onMove`, and a superset onto a `Section` of it, with its Rounds and Rest in the section's header; swipe to delete is the iOS habit, but keep the "ask first if it has something in it" rule.
+- **iOS:** the kind pill maps onto a `Menu` (or a `Picker` with `.menu` style) labelled with the kind; the Steps tip onto a `.popover` or `.help()` on an `info.circle` button. The wheels map directly onto `Picker` with `.wheel` style. Drag to reorder maps onto `List` with `onMove`, and a superset onto a `Section` of it, with its Rounds and Rest in the section's header; swipe to delete is the iOS habit, but keep the "ask first if it has something in it" rule. Start and Save map onto two buttons at the foot of the form, Start `.borderedProminent` and Save `.bordered`; Save pops back to the library, scrolling to the saved row and marking it.

@@ -29,6 +29,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | BLD-12 | Superset or giant set: exercises in a row, then rest, for rounds         | ✅  | —   | [build-a-workout](build-a-workout.md)         |
 | BLD-13 | Add headings to a workout                                                | ✅  | —   | [build-a-workout](build-a-workout.md)         |
 | BLD-14 | Swap a step's exercise for one working the same muscles                  | ✅  | —   | [exercises](exercises.md)                     |
+| BLD-15 | Save a workout without starting it                                       | ✅  | —   | [build-a-workout](build-a-workout.md)         |
 | RUN-1  | See where I am in the workout at a glance                                | ✅  | —   | [run-a-workout](run-a-workout.md)             |
 | RUN-2  | See what's next                                                          | ✅  | —   | [run-a-workout](run-a-workout.md)             |
 | RUN-3  | Tap Done when a set of reps is finished                                  | ✅  | —   | [run-a-workout](run-a-workout.md)             |

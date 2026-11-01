@@ -982,7 +982,17 @@
             @if (noSetAmountError(); as error) {
                 <mat-error>{{ error.message }}</mat-error>
             }
-            <div class="m-4 flex justify-center">
+            <!-- Start is the main one; Save keeps it in the library for later (BLD-15) -->
+            <div class="m-4 flex flex-wrap items-center justify-center gap-3">
+                <button
+                    class="btn-pill setup-save"
+                    type="button"
+                    [disabled]="workoutForm().invalid()"
+                    (click)="saveOnly()"
+                >
+                    <mat-icon aria-hidden="true">bookmark_add</mat-icon>
+                    Save
+                </button>
                 <button class="btn-main" type="submit" [disabled]="workoutForm().invalid()">
                     <mat-icon aria-hidden="true">play_arrow</mat-icon>
                     {{ editingWorkoutId() ? 'Save & start workout' : 'Start workout' }}

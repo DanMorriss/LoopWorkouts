@@ -163,6 +163,15 @@
     z-index: 9;
 }
 
+// Just saved in Create (BLD-15): tinted, with a bar down its left, as the history marks a
+// workout just done
+:host(.workout-card--highlighted) .workout-card__face {
+    background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--card);
+    box-shadow:
+        inset 3px 0 0 var(--accent),
+        0 10px 30px var(--shadow);
+}
+
 // Held, it lifts off the list to be dragged: a little bigger, its shadow deeper and further
 // below. The copy that follows the finger (the drop list's preview) stays lifted.
 :host(.workout-card--lifted),

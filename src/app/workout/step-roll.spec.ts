@@ -27,7 +27,8 @@ describe('step rolls', () => {
             'rotateX(-75deg)'
         );
         await animation.finished;
-        expect(done).toHaveBeenCalledTimes(1);
+        // Called a few promise steps after it finishes, or by its timer if that's first
+        await vi.waitFor(() => expect(done).toHaveBeenCalledTimes(1));
     });
 
     it('rolls away from wherever it had got to when caught still rolling in', async () => {
@@ -49,7 +50,8 @@ describe('step rolls', () => {
         );
         expect(to['transform']).toBe('rotateX(75deg)');
         await animations[0].finished;
-        expect(done).toHaveBeenCalledTimes(1);
+        // Called a few promise steps after it finishes, or by its timer if that's first
+        await vi.waitFor(() => expect(done).toHaveBeenCalledTimes(1));
     });
 
     it('only cross-fades with reduced motion', () => {

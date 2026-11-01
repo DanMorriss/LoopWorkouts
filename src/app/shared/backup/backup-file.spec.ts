@@ -9,6 +9,7 @@ const SETTINGS: Settings = {
     theme: 'dark',
     sound: true,
     vibration: true,
+    countdownBeeps: true,
     keepScreenOn: true,
     weightUnit: 'kg',
     bodyFigure: 'male',

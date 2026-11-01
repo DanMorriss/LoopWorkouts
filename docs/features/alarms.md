@@ -6,21 +6,24 @@
 - **ALM-2** As a user I want the alarms to keep going with my phone locked, so I can work out with it in my pocket.
 - **ALM-3** As a user I want my phone to vibrate as each step starts, for when it's noisy or I'm wearing headphones.
 - **ALM-4** As a user I want to choose which sound plays for each step, with a preview. (Not built: waiting on proper sound files.)
+- **ALM-5** As a user I want the last few seconds of a timed step or rest counted down with a beep, so I know it's ending without watching the screen.
 
 ## Rules
 
 ### Sounds
 
-| Alarm      | Plays at                                                    | Sound                                                                               | Vibration (on, off, … in ms) |
-| ---------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------- |
-| Timed      | the start of each timed or rep step                         | two short high beeps: 880 Hz, 0.15s each, the second at 0.25s                       | 150, 100, 150                |
-| Rest       | the start of each rest step                                 | one long low tone: 440 Hz, 0.5s                                                     | 500                          |
-| Finish     | the end of the workout                                      | three rising notes: 523.25, 659.25, 783.99 Hz at 0s, 0.2s, 0.4s; the last held 0.6s | 180, 20, 180, 20, 600        |
-| Time limit | 10, 3, 2 and 1 seconds before a time limit runs out (RUN-8) | one short tick: 660 Hz, 0.08s                                                       | 60                           |
+| Alarm     | Plays at                                                                                                                    | Sound                                                                               | Vibration (on, off, … in ms) |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------------- |
+| Timed     | the start of each timed or rep step                                                                                         | two short high beeps: 880 Hz, 0.15s each, the second at 0.25s                       | 150, 100, 150                |
+| Rest      | the start of each rest step                                                                                                 | one long low tone: 440 Hz, 0.5s                                                     | 500                          |
+| Finish    | the end of the workout                                                                                                      | three rising notes: 523.25, 659.25, 783.99 Hz at 0s, 0.2s, 0.4s; the last held 0.6s | 180, 20, 180, 20, 600        |
+| Countdown | 10, 3, 2 and 1 seconds before a time limit runs out (RUN-8); 3, 2 and 1 seconds before each timed step or rest ends (ALM-5) | one short tick: 660 Hz, 0.08s                                                       | 60                           |
 
 - Notes are triangle waves at 30% volume, faded in over 10 ms and out over 30 ms so they don't click. They're placeholders until proper sound files arrive.
 - A **rep step** sounds the work alarm as it starts.
 - No rest alarm at the end of the last round (that rest is skipped), and no finish alarm for a workout that runs until stopped.
+- **Countdown beeps** (ALM-5, on unless turned off in Settings): a tick 3, 2 and 1 seconds before each timed step or rest of **10 seconds or more** ends. Shorter steps (e.g. Switch sides at 5 seconds) have none, so they aren't all beeps. Rep steps have none, as no one knows when they'll end; the step before one counts down to it. Rest at the end of the last round is skipped, so it has none either.
+- With a **time limit**, its own countdown has the last 10 seconds to itself: no step ticks in them, so the two never play over each other.
 - With a **time limit**, no step alarm at or after the moment it runs out; the finish sounds then, part-way through a step or not. The ticks and the finish are booked even while a rep step is waited on, as the end doesn't move: Done moves the countdown's start on by just the time it adds to the time on rep steps.
 
 ### Timing
@@ -45,6 +48,10 @@
 
 - Given work 0:03, rest 0:02, 2 rounds, then alarms sound: work at 0s, rest at 3s, work at 5s, finish at 8s.
 - Given work 0:30, rest 0:10 and a time limit of 1:40, then alarms sound: work at 0s, 40s and 80s, rest at 30s and 70s, ticks at 90s, 97s, 98s and 99s, and the finish at 100s.
+- Given work 0:30, rest 0:10, 2 rounds and countdown beeps on, then ticks sound at 27, 28 and 29s, 37, 38 and 39s, and 67, 68 and 69s, before the rest at 30s, the work at 40s and the finish at 70s.
+- Given work 0:09 and rest 0:05 with countdown beeps on, then there are no ticks.
+- Given work 0:30, rest 0:10, a time limit of 1:40 and countdown beeps on, then the last step ticks are at 77, 78 and 79s, and the time limit's at 90, 97, 98 and 99s.
+- Given countdown beeps are turned off mid-workout, then the ticks still to come are silenced, and the other alarms stay.
 - Given rest of 0:00, then there are no rest alarms.
 - Given a rep step, then the work alarm sounds as it starts and nothing is booked after it until Done.
 - Given an alarm due 0.5s ago, then it plays at once; given one due 1.5s ago, then it's skipped.

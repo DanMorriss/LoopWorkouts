@@ -1729,6 +1729,39 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
+        describe('countdown beeps', () => {
+            afterEach(() => localStorage.clear());
+
+            // 12s work, once: work at 0s, ticks at 9, 10 and 11s, finish at 12s
+            const long = () => makeWorkout({ workSeconds: 12, restSeconds: 0, repeats: 1 });
+            const TICK_AT = (s: number) => [`660@${s}`];
+
+            it('tick in the last 3 seconds of a step', () => {
+                start(long());
+                unlockSound();
+
+                expect(audio.scheduledNotes()).toEqual([
+                    ...WORK_AT(0),
+                    ...TICK_AT(9),
+                    ...TICK_AT(10),
+                    ...TICK_AT(11),
+                    ...FINISH_AT(12),
+                ]);
+                fixture.destroy();
+            });
+
+            it('stop at once when turned off in settings', () => {
+                start(long());
+                unlockSound();
+
+                TestBed.inject(SettingsStore).update({ countdownBeeps: false });
+                fixture.detectChanges();
+
+                expect(audio.scheduledNotes()).toEqual([...WORK_AT(0), ...FINISH_AT(12)]);
+                fixture.destroy();
+            });
+        });
+
         it('silences the alarms while paused, and reschedules the rest on resume', () => {
             start(workout());
             unlockSound();

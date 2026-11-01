@@ -7,11 +7,12 @@ describe('SettingsStore', () => {
 
     const createStore = () => TestBed.inject(SettingsStore);
 
-    it('has sound and vibration on by default', () => {
+    it('has sound, vibration and countdown beeps on by default', () => {
         const store = createStore();
 
         expect(store.sound()).toBe(true);
         expect(store.vibration()).toBe(true);
+        expect(store.countdownBeeps()).toBe(true);
     });
 
     it('saves changes, and loads them next time', () => {
@@ -20,6 +21,7 @@ describe('SettingsStore', () => {
             theme: 'dark',
             sound: false,
             vibration: true,
+            countdownBeeps: true,
             keepScreenOn: true,
             weightUnit: 'kg',
             bodyFigure: 'male',

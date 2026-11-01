@@ -87,6 +87,7 @@ export class BackupService {
                     theme: this.settings.theme(),
                     sound: this.settings.sound(),
                     vibration: this.settings.vibration(),
+                    countdownBeeps: this.settings.countdownBeeps(),
                     keepScreenOn: this.settings.keepScreenOn(),
                     weightUnit: this.settings.weightUnit(),
                     bodyFigure: this.settings.bodyFigure(),

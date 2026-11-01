@@ -177,3 +177,62 @@ describe('alarmEvents with a time limit', () => {
         ]);
     });
 });
+
+describe('alarmEvents with countdown beeps', () => {
+    const ticks = (...seconds: number[]) =>
+        seconds.map((s) => ({ kind: 'countdown' as const, at: s * 1000 }));
+
+    it('counts down the last 3 seconds of each timed step and rest', () => {
+        // 30s work, 10s rest, 2 rounds: the last rest is skipped, so the finish has its own
+        expect(alarmEvents(makeWorkout({ repeats: 2 }), 0, 0, 100, 0, 0, true)).toEqual([
+            { kind: 'work', at: 0 },
+            ...ticks(27, 28, 29),
+            { kind: 'rest', at: 30_000 },
+            ...ticks(37, 38, 39),
+            { kind: 'work', at: 40_000 },
+            ...ticks(67, 68, 69),
+            { kind: 'finish', at: 70_000 },
+        ]);
+    });
+
+    it('leaves out steps under 10 seconds', () => {
+        const short = makeWorkout({ workSeconds: 9, restSeconds: 5, repeats: 3 });
+
+        expect(
+            alarmEvents(short, 0, 0, 100, 0, 0, true).filter((e) => e.kind === 'countdown')
+        ).toEqual([]);
+    });
+
+    it('counts down to a rep step, and books nothing after it', () => {
+        const circuit = makeWorkout({ steps: [work(10), reps(20), rest(5)], repeats: 2 });
+
+        expect(alarmEvents(circuit, 0, 0, 100, 0, 0, true)).toEqual([
+            { kind: 'work', at: 0 },
+            ...ticks(7, 8, 9),
+            { kind: 'work', at: 10_000 },
+        ]);
+    });
+
+    it("leaves a time limit's last 10 seconds to its own countdown", () => {
+        // 30s work, 10s rest, 100s: the last work step would end at 110s
+        const amrap = makeWorkout({ timeLimitSeconds: 100 });
+
+        expect(alarmEvents(amrap, 0, 0, 100, 0, 0, true)).toEqual([
+            { kind: 'work', at: 0 },
+            ...ticks(27, 28, 29),
+            { kind: 'rest', at: 30_000 },
+            ...ticks(37, 38, 39),
+            { kind: 'work', at: 40_000 },
+            ...ticks(67, 68, 69),
+            { kind: 'rest', at: 70_000 },
+            ...ticks(77, 78, 79),
+            { kind: 'work', at: 80_000 },
+            ...ticks(90, 97, 98, 99),
+            { kind: 'finish', at: 100_000 },
+        ]);
+    });
+
+    it('books none unless asked for', () => {
+        expect(alarmEvents(makeWorkout(), 0).filter((e) => e.kind === 'countdown')).toEqual([]);
+    });
+});

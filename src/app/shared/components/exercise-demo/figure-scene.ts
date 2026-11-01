@@ -214,7 +214,8 @@ export class FigureScene {
     };
     /** The torso as made, to turn it a little more up the back for a twist. */
     private readonly torsoRest: { position: Float32Array; normal: Float32Array };
-    private torsoTwist = 0;
+    /** What the torso was last shaped for, so it's only shaped again when that changes. */
+    private torsoShapedFor = '';
     /** Kit that moves with the figure, placed each frame. */
     private readonly carried: ((skeleton: Skeleton) => void)[] = [];
 
@@ -674,7 +675,14 @@ export class FigureScene {
         const restHipY = model.joints.hip[1];
         const [shoulderZ, shoulderY] = model.joints.shoulder;
         const tall = (BODY.torso - 4) / (shoulderY - restHipY);
-        this.twistTorso(skeleton.twist, restHipY, model.levels.armpit);
+        // How far each thigh is bent forwards at the hip, from hanging straight down
+        const bent = skeleton.legs.map((leg) => {
+            const thigh = normalize3(sub3(leg.mid, leg.root));
+            const degrees =
+                (Math.atan2(dot3(thigh, bodyForward), -dot3(thigh, up)) * 180) / Math.PI;
+            return Math.min(140, Math.max(-40, degrees));
+        }) as [number, number];
+        this.shapeTorso(skeleton.twist, bent, restHipY, model.levels.armpit);
         parts.torso.matrix.copy(
             moveMatrix(
                 [0, restHipY, 0],
@@ -790,29 +798,74 @@ export class FigureScene {
     }
 
     /**
-     * Turns the torso by `twist` degrees about its middle line, none at the hips and all of it
-     * from the armpits up, as a back twists.
+     * Shapes the torso for the pose. Its seat, below the hip joints, bends forwards with each
+     * thigh (`bent`, right and left, in degrees) and flattens behind as the glutes stretch,
+     * rather than sticking out behind a body bent over. Above the hips it turns by `twist`
+     * degrees about its middle line, none at the hips and all of it from the armpits up, as a
+     * back twists.
      */
-    private twistTorso(twist: number, hipY: number, armpitY: number) {
-        if (twist === this.torsoTwist) {
+    private shapeTorso(
+        twist: number,
+        bent: readonly [number, number],
+        hipY: number,
+        armpitY: number
+    ) {
+        const shapedFor = [twist, ...bent].map((value) => value.toFixed(1)).join();
+        if (shapedFor === this.torsoShapedFor) {
             return;
         }
-        this.torsoTwist = twist;
+        this.torsoShapedFor = shapedFor;
         const geometry = this.parts.torso.geometry;
         const position = geometry.getAttribute('position');
         const normal = geometry.getAttribute('normal');
         const { position: restPosition, normal: restNormal } = this.torsoRest;
+        const smooth = (t: number) => {
+            const clamped = Math.min(1, Math.max(0, t));
+            return clamped * clamped * (3 - 2 * clamped);
+        };
+        const point = new Vector3();
+        const facing = new Vector3();
         for (let i = 0; i < position.count; i++) {
-            const y = restPosition[i * 3 + 1];
-            const t = Math.min(1, Math.max(0, (y - hipY) / (armpitY - hipY)));
-            const angle = (twist * t * t * (3 - 2 * t) * Math.PI) / 180;
-            const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
-            const turn = (from: Float32Array, to: typeof position) => {
-                const [x, z] = [from[i * 3], from[i * 3 + 2]];
-                to.setXYZ(i, x * cos + z * sin, from[i * 3 + 1], -x * sin + z * cos);
-            };
-            turn(restPosition, position);
-            turn(restNormal, normal);
+            point.fromArray(restPosition, i * 3);
+            facing.fromArray(restNormal, i * 3);
+            const y = point.y;
+
+            // The seat: each side goes with its own thigh, blending across the middle
+            const rightShare = smooth((point.z + 8) / 16);
+            const hip = bent[0] * rightShare + bent[1] * (1 - rightShare);
+            // Bending gradually, from above the hip joints to below the seat, so it stays round
+            const seat = smooth((hipY + 10 - y) / 22) * 0.9;
+            if (hip > 0 && point.x < 0) {
+                // Flatter behind as the hip bends, around the glutes
+                const glutes = smooth((hipY + 14 - y) / 8);
+                point.x *= 1 - 0.4 * Math.min(1, hip / 100) * glutes;
+            }
+            if (seat > 0) {
+                const angle = (hip * seat * Math.PI) / 180;
+                const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+                // About the line across through the hip joints: positive brings it forwards
+                const [x, down] = [point.x, point.y - hipY];
+                point.set(x * cos - down * sin, hipY + x * sin + down * cos, point.z);
+                facing.set(
+                    facing.x * cos - facing.y * sin,
+                    facing.x * sin + facing.y * cos,
+                    facing.z
+                );
+            }
+
+            const t = smooth((y - hipY) / (armpitY - hipY));
+            if (t > 0 && twist) {
+                const angle = (twist * t * Math.PI) / 180;
+                const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+                point.set(point.x * cos + point.z * sin, point.y, -point.x * sin + point.z * cos);
+                facing.set(
+                    facing.x * cos + facing.z * sin,
+                    facing.y,
+                    -facing.x * sin + facing.z * cos
+                );
+            }
+            position.setXYZ(i, point.x, point.y, point.z);
+            normal.setXYZ(i, facing.x, facing.y, facing.z);
         }
         position.needsUpdate = true;
         normal.needsUpdate = true;

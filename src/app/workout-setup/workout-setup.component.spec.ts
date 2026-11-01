@@ -21,6 +21,7 @@ import {
     Workout,
     WorkoutFields,
 } from '../models/workout';
+import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
@@ -1829,6 +1830,9 @@ describe('WorkoutSetupComponent', () => {
 
             async function editSquats() {
                 await setup({ editId: 'workout-1' });
+                // Wheels jump to a new value rather than glide: this test browser can cut a glide short
+                // and land a wheel back where it began, which a real one doesn't
+                fakeReducedMotion(true);
                 // Goblet squats at 24 kg last time
                 TestBed.inject(HistoryStore).record({
                     id: `${Date.now() - 1000}-other`,
@@ -1854,6 +1858,16 @@ describe('WorkoutSetupComponent', () => {
                 store.addWorkout(squats);
                 await create();
                 await press('Step 1, Back squat, 10 reps @ 60 kg');
+            }
+
+            /** Waits for the step's weight wheel to glide to `value` and stay there. */
+            async function wheelSettlesOn(value: string) {
+                const weight = () =>
+                    el('[id$="-weight"] [role="spinbutton"]').getAttribute('aria-valuetext');
+                await vi.waitFor(() => expect(weight()).toBe(value), { timeout: 3000 });
+                await new Promise((resolve) => setTimeout(resolve, 300));
+                fixture.detectChanges();
+                expect(weight()).toBe(value);
             }
 
             function searchAndPick(name: string) {
@@ -1895,6 +1909,9 @@ describe('WorkoutSetupComponent', () => {
                 );
                 expect(document.activeElement).toBe(button('Swap Goblet squat'));
 
+                // Let the weight wheel glide to its new weight: settling after saving has emptied the
+                // form would set a step that's gone (in the app, the page has gone by then)
+                await wheelSettlesOn('24');
                 await submit();
 
                 expect(allSteps(store.workouts()[0])[0]).toEqual({
@@ -1913,6 +1930,8 @@ describe('WorkoutSetupComponent', () => {
 
                 TestBed.inject(UndoService).undo();
                 fixture.detectChanges();
+                // As above, the weight wheel glides back first
+                await wheelSettlesOn('60');
                 await submit();
 
                 expect(allSteps(store.workouts()[0])[0]).toMatchObject({

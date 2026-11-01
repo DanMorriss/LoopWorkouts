@@ -273,7 +273,9 @@
     grid-column: 2;
 }
 
+// At the top, so its caption lines up with Pause's rather than sinking with the key cap
 .workout-control--skip {
+    align-self: start;
     justify-self: start;
     margin-left: 1.5rem;
 }

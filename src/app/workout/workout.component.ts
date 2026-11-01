@@ -37,8 +37,8 @@ import {
     weightToKg,
 } from '../models/weight';
 import { placeAt } from './workout-state';
-import { Exercise } from '../models/exercise';
-import { isTimedSet } from '../models/history';
+import { lastRepSets } from './last-sets';
+import { Exercise, MeasuredBy } from '../models/exercise';
 import { canStepUpEachSet, steppedUp, suggestedWeight } from '../models/progress';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
 import { WheelPickerComponent } from '../shared/components/wheel-picker/wheel-picker.component';
@@ -52,6 +52,8 @@ import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
+import { UndoService } from '../shared/undo/undo.service';
+import { SwapExerciseDialogComponent } from './swap-exercise/swap-exercise-dialog.component';
 import { describeSets } from '../history/history-format';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { criticallyDampedSpring } from '../shared/spring';
@@ -107,6 +109,7 @@ const MAX_ROUND_DOTS = 15;
         StepStripComponent,
         WorkoutNoteComponent,
         WorkoutRingComponent,
+        SwapExerciseDialogComponent,
     ],
     templateUrl: './workout.component.html',
     styleUrls: [
@@ -142,6 +145,7 @@ export class WorkoutComponent {
     private readonly settings = inject(SettingsStore);
     private readonly history = inject(HistoryStore);
     private readonly exercises = inject(ExerciseStore);
+    private readonly undo = inject(UndoService);
     /** Sound is on, but the browser is waiting for a tap before it will play any. */
     soundLocked = computed(
         () => this.alarms.supported && this.settings.sound() && !this.alarms.unlocked()
@@ -227,22 +231,9 @@ export class WorkoutComponent {
     /** The rep sets of the rep step's exercise from the most recent workout with any. */
     private readonly lastSets = computed(() => {
         const step = this.state()?.step;
-        if (step?.kind !== 'reps' || step.exerciseId === undefined) {
-            return [];
-        }
-        const runId = this.run.runId();
-        for (const entry of this.history.entries()) {
-            if (entry.id === runId) {
-                continue;
-            }
-            const sets = (entry.sets ?? []).filter(
-                (set) => !isTimedSet(set) && set.exerciseId === step.exerciseId
-            );
-            if (sets.length > 0) {
-                return sets;
-            }
-        }
-        return [];
+        return step?.kind === 'reps' && step.exerciseId !== undefined
+            ? lastRepSets(this.history.entries(), step.exerciseId, this.run.runId())
+            : [];
     });
     // Changing the reps or weight of the rep step being waited on, e.g. going up a weight
     protected readonly repOptions = Array.from({ length: MAX_REPS }, (_, i) => ({
@@ -412,6 +403,10 @@ export class WorkoutComponent {
     });
     /** The exercise whose details are open over the workout, which carries on underneath. */
     protected readonly exerciseInDetails = signal<Exercise | null>(null);
+    /** The step's exercise being swapped for another (RUN-11), while its dialog is open. */
+    protected readonly swapping = signal<{ exercise: Exercise; measuredBy: MeasuredBy } | null>(
+        null
+    );
     /** e.g. "Plank · 00:45", "Squats · 10 reps @ 60 kg", or "finish" when the workout ends after this step. */
     upNext = computed(() => {
         const next = this.nextState();
@@ -787,7 +782,21 @@ export class WorkoutComponent {
     /** Apple's spring for moving something about: no bounce, a 0.4s response. */
     private readonly glide = criticallyDampedSpring(0.4);
 
+    /** The Undo bar's offer to take a swap back, and the step it was made on. */
+    private swapOffer: { id: number | undefined; step: string } | null = null;
+
     constructor() {
+        // A swap's Undo goes as its step ends, rather than sitting over Pause all workout
+        effect(() => {
+            const step = this.stepKey();
+            const offer = untracked(this.undo.offer);
+            if (this.swapOffer && this.swapOffer.step !== step) {
+                if (offer?.id === this.swapOffer.id) {
+                    untracked(() => this.undo.dismiss());
+                }
+                this.swapOffer = null;
+            }
+        });
         // A rep step has come round: Done swells once, as it's the user's move now
         effect(() => {
             if (this.currentSet() === null || untracked(this.reducedMotion)) {
@@ -887,7 +896,8 @@ export class WorkoutComponent {
             this.isPaused() &&
             !this.isComplete() &&
             !this.summaryOpen() &&
-            !this.exerciseInDetails()
+            !this.exerciseInDetails() &&
+            !this.swapping()
         ) {
             this.togglePause();
         }
@@ -941,6 +951,7 @@ export class WorkoutComponent {
             !this.workout() ||
             this.summaryOpen() ||
             this.exerciseInDetails() ||
+            this.swapping() ||
             this.isComplete() ||
             (event as KeyboardEvent).repeat ||
             target?.closest?.(SPACE_HANDLED_BY)
@@ -960,13 +971,67 @@ export class WorkoutComponent {
         this.exerciseInDetails.set(exercise);
     }
 
-    /**
-     * Back to the (i) that opened the details, on the face or, while paused, over it; if the
-     * workout has moved on to a step with no exercise meanwhile, to Done or Pause (or Resume),
-     * so focus isn't lost.
-     */
+    /** Back to the (i) that opened the details. */
     protected closeExercise() {
         this.exerciseInDetails.set(null);
+        this.focusInfo();
+    }
+
+    /**
+     * Swap exercise, from the details: what to do instead (RUN-11), for a step measured as
+     * this one is.
+     */
+    protected startSwap() {
+        const exercise = this.exerciseInDetails();
+        const step = this.state()?.step;
+        this.exerciseInDetails.set(null);
+        if (exercise && step && step.kind !== 'rest') {
+            this.swapping.set({ exercise, measuredBy: step.kind === 'reps' ? 'reps' : 'timed' });
+        } else {
+            this.focusInfo();
+        }
+    }
+
+    /**
+     * Swaps the step for `replacement`, for the rest of the run, with Undo to take it back
+     * until the step ends. If the step has finished meanwhile, nothing is swapped, and the
+     * Undo bar says so.
+     */
+    protected swapFor(replacement: Exercise) {
+        const was = this.swapping()?.exercise;
+        this.swapping.set(null);
+        const swap =
+            was && this.stepExercise()?.id === was.id
+                ? this.run.swapExercise(
+                      replacement,
+                      lastRepSets(this.history.entries(), replacement.id, this.run.runId())
+                  )
+                : null;
+        if (swap && was) {
+            this.undo.offerUndo({
+                message: `Swapped to ${replacement.name}`,
+                undo: () => {
+                    this.run.undoSwap();
+                    this.focusInfo();
+                },
+            });
+            this.swapOffer = { id: this.undo.offer()?.id, step: this.stepKey() };
+        } else if (was) {
+            this.undo.notify(`${was.name} has finished, so it wasn't swapped`);
+        }
+        this.focusInfo();
+    }
+
+    protected closeSwap() {
+        this.swapping.set(null);
+        this.focusInfo();
+    }
+
+    /**
+     * Focus on the step's (i), on the face or, while paused, over it; if the workout has moved
+     * on to a step with no exercise meanwhile, on Done or Pause (or Resume), so it isn't lost.
+     */
+    private focusInfo() {
         afterNextRender(
             () => {
                 const info = this.host.nativeElement.querySelector<HTMLElement>(

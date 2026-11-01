@@ -1,4 +1,5 @@
 import { LoggedSet, RepSet, TimedSet } from '../models/history';
+import { runPosition, stepAsRunAt, StepSwap } from '../models/step-swap';
 import {
     endlessRounds,
     repStepsPerRound,
@@ -208,12 +209,15 @@ export function isSetAt(set: LoggedSet, round: number, place: StepPlace): boolea
 
 /**
  * The sets a run has done by `state`: its rep sets, as logged on Done, and a timed set for
- * each work step of an exercise that has run to its end, in the order they were done.
+ * each work step of an exercise that has run to its end, in the order they were done. A
+ * step swapped for another exercise part-way (RUN-11) is named as it was at the time, from
+ * `swaps`.
  */
 export function setsDone(
     workout: Workout,
     state: WorkoutState,
-    repSets: readonly RepSet[]
+    repSets: readonly RepSet[],
+    swaps: readonly StepSwap[] = []
 ): LoggedSet[] {
     const { steps, places } = runPlan(workout);
     const timed: TimedSet[] = [];
@@ -223,8 +227,12 @@ export function setsDone(
         const stepsDone = round < state.round ? steps.length : state.stepIndex;
         steps.slice(0, stepsDone).forEach((step, stepIndex) => {
             const place = places[stepIndex];
-            if (step.kind === 'work' && step.exerciseId !== undefined && place) {
-                const { name, seconds, exerciseId } = step;
+            const asRun = place
+                ? stepAsRunAt(swaps, place.step, runPosition(round, stepIndex, steps.length))
+                : undefined;
+            const { name, exerciseId } = asRun ?? step;
+            if (step.kind === 'work' && exerciseId !== undefined && place) {
+                const { seconds } = step;
                 timed.push({
                     round,
                     step: place.step,

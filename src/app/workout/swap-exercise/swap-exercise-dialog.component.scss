@@ -1,0 +1,119 @@
+@use 'type' as *;
+
+// Over the workout like the exercise's details, scrolling within itself
+.swap-overlay {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--overlay);
+    backdrop-filter: blur(6px);
+    padding: 1rem;
+    z-index: 40;
+
+    @media (prefers-reduced-transparency: reduce) {
+        backdrop-filter: none;
+    }
+}
+
+.swap {
+    width: min(440px, 100%);
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    border-radius: 0.9rem;
+    border: 1px solid var(--border);
+    background: var(--raised);
+    box-shadow: 0 18px 40px var(--shadow);
+    padding: 1.2rem;
+}
+
+.swap__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.swap__close {
+    flex-shrink: 0;
+    margin: -0.35rem -0.35rem 0 0;
+}
+
+.swap__title {
+    margin: 0;
+    padding-top: 0.35rem;
+    @include display;
+    font-size: 1.3rem;
+    color: var(--text-strong);
+    overflow-wrap: anywhere;
+}
+
+.swap__hint {
+    margin: 0.5rem 0 1rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.swap__search-box {
+    position: relative;
+    display: block;
+}
+
+.swap__search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.8rem;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.swap__search-input {
+    padding-left: 2.6rem;
+}
+
+.swap__heading {
+    margin: 1.1rem 0 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+// The options as one panel of full-width rows, as a menu's are
+.swap__options {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+    overflow: hidden;
+
+    li:not(:last-child) .swap__option {
+        border-bottom: 1px solid var(--border-soft);
+    }
+}
+
+// Its name, with its main muscles and equipment under it to tell similar ones apart
+.swap__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.swap__name {
+    overflow-wrap: anywhere;
+}
+
+.swap__detail {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.swap__none {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}

@@ -12,6 +12,7 @@
 - **RUN-8** As a user I want a workout with a time limit to count my rounds up, show the time left, warn me as it runs out, and stop when time's up, so I can just keep going until then.
 - **RUN-9** As a user I want to check how a step's exercise is done, mid-workout, without leaving it.
 - **RUN-10** As a user I want the workout to show which set, side or round I'm on, and the section I'm in, so I know where I am in a long gym workout.
+- **RUN-11** As a user I want to swap an exercise for something equivalent mid-workout, e.g. when someone's on the machine, so I can still work those muscles.
 
 ## Rules
 
@@ -63,7 +64,7 @@
     - An **icon for the step's kind** on its own line (a stopwatch for timed, a seated figure for rest, a dumbbell for reps), so the kinds aren't told apart by colour alone.
     - The step's name under it. Unnamed work shows just the icon over the time; unnamed rest says "Rest"; unnamed reps say "Reps".
     - For a step done each side, **which side** under its name: "Left side" or "Right side". The other side rolls up from below, as a new step does. Screen readers hear it with the step, e.g. "Step-up, left side, 10 reps".
-    - An **(i)** to the right of the name of a step that's an exercise (RUN-9), drawn small in the face's quieter text colour but 44px to tap. It opens the exercise's details over the workout, as Create's Details does (EXR-11): what its page shows (its description, your note, the muscles it works, how to do it and tips), without Pick another or its progress. The workout carries on underneath, the clock too; Space and Escape are left to the dialog while it's open. ✕ at its top right, which stays in reach as the details scroll (or Done at the bottom, Escape, or a tap outside) closes it, with focus back on the (i), or on Done or Pause if the workout has moved on to a step with no exercise meanwhile. A step that's only a name, e.g. "Jog", has none. Screen readers hear it as "Details of Push-up". While paused it stays, beside the step's name over the greyed ring, as pausing to read how it's done is what it's for (see [pause-and-stop](pause-and-stop.md)); closing the details there goes back to it.
+    - An **(i)** to the right of the name of a step that's an exercise (RUN-9), drawn small in the face's quieter text colour but 44px to tap. It opens the exercise's details over the workout, as Create's Details does (EXR-11): what its page shows (its description, your note, the muscles it works, how to do it and tips), without its progress, and with **Swap exercise** in place of Create's Pick another (RUN-11, below). The workout carries on underneath, the clock too; Space and Escape are left to the dialog while it's open. ✕ at its top right, which stays in reach as the details scroll (or Done at the bottom, Escape, or a tap outside) closes it, with focus back on the (i), or on Done or Pause if the workout has moved on to a step with no exercise meanwhile. A step that's only a name, e.g. "Jog", has none. Screen readers hear it as "Details of Push-up". While paused it stays, beside the step's name over the greyed ring, as pausing to read how it's done is what it's for (see [pause-and-stop](pause-and-stop.md)); closing the details there goes back to it.
     - A **long name** is fitted to the circle: at full size on one line if it fits; otherwise on two even lines, e.g. "Bodyweight / squat"; and only if that's still too wide, shrunk as far as it needs to be, to no less than 70% of its size. A name too long even for that, e.g. "Single-leg Romanian deadlift" on a phone, gets a third line in the same way. Past that, its last line ends in "…". It's fitted again when the screen changes size, e.g. a phone turned round.
     - The time left as mm:ss, e.g. "00:45". On each of a timed work step's **last 3 seconds** (for a step longer than that) the time pops in a little large and settles. Not rest. Countdown beeps tick in the last 3 seconds of timed steps and rests of 10 seconds or more (ALM-5; see [alarms](alarms.md)).)
     - On a rep step, the **count is the big thing**, e.g. "12 reps", with the weight and "Last time" under it.
@@ -84,6 +85,23 @@
 - A wheel closes by itself as it does anywhere else (on a pick, or two fifths of a second after it stops turning).
 - Space on a focused wheel is left to the wheel, rather than pressing Done.
 
+### Swapping an exercise (RUN-11)
+
+- **Swap exercise**, in the step's details (the (i), on the face or while paused), opens "**Swap Back squat**" over the workout: "For the rest of this workout. Sets done so far stay.", a **Search exercises** box (where focus starts), and a list.
+- With nothing typed, the list is "**Same muscles**" ("Same muscles, with your equipment" once some is picked on the Exercises page): the **closest five**, each with its main muscles and equipment under its name, e.g. "Quads, glutes · Dumbbells", as the exercise picker shows them.
+    - Only exercises **measured the same way** as the step (reps for a rep step, time for a timed one), as the step keeps its reps or time; not hidden ones, and not itself.
+    - Only ones that share a main muscle, and that can be done with **your equipment**, if you've picked any (all of them if not).
+    - Ranked by how closely their main muscles match, each extra or missing main muscle counting against one (so a whole-body move doesn't top a chest one), a little for supporting muscles in common, and a little more for needing **none of its equipment**, as that's likely what's taken. Then by name.
+    - With none, "Nothing else works the same muscles. Search for one above."
+- Typing searches every exercise measured the same way by name, as the picker does (hidden ones only when named in full), under "3 matches"; with none, "No exercise measured in reps matches that."
+- Picking one swaps the step **for the rest of this run**: its name and exercise are the new one's; its reps or time, sets (and how they vary) and sides stay; its **weight is the new exercise's from last time** (each set's own where they vary), or none if it's never been done with a weight. The (i), Last time, the step up to try and your note follow the new exercise.
+- The Undo bar says "**Swapped to Goblet squat**", with **Undo** to put the step back, until the step ends (then it goes, rather than sitting over Pause). Focus goes back to the (i).
+- **Sets already done stay as they were**, under the old exercise, timed ones included; the history logs each set as the exercise it was done as, so progress, personal bests and the muscles worked count the right one.
+- **The saved workout keeps its own**: changing the reps or weight of a swapped step changes it in this run only. A step can be swapped again, or back.
+- The swaps are kept for the tab, so a **reload** carries on with them; a new run starts with none.
+- ✕, Escape or a tap outside close it, swapping nothing, with focus back on the (i). Space and Escape are left to the dialog while it's open.
+- If the step ends while the dialog is open (a timed step running out), picking swaps nothing, and the Undo bar says "Back squat has finished, so it wasn't swapped".
+
 ### Finishing, and the summary (RUN-4, RUN-7)
 
 - The face says "**You're finished!**", the controls go, and the **summary** opens over the page by itself. End workout opens the same summary (see [pause-and-stop](pause-and-stop.md)).
@@ -97,7 +115,8 @@
     - When time ran out part-way through a rep step: "**Time ran out during Push-ups. How many reps did you get?**", with a Reps wheel (starting at the step's reps) and **Add set**, which logs that many reps at the step's weight. It's a set like any other after that, and can be changed with the rest, but it doesn't make the score "+ 1", as the step wasn't finished, and "Use these settings next time?" leaves it out.
     - **Personal bests** this workout set (PRG-2), and "Most rounds: 7 rounds + 3" for a time limit beaten (PRG-7; see [progress](progress.md)).
     - **Sets**, one line per step as in the history, e.g. "Squats: 10, 10, 8 @ 60 kg" or "Plank: 3 × 0:45".
-    - **Next time**: a step up for each rep step where every set got its reps, e.g. "Bench press: try 82.5 kg, up from 80 kg" or "Push-ups: try 13 reps, up from 12", each with **Apply** to put it on the saved workout (PRG-10).
+    - **Next time**: a step up for each rep step where every set got its reps, e.g. "Bench press: try 82.5 kg, up from 80 kg" or "Push-ups: try 13 reps, up from 12", each with **Apply** to put it on the saved workout (PRG-10). Not for a swapped step (RUN-11), whose saved step is still the old exercise, unless it's been kept.
+    - **Swapped** (RUN-11): each step swapped, e.g. "Back squat for Goblet squat", and "Use Goblet squat next time?" with **No, just this time** and **Yes, use next time** (for a workout still in the library). Yes puts the swapped step (its exercise, name and weight) on the saved workout and says "Saved: next time it's Goblet squat."; No leaves it, saying "Next time it's Back squat again.", as the machine's likely free next time. Focus moves to what it says. A step swapped back to what it was isn't listed.
     - **Muscles worked**: the body map, shaded by this workout's sets (PRG-11).
     - A **Note** box, saved to this workout in the history as you leave it.
     - The **suggested next workout**, as on the history page, without its Start button (PRG-9; see [progress](progress.md)).
@@ -158,10 +177,16 @@
 - Given work 0:10, then the time pops at 00:03, 00:02 and 00:01, and not in the rest after.
 - Given Squats, Plank, Rest in round 1 of 2, then the rest's face says "then Squats · 00:03".
 - Given a rep step comes round, then Done swells once; with reduced motion it doesn't.
-- Given Jog (timed, just a name) then Push-ups (the Push-up exercise), then Jog has no (i); at Push-ups an (i) named "Details of Push-up" opens its details, with no Pick another, and the workout still waits on the push-ups; Space there doesn't press Done; ✕ at the top right closes them, as Done does, with focus back on the (i).
+- Given Jog (timed, just a name) then Push-ups (the Push-up exercise), then Jog has no (i); at Push-ups an (i) named "Details of Push-up" opens its details, with Swap exercise, and the workout still waits on the push-ups; Space there doesn't press Done; ✕ at the top right closes them, as Done does, with focus back on the (i).
+
+- Given 10 back squats at 60 kg, and goblet squats done at 24 kg last time, when I open the (i), press Swap exercise, search "goblet" and pick Goblet squat, then the face says Goblet squat at 24 kg, the Undo bar says "Swapped to Goblet squat", the next round's squats are goblet squats too, and the saved workout still has back squats; Undo puts back squats back at 60 kg.
+- Given Back squat, then Swap exercise lists five exercises that work the quads or glutes, not Back squat; searching "wall sit" finds nothing, as it's timed.
+- Given a timed step swapped part-way through a workout, then its sets before the swap are logged under the old exercise and those after under the new one.
+- Given a swapped step at the summary, when I press Yes, use next time, then the saved workout's step is the new exercise at its weight; when I press No, just this time, then it's unchanged. Either way there's no Next time step-up for it.
+- Given a run with a swap, when the page reloads, then the step is still swapped.
 
 ## Platform notes
 
 - **Web:** the maths is pure and has no Angular in it, so it can be ported line for line: `workoutStateAt()` in `src/app/workout/workout-state.ts` (where a workout is after so many ms, given the rep steps done and, for a time limit, the time they took; `stepsIntoRound()` gives the score's steps) and the helpers in `src/app/models/workout.ts`. The run itself is `ActiveRunService` (`src/app/shared/run/`), and the page is `WorkoutComponent` (`src/app/workout/`), with each kind of step's look and motion in `workout-steps.scss` and `workout-motion.scss`, the step strip in `step-strip/`, an exercise's details in the shared `ExerciseDetailsDialogComponent` (RUN-9), and long names fitted to the face by `fitName()` (`fit-name.ts`), which measures the text rather than counting letters.
-- **Web:** the summary is `WorkoutSummaryComponent` (`src/app/workout/workout-summary/`), with its sets in `SummarySetsComponent` and Next time in `SummaryStepUpsComponent`. Its host is a grid whose one cell is the screen (`grid-template: minmax(0, 1fr) / minmax(0, 1fr)`): an auto row grows to the content, and the sheet then runs off the screen once the summary is long.
+- **Web:** the summary is `WorkoutSummaryComponent` (`src/app/workout/workout-summary/`), with its sets in `SummarySetsComponent` and Next time in `SummaryStepUpsComponent`. Swapped is `SummarySwapsComponent`. Its host is a grid whose one cell is the screen (`grid-template: minmax(0, 1fr) / minmax(0, 1fr)`): an auto row grows to the content, and the sheet then runs off the screen once the summary is long.
 - **iOS:** keep the same "work it out from the clock" design: store when the run started (moved on by pauses and rep steps) and derive everything else. That's also what makes a relaunch carry on correctly (see [pause-and-stop](pause-and-stop.md)). A `TimelineView` or a display-link tick only needs to redraw. The face's drum is a `rotation3DEffect` about the x axis (the y axis for a new round) with an anchor behind the face; a long name can use `ViewThatFits`, or `lineLimit(3)` with `minimumScaleFactor(0.7)`. The (i) by an exercise's name (RUN-9) can open its details as a `.sheet` with medium and large detents, so the ring stays in sight above it.

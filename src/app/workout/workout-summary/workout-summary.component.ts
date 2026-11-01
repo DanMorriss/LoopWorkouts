@@ -42,6 +42,7 @@ import {
     SummarySetsComponent,
 } from './summary-sets/summary-sets.component';
 import { SummaryStepUpsComponent } from './summary-step-ups/summary-step-ups.component';
+import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';
 
 /** px/s: let go faster than this, the sheet was thrown rather than set down. */
 const THROWN = 300;
@@ -86,6 +87,7 @@ function scrolledWithin(target: Element, container: Element): boolean {
         SuggestedWorkoutComponent,
         SummarySetsComponent,
         SummaryStepUpsComponent,
+        SummarySwapsComponent,
         WheelPickerComponent,
     ],
     templateUrl: './workout-summary.component.html',

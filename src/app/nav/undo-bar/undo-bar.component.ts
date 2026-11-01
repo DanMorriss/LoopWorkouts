@@ -8,10 +8,10 @@ import {
     untracked,
     viewChild,
 } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { UndoService } from '../../shared/undo/undo.service';
 import { injectCurrentUrl } from '../current-url';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 /**
  * The Undo bar, floating above the tabs (and the workout's bar) after a delete: what
@@ -23,7 +23,7 @@ import { injectCurrentUrl } from '../current-url';
  */
 @Component({
     selector: 'app-undo-bar',
-    imports: [MatIconModule, RouterLink],
+    imports: [IconComponent, RouterLink],
     templateUrl: './undo-bar.component.html',
     styleUrl: './undo-bar.component.scss',
 })

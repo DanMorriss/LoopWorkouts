@@ -1,8 +1,8 @@
 import { Component, computed } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { injectCurrentUrl, isOnPage } from '../current-url';
 import { TABS } from './tabs';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 /**
  * The tabs along the bottom: Home, Exercises, Library, History and Account, as on an iPhone. A
@@ -11,7 +11,7 @@ import { TABS } from './tabs';
  */
 @Component({
     selector: 'app-tab-bar',
-    imports: [MatIconModule, RouterLink],
+    imports: [IconComponent, RouterLink],
     templateUrl: './tab-bar.component.html',
     styleUrl: './tab-bar.component.scss',
 })

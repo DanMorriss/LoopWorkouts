@@ -2,7 +2,7 @@
     <!-- Shows behind the bar as it's swiped right, to end the workout -->
     @if (!finished()) {
         <div class="run-bar__end" aria-hidden="true">
-            <mat-icon>stop</mat-icon>
+            <app-icon>stop</app-icon>
             End workout
         </div>
     }
@@ -31,7 +31,7 @@
                 [attr.aria-label]="isPaused() ? 'Resume' : 'Pause'"
                 (click)="togglePause()"
             >
-                <mat-icon aria-hidden="true">{{ isPaused() ? 'play_arrow' : 'pause' }}</mat-icon>
+                <app-icon>{{ isPaused() ? 'play_arrow' : 'pause' }}</app-icon>
             </button>
         }
     </aside>

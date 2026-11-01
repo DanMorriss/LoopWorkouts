@@ -39,10 +39,6 @@ Ten ready-made workouts are in the library's Ready-made workouts page (see `docs
 - [ ] **Dan to review the first batch:** the exercises, sets, reps and rests of each, and their descriptions. Ids are fixed once released, so rename before merging if a title changes.
 - [ ] **More batches, once reviewed:** e.g. a band workout, pull-up bar and rings, a beginner gym full body, mobility or stretching, and longer runs of intervals. Each must pass `built-in-workouts.spec.ts`.
 
-### From using it (Tom, 2026-10-31; Dan, 2026-11-01)
-
-- [ ] **Swap an exercise, next steps (RUN-11, BLD-14):** swapping is built, mid-workout and in Create (see Swapping an exercise in `docs/features/run-a-workout.md`). Still to do: swap the next exercise during the rest before it (the likeliest moment to find the machine taken), which today needs waiting until it starts; and tag each built-in exercise with its movement (squat, hinge, horizontal push, vertical pull, …) to rank suggestions by it as well as by muscles, as muscles alone are rough (Front squat suggests Burpee, as both work the quads).
-
 ### Alarms (any time)
 
 - [ ] **Alarm sound files:** swap the beeps generated in code (`AlarmService`) for proper sounds. Waiting on Dan to supply the files.

@@ -6,6 +6,7 @@ How the exercises that come with Loop Workouts are written, and which are still 
 
 - The exercises: `src/app/models/built-in-exercises.ts`, one batch of 10 at a time, added to the end of the list under a comment saying what the batch is, e.g. `// Fourth batch: core, carries and variations`.
 - Their words (`description`, `steps` and `tips`): `src/app/models/built-in-exercise-text.ts`, under each one's id, in the same order and under the same batch comment. They're kept apart so they aren't in the app's first download.
+- Their movement (squat, hinge, horizontal push, vertical pull, …), which Swap ranks by (RUN-11): `src/app/models/built-in-exercise-movements.ts`, under each one's id, in the same order. Pick one of its `Movement`s, adding a new one only for a way of moving none of them is. Every built-in exercise has one; a test checks.
 - Their shape: `BuiltInExercise` and `ExerciseText` in `src/app/models/exercise.ts`.
 - How they move, for their animated demos (EXR-13): `src/app/models/built-in-exercise-motion.ts`, under each one's id, written as `exercise-motion.ts` explains. Every built-in exercise has one, so a new one needs one too; a test checks. Look at it drawn before raising it, in 3D and turned round (see [exercises](features/exercises.md)): a flat pose can look right from the side and wrong from the front. `tools/shoot-demos.mjs` screenshots demos from `ng serve --port 4300`, turned round if asked.
 - The rules below that can be checked are checked by `src/app/models/built-in-exercises.spec.ts`. Run it after every batch.

@@ -251,9 +251,25 @@
                                     <!-- What's after the rest, to get ready for. "Next:" says it
                                          to screen readers. -->
                                     @if (slide.then) {
-                                        <p class="workout-face__then" aria-hidden="true">
-                                            then {{ slide.then }}
-                                        </p>
+                                        <div class="workout-face__name">
+                                            <p class="workout-face__then" aria-hidden="true">
+                                                then {{ slide.then }}
+                                            </p>
+                                            <!-- Its details, and Swap: the rest is when the
+                                                 machine's found taken (RUN-11) -->
+                                            @if (slide.nextExercise; as next) {
+                                                <button
+                                                    type="button"
+                                                    class="workout-face__info"
+                                                    [attr.aria-label]="
+                                                        'Details of ' + next.name + ', next'
+                                                    "
+                                                    (click)="showExercise(next, true)"
+                                                >
+                                                    <mat-icon aria-hidden="true">info</mat-icon>
+                                                </button>
+                                            }
+                                        </div>
                                     }
                                 } @else {
                                     <p>You're finished!</p>

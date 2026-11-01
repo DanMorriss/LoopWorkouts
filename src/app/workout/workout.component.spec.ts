@@ -4530,6 +4530,62 @@ describe('WorkoutComponent', () => {
             expect(component.isRepsActive()).toBe(true);
         });
 
+        describe('in the rest before it', () => {
+            const label = () => el('.workout-face__label')!.textContent!.trim();
+            const then = () => el('.workout-face__then')?.textContent?.trim();
+            beforeEach(() => {
+                component.finishReps();
+                fixture.detectChanges();
+            });
+
+            it("offers the next exercise's details beside what's next", () => {
+                const info = el('.workout-face__info')!;
+
+                expect(info.getAttribute('aria-label')).toBe('Details of Back squat, next');
+                info.click();
+                fixture.detectChanges();
+                el('.details__pick-another')!.click();
+                fixture.detectChanges();
+
+                expect(swapTitle()).toBe('Swap Back squat');
+            });
+
+            it('swaps the next step, with Undo until it ends', async () => {
+                openSwap();
+                pick('Goblet squat');
+                await fixture.whenStable();
+
+                expect(then()).toMatch(/^then Goblet squat · .*10 reps @ 24 kg$/);
+                expect(undo().offer()?.message).toBe('Swapped to Goblet squat');
+                expect(document.activeElement).toBe(el('.workout-face__info'));
+                // The set before the rest was back squats
+                expect(TestBed.inject(ActiveRunService).sets()[0].name).toBe('Back squat');
+
+                advance(2000);
+                fixture.detectChanges();
+
+                expect(label()).toBe('Goblet squat');
+                expect(stepWeight()).toBe(24);
+                expect(undo().offer()).not.toBeNull();
+
+                component.finishReps();
+                fixture.detectChanges();
+
+                expect(undo().offer()).toBeNull();
+                expect(TestBed.inject(ActiveRunService).sets()[1].name).toBe('Goblet squat');
+            });
+
+            it('swaps the step once started, if the rest ends while choosing', () => {
+                openSwap();
+                advance(2000);
+                fixture.detectChanges();
+                pick('Goblet squat');
+
+                expect(label()).toBe('Goblet squat');
+                expect(undo().offer()?.message).toBe('Swapped to Goblet squat');
+            });
+        });
+
         describe('on the summary', () => {
             function finishSwapped() {
                 openSwap();

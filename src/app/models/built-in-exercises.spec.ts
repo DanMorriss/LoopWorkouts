@@ -1,3 +1,4 @@
+import { BUILT_IN_MOVEMENTS } from './built-in-exercise-movements';
 import { BUILT_IN_EXERCISE_TEXT } from './built-in-exercise-text';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
 
@@ -68,6 +69,12 @@ describe('built-in exercises', () => {
 
     it('each have their words, in the same order, and there are none for anything else', () => {
         expect(Object.keys(BUILT_IN_EXERCISE_TEXT)).toEqual(
+            BUILT_IN_EXERCISES.map((exercise) => exercise.id)
+        );
+    });
+
+    it('each have their movement, in the same order, and there are none for anything else', () => {
+        expect(Object.keys(BUILT_IN_MOVEMENTS)).toEqual(
             BUILT_IN_EXERCISES.map((exercise) => exercise.id)
         );
     });

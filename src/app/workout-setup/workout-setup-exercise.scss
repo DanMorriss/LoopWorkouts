@@ -1,0 +1,43 @@
+// A timed or rep step's exercise: its name box, with Browse (BLD-16) beside it, and the line
+// under it saying which exercise the step is
+
+// Which exercise the step is, under its name, with buttons for its details and to edit it
+// or add a note; they go under the line when there isn't room beside it
+.step__exercise {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: -0.35rem;
+}
+
+.step__exercise-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.step__exercise-status {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.step__exercise-note {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--text);
+}
+
+// The name box, with Browse (BLD-16) to its right
+.step__name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step__name-picker {
+    flex: 1;
+    min-width: 0;
+}

@@ -61,6 +61,7 @@ import { findByName } from '../models/exercise-links';
 import { ExerciseEditorComponent } from '../shared/components/exercise-editor/exercise-editor.component';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
 import { SwapExerciseDialogComponent } from '../shared/components/swap-exercise-dialog/swap-exercise-dialog.component';
+import { BrowseExercisesDialogComponent } from './browse-exercises-dialog/browse-exercises-dialog.component';
 import { lastRepSets } from '../history/last-sets';
 import { lastWeight } from '../models/step-swap';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
@@ -185,7 +186,11 @@ const NAME_EXAMPLES: Record<StepKind, string> = {
 @Component({
     selector: 'app-workout-setup',
     templateUrl: './workout-setup.component.html',
-    styleUrls: ['./workout-setup.component.scss', './workout-setup-supersets.scss'],
+    styleUrls: [
+        './workout-setup.component.scss',
+        './workout-setup-exercise.scss',
+        './workout-setup-supersets.scss',
+    ],
     host: {
         '(document:click)': 'closePopups($event)',
     },
@@ -204,6 +209,7 @@ const NAME_EXAMPLES: Record<StepKind, string> = {
         ExerciseEditorComponent,
         ExerciseDetailsDialogComponent,
         SwapExerciseDialogComponent,
+        BrowseExercisesDialogComponent,
         StepDragPreviewComponent,
         StepKindMenuComponent,
         MatFormFieldModule,
@@ -324,6 +330,8 @@ export class WorkoutSetupComponent {
 
     /** The exercise open in the editor, and the step it was opened from. */
     /** The exercise whose details are showing, and the step they were opened from. */
+    /** The step whose exercise is being browsed for (BLD-16), while its dialog is open. */
+    protected readonly browsing = signal<{ stepKey: number; stepNumber: number } | null>(null);
     /** The step whose exercise is being swapped (BLD-14), while its dialog is open. */
     protected readonly swapping = signal<{
         exercise: Exercise;
@@ -816,6 +824,35 @@ export class WorkoutSetupComponent {
                 },
                 { injector: this.injector }
             );
+        }
+    }
+
+    /** Browse: the exercises as the Exercises page lists them, to pick the step's from (BLD-16). */
+    protected startBrowse(stepKey: number, stepNumber: number) {
+        this.browsing.set({ stepKey, stepNumber });
+    }
+
+    /**
+     * The step becomes `picked`, its name and link, as picking it in the name box does; the
+     * rest of the step stays as it is. Focus goes back to Browse.
+     */
+    protected browsedTo(picked: Exercise) {
+        const opened = this.browsing();
+        this.browsing.set(null);
+        const step = opened && this.model().steps.find((each) => each.key === opened.stepKey);
+        if (!opened || !step) {
+            return;
+        }
+        this.replaceStep({ ...step, name: picked.name, exerciseId: picked.id });
+        this.stepAnnouncement.set(`Step ${opened.stepNumber} is now ${picked.name}`);
+        this.focusAfterRender(`step-${opened.stepKey}-browse`);
+    }
+
+    protected closeBrowse() {
+        const opened = this.browsing();
+        this.browsing.set(null);
+        if (opened) {
+            this.focusAfterRender(`step-${opened.stepKey}-browse`);
         }
     }
 

@@ -1,5 +1,21 @@
 @let c = card();
-<a class="exercise-card" [href]="url()" (click)="slide.follow($event, url(), 'in')">
+@if (picks()) {
+    <!-- Browse in Create (BLD-16): picking it fills in the step, rather than opening its page -->
+    <button
+        type="button"
+        class="exercise-card exercise-card--pick"
+        (click)="picked.emit(c.exercise)"
+    >
+        <ng-container [ngTemplateOutlet]="text" />
+    </button>
+} @else {
+    <a class="exercise-card" [href]="url()" (click)="slide.follow($event, url(), 'in')">
+        <ng-container [ngTemplateOutlet]="text" />
+        <mat-icon class="exercise-card__chevron" aria-hidden="true">chevron_right</mat-icon>
+    </a>
+}
+
+<ng-template #text>
     <span class="exercise-card__text">
         <span class="exercise-card__name">
             {{ c.exercise.name }}
@@ -35,5 +51,4 @@
             </span>
         }
     </span>
-    <mat-icon class="exercise-card__chevron" aria-hidden="true">chevron_right</mat-icon>
-</a>
+</ng-template>

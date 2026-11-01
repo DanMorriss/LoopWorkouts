@@ -31,6 +31,14 @@
         outline: 2px solid var(--accent);
         outline-offset: 2px;
     }
+
+    // A button, for picking: the whole width, its text as a link's
+    &--pick {
+        width: 100%;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
 }
 
 .exercise-card__text {

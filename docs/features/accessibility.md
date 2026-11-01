@@ -23,6 +23,7 @@
 - Wheels are spin buttons named by their step, e.g. "Step 2, rest, Seconds", reporting their value and range.
 - Adding, moving, deleting or changing the kind of a step is announced, e.g. "Moved squats to step 3", "Step 2 is now rest".
 - A step's kind pill is a button named with its kind and step, e.g. "Reps, change type of step 1", saying whether its menu is open; the menu marks the current kind as pressed.
+- Browse by a step's name box (BLD-16) is named for its step, "Browse exercises for step 2". Its dialog's cards are buttons named with the exercise, its muscles and equipment; the muscle chips are toggles (pressed when picked), the count of exercises shown is read out as it changes, and picking one says "Step 2 is now Goblet squat".
 - The (i) button by setup's Steps heading is described by its tip (`role="tooltip"`), so screen readers read the tip without opening it.
 - A step whose sets vary (BLD-11) lists its rows under the Vary each set switch, which names the list. Each row is a button saying its set, e.g. "Set 2 · 10 × 45 kg", whether it's open, and the wheels it controls; its wheels are named by the step, the set and the wheel, e.g. "Step 1, Leg press, Set 2, Reps".
 - A superset (BLD-12) is named to screen readers in Create as "Superset, steps 2 to 3" (or "Giant set"), and each of its steps' open buttons says it's in it, e.g. "Step 2, Bench, in the superset, 10 reps". Joining, taking out and moving are announced, e.g. "Took Press out of the giant set, now step 4", "Moved superset to before step 3".

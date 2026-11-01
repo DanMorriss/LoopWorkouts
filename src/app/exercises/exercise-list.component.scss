@@ -1,7 +1,6 @@
 @use 'type' as *;
 
 @use 'interaction' as *;
-@use 'chip' as *;
 
 :host {
     display: block;
@@ -81,29 +80,7 @@
 }
 
 .exercises__chips {
-    display: flex;
-    gap: 0.4rem;
-
-    &--wrap {
-        flex-wrap: wrap;
-    }
-
-    // One row that scrolls sideways, so the list starts high on a phone
-    &--scroll {
-        margin: 0 -0.25rem 0.5rem;
-        padding: 0.25rem;
-        overflow-x: auto;
-        scrollbar-width: thin;
-    }
-}
-
-// A toggle: picked ones are outlined in the accent and filled, so it isn't colour alone
-.exercises__chip {
-    @include chip;
-}
-
-.exercises__chip-icon {
-    @include chip-icon;
+    margin-bottom: 0.5rem;
 }
 
 .exercises__map {

@@ -1,0 +1,20 @@
+@use 'chip' as *;
+
+:host {
+    display: block;
+}
+
+// One row that scrolls sideways, so the list starts high on a phone
+.muscle-chips {
+    display: flex;
+    gap: 0.4rem;
+    margin: 0 -0.25rem;
+    padding: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+// A toggle: picked ones are outlined in the accent and filled, so it isn't colour alone
+.muscle-chips__chip {
+    @include chip;
+}

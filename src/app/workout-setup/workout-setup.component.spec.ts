@@ -2013,6 +2013,87 @@ describe('WorkoutSetupComponent', () => {
             expect(document.activeElement).toBe(box);
             expect([box.selectionStart, box.selectionEnd]).toEqual([0, 'Back squat'.length]);
         });
+
+        describe('browsing for it (BLD-16)', () => {
+            const cardNames = () =>
+                Array.from(
+                    fixture.nativeElement.querySelectorAll(
+                        'app-browse-exercises-dialog .exercise-card__name'
+                    )
+                ).map((name) => (name as HTMLElement).firstChild!.textContent!.trim());
+
+            function pickCard(name: string) {
+                const card = Array.from(
+                    fixture.nativeElement.querySelectorAll(
+                        'app-browse-exercises-dialog .exercise-card'
+                    )
+                ).find(
+                    (c) =>
+                        (c as HTMLElement)
+                            .querySelector('.exercise-card__name')!
+                            .firstChild!.textContent!.trim() === name
+                ) as HTMLButtonElement;
+                expect(card, `expected a "${name}" card`).toBeDefined();
+                card.click();
+                fixture.detectChanges();
+            }
+
+            it("opens the exercises over Create from a button by a step's name box", async () => {
+                await setup();
+                await create();
+
+                // Timed and rep steps have it; a rest isn't an exercise
+                expect(steps()[1].querySelector('[id$="-browse"]')).toBeNull();
+                await press('Browse exercises for step 1');
+
+                expect(el('.browse__title').textContent!.trim()).toBe('Browse exercises');
+                expect(el('.browse__hint').textContent!.trim()).toBe('Pick one for step 1.');
+                expect(cardNames()).toContain('Back squat');
+                expect(document.activeElement).toBe(el('#browse-search'));
+            });
+
+            it('fills in the step with the exercise picked, linked to it', async () => {
+                await setup();
+                await create();
+                await press('Browse exercises for step 1');
+
+                typeInto(el('#browse-search'), 'front squat');
+                pickCard('Front squat');
+                await fixture.whenStable();
+
+                expect(el('app-browse-exercises-dialog')).toBeNull();
+                expect(shown().steps[0].name).toBe('Front squat');
+                expect(status(0)).toContain('Built-in exercise');
+                expect(el('.sr-only[aria-live="polite"]').textContent!.trim()).toBe(
+                    'Step 1 is now Front squat'
+                );
+                expect(document.activeElement).toBe(button('Browse exercises for step 1'));
+
+                chooseTime(0, 'seconds', '30');
+                await submit();
+                expect(allSteps(store.workouts()[0])[0]).toEqual({
+                    kind: 'work',
+                    seconds: 30,
+                    name: 'Front squat',
+                    exerciseId: 'builtin:front-squat',
+                });
+            });
+
+            it('closes with ✕, leaving the step as it was', async () => {
+                await setup();
+                await create();
+                typeName(0, 'Back squat');
+                await press('Browse exercises for step 1');
+
+                el<HTMLButtonElement>('.browse__close').click();
+                fixture.detectChanges();
+                await fixture.whenStable();
+
+                expect(el('app-browse-exercises-dialog')).toBeNull();
+                expect(shown().steps[0].name).toBe('Back squat');
+                expect(document.activeElement).toBe(button('Browse exercises for step 1'));
+            });
+        });
     });
 
     describe('until stopped', () => {

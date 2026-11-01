@@ -34,30 +34,11 @@
 
         <app-equipment-filter class="exercises__kit" idPrefix="exercise-list" things="Exercises" />
 
-        <div
-            class="exercises__chips exercises__chips--scroll"
-            role="group"
-            aria-label="Main muscle"
-        >
-            <button
-                type="button"
-                class="exercises__chip"
-                [attr.aria-pressed]="selectedMuscles().length === 0"
-                (click)="clearMuscles()"
-            >
-                All muscles
-            </button>
-            @for (m of muscles; track m) {
-                <button
-                    type="button"
-                    class="exercises__chip"
-                    [attr.aria-pressed]="selectedMuscles().includes(m)"
-                    (click)="pickMuscle(m)"
-                >
-                    {{ muscleLabels[m] }}
-                </button>
-            }
-        </div>
+        <app-muscle-chips
+            class="exercises__chips"
+            [selected]="selectedMuscles()"
+            (selectedChange)="setMuscles($event)"
+        />
 
         <section class="exercises__map" aria-label="Pick muscles on body map">
             <app-body-map

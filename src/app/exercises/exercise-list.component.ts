@@ -4,17 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ExerciseEditorComponent } from '../shared/components/exercise-editor/exercise-editor.component';
 import { EquipmentFilterComponent } from '../shared/components/equipment-filter/equipment-filter.component';
 import { BodyMapComponent } from '../shared/components/body-map/body-map.component';
-import {
-    canDoWith,
-    capitalise,
-    equipmentPhrases,
-    Exercise,
-    exercisePath,
-    isBuiltIn,
-    MUSCLE_LABELS,
-    MuscleGroup,
-} from '../models/exercise';
-import { searchExercises } from '../models/exercise-links';
+import { Exercise, exercisePath, MuscleGroup } from '../models/exercise';
 import {
     exerciseBests,
     ExerciseSession,
@@ -30,11 +20,11 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { parseMusclesParam, serialiseMusclesParam } from './muscle-filter-query';
 import {
     CardProgress,
-    ExerciseCard,
+    exerciseCard,
     ExerciseCardComponent,
 } from './exercise-card/exercise-card.component';
-
-const MUSCLES = Object.keys(MUSCLE_LABELS) as MuscleGroup[];
+import { filterExercises } from './exercise-filter';
+import { MuscleChipsComponent } from './muscle-chips/muscle-chips.component';
 
 /**
  * Every exercise, built-in and your own, to browse and search (EXR-6). The list can be cut
@@ -49,6 +39,7 @@ const MUSCLES = Object.keys(MUSCLE_LABELS) as MuscleGroup[];
         BodyMapComponent,
         ExerciseEditorComponent,
         ExerciseCardComponent,
+        MuscleChipsComponent,
     ],
     templateUrl: './exercise-list.component.html',
     styleUrl: './exercise-list.component.scss',
@@ -59,9 +50,6 @@ export class ExerciseListComponent {
     private readonly history = inject(HistoryStore);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-
-    protected readonly muscles = MUSCLES;
-    protected readonly muscleLabels = MUSCLE_LABELS;
 
     protected readonly query = signal('');
     /** Main muscles the list is cut down to, or empty for all. */
@@ -83,32 +71,20 @@ export class ExerciseListComponent {
 
     /** Best match first while searching, otherwise A to Z. */
     private readonly found = computed(() => {
-        const selected = this.selectedMuscles();
-        const kit = this.myEquipment();
-        const typed = this.query().trim();
-        const all = this.exercises.exercises();
         const queryParams = this.muscleQueryParams();
-        const matches = typed
-            ? searchExercises(typed, all, Infinity)
-            : [...all]
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((exercise) => ({ exercise, otherName: undefined }));
-        return matches
-            .filter(
-                ({ exercise }) =>
-                    (selected.length === 0 ||
-                        selected.some((muscle) => exercise.mainMuscles.includes(muscle))) &&
-                    (!this.onlyMyEquipment() || canDoWith(exercise, kit))
-            )
-            .map(({ exercise, otherName }) =>
-                card(
-                    exercise,
-                    queryParams,
-                    otherName,
-                    this.sessions().get(exercise.id),
-                    this.settings.weightUnit()
-                )
-            );
+        const unit = this.settings.weightUnit();
+        return filterExercises(this.exercises.exercises(), {
+            query: this.query(),
+            muscles: this.selectedMuscles(),
+            onlyMine: this.onlyMyEquipment(),
+            myEquipment: this.myEquipment(),
+        }).map(({ exercise, otherName }) => {
+            const sessions = this.sessions().get(exercise.id);
+            return {
+                ...exerciseCard(exercise, otherName, queryParams),
+                ...(sessions?.length ? { progress: cardProgress(sessions, unit) } : {}),
+            };
+        });
     });
 
     constructor() {
@@ -144,7 +120,7 @@ export class ExerciseListComponent {
         this.setMuscles([]);
     }
 
-    private setMuscles(next: MuscleGroup[]) {
+    protected setMuscles(next: MuscleGroup[]) {
         this.selectedMuscles.set(next);
         void this.router.navigate([], {
             relativeTo: this.route,
@@ -173,25 +149,6 @@ export class ExerciseListComponent {
         this.drafting.set(false);
         document.getElementById('exercise-list-new')?.focus();
     }
-}
-
-function card(
-    exercise: Exercise,
-    queryParams: { muscles?: string },
-    otherName: string | undefined,
-    sessions: readonly ExerciseSession[] | undefined,
-    unit: WeightUnit
-): ExerciseCard {
-    return {
-        exercise,
-        path: exercisePath(exercise),
-        queryParams,
-        own: !isBuiltIn(exercise),
-        mainMuscles: exercise.mainMuscles.map((muscle) => MUSCLE_LABELS[muscle]),
-        equipment: capitalise(equipmentPhrases(exercise.equipment).join(', ')),
-        otherName,
-        ...(sessions?.length ? { progress: cardProgress(sessions, unit) } : {}),
-    };
 }
 
 // Its latest session's sets, as in the history, and its headline best

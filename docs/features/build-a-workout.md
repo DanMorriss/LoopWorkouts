@@ -17,6 +17,7 @@
 - **BLD-13** As a user I want to add headings to a workout (e.g. "Warmup", "Upper body"), so a long workout is easy to follow.
 - **BLD-14** As a user I want to swap a step's exercise for another that works the same muscles while setting a workout up, so I can fit it to the equipment I have. (Its rules are with the exercise picker in [exercises](exercises.md).)
 - **BLD-15** As a user I want to save a workout without starting it, so I can build one now and do it another day.
+- **BLD-16** As a user I want to browse the exercises for a step, by muscle and the equipment I have, as the Exercises page lists them, without leaving the workout I'm making. (Its rules are with the exercise picker in [exercises](exercises.md).)
 
 ## Rules
 
@@ -36,7 +37,7 @@
     - **Rest**: a time, the same range.
     - **Reps**: a count, 1 to 100, and an optional **weight**. No countdown; the workout waits until Done (see [run-a-workout](run-a-workout.md)).
 - Each step has an optional **name**, up to 40 characters, trimmed when saved. The name box suggests "e.g. Squats" (timed), "e.g. Catch your breath" (rest) or "e.g. Push-ups" (reps).
-- A timed or rep step's name box is labelled **Exercise (optional)** and finds exercises as you type, or makes a new one (EXR-2, see [exercises](exercises.md#picking-an-exercise-exr-2)). A rest step's is a plain name box.
+- A timed or rep step's name box is labelled **Exercise (optional)** and finds exercises as you type, or makes a new one (EXR-2, see [exercises](exercises.md#picking-an-exercise-exr-2)), with a **Browse** button to its right that opens the whole list to pick from (BLD-16). A rest step's is a plain name box.
 - **Up to 20 steps.** At 20, the **+ Step** button is disabled and the page says "That's the most steps a workout can have (20)."
 - A new workout starts with **one open rep step** at 0 reps. Every step can be deleted, which shows the hint "Add a step to start."
 - An **(i) button** beside the Steps heading shows the tip "Each round runs these in order. Steps left at 00:00 or 0 reps are skipped." on hover, focus or a tap, and hides it on Escape, when the pointer or focus leaves, or on a click elsewhere.

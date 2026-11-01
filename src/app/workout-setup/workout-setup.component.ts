@@ -325,6 +325,16 @@ export class WorkoutSetupComponent {
 
     /** Read out by screen readers after a step is added, moved, changed or deleted. */
     protected readonly stepAnnouncement = signal('');
+    /**
+     * Why a step's kind just changed, shown under its name box: its exercise is measured the
+     * other way. Only while the step is still that exercise and that kind.
+     */
+    private readonly kindNote = signal<{
+        stepKey: number;
+        exerciseId: string;
+        kind: StepKind;
+        text: string;
+    } | null>(null);
     private readonly undo = inject(UndoService);
     private readonly document = inject(DOCUMENT);
 
@@ -827,6 +837,51 @@ export class WorkoutSetupComponent {
         }
     }
 
+    /** The step's name box picked an exercise, or was left with one's name typed in it. */
+    protected exerciseChanged(stepKey: number, exercise: Exercise) {
+        const why = this.measureAs(stepKey, exercise);
+        if (why) {
+            this.stepAnnouncement.set(why);
+        }
+    }
+
+    /**
+     * A step that's just become `exercise` becomes the kind it's measured by: timed for a timed
+     * one, reps for one measured in reps, at the amounts adding it from its page gives (0:30,
+     * or 10 reps), each set's too where they vary. Its sets, rest and sides stay, and its kind
+     * can be changed back from its menu. Says why, or gives null if its kind was right.
+     */
+    private measureAs(stepKey: number, exercise: Exercise): string | null {
+        const step = this.model().steps.find((each) => each.key === stepKey);
+        const kind = exercise.measuredBy === 'timed' ? 'work' : 'reps';
+        if (!step || !isExercise(step) || step.kind === kind) {
+            return null;
+        }
+        const amount = kind === 'work' ? { minutes: 0, seconds: 30 } : { reps: 10 };
+        this.replaceStep({
+            ...step,
+            ...amount,
+            kind,
+            setRows: step.setRows.map((row) => ({ ...row, ...amount })),
+        });
+        const measured = kind === 'work' ? 'is timed' : 'is done in reps';
+        const what = step.vary ? 'each set' : 'this step';
+        const now = kind === 'work' ? '00:30' : '10 reps';
+        const text = `${exercise.name} ${measured}, so ${what} is now ${now}`;
+        this.kindNote.set({ stepKey, exerciseId: exercise.id, kind, text });
+        return text;
+    }
+
+    /** Why the step's kind just changed, while it's still that exercise and kind. */
+    protected kindNoteFor(step: StepModel): string | null {
+        const note = this.kindNote();
+        return note?.stepKey === step.key &&
+            note.kind === step.kind &&
+            this.exerciseFor(step)?.id === note.exerciseId
+            ? note.text
+            : null;
+    }
+
     /** Browse: the exercises as the Exercises page lists them, to pick the step's from (BLD-16). */
     protected startBrowse(stepKey: number, stepNumber: number) {
         this.browsing.set({ stepKey, stepNumber });
@@ -844,7 +899,10 @@ export class WorkoutSetupComponent {
             return;
         }
         this.replaceStep({ ...step, name: picked.name, exerciseId: picked.id });
-        this.stepAnnouncement.set(`Step ${opened.stepNumber} is now ${picked.name}`);
+        const why = this.measureAs(step.key, picked);
+        this.stepAnnouncement.set(
+            [`Step ${opened.stepNumber} is now ${picked.name}`, why].filter(Boolean).join('. ')
+        );
         this.focusAfterRender(`step-${opened.stepKey}-browse`);
     }
 

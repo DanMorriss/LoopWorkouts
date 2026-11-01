@@ -11,12 +11,14 @@ import { ExercisePickerComponent } from './exercise-picker.component';
             [(value)]="name"
             [(exerciseId)]="exerciseId"
             placeholder="e.g. Push-ups"
+            (exerciseChange)="changes.push($event.name)"
         />
     `,
 })
 class HostComponent {
     readonly name = signal('');
     readonly exerciseId = signal('');
+    readonly changes: string[] = [];
 }
 
 describe('ExercisePickerComponent', () => {
@@ -206,6 +208,29 @@ describe('ExercisePickerComponent', () => {
         // Arrow down opens it again
         await press('ArrowDown');
         expect(list().hidden).toBe(false);
+    });
+
+    it('says when the step becomes another exercise: picked, or typed and left', async () => {
+        box().dispatchEvent(new Event('focus'));
+        await type('pla');
+        options()[0].click();
+        fixture.detectChanges();
+        expect(host.changes).toEqual(['Plank']);
+
+        // Left with the same exercise's name, or none, says nothing
+        const leave = async (text: string) => {
+            await type(text);
+            box().dispatchEvent(new Event('change'));
+        };
+        await leave('plank');
+        await leave('Wall walk');
+        expect(host.changes).toEqual(['Plank']);
+
+        // Not as it's typed, only once it's left
+        await type('Push-up');
+        expect(host.changes).toEqual(['Plank']);
+        box().dispatchEvent(new Event('change'));
+        expect(host.changes).toEqual(['Plank', 'Push-up']);
     });
 
     it('closes when focus leaves the box', async () => {

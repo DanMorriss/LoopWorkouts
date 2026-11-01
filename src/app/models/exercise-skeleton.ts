@@ -109,6 +109,13 @@ function bend(root: Vec3, end: Vec3, upper: number, lower: number, towards: Vec3
     );
 }
 
+/** `end` brought in towards `root`, if it's further than `length` from it. */
+function within(root: Vec3, end: Vec3, length: number): Vec3 {
+    const away = sub3(end, root);
+    const distance = length3(away);
+    return distance <= length ? end : add3(root, scale3(away, length / distance));
+}
+
 /** The figure in `pose`, in 3D. */
 export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
     const view = motion.view;
@@ -152,15 +159,31 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
             BODY.upperArm,
             BODY.forearm,
         ]);
-        if (!side || pose.handsApart === undefined) {
+        // Hands held closer together, or further forwards, than drawn: the hand moved, and the
+        // elbow bent to reach it
+        let end = placed.end;
+        if (side && pose.handsApart !== undefined) {
+            end = add3(end, scale3(right, (placed.side * (pose.handsApart - HANDS_APART)) / 2));
+        }
+        if (!side && pose.handsForward) {
+            end = add3(end, scale3(forward, pose.handsForward));
+        }
+        let towards = sub3(placed.mid, scale3(add3(placed.root, end), 0.5));
+        if (pose.elbowsOut) {
+            // Out to the side: square to the line from the shoulder to the hand
+            const along = normalize3(sub3(end, placed.root));
+            const out = scale3(right, placed.side);
+            const sideways = sub3(out, scale3(along, dot3(out, along)));
+            towards = add3(
+                scale3(normalize3(towards), 1 - pose.elbowsOut),
+                scale3(normalize3(sideways), pose.elbowsOut)
+            );
+        }
+        if (end === placed.end && !pose.elbowsOut) {
             return placed;
         }
-        // Hands held closer together: the hand moved in, and the elbow bent to reach it
-        const end = add3(
-            placed.end,
-            scale3(right, (placed.side * (pose.handsApart - HANDS_APART)) / 2)
-        );
-        const mid = bend(placed.root, end, BODY.upperArm, BODY.forearm, sub3(placed.mid, end));
+        end = within(placed.root, end, BODY.upperArm + BODY.forearm);
+        const mid = bend(placed.root, end, BODY.upperArm, BODY.forearm, towards);
         return { ...placed, mid, end };
     };
     const turnLimb = (limb: Limb3): Limb3 => ({
@@ -190,6 +213,7 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         return length3(forwards) > 0.2 ? normalize3(forwards) : forward;
     };
 
+    const arms = clearLegs(motion, [turnLimb(arm(0)), turnLimb(arm(1))], legs, hips);
     return {
         hips,
         shoulders: turnedShoulders,
@@ -199,11 +223,64 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         right: turnDir(right),
         twist,
         headUp,
-        arms: [turnLimb(arm(0)), turnLimb(arm(1))],
+        arms,
         legs,
         feet: [foot(0), foot(1)],
         bar: turn(lift(view, solved.bar)),
     };
+}
+
+/** How far a barbell's middle keeps clear of the middle of a thigh and of a shin, in cm. */
+const BAR_CLEARS = { thigh: 9.5, shin: 7 } as const;
+
+/**
+ * A barbell held from the side, moved forwards clear of the legs if it would go through them:
+ * flat, the hands hang over the legs; in 3D the bar runs across in front of them, as it would.
+ * The hands go with it, the elbows bending to reach.
+ */
+function clearLegs(
+    motion: ExerciseMotion,
+    arms: readonly [Limb3, Limb3],
+    legs: readonly [Limb3, Limb3],
+    hips: Vec3
+): readonly [Limb3, Limb3] {
+    if (motion.view !== 'side' || !motion.props?.includes('barbell')) {
+        return arms;
+    }
+    const barY = (arms[0].end[1] + arms[1].end[1]) / 2;
+    // Only a bar hanging below the hips: one resting on them (a hip thrust) is where it should be
+    if (barY >= hips[1]) {
+        return arms;
+    }
+    const barX = (arms[0].end[0] + arms[1].end[0]) / 2;
+    let needed = 0;
+    for (const leg of legs) {
+        for (const [from, to, clear] of [
+            [leg.root, leg.mid, BAR_CLEARS.thigh],
+            [leg.mid, leg.end, BAR_CLEARS.shin],
+        ] as const) {
+            const [low, high] = from[1] < to[1] ? [from, to] : [to, from];
+            // Only a leg more upright than not: a bar resting on the hips over flat thighs (a hip
+            // thrust) is where it should be
+            const steep = high[1] - low[1] > Math.abs(high[0] - low[0]);
+            if (!steep || barY < low[1] || barY > high[1]) {
+                continue;
+            }
+            // Where the leg is, front to back, at the bar's height
+            const t = (barY - low[1]) / (high[1] - low[1]);
+            const x = low[0] + (high[0] - low[0]) * t;
+            needed = Math.max(needed, x + clear - barX);
+        }
+    }
+    if (needed <= 0) {
+        return arms;
+    }
+    const move = (arm: Limb3): Limb3 => {
+        const end = within(arm.root, add3(arm.end, [needed, 0, 0]), BODY.upperArm + BODY.forearm);
+        const mid = bend(arm.root, end, BODY.upperArm, BODY.forearm, sub3(arm.mid, arm.root));
+        return { ...arm, mid, end };
+    };
+    return [move(arms[0]), move(arms[1])];
 }
 
 /**

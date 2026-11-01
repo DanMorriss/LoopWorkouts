@@ -66,6 +66,16 @@ export interface Pose {
      * closer than the shoulders (hands together, say). From the side only.
      */
     readonly handsApart?: number;
+    /**
+     * Only for the 3D figure: how far in front of where they're drawn the hands are, in cm.
+     * From the front only, where a drawing can't show it (hands meeting in front of the chest).
+     */
+    readonly handsForward?: number;
+    /**
+     * Only for the 3D figure: how far the elbows point out to the sides rather than the way
+     * they're drawn, from 0 to 1, the hands staying put (as in a face pull).
+     */
+    readonly elbowsOut?: number;
 }
 
 /**
@@ -89,14 +99,15 @@ export type Prop =
 /**
  * Equipment that stays put, behind the figure: a bench's or seat's cushion (along its middle),
  * a frame's post or rail, a bar end on (to hang from or hold), a step or box (its opposite
- * corners), or a cable from a pulley to the nearer hand.
+ * corners), or a cable from a pulley to the nearer hand (in 3D, with `each`, a cable from a
+ * pulley to each hand, as in a cable curl).
  */
 export type Kit =
     | { readonly kind: 'pad'; readonly from: Point; readonly to: Point }
     | { readonly kind: 'frame'; readonly from: Point; readonly to: Point }
     | { readonly kind: 'bar'; readonly at: Point }
     | { readonly kind: 'block'; readonly from: Point; readonly to: Point }
-    | { readonly kind: 'cable'; readonly from: Point };
+    | { readonly kind: 'cable'; readonly from: Point; readonly each?: boolean };
 
 export interface MotionFrame {
     /** What the position is called, under its still when motion is reduced, e.g. "Bottom". */
@@ -579,6 +590,12 @@ export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
         feet: [lerp(feetA[0], feetB[0], t), lerp(feetA[1], feetB[1], t)],
         ...(a.shrug || b.shrug ? { shrug: lerp(a.shrug ?? 0, b.shrug ?? 0, t) } : {}),
         ...(a.twist || b.twist ? { twist: lerp(a.twist ?? 0, b.twist ?? 0, t) } : {}),
+        ...(a.handsForward || b.handsForward
+            ? { handsForward: lerp(a.handsForward ?? 0, b.handsForward ?? 0, t) }
+            : {}),
+        ...(a.elbowsOut || b.elbowsOut
+            ? { elbowsOut: lerp(a.elbowsOut ?? 0, b.elbowsOut ?? 0, t) }
+            : {}),
         ...(a.handsApart !== undefined || b.handsApart !== undefined
             ? {
                   handsApart: lerp(a.handsApart ?? HANDS_APART, b.handsApart ?? HANDS_APART, t),

@@ -133,6 +133,68 @@ describe('skeletonOf', () => {
     });
 });
 
+describe('skeletonOf, placing the hands in 3D', () => {
+    it('brings the hands forwards from the front by handsForward', () => {
+        const pose: Pose = {
+            ...standing,
+            hips: [0, -99.5],
+            arms: [
+                { reach: [-6, -106], bend: 'cw' },
+                { reach: [6, -106], bend: 'ccw' },
+            ],
+        };
+        const flat = skeletonOf(pose, front(pose));
+        const forward = skeletonOf({ ...pose, handsForward: 30 }, front(pose));
+
+        forward.arms.forEach((arm, i) => {
+            expect(arm.end[0] - flat.arms[i].end[0]).toBeCloseTo(30, 4);
+            expectLengths(arm, BODY.upperArm, BODY.forearm);
+        });
+    });
+
+    it('points the elbows out to the sides with elbowsOut, the hands staying put', () => {
+        const pulled: Pose = {
+            ...standing,
+            arms: [
+                { reach: [18, -160], bend: 'ccw' },
+                { reach: [18, -160], bend: 'ccw' },
+            ],
+        };
+        const up = skeletonOf(pulled, side(pulled));
+        const out = skeletonOf({ ...pulled, elbowsOut: 1 }, side(pulled));
+
+        out.arms.forEach((arm, i) => {
+            close(arm.end, up.arms[i].end);
+            expectLengths(arm, BODY.upperArm, BODY.forearm);
+            // Further out to its own side than the shoulder, and no higher than drawn
+            expect(arm.mid[2] * arm.side).toBeGreaterThan(arm.root[2] * arm.side + 10);
+            expect(arm.mid[1]).toBeLessThan(up.arms[i].mid[1] + 1e-6);
+        });
+    });
+
+    it('carries a barbell held below the hips in front of the legs, not through them', () => {
+        const pose: Pose = {
+            hips: [-26, -60],
+            torso: 112,
+            arms: [
+                { reach: [8, -17], bend: 'cw' },
+                { reach: [8, -17], bend: 'cw' },
+            ],
+            legs: standing.legs,
+        };
+        const lift: ExerciseMotion = { ...side(pose), props: ['barbell'] };
+        const skeleton = skeletonOf(pose, lift);
+        const shin = skeleton.legs[0];
+        const barX = skeleton.arms[0].end[0];
+
+        // In front of the shin at the bar's height
+        const t = (skeleton.arms[0].end[1] - shin.end[1]) / (shin.mid[1] - shin.end[1]);
+        const shinX = shin.end[0] + (shin.mid[0] - shin.end[0]) * t;
+        expect(barX).toBeGreaterThanOrEqual(shinX + 6.9);
+        skeleton.arms.forEach((arm) => expectLengths(arm, BODY.upperArm, BODY.forearm));
+    });
+});
+
 describe('motionJoints', () => {
     it('reaches the head and the hands in every position', () => {
         const raised: Pose = {

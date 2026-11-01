@@ -44,9 +44,18 @@ const DOCUMENT_LEVEL_RULES = [
     'document-title',
 ];
 
+// A closed wheel's other numbers: scrolled out of its one-row window and hidden from screen
+// readers. Setup has over 700, and checking their contrast was most of axe's time there.
+const UNSEEN_WHEEL_NUMBERS =
+    'app-wheel-picker:not(.wheel-picker--open) .wheel-picker__item:not(.wheel-picker__item--selected)';
+
+// Each check renders the whole app and runs axe once or twice over it, which takes a few
+// seconds on a busy CI machine: past the default 15s, now and then, for the bigger pages
+const AXE_TEST_TIMEOUT_MS = 45_000;
+
 // Every page and state is checked in both themes, so neither can fall below WCAG AA
 for (const theme of ['dark', 'light'] as const) {
-    describe(`Accessibility (axe), ${theme} theme`, () => {
+    describe(`Accessibility (axe), ${theme} theme`, { timeout: AXE_TEST_TIMEOUT_MS }, () => {
         let fixture: ComponentFixture<AppComponent>;
         let router: Router;
         let store: WorkoutStore;
@@ -101,7 +110,11 @@ for (const theme of ['dark', 'light'] as const) {
                 .getAnimations()
                 .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
                 .forEach((animation) => animation.finish());
-            const results = await axe.run(fixture.nativeElement as HTMLElement, {
+            const context = {
+                include: [fixture.nativeElement as HTMLElement],
+                exclude: [UNSEEN_WHEEL_NUMBERS],
+            };
+            const results = await axe.run(context, {
                 runOnly: {
                     type: 'tag',
                     values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],

@@ -63,5 +63,5 @@
 
 ## Platform notes
 
-- **Web:** checked by axe over every page and state (`src/app/a11y.spec.ts`) and colour contrast tests (`src/app/shared/theme/theme-contrast.spec.ts`).
+- **Web:** checked by axe over every page and state (`src/app/a11y.spec.ts`), leaving out a closed number wheel's other numbers, which are out of sight and hidden from screen readers (its current number and an open wheel's are checked) and colour contrast tests (`src/app/shared/theme/theme-contrast.spec.ts`).
 - **iOS:** VoiceOver announcements via `AccessibilityNotification.Announcement`; spin buttons map onto adjustable elements (`accessibilityAdjustableAction`); honour `accessibilityReduceMotion` and Dynamic Type. Reading text is SF Pro with Dynamic Type text styles (`.body`, `.headline`); Audiowide stays for titles and the timer, with `.monospacedDigit()`-style cells for its countdown. Press feedback comes from a `ButtonStyle` reading `configuration.isPressed`; there's no hover to worry about on a phone. Xcode's Accessibility Inspector audit plays the part of axe.

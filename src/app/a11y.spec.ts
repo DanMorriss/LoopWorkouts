@@ -322,7 +322,14 @@ for (const theme of ['dark', 'light'] as const) {
                     fixture.nativeElement.querySelector('app-browse-exercises-dialog')
                 ).not.toBeNull();
                 click('.muscle-chips__chip:nth-child(2)');
+                // A short list, so the check reads a few cards rather than every exercise
+                const box = fixture.nativeElement.querySelector('#browse-search');
+                box.value = 'press';
+                box.dispatchEvent(new Event('input'));
                 await settle();
+                expect(
+                    fixture.nativeElement.querySelectorAll('.browse .exercise-card').length
+                ).toBeGreaterThan(0);
                 await expectNoViolations();
             });
         });

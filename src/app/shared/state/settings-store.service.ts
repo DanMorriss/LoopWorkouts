@@ -19,6 +19,8 @@ export interface Settings {
     sound: boolean;
     /** Vibrate as each phase starts, where the device can. */
     vibration: boolean;
+    /** Count down the last seconds of each timed step and rest with a beep. */
+    countdownBeeps: boolean;
     /** Stop the screen locking during a workout, where the browser can. */
     keepScreenOn: boolean;
     /** What weights are shown and picked in; they're always saved in kg. */
@@ -41,6 +43,7 @@ const DEFAULT_SETTINGS: Settings = {
     theme: 'dark',
     sound: true,
     vibration: true,
+    countdownBeeps: true,
     keepScreenOn: true,
     weightUnit: 'kg',
     bodyFigure: 'male',
@@ -60,6 +63,7 @@ export class SettingsStore {
     readonly theme = computed(() => this.settings().theme);
     readonly sound = computed(() => this.settings().sound);
     readonly vibration = computed(() => this.settings().vibration);
+    readonly countdownBeeps = computed(() => this.settings().countdownBeeps);
     readonly keepScreenOn = computed(() => this.settings().keepScreenOn);
     readonly weightUnit = computed(() => this.settings().weightUnit);
     readonly bodyFigure = computed(() => this.settings().bodyFigure);
@@ -86,8 +90,9 @@ function loadSettings(): Settings {
     } catch {
         // Corrupted: use the defaults
     }
-    const flag = (key: 'sound' | 'vibration' | 'keepScreenOn' | 'onlyMyEquipment') =>
-        typeof saved[key] === 'boolean' ? saved[key] : DEFAULT_SETTINGS[key];
+    const flag = (
+        key: 'sound' | 'vibration' | 'countdownBeeps' | 'keepScreenOn' | 'onlyMyEquipment'
+    ) => (typeof saved[key] === 'boolean' ? saved[key] : DEFAULT_SETTINGS[key]);
     const theme = THEMES.find((t) => t === saved['theme']) ?? DEFAULT_SETTINGS.theme;
     const weightUnit =
         WEIGHT_UNITS.find((u) => u === saved['weightUnit']) ?? DEFAULT_SETTINGS.weightUnit;
@@ -95,6 +100,7 @@ function loadSettings(): Settings {
         theme,
         sound: flag('sound'),
         vibration: flag('vibration'),
+        countdownBeeps: flag('countdownBeeps'),
         keepScreenOn: flag('keepScreenOn'),
         weightUnit,
         bodyFigure:

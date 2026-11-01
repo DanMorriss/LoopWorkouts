@@ -46,6 +46,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | ALM-2  | Hear alarms with my phone locked, in my pocket                           | ◐   | —   | [alarms](alarms.md)                           |
 | ALM-3  | Feel each step start (vibration)                                         | ◐   | —   | [alarms](alarms.md)                           |
 | ALM-4  | Choose the sound for each step                                           | —   | —   | [alarms](alarms.md)                           |
+| ALM-5  | Hear the last seconds of a step counted down                             | ✅  | —   | [alarms](alarms.md)                           |
 | LIB-1  | See my saved workouts and start one                                      | ✅  | —   | [library](library.md)                         |
 | LIB-2  | Edit or delete a saved workout                                           | ✅  | —   | [library](library.md)                         |
 | LIB-3  | Put my workouts in the order I want                                      | ✅  | —   | [library](library.md)                         |

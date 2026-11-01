@@ -181,7 +181,8 @@ export class ActiveRunService {
      */
     private readonly resumedAt = signal(0);
 
-    // Changes when the workout starts, pauses, resumes or needs its next batch, not every tick
+    // Changes when the workout starts, pauses, resumes or needs its next batch, or countdown
+    // beeps are turned on or off; not every tick
     private readonly alarmEvents = computed(() => {
         const workout = this.running();
         const startedAt = this.store.activeWorkoutStartedAt();
@@ -194,7 +195,8 @@ export class ActiveRunService {
                   fromRound,
                   ALARM_WINDOW,
                   this.store.activeRepStepsDone(),
-                  this.store.activeRepMs()
+                  this.store.activeRepMs(),
+                  this.settings.countdownBeeps()
               ).filter((event) => event.at > resumedAt)
             : [];
     });

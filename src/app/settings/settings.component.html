@@ -99,6 +99,21 @@
 
             <div class="setting">
                 <div class="setting__text">
+                    <span class="setting__name" id="countdown-label">Countdown beeps</span>
+                    <span class="setting__hint" id="countdown-hint">
+                        Ticks in the last 3 seconds of each timed step and rest
+                    </span>
+                </div>
+                <app-toggle-switch
+                    [checked]="settings.countdownBeeps()"
+                    (checkedChange)="settings.update({ countdownBeeps: $event })"
+                    labelledBy="countdown-label"
+                    describedBy="countdown-hint"
+                />
+            </div>
+
+            <div class="setting">
+                <div class="setting__text">
                     <span class="setting__name" id="vibration-label">Vibration</span>
                     <span class="setting__hint" id="vibration-hint">
                         {{

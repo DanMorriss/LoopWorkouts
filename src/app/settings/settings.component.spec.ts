@@ -146,6 +146,17 @@ describe('SettingsComponent', () => {
         expect(hint.textContent).toContain('Beeps as each phase starts');
     });
 
+    it('has countdown beeps on to begin with, and turns them off', () => {
+        create();
+        expect(isOn('countdown')).toBe(true);
+
+        toggle('countdown').click();
+        fixture.detectChanges();
+
+        expect(settings.countdownBeeps()).toBe(false);
+        expect(isOn('countdown')).toBe(false);
+    });
+
     it('turns vibration off where the device can vibrate', () => {
         Object.defineProperty(TestBed.inject(AlarmService), 'canVibrate', { value: true });
         create();
@@ -179,7 +190,7 @@ describe('SettingsComponent', () => {
         expect(audio.scheduledNotes()).toEqual([expect.stringMatching(/^440@/)]);
     });
 
-    it('offers a preview of the work, rest, finish and time limit alarms', () => {
+    it('offers a preview of the work, rest, finish and countdown alarms', () => {
         create();
         const labels = Array.from(
             fixture.nativeElement.querySelectorAll('.play-button') as NodeListOf<HTMLElement>
@@ -189,7 +200,7 @@ describe('SettingsComponent', () => {
             'Play the timed alarm',
             'Play the rest alarm',
             'Play the finish alarm',
-            'Play the time limit alarm',
+            'Play the countdown alarm',
         ]);
     });
 

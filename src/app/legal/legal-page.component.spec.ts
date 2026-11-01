@@ -36,6 +36,7 @@ describe('the Privacy notice and Terms of use', () => {
         expect(page.querySelector('[aria-labelledby="legal-title"]')).not.toBeNull();
         expect(page.textContent).toContain('without one, none of it is sent anywhere');
         expect(page.textContent).toContain("Syncing, while you're signed in.");
+        expect(page.textContent).toContain('Counting visits.');
         expect(page.textContent).toContain('Last updated');
     });
 

@@ -17,6 +17,7 @@ import { PlanStore } from './shared/state/plan-store.service';
 import { weekdayOf } from './models/plan';
 import { WorkoutStore } from './shared/state/workout-store.service';
 import { AddressMove } from './nav/moved-banner/address-move.service';
+import { UndoService } from './shared/undo/undo.service';
 import { asOneGroup } from './models/workout';
 
 /**
@@ -766,6 +767,17 @@ for (const theme of ['dark', 'light'] as const) {
         describe('account', () => {
             it('as first opened, signed out', async () => {
                 await open('/account');
+                await expectNoViolations();
+            });
+
+            it('after an import, with View library in the bar', async () => {
+                await open('/account');
+                TestBed.inject(UndoService).notify('Added 2 workouts.', {
+                    quiet: true,
+                    link: { label: 'View library', url: '/library' },
+                });
+                await settle();
+                expect(fixture.nativeElement.querySelector('a.undo-bar__action')).not.toBeNull();
                 await expectNoViolations();
             });
 

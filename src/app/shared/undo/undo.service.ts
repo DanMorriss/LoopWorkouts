@@ -12,6 +12,13 @@ export interface UndoOffer {
     undo?: () => void;
     /** Where focus goes if the offer is closed without undoing, e.g. the step after it. */
     dismissed?: () => void;
+    /** A page to see what happened on, e.g. View library after an import. */
+    link?: { label: string; url: string };
+    /**
+     * Already read out on the page it happened on, so the bar only shows it: e.g. an import's
+     * result, which Your data says in a line of its own.
+     */
+    quiet?: boolean;
 }
 
 /**
@@ -37,11 +44,12 @@ export class UndoService {
 
     /**
      * Says what just happened in the same bar, with nothing to undo, e.g. "Signed in as
-     * me@example.com" on the page signing in ends on. Read out as it shows; it doesn't take
-     * focus, and goes as an offer does.
+     * me@example.com" on the page signing in ends on. Read out as it shows, unless it's
+     * `quiet`; it doesn't take focus, and goes as an offer does. A `link` goes with it, e.g.
+     * View library.
      */
-    notify(message: string) {
-        this.offerUndo({ message });
+    notify(message: string, more: Pick<UndoOffer, 'link' | 'quiet'> = {}) {
+        this.offerUndo({ message, ...more });
     }
 
     /** Takes the offer up. */

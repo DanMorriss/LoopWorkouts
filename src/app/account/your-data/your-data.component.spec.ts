@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BackupService, ImportCounts } from '../../shared/backup/backup.service';
 import { planPrompt } from '../../shared/backup/plan-prompt';
-import { importMessage, YourDataComponent } from './your-data.component';
+import { UndoService } from '../../shared/undo/undo.service';
+import { importLink, importMessage, YourDataComponent } from './your-data.component';
 
 // An import that changed nothing, to build results from
 const NOTHING: ImportCounts = {
@@ -96,6 +97,26 @@ describe('YourDataComponent', () => {
             expect(status()).toBe('Added 2 workouts and 14 history entries.');
         });
 
+        it('shows what an import did in the bar at the bottom too, without reading it out twice', async () => {
+            create();
+            vi.spyOn(TestBed.inject(BackupService), 'import').mockResolvedValue({
+                ...NOTHING,
+                ok: true,
+                workoutsAdded: 2,
+            });
+            const file = new File(['{}'], 'backup.json');
+            Object.defineProperty(fileInput(), 'files', { value: [file], configurable: true });
+
+            fileInput().dispatchEvent(new Event('change'));
+            await fixture.whenStable();
+
+            expect(TestBed.inject(UndoService).offer()).toMatchObject({
+                message: 'Added 2 workouts.',
+                quiet: true,
+                link: { label: 'View library', url: '/library' },
+            });
+        });
+
         it('copies the prompt for bringing in a plan with AI, and says so', async () => {
             create();
             const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
@@ -117,6 +138,32 @@ describe('YourDataComponent', () => {
             fixture.detectChanges();
 
             expect(status()).toBe("The prompt couldn't be copied. Try again, or another browser.");
+        });
+    });
+
+    describe('importLink', () => {
+        it('goes to where the import brought things in, workouts first', () => {
+            expect(
+                importLink({ ...NOTHING, ok: true, workoutsUpdated: 1, entriesAdded: 3 })
+            ).toEqual({
+                label: 'View library',
+                url: '/library',
+            });
+            expect(
+                importLink({ ...NOTHING, ok: true, exercisesAdded: 1, entriesAdded: 3 })
+            ).toEqual({
+                label: 'View exercises',
+                url: '/exercises',
+            });
+            expect(importLink({ ...NOTHING, ok: true, entriesUpdated: 2 })).toEqual({
+                label: 'View history',
+                url: '/history',
+            });
+        });
+
+        it('has nowhere to go when nothing came in, or the file was no good', () => {
+            expect(importLink({ ...NOTHING, ok: true, removed: 2 })).toBeUndefined();
+            expect(importLink({ ok: false, problem: 'not-a-backup' })).toBeUndefined();
         });
     });
 

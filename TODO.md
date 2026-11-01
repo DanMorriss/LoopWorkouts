@@ -4,6 +4,16 @@ Open work, highest priority first. Tick items off (or delete them) as they're do
 
 ## 1. Features
 
+### Launch
+
+Promoting the app to new users. The words to use, what's true to say, and the plan are in [docs/marketing.md](docs/marketing.md). Shared links already show a description and `public/share.png`.
+
+- [ ] **Analytics:** privacy-friendly ones (e.g. Plausible or Vercel Analytics, with no cookies), named in the privacy notice, so it's clear which places bring people who come back.
+- [ ] **A way to send feedback** from the app, e.g. a link to email dan@loopworkouts.com in Account → About.
+- [ ] **Clear the iPhone checks and the legal review in Known issues first** (the Content-Security-Policy check, `push_records()`, the privacy notice), so new users' first visit goes well.
+- [ ] **Soft launch, then communities, then Show HN or Product Hunt**, with the posts in docs/marketing.md. Short screen-recorded videos for Reels, TikTok and Shorts along the way.
+- [ ] **App stores, later:** Google Play through a Trusted Web Activity, and the App Store with the Apple Developer account (which Sign in with Apple needs too).
+
 ### Sync
 
 Accounts and sync are built and working (SYN-3, SYN-4, SYN-7 with Google, SYN-8, SYN-9); how they work is in `docs/features/backup-and-sync.md`. Worth knowing when planning: Supabase's free tier has 50,000 monthly users, a 500 MB database and 5 GB of egress, and pauses after a week unused (Pro is $25 a month, checked 2026-10-28). loopworkouts.com's DNS is at GoDaddy, with Microsoft 365 for Dan's email on the bare domain and Resend's records on the `mail` subdomain.

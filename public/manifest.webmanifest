@@ -1,7 +1,7 @@
 {
     "name": "Loop Workouts",
     "short_name": "Loop Workouts",
-    "description": "Interval timer and workout log",
+    "description": "Interval timer and workout log that shows you how you're improving",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",

@@ -341,10 +341,11 @@
 
         @if (isComplete() === false) {
             @if (isPaused() === false) {
-                <!-- Media-player controls: a big Pause in the middle, on every kind of step
-                 (on a rep step, Done is the "Next:" pill above). Resume and End workout are
-                 over the ring while paused. The caption repeats the button's name for sighted
-                 users, so screen readers skip it. -->
+                <!-- Media-player controls: a big Pause in the middle and Skip to its right
+                 (RUN-12), on every kind of step (on a rep step, Done is the "Next:" pill above,
+                 and Skip moves on without logging the set). Resume and End workout are over the ring while paused. The
+                 captions repeat the buttons' names for sighted users, so screen readers skip
+                 them. -->
                 <div class="workout-controls">
                     <div class="workout-control workout-control--main">
                         <button
@@ -367,6 +368,17 @@
                             aria-hidden="true"
                             >Space</kbd
                         >
+                    </div>
+                    <div class="workout-control workout-control--skip">
+                        <button
+                            type="button"
+                            class="btn-icon workout-control__skip"
+                            [attr.aria-label]="isRestActive() ? 'Skip rest' : 'Skip step'"
+                            (click)="skip()"
+                        >
+                            <mat-icon aria-hidden="true">skip_next</mat-icon>
+                        </button>
+                        <span class="workout-control__caption" aria-hidden="true">Skip</span>
                     </div>
                 </div>
             }

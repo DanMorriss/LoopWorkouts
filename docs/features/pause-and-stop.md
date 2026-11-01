@@ -11,7 +11,7 @@
 
 ### Controls
 
-- Like a media player: a big **Pause** button under the ring, and nothing else while it runs. On a rep step it's still Pause, and Done is the "Next:" pill above it (see [run-a-workout](run-a-workout.md)).
+- Like a media player: a big **Pause** button under the ring, with **Skip** to its right (RUN-12), and nothing else while it runs. On a rep step they're still Pause and Skip, and Done is the "Next:" pill above it (see [run-a-workout](run-a-workout.md)).
 - There's **no Stop while running**: a workout is only ended from the paused screen, two presses away, so it's never ended by mistake.
 - On a keyboard, **Space** pauses and resumes, or presses Done on a rep step. It's ignored when held down (no flicker), with Shift, Ctrl, Alt or Cmd, once finished, and when a button or text box has focus (Space already does something there). **Escape** resumes too, except when it's closing a dialog over the workout (e.g. the exercise's details opened while paused), which it only closes.
 
@@ -44,7 +44,7 @@
 - Given a rest step that began half a second ago, when I pause and resume, then the rest alarm doesn't play again.
 - Given a run paused, when the app reloads, then it's still paused at the same point.
 - Given a run 4.5s in, when the app reloads, then it carries on from 4.5s, and only alarms still to come are booked.
-- Given a run going, then the only control is Pause; when paused, then Resume and End workout show over the greyed ring, and Escape resumes.
+- Given a run going, then the only controls are Pause and Skip; when paused, then Resume and End workout show over the greyed ring, and Escape resumes.
 - Given a run paused on Push-ups (the Push-up exercise), then "Push-ups" and an (i) named "Details of Push-up" show above "Paused"; the (i) opens its details, and closing them leaves the run paused with focus on the (i). Paused on Jog (just a name), then "Jog" shows with no (i).
 - Given a run going, when I press Pause, then Resume glides from Pause's place up into the ring; when I press Resume before it gets there, then Pause glides back from where Resume was.
 - Given a run on its first step, when I end it, then nothing is logged, and the summary says "Nothing to log".
@@ -57,4 +57,4 @@
 ## Platform notes
 
 - **Web:** `ActiveRunService` (`src/app/shared/run/active-run.service.ts`) owns the run; `WorkoutStore` (`src/app/shared/state/workout-store.service.ts`) saves the run's state in `sessionStorage` (see [data](data.md)). Closing the tab is caught with `pagehide`. The glide between Pause and Resume is a FLIP animation (`WorkoutComponent.glideFrom()`) with a spring easing from `src/app/shared/spring.ts`, rather than a view transition, which would block taps while it ran.
-- **iOS:** the same few values (workout id, run start, adjusted start, paused at, rep steps done, rep time) saved to `UserDefaults` give "carry on after relaunch". There's no reliable "app is closing" hook on iOS, so log the run as it stands whenever the app goes to the background (`scenePhase` → `.background`), which covers being swiped away. The lock-screen controls of a Live Activity could offer Pause and Stop too. The glide is a `matchedGeometryEffect` between the two buttons with `.spring(response: 0.4, dampingFraction: 1)`.
+- **iOS:** the same few values (workout id, run start, adjusted start, paused at, rep steps done, rep time, skips) saved to `UserDefaults` give "carry on after relaunch". There's no reliable "app is closing" hook on iOS, so log the run as it stands whenever the app goes to the background (`scenePhase` → `.background`), which covers being swiped away. The lock-screen controls of a Live Activity could offer Pause and Stop too. The glide is a `matchedGeometryEffect` between the two buttons with `.spring(response: 0.4, dampingFraction: 1)`.

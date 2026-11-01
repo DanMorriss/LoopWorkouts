@@ -24,7 +24,7 @@
     - the workout's **supersets and giant sets** as it ran (BLD-12), each with the steps it covers, so their sets can be grouped together. Workouts logged before this have none, and their lines show one by one.
     - the **sets** done (HIS-5), in order:
         - for each Done on a rep step: the round, the step, its name, the reps and the weight. A set is only logged on Done, so a workout stopped mid-set doesn't log that set.
-        - for each timed work step of an exercise that ran to its end: the round, the step, its name and its length in seconds. One stopped part-way isn't a set, and nor is a rest or an unnamed step. Workouts logged before this have no timed sets.
+        - for each timed work step of an exercise that ran to its end: the round, the step, its name and its length in seconds; one skipped part-way (RUN-12), with the seconds it ran. One stopped part-way isn't a set, and nor is a rest or an unnamed step. Workouts logged before this have no timed sets.
 - **One entry per run**: logging the same run again (e.g. stopped when the app closed, then finished after a reload) updates its entry, keeping any note added meanwhile.
 - **All are kept**, however many: years of them (SYN-5).
 

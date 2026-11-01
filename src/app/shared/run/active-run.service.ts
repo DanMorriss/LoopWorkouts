@@ -107,7 +107,7 @@ export class ActiveRunService {
                   workout,
                   elapsedMs,
                   this.store.activeRepStepsDone(),
-                  this.store.activeRepMs()
+                  this.store.activeOffClockMs()
               )
             : null;
     });
@@ -125,8 +125,8 @@ export class ActiveRunService {
         // the time on rep steps
         const reps = state.phase === 'reps';
         const repStepsDone = this.store.activeRepStepsDone() + (reps ? 1 : 0);
-        const repMs = this.store.activeRepMs() + (reps ? state.phaseElapsedMs : 0);
-        return workoutStateAt(workout, stepEndMs, repStepsDone, repMs);
+        const offClockMs = this.store.activeOffClockMs() + (reps ? state.phaseElapsedMs : 0);
+        return workoutStateAt(workout, stepEndMs, repStepsDone, offClockMs);
     });
 
     /** The sets done so far, rep and timed, in the order they were done. */
@@ -134,13 +134,19 @@ export class ActiveRunService {
         const workout = this.running();
         const state = this.state();
         return workout && state
-            ? setsDone(workout, state, this.store.activeSets(), this.store.activeSwaps())
+            ? setsDone(
+                  workout,
+                  state,
+                  this.store.activeSets(),
+                  this.store.activeSwaps(),
+                  this.store.activeSkips()
+              )
             : [];
     });
 
     /**
      * Time left of a time limit, in ms, rep steps and rests included: the clock plus the time
-     * on rep steps done. Null without a time limit (or a run).
+     * off it (see `WorkoutStore.activeOffClockMs`). Null without a time limit (or a run).
      */
     readonly timeLeftMs = computed(() => {
         const limit = this.workout()?.timeLimitSeconds;
@@ -148,7 +154,7 @@ export class ActiveRunService {
         if (limit === undefined || elapsedMs === null) {
             return null;
         }
-        return Math.max(0, limit * 1000 - elapsedMs - this.store.activeRepMs());
+        return Math.max(0, limit * 1000 - elapsedMs - this.store.activeOffClockMs());
     });
 
     readonly isComplete = computed(() => this.state()?.phase === 'complete');
@@ -188,7 +194,9 @@ export class ActiveRunService {
     /**
      * When the run last resumed. Resuming moves the clock on by the pause, so an alarm that
      * sounded just before it now looks due a moment ago, and alarms that late still play
-     * (for the first one after Start); anything due by this was heard already.
+     * (for the first one after Start); anything due by this was heard already. Skip sets it
+     * too, just before the next step's alarm, as the skipped step's countdown beeps are
+     * now past and never to be heard.
      */
     private readonly resumedAt = signal(0);
 
@@ -206,7 +214,7 @@ export class ActiveRunService {
                   fromRound,
                   ALARM_WINDOW,
                   this.store.activeRepStepsDone(),
-                  this.store.activeRepMs(),
+                  this.store.activeOffClockMs(),
                   this.settings.countdownBeeps()
               ).filter((event) => event.at > resumedAt)
             : [];
@@ -335,6 +343,30 @@ export class ActiveRunService {
             ...(weight === undefined ? {} : { weight }),
             ...(exerciseId === undefined ? {} : { exerciseId }),
         });
+        this.sync();
+    }
+
+    /**
+     * Skip (RUN-12): on to the next step, from its full time, as Done does. A rep step skipped
+     * is Done without its set, so it isn't logged. Of a timed step or rest, what was left is
+     * added to the clock, so a time limit still runs out on time, with more rounds in it; a
+     * skipped timed exercise is logged with the time it ran.
+     */
+    skipStep() {
+        this.sync();
+        const state = this.state();
+        if (state?.phase === 'reps') {
+            this.store.finishRepStep(state.phaseElapsedMs);
+            this.sync();
+            return;
+        }
+        if (state?.phase !== 'work' && state?.phase !== 'rest') {
+            return;
+        }
+        const skippedMs = state.phaseSeconds * 1000 - state.phaseElapsedMs;
+        this.store.skipStep({ round: state.round, stepIndex: state.stepIndex, skippedMs });
+        // The next step starts now, and its alarm with it
+        this.resumedAt.set(Date.now() - 1);
         this.sync();
     }
 
@@ -630,14 +662,15 @@ export class ActiveRunService {
         }
         // A finish is dated when the workout actually ended, even if the page only notices
         // later (e.g. it was in the background); startedAt has moved on by any pauses and by
-        // the time spent on rep steps, which the clock leaves out. A time limit ends when the
-        // clock and the time on rep steps add up to it.
+        // the time spent on rep steps, which the clock leaves out, and back by any time
+        // skipped, which it adds. A time limit ends when the clock and the time off it add up
+        // to it.
         const limit = workout.timeLimitSeconds;
-        const repMs = this.store.activeRepMs();
+        const offClockMs = this.store.activeOffClockMs();
         const finishMs =
-            limit === undefined ? workoutSeconds(workout) * 1000 : limit * 1000 - repMs;
+            limit === undefined ? workoutSeconds(workout) * 1000 : limit * 1000 - offClockMs;
         const countdownMs = finished ? finishMs : elapsedMs;
-        const activeSeconds = Math.floor((countdownMs + repMs) / 1000);
+        const activeSeconds = Math.floor((countdownMs + offClockMs) / 1000);
         const sets = this.sets();
         const headings = placedHeadings(workout);
         const supersets = placedSupersets(workout);

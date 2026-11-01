@@ -944,6 +944,14 @@ export class WorkoutComponent {
         }
     }
 
+    /**
+     * Skip: on to the next step, from its full time (RUN-12). A skipped rep step isn't logged,
+     * so unlike Done, its ring doesn't fill.
+     */
+    protected skip() {
+        this.run.skipStep();
+    }
+
     /** Space pauses and resumes, like most media players, or presses Done on a rep step. */
     onSpace(event: Event) {
         const target = event.target as Element | null;

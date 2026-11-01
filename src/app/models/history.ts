@@ -76,8 +76,9 @@ export interface RepSet {
 }
 
 /**
- * One timed work step of an exercise that ran to its end. A step stopped part-way isn't a
- * set, and nor is an unnamed or rest step, which isn't an exercise.
+ * One timed work step of an exercise that ran to its end, or was skipped part-way (RUN-12). A
+ * step stopped part-way isn't a set, and nor is an unnamed or rest step, which isn't an
+ * exercise.
  */
 export interface TimedSet {
     round: number;
@@ -85,7 +86,7 @@ export interface TimedSet {
     set?: number;
     side?: Side;
     name: string;
-    /** How long it ran: the step's whole length. */
+    /** How long it ran: the step's whole length, or up to where it was skipped. */
     seconds: number;
     exerciseId?: string;
 }

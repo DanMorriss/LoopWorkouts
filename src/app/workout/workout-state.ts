@@ -43,13 +43,24 @@ export interface WorkoutState {
 }
 
 /**
+ * A timed step or rest skipped part-way (RUN-12): its round, its place in the round, and how
+ * much of it was left, in ms. Skip moves the clock on by that much, to the next step.
+ */
+export interface StepSkip {
+    round: number;
+    stepIndex: number;
+    skippedMs: number;
+}
+
+/**
  * Works out where a workout is from how long it has been running, and how many rep steps
  * have been done.
  *
  * Each round runs the workout's steps in order, and rounds repeat `repeats` times. Rest at
  * the end of the last round is skipped, and a workout that runs until stopped never
  * completes. One with a time limit completes when the time's up: the clock plus `repMs`,
- * the time spent on rep steps already done (the one being waited on is still on the clock).
+ * the time off the clock (see `WorkoutStore.activeOffClockMs`): the time spent on rep steps
+ * already done (the one being waited on is still on the clock), less any time skipped.
  *
  * A rep step takes no time on this clock: the workout stops at the first one not yet done
  * and stays there however long it runs, until Done adds it to `repStepsDone` and moves the
@@ -211,15 +222,18 @@ export function isSetAt(set: LoggedSet, round: number, place: StepPlace): boolea
  * The sets a run has done by `state`: its rep sets, as logged on Done, and a timed set for
  * each work step of an exercise that has run to its end, in the order they were done. A
  * step swapped for another exercise part-way (RUN-11) is named as it was at the time, from
- * `swaps`.
+ * `swaps`. One skipped part-way (RUN-12, in `skips`) is the time it ran, in whole seconds,
+ * and isn't a set if that's under one.
  */
 export function setsDone(
     workout: Workout,
     state: WorkoutState,
     repSets: readonly RepSet[],
-    swaps: readonly StepSwap[] = []
+    swaps: readonly StepSwap[] = [],
+    skips: readonly StepSkip[] = []
 ): LoggedSet[] {
     const { steps, places } = runPlan(workout);
+    const skipped = new Map(skips.map((skip) => [`${skip.round}/${skip.stepIndex}`, skip]));
     const timed: TimedSet[] = [];
     // Once complete, `round` is the rounds there were and `stepIndex` 0, so all of them count;
     // when time ran out, the steps before the one it was on count, and that one doesn't
@@ -232,7 +246,11 @@ export function setsDone(
                 : undefined;
             const { name, exerciseId } = asRun ?? step;
             if (step.kind === 'work' && exerciseId !== undefined && place) {
-                const { seconds } = step;
+                const skippedMs = skipped.get(`${round}/${stepIndex}`)?.skippedMs ?? 0;
+                const seconds = Math.floor((step.seconds * 1000 - skippedMs) / 1000);
+                if (seconds < 1) {
+                    return;
+                }
                 timed.push({
                     round,
                     step: place.step,

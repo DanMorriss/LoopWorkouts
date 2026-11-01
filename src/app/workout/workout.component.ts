@@ -406,7 +406,7 @@ export class WorkoutComponent {
         return step?.exerciseId ? (this.exercises.noteFor(step.exerciseId) ?? '') : '';
     });
     /** The step's exercise, for its details from the (i) beside its name (RUN-9). */
-    private readonly stepExercise = computed(() => {
+    protected readonly stepExercise = computed(() => {
         const id = this.state()?.step?.exerciseId;
         return id ? this.exercises.byId(id) : undefined;
     });
@@ -955,18 +955,22 @@ export class WorkoutComponent {
     }
 
     /**
-     * Back to the (i) that opened the details; if the workout has moved on to a step with no
-     * exercise meanwhile, to Done or Pause, so focus isn't lost.
+     * Back to the (i) that opened the details, on the face or, while paused, over it; if the
+     * workout has moved on to a step with no exercise meanwhile, to Done or Pause (or Resume),
+     * so focus isn't lost.
      */
     protected closeExercise() {
         this.exerciseInDetails.set(null);
         afterNextRender(
             () => {
                 const info = this.host.nativeElement.querySelector<HTMLElement>(
-                    `.workout-face [data-step="${this.stepKey()}"] .workout-face__info`
+                    this.isPaused()
+                        ? '.workout-paused__info'
+                        : `.workout-face [data-step="${this.stepKey()}"] .workout-face__info`
                 );
                 (
                     info ??
+                    (this.isPaused() ? this.resumeButton() : undefined)?.nativeElement ??
                     this.doneButton()?.nativeElement ??
                     this.mainButton()?.nativeElement
                 )?.focus();

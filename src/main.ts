@@ -2,6 +2,7 @@ import { inject, provideAppInitializer } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, withNavigationErrorHandler } from '@angular/router';
 import { sendSignInToAccount } from './app/account/sign-in-landing';
+import { startAnalytics } from './app/analytics';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { AddressMove } from './app/nav/moved-banner/address-move.service';
@@ -35,3 +36,6 @@ bootstrapApplication(AppComponent, {
         }),
     ],
 }).catch((err) => console.error(err));
+
+// Count page views (anonymously, with no cookies), once the app is on its way
+startAnalytics();

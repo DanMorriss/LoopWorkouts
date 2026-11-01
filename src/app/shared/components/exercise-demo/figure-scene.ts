@@ -494,23 +494,34 @@ export class FigureScene {
                 this.rod(from, to, 1.8, this.metalMaterial);
                 points.push(from, to);
             } else {
-                const pulley = this.mesh(new SphereGeometry(3.5, 16, 12), this.kitMaterial);
-                const cable = this.mesh(new CylinderGeometry(0.5, 0.5, 1, 8), this.metalMaterial);
                 const from = lift(piece.from);
-                this.carried.push((skeleton) => {
+                /** A pulley and its cable, run to the hand `handOf` picks each pose. */
+                const cableTo = (handOf: (hands: readonly Vec3[]) => Vec3) => {
+                    const pulley = this.mesh(new SphereGeometry(3.5, 16, 12), this.kitMaterial);
+                    const cable = this.mesh(
+                        new CylinderGeometry(0.5, 0.5, 1, 8),
+                        this.metalMaterial
+                    );
+                    this.carried.push((skeleton) => {
+                        const hand = handOf(skeleton.arms.map((arm) => arm.end));
+                        // The pulley in line with the hand it runs to
+                        const at = add3(from, scale3(depthAxis, dot3(hand, depthAxis)));
+                        pulley.position.copy(v(at));
+                        const along = sub3(hand, at);
+                        cable.scale.set(1, length3(along), 1);
+                        cable.position.copy(v(add3(at, scale3(along, 0.5))));
+                        orient(cable, along, [1, 0, 0]);
+                    });
+                };
+                if (piece.each) {
+                    cableTo((hands) => hands[0]);
+                    cableTo((hands) => hands[1]);
+                } else {
                     // The nearer hand, as drawn
-                    const hands = skeleton.arms.map((arm) => arm.end);
                     const flat = (point: Vec3) =>
                         length3(sub3(sub3(point, scale3(depthAxis, dot3(point, depthAxis))), from));
-                    const hand = flat(hands[0]) <= flat(hands[1]) ? hands[0] : hands[1];
-                    // The pulley in line with the hand it runs to
-                    const at = add3(from, scale3(depthAxis, dot3(hand, depthAxis)));
-                    pulley.position.copy(v(at));
-                    const along = sub3(hand, at);
-                    cable.scale.set(1, length3(along), 1);
-                    cable.position.copy(v(add3(at, scale3(along, 0.5))));
-                    orient(cable, along, [1, 0, 0]);
-                });
+                    cableTo((hands) => (flat(hands[0]) <= flat(hands[1]) ? hands[0] : hands[1]));
+                }
                 points.push(from);
             }
         }
@@ -725,7 +736,7 @@ export class FigureScene {
         skeleton.legs.forEach((leg, i) => {
             const pivot = normalize3(add3(scale3(up, -1), scale3(bodyForward, 0.3)));
             const side = leg.side;
-            this.placeLimb(
+            const shinFront = this.placeLimb(
                 [parts.thighs[i], parts.shins[i]],
                 [
                     restJoint(model, 'hip', side),
@@ -738,7 +749,13 @@ export class FigureScene {
                 pivot
             );
             const foot = skeleton.feet[i];
-            const top = square(sub3(leg.mid, leg.end), foot, up);
+            // The top of the foot faces up the shin, or, with the foot pointed in line with it
+            // (kneeling), the way the front of the shin does
+            const top = square(
+                add3(normalize3(sub3(leg.mid, leg.end)), scale3(shinFront, 0.5)),
+                foot,
+                up
+            );
             parts.feet[i].matrix.copy(
                 moveMatrix([0, 0, 0], still, leg.end, [foot, top, cross3(foot, top)])
             );
@@ -750,7 +767,8 @@ export class FigureScene {
      * Places a limb's parts from where they are at rest (`rest`: its three joints) onto the
      * skeleton's, each stretched to the skeleton's length. The way each part's front faces is
      * carried, by the least turn, from where the limb points at `pivot`, so it never flips
-     * over as the limb moves, short of pointing the opposite way to `pivot`.
+     * over as the limb moves, short of pointing the opposite way to `pivot`. Returns the way
+     * the front of its lower part faces.
      */
     private placeLimb(
         meshes: readonly Mesh[],
@@ -759,7 +777,7 @@ export class FigureScene {
         [upperLength, lowerLength]: readonly [number, number],
         axes: { forward: Vec3; up: Vec3; right: Vec3 },
         pivot: Vec3
-    ) {
+    ): Vec3 {
         const [restRoot, restMid, restEnd] = rest;
         const restUpper = normalize3(sub3(restMid, restRoot));
         const restLower = normalize3(sub3(restEnd, restMid));
@@ -795,6 +813,7 @@ export class FigureScene {
         );
         // The hand goes with the forearm
         meshes.slice(1).forEach((mesh) => mesh.matrix.copy(lower));
+        return lowerFront;
     }
 
     /**

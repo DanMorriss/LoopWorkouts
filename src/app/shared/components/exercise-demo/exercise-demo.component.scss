@@ -34,8 +34,11 @@
     fill: currentColor;
 }
 
+// Wrapping onto more rows when there are many (a box jump has eight), each still kept wide
+// enough for its figure and label
 .demo__stills {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
     margin: 0;
@@ -45,7 +48,8 @@
 
 .demo__still {
     display: flex;
-    flex: 1 1 0;
+    flex: 1 1 5.5rem;
+    max-width: 50%;
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;

@@ -1,8 +1,13 @@
 // Screenshots exercise demos (EXR-13) from a running `ng serve --port 4300`, to check the 3D
 // figure by eye. Ids are as in the page's address (back-squat, not builtin:back-squat).
-// Usage: node tools/shoot-demos.mjs <out-dir> <id>... [--theme=light] [--turns=2] [--at=500] [--figure=female] [--big]
-//   --figure: the Sex setting; the 3D figure is always male for now [--drag=50]
-//   --turns: presses Turn that many times first (45° each); --at: waits that many ms more
+// Usage: node tools/shoot-demos.mjs <out-dir> <id>... [options]
+//   --theme=light   the light theme (dark if not given)
+//   --turns=2       presses Turn that many times first (45° each)
+//   --drag=50       drags it round that many pixels (0.6° each; leftwards turns it on round)
+//   --at=500        waits that many ms more before the shot
+//   --big           draws it larger, to look at its shape closely
+//   --stills        every key position side by side, as with reduced motion
+//   --figure=female the Sex setting (the 3D figure is always male for now)
 import { chromium } from 'playwright';
 
 const [out, ...rest] = process.argv.slice(2);
@@ -10,6 +15,7 @@ const ids = rest.filter((arg) => !arg.startsWith('--'));
 const theme = rest.find((arg) => arg.startsWith('--theme='))?.slice(8) ?? 'dark';
 const turns = Number(rest.find((arg) => arg.startsWith('--turns='))?.slice(8) ?? 0);
 const figure = rest.find((arg) => arg.startsWith('--figure='))?.slice(9) ?? 'male';
+const stills = rest.includes('--stills');
 const big = rest.includes('--big');
 const drag = Number(rest.find((arg) => arg.startsWith('--drag='))?.slice(7) ?? 0);
 const at = Number(rest.find((arg) => arg.startsWith('--at='))?.slice(5) ?? 0);
@@ -21,6 +27,9 @@ page.on('console', (message) => {
         console.log(`[${message.type()}]`, message.text());
     }
 });
+if (stills) {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+}
 await page.goto('http://localhost:4300/home');
 await page.evaluate(
     ([theme, bodyFigure]) => {

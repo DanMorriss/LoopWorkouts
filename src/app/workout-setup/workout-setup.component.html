@@ -262,19 +262,37 @@
                                             >
                                                 Exercise (optional)
                                             </label>
-                                            <app-exercise-picker
-                                                [inputId]="'step-' + key + '-name'"
-                                                [formField]="step.name"
-                                                [(exerciseId)]="step.exerciseId().value"
-                                                [placeholder]="nameExamples[kind]"
-                                                [describedBy]="
-                                                    'step-' +
-                                                    key +
-                                                    '-title step-' +
-                                                    key +
-                                                    '-exercise-status'
-                                                "
-                                            />
+                                            <div class="step__name-row">
+                                                <app-exercise-picker
+                                                    class="step__name-picker"
+                                                    [inputId]="'step-' + key + '-name'"
+                                                    [formField]="step.name"
+                                                    [(exerciseId)]="step.exerciseId().value"
+                                                    [placeholder]="nameExamples[kind]"
+                                                    [describedBy]="
+                                                        'step-' +
+                                                        key +
+                                                        '-title step-' +
+                                                        key +
+                                                        '-exercise-status'
+                                                    "
+                                                />
+                                                <!-- The exercises as the Exercises page lists
+                                                     them, to pick from (BLD-16) -->
+                                                <button
+                                                    type="button"
+                                                    class="btn-icon"
+                                                    [id]="'step-' + key + '-browse'"
+                                                    [attr.aria-label]="
+                                                        'Browse exercises for step ' + stepNumber(i)
+                                                    "
+                                                    (click)="startBrowse(key, stepNumber(i))"
+                                                >
+                                                    <mat-icon aria-hidden="true"
+                                                        >manage_search</mat-icon
+                                                    >
+                                                </button>
+                                            </div>
                                         </div>
                                         @if (exercise || step().value().name.trim()) {
                                             <div class="step__exercise">
@@ -1018,6 +1036,16 @@
         [exercise]="opened.exercise"
         (closed)="closeExercise()"
         (saved)="exerciseSaved($event)"
+    />
+}
+
+<!-- A step's exercise picked from the whole list (BLD-16) -->
+@if (browsing(); as opened) {
+    <app-browse-exercises-dialog
+        animate.leave="dialog-leave"
+        [stepNumber]="opened.stepNumber"
+        (closed)="closeBrowse()"
+        (picked)="browsedTo($event)"
     />
 }
 

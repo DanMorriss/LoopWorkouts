@@ -313,6 +313,25 @@ for (const theme of ['dark', 'light'] as const) {
                 expect(fixture.nativeElement.textContent).toContain('Swapped to');
                 await expectNoViolations();
             });
+
+            it('browsing the exercises for a step, cut down to a muscle', async () => {
+                await open('/setup');
+                click('[id$="-browse"]');
+                await settle();
+                expect(
+                    fixture.nativeElement.querySelector('app-browse-exercises-dialog')
+                ).not.toBeNull();
+                click('.muscle-chips__chip:nth-child(2)');
+                // A short list, so the check reads a few cards rather than every exercise
+                const box = fixture.nativeElement.querySelector('#browse-search');
+                box.value = 'press';
+                box.dispatchEvent(new Event('input'));
+                await settle();
+                expect(
+                    fixture.nativeElement.querySelectorAll('.browse .exercise-card').length
+                ).toBeGreaterThan(0);
+                await expectNoViolations();
+            });
         });
 
         describe('home', () => {

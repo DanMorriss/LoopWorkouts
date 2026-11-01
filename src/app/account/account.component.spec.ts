@@ -367,5 +367,14 @@ describe('AccountComponent', () => {
                 ['Terms of use', '/terms'],
             ]);
         });
+
+        it('offers an email for feedback, under About, its subject filled in', () => {
+            const link = element.querySelector<HTMLAnchorElement>('.account__feedback a')!;
+
+            expect(link.textContent!.trim()).toBe('dan@loopworkouts.com');
+            expect(link.getAttribute('href')).toBe(
+                'mailto:dan@loopworkouts.com?subject=Loop%20Workouts%20feedback'
+            );
+        });
     });
 });

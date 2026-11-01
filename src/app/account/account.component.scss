@@ -128,6 +128,22 @@
     text-align: center;
 }
 
+// Inline in its sentence, so it's exempt from the 44px target the legal links have
+.account__feedback {
+    margin-top: 0.5rem;
+
+    a {
+        color: var(--glow-text);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+
+        &:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+    }
+}
+
 .account__legal {
     display: flex;
     flex-wrap: wrap;

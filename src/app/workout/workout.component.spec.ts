@@ -2119,6 +2119,22 @@ describe('WorkoutComponent', () => {
                     expect(document.activeElement).toBe(pausedInfo());
                     expect(component.isPaused()).toBe(true);
                 });
+
+                it('closes the details with Escape, staying paused', async () => {
+                    advance(3000);
+                    pause();
+                    pausedInfo()!.click();
+                    fixture.detectChanges();
+
+                    el('.details__title')!.dispatchEvent(
+                        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+                    );
+                    fixture.detectChanges();
+                    await fixture.whenStable();
+
+                    expect(el('app-exercise-details-dialog')).toBeNull();
+                    expect(component.isPaused()).toBe(true);
+                });
             });
 
             it("leaves Space to the dialog while it's open", () => {

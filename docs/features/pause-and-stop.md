@@ -13,7 +13,7 @@
 
 - Like a media player: a big **Pause** button under the ring, and nothing else while it runs. On a rep step it's still Pause, and Done is the "Next:" pill above it (see [run-a-workout](run-a-workout.md)).
 - There's **no Stop while running**: a workout is only ended from the paused screen, two presses away, so it's never ended by mistake.
-- On a keyboard, **Space** pauses and resumes, or presses Done on a rep step. It's ignored when held down (no flicker), with Shift, Ctrl, Alt or Cmd, once finished, and when a button or text box has focus (Space already does something there). **Escape** resumes too.
+- On a keyboard, **Space** pauses and resumes, or presses Done on a rep step. It's ignored when held down (no flicker), with Shift, Ctrl, Alt or Cmd, once finished, and when a button or text box has focus (Space already does something there). **Escape** resumes too, except when it's closing a dialog over the workout (e.g. the exercise's details opened while paused), which it only closes.
 
 ### Pause
 

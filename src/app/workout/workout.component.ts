@@ -117,7 +117,7 @@ const MAX_ROUND_DOTS = 15;
     ],
     host: {
         '(document:keydown.space)': 'onSpace($event)',
-        '(document:keydown.escape)': 'onEscape()',
+        '(document:keydown.escape)': 'onEscape($event)',
         // A phone turned round gives the face a new width to fit the name to
         '(window:resize)': 'fitName(stepKey())',
     },
@@ -875,9 +875,15 @@ export class WorkoutComponent {
         );
     }
 
-    /** Escape resumes, as it would close a menu or dialog. */
-    onEscape() {
+    /**
+     * Escape resumes, as it would close a menu or dialog; not when it's closing a dialog over
+     * the workout, e.g. the exercise's details opened while paused, which has already gone by
+     * the time it gets here.
+     */
+    onEscape(event: Event) {
+        const target = event.target as Element | null;
         if (
+            !target?.closest?.('[role="dialog"]') &&
             this.isPaused() &&
             !this.isComplete() &&
             !this.summaryOpen() &&

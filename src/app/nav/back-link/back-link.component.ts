@@ -1,6 +1,6 @@
 import { Component, inject, input } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { PageSlide } from '../page-slide';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 /**
  * ‹ and where it goes back to, at the top of a page that slides in over another (an exercise
@@ -8,10 +8,10 @@ import { PageSlide } from '../page-slide';
  */
 @Component({
     selector: 'app-back-link',
-    imports: [MatIconModule],
+    imports: [IconComponent],
     template: `
         <a [href]="url()" class="back-link" (click)="slide.follow($event, url(), 'out')">
-            <mat-icon aria-hidden="true">chevron_left</mat-icon>
+            <app-icon>chevron_left</app-icon>
             {{ label() }}
         </a>
     `,

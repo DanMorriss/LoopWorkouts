@@ -16,7 +16,7 @@
                 [routerLink]="tab.path"
                 [attr.aria-current]="currentFor(i)"
             >
-                <mat-icon class="tab-bar__icon" aria-hidden="true">{{ tab.icon }}</mat-icon>
+                <app-icon class="tab-bar__icon">{{ tab.icon }}</app-icon>
                 <span class="tab-bar__label">{{ tab.label }}</span>
             </a>
         }

@@ -1,5 +1,4 @@
 import { Component, computed, ElementRef, inject, viewChild } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { ActiveRunService } from '../../shared/run/active-run.service';
 import { formatTime } from '../../shared/format-time';
@@ -8,6 +7,7 @@ import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { criticallyDampedSpring } from '../../shared/spring';
 import { injectCurrentUrl, isOnPage } from '../current-url';
 import { WorkoutMorph } from '../workout-morph';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 /** px a finger moves before it's taken as a swipe or a scroll. */
 const SLOP = 10;
@@ -24,7 +24,7 @@ const SLOP = 10;
  */
 @Component({
     selector: 'app-run-bar',
-    imports: [MatIconModule],
+    imports: [IconComponent],
     templateUrl: './run-bar.component.html',
     styleUrl: './run-bar.component.scss',
 })

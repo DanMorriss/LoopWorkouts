@@ -1,12 +1,12 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MatIconModule } from '@angular/material/icon';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { injectCurrentUrl, isOnPage } from './current-url';
 import { TABS } from './tab-bar/tabs';
 import { WorkoutMorph } from './workout-morph';
+import { IconComponent } from '../shared/components/icon/icon.component';
 
 /** Where the workout page's back link goes if it was opened straight from an address. */
 const FALLBACK = '/library';
@@ -18,7 +18,7 @@ const FALLBACK = '/library';
  */
 @Component({
     selector: 'app-nav',
-    imports: [MatIconModule],
+    imports: [IconComponent],
     templateUrl: './nav.component.html',
     styleUrl: './nav.component.scss',
 })

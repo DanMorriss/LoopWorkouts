@@ -446,14 +446,21 @@ export class ActiveRunService {
     /**
      * Swaps the step in progress for `exercise` (RUN-11), for the rest of this run: the same
      * reps or time, sets and sides, at the weight in `lastSets`, its sets last time. Sets
-     * already done stay as they were. Returns the swap, or null if the step isn't an exercise.
+     * already done stay as they were. With `next`, it's the step after this one instead, e.g.
+     * during the rest before it. Returns the swap, or null if the step isn't an exercise.
      */
-    swapExercise(exercise: Exercise, lastSets: readonly RepSet[]): StepSwap | null {
+    swapExercise(exercise: Exercise, lastSets: readonly RepSet[], next = false): StepSwap | null {
         const workout = this.running();
-        const state = this.state();
+        const state = next ? this.nextState() : this.state();
         const place = workout && state ? placeAt(workout, state.stepIndex) : null;
         const current = workout && place ? allSteps(workout)[place.step] : undefined;
-        if (!workout || !state || !place || current?.kind === 'rest' || !current?.exerciseId) {
+        if (
+            !workout ||
+            !state?.step ||
+            !place ||
+            current?.kind === 'rest' ||
+            !current?.exerciseId
+        ) {
             return null;
         }
         const swap: StepSwap = {

@@ -56,7 +56,24 @@ describe('swapSuggestions', () => {
         ).toBe(true);
     });
 
-    it('offers nothing when nothing shares a main muscle', () => {
+    it('puts ones moving the same way first, as muscles alone are rough', () => {
+        // Burpee works the quads too, but it isn't a squat
+        const forFrontSquat = names(suggested('front-squat'));
+
+        expect(forFrontSquat).not.toContain('Burpee');
+        expect(forFrontSquat.slice(0, 3)).toEqual(
+            expect.arrayContaining(['Hack squat', 'Goblet squat'])
+        );
+    });
+
+    it('offers one moving the same way, even with no main muscle in common', () => {
+        // Both circle a kettlebell: one for the shoulders, one for the trunk
+        expect(
+            names(suggested('kettlebell-halo', [], [byId('kettlebell-around-the-world')]))
+        ).toEqual(['Kettlebell around the world']);
+    });
+
+    it('offers nothing when nothing shares a main muscle or a movement', () => {
         expect(suggested('bench-press', [], [byId('calf-raise'), byId('leg-curl')])).toEqual([]);
     });
 });

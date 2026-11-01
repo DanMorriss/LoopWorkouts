@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, model, signal } from '@angular/core';
+import { Component, computed, inject, input, model, output, signal } from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -28,7 +28,8 @@ let nextId = 0;
  * if the workout isn't.
  *
  * Works with Signal Forms: bind the name with `[formField]` and the link with
- * `[(exerciseId)]`.
+ * `[(exerciseId)]`. `exerciseChange` says when the step becomes another exercise: on
+ * picking one, or on leaving the box (or pressing Enter) with another's name typed in it.
  */
 @Component({
     selector: 'app-exercise-picker',
@@ -44,6 +45,11 @@ export class ExercisePickerComponent implements FormValueControl<string> {
     readonly inputId = input.required<string>();
     readonly placeholder = input('');
     readonly describedBy = input<string>();
+    /**
+     * The step is now this exercise, which it wasn't when the box was last left: picked, or
+     * its name typed. Not as each letter is typed, so a half-typed name doesn't count.
+     */
+    readonly exerciseChange = output<Exercise>();
 
     private readonly exercises = inject(ExerciseStore);
     protected readonly listId = `exercise-picker-${nextId++}`;
@@ -74,6 +80,36 @@ export class ExercisePickerComponent implements FormValueControl<string> {
     );
 
     protected readonly isBuiltIn = isBuiltIn;
+
+    /** The id of the exercise the step was when last said, so it's only said once. */
+    private saidExerciseId: string | null = null;
+
+    /** The exercise the step is: the one picked, or else the one its name means. */
+    private current(): Exercise | undefined {
+        const all = this.exercises.exercises();
+        const picked = this.exerciseId();
+        return (
+            (picked ? all.find((exercise) => exercise.id === picked) : undefined) ??
+            findByName(this.value(), all)
+        );
+    }
+
+    protected onFocus() {
+        this.saidExerciseId = this.current()?.id ?? '';
+    }
+
+    /** Says if the step is now another exercise than it was. */
+    protected settle() {
+        const exercise = this.current();
+        const id = exercise?.id ?? '';
+        if (this.saidExerciseId !== null && id === this.saidExerciseId) {
+            return;
+        }
+        this.saidExerciseId = id;
+        if (exercise) {
+            this.exerciseChange.emit(exercise);
+        }
+    }
 
     protected optionId(index: number): string {
         return `${this.listId}-${index}`;
@@ -129,6 +165,7 @@ export class ExercisePickerComponent implements FormValueControl<string> {
             this.exerciseId.set('');
         }
         this.close();
+        this.settle();
     }
 
     protected close() {

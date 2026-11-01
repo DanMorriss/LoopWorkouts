@@ -1737,16 +1737,124 @@ describe('WorkoutSetupComponent', () => {
             await setup();
             await create();
 
-            typeName(0, 'front sq');
-            pick(0, 'Front squat');
-            chooseTime(0, 'seconds', '30');
+            typeName(0, 'pla');
+            pick(0, 'Plank');
+            chooseTime(0, 'seconds', '45');
             await submit();
 
             expect(allSteps(store.workouts()[0])[0]).toEqual({
                 kind: 'work',
-                seconds: 30,
-                name: 'Front squat',
-                exerciseId: 'builtin:front-squat',
+                seconds: 45,
+                name: 'Plank',
+                exerciseId: 'builtin:plank',
+            });
+        });
+
+        describe('a step becomes the kind its exercise is measured by', () => {
+            const kindNote = (step: number) =>
+                el('.step__kind-note', steps()[step])?.textContent!.trim();
+            const announced = () => el('.sr-only[aria-live="polite"]').textContent!.trim();
+            /** Types a name and leaves the box, as moving on to the wheels does. */
+            function typeAndLeave(step: number, value: string) {
+                typeName(step, value);
+                el('input', steps()[step]).dispatchEvent(new Event('change'));
+                fixture.detectChanges();
+            }
+            function chooseSets(step: number, value: string) {
+                el(`[id$="-sets"] [data-value="${value}"]`, steps()[step]).click();
+                fixture.detectChanges();
+            }
+
+            it('turns a rep step timed, at 00:30, when a timed exercise is picked', async () => {
+                await setup();
+                await create({ empty: true });
+                chooseReps(0, '12');
+                chooseSets(0, '3');
+
+                typeName(0, 'plan');
+                pick(0, 'Plank');
+
+                expect(shown().steps[0]).toEqual({ kind: 'Timed', name: 'Plank', time: '0:30' });
+                expect(kindNote(0)).toBe('Plank is timed, so this step is now 00:30');
+                expect(announced()).toBe('Plank is timed, so this step is now 00:30');
+                await submit();
+                const [block] = store.workouts()[0].blocks;
+                // Its sets and rest stay
+                expect(block).toMatchObject({ rounds: 3, restSeconds: 60 });
+                expect(allSteps(store.workouts()[0])[0]).toEqual({
+                    ...work(30, 'Plank'),
+                    exerciseId: 'builtin:plank',
+                });
+            });
+
+            it('turns a timed step to 10 reps when an exercise in reps is typed in', async () => {
+                await setup();
+                await create();
+                chooseTime(0, 'seconds', '45');
+
+                // Not while it's being typed
+                typeName(0, 'Push-up');
+                expect(shown().steps[0].kind).toBe('Timed');
+                expect(kindNote(0)).toBeUndefined();
+
+                el('input', steps()[0]).dispatchEvent(new Event('change'));
+                fixture.detectChanges();
+
+                expect(shown().steps[0]).toEqual({
+                    kind: 'Reps',
+                    name: 'Push-up',
+                    time: '10 reps',
+                });
+                expect(kindNote(0)).toBe('Push-up is done in reps, so this step is now 10 reps');
+            });
+
+            it('leaves the step as it is for an exercise measured as it is, or a new one', async () => {
+                await setup();
+                await create();
+                chooseTime(0, 'seconds', '45');
+
+                typeAndLeave(0, 'Plank');
+                typeAndLeave(0, 'Wall walk');
+
+                expect(shown().steps[0]).toEqual({
+                    kind: 'Timed',
+                    name: 'Wall walk',
+                    time: '0:45',
+                });
+                expect(kindNote(0)).toBeUndefined();
+            });
+
+            it("keeps a kind changed back from the menu, until it's another exercise", async () => {
+                await setup();
+                await create({ empty: true });
+                typeAndLeave(0, 'Plank');
+
+                await changeKind(0, 'Reps');
+                expect(kindNote(0)).toBeUndefined();
+                // The same exercise again doesn't change it back
+                typeAndLeave(0, 'plank');
+                expect(shown().steps[0].kind).toBe('Reps');
+
+                typeAndLeave(0, 'Push-up');
+                typeAndLeave(0, 'Plank');
+                expect(shown().steps[0].kind).toBe('Timed');
+            });
+
+            it("changes each set's amount where they vary", async () => {
+                await setup();
+                await create({ empty: true });
+                chooseSets(0, '2');
+                el<HTMLElement>('[id$="-vary"] [role="switch"]', steps()[0]).click();
+                fixture.detectChanges();
+                await fixture.whenStable();
+
+                typeAndLeave(0, 'Plank');
+
+                expect(kindNote(0)).toBe('Plank is timed, so each set is now 00:30');
+                const sets = Array.from(steps()[0].querySelectorAll('.wheel-row__toggle')).map(
+                    (row) => row.textContent!.replace('expand_more', '').trim()
+                );
+                expect(sets).toEqual(['Set 1 · 00:30', 'Set 2 · 00:30']);
             });
         });
 
@@ -2057,26 +2165,45 @@ describe('WorkoutSetupComponent', () => {
                 await create();
                 await press('Browse exercises for step 1');
 
+                typeInto(el('#browse-search'), 'plank');
+                pickCard('Plank');
+                await fixture.whenStable();
+
+                expect(el('app-browse-exercises-dialog')).toBeNull();
+                expect(shown().steps[0].name).toBe('Plank');
+                expect(status(0)).toContain('Built-in exercise');
+                expect(el('.sr-only[aria-live="polite"]').textContent!.trim()).toBe(
+                    'Step 1 is now Plank'
+                );
+                expect(document.activeElement).toBe(button('Browse exercises for step 1'));
+
+                chooseTime(0, 'seconds', '45');
+                await submit();
+                expect(allSteps(store.workouts()[0])[0]).toEqual({
+                    kind: 'work',
+                    seconds: 45,
+                    name: 'Plank',
+                    exerciseId: 'builtin:plank',
+                });
+            });
+
+            it('makes the step the kind the exercise picked is measured by', async () => {
+                await setup();
+                await create();
+                await press('Browse exercises for step 1');
+
                 typeInto(el('#browse-search'), 'front squat');
                 pickCard('Front squat');
                 await fixture.whenStable();
 
-                expect(el('app-browse-exercises-dialog')).toBeNull();
-                expect(shown().steps[0].name).toBe('Front squat');
-                expect(status(0)).toContain('Built-in exercise');
-                expect(el('.sr-only[aria-live="polite"]').textContent!.trim()).toBe(
-                    'Step 1 is now Front squat'
-                );
-                expect(document.activeElement).toBe(button('Browse exercises for step 1'));
-
-                chooseTime(0, 'seconds', '30');
-                await submit();
-                expect(allSteps(store.workouts()[0])[0]).toEqual({
-                    kind: 'work',
-                    seconds: 30,
+                expect(shown().steps[0]).toEqual({
+                    kind: 'Reps',
                     name: 'Front squat',
-                    exerciseId: 'builtin:front-squat',
+                    time: '10 reps',
                 });
+                expect(el('.sr-only[aria-live="polite"]').textContent!.trim()).toBe(
+                    'Step 1 is now Front squat. Front squat is done in reps, so this step is now 10 reps'
+                );
             });
 
             it('closes with ✕, leaving the step as it was', async () => {

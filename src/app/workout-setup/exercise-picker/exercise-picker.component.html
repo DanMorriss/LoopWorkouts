@@ -13,6 +13,8 @@
     [attr.aria-activedescendant]="activeOptionId()"
     (input)="onInput($event)"
     (keydown)="onKeydown($event)"
+    (focus)="onFocus()"
+    (change)="settle()"
     (blur)="close()"
 />
 <!-- In the page all along, so aria-controls always points somewhere; hidden while closed -->

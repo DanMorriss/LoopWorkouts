@@ -36,7 +36,7 @@ import {
     weightOptions,
     weightToKg,
 } from '../models/weight';
-import { placeAt } from './workout-state';
+import { placeAt, WorkoutState } from './workout-state';
 import { lastRepSets } from '../history/last-sets';
 import { Exercise, MeasuredBy } from '../models/exercise';
 import { canStepUpEachSet, steppedUp, suggestedWeight } from '../models/progress';
@@ -401,12 +401,24 @@ export class WorkoutComponent {
         const id = this.state()?.step?.exerciseId;
         return id ? this.exercises.byId(id) : undefined;
     });
+    /** During a rest, the exercise after it, for its details and Swap from the face (RUN-11). */
+    protected readonly nextExercise = computed(() => {
+        const id = this.state()?.phase === 'rest' ? this.nextState()?.step?.exerciseId : undefined;
+        return id ? this.exercises.byId(id) : undefined;
+    });
     /** The exercise whose details are open over the workout, which carries on underneath. */
     protected readonly exerciseInDetails = signal<Exercise | null>(null);
-    /** The step's exercise being swapped for another (RUN-11), while its dialog is open. */
-    protected readonly swapping = signal<{ exercise: Exercise; measuredBy: MeasuredBy } | null>(
-        null
-    );
+    /** Whether those details are of the next step's exercise, opened during the rest before it. */
+    private detailsOfNext = false;
+    /**
+     * The step's exercise being swapped for another (RUN-11), while its dialog is open; `next`
+     * for the step after the rest it was opened in.
+     */
+    protected readonly swapping = signal<{
+        exercise: Exercise;
+        measuredBy: MeasuredBy;
+        next: boolean;
+    } | null>(null);
     /** e.g. "Plank · 00:45", "Squats · 10 reps @ 60 kg", or "finish" when the workout ends after this step. */
     upNext = computed(() => {
         const next = this.nextState();
@@ -456,10 +468,11 @@ export class WorkoutComponent {
     /** Which step is showing, so each gets its own text on the face: 'complete' at the end. */
     protected readonly stepKey = computed(() => {
         const state = this.state();
-        return !state || state.phase === 'complete'
-            ? 'complete'
-            : `${this.workoutStore.activeRunStartedAt()}-${state.round}-${state.stepIndex}`;
+        return !state || state.phase === 'complete' ? 'complete' : this.keyOf(state);
     });
+    private keyOf(state: Pick<WorkoutState, 'round' | 'stepIndex'>) {
+        return `${this.workoutStore.activeRunStartedAt()}-${state.round}-${state.stepIndex}`;
+    }
     faceSlides = computed(() => {
         const state = this.state();
         const step = state?.step;
@@ -482,6 +495,7 @@ export class WorkoutComponent {
                     state.remainingSeconds <= POP_SECONDS,
                 // Rest is for getting ready, so it shows what's coming on the face itself
                 then: state?.phase === 'rest' && this.nextState()?.step ? this.upNext() : '',
+                nextExercise: this.nextExercise(),
             },
         ];
     });
@@ -782,15 +796,18 @@ export class WorkoutComponent {
     /** Apple's spring for moving something about: no bounce, a 0.4s response. */
     private readonly glide = criticallyDampedSpring(0.4);
 
-    /** The Undo bar's offer to take a swap back, and the step it was made on. */
-    private swapOffer: { id: number | undefined; step: string } | null = null;
+    /**
+     * The Undo bar's offer to take a swap back, and the steps it stays for: the one swapped,
+     * and the rest before it where it was swapped then.
+     */
+    private swapOffer: { id: number | undefined; steps: string[] } | null = null;
 
     constructor() {
         // A swap's Undo goes as its step ends, rather than sitting over Pause all workout
         effect(() => {
             const step = this.stepKey();
             const offer = untracked(this.undo.offer);
-            if (this.swapOffer && this.swapOffer.step !== step) {
+            if (this.swapOffer && !this.swapOffer.steps.includes(step)) {
                 if (offer?.id === this.swapOffer.id) {
                     untracked(() => this.undo.dismiss());
                 }
@@ -975,7 +992,9 @@ export class WorkoutComponent {
         }
     }
 
-    protected showExercise(exercise: Exercise) {
+    /** `next` for the exercise after a rest, from the (i) beside "then …" on its face. */
+    protected showExercise(exercise: Exercise, next = false) {
+        this.detailsOfNext = next;
         this.exerciseInDetails.set(exercise);
     }
 
@@ -987,34 +1006,56 @@ export class WorkoutComponent {
 
     /**
      * Swap exercise, from the details: what to do instead (RUN-11), for a step measured as
-     * this one is.
+     * the one being swapped is.
      */
     protected startSwap() {
         const exercise = this.exerciseInDetails();
-        const step = this.state()?.step;
+        const target = exercise && this.swapTarget(exercise, this.detailsOfNext);
         this.exerciseInDetails.set(null);
-        if (exercise && step && step.kind !== 'rest') {
-            this.swapping.set({ exercise, measuredBy: step.kind === 'reps' ? 'reps' : 'timed' });
+        if (exercise && target) {
+            this.swapping.set({
+                exercise,
+                measuredBy: target.step.kind === 'reps' ? 'reps' : 'timed',
+                next: target.next,
+            });
         } else {
             this.focusInfo();
         }
     }
 
     /**
-     * Swaps the step for `replacement`, for the rest of the run, with Undo to take it back
-     * until the step ends. If the step has finished meanwhile, nothing is swapped, and the
-     * Undo bar says so.
+     * The step to swap `exercise` on, if it's still to be done: with `next`, the one after
+     * the rest, or this one if the rest has ended meanwhile; otherwise this one.
+     */
+    private swapTarget(exercise: Exercise, next: boolean) {
+        const nextStep = this.nextState()?.step;
+        if (next && nextStep && this.nextExercise()?.id === exercise.id) {
+            return { step: nextStep, next: true };
+        }
+        const step = this.state()?.step;
+        return step && this.stepExercise()?.id === exercise.id ? { step, next: false } : null;
+    }
+
+    /**
+     * Swaps the step (or, from a rest, the next one) for `replacement`, for the rest of the
+     * run, with Undo to take it back until the step ends. If the step has finished meanwhile,
+     * nothing is swapped, and the Undo bar says so.
      */
     protected swapFor(replacement: Exercise) {
-        const was = this.swapping()?.exercise;
+        const swapping = this.swapping();
+        const was = swapping?.exercise;
         this.swapping.set(null);
-        const swap =
-            was && this.stepExercise()?.id === was.id
-                ? this.run.swapExercise(
-                      replacement,
-                      lastRepSets(this.history.entries(), replacement.id, this.run.runId())
-                  )
-                : null;
+        const target = was && this.swapTarget(was, swapping.next);
+        const next = target?.next && this.nextState();
+        // Undo stays through the rest, then for the step swapped
+        const steps = next ? [this.stepKey(), this.keyOf(next)] : [this.stepKey()];
+        const swap = target
+            ? this.run.swapExercise(
+                  replacement,
+                  lastRepSets(this.history.entries(), replacement.id, this.run.runId()),
+                  target.next
+              )
+            : null;
         if (swap && was) {
             this.undo.offerUndo({
                 message: `Swapped to ${replacement.name}`,
@@ -1023,7 +1064,7 @@ export class WorkoutComponent {
                     this.focusInfo();
                 },
             });
-            this.swapOffer = { id: this.undo.offer()?.id, step: this.stepKey() };
+            this.swapOffer = { id: this.undo.offer()?.id, steps };
         } else if (was) {
             this.undo.notify(`${was.name} has finished, so it wasn't swapped`);
         }

@@ -39,10 +39,6 @@ Ten ready-made workouts are in the library's Ready-made workouts page (see `docs
 - [ ] **Dan to review the first batch:** the exercises, sets, reps and rests of each, and their descriptions. Ids are fixed once released, so rename before merging if a title changes.
 - [ ] **More batches, once reviewed:** e.g. a band workout, pull-up bar and rings, a beginner gym full body, mobility or stretching, and longer runs of intervals. Each must pass `built-in-workouts.spec.ts`.
 
-### From using it (Tom, 2026-10-31; Dan, 2026-11-01)
-
-- [ ] **Swap an exercise, next steps (RUN-11, BLD-14):** swapping is built, mid-workout and in Create (see Swapping an exercise in `docs/features/run-a-workout.md`). Still to do: swap the next exercise during the rest before it (the likeliest moment to find the machine taken), which today needs waiting until it starts; and tag each built-in exercise with its movement (squat, hinge, horizontal push, vertical pull, …) to rank suggestions by it as well as by muscles, as muscles alone are rough (Front squat suggests Burpee, as both work the quads).
-
 ### Alarms (any time)
 
 - [ ] **Alarm sound files:** swap the beeps generated in code (`AlarmService`) for proper sounds. Waiting on Dan to supply the files.
@@ -61,3 +57,4 @@ Ten ready-made workouts are in the library's Ready-made workouts page (see `docs
     - **Load the built-in exercises on demand (about 20 kB):** their words already do; the list itself (`models/built-in-exercises.ts`) still loads at start, because the stores pull it in. Load it the first time the Exercises page, the exercise picker or a workout needs it.
     - **Our own icons instead of Material's (about 15 kB):** `mat-icon` (Material's icon module) is in the tab bar, run bar and undo bar, which are on every page. Swap it for a small icon component or inline SVG, and Material leaves the start-up code.
 - [ ] **An open superset folds as its handle is pressed:** in Create, pressing a superset's drag handle hides its steps straight away (so the drag measures the list without them), before the drag starts, so the list below jumps up under the finger. Folding them only once the drag starts would need the drop list to measure itself again after (the CDK caches the rows' places at the start).
+- [ ] **No swapping the next exercise while paused in a rest (RUN-11):** the (i) for the exercise after a rest, with its Swap, is on the face only; paused, the greyed ring shows the rest's name, which has no (i).

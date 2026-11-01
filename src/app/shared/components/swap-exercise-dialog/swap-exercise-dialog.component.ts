@@ -11,21 +11,21 @@ import {
     viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Exercise, MeasuredBy } from '../../models/exercise';
-import { findByName, searchExercises } from '../../models/exercise-links';
+import { Exercise, MeasuredBy } from '../../../models/exercise';
+import { findByName, searchExercises } from '../../../models/exercise-links';
 import { swapSuggestions } from './swap-suggestions';
-import { growFromClick } from '../../shared/dialog-origin';
-import { ExerciseStore } from '../../shared/state/exercise-store.service';
-import { SettingsStore } from '../../shared/state/settings-store.service';
-import { hint } from '../../workout-setup/exercise-picker/exercise-picker.component';
+import { growFromClick } from '../../dialog-origin';
+import { ExerciseStore } from '../../state/exercise-store.service';
+import { SettingsStore } from '../../state/settings-store.service';
+import { hint } from '../../../workout-setup/exercise-picker/exercise-picker.component';
 
 /**
- * Something to do instead of the step's exercise, mid-workout (RUN-11), e.g. when the machine
- * is taken: the closest few by the muscles they work, doable with your equipment, and a
- * search of the rest. Only exercises measured as the step is (reps or time) are offered, as
- * the step keeps its reps or time. Focus starts on the search box and is trapped inside
- * while it's open; ✕, Escape or a click outside close it. Where it's used, it has
- * animate.leave="dialog-leave".
+ * Something to do instead of a step's exercise: mid-workout (RUN-11), e.g. when the machine is
+ * taken, or while setting a workout up (BLD-14): the closest few by the muscles they work,
+ * doable with your equipment, and a search of the rest. Only exercises measured as the step
+ * is (reps or time) are offered, as the step keeps its reps or time. Focus starts on the
+ * search box and is trapped inside while it's open; ✕, Escape or a click outside close it.
+ * Where it's used, it has animate.leave="dialog-leave".
  */
 @Component({
     selector: 'app-swap-exercise-dialog',
@@ -58,7 +58,9 @@ import { hint } from '../../workout-setup/exercise-picker/exercise-picker.compon
                         <mat-icon aria-hidden="true">close</mat-icon>
                     </button>
                 </div>
-                <p class="swap__hint">For the rest of this workout. Sets done so far stay.</p>
+                @if (hint()) {
+                    <p class="swap__hint">{{ hint() }}</p>
+                }
 
                 <label class="picker-field swap__search" for="swap-search">
                     <span class="picker-field__label">Search exercises</span>
@@ -113,6 +115,8 @@ export class SwapExerciseDialogComponent {
     readonly exercise = input.required<Exercise>();
     /** How the step is measured, which what it's swapped for must be too. */
     readonly measuredBy = input.required<MeasuredBy>();
+    /** A line under the title on what swapping does, e.g. "For the rest of this workout." */
+    readonly hint = input('');
     readonly closed = output<void>();
     readonly picked = output<Exercise>();
 

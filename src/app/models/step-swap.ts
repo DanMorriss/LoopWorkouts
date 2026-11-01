@@ -64,8 +64,7 @@ export function swappedStep(step: Step, exercise: Exercise, lastSets: readonly R
     if (named.kind !== 'reps') {
         return named;
     }
-    const weightOf = (set: number) =>
-        (lastSets.find((last) => (last.set ?? 0) === set) ?? lastSets[0])?.weight;
+    const weightOf = (set: number) => lastWeight(lastSets, set);
     const withWeight = <A extends RepSetAmount>(amount: A, weight: number | undefined): A => {
         const { weight: _old, ...rest } = amount;
         return (weight === undefined ? rest : { ...rest, weight }) as A;
@@ -74,4 +73,12 @@ export function swappedStep(step: Step, exercise: Exercise, lastSets: readonly R
     return swapped.sets
         ? { ...swapped, sets: swapped.sets.map((amount, set) => withWeight(amount, weightOf(set))) }
         : swapped;
+}
+
+/**
+ * The weight, in kg, of set `set` (from 0) in `lastSets`, an exercise's sets last time, or
+ * the first set's where that one wasn't done. Undefined for none.
+ */
+export function lastWeight(lastSets: readonly RepSet[], set: number): number | undefined {
+    return (lastSets.find((last) => (last.set ?? 0) === set) ?? lastSets[0])?.weight;
 }

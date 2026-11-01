@@ -21,6 +21,8 @@ import {
     Workout,
     WorkoutFields,
 } from '../models/workout';
+import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
+import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
@@ -1800,6 +1802,168 @@ describe('WorkoutSetupComponent', () => {
 
             expect(el('app-exercise-details-dialog')).toBeNull();
             expect(document.activeElement).toBe(button('Details of Front squat'));
+        });
+
+        describe('swapping it for another (BLD-14)', () => {
+            const squats: WorkoutFields = {
+                ...savedWorkout,
+                blocks: asOneGroup([
+                    {
+                        kind: 'reps',
+                        reps: 10,
+                        name: 'Back squat',
+                        weight: 60,
+                        exerciseId: 'builtin:back-squat',
+                    },
+                    {
+                        kind: 'work',
+                        seconds: 45,
+                        name: 'Plank',
+                        exerciseId: 'builtin:plank',
+                    },
+                ]),
+            };
+            const swapNames = () =>
+                Array.from(fixture.nativeElement.querySelectorAll('.swap__option .swap__name')).map(
+                    (name) => (name as HTMLElement).textContent!.trim()
+                );
+
+            async function editSquats() {
+                await setup({ editId: 'workout-1' });
+                // Wheels jump to a new value rather than glide: this test browser can cut a glide short
+                // and land a wheel back where it began, which a real one doesn't
+                fakeReducedMotion(true);
+                // Goblet squats at 24 kg last time
+                TestBed.inject(HistoryStore).record({
+                    id: `${Date.now() - 1000}-other`,
+                    workoutId: 'other',
+                    title: 'Other',
+                    startedAt: Date.now() - 1000,
+                    endedAt: Date.now(),
+                    activeSeconds: 60,
+                    roundsCompleted: 1,
+                    totalRounds: 1,
+                    outcome: 'finished',
+                    sets: [
+                        {
+                            round: 0,
+                            step: 0,
+                            name: 'Goblet squat',
+                            reps: 10,
+                            weight: 24,
+                            exerciseId: 'builtin:goblet-squat',
+                        },
+                    ],
+                });
+                store.addWorkout(squats);
+                await create();
+                await press('Step 1, Back squat, 10 reps @ 60 kg');
+            }
+
+            /** Waits for the step's weight wheel to glide to `value` and stay there. */
+            async function wheelSettlesOn(value: string) {
+                const weight = () =>
+                    el('[id$="-weight"] [role="spinbutton"]').getAttribute('aria-valuetext');
+                await vi.waitFor(() => expect(weight()).toBe(value), { timeout: 3000 });
+                await new Promise((resolve) => setTimeout(resolve, 300));
+                fixture.detectChanges();
+                expect(weight()).toBe(value);
+            }
+
+            function searchAndPick(name: string) {
+                typeInto(el('#swap-search'), name);
+                const option = Array.from(
+                    fixture.nativeElement.querySelectorAll('.swap__option')
+                ).find(
+                    (o) =>
+                        (o as HTMLElement).querySelector('.swap__name')!.textContent!.trim() ===
+                        name
+                ) as HTMLElement;
+                option.click();
+                fixture.detectChanges();
+            }
+
+            it('offers the closest exercises for the same muscles, then search', async () => {
+                await editSquats();
+
+                await press('Swap Back squat');
+
+                expect(el('.swap__title').textContent!.trim()).toBe('Swap Back squat');
+                expect(el('.swap__hint').textContent).toContain('Keeps the step');
+                expect(swapNames()).toHaveLength(5);
+                expect(swapNames()).not.toContain('Back squat');
+                expect(document.activeElement).toBe(el('#swap-search'));
+            });
+
+            it('makes the step the new exercise, with its reps, at its weight last time', async () => {
+                await editSquats();
+                await press('Swap Back squat');
+
+                searchAndPick('Goblet squat');
+                await fixture.whenStable();
+
+                expect(el('app-swap-exercise-dialog')).toBeNull();
+                expect(shown().steps[0].name).toBe('Goblet squat');
+                expect(TestBed.inject(UndoService).offer()?.message).toBe(
+                    'Swapped to Goblet squat'
+                );
+                expect(document.activeElement).toBe(button('Swap Goblet squat'));
+
+                // Let the weight wheel glide to its new weight: settling after saving has emptied the
+                // form would set a step that's gone (in the app, the page has gone by then)
+                await wheelSettlesOn('24');
+                await submit();
+
+                expect(allSteps(store.workouts()[0])[0]).toEqual({
+                    kind: 'reps',
+                    reps: 10,
+                    name: 'Goblet squat',
+                    weight: 24,
+                    exerciseId: 'builtin:goblet-squat',
+                });
+            });
+
+            it('puts the step back with Undo', async () => {
+                await editSquats();
+                await press('Swap Back squat');
+                searchAndPick('Goblet squat');
+
+                TestBed.inject(UndoService).undo();
+                fixture.detectChanges();
+                // As above, the weight wheel glides back first
+                await wheelSettlesOn('60');
+                await submit();
+
+                expect(allSteps(store.workouts()[0])[0]).toMatchObject({
+                    name: 'Back squat',
+                    weight: 60,
+                    exerciseId: 'builtin:back-squat',
+                });
+            });
+
+            it('offers only timed exercises for a timed step', async () => {
+                await editSquats();
+                await press('Step 2, Plank, 00:45');
+
+                await press('Swap Plank');
+                typeInto(el('#swap-search'), 'squat');
+
+                // The squats are all measured in reps, so none are offered for a timed step
+                expect(swapNames().every((name) => !name.includes('squat'))).toBe(true);
+            });
+
+            it('closes with ✕, changing nothing, with focus back on Swap', async () => {
+                await editSquats();
+                await press('Swap Back squat');
+
+                el('.swap__close').click();
+                fixture.detectChanges();
+                await fixture.whenStable();
+
+                expect(el('app-swap-exercise-dialog')).toBeNull();
+                expect(shown().steps[0].name).toBe('Back squat');
+                expect(document.activeElement).toBe(button('Swap Back squat'));
+            });
         });
 
         it('goes back to the name box to pick another, ready to type over', async () => {

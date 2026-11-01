@@ -314,6 +314,22 @@
                                                             >
                                                             Details
                                                         </button>
+                                                        <!-- Another exercise for the same
+                                                             muscles (BLD-14) -->
+                                                        <button
+                                                            type="button"
+                                                            class="btn-pill step__exercise-swap"
+                                                            [id]="'step-' + key + '-swap'"
+                                                            [attr.aria-label]="
+                                                                'Swap ' + exercise.name
+                                                            "
+                                                            (click)="startSwap(exercise, key, kind)"
+                                                        >
+                                                            <mat-icon aria-hidden="true"
+                                                                >swap_horiz</mat-icon
+                                                            >
+                                                            Swap
+                                                        </button>
                                                         <button
                                                             type="button"
                                                             class="btn-pill step__exercise-edit"
@@ -992,5 +1008,17 @@
         [exercise]="opened.exercise"
         (closed)="closeExercise()"
         (saved)="exerciseSaved($event)"
+    />
+}
+
+<!-- Another exercise for the same muscles (BLD-14) -->
+@if (swapping(); as opened) {
+    <app-swap-exercise-dialog
+        animate.leave="dialog-leave"
+        [exercise]="opened.exercise"
+        [measuredBy]="opened.measuredBy"
+        hint="Keeps the step's reps or time, at the weight you did it at last time."
+        (closed)="closeSwap()"
+        (picked)="swapFor($event)"
     />
 }

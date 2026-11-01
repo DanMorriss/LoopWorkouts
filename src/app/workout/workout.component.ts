@@ -37,7 +37,7 @@ import {
     weightToKg,
 } from '../models/weight';
 import { placeAt } from './workout-state';
-import { lastRepSets } from './last-sets';
+import { lastRepSets } from '../history/last-sets';
 import { Exercise, MeasuredBy } from '../models/exercise';
 import { canStepUpEachSet, steppedUp, suggestedWeight } from '../models/progress';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
@@ -53,7 +53,7 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { UndoService } from '../shared/undo/undo.service';
-import { SwapExerciseDialogComponent } from './swap-exercise/swap-exercise-dialog.component';
+import { SwapExerciseDialogComponent } from '../shared/components/swap-exercise-dialog/swap-exercise-dialog.component';
 import { describeSets } from '../history/history-format';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { criticallyDampedSpring } from '../shared/spring';

@@ -47,10 +47,14 @@ import {
     UNTIL_STOPPED,
 } from '../models/workout';
 import { WeightUnit, weightIn, weightOptions, weightToKg } from '../models/weight';
-import { Exercise, isBuiltIn, MAX_EXERCISE_NAME_LENGTH } from '../models/exercise';
+import { Exercise, isBuiltIn, MAX_EXERCISE_NAME_LENGTH, MeasuredBy } from '../models/exercise';
+import { HistoryStore } from '../shared/state/history-store.service';
 import { findByName } from '../models/exercise-links';
 import { ExerciseEditorComponent } from '../shared/components/exercise-editor/exercise-editor.component';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
+import { SwapExerciseDialogComponent } from '../shared/components/swap-exercise-dialog/swap-exercise-dialog.component';
+import { lastRepSets } from '../history/last-sets';
+import { lastWeight } from '../models/step-swap';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { ExercisePickerComponent } from './exercise-picker/exercise-picker.component';
 import { InfinitySwitchComponent } from '../shared/components/infinity-switch/infinity-switch.component';
@@ -191,6 +195,7 @@ const NAME_EXAMPLES: Record<StepKind, string> = {
         ExercisePickerComponent,
         ExerciseEditorComponent,
         ExerciseDetailsDialogComponent,
+        SwapExerciseDialogComponent,
         StepDragPreviewComponent,
         StepKindMenuComponent,
         MatFormFieldModule,
@@ -205,6 +210,7 @@ export class WorkoutSetupComponent {
     private readonly injector = inject(Injector);
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly exercises = inject(ExerciseStore);
+    private readonly history = inject(HistoryStore);
     /** Weights are shown and picked in this, and saved in kg. */
     protected readonly weightUnit = inject(SettingsStore).weightUnit();
 
@@ -310,6 +316,12 @@ export class WorkoutSetupComponent {
 
     /** The exercise open in the editor, and the step it was opened from. */
     /** The exercise whose details are showing, and the step they were opened from. */
+    /** The step whose exercise is being swapped (BLD-14), while its dialog is open. */
+    protected readonly swapping = signal<{
+        exercise: Exercise;
+        stepKey: number;
+        measuredBy: MeasuredBy;
+    } | null>(null);
     protected readonly exerciseInDetails = signal<{ exercise: Exercise; stepKey: number } | null>(
         null
     );
@@ -797,6 +809,72 @@ export class WorkoutSetupComponent {
                 { injector: this.injector }
             );
         }
+    }
+
+    /** Swap: another exercise for the same muscles (BLD-14), for a step measured as this one is. */
+    protected startSwap(exercise: Exercise, stepKey: number, kind: ItemKind) {
+        if (kind === 'reps' || kind === 'work') {
+            this.swapping.set({
+                exercise,
+                stepKey,
+                measuredBy: kind === 'reps' ? 'reps' : 'timed',
+            });
+        }
+    }
+
+    /**
+     * The step becomes `replacement`: its name and link, keeping its reps or time, sets and
+     * sides, at the weight it was done at last time (each set's own where they vary), or
+     * none. Undo puts the step back as it was. Focus goes back to Swap.
+     */
+    protected swapFor(replacement: Exercise) {
+        const opened = this.swapping();
+        this.swapping.set(null);
+        const before = opened && this.model().steps.find((step) => step.key === opened.stepKey);
+        if (!opened || !before) {
+            return;
+        }
+        const lastSets = lastRepSets(this.history.entries(), replacement.id, null);
+        const weighed = <T extends { weight: number; savedWeight: number | null }>(
+            amount: T,
+            set: number
+        ): T => {
+            const kg = before.kind === 'reps' ? lastWeight(lastSets, set) : undefined;
+            return kg === undefined
+                ? { ...amount, weight: 0, savedWeight: null }
+                : { ...amount, weight: weightIn(kg, this.weightUnit), savedWeight: kg };
+        };
+        const swapped: StepModel = {
+            ...(before.kind === 'reps' ? weighed(before, 0) : before),
+            name: replacement.name,
+            exerciseId: replacement.id,
+            setRows:
+                before.kind === 'reps'
+                    ? before.setRows.map((row, set) => weighed(row, set))
+                    : before.setRows,
+        };
+        this.replaceStep(swapped);
+        this.undo.offerUndo({
+            message: `Swapped to ${replacement.name}`,
+            undo: () => {
+                this.replaceStep(before);
+                this.focusAfterRender(`step-${before.key}-swap`);
+            },
+        });
+        this.focusAfterRender(`step-${opened.stepKey}-swap`);
+    }
+
+    protected closeSwap() {
+        const opened = this.swapping();
+        this.swapping.set(null);
+        if (opened) {
+            this.focusAfterRender(`step-${opened.stepKey}-swap`);
+        }
+    }
+
+    /** Puts `step` in place of the step with its key, if it's still there. */
+    private replaceStep(step: StepModel) {
+        this.updateSteps((steps) => steps.map((each) => (each.key === step.key ? step : each)));
     }
 
     protected openExercise(exercise: Exercise, stepKey: number) {

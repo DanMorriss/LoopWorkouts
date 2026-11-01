@@ -284,6 +284,35 @@ for (const theme of ['dark', 'light'] as const) {
                 ).not.toBeNull();
                 await expectNoViolations();
             });
+
+            it('swapping an exercise for another, then with Undo offered', async () => {
+                const saved = store.addWorkout(
+                    makeWorkout({
+                        steps: [
+                            {
+                                kind: 'reps',
+                                reps: 8,
+                                name: 'Inverted row',
+                                exerciseId: 'builtin:inverted-row',
+                            },
+                        ],
+                    })
+                );
+                await open('/setup?editId=' + saved.id);
+                click('.step__toggle');
+                await settle();
+                click('.step__exercise-swap');
+                await settle();
+                expect(
+                    fixture.nativeElement.querySelector('app-swap-exercise-dialog')
+                ).not.toBeNull();
+                await expectNoViolations();
+
+                click('.swap__option');
+                await settle();
+                expect(fixture.nativeElement.textContent).toContain('Swapped to');
+                await expectNoViolations();
+            });
         });
 
         describe('home', () => {

@@ -1,5 +1,5 @@
-import { BUILT_IN_EXERCISES } from '../../models/built-in-exercises';
-import { canDoWith, Equipment, Exercise } from '../../models/exercise';
+import { BUILT_IN_EXERCISES } from '../../../models/built-in-exercises';
+import { canDoWith, Equipment, Exercise } from '../../../models/exercise';
 import { swapSuggestions } from './swap-suggestions';
 
 const byId = (id: string) =>

@@ -87,6 +87,7 @@
 
 ### Swapping an exercise (RUN-11)
 
+- The same swap is in Create, as each exercise step's **Swap** button (BLD-14; see [exercises](exercises.md)).
 - **Swap exercise**, in the step's details (the (i), on the face or while paused), opens "**Swap Back squat**" over the workout: "For the rest of this workout. Sets done so far stay.", a **Search exercises** box (where focus starts), and a list.
 - With nothing typed, the list is "**Same muscles**" ("Same muscles, with your equipment" once some is picked on the Exercises page): the **closest five**, each with its main muscles and equipment under its name, e.g. "Quads, glutes · Dumbbells", as the exercise picker shows them.
     - Only exercises **measured the same way** as the step (reps for a rep step, time for a timed one), as the step keeps its reps or time; not hidden ones, and not itself.

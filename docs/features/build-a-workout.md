@@ -15,6 +15,7 @@
 - **BLD-11** As a user I want each set of an exercise to have its own reps and weight (e.g. 12 @ 40 kg, 10 @ 45 kg, 8 @ 50 kg), for a pyramid or warm-up sets.
 - **BLD-12** As a user I want a superset (or, of three or more, a giant set): exercises done one after another, then a rest, for a number of rounds.
 - **BLD-13** As a user I want to add headings to a workout (e.g. "Warmup", "Upper body"), so a long workout is easy to follow.
+- **BLD-14** As a user I want to swap a step's exercise for another that works the same muscles while setting a workout up, so I can fit it to the equipment I have. (Its rules are with the exercise picker in [exercises](exercises.md).)
 
 ## Rules
 

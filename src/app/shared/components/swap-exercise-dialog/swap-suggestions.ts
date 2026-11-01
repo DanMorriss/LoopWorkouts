@@ -1,4 +1,4 @@
-import { canDoWith, Equipment, Exercise, MeasuredBy, MuscleGroup } from '../../models/exercise';
+import { canDoWith, Equipment, Exercise, MeasuredBy, MuscleGroup } from '../../../models/exercise';
 
 /** How many suggestions to offer: enough to find one free, few enough to read between sets. */
 const SUGGESTIONS = 5;

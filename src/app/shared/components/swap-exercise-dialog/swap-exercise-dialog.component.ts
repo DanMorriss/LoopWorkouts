@@ -11,7 +11,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Exercise, MeasuredBy } from '../../../models/exercise';
+import { Equipment, Exercise, MeasuredBy } from '../../../models/exercise';
 import { findByName, searchExercises } from '../../../models/exercise-links';
 import { swapSuggestions } from './swap-suggestions';
 import { growFromClick } from '../../dialog-origin';
@@ -134,13 +134,23 @@ export class SwapExerciseDialogComponent {
                     exercise.measuredBy === this.measuredBy() && exercise.id !== this.exercise().id
             )
     );
-    private readonly suggestions = computed(() =>
+    private readonly closest = (myEquipment: readonly Equipment[]) =>
         swapSuggestions(
             this.exercise(),
             this.measuredBy(),
             this.candidates().filter((exercise) => !this.exercises.isHidden(exercise.id)),
-            this.myEquipment()
-        )
+            myEquipment
+        );
+    private readonly withMyEquipment = computed(() => this.closest(this.myEquipment()));
+    /**
+     * Whether none of the closest can be done with your equipment, so they're offered
+     * whatever they need rather than nothing, e.g. only kettlebells for a chainsaw row.
+     */
+    private readonly beyondMyEquipment = computed(
+        () => this.withMyEquipment().length === 0 && this.myEquipment().length > 0
+    );
+    private readonly suggestions = computed(() =>
+        this.beyondMyEquipment() ? this.closest([]) : this.withMyEquipment()
     );
     /** Found by name as the picker finds them: hidden ones only when named in full. */
     private readonly found = computed(() => {
@@ -161,9 +171,11 @@ export class SwapExerciseDialogComponent {
             ? this.found().length === 1
                 ? '1 match'
                 : `${this.found().length} matches`
-            : this.myEquipment().length
-              ? 'Same muscles, with your equipment'
-              : 'Same muscles'
+            : this.beyondMyEquipment()
+              ? 'Same muscles, needing other equipment'
+              : this.myEquipment().length
+                ? 'Same muscles, with your equipment'
+                : 'Same muscles'
     );
     protected readonly emptyText = computed(() =>
         this.searching()

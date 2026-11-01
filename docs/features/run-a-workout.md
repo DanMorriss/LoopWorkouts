@@ -100,7 +100,7 @@
 - **Swap exercise**, in the step's details (the (i), on the face or while paused), opens "**Swap Back squat**" over the workout: "For the rest of this workout. Sets done so far stay.", a **Search exercises** box (where focus starts), and a list.
 - With nothing typed, the list is "**Same muscles**" ("Same muscles, with your equipment" once some is picked on the Exercises page): the **closest five**, each with its main muscles and equipment under its name, e.g. "Quads, glutes · Dumbbells", as the exercise picker shows them.
     - Only exercises **measured the same way** as the step (reps for a rep step, time for a timed one), as the step keeps its reps or time; not hidden ones, and not itself.
-    - Only ones that share a main muscle, and that can be done with **your equipment**, if you've picked any (all of them if not).
+    - Only ones that share a main muscle (one is enough; supporting muscles don't have to match), and that can be done with **your equipment**, if you've picked any (all of them if not). When none of them can be done with your equipment, e.g. only kettlebells for a chainsaw row, the closest five are offered whatever they need, under "**Same muscles, needing other equipment**", rather than nothing.
     - Ranked by how closely their main muscles match, each extra or missing main muscle counting against one (so a whole-body move doesn't top a chest one), a little for supporting muscles in common, and a little more for needing **none of its equipment**, as that's likely what's taken. Then by name.
     - With none, "Nothing else works the same muscles. Search for one above."
 - Typing searches every exercise measured the same way by name, as the picker does (hidden ones only when named in full), under "3 matches"; with none, "No exercise measured in reps matches that."
@@ -190,6 +190,7 @@
 - Given Jog (timed, just a name) then Push-ups (the Push-up exercise), then Jog has no (i); at Push-ups an (i) named "Details of Push-up" opens its details, with Swap exercise, and the workout still waits on the push-ups; Space there doesn't press Done; ✕ at the top right closes them, as Done does, with focus back on the (i).
 
 - Given 10 back squats at 60 kg, and goblet squats done at 24 kg last time, when I open the (i), press Swap exercise, search "goblet" and pick Goblet squat, then the face says Goblet squat at 24 kg, the Undo bar says "Swapped to Goblet squat", the next round's squats are goblet squats too, and the saved workout still has back squats; Undo puts back squats back at 60 kg.
+- Given Chainsaw row and only kettlebells picked as my equipment, then Swap exercise lists five rows needing other equipment, under "Same muscles, needing other equipment", not "Nothing else works the same muscles".
 - Given Back squat, then Swap exercise lists five exercises that work the quads or glutes, not Back squat; searching "wall sit" finds nothing, as it's timed.
 - Given a timed step swapped part-way through a workout, then its sets before the swap are logged under the old exercise and those after under the new one.
 - Given a swapped step at the summary, when I press Yes, use next time, then the saved workout's step is the new exercise at its weight; when I press No, just this time, then it's unchanged. Either way there's no Next time step-up for it.

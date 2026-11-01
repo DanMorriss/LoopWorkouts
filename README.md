@@ -107,11 +107,11 @@ supabase/schema.sql  The server side: the records table, and the sync and delete
 
 ## Roadmap
 
-Loop Workouts is becoming a workout helper that shows you how you're improving: see [docs/direction.md](docs/direction.md). Done so far: exercises with a body map, last time and personal bests in the workout, progress pages, sync, a suggested next weight, a workout summary with the muscles worked, what to step up next time and the workout to do next, and gym plans as they're written: sets with a rest between them, exercises done each side, sets with their own reps and weight, supersets and giant sets, and headings. Since then: adding an exercise to a workout from its page, a weekly plan with what's due today on Home, and signing in with Google. Each built-in exercise shows an animated demo of how it's done, in 3D, which can be turned round. Still to come:
+Loop Workouts is becoming a workout helper that shows you how you're improving: see [docs/direction.md](docs/direction.md). Done so far: exercises with a body map, last time and personal bests in the workout, progress pages, sync, a suggested next weight, a workout summary with the muscles worked, what to step up next time and the workout to do next, and gym plans as they're written: sets with a rest between them, exercises done each side, sets with their own reps and weight, supersets and giant sets, and headings. Since then: adding an exercise to a workout from its page, a weekly plan with what's due today on Home, and signing in with Google. Each built-in exercise shows an animated demo of how it's done, in 3D, which can be turned round. Then ten ready-made workouts, countdown beeps in a step's last seconds, and swapping an exercise for one that works the same muscles, mid-workout or in Create. Still to come:
 
 1. **Sign in with Apple**, once there's an Apple Developer account.
 
-Also planned: proper alarm sounds, choosing the sound for each step, and alarms on a locked phone.
+Also planned: skipping a step, saving a workout without starting it, a fuller exercise search when building one, timed exercises (like a plank) making their step timed, proper alarm sounds, choosing the sound for each step, and alarms on a locked phone.
 
 Work on these, plus design and technical follow-ups, is tracked in [TODO.md](TODO.md).
 

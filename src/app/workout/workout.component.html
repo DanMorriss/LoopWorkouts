@@ -388,7 +388,21 @@
             <app-exercise-details-dialog
                 animate.leave="dialog-leave"
                 [exercise]="exercise"
+                [canPickAnother]="true"
+                pickAnotherLabel="Swap exercise"
                 (closed)="closeExercise()"
+                (pickAnother)="startSwap()"
+            />
+        }
+
+        <!-- Something to do instead, e.g. the machine's taken (RUN-11) -->
+        @if (swapping(); as swap) {
+            <app-swap-exercise-dialog
+                animate.leave="dialog-leave"
+                [exercise]="swap.exercise"
+                [measuredBy]="swap.measuredBy"
+                (closed)="closeSwap()"
+                (picked)="swapFor($event)"
             />
         }
     } @else {

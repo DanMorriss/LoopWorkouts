@@ -8,6 +8,7 @@ import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { AlarmService } from '../shared/alarms/alarm.service';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { KeepAwakeService } from '../shared/run/keep-awake.service';
+import { UndoService } from '../shared/undo/undo.service';
 import { contrastRatio } from '../shared/testing/contrast';
 import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
 import { FakeAudioContext, provideFakeAudioContext } from '../shared/testing/fake-audio-context';
@@ -2047,8 +2048,10 @@ describe('WorkoutComponent', () => {
                 expect(dialog.querySelector('.details__title')!.textContent!.trim()).toBe(
                     'Push-up'
                 );
-                // Nothing to pick another for mid-workout
-                expect(dialog.querySelector('.details__pick-another')).toBeNull();
+                // Mid-workout, Pick another is Swap exercise (RUN-11)
+                expect(dialog.querySelector('.details__pick-another')!.textContent).toContain(
+                    'Swap exercise'
+                );
                 expect(component.isRepsActive()).toBe(true);
 
                 (dialog.querySelector('.details__done') as HTMLElement).click();
@@ -4209,6 +4212,239 @@ describe('WorkoutComponent', () => {
 
             expect(line()).toBeNull();
             fixture.destroy();
+        });
+    });
+
+    describe('swapping an exercise (RUN-11)', () => {
+        const el = (selector: string) =>
+            fixture.nativeElement.querySelector(selector) as HTMLElement | null;
+        const backSquat: RepStep = {
+            kind: 'reps',
+            reps: 10,
+            name: 'Back squat',
+            weight: 60,
+            exerciseId: 'builtin:back-squat',
+        };
+        // 10 back squats at 60 kg, then 2s rest; twice
+        const legs = () => makeWorkout({ steps: [backSquat, rest(2)], repeats: 2 });
+        const options = () =>
+            Array.from(fixture.nativeElement.querySelectorAll('.swap__option .swap__name')).map(
+                (name) => (name as HTMLElement).textContent!.trim()
+            );
+        const swapTitle = () => el('.swap__title')?.textContent?.trim();
+        const undo = () => TestBed.inject(UndoService);
+        const savedStep = () => allSteps(store.workouts()[0])[0];
+        const stepWeight = () =>
+            (TestBed.inject(ActiveRunService).state()?.step as RepStep | undefined)?.weight;
+
+        beforeEach(() => {
+            localStorage.clear();
+            // Goblet squats at 24 kg last time
+            TestBed.inject(HistoryStore).record({
+                id: `${Date.now() - 1000}-other`,
+                workoutId: 'other',
+                title: 'Other',
+                startedAt: Date.now() - 1000,
+                endedAt: Date.now(),
+                activeSeconds: 60,
+                roundsCompleted: 1,
+                totalRounds: 1,
+                outcome: 'finished',
+                sets: [
+                    {
+                        round: 0,
+                        step: 0,
+                        name: 'Goblet squat',
+                        reps: 10,
+                        weight: 24,
+                        exerciseId: 'builtin:goblet-squat',
+                    },
+                ],
+            });
+            start(store.addWorkout(legs()));
+        });
+        afterEach(() => {
+            fixture.destroy();
+            localStorage.clear();
+        });
+
+        function openSwap() {
+            el('.workout-face__info')!.click();
+            fixture.detectChanges();
+            el('.details__pick-another')!.click();
+            fixture.detectChanges();
+        }
+
+        /** Finds the exercise by name, as you would one not in the suggestions, and picks it. */
+        function pick(name: string) {
+            const search = el('#swap-search') as HTMLInputElement;
+            search.value = name;
+            search.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+            const option = Array.from(fixture.nativeElement.querySelectorAll('.swap__option')).find(
+                (button) =>
+                    (button as HTMLElement).querySelector('.swap__name')!.textContent!.trim() ===
+                    name
+            ) as HTMLElement;
+            option.click();
+            fixture.detectChanges();
+        }
+
+        it('offers Swap exercise in the details, then the closest exercises', () => {
+            el('.workout-face__info')!.click();
+            fixture.detectChanges();
+            expect(el('.details__pick-another')!.textContent).toContain('Swap exercise');
+
+            el('.details__pick-another')!.click();
+            fixture.detectChanges();
+
+            expect(el('app-exercise-details-dialog')).toBeNull();
+            expect(swapTitle()).toBe('Swap Back squat');
+            expect(options()).toHaveLength(5);
+            expect(options()).not.toContain('Back squat');
+            expect(el('.swap__heading')!.textContent!.trim()).toBe('Same muscles');
+            expect(document.activeElement).toBe(el('#swap-search'));
+        });
+
+        it('finds any other rep exercise by name', () => {
+            openSwap();
+            const search = el('#swap-search') as HTMLInputElement;
+            search.value = 'leg ext';
+            search.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+
+            expect(options()).toEqual(['Leg extension']);
+            expect(el('.swap__heading')!.textContent!.trim()).toBe('1 match');
+
+            search.value = 'wall sit';
+            search.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+
+            // Measured by time, so it can't take a rep step's place
+            expect(options()).toEqual([]);
+            expect(el('.swap__none')!.textContent).toContain('No exercise measured in reps');
+        });
+
+        it('swaps the step for the rest of the workout, at its weight last time, with Undo', async () => {
+            openSwap();
+            pick('Goblet squat');
+            await fixture.whenStable();
+
+            expect(el('app-swap-exercise-dialog')).toBeNull();
+            expect(el('.workout-face__label')!.textContent!.trim()).toBe('Goblet squat');
+            expect(stepWeight()).toBe(24);
+            expect(undo().offer()?.message).toBe('Swapped to Goblet squat');
+            expect(document.activeElement).toBe(el('.workout-face__info'));
+            // The saved workout keeps its own
+            expect(savedStep().name).toBe('Back squat');
+
+            component.finishReps();
+            advance(2000);
+            fixture.detectChanges();
+
+            // The next round's squats are goblet squats too, and the set was logged as one
+            expect(el('.workout-face__label')!.textContent!.trim()).toBe('Goblet squat');
+            expect(TestBed.inject(ActiveRunService).sets()[0]).toMatchObject({
+                name: 'Goblet squat',
+                weight: 24,
+                exerciseId: 'builtin:goblet-squat',
+            });
+        });
+
+        it('takes the swap back with Undo', () => {
+            openSwap();
+            pick('Goblet squat');
+
+            undo().undo();
+            fixture.detectChanges();
+
+            expect(el('.workout-face__label')!.textContent!.trim()).toBe('Back squat');
+            expect(stepWeight()).toBe(60);
+        });
+
+        it('lets Undo go once the step has ended', () => {
+            openSwap();
+            pick('Goblet squat');
+            expect(undo().offer()).not.toBeNull();
+
+            component.finishReps();
+            fixture.detectChanges();
+
+            expect(undo().offer()).toBeNull();
+        });
+
+        it('closes with ✕, swapping nothing, with focus back on the (i)', async () => {
+            openSwap();
+            (el('.swap__close') as HTMLElement).click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(el('app-swap-exercise-dialog')).toBeNull();
+            expect(el('.workout-face__label')!.textContent!.trim()).toBe('Back squat');
+            expect(document.activeElement).toBe(el('.workout-face__info'));
+        });
+
+        it('leaves Space and Escape to the dialog while it is open', () => {
+            openSwap();
+            el('#swap-search')!.dispatchEvent(
+                new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true })
+            );
+            fixture.detectChanges();
+
+            expect(component.isRepsActive()).toBe(true);
+        });
+
+        describe('on the summary', () => {
+            function finishSwapped() {
+                openSwap();
+                pick('Goblet squat');
+                component.finishReps();
+                advance(2000);
+                component.finishReps();
+                fixture.detectChanges();
+            }
+            const swapsText = () => el('.swaps')?.textContent?.replace(/\s+/g, ' ') ?? '';
+            const button = (label: string) =>
+                Array.from(fixture.nativeElement.querySelectorAll('.swaps button')).find(
+                    (b) => (b as HTMLElement).textContent!.trim() === label
+                ) as HTMLElement;
+
+            it('says what was swapped, and asks whether to use it next time', () => {
+                finishSwapped();
+
+                expect(swapsText()).toContain('Back squat for Goblet squat');
+                expect(swapsText()).toContain('Use Goblet squat next time?');
+            });
+
+            it('puts it on the saved workout with Yes', async () => {
+                finishSwapped();
+                button('Yes, use next time').click();
+                fixture.detectChanges();
+                await fixture.whenStable();
+
+                expect(savedStep()).toMatchObject({
+                    name: 'Goblet squat',
+                    weight: 24,
+                    exerciseId: 'builtin:goblet-squat',
+                });
+                expect(swapsText()).toContain("Saved: next time it's Goblet squat.");
+                expect(document.activeElement).toBe(el('.swaps__answer'));
+            });
+
+            it('leaves the saved workout as it was with No', () => {
+                finishSwapped();
+                button('No, just this time').click();
+                fixture.detectChanges();
+
+                expect(savedStep().name).toBe('Back squat');
+                expect(swapsText()).toContain("Next time it's Back squat again.");
+            });
+
+            it('offers no step-up for it, as the saved step is still the old exercise', () => {
+                finishSwapped();
+
+                expect(el('.step-ups')).toBeNull();
+            });
         });
     });
 });

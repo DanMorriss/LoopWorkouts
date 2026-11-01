@@ -428,6 +428,54 @@ describe('WorkoutStore', () => {
             expect(createStore().activeWorkout()).toEqual(saved);
         });
 
+        describe('swaps (RUN-11)', () => {
+            const original = { kind: 'work' as const, seconds: 30, name: 'Plank' };
+            const swap = {
+                step: 0,
+                from: 2,
+                original,
+                swapped: { ...original, name: 'Wall sit', exerciseId: 'builtin:wall-sit' },
+            };
+
+            it("keeps the run's swaps across a reload, and forgets them when it stops", () => {
+                const store = createStore();
+                store.setActiveWorkout(store.addWorkout(makeWorkout()));
+                store.swapActiveStep(swap);
+
+                TestBed.resetTestingModule();
+                const reloaded = createStore();
+                expect(reloaded.activeSwaps()).toEqual([swap]);
+
+                reloaded.stop();
+                expect(reloaded.activeSwaps()).toEqual([]);
+                expect(sessionStorage.getItem('activeSwaps')).toBeNull();
+            });
+
+            it('starts a new run with none', () => {
+                const store = createStore();
+                const workout = store.addWorkout(makeWorkout());
+                store.setActiveWorkout(workout);
+                store.swapActiveStep(swap);
+
+                store.setActiveWorkout(workout);
+
+                expect(store.activeSwaps()).toEqual([]);
+            });
+
+            it('leaves out saved swaps that are broken', () => {
+                const store = createStore();
+                store.setActiveWorkout(store.addWorkout(makeWorkout()));
+                sessionStorage.setItem(
+                    'activeSwaps',
+                    JSON.stringify([swap, { ...swap, step: -1 }, { ...swap, swapped: {} }])
+                );
+
+                TestBed.resetTestingModule();
+
+                expect(createStore().activeSwaps()).toEqual([swap]);
+            });
+        });
+
         it('has no active workout when the remembered one no longer exists', () => {
             sessionStorage.setItem('activeWorkoutId', 'workout-3');
 

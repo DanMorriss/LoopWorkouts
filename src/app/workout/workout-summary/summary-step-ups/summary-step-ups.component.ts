@@ -82,13 +82,17 @@ export class SummaryStepUpsComponent {
         const sets = this.run.sets();
         const unit = this.weightUnit();
         const applied = this.applied();
+        // A step swapped for another exercise (RUN-11) has the old one on the saved workout, so
+        // nothing to step up from, unless it was kept for next time
+        const swappedAway = (step: number) =>
+            this.run.swappedSteps().has(step) && !this.run.keptSwaps().has(step);
         return [
             ...applied.values(),
             ...progressionSuggestions(
                 sets,
                 allSteps(this.run.workout() ?? { blocks: [] }),
                 unit
-            ).filter(({ step }) => !applied.has(step)),
+            ).filter(({ step }) => !applied.has(step) && !swappedAway(step)),
         ]
             .sort((a, b) => a.step - b.step)
             .map((suggestion) => {

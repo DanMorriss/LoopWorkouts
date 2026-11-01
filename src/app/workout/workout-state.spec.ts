@@ -853,3 +853,28 @@ describe('a step with one set changed (BLD-11)', () => {
         expect(withEachRepSet(equal, up)).toEqual({ ...equal, weight: 42.5 });
     });
 });
+
+describe('setsDone with a swap (RUN-11)', () => {
+    const plank: Step = { kind: 'work', seconds: 45, name: 'Plank', exerciseId: 'builtin:plank' };
+    const sidePlank: Step = {
+        kind: 'work',
+        seconds: 45,
+        name: 'Side plank',
+        exerciseId: 'builtin:side-plank',
+    };
+    // 45s plank, 15s rest; 3 rounds. Swapped for a side plank as round 2's plank began
+    const workout = makeWorkout({ steps: [plank, rest(15)], repeats: 3 });
+    const swaps = [{ step: 0, from: 2, original: plank, swapped: sidePlank }];
+    const running = makeWorkout({ steps: [sidePlank, rest(15)], repeats: 3 });
+
+    it('names each timed set as the step was when it ran', () => {
+        const complete = workoutStateAt(running, 1_000_000);
+
+        expect(setsDone(running, complete, [], swaps).map((set) => set.name)).toEqual([
+            'Plank',
+            'Side plank',
+            'Side plank',
+        ]);
+        expect(setsDone(workout, workoutStateAt(workout, 1_000_000), []).length).toBe(3);
+    });
+});

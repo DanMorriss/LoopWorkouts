@@ -25,6 +25,7 @@ import {
 } from '../../models/workout';
 import { MAX_WEIGHT_KG } from '../../models/weight';
 import { isLoggedSet, isTimedSet, RepSet } from '../../models/history';
+import { StepSwap } from '../../models/step-swap';
 import { Deletion, inOrder, LibraryOrder, mergeRecords, newId } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { SyncClock } from './sync-clock.service';
@@ -47,6 +48,7 @@ export class WorkoutStore {
     private _activeRepMs = signal(0);
     private _activeSets = signal<RepSet[]>([]);
     private _activeSides = signal<RunSides>(DEFAULT_RUN_SIDES);
+    private _activeSwaps = signal<StepSwap[]>([]);
 
     readonly workouts = computed(() => this._workouts());
     /** The library's order, to sync with other copies (see `mergeLibraryOrder()`). */
@@ -78,6 +80,11 @@ export class WorkoutStore {
      */
     readonly activeSets = computed(() => this._activeSets());
     /**
+     * Exercises swapped for others in the current run (RUN-11), in the order they were
+     * swapped. The saved workout keeps its own (see `ActiveRunService.running`).
+     */
+    readonly activeSwaps = computed(() => this._activeSwaps());
+    /**
      * How the current run does exercises each side, from the settings when it started: kept
      * with the run, so changing them mid-workout can't move its clock.
      */
@@ -102,6 +109,7 @@ export class WorkoutStore {
             this._activeRepMs.set(readCount(sessionStorage.getItem('activeRepMs')));
             this._activeSets.set(readSets(sessionStorage.getItem('activeSets')));
             this._activeSides.set(readSides(sessionStorage.getItem('activeSides')));
+            this._activeSwaps.set(readSwaps(sessionStorage.getItem('activeSwaps')));
         }
     }
 
@@ -340,6 +348,35 @@ export class WorkoutStore {
         sessionStorage.setItem('activeRunStartedAt', String(startedAt));
         sessionStorage.removeItem('activeWorkoutPausedAt');
         this.clearRepSteps();
+        this.setSwaps([]);
+    }
+
+    /** Swaps a step's exercise for another, for the rest of this run (RUN-11). */
+    swapActiveStep(swap: StepSwap) {
+        this.setSwaps([...this._activeSwaps(), swap]);
+    }
+
+    /** The step's latest swap as it runs now, e.g. its reps or weight changed mid-workout. */
+    updateActiveSwap(step: number, swapped: Step) {
+        const swaps = this._activeSwaps();
+        const last = swaps.map((swap) => swap.step).lastIndexOf(step);
+        if (last >= 0) {
+            this.setSwaps(swaps.map((swap, i) => (i === last ? { ...swap, swapped } : swap)));
+        }
+    }
+
+    /** Takes back the latest swap, e.g. with Undo. */
+    undoActiveSwap() {
+        this.setSwaps(this._activeSwaps().slice(0, -1));
+    }
+
+    private setSwaps(swaps: StepSwap[]) {
+        this._activeSwaps.set(swaps);
+        if (swaps.length > 0) {
+            sessionStorage.setItem('activeSwaps', JSON.stringify(swaps));
+        } else {
+            sessionStorage.removeItem('activeSwaps');
+        }
     }
 
     /**
@@ -463,6 +500,7 @@ export class WorkoutStore {
         sessionStorage.removeItem('activeRunStartedAt');
         sessionStorage.removeItem('activeSides');
         this.clearRepSteps();
+        this.setSwaps([]);
     }
 
     /** Blocks with their named steps linked to exercises (see `linkSteps()`). */
@@ -756,6 +794,29 @@ function stepsFromWorkAndRest(saved: Record<string, unknown>): Step[] | null {
 }
 
 /** The saved sides of the run in progress; anything missing or broken is the defaults. */
+/** The run's saved swaps; any that aren't usable are left out. */
+function readSwaps(saved: string | null): StepSwap[] {
+    try {
+        const parsed: unknown = JSON.parse(saved ?? '[]');
+        return Array.isArray(parsed) ? parsed.filter(isSwap) : [];
+    } catch {
+        return [];
+    }
+}
+
+function isSwap(value: unknown): value is StepSwap {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+    const swap = value as Record<string, unknown>;
+    return (
+        isWholeNumber(swap['step'], 0) &&
+        isWholeNumber(swap['from'], 0) &&
+        isStep(swap['original']) &&
+        isStep(swap['swapped'])
+    );
+}
+
 function readSides(saved: string | null): RunSides {
     try {
         const parsed: unknown = JSON.parse(saved ?? 'null');

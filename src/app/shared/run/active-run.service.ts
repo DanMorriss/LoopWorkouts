@@ -8,7 +8,9 @@ import {
     signal,
     untracked,
 } from '@angular/core';
+import { Exercise } from '../../models/exercise';
 import { HistoryEntry, historyId, RepSet } from '../../models/history';
+import { runPosition, StepSwap, swappedStep, withSwaps } from '../../models/step-swap';
 import {
     allSteps,
     placedHeadings,
@@ -16,6 +18,7 @@ import {
     RepSetAmount,
     RepStep,
     RunningWorkout,
+    Step,
     runPlan,
     stepForSet,
     stepRounds,
@@ -67,12 +70,18 @@ export class ActiveRunService {
 
     readonly workout = this.store.activeWorkout;
     /**
-     * The workout as it runs, with how it does exercises each side (see `RunningWorkout`): what
-     * its clock, alarms and sets are worked out from.
+     * The workout as it runs, with how it does exercises each side (see `RunningWorkout`) and
+     * any exercises swapped for others (RUN-11): what its clock, alarms and sets are worked
+     * out from. `workout` is the saved one, without the swaps.
      */
     readonly running = computed((): RunningWorkout | null => {
         const workout = this.workout();
-        return workout && { ...workout, sides: this.store.activeSides() };
+        return (
+            workout && {
+                ...withSwaps(workout, this.store.activeSwaps()),
+                sides: this.store.activeSides(),
+            }
+        );
     });
     readonly isPaused = this.store.isPaused;
 
@@ -124,7 +133,9 @@ export class ActiveRunService {
     readonly sets = computed(() => {
         const workout = this.running();
         const state = this.state();
-        return workout && state ? setsDone(workout, state, this.store.activeSets()) : [];
+        return workout && state
+            ? setsDone(workout, state, this.store.activeSets(), this.store.activeSwaps())
+            : [];
     });
 
     /**
@@ -289,6 +300,7 @@ export class ActiveRunService {
         this.resumedAt.set(0);
         this.ending.set(false);
         this._steppedUp.set(new Set());
+        this._keptSwaps.set(new Set());
         this.sync();
     }
 
@@ -330,7 +342,8 @@ export class ActiveRunService {
      * Changes the reps or weight of the rep step being waited on, e.g. going up a weight, in
      * this run and the saved workout, so next time starts there: for this set and the rest of
      * the run, or, on a step whose sets vary (BLD-11), for this set only. Both sides of a set
-     * go together. A weight of undefined is none.
+     * go together. A weight of undefined is none. A step swapped for another exercise (RUN-11)
+     * changes in this run only, unless the swap's been kept for next time.
      */
     changeReps(change: { reps: number } | { weight: number | undefined }) {
         const state = this.state();
@@ -343,7 +356,7 @@ export class ActiveRunService {
         const reps = 'reps' in change ? change.reps : step.reps;
         const weight = 'weight' in change ? change.weight : step.weight;
         // No weight is left out, rather than saved as undefined
-        this.store.updateActiveStep(
+        this.updateStep(
             place.step,
             withRepSet(saved, place.set, { reps, ...(weight === undefined ? {} : { weight }) })
         );
@@ -360,7 +373,80 @@ export class ActiveRunService {
         if (state?.phase !== 'reps' || saved?.kind !== 'reps' || !place) {
             return;
         }
-        this.store.updateActiveStep(place.step, withEachRepSet(saved, change));
+        this.updateStep(place.step, withEachRepSet(saved, change));
+    }
+
+    /** A step changed mid-workout, in this run and the saved workout, or the run's swap. */
+    private updateStep(step: number, changed: Step) {
+        if (this.swappedSteps().has(step)) {
+            this.store.updateActiveSwap(step, changed);
+            if (!this._keptSwaps().has(step)) {
+                return;
+            }
+        }
+        this.store.updateActiveStep(step, changed);
+    }
+
+    /**
+     * The steps swapped for another exercise in this run (RUN-11), by their place in the
+     * workout, each with what it was at first and what it is now.
+     */
+    readonly swaps = computed(() => {
+        const latest = new Map<number, { step: number; was: Step; now: Step }>();
+        for (const swap of this.store.activeSwaps()) {
+            const was = latest.get(swap.step)?.was ?? swap.original;
+            latest.set(swap.step, { step: swap.step, was, now: swap.swapped });
+        }
+        // Swapped back to what it was is no swap at all
+        return [...latest.values()]
+            .filter((swap) => swap.now.exerciseId !== swap.was.exerciseId)
+            .sort((a, b) => a.step - b.step);
+    });
+    /** The steps swapped in this run (RUN-11), by their place in the workout. */
+    readonly swappedSteps = computed(
+        () => new Set(this.store.activeSwaps().map((swap) => swap.step))
+    );
+
+    private readonly _keptSwaps = signal<ReadonlySet<number>>(new Set());
+    /** Swapped steps the summary was told to keep for next time (see `keepSwap()`). */
+    readonly keptSwaps = this._keptSwaps.asReadonly();
+
+    /**
+     * Swaps the step in progress for `exercise` (RUN-11), for the rest of this run: the same
+     * reps or time, sets and sides, at the weight in `lastSets`, its sets last time. Sets
+     * already done stay as they were. Returns the swap, or null if the step isn't an exercise.
+     */
+    swapExercise(exercise: Exercise, lastSets: readonly RepSet[]): StepSwap | null {
+        const workout = this.running();
+        const state = this.state();
+        const place = workout && state ? placeAt(workout, state.stepIndex) : null;
+        const current = workout && place ? allSteps(workout)[place.step] : undefined;
+        if (!workout || !state || !place || current?.kind === 'rest' || !current?.exerciseId) {
+            return null;
+        }
+        const swap: StepSwap = {
+            step: place.step,
+            from: runPosition(state.round, state.stepIndex, runPlan(workout).steps.length),
+            original: current,
+            swapped: swappedStep(current, exercise, lastSets),
+        };
+        this.store.swapActiveStep(swap);
+        return swap;
+    }
+
+    /** Takes back the latest swap, e.g. with Undo. */
+    undoSwap() {
+        this.store.undoActiveSwap();
+    }
+
+    /** The summary's "Use … next time": the saved workout's step becomes the swapped one. */
+    keepSwap(step: number) {
+        const swap = this.swaps().find((swap) => swap.step === step);
+        if (!swap) {
+            return;
+        }
+        this.store.updateActiveStep(step, swap.now);
+        this._keptSwaps.update((steps) => new Set([...steps, step]));
     }
 
     /**
@@ -462,6 +548,7 @@ export class ActiveRunService {
             if (
                 step.kind !== 'reps' ||
                 this._steppedUp().has(stepIndex) ||
+                (this.swappedSteps().has(stepIndex) && !this._keptSwaps().has(stepIndex)) ||
                 !done.some((set) => set.step === stepIndex)
             ) {
                 return;

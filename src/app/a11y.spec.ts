@@ -898,6 +898,43 @@ for (const theme of ['dark', 'light'] as const) {
                 );
                 await expectNoViolations();
             });
+
+            it('swapping an exercise, then asked whether to use it next time', async () => {
+                store.setActiveWorkout(
+                    store.addWorkout(
+                        makeWorkout({
+                            steps: [
+                                {
+                                    kind: 'reps',
+                                    reps: 10,
+                                    name: 'Back squat',
+                                    weight: 60,
+                                    exerciseId: 'builtin:back-squat',
+                                },
+                            ],
+                            repeats: 2,
+                        })
+                    )
+                );
+                await open('/workout');
+                click('.workout-face__info');
+                await settle();
+                click('.details__pick-another');
+                await settle();
+                expect(
+                    fixture.nativeElement.querySelector('app-swap-exercise-dialog')
+                ).not.toBeNull();
+                await expectNoViolations();
+
+                click('.swap__option');
+                await settle();
+                click('.workout-next--done');
+                await settle();
+                click('.workout-next--done');
+                await settle();
+                expect(fixture.nativeElement.textContent).toContain('next time?');
+                await expectNoViolations();
+            });
         });
     });
 }

@@ -9,6 +9,16 @@
                     [style.width.%]="row.band.width"
                 ></span>
                 <span class="bars__fill" [style.width.%]="row.width"></span>
+                <span
+                    class="bars__edge"
+                    [class.bars__edge--covered]="row.band.lowCovered"
+                    [style.left.%]="row.band.left"
+                ></span>
+                <span
+                    class="bars__edge bars__edge--high"
+                    [class.bars__edge--covered]="row.band.highCovered"
+                    [style.left.%]="row.band.right"
+                ></span>
             </span>
             <span class="bars__count" aria-hidden="true">{{ row.count }}</span>
             <span class="sr-only">{{ row.description }}</span>

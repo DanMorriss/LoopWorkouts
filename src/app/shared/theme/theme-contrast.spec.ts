@@ -137,5 +137,16 @@ for (const theme of ['dark', 'light'] as const) {
                 ).toBeGreaterThanOrEqual(3);
             }
         });
+
+        // The aim's edges: a line on the track, and a notch in the track's colour on a fill,
+        // so the fills against the track (above) cover the notches
+        it("makes the aim's edges stand out on the track (at least 3:1)", () => {
+            expect(
+                contrastRatio(
+                    flatten(['--muscle-idle', '--balance-band-edge']),
+                    token('--muscle-idle')
+                )
+            ).toBeGreaterThanOrEqual(3);
+        });
     });
 }

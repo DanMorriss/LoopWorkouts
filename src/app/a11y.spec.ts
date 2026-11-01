@@ -515,10 +515,18 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it("a built-in exercise's animated demo, paused", async () => {
+            it("a built-in exercise's animated demo, in 3D with Turn, paused", async () => {
                 await TestBed.inject(ExerciseStore).loadMotion();
                 await open('/exercises/back-squat');
-                expect(fixture.nativeElement.querySelector('app-exercise-figure')).not.toBeNull();
+                // three.js loads with the first demo
+                await vi.waitFor(
+                    () =>
+                        expect(
+                            fixture.nativeElement.querySelector('app-exercise-figure-3d')
+                        ).not.toBeNull(),
+                    { timeout: 10000 }
+                );
+                fixture.detectChanges();
                 click('.demo__toggle');
                 await settle();
                 await expectNoViolations();

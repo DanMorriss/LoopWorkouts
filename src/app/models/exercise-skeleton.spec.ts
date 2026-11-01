@@ -1,0 +1,173 @@
+import { BUILT_IN_EXERCISE_MOTION } from './built-in-exercise-motion';
+import { BODY, ExerciseMotion, loopLength, Pose, poseAt } from './exercise-motion';
+import {
+    dot3,
+    HIP_SPREAD,
+    length3,
+    Limb3,
+    motionJoints,
+    SHOULDER_SPREAD,
+    skeletonOf,
+    sub3,
+    Vec3,
+} from './exercise-skeleton';
+
+const distance = (a: Vec3, b: Vec3) => length3(sub3(a, b));
+const close = (a: Vec3, b: Vec3) => a.forEach((value, i) => expect(value).toBeCloseTo(b[i], 5));
+
+const standing: Pose = {
+    hips: [0, -92],
+    torso: 180,
+    arms: [{ angles: [0, 0] }, { angles: [0, 0] }],
+    legs: [
+        { reach: [0, -4], bend: 'ccw' },
+        { reach: [0, -4], bend: 'ccw' },
+    ],
+};
+const side = (pose: Pose): ExerciseMotion => ({
+    view: 'side',
+    frames: [{ label: 'Hold', pose, ms: 1000 }],
+});
+const front = (pose: Pose): ExerciseMotion => ({ ...side(pose), view: 'front' });
+
+/** Each part of a limb keeps its length, however it was drawn. */
+function expectLengths(limb: Limb3, upper: number, lower: number) {
+    expect(distance(limb.root, limb.mid)).toBeCloseTo(upper, 4);
+    expect(distance(limb.mid, limb.end)).toBeCloseTo(lower, 4);
+}
+
+describe('skeletonOf', () => {
+    it('lifts a figure drawn from the side: facing +x, up +y, its near limbs on its right', () => {
+        const skeleton = skeletonOf(standing, side(standing));
+
+        close(skeleton.hips, [0, 92, 0]);
+        close(skeleton.up, [0, 1, 0]);
+        close(skeleton.forward, [1, 0, 0]);
+        close(skeleton.right, [0, 0, 1]);
+        expect(skeleton.shoulders[1]).toBeCloseTo(92 + BODY.torso, 5);
+        expect(skeleton.arms[0].root[2]).toBeCloseTo(SHOULDER_SPREAD, 5);
+        expect(skeleton.arms[1].root[2]).toBeCloseTo(-SHOULDER_SPREAD, 5);
+        expect(skeleton.legs[0].root[2]).toBeCloseTo(HIP_SPREAD, 5);
+        expect(skeleton.arms.map((arm) => arm.side)).toEqual([1, -1]);
+        // Feet flat, pointing forwards
+        close(skeleton.feet[0], [1, 0, 0]);
+    });
+
+    it('lifts a figure drawn from the front the same way round', () => {
+        const pose: Pose = { ...standing, hips: [0, -99.5] };
+        const skeleton = skeletonOf(pose, front(pose));
+
+        close(skeleton.forward, [1, 0, 0]);
+        close(skeleton.right, [0, 0, 1]);
+        // The near arm, on your left as drawn, is the figure's right
+        expect(skeleton.arms[0].root[2]).toBeGreaterThan(0);
+        expect(skeleton.arms[1].root[2]).toBeLessThan(0);
+        close(skeleton.feet[0], [1, 0, 0]);
+    });
+
+    it('keeps every part its length, as drawn or reaching', () => {
+        const skeleton = skeletonOf(standing, side(standing));
+
+        skeleton.arms.forEach((arm) => expectLengths(arm, BODY.upperArm, BODY.forearm));
+        skeleton.legs.forEach((leg) => expectLengths(leg, BODY.thigh, BODY.shin));
+    });
+
+    it('points a part drawn shorter out of the drawing by the length it misses', () => {
+        // A fly's arms opening: towards you from the side, the far one away
+        const open: Pose = {
+            ...standing,
+            arms: [
+                { angles: [180, 180], scale: [0.2, 0.2] },
+                { angles: [180, 180], scale: [0.2, 0.2] },
+            ],
+        };
+        const skeleton = skeletonOf(open, side(open));
+
+        skeleton.arms.forEach((arm) => expectLengths(arm, BODY.upperArm, BODY.forearm));
+        expect(skeleton.arms[0].end[2]).toBeGreaterThan(SHOULDER_SPREAD + 50);
+        expect(skeleton.arms[1].end[2]).toBeLessThan(-SHOULDER_SPREAD - 50);
+
+        // A thigh drawn short from the front, sitting, points forwards
+        const sitting: Pose = {
+            ...standing,
+            hips: [0, -58],
+            legs: [
+                { angles: [-10, -6], scale: [0.25, 0.85] },
+                { angles: [10, 6], scale: [0.25, 0.85] },
+            ],
+        };
+        const seated = skeletonOf(sitting, front(sitting));
+        seated.legs.forEach((leg) => {
+            expectLengths(leg, BODY.thigh, BODY.shin);
+            expect(leg.mid[0] - leg.root[0]).toBeGreaterThan(40);
+        });
+    });
+
+    it('turns the shoulders, arms and head about the back by its twist', () => {
+        const reaching: Pose = {
+            ...standing,
+            arms: [{ angles: [90, 90] }, { angles: [90, 90] }],
+        };
+        const still = skeletonOf(reaching, side(reaching));
+        const turned = skeletonOf({ ...reaching, twist: 90 }, side(reaching));
+
+        // Turned to the figure's left, a quarter turn: the arms reach that way, not forwards
+        close(turned.forward, [0, 0, -1]);
+        expect(turned.arms[0].end[2]).toBeLessThan(-40);
+        expect(turned.arms[0].end[1]).toBeCloseTo(still.arms[0].end[1], 5);
+        // The legs and hips stay
+        expect(turned.legs).toEqual(still.legs);
+        close(turned.hips, still.hips);
+    });
+
+    it('brings the hands together when told how far apart they are', () => {
+        const together: Pose = {
+            ...standing,
+            arms: [{ angles: [60, 120] }, { angles: [60, 120] }],
+            handsApart: 4,
+        };
+        const skeleton = skeletonOf(together, side(together));
+
+        expect(Math.abs(skeleton.arms[0].end[2] - skeleton.arms[1].end[2])).toBeCloseTo(4, 4);
+        skeleton.arms.forEach((arm) => expectLengths(arm, BODY.upperArm, BODY.forearm));
+    });
+});
+
+describe('motionJoints', () => {
+    it('reaches the head and the hands in every position', () => {
+        const raised: Pose = {
+            ...standing,
+            arms: [{ angles: [180, 180] }, { angles: [180, 180] }],
+        };
+        const motion: ExerciseMotion = {
+            view: 'side',
+            frames: [
+                { label: 'Down', pose: standing, ms: 500 },
+                { label: 'Up', pose: raised, ms: 500 },
+            ],
+        };
+        const highest = Math.max(...motionJoints(motion).map((joint) => joint[1]));
+
+        expect(highest).toBeGreaterThan(92 + BODY.torso + BODY.upperArm + BODY.forearm - 5);
+    });
+});
+
+describe('BUILT_IN_EXERCISE_MOTION in 3D', () => {
+    const motions = Object.entries(BUILT_IN_EXERCISE_MOTION) as [string, ExerciseMotion][];
+
+    it.each(motions)('%s keeps every part its length, all through its loop', (_, motion) => {
+        const steps = 12;
+        for (let i = 0; i < steps; i++) {
+            const skeleton = skeletonOf(poseAt(motion, (loopLength(motion) * i) / steps), motion);
+            // A reach out of range stretches straight, so a part can come up short, but never long
+            for (const [limb, upper, lower] of [
+                ...skeleton.arms.map((arm) => [arm, BODY.upperArm, BODY.forearm] as const),
+                ...skeleton.legs.map((leg) => [leg, BODY.thigh, BODY.shin] as const),
+            ]) {
+                expect(distance(limb.root, limb.mid)).toBeLessThanOrEqual(upper + 1e-6);
+                expect(distance(limb.mid, limb.end)).toBeLessThanOrEqual(lower + 1e-6);
+            }
+            expect(dot3(skeleton.up, skeleton.right)).toBeCloseTo(0, 6);
+        }
+    });
+});

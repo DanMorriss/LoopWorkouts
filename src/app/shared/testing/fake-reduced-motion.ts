@@ -8,10 +8,13 @@ export function fakeReducedMotion(initiallyReduced: boolean) {
         removeEventListener: (_: string, listener: (event: MediaQueryListEvent) => void) =>
             listeners.delete(listener),
     };
-    vi.spyOn(window, 'matchMedia').mockImplementation((media: string) => {
-        expect(media).toBe('(prefers-reduced-motion: reduce)');
-        return query as unknown as MediaQueryList;
-    });
+    // Other queries (the theme's colour scheme, say) are the browser's own
+    const real = window.matchMedia.bind(window);
+    vi.spyOn(window, 'matchMedia').mockImplementation((media: string) =>
+        media === '(prefers-reduced-motion: reduce)'
+            ? (query as unknown as MediaQueryList)
+            : real(media)
+    );
     return {
         listenerCount: () => listeners.size,
         set(reduced: boolean) {

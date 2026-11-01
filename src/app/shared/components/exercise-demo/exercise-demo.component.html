@@ -1,23 +1,45 @@
 @if (motion(); as motion) {
-    @if (reduced() || motion.frames.length === 1) {
+    @let solid = scene();
+    @let still = reduced() || motion.frames.length === 1;
+    @if (still) {
         <!-- Its key positions, still, or the one position of a hold. Hidden from screen readers
              with the figures: the steps say it -->
         <ul class="demo__stills" aria-hidden="true">
             @for (frame of motion.frames; track $index) {
                 <li class="demo__still">
-                    <app-exercise-figure
-                        class="demo__figure demo__figure--still"
-                        [motion]="motion"
-                        [pose]="frame.pose"
-                        [main]="exercise().mainMuscles"
-                        [supporting]="exercise().supportingMuscles"
-                    />
+                    @if (solid) {
+                        <app-exercise-figure-3d
+                            class="demo__figure demo__figure--still"
+                            [scene]="solid"
+                            [pose]="frame.pose"
+                            [paint]="paint()"
+                            [(yaw)]="yaw"
+                        />
+                    } @else if (drawing() === 'flat') {
+                        <app-exercise-figure
+                            class="demo__figure demo__figure--still"
+                            [motion]="motion"
+                            [pose]="frame.pose"
+                            [main]="exercise().mainMuscles"
+                            [supporting]="exercise().supportingMuscles"
+                        />
+                    } @else {
+                        <div class="demo__waiting demo__waiting--still"></div>
+                    }
                     <span class="demo__label">{{ frame.label }}</span>
                 </li>
             }
         </ul>
     } @else {
-        <div class="demo__stage">
+        @if (solid) {
+            <app-exercise-figure-3d
+                class="demo__figure"
+                [scene]="solid"
+                [pose]="pose()!"
+                [paint]="paint()"
+                [(yaw)]="yaw"
+            />
+        } @else if (drawing() === 'flat') {
             <app-exercise-figure
                 class="demo__figure"
                 [motion]="motion"
@@ -25,24 +47,57 @@
                 [main]="exercise().mainMuscles"
                 [supporting]="exercise().supportingMuscles"
             />
-            <button
-                type="button"
-                class="btn-pill demo__toggle"
-                [attr.aria-label]="playing() ? 'Pause the demo' : 'Play the demo'"
-                (click)="toggle()"
-            >
-                <svg class="demo__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    @if (playing()) {
-                        <rect x="6" y="5" width="4" height="14" rx="1" />
-                        <rect x="14" y="5" width="4" height="14" rx="1" />
-                    } @else {
+        } @else {
+            <div class="demo__waiting"></div>
+        }
+    }
+    @if (solid || !still) {
+        <div class="demo__controls">
+            @if (solid) {
+                <button
+                    type="button"
+                    class="btn-pill demo__turn"
+                    aria-label="Turn the figure"
+                    (click)="turn()"
+                >
+                    <svg
+                        class="demo__icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        focusable="false"
+                    >
                         <path
-                            d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"
+                            d="M12 5c-4.4 0-8 1.8-8 4.5 0 2.2 2.5 3.9 6 4.4v-2a.5.5 0 0 1 .85-.35l3 3a.5.5 0 0 1 0 .7l-3 3A.5.5 0 0 1 10 18v-2.1c-4.6-.6-8-3-8-6.4C2 5.6 6.5 3 12 3s10 2.6 10 6.5c0 2.5-1.9 4.6-5 5.7v-2.2c1.9-.9 3-2.1 3-3.5C20 6.8 16.4 5 12 5z"
                         />
-                    }
-                </svg>
-                {{ playing() ? 'Pause' : 'Play' }}
-            </button>
+                    </svg>
+                    Turn
+                </button>
+            }
+            @if (!still) {
+                <button
+                    type="button"
+                    class="btn-pill demo__toggle"
+                    [attr.aria-label]="playing() ? 'Pause the demo' : 'Play the demo'"
+                    (click)="toggle()"
+                >
+                    <svg
+                        class="demo__icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        focusable="false"
+                    >
+                        @if (playing()) {
+                            <rect x="6" y="5" width="4" height="14" rx="1" />
+                            <rect x="14" y="5" width="4" height="14" rx="1" />
+                        } @else {
+                            <path
+                                d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"
+                            />
+                        }
+                    </svg>
+                    {{ playing() ? 'Pause' : 'Play' }}
+                </button>
+            }
         </div>
     }
 }

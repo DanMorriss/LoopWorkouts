@@ -10,7 +10,8 @@ const SLOP = 10;
  * Where a swipe can't start: things a finger moves sideways on for their own sake (the
  * progress chart, which follows a finger across it), and anything typed in.
  */
-const OWN_GESTURES = '.progress__svg, input, textarea, select, [contenteditable]';
+const OWN_GESTURES =
+    '.progress__svg, app-exercise-figure-3d, input, textarea, select, [contenteditable]';
 
 /**
  * Swiping right on a page goes back to `appSwipeBack` (a url), as on a phone: the page

@@ -8,6 +8,7 @@ import {
     Pose,
     SolvedLimb,
     solvePose,
+    STANCE,
 } from './exercise-motion';
 
 /**
@@ -54,6 +55,16 @@ export interface Skeleton {
     readonly feet: readonly [near: Vec3, far: Vec3];
     /** Where a barbell on the back sits. */
     readonly bar: Vec3;
+    /** How far the dumbbells are turned palms in (`Pose.palmsIn`). */
+    readonly palmsIn: number;
+    /**
+     * Where a kettlebell's handle is: in the hand `Pose.heldBy` says, between the hands, or
+     * set down (`Pose.bellAt`), and whether it's set down, so stands upright.
+     */
+    readonly bell: Vec3;
+    readonly bellDown: boolean;
+    /** Which hand the kettlebell is in (`Pose.heldBy`). */
+    readonly heldBy: number;
 }
 
 /** How far each shoulder and hip joint is from the middle, side to side. */
@@ -165,6 +176,9 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         if (side && pose.handsApart !== undefined) {
             end = add3(end, scale3(right, (placed.side * (pose.handsApart - HANDS_APART)) / 2));
         }
+        if (side && pose.handsOut?.[index]) {
+            end = add3(end, scale3(right, placed.side * pose.handsOut[index]));
+        }
         if (!side && pose.handsForward) {
             end = add3(end, scale3(forward, pose.handsForward));
         }
@@ -179,7 +193,17 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
                 scale3(normalize3(sideways), pose.elbowsOut)
             );
         }
-        if (end === placed.end && !pose.elbowsOut) {
+        if (pose.elbowsDown) {
+            // Down the body: square to the line from the shoulder to the hand
+            const along = normalize3(sub3(end, placed.root));
+            const down = scale3(up, -1);
+            const downwards = sub3(down, scale3(along, dot3(down, along)));
+            towards = add3(
+                scale3(normalize3(towards), 1 - pose.elbowsDown),
+                scale3(normalize3(downwards), pose.elbowsDown)
+            );
+        }
+        if (end === placed.end && !pose.elbowsOut && !pose.elbowsDown) {
             return placed;
         }
         end = within(placed.root, end, BODY.upperArm + BODY.forearm);
@@ -192,10 +216,23 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         mid: turn(limb.mid),
         end: turn(limb.end),
     });
-    const legs = [
-        limb(solved.legs[0], 0, HIP_SPREAD, [BODY.thigh, BODY.shin]),
-        limb(solved.legs[1], 1, HIP_SPREAD, [BODY.thigh, BODY.shin]),
-    ] as const;
+    const leg = (index: 0 | 1): Limb3 => {
+        const placed = limb(solved.legs[index], index, HIP_SPREAD, [BODY.thigh, BODY.shin]);
+        if (!side || pose.stance === undefined) {
+            return placed;
+        }
+        // A wide stance: the foot moved out, the knee bent out over it
+        const end = within(
+            placed.root,
+            add3(placed.end, scale3(right, (placed.side * (pose.stance - STANCE)) / 2)),
+            BODY.thigh + BODY.shin
+        );
+        const drawn = sub3(placed.mid, scale3(add3(placed.root, placed.end), 0.5));
+        const towards = add3(drawn, scale3(right, placed.side * length3(drawn) * 0.5));
+        const mid = bend(placed.root, end, BODY.thigh, BODY.shin, towards);
+        return { ...placed, mid, end };
+    };
+    const legs = [leg(0), leg(1)] as const;
 
     const headAngle = ((pose.head ?? pose.torso) * Math.PI) / 180;
     const headUp = turnDir(normalize3(lift(view, [Math.sin(headAngle), Math.cos(headAngle)])));
@@ -214,6 +251,7 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
     };
 
     const arms = clearLegs(motion, [turnLimb(arm(0)), turnLimb(arm(1))], legs, hips);
+    const bellAt = pose.bellAt;
     return {
         hips,
         shoulders: turnedShoulders,
@@ -227,6 +265,12 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         legs,
         feet: [foot(0), foot(1)],
         bar: turn(lift(view, solved.bar)),
+        palmsIn: pose.palmsIn ?? 0,
+        bell: bellAt
+            ? add3(lift(view, [bellAt[0], bellAt[1]]), scale3(right, bellAt[2]))
+            : lerp3(arms[0].end, arms[1].end, pose.heldBy ?? 0),
+        bellDown: !!bellAt,
+        heldBy: pose.heldBy ?? 0,
     };
 }
 

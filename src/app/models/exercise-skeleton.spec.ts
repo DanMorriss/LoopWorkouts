@@ -172,6 +172,80 @@ describe('skeletonOf, placing the hands in 3D', () => {
         });
     });
 
+    it('points the elbows down the body with elbowsDown, the hands staying put', () => {
+        // Hands in front of the shoulders, from the front, as an Arnold press starts
+        const pose: Pose = {
+            ...standing,
+            hips: [0, -99.5],
+            handsForward: 20,
+            arms: [
+                { reach: [-14, -160], bend: 'ccw' },
+                { reach: [14, -160], bend: 'cw' },
+            ],
+        };
+        const drawn = skeletonOf(pose, front(pose));
+        const down = skeletonOf({ ...pose, elbowsDown: 1 }, front(pose));
+
+        down.arms.forEach((arm, i) => {
+            close(arm.end, drawn.arms[i].end);
+            expectLengths(arm, BODY.upperArm, BODY.forearm);
+            // Below the shoulder and the hand, and in front of the shoulder, not out to the side
+            expect(arm.mid[1]).toBeLessThan(Math.min(arm.root[1], arm.end[1]));
+            expect(Math.abs(arm.mid[2] - arm.root[2])).toBeLessThan(5);
+        });
+    });
+
+    it('moves one hand across the body with handsOut, the other staying put', () => {
+        const pose: Pose = {
+            ...standing,
+            arms: [
+                { reach: [20, -100], bend: 'cw' },
+                { reach: [20, -100], bend: 'cw' },
+            ],
+        };
+        const drawn = skeletonOf(pose, side(pose));
+        const across = skeletonOf({ ...pose, handsOut: [-30, 0] }, side(pose));
+
+        expect(across.arms[0].end[2]).toBeCloseTo(drawn.arms[0].end[2] - 30, 4);
+        close(across.arms[1].end, drawn.arms[1].end);
+        expectLengths(across.arms[0], BODY.upperArm, BODY.forearm);
+    });
+
+    it('puts the feet wider apart for a wide stance, the knees out over them', () => {
+        const squat: Pose = { ...standing, hips: [-20, -50], torso: 140 };
+        const drawn = skeletonOf(squat, side(squat));
+        const wide = skeletonOf({ ...squat, stance: 50 }, side(squat));
+
+        expect(wide.legs[0].end[2] - wide.legs[1].end[2]).toBeCloseTo(50, 4);
+        wide.legs.forEach((leg, i) => {
+            expectLengths(leg, BODY.thigh, BODY.shin);
+            expect(leg.mid[2] * leg.side).toBeGreaterThan(drawn.legs[i].mid[2] * leg.side);
+        });
+    });
+
+    it('puts a kettlebell in the hand that holds it, between the hands, or set down', () => {
+        const pose: Pose = {
+            ...standing,
+            arms: [
+                { reach: [20, -100], bend: 'cw' },
+                { reach: [30, -100], bend: 'cw' },
+            ],
+        };
+        const motion = side(pose);
+        const [near, far] = skeletonOf(pose, motion).arms;
+
+        close(skeletonOf(pose, motion).bell, near.end);
+        close(skeletonOf({ ...pose, heldBy: 1 }, motion).bell, far.end);
+        close(skeletonOf({ ...pose, heldBy: 0.5 }, motion).bell, [
+            (near.end[0] + far.end[0]) / 2,
+            (near.end[1] + far.end[1]) / 2,
+            (near.end[2] + far.end[2]) / 2,
+        ]);
+        const down = skeletonOf({ ...pose, bellAt: [40, -19, -25] }, motion);
+        close(down.bell, [40, 19, -25]);
+        expect(down.bellDown).toBe(true);
+    });
+
     it('carries a barbell held below the hips in front of the legs, not through them', () => {
         const pose: Pose = {
             hips: [-26, -60],

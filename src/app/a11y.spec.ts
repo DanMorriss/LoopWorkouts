@@ -762,6 +762,32 @@ for (const theme of ['dark', 'light'] as const) {
                 expect(fixture.nativeElement.querySelector('app-welcome')).not.toBeNull();
                 await expectNoViolations();
             });
+
+            it('the setup, its name, equipment and body questions, and the workout to start with', async () => {
+                await open('/welcome/setup');
+                await expectNoViolations();
+
+                // Name, goal, then equipment, with a chip picked
+                click('.setup__form button[type="submit"]');
+                await settle();
+                click('.setup__actions .btn-main');
+                await settle();
+                click('.setup__chip');
+                await settle();
+                await expectNoViolations();
+
+                click('.setup__actions .btn-main');
+                await settle();
+                expect(fixture.nativeElement.querySelector('app-body-map')).not.toBeNull();
+                await expectNoViolations();
+
+                click('.setup__actions .btn-main');
+                await settle();
+                click('.setup__actions .btn-main');
+                await settle();
+                expect(fixture.nativeElement.querySelector('.setup__workout')).not.toBeNull();
+                await expectNoViolations();
+            });
         });
 
         describe('account', () => {

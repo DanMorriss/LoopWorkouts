@@ -1,4 +1,5 @@
 import { copyPlan, isWeekPlan, WeekPlan } from '../models/plan';
+import { Profile, readProfile } from '../models/profile';
 import { isDeletion, isLibraryOrder, LibraryOrder, SyncedKind } from '../models/sync';
 import { BACKUP_VERSION } from '../shared/backup/backup-file';
 import { CopyToMerge } from '../shared/backup/backup.service';
@@ -11,16 +12,19 @@ import { readHistoryEntry } from '../shared/state/history-store.service';
 import { readWorkout } from '../shared/state/workout-store.service';
 
 /**
- * The kinds of record on the server: those that leave a deletion, the library's order, and
- * the weekly plan.
+ * The kinds of record on the server: those that leave a deletion, the library's order, the
+ * weekly plan and the profile.
  */
-export type RecordKind = SyncedKind | 'library-order' | 'plan';
+export type RecordKind = SyncedKind | 'library-order' | 'plan' | 'profile';
 
 /** The library's order is one record, under this id. */
 export const LIBRARY_ORDER_ID = 'library';
 
 /** The weekly plan is one record, under this id. */
 export const PLAN_ID = 'week';
+
+/** The profile is one record, under this id. */
+export const PROFILE_ID = 'me';
 
 /** A record as the server keeps it (see supabase/schema.sql). A deletion has `deleted_at`. */
 export interface ServerRecord {
@@ -38,10 +42,11 @@ export interface ServerRecord {
 /** Everything on this device that syncs. */
 export type CopyHere = Omit<
     CopyToMerge,
-    'libraryOrder' | 'plan' | 'fromVersion1' | 'newWorkouts'
+    'libraryOrder' | 'plan' | 'profile' | 'fromVersion1' | 'newWorkouts'
 > & {
     libraryOrder: LibraryOrder;
     plan: WeekPlan;
+    profile: Profile;
 };
 
 /** Everything on this device, as the server keeps it. */
@@ -66,6 +71,10 @@ export function recordsHere(copy: CopyHere): ServerRecord[] {
             : []),
         // Never planned, so there's no plan to give
         ...(copy.plan.updatedAt > 0 ? [record('plan', { id: PLAN_ID, ...copy.plan })] : []),
+        // Not set up here, so there's no profile to give
+        ...(copy.profile.updatedAt > 0
+            ? [record('profile', { id: PROFILE_ID, ...copy.profile })]
+            : []),
         ...copy.deleted.map(
             (deletion): ServerRecord => ({
                 kind: deletion.kind,
@@ -128,6 +137,7 @@ export function readPulled(fetched: readonly unknown[]): PulledPage {
         hiddenExercises: [],
         libraryOrder: null,
         plan: null,
+        profile: null,
         deleted: [],
     };
     const read: ServerRecord[] = [];
@@ -185,6 +195,7 @@ const RECORD_KINDS: readonly RecordKind[] = [
     'hidden-exercise',
     'library-order',
     'plan',
+    'profile',
 ];
 
 /** Adds a record to the copy to merge, if it's usable, and gives whether it was. */
@@ -225,6 +236,14 @@ function addTo(copy: CopyToMerge, record: ServerRecord): boolean {
             }
             copy.plan = { ...copyPlan(record.data), updatedAt: record.updated_at };
             return true;
+        case 'profile': {
+            const profile = record.id === PROFILE_ID ? readProfile(record.data) : null;
+            if (profile === null) {
+                return false;
+            }
+            copy.profile = { ...profile, updatedAt: record.updated_at };
+            return true;
+        }
     }
 }
 

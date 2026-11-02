@@ -101,7 +101,7 @@ begin
     from jsonb_to_recordset(changes) as c(
         kind text, id text, updated_at bigint, deleted_at bigint, data jsonb, version integer
     )
-    where c.kind in ('workout', 'history', 'exercise', 'exercise-note', 'hidden-exercise', 'library-order', 'plan')
+    where c.kind in ('workout', 'history', 'exercise', 'exercise-note', 'hidden-exercise', 'library-order', 'plan', 'profile')
         and c.id <> ''
         and c.updated_at > 0
         and (c.deleted_at is not null or c.data is not null)

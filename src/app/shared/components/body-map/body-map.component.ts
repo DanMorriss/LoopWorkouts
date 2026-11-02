@@ -18,7 +18,8 @@ let nextId = 0;
  * with (the editor's chips do the same for keyboards and screen readers). With `toggles` as
  * well, each muscle is a toggle button for keyboards and screen readers too, pressed when
  * it's main: for a filter, where tapping turns a muscle on or off (the Exercises list).
- * `removableLabels` gives each listed muscle a remove button.
+ * `removableLabels` gives each listed muscle a remove button. `figureOnly` leaves the list
+ * out, for showing the figure itself (the setup's choice of body).
  */
 @Component({
     selector: 'app-body-map',
@@ -33,6 +34,7 @@ export class BodyMapComponent {
     readonly tappable = input(false);
     readonly toggles = input(false);
     readonly removableLabels = input(false);
+    readonly figureOnly = input(false);
     readonly muscleTapped = output<MuscleGroup>();
     readonly muscleCleared = output<MuscleGroup>();
 

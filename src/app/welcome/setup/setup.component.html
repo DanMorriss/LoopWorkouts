@@ -1,0 +1,195 @@
+<div class="flex justify-center">
+    <div
+        class="setup m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-6 shadow-xl shadow-(color:--shadow)"
+    >
+        @if (checking()) {
+            <p class="setup__checking" role="status">Getting your profile…</p>
+        } @else {
+            @if (number(); as number) {
+                <!-- How far through: said once, in words; the bar is for the eye -->
+                <p class="setup__count">Question {{ number }} of {{ questionCount }}</p>
+                <div class="setup__progress" aria-hidden="true">
+                    <span
+                        class="setup__progress-fill"
+                        [style.width.%]="(number / questionCount) * 100"
+                    ></span>
+                </div>
+            }
+
+            @switch (step()) {
+                @case ('name') {
+                    <form class="setup__form" (submit)="next($event)">
+                        <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
+                            What should we call you?
+                        </h2>
+                        <p class="setup__hint" id="setup-name-hint">
+                            Home greets you by it. You can leave it empty.
+                        </p>
+                        <label class="picker-field">
+                            <span class="picker-field__label">Your name</span>
+                            <input
+                                class="picker-field__input"
+                                type="text"
+                                name="name"
+                                autocomplete="given-name"
+                                aria-describedby="setup-name-hint"
+                                [maxLength]="maxNameLength"
+                                [value]="name()"
+                                (input)="typed($event)"
+                            />
+                        </label>
+                        <div class="setup__actions">
+                            <span></span>
+                            <button type="submit" class="btn-main btn-main--small">Next</button>
+                        </div>
+                    </form>
+                }
+
+                @case ('goal') {
+                    <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
+                        What do you train for?
+                    </h2>
+                    <p class="setup__hint">It sets how many sets a week each muscle aims at.</p>
+                    <div class="setup__choices" role="radiogroup" aria-labelledby="setup-question">
+                        @for (option of goals; track option.value) {
+                            <label class="setup__choice">
+                                <input
+                                    type="radio"
+                                    name="trainingGoal"
+                                    class="setup__input"
+                                    [value]="option.value"
+                                    [checked]="settings.trainingGoal() === option.value"
+                                    (change)="settings.update({ trainingGoal: option.value })"
+                                />
+                                <span class="setup__choice-label">{{ option.label }}</span>
+                                <span class="setup__choice-hint">{{ option.hint }}</span>
+                            </label>
+                        }
+                    </div>
+                }
+
+                @case ('equipment') {
+                    <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
+                        What equipment do you have?
+                    </h2>
+                    <p class="setup__hint" id="setup-equipment-hint">
+                        Pick all you can use. Exercises and workouts show what you can do with it,
+                        and those that need nothing always show. Pick none to see everything.
+                    </p>
+                    <div
+                        class="setup__chips"
+                        role="group"
+                        aria-labelledby="setup-question"
+                        aria-describedby="setup-equipment-hint"
+                    >
+                        @for (equipment of equipmentChoices; track equipment) {
+                            <button
+                                type="button"
+                                class="setup__chip"
+                                [attr.aria-pressed]="has(equipment)"
+                                (click)="toggle(equipment)"
+                            >
+                                @if (has(equipment)) {
+                                    <app-icon class="setup__chip-icon">check</app-icon>
+                                }
+                                {{ equipmentLabel(equipment) }}
+                            </button>
+                        }
+                    </div>
+                }
+
+                @case ('body') {
+                    <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
+                        Which body should the muscle maps show?
+                    </h2>
+                    <p class="setup__hint">The figure that shows which muscles you've worked.</p>
+                    <div
+                        class="setup__choices setup__choices--row"
+                        role="radiogroup"
+                        aria-labelledby="setup-question"
+                    >
+                        @for (option of bodies; track option.value) {
+                            <label class="setup__choice">
+                                <input
+                                    type="radio"
+                                    name="bodyFigure"
+                                    class="setup__input"
+                                    [value]="option.value"
+                                    [checked]="settings.bodyFigure() === option.value"
+                                    (change)="settings.update({ bodyFigure: option.value })"
+                                />
+                                <span class="setup__choice-label">{{ option.label }}</span>
+                            </label>
+                        }
+                    </div>
+                    <!-- The chosen figure, as the maps will draw it -->
+                    <app-body-map class="setup__body" aria-hidden="true" [figureOnly]="true" />
+                }
+
+                @case ('units') {
+                    <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
+                        Do you lift in kilograms or pounds?
+                    </h2>
+                    <p class="setup__hint">Switching later loses nothing.</p>
+                    <div class="setup__choices" role="radiogroup" aria-labelledby="setup-question">
+                        @for (option of units; track option.value) {
+                            <label class="setup__choice">
+                                <input
+                                    type="radio"
+                                    name="weightUnit"
+                                    class="setup__input"
+                                    [value]="option.value"
+                                    [checked]="settings.weightUnit() === option.value"
+                                    (change)="settings.update({ weightUnit: option.value })"
+                                />
+                                <span class="setup__choice-label">{{ option.label }}</span>
+                            </label>
+                        }
+                    </div>
+                }
+
+                @case ('start') {
+                    <h2 #heading class="setup__question" tabindex="-1">{{ doneTitle() }}</h2>
+                    <p class="setup__hint">
+                        You can change any of it on Account, under Profile. Here's a workout to
+                        start with:
+                    </p>
+                    @if (first(); as first) {
+                        <div class="setup__workout">
+                            <h3 class="setup__workout-name">{{ first.workout.title }}</h3>
+                            <p class="setup__workout-description">
+                                {{ first.workout.description }}
+                            </p>
+                            <p class="setup__workout-meta">{{ first.needs }}</p>
+                        </div>
+                    }
+                    <div class="setup__finish">
+                        <button type="button" class="btn-main" (click)="startFirst()">
+                            Start it
+                        </button>
+                        <button type="button" class="btn-pill" (click)="finish('/home')">
+                            Go to Home
+                        </button>
+                        <button type="button" class="setup__link" (click)="finish('/ready-made')">
+                            See all the ready-made workouts
+                        </button>
+                    </div>
+                }
+            }
+
+            @if (number() > 1) {
+                <div class="setup__actions">
+                    <button type="button" class="btn-pill" (click)="back()">Back</button>
+                    <button type="button" class="btn-main btn-main--small" (click)="next()">
+                        Next
+                    </button>
+                </div>
+            }
+            @if (number() > 0) {
+                <button type="button" class="setup__skip" (click)="finish('/home')">
+                    Skip for now
+                </button>
+            }
+        }
+    </div>
+</div>

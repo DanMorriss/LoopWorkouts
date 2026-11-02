@@ -227,7 +227,7 @@ describe('AccountComponent', () => {
 
         it('says who, what syncs, and that clearing the device signs it out', () => {
             expect(text()).toContain('Signed in as me@example.com.');
-            expect(text()).toContain('Settings stay a choice for each device.');
+            expect(text()).toContain('Other settings stay a choice for each device.');
             expect(text()).toContain('That signs this device out too');
             expect(element.querySelector('#account-email')).toBeNull();
         });

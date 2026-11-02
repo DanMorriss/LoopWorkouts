@@ -3,8 +3,9 @@ import { provideRouter } from '@angular/router';
 import { HistoryEntry, LoggedSet } from '../models/history';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
+import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
-import { HomeComponent } from './home.component';
+import { greetingFor, HomeComponent } from './home.component';
 import { asOneGroup } from '../models/workout';
 
 const NOW = new Date(2026, 9, 18, 12, 0).getTime();
@@ -57,6 +58,28 @@ describe('HomeComponent', () => {
         Array.from(element().querySelectorAll<HTMLElement>(selector)).map((el) =>
             el.textContent!.replace(/\s+/g, ' ').trim()
         );
+
+    it('greets you for the time of day, by name once you have given one (NAV-4)', () => {
+        create();
+        expect(text('h2')[0]).toBe('Good afternoon');
+        fixture.destroy();
+
+        TestBed.inject(SettingsStore).update({ name: 'Sam' });
+        create();
+        expect(text('h2')[0]).toBe('Good afternoon, Sam');
+    });
+
+    it('says good morning from 5am, good afternoon from noon and good evening from 6pm', () => {
+        expect([4, 5, 11, 12, 17, 18, 23].map(greetingFor)).toEqual([
+            'Good evening',
+            'Good morning',
+            'Good morning',
+            'Good afternoon',
+            'Good afternoon',
+            'Good evening',
+            'Good evening',
+        ]);
+    });
 
     it('shows no logo, and before any workout a way to the library', () => {
         create();

@@ -1,18 +1,36 @@
 import { Component, computed, inject } from '@angular/core';
 import { BodyFigure } from '../../models/exercise';
 import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
+import { MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 
 /**
- * Account → Profile: your sex, for the body map's figure (SET-5), what you train for, for
- * the muscle bars' aims (PRG-8), and the weight unit you lift in (SET-4). They're saved with the settings, so they stay a choice for each device.
+ * Account → Profile: your name, for Home's greeting (SET-7), your sex, for the body map's
+ * figure (SET-5), what you train for, for the muscle bars' aims (PRG-8), and the weight unit
+ * you lift in (SET-4). They're saved with the settings, and synced with your account when
+ * you're signed in, with your equipment, as your profile.
  */
 @Component({
     selector: 'app-profile',
     template: `
+        <!-- Saved as it's left, trimmed -->
+        <label class="picker-field profile__field">
+            <span class="profile__name">Name</span>
+            <input
+                class="picker-field__input"
+                type="text"
+                autocomplete="given-name"
+                aria-describedby="name-hint"
+                [maxLength]="maxNameLength"
+                [value]="settings.name()"
+                (change)="setName($event)"
+            />
+        </label>
+        <p class="profile__hint" id="name-hint">What Home greets you by</p>
+
         <!-- Which figure the body maps draw -->
-        <fieldset class="segmented" aria-describedby="sex-hint">
+        <fieldset class="segmented profile__picker" aria-describedby="sex-hint">
             <legend class="profile__name">Sex</legend>
             <div
                 class="segmented__options"
@@ -116,6 +134,10 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
             color: var(--text);
         }
 
+        .profile__field {
+            padding-top: 0.25rem;
+        }
+
         .profile__hint {
             margin: 0.5rem 0 0;
             font-size: 0.85rem;
@@ -125,6 +147,14 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
 })
 export class ProfileComponent {
     protected readonly settings = inject(SettingsStore);
+    protected readonly maxNameLength = MAX_NAME_LENGTH;
+
+    protected setName(event: Event) {
+        const input = event.target as HTMLInputElement;
+        this.settings.update({ name: input.value });
+        // As it's kept, e.g. without the spaces round it
+        input.value = this.settings.name();
+    }
 
     protected readonly sexes: { value: BodyFigure; label: string }[] = [
         { value: 'male', label: 'Male' },

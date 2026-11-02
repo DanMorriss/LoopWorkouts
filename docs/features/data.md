@@ -1,6 +1,6 @@
 # Data
 
-What the app saves, and in what shape. Everything is on the device. Signed in, the workouts, the library's order, the history, your own exercises, notes, hidden exercises and deletions are kept with the account too, as rows of one table on the server, in the same shapes as here (see [backup-and-sync](backup-and-sync.md), Sync); settings and the run in progress aren't.
+What the app saves, and in what shape. Everything is on the device. Signed in, the workouts, the library's order, the history, your own exercises, notes, hidden exercises, deletions and the profile are kept with the account too, as rows of one table on the server, in the same shapes as here (see [backup-and-sync](backup-and-sync.md), Sync); the other settings and the run in progress aren't.
 
 **Ready for sync:** every workout and history entry has an id that can't clash with another device's (random, not 1, 2, 3) and an `updatedAt`, the time it last changed in ms since 1970. Deleting one leaves a marker in `deleted`. Merging two copies (a backup now, another device later) goes by id: the most recent change to each record wins, and a deletion wins over changes made before it. See [backup-and-sync](backup-and-sync.md).
 
@@ -193,11 +193,13 @@ The run in progress in a tab moves too (`activeTimerId`, `activeTimerStartedAt` 
     "myEquipment": ["barbell", "rack"],
     "onlyMyEquipment": false,
     "eachSideFirst": "left",
-    "switchSidesSeconds": 5
+    "switchSidesSeconds": 5,
+    "name": "Sam",
+    "profileUpdatedAt": 1793000000000
 }
 ```
 
-`theme` is `dark`, `light` or `system`. `countdownBeeps` is the Countdown beeps switch (ALM-5), on by default. `weightUnit` is `kg` or `lb`. `bodyFigure` is `male` or `female`. `myEquipment` is the equipment you have, picked on the Exercises page or the ready-made workouts, in the order it's offered there (unknown pieces are dropped); `onlyMyEquipment` is its Only what I have switch, which filters both. `eachSideFirst` is `left` (the default) or `right`, and `switchSidesSeconds` 0 (Off) to 30, 5 by default (BLD-10); anything else is the default.
+`theme` is `dark`, `light` or `system`. `countdownBeeps` is the Countdown beeps switch (ALM-5), on by default. `weightUnit` is `kg` or `lb`. `bodyFigure` is `male` or `female`. `myEquipment` is the equipment you have, picked on the Exercises page or the ready-made workouts, in the order it's offered there (unknown pieces are dropped); `onlyMyEquipment` is its Only what I have switch, which filters both. `eachSideFirst` is `left` (the default) or `right`, and `switchSidesSeconds` 0 (Off) to 30, 5 by default (BLD-10); anything else is the default. `name` is what Home greets you by (SET-7), trimmed and at most 40 characters, `''` if not given. `name`, `bodyFigure`, `trainingGoal`, `weightUnit` and `myEquipment` are the profile, which syncs as one record (kind `profile`, id `me`, with those fields and `updatedAt`); `profileUpdatedAt` is when any of them last changed, by the sync clock, or 0 if never here (a device not set up, or signed out of), when it isn't sent. A backup's `settings` has `name` but not `profileUpdatedAt`.
 
 ### `sb-cpgacyzlfyskifzhkotu-auth-token`: who's signed in
 
@@ -215,9 +217,13 @@ In ms since the epoch, by the device's clock, for the Account tab. Signing out r
 
 `guest` or `signed-in` once the welcome screen (NAV-3) has been answered on this device, or set to `guest` for a device that already had workouts or history when it came in. Missing on a device new to the app, which opens the welcome screen. Signing out, deleting the account and Clear this device remove it.
 
+### `setup`: the setup's still to do
+
+`due` once a device new to the app is sent to the welcome screen, and `asking` once the setup's questions (NAV-4) start: while it's there, Home opens the setup. Finishing or skipping it removes it. Missing on a device in use before the setup came in, which isn't asked. Signing out and Clear this device remove it.
+
 ### `clock-offset`: how far this device's clock is from the server's
 
-In ms, added to the device's clock to date changes (see [backup and sync](backup-and-sync.md), Sync). Kept after signing out, as the clock's no less off; so are the settings, which are this device's. Signing out removes everything else.
+In ms, added to the device's clock to date changes (see [backup and sync](backup-and-sync.md), Sync). Kept after signing out, as the clock's no less off; so are the settings, which are this device's, less the name, and with `profileUpdatedAt` 0. Signing out removes everything else.
 
 ## Saved for the run in progress (`sessionStorage` on the web, per tab)
 

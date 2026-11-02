@@ -1,0 +1,217 @@
+@use 'chip' as *;
+@use 'interaction' as *;
+@use 'type' as *;
+
+:host {
+    display: block;
+}
+
+.setup {
+    display: flex;
+    flex-direction: column;
+}
+
+.setup__checking {
+    margin: 2rem 0;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.setup__count {
+    margin: 0 0 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.setup__progress {
+    height: 4px;
+    margin-bottom: 1.25rem;
+    border-radius: 999px;
+    background: var(--control);
+    overflow: hidden;
+}
+
+.setup__progress-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+    transition: width var(--spring-duration) var(--ease-spring);
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.setup__form {
+    display: flex;
+    flex-direction: column;
+}
+
+.setup__question {
+    margin: 0 0 0.4rem;
+    @include display;
+    color: var(--text-strong);
+    font-size: 1.4rem;
+
+    // Focused from code, to be read out; it's not something to press
+    &:focus {
+        outline: none;
+    }
+}
+
+.setup__hint {
+    margin: 0 0 1.25rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+// A card per option: the radio button inside is hidden, but still the real, focusable one
+.setup__choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.setup__choices--row {
+    flex-direction: row;
+
+    .setup__choice {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+.setup__choice {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-height: 44px;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--control);
+    cursor: pointer;
+
+    @include hover {
+        background: var(--control-hover);
+    }
+
+    &:has(:checked) {
+        border-color: var(--glow-text);
+        background: var(--accent-soft);
+        box-shadow: inset 0 0 0 1px var(--glow-text);
+    }
+
+    &:has(:focus-visible) {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}
+
+.setup__input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.setup__choice-label {
+    color: var(--text-strong);
+    font-weight: 600;
+}
+
+.setup__choice-hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.setup__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.setup__chip {
+    @include chip;
+}
+
+.setup__chip-icon {
+    @include chip-icon;
+}
+
+.setup__body {
+    display: block;
+    width: min(16rem, 100%);
+    margin: 1rem auto 0;
+}
+
+.setup__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+.setup__skip,
+.setup__link {
+    align-self: center;
+    min-height: 44px;
+    margin-top: 0.75rem;
+    padding: 0 0.75rem;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}
+
+.setup__link {
+    color: var(--accent);
+}
+
+.setup__workout {
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--control);
+}
+
+.setup__workout-name {
+    margin: 0 0 0.3rem;
+    color: var(--text-strong);
+    font-size: 1.05rem;
+}
+
+.setup__workout-description {
+    margin: 0 0 0.4rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.setup__workout-meta {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.setup__finish {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}

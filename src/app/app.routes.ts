@@ -20,6 +20,12 @@ export const routes: Routes = [
         loadComponent: () => import('./welcome/welcome.component').then((m) => m.WelcomeComponent),
     },
     {
+        // Asked once, after the welcome screen: your name, goal, equipment, body and units
+        path: 'welcome/setup',
+        loadComponent: () =>
+            import('./welcome/setup/setup.component').then((m) => m.SetupComponent),
+    },
+    {
         path: 'setup',
         loadComponent: () =>
             import('./workout-setup/workout-setup.component').then((m) => m.WorkoutSetupComponent),

@@ -1,3 +1,4 @@
+import { Profile } from '../models/profile';
 import { BACKUP_VERSION } from '../shared/backup/backup-file';
 import { makeWorkout } from '../shared/testing/make-workout';
 import {
@@ -19,12 +20,42 @@ function copyHere(overrides: Partial<CopyHere> = {}): CopyHere {
         hiddenExercises: [],
         libraryOrder: { ids: [], updatedAt: 0 },
         plan: { days: [[], [], [], [], [], [], []], updatedAt: 0 },
+        profile: profile(0),
         deleted: [],
         ...overrides,
     };
 }
 
+function profile(updatedAt: number): Profile {
+    return {
+        name: 'Sam',
+        bodyFigure: 'female',
+        trainingGoal: 'fitness',
+        weightUnit: 'lb',
+        myEquipment: ['dumbbells'],
+        updatedAt,
+    };
+}
+
 describe('recordsHere', () => {
+    it('gives the profile as one record, once it has been set (NAV-4)', () => {
+        expect(recordsHere(copyHere()).filter((record) => record.kind === 'profile')).toEqual([]);
+        expect(
+            recordsHere(copyHere({ profile: profile(9) })).filter(
+                (record) => record.kind === 'profile'
+            )
+        ).toEqual([
+            {
+                kind: 'profile',
+                id: 'me',
+                updated_at: 9,
+                deleted_at: null,
+                data: { id: 'me', ...profile(9) },
+                version: BACKUP_VERSION,
+            },
+        ]);
+    });
+
     it('gives the weekly plan as one record, once something has been planned', () => {
         const days = [[], ['w1'], [], [], [], [], []];
 
@@ -157,6 +188,35 @@ describe('readPulled', () => {
 
         expect(page.copy.plan).toEqual({ days, updatedAt: 6 });
         expect(page.read.map(keyOf)).toEqual(['plan:week']);
+    });
+
+    it('reads the profile, dated as the server has it, and not a broken one (NAV-4)', () => {
+        const page = readPulled([
+            row({
+                seq: 1,
+                kind: 'profile',
+                id: 'me',
+                updated_at: 6,
+                data: { id: 'me', ...profile(99), myEquipment: ['dumbbells', 'jetpack'] },
+            }),
+            row({
+                seq: 2,
+                kind: 'profile',
+                id: 'other',
+                updated_at: 7,
+                data: { id: 'other', ...profile(7) },
+            }),
+            row({
+                seq: 3,
+                kind: 'profile',
+                id: 'me',
+                updated_at: 8,
+                data: { id: 'me', ...profile(8), weightUnit: 'stone' },
+            }),
+        ]);
+
+        expect(page.copy.profile).toEqual(profile(6));
+        expect(page.read.map(keyOf)).toEqual(['profile:me']);
     });
 
     it('reads records and deletions to merge, dated as the server has them', () => {

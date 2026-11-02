@@ -2,7 +2,7 @@
     <div
         class="home m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-6 shadow-xl shadow-(color:--shadow)"
     >
-        <h2 class="sr-only">Home</h2>
+        <h2 class="home__greeting">{{ greeting() }}</h2>
 
         <!-- The weekly plan's workouts for today (PLN-2) -->
         <app-due-today #dueToday class="home__card" />

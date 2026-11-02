@@ -36,6 +36,14 @@ Ten ready-made workouts are in the library's Ready-made workouts page (see `docs
 - [ ] **Dan to review the first batch:** the exercises, sets, reps and rests of each, and their descriptions. Ids are fixed once released, so rename before merging if a title changes.
 - [ ] **More batches, once reviewed:** e.g. a band workout, pull-up bar and rings, a beginner gym full body, mobility or stretching, and longer runs of intervals. Each must pass `built-in-workouts.spec.ts`.
 
+### Setup and profile (NAV-4, SET-7)
+
+The setup after the welcome screen and the synced profile are in `docs/features/home-and-navigation.md` and `docs/features/settings.md`.
+
+- [ ] **More goals, once there are more workouts:** Training for is only Muscle or Fitness (Dan, 2026-11-02). A goal such as "Get stronger" or "Lose weight" needs its own weekly aims (`WEEKLY_AIMS`) and its own first workout (`FIRST_CHOICES` in `welcome/setup/first-workout.ts`).
+- [ ] **Devices from before the setup:** they're never asked, so they have no name to greet by unless it's given on Account → Profile. If that's wanted, a card on Home ("Add your name") that can be closed.
+- [ ] **The female 3D figure:** picking Female in the setup changes the body map, but the 3D demos still draw the male figure (see Exercise demos).
+
 ### Alarms (any time)
 
 - [ ] **Alarm sound files:** swap the beeps generated in code (`AlarmService`) for proper sounds. Waiting on Dan to supply the files.
@@ -45,6 +53,7 @@ Ten ready-made workouts are in the library's Ready-made workouts page (see `docs
 ## 2. Known issues
 
 - [ ] **Enter in a step's name box may save before its kind follows the exercise:** a step becomes the kind its exercise is measured by when the box is left or Enter is pressed (the input's `change` event). Enter with nothing highlighted in the list also submits the form; Chrome fires `change` first, so the step saves as its new kind, but other browsers may save the old one. Check in Safari; if it saves the old kind, have the picker settle the step on Enter before letting the submit through.
+- [ ] **Run `supabase/schema.sql` again in Supabase before deploying the setup (NAV-4):** the profile syncs as a new record kind, `profile`, which the server's `push_records()` only keeps once the file's been run in the project's SQL editor (it was added to its list of kinds on 2026-11-02). Until then a profile sent is quietly dropped and marked as sent, so it doesn't reach the account until it's next changed, and a new device signing in is asked the setup again. The same run brings in the limits below.
 - [ ] **Run the new `push_records()` in Supabase:** `supabase/schema.sql` now limits what one account can store (500 changes a call, 64 kB a record, 20,000 records and 20 MB an account; added on 2026-10-30, tested against PGlite). It takes effect only once the file is run again in the project's SQL editor. Over a limit the push is refused whole and the Account tab shows the usual "couldn't sync" message, retrying each time; no one's workouts come near it, so there's no message of its own.
 - [ ] **Check the Content-Security-Policy on an iPhone:** added on 2026-10-30 (`security.autoCsp` in `angular.json` writes a `<meta>` policy with the inline scripts' hashes on each build; `vercel.json` adds `frame-ancestors 'none'` and the other headers). On the Vercel preview, check in Safari that the app loads styled, signing in with an email link and with Google still works, and buttons still darken while pressed (the empty `touchstart` listener moved from `<body ontouchstart>`, which the policy blocks, into the theme script in `index.html`).
 - [ ] **Have the Privacy notice and Terms of use looked over:** written on 2026-10-26 from what the app does, and updated on 2026-10-28 for accounts and sync (Supabase and Resend in Europe; workouts, history and exercises kept with the account) and dan@loopworkouts.com to contact, and on 2026-10-30 for the weekly plan and signing in with Google, and on 2026-11-01 for Vercel Web Analytics. They name no country's law, nor who's responsible for the data (as the UK and EU GDPR ask); decide whether they should, now that data leaves the device.

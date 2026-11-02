@@ -5,7 +5,7 @@ import { Settings } from '../state/settings-store.service';
 import { makeWorkout, rest, savedBeforeGroups, work } from '../testing/make-workout';
 import { BACKUP_VERSION, backupFileName, makeBackup, readBackup } from './backup-file';
 
-const SETTINGS: Settings = {
+const SETTINGS: Omit<Settings, 'profileUpdatedAt'> = {
     theme: 'dark',
     sound: true,
     vibration: true,
@@ -18,6 +18,7 @@ const SETTINGS: Settings = {
     onlyMyEquipment: true,
     eachSideFirst: 'right',
     switchSidesSeconds: 10,
+    name: 'Sam',
 };
 
 const ENTRY: HistoryEntry = {

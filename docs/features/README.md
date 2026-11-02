@@ -69,9 +69,11 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | SET-4  | Choose kg or lb for weights                                              | ✅  | —   | [settings](settings.md)                       |
 | SET-5  | Choose a male or female figure for the body map                          | ✅  | —   | [settings](settings.md)                       |
 | SET-6  | Read the privacy notice and terms of use                                 | ✅  | —   | [settings](settings.md)                       |
+| SET-7  | Give my name, and have my profile on every device I sign in on           | ✅  | —   | [settings](settings.md)                       |
 | NAV-1  | Get to any page from anywhere, and back to a workout in progress         | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-2  | Open on what to do next and how my week is going                         | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-3  | Choose to sign in or carry on as a guest, the first time                 | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
+| NAV-4  | Set up my name, goal, equipment, body and units once, as I start         | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | A11Y-1 | Use every feature with a screen reader, keyboard or reduced motion       | ✅  | —   | [accessibility](accessibility.md)             |
 | EXR-1  | Exercises as things in their own right, used across workouts             | ✅  | —   | [exercises](exercises.md)                     |
 | EXR-2  | Pick an exercise, built-in or my own, or make a new one                  | ✅  | —   | [exercises](exercises.md)                     |

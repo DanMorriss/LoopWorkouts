@@ -29,6 +29,23 @@ describe('ProfileComponent', () => {
     const labels = (name: string) =>
         radios(name).map((r) => r.closest('label')!.textContent!.trim());
 
+    describe('name (SET-7)', () => {
+        it('saves a name as it is left, trimmed, and shows it as kept', () => {
+            create();
+            const input = fixture.nativeElement.querySelector(
+                'input[type="text"]'
+            ) as HTMLInputElement;
+            expect(input.closest('label')!.textContent).toContain('Name');
+            expect(input.value).toBe('');
+
+            input.value = '  Sam  ';
+            input.dispatchEvent(new Event('change'));
+
+            expect(settings.name()).toBe('Sam');
+            expect(input.value).toBe('Sam');
+        });
+    });
+
     describe('sex', () => {
         it('offers Male and Female in a labelled group, with Male chosen to begin with', () => {
             create();

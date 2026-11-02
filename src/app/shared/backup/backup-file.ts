@@ -69,7 +69,8 @@ export interface BackupFile {
     plan: WeekPlan;
     /** Records deleted on the device it came from, so importing deletes them here too. */
     deleted: Deletion[];
-    settings: Settings;
+    /** This device's settings, its profile included, but not when the profile changed. */
+    settings: Omit<Settings, 'profileUpdatedAt'>;
 }
 
 export type BackupProblem = 'unreadable' | 'not-a-backup' | 'too-new';

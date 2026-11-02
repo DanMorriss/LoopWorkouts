@@ -63,6 +63,30 @@ describe('routes', () => {
 
             expect(TestBed.inject(Router).url).toBe('/home');
         });
+
+        it('opens the setup (NAV-4) once answered, until it is done', async () => {
+            const harness = await RouterTestingHarness.create();
+            await harness.navigateByUrl('/');
+            expect(localStorage.getItem('setup')).toBe('due');
+
+            localStorage.setItem('welcomed', 'guest');
+            await harness.navigateByUrl('/home');
+            expect(TestBed.inject(Router).url).toBe('/welcome/setup');
+
+            localStorage.removeItem('setup');
+            await harness.navigateByUrl('/home');
+            expect(TestBed.inject(Router).url).toBe('/home');
+        });
+
+        it('opens the setup once signed in from the welcome screen', async () => {
+            localStorage.setItem('setup', 'due');
+            localStorage.setItem(AUTH_STORAGE_KEY, '{}');
+            const harness = await RouterTestingHarness.create();
+
+            await harness.navigateByUrl('/');
+
+            expect(TestBed.inject(Router).url).toBe('/welcome/setup');
+        });
     });
 
     // It loads in the background, so the page would otherwise say there's nothing yet

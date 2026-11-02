@@ -7,6 +7,7 @@ import { ExerciseStore } from '../state/exercise-store.service';
 import { HistoryStore } from '../state/history-store.service';
 import { SettingsStore } from '../state/settings-store.service';
 import { PlanStore } from '../state/plan-store.service';
+import { Profile } from '../../models/profile';
 import { WorkoutStore } from '../state/workout-store.service';
 import {
     BackupProblem,
@@ -52,7 +53,10 @@ export type CopyToMerge = Pick<
     | 'plan'
     | 'deleted'
 > &
-    Partial<Pick<Extract<ReadBackup, { ok: true }>, 'fromVersion1' | 'newWorkouts'>>;
+    Partial<Pick<Extract<ReadBackup, { ok: true }>, 'fromVersion1' | 'newWorkouts'>> & {
+        /** The profile, from another device by sync (a backup's settings aren't imported). */
+        profile?: Profile | null;
+    };
 
 export type ImportResult =
     | ({ ok: true } & ImportCounts)
@@ -96,6 +100,7 @@ export class BackupService {
                     onlyMyEquipment: this.settings.onlyMyEquipment(),
                     eachSideFirst: this.settings.eachSideFirst(),
                     switchSidesSeconds: this.settings.switchSidesSeconds(),
+                    name: this.settings.name(),
                 },
             },
             exportedAt
@@ -142,7 +147,8 @@ export class BackupService {
      * one: the one here is kept, and what in the copy used the other id uses its id. Workouts
      * with no id (a file written by hand) are added unless the same workout is here already.
      * The library's order is taken from the file if a workout was moved there more recently.
-     * Settings aren't part of it, since they're a choice for each device. Wait for the
+     * Settings aren't part of it, since they're a choice for each device, but the profile from
+     * another device is, taken if it changed there more recently. Wait for the
      * history's `ready` first.
      */
     merge(backup: CopyToMerge): MergeCounts {
@@ -180,6 +186,9 @@ export class BackupService {
         }
         if (backup.plan) {
             this.plan.merge(backup.plan);
+        }
+        if (backup.profile) {
+            this.settings.mergeProfile(backup.profile);
         }
         const entries = this.history.mergeEntries(linkedHistory, backup.deleted);
         return {

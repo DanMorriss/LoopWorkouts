@@ -20,6 +20,7 @@
 - ∞ is read as "until stopped". The round dots, the step strip and each step's kind icon are hidden (the announcements say the same), and so is what's after a rest on the face, which "Next:" says.
 - The ring reports progress through the step as a percentage, or "Waiting for Done" on a rep step. The progress bar is a layer of its own over the ring, not the ring holding the face, as a progress bar's contents are hidden from screen readers and the face's reps and weight wheels must be reachable.
 - Icon buttons have names (Pause, Resume, Skip step or Skip rest, Options for …), and Done on a rep step is named for what it does and where it goes, "Done. Next: Rest · 01:00". Visible captions repeat them, hidden from screen readers.
+- The setup (NAV-4) moves focus to each question's heading as it shows, so it's read out, and says "Question 2 of 5" in words (its bar is hidden). Its options are real radio buttons in a group named by the question, and the equipment chips are toggles (pressed when picked), as on the Exercises page; picking doesn't move on, so arrow keys can go through the options. Signed in, "Getting your profile…" is a status, read out.
 - Wheels are spin buttons named by their step, e.g. "Step 2, rest, Seconds", reporting their value and range.
 - Adding, moving, deleting or changing the kind of a step is announced, e.g. "Moved squats to step 3", "Step 2 is now rest".
 - A step's kind pill is a button named with its kind and step, e.g. "Reps, change type of step 1", saying whether its menu is open; the menu marks the current kind as pressed.

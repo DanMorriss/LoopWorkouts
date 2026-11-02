@@ -4,6 +4,7 @@ import { filter, take } from 'rxjs';
 import { AUTH_STORAGE_KEY } from '../../account/account-client';
 import { UndoService } from '../undo/undo.service';
 import { deleteDatabase } from './history-database';
+import { SettingsStore } from './settings-store.service';
 import { WorkoutStore } from './workout-store.service';
 
 /** Where a tab clearing this device tells the app's other open tabs. */
@@ -37,6 +38,7 @@ export const LEFT_ACCOUNT_TEXT: Record<LeftAccount, string> = {
 @Service()
 export class DeviceDataService {
     private readonly workouts = inject(WorkoutStore);
+    private readonly settings = inject(SettingsStore);
     private readonly document = inject(DOCUMENT);
     private readonly router = inject(Router);
     private readonly undo = inject(UndoService);
@@ -81,11 +83,15 @@ export class DeviceDataService {
      * device, then reloads the app, and the app's other open tabs. A workout going is
      * dropped, not logged: logging it as the page unloads would put it straight back in the
      * history. Signing out or deleting the account (`leaving`) keeps this device's settings,
-     * and leaves a note for the Account tab to say it's done.
+     * less the account's name and when the profile changed, and leaves a note for the Account
+     * tab to say it's done.
      */
     async clear({ leaving }: { leaving?: LeftAccount } = {}) {
         const signingOut = leaving !== undefined;
         this.workouts.stop();
+        if (signingOut) {
+            this.settings.forgetProfile();
+        }
         const kept = signingOut
             ? DEVICE_KEYS.flatMap((key) => {
                   const value = localStorage.getItem(key);

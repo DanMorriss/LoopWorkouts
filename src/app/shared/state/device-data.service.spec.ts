@@ -61,18 +61,25 @@ describe('DeviceDataService', () => {
         expect(reload).toHaveBeenCalledTimes(1);
     });
 
-    it("keeps this device's settings when signing out, and leaves a note to say so", async () => {
+    it("keeps this device's settings but not the profile's name when signing out, and leaves a note", async () => {
         const workouts = TestBed.inject(WorkoutStore);
         workouts.addWorkout({ title: 'Legs', blocks: makeWorkout().blocks, repeats: 3 });
-        localStorage.setItem('settings', JSON.stringify({ theme: 'light' }));
+        localStorage.setItem(
+            'settings',
+            JSON.stringify({ theme: 'light', name: 'Sam', profileUpdatedAt: 5 })
+        );
         localStorage.setItem('clock-offset', '120');
         localStorage.setItem('week-plan', '{}');
 
         await TestBed.inject(DeviceDataService).clear({ leaving: 'signed-out' });
 
-        expect({ ...localStorage }).toEqual({
-            settings: JSON.stringify({ theme: 'light' }),
-            'clock-offset': '120',
+        expect(Object.keys({ ...localStorage }).sort()).toEqual(['clock-offset', 'settings']);
+        expect(localStorage.getItem('clock-offset')).toBe('120');
+        // Less the account's name, and undated, so it isn't sent to the next account
+        expect(JSON.parse(localStorage.getItem('settings')!)).toMatchObject({
+            theme: 'light',
+            name: '',
+            profileUpdatedAt: 0,
         });
         expect(sessionStorage.getItem(SIGNED_OUT_NOTE)).toBe('signed-out');
         expect(reload).toHaveBeenCalledTimes(1);

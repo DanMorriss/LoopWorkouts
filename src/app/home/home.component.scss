@@ -1,7 +1,16 @@
+@use 'type' as *;
+
 .home {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+}
+
+.home__greeting {
+    margin: 0;
+    @include display;
+    color: var(--text-strong);
+    font-size: 1.4rem;
 }
 
 // A card that has nothing to show leaves no gap

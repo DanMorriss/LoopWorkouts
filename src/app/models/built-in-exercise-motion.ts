@@ -3040,14 +3040,15 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
         ],
     },
     // Both hands on the bell by its horns, round the head close to it, the elbows forwards: in
-    // 3D, by each ear one hand is in front of the head and the other behind it
-    // Both hands on the bell, round the head
+    // 3D, by each ear one hand is in front of the head and the other behind it. Once round one
+    // way, then back the other
     'builtin:kettlebell-halo': {
         view: 'front',
         props: ['kettlebell'],
         frames: [
             {
                 label: 'In front of the chest',
+                hold: 200,
                 ms: 600,
                 pose: {
                     ...FRONT_STANDING,
@@ -3059,8 +3060,8 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
             },
             {
                 label: 'By one ear',
-                ms: 600,
                 through: true,
+                ms: 600,
                 pose: {
                     ...FRONT_STANDING,
                     heldBy: 0.5,
@@ -3071,8 +3072,8 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
             },
             {
                 label: 'Behind the head',
-                ms: 600,
                 through: true,
+                ms: 600,
                 pose: {
                     ...FRONT_STANDING,
                     heldBy: 0.5,
@@ -3083,8 +3084,8 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
             },
             {
                 label: 'By the other ear',
-                ms: 600,
                 through: true,
+                ms: 600,
                 pose: {
                     ...FRONT_STANDING,
                     heldBy: 0.5,
@@ -3093,9 +3094,57 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     arms: [reach(14, -195, 'ccw'), reach(30, -195, 'cw')],
                 },
             },
+            {
+                label: 'Back in front of the chest',
+                hold: 200,
+                ms: 600,
+                pose: {
+                    ...FRONT_STANDING,
+                    heldBy: 0.5,
+                    handsForward: 24,
+                    elbowsDown: 1,
+                    arms: [reach(-5, -166, 'ccw'), reach(5, -166, 'cw')],
+                },
+            },
+            {
+                label: 'The other way, by the other ear',
+                through: true,
+                ms: 600,
+                pose: {
+                    ...FRONT_STANDING,
+                    heldBy: 0.5,
+                    handsForward: [14, -6],
+                    elbowsForward: 1,
+                    arms: [reach(14, -195, 'ccw'), reach(30, -195, 'cw')],
+                },
+            },
+            {
+                label: 'Behind the head again',
+                through: true,
+                ms: 600,
+                pose: {
+                    ...FRONT_STANDING,
+                    heldBy: 0.5,
+                    handsForward: -18,
+                    elbowsForward: 1,
+                    arms: [reach(-6, -195, 'ccw'), reach(6, -195, 'cw')],
+                },
+            },
+            {
+                label: 'By the first ear',
+                through: true,
+                ms: 600,
+                pose: {
+                    ...FRONT_STANDING,
+                    heldBy: 0.5,
+                    handsForward: [-6, 14],
+                    elbowsForward: 1,
+                    arms: [reach(-30, -195, 'ccw'), reach(-14, -195, 'cw')],
+                },
+            },
         ],
     },
-    // Passed from hand to hand round the waist
+
     // Passed from hand to hand round the waist: in front, round one side, behind, round the other
     'builtin:kettlebell-around-the-world': {
         view: 'front',

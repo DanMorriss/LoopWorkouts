@@ -439,6 +439,7 @@ export class FigureScene {
     /**
      * The kit that stays put, placed from the drawing: out of it, a bench is 30 wide, a box 40,
      * and a frame's posts are on either side. Returns the points it reaches, to fit the view.
+     * A landmine and a cable's bar go where the hands are, so are placed with the figure.
      */
     private buildKit(): Vec3[] {
         const view = this.motion.view;
@@ -450,8 +451,10 @@ export class FigureScene {
         const postsApart = seated ? 12 : 50;
         const points: Vec3[] = [];
         for (const piece of kit) {
+            // Moved to the figure's left, which is -z from either view
+            const aside: Vec3 = [0, 0, -('aside' in piece ? (piece.aside ?? 0) : 0)];
             if (piece.kind === 'pad' || piece.kind === 'block') {
-                const [from, to] = [lift(piece.from), lift(piece.to)];
+                const [from, to] = [add3(lift(piece.from), aside), add3(lift(piece.to), aside)];
                 const width = piece.kind === 'pad' ? 30 : 40;
                 const along = sub3(to, from);
                 if (piece.kind === 'pad') {
@@ -482,17 +485,47 @@ export class FigureScene {
             } else if (piece.kind === 'frame') {
                 for (const depth of [-postsApart, postsApart]) {
                     this.rod(
-                        lift(piece.from, depth),
-                        lift(piece.to, depth),
+                        add3(lift(piece.from, depth), aside),
+                        add3(lift(piece.to, depth), aside),
                         1.6,
                         this.metalMaterial
                     );
                 }
-                points.push(lift(piece.from, postsApart), lift(piece.to, -postsApart));
+                points.push(
+                    add3(lift(piece.from, postsApart), aside),
+                    add3(lift(piece.to, -postsApart), aside)
+                );
             } else if (piece.kind === 'bar') {
                 const [from, to] = [lift(piece.at, -55), lift(piece.at, 55)];
                 this.rod(from, to, 1.8, this.metalMaterial);
                 points.push(from, to);
+            } else if (piece.kind === 'bars') {
+                // Either side, running front to back, each on a post at its back end. The figure
+                // faces +x, its right +z, from either view
+                for (const side of [-1, 1]) {
+                    const middle = add3(lift(piece.at), [0, 0, (side * piece.apart) / 2]);
+                    const [front, back] = [add3(middle, [30, 0, 0]), add3(middle, [-30, 0, 0])];
+                    this.rod(back, front, 1.8, this.metalMaterial);
+                    this.rod(back, [back[0], 0, back[2]], 1.6, this.metalMaterial);
+                    points.push(front, back);
+                }
+            } else if (piece.kind === 'landmine') {
+                // From its pivot on the floor through the middle of the hands, a plate beyond them
+                const pivot = lift(piece.at);
+                this.mesh(new SphereGeometry(3, 16, 12), this.kitMaterial).position.copy(v(pivot));
+                const bar = this.mesh(new CylinderGeometry(1.6, 1.6, 1, 16), this.metalMaterial);
+                const plate = this.mesh(new CylinderGeometry(15, 15, 5, 40), this.kitMaterial);
+                this.carried.push((skeleton) => {
+                    const hands = scale3(add3(skeleton.arms[0].end, skeleton.arms[1].end), 0.5);
+                    const way = normalize3(sub3(hands, pivot));
+                    const end = add3(hands, scale3(way, 24));
+                    bar.scale.set(1, length3(sub3(end, pivot)), 1);
+                    bar.position.copy(v(scale3(add3(pivot, end), 0.5)));
+                    orient(bar, way, [1, 0, 0]);
+                    plate.position.copy(v(add3(hands, scale3(way, 16))));
+                    orient(plate, way, [1, 0, 0]);
+                });
+                points.push(pivot);
             } else {
                 const from = lift(piece.from);
                 /** A pulley and its cable, run to the hand `handOf` picks each pose. */
@@ -516,6 +549,20 @@ export class FigureScene {
                 if (piece.each) {
                     cableTo((hands) => hands[0]);
                     cableTo((hands) => hands[1]);
+                } else if (piece.bar) {
+                    // To the middle of a bar held in both hands, through them and beyond
+                    const long = piece.bar;
+                    const bar = this.mesh(
+                        new CylinderGeometry(1.3, 1.3, long, 12),
+                        this.metalMaterial
+                    );
+                    cableTo((hands) => scale3(add3(hands[0], hands[1]), 0.5));
+                    this.carried.push((skeleton) => {
+                        const [a, b] = [skeleton.arms[0].end, skeleton.arms[1].end];
+                        bar.position.copy(v(scale3(add3(a, b), 0.5)));
+                        const across = sub3(a, b);
+                        orient(bar, length3(across) < 4 ? skeleton.right : across, [1, 0, 0]);
+                    });
                 } else {
                     // The nearer hand, as drawn
                     const flat = (point: Vec3) =>
@@ -559,10 +606,25 @@ export class FigureScene {
             this.scene.add(group);
             return group;
         };
-        /** The way a dumbbell's handle lies in the hand: across the forearm, side to side. */
+        /**
+         * The way a dumbbell's handle lies in the hand: across the forearm, side to side, or
+         * turned palms in (`Pose.palmsIn`), square to the forearm and to the sides.
+         */
         const grip = (skeleton: Skeleton, arm: Limb3) => {
             const forearm = normalize3(sub3(arm.end, arm.mid));
-            return square(skeleton.right, forearm, square(skeleton.forward, forearm, [0, 1, 0]));
+            const across = square(
+                skeleton.right,
+                forearm,
+                square(skeleton.forward, forearm, [0, 1, 0])
+            );
+            if (!skeleton.palmsIn) {
+                return across;
+            }
+            const facing = cross3(forearm, skeleton.right);
+            const palmsIn = length3(facing) > 0.1 ? normalize3(facing) : skeleton.forward;
+            return normalize3(
+                add3(scale3(across, 1 - skeleton.palmsIn), scale3(palmsIn, skeleton.palmsIn))
+            );
         };
         const handsMiddle = (skeleton: Skeleton) =>
             scale3(add3(skeleton.arms[0].end, skeleton.arms[1].end), 0.5);
@@ -587,21 +649,74 @@ export class FigureScene {
                 });
             }
         }
-        if (props.has('kettlebell')) {
-            const bell = new Group();
-            const ball = this.mesh(new SphereGeometry(8, 24, 16), this.kitMaterial, bell);
-            ball.position.y = -11;
-            const handle = this.mesh(new TorusGeometry(4.5, 1.1, 8, 24), this.metalMaterial, bell);
-            handle.position.y = -2;
-            this.scene.add(bell);
-            this.carried.push((skeleton) => {
-                const arm = skeleton.arms[0];
-                // Hanging from the hand, swung out a little along the forearm
+        if (props.has('kettlebell') || props.has('kettlebells')) {
+            const kettlebell = () => {
+                const bell = new Group();
+                const ball = this.mesh(new SphereGeometry(8, 24, 16), this.kitMaterial, bell);
+                ball.position.y = -11;
+                const handle = this.mesh(
+                    new TorusGeometry(4.5, 1.1, 8, 24),
+                    this.metalMaterial,
+                    bell
+                );
+                handle.position.y = -2;
+                this.scene.add(bell);
+                return bell;
+            };
+            const smooth = (t: number) => {
+                const clamped = Math.min(1, Math.max(0, t));
+                return clamped * clamped * (3 - 2 * clamped);
+            };
+            /**
+             * The way the bell is from its handle in `arm`'s hand: hanging, swung out a little
+             * along the forearm, or, with the forearm pointing up (racked, pressed), resting on
+             * the back of it, out to the side and a little in front, clear of the arm and body.
+             */
+            const fromHand = (skeleton: Skeleton, arm: Limb3): Vec3 => {
                 const along = normalize3(sub3(arm.end, arm.mid));
                 const hang = normalize3(add3(scale3(along, 0.6), [0, -1, 0]));
-                bell.position.copy(v(arm.end));
-                orient(bell, scale3(hang, -1), skeleton.right);
-            });
+                const outwards = add3(
+                    scale3(skeleton.right, 0.8 * arm.side),
+                    scale3(skeleton.forward, 0.6)
+                );
+                const rest = normalize3(
+                    add3(scale3(along, -0.35), square(outwards, along, skeleton.forward))
+                );
+                const up = smooth((along[1] + 0.1) / 0.5);
+                return normalize3(add3(scale3(hang, 1 - up), scale3(rest, up)));
+            };
+            if (props.has('kettlebells')) {
+                for (const i of [0, 1]) {
+                    const bell = kettlebell();
+                    this.carried.push((skeleton) => {
+                        const arm = skeleton.arms[i];
+                        bell.position.copy(v(arm.end));
+                        orient(bell, scale3(fromHand(skeleton, arm), -1), skeleton.right);
+                    });
+                }
+            } else {
+                const bell = kettlebell();
+                this.carried.push((skeleton) => {
+                    bell.position.copy(v(skeleton.bell));
+                    if (skeleton.bellDown) {
+                        // Standing on the floor
+                        orient(bell, [0, 1, 0], skeleton.right);
+                        return;
+                    }
+                    // In one hand, or held in both, between them, hanging straight down
+                    const [near, far] = skeleton.arms;
+                    const share = skeleton.heldBy;
+                    const oneHand = normalize3(
+                        add3(
+                            scale3(fromHand(skeleton, near), 1 - share),
+                            scale3(fromHand(skeleton, far), share)
+                        )
+                    );
+                    const both = smooth(1 - Math.abs(share - 0.5) / 0.3);
+                    const way = normalize3(add3(scale3(oneHand, 1 - both), [0, -both, 0]));
+                    orient(bell, scale3(way, -1), skeleton.right);
+                });
+            }
         }
         if (props.has('ab-wheel')) {
             const wheel = new Group();
@@ -645,6 +760,26 @@ export class FigureScene {
                 orient(roller, skeleton.right, [1, 0, 0]);
             });
         }
+        if (props.has('pad-on-knees')) {
+            const pad = this.mesh(new BoxGeometry(40, 7, 22), this.kitMaterial);
+            this.carried.push((skeleton) => {
+                const leg = skeleton.legs[0];
+                const thigh = normalize3(sub3(leg.mid, leg.root));
+                const top = square(skeleton.up, thigh, [0, 1, 0]);
+                // On top of both thighs, its front edge at the knees
+                const at = add3(add3(leg.mid, scale3(thigh, -11)), scale3(top, 11));
+                pad.position.copy(
+                    v(
+                        sub3(
+                            at,
+                            scale3(skeleton.right, dot3(sub3(at, skeleton.hips), skeleton.right))
+                        )
+                    )
+                );
+                // Across the legs (x), its top up (y), along the thighs (z)
+                orient(pad, top, thigh);
+            });
+        }
         if (props.has('foot-plate')) {
             const plate = this.mesh(new BoxGeometry(50, 4, 40), this.kitMaterial);
             this.carried.push((skeleton) => {
@@ -686,11 +821,13 @@ export class FigureScene {
         const restHipY = model.joints.hip[1];
         const [shoulderZ, shoulderY] = model.joints.shoulder;
         const tall = (BODY.torso - 4) / (shoulderY - restHipY);
-        // How far each thigh is bent forwards at the hip, from hanging straight down
+        // How far each thigh is bent forwards at the hip, from hanging straight down. A thigh
+        // out to the side counts as hanging, however high, so a wide squat's knees, above the
+        // hips, don't fold the seat away as a knee raised to the chest would
         const bent = skeleton.legs.map((leg) => {
             const thigh = normalize3(sub3(leg.mid, leg.root));
-            const degrees =
-                (Math.atan2(dot3(thigh, bodyForward), -dot3(thigh, up)) * 180) / Math.PI;
+            const down = -dot3(thigh, up) + Math.abs(dot3(thigh, bodyRight));
+            const degrees = (Math.atan2(dot3(thigh, bodyForward), down) * 180) / Math.PI;
             return Math.min(140, Math.max(-40, degrees));
         }) as [number, number];
         this.shapeTorso(skeleton.twist, bent, restHipY, model.levels.armpit);

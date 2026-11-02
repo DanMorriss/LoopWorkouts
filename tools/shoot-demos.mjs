@@ -7,6 +7,7 @@
 //   --at=500        waits that many ms more before the shot
 //   --big           draws it larger, to look at its shape closely
 //   --stills        every key position side by side, as with reduced motion
+//   --still=2       only that key position (from 1), as large as the moving figure
 //   --figure=female the Sex setting (the 3D figure is always male for now)
 import { chromium } from 'playwright';
 
@@ -15,7 +16,8 @@ const ids = rest.filter((arg) => !arg.startsWith('--'));
 const theme = rest.find((arg) => arg.startsWith('--theme='))?.slice(8) ?? 'dark';
 const turns = Number(rest.find((arg) => arg.startsWith('--turns='))?.slice(8) ?? 0);
 const figure = rest.find((arg) => arg.startsWith('--figure='))?.slice(9) ?? 'male';
-const stills = rest.includes('--stills');
+const only = Number(rest.find((arg) => arg.startsWith('--still='))?.slice(8) ?? 0);
+const stills = rest.includes('--stills') || only > 0;
 const big = rest.includes('--big');
 const drag = Number(rest.find((arg) => arg.startsWith('--drag='))?.slice(7) ?? 0);
 const at = Number(rest.find((arg) => arg.startsWith('--at='))?.slice(5) ?? 0);
@@ -41,12 +43,23 @@ await page.evaluate(
 for (const id of ids) {
     await page.goto(`http://localhost:4300/exercises/${id}`);
     const demo = page.locator('app-exercise-demo');
-    await demo.waitFor();
+    try {
+        await demo.waitFor({ timeout: 15000 });
+    } catch {
+        console.log('no demo for', id);
+        continue;
+    }
     if (big) {
         // Larger, to look at its shape closely
         await page.addStyleTag({
             content:
                 'app-exercise-demo { --figure-max-height: 52rem !important; } app-exercise-figure-3d { --figure-max-height: 52rem !important; }',
+        });
+    }
+    if (only) {
+        // One key position, as large as the moving figure
+        await page.addStyleTag({
+            content: `.demo__still:not(:nth-child(${only})) { display: none !important; } .demo__still { max-width: 100% !important; } .demo__figure--still { --figure-max-height: 30rem !important; }`,
         });
     }
     await demo.scrollIntoViewIfNeeded();
@@ -57,7 +70,10 @@ for (const id of ids) {
     }
     if (drag) {
         // Turns it by dragging, 0.6° a pixel: leftwards turns it on round
-        const box = await page.locator('app-exercise-figure-3d canvas').first().boundingBox();
+        const box = await page
+            .locator('app-exercise-figure-3d canvas:visible')
+            .first()
+            .boundingBox();
         const [x, y] = [box.x + box.width / 2, box.y + box.height / 2];
         await page.mouse.move(x, y);
         await page.mouse.down();
@@ -70,7 +86,7 @@ for (const id of ids) {
     }
     await demo.scrollIntoViewIfNeeded();
     await demo.screenshot({
-        path: `${out}/${id}${turns ? `-t${turns}` : ''}${at ? `-${at}` : ''}.png`,
+        path: `${out}/${id}${only ? `-s${only}` : ''}${turns ? `-t${turns}` : ''}${drag ? `-d${drag}` : ''}${at ? `-${at}` : ''}.png`,
     });
     console.log('shot', id);
 }

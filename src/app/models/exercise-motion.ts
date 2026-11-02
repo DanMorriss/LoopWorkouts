@@ -68,21 +68,62 @@ export interface Pose {
     readonly handsApart?: number;
     /**
      * Only for the 3D figure: how far in front of where they're drawn the hands are, in cm.
-     * From the front only, where a drawing can't show it (hands meeting in front of the chest).
+     * From the front only, where a drawing can't show it (hands meeting in front of the chest);
+     * one for each hand if they differ (one in front of the head, one behind it).
      */
-    readonly handsForward?: number;
+    readonly handsForward?: number | readonly [near: number, far: number];
     /**
      * Only for the 3D figure: how far the elbows point out to the sides rather than the way
      * they're drawn, from 0 to 1, the hands staying put (as in a face pull).
      */
     readonly elbowsOut?: number;
+    /**
+     * Only for the 3D figure: how far the elbows point down the body rather than the way
+     * they're drawn, from 0 to 1, the hands staying put (in front of the shoulders, as an
+     * Arnold press starts).
+     */
+    readonly elbowsDown?: number;
+    /**
+     * Only for the 3D figure: how far the elbows point forwards rather than the way they're
+     * drawn, from 0 to 1, the hands staying put (round the head, as in a kettlebell halo).
+     */
+    readonly elbowsForward?: number;
+    /**
+     * Only for the 3D figure: how far each hand is moved out to its own side, in cm, the elbow
+     * bending to reach; negative is across the body (a hand reaching under it, say). From the
+     * side only.
+     */
+    readonly handsOut?: readonly [near: number, far: number];
+    /**
+     * Only for the 3D figure: how far apart the feet are, side to side, in cm, wider than the
+     * hips for a wide stance (as in a kettlebell swing). From the side only.
+     */
+    readonly stance?: number;
+    /**
+     * Only for the 3D figure: how far the dumbbells are turned palms in, from 0 (the handles
+     * side to side) to 1 (the palms facing each other, as in a hammer curl).
+     */
+    readonly palmsIn?: number;
+    /**
+     * Only for the 3D figure: which hand the kettlebell is in, from 0 (the near hand) to 1 (the
+     * far one); between, it's held in both, between them (0.5 for a goblet squat), or being
+     * passed from one to the other.
+     */
+    readonly heldBy?: number;
+    /**
+     * Only for the 3D figure: where the kettlebell is when it's set down, not hanging from a
+     * hand: as drawn, and how far it is to the figure's right (from the side). Given in each of
+     * a motion's positions, if in any.
+     */
+    readonly bellAt?: readonly [x: number, y: number, right: number];
 }
 
 /**
  * Equipment the figure carries, drawn where its hands or feet are: a barbell on the back or
  * in the hands, a dumbbell in each hand or one in the near hand, one kettlebell hanging from
- * the near hand, an ab wheel under the hands, a band between them, a machine's roller on the
- * front of the shins or behind the ankles, or a leg press's plate under the feet.
+ * the near hand (in 3D, the hand `heldBy` says) or one from each hand, an ab wheel under the
+ * hands, a band between them, a machine's roller on the front of the shins or behind the
+ * ankles, its pad on top of the thighs by the knees, or a leg press's plate under the feet.
  */
 export type Prop =
     | 'barbell-on-back'
@@ -90,24 +131,41 @@ export type Prop =
     | 'dumbbells'
     | 'dumbbell'
     | 'kettlebell'
+    | 'kettlebells'
     | 'ab-wheel'
     | 'band'
     | 'roller-on-shins'
     | 'roller-behind-ankles'
+    | 'pad-on-knees'
     | 'foot-plate';
 
 /**
  * Equipment that stays put, behind the figure: a bench's or seat's cushion (along its middle),
  * a frame's post or rail, a bar end on (to hang from or hold), a step or box (its opposite
  * corners), or a cable from a pulley to the nearer hand (in 3D, with `each`, a cable from a
- * pulley to each hand, as in a cable curl).
+ * pulley to each hand, as in a cable curl, or with `bar`, a cable to the middle of a bar that
+ * long, held in both hands, as in a lat pulldown).
+ *
+ * Or two bars to hold, either side of the body at `at` (in 3D `apart` apart, parallel, running
+ * front to back, as a dip station's), or a landmine: a bar
+ * from a pivot on the floor at `at`, through the hands, loaded beyond them.
+ *
+ * In 3D, `aside` moves a cushion or frame that far to the figure's left, in cm (a bench beside
+ * the standing leg).
  */
 export type Kit =
-    | { readonly kind: 'pad'; readonly from: Point; readonly to: Point }
-    | { readonly kind: 'frame'; readonly from: Point; readonly to: Point }
+    | { readonly kind: 'pad'; readonly from: Point; readonly to: Point; readonly aside?: number }
+    | { readonly kind: 'frame'; readonly from: Point; readonly to: Point; readonly aside?: number }
     | { readonly kind: 'bar'; readonly at: Point }
+    | { readonly kind: 'bars'; readonly at: Point; readonly apart: number }
+    | { readonly kind: 'landmine'; readonly at: Point }
     | { readonly kind: 'block'; readonly from: Point; readonly to: Point }
-    | { readonly kind: 'cable'; readonly from: Point; readonly each?: boolean };
+    | {
+          readonly kind: 'cable';
+          readonly from: Point;
+          readonly each?: boolean;
+          readonly bar?: number;
+      };
 
 export interface MotionFrame {
     /** What the position is called, under its still when motion is reduced, e.g. "Bottom". */
@@ -117,6 +175,11 @@ export interface MotionFrame {
     readonly hold?: number;
     /** How long it takes to move from this position to the next (or back to the first). */
     readonly ms: number;
+    /**
+     * Passed through without slowing, from the position before to the next, as one smooth
+     * move (a roll out that goes on to the full stretch); no hold. Never the first position.
+     */
+    readonly through?: boolean;
 }
 
 export interface ExerciseMotion {
@@ -144,6 +207,8 @@ export const BODY = {
 
 /** How far apart the hands are, side to side, unless a pose says (from the shoulders). */
 export const HANDS_APART = 34;
+/** How far apart the feet are, side to side, unless a pose says (under the hips). */
+export const STANCE = 18;
 
 /** How the figure is put together from each view. */
 const VIEWS = {
@@ -413,8 +478,14 @@ export function drawFigure(pose: Pose, motion: ExerciseMotion): FigureLayers {
             kit.push(slab(piece.from, piece.to, 7));
         } else if (piece.kind === 'frame') {
             kit.push(line(piece.from, piece.to, 3));
-        } else if (piece.kind === 'bar') {
+        } else if (piece.kind === 'bar' || piece.kind === 'bars') {
             kit.push(circle(piece.at, 2.5, 'bar'));
+        } else if (piece.kind === 'landmine') {
+            // From the pivot through the hands, its plate just beyond them
+            const middle = lerpPoint(hands[0], hands[1], 0.5);
+            const along = sub(middle, piece.at);
+            const end = add(middle, scale(along, 22 / (Math.hypot(along[0], along[1]) || 1)));
+            kit.push(line(piece.at, end, 3.5), circle(end, 15));
         } else if (piece.kind === 'block') {
             const [[x1, y1], [x2, y2]] = [piece.from, piece.to];
             kit.push({
@@ -449,7 +520,18 @@ export function drawFigure(pose: Pose, motion: ExerciseMotion): FigureLayers {
             const shin = place('shin', mid, shinAngle, flip(index), lowerScale);
             into.push(circle(placePoint(shin, [front * 9, BODY.shin - 8]), 5));
         }
-        into.push(place('thigh', root, angleOf(root, mid), flip(index), upperScale));
+        const thigh = place('thigh', root, angleOf(root, mid), flip(index), upperScale);
+        into.push(thigh);
+        if (props.has('pad-on-knees') && index === 0) {
+            // Along the top of the thigh, ending at the knee
+            into.push(
+                slab(
+                    placePoint(thigh, [-11, BODY.thigh - 22]),
+                    placePoint(thigh, [-11, BODY.thigh]),
+                    7
+                )
+            );
+        }
     };
     const drawArm = (index: 0 | 1, into: FigureItem[]) => {
         const { root, mid, end, upperScale, lowerScale } = arms[index];
@@ -457,7 +539,11 @@ export function drawFigure(pose: Pose, motion: ExerciseMotion): FigureLayers {
             // Seen end on, from the side or the front, in the hand
             into.push(circle(end, 7.5));
         }
-        if (props.has('kettlebell') && index === 0) {
+        if (props.has('kettlebell') && index === 0 && pose.bellAt) {
+            // Set down: standing on the floor, its handle where it says
+            const handle: Point = [pose.bellAt[0], pose.bellAt[1]];
+            into.push(circle(add(handle, [0, 11]), 8), circle(handle, 3.5, 'bar'));
+        } else if ((props.has('kettlebell') && index === 0) || props.has('kettlebells')) {
             // Hanging from the hand, swung out a little along the forearm
             const along = dir(angleOf(mid, end));
             const hang = add(scale(along, 0.6), [0, 1]);
@@ -576,6 +662,20 @@ function lerpLimb(a: Limb, b: Limb, t: number): Limb {
     return t < 0.5 ? a : b;
 }
 
+/** One value or one for each hand, `t` of the way from `a` to `b`. */
+function lerpEach(
+    a: number | readonly [number, number],
+    b: number | readonly [number, number],
+    t: number
+): number | readonly [number, number] {
+    if (typeof a === 'number' && typeof b === 'number') {
+        return lerp(a, b, t);
+    }
+    const [a0, a1] = typeof a === 'number' ? [a, a] : a;
+    const [b0, b1] = typeof b === 'number' ? [b, b] : b;
+    return [lerp(a0, b0, t), lerp(a1, b1, t)];
+}
+
 /** The pose `t` of the way (0 to 1) from `a` to `b`. */
 export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
     const footAngle = VIEWS[view].footAngle;
@@ -591,14 +691,42 @@ export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
         ...(a.shrug || b.shrug ? { shrug: lerp(a.shrug ?? 0, b.shrug ?? 0, t) } : {}),
         ...(a.twist || b.twist ? { twist: lerp(a.twist ?? 0, b.twist ?? 0, t) } : {}),
         ...(a.handsForward || b.handsForward
-            ? { handsForward: lerp(a.handsForward ?? 0, b.handsForward ?? 0, t) }
+            ? { handsForward: lerpEach(a.handsForward ?? 0, b.handsForward ?? 0, t) }
+            : {}),
+        ...(a.elbowsForward || b.elbowsForward
+            ? { elbowsForward: lerp(a.elbowsForward ?? 0, b.elbowsForward ?? 0, t) }
             : {}),
         ...(a.elbowsOut || b.elbowsOut
             ? { elbowsOut: lerp(a.elbowsOut ?? 0, b.elbowsOut ?? 0, t) }
             : {}),
+        ...(a.elbowsDown || b.elbowsDown
+            ? { elbowsDown: lerp(a.elbowsDown ?? 0, b.elbowsDown ?? 0, t) }
+            : {}),
         ...(a.handsApart !== undefined || b.handsApart !== undefined
             ? {
                   handsApart: lerp(a.handsApart ?? HANDS_APART, b.handsApart ?? HANDS_APART, t),
+              }
+            : {}),
+        ...(a.handsOut || b.handsOut
+            ? {
+                  handsOut: [
+                      lerp(a.handsOut?.[0] ?? 0, b.handsOut?.[0] ?? 0, t),
+                      lerp(a.handsOut?.[1] ?? 0, b.handsOut?.[1] ?? 0, t),
+                  ],
+              }
+            : {}),
+        ...(a.stance !== undefined || b.stance !== undefined
+            ? { stance: lerp(a.stance ?? STANCE, b.stance ?? STANCE, t) }
+            : {}),
+        ...(a.palmsIn || b.palmsIn ? { palmsIn: lerp(a.palmsIn ?? 0, b.palmsIn ?? 0, t) } : {}),
+        ...(a.heldBy || b.heldBy ? { heldBy: lerp(a.heldBy ?? 0, b.heldBy ?? 0, t) } : {}),
+        ...(a.bellAt && b.bellAt
+            ? {
+                  bellAt: [
+                      lerp(a.bellAt[0], b.bellAt[0], t),
+                      lerp(a.bellAt[1], b.bellAt[1], t),
+                      lerp(a.bellAt[2], b.bellAt[2], t),
+                  ],
               }
             : {}),
     };
@@ -610,23 +738,39 @@ export const loopLength = (motion: ExerciseMotion) =>
 
 /**
  * Where the figure is `elapsed` milliseconds into the loop: holding a position, or easing
- * in and out between two (as a body slows into each end of a rep).
+ * in and out between two (as a body slows into each end of a rep). Positions it passes
+ * `through` don't slow it: it eases in and out of the whole move, from one it stops at to
+ * the next.
  */
 export function poseAt(motion: ExerciseMotion, elapsed: number): Pose {
     const frames = motion.frames;
     let time = elapsed % loopLength(motion);
-    for (let i = 0; i < frames.length; i++) {
-        const frame = frames[i];
-        const hold = frame.hold ?? 0;
+    for (let i = 0; i < frames.length; ) {
+        const hold = frames[i].hold ?? 0;
         if (time < hold) {
-            return frame.pose;
+            return frames[i].pose;
         }
         time -= hold;
-        if (time < frame.ms) {
-            const eased = (1 - Math.cos((Math.PI * time) / frame.ms)) / 2;
-            return lerpPose(frame.pose, frames[(i + 1) % frames.length].pose, eased, motion.view);
+        // The move on to the next position it stops at
+        let end = i + 1;
+        while (end < frames.length && frames[end].through) {
+            end++;
         }
-        time -= frame.ms;
+        const moves = frames.slice(i, end);
+        const ms = moves.reduce((total, frame) => total + frame.ms, 0);
+        if (time < ms) {
+            let at = (ms * (1 - Math.cos((Math.PI * time) / ms))) / 2;
+            for (let j = i; ; j++) {
+                const frame = frames[j];
+                if (at < frame.ms || j === end - 1) {
+                    const next = frames[(j + 1) % frames.length].pose;
+                    return lerpPose(frame.pose, next, Math.min(1, at / frame.ms), motion.view);
+                }
+                at -= frame.ms;
+            }
+        }
+        time -= ms;
+        i = end;
     }
     return frames[0].pose;
 }

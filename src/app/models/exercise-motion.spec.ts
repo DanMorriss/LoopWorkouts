@@ -98,6 +98,32 @@ describe('poseAt', () => {
         expect(poseAt(squat, 300).hips[1]).toBeGreaterThan(-93);
         expect(poseAt(squat, 2100)).toBe(standing);
     });
+
+    it('passes through a position marked through without slowing, easing the whole move', () => {
+        const halfway: Pose = { ...standing, hips: [-10, -71], torso: 160 };
+        const frames = (through: boolean): ExerciseMotion => ({
+            view: 'side',
+            frames: [
+                { label: 'Standing', pose: standing, ms: 500 },
+                { label: 'Halfway', pose: halfway, ms: 500, through },
+                { label: 'Bottom', pose: squatting, ms: 1000 },
+            ],
+        });
+        const stopping = frames(false);
+        const smooth = frames(true);
+
+        expect(loopLength(smooth)).toBe(2000);
+        // Halfway through the whole move, it's at the position in the middle
+        expect(poseAt(smooth, 500).hips[1]).toBeCloseTo(-71);
+        // Still moving as it passes it, where it would have slowed to a stop
+        const moved = (motion: ExerciseMotion) =>
+            Math.abs(poseAt(motion, 550).hips[1] - poseAt(motion, 450).hips[1]);
+        expect(moved(smooth)).toBeGreaterThan(5);
+        expect(moved(smooth)).toBeGreaterThan(4 * moved(stopping));
+        // And gets to the end of the move, then back, as before
+        expect(poseAt(smooth, 1000).hips[1]).toBeCloseTo(-50);
+        expect(poseAt(smooth, 1500).hips[1]).toBeCloseTo(-71);
+    });
 });
 
 describe('muscleTone', () => {
@@ -190,6 +216,8 @@ describe('drawFigure', () => {
         expect(props({ ...squat, view: 'front', props: ['barbell'] })).toBe(3);
         // One, in the near hand: the bell and its handle
         expect(props({ ...squat, props: ['kettlebell'] })).toBe(2);
+        // One in each hand
+        expect(props({ ...squat, props: ['kettlebells'] })).toBe(4);
         expect(props({ ...squat, props: ['dumbbell'] })).toBe(1);
     });
 
@@ -304,6 +332,14 @@ describe('BUILT_IN_EXERCISE_MOTION', () => {
             expect(frame.label.trim()).not.toBe('');
             expect(frame.ms).toBeGreaterThan(0);
         }
+        // Passed through without stopping, so not held, and never where it starts
+        expect(motion.frames[0].through).toBeFalsy();
+        for (const frame of motion.frames.filter((frame) => frame.through)) {
+            expect(frame.hold).toBeUndefined();
+        }
+        // A kettlebell set down is set down somewhere in every position, if in any
+        const setDown = motion.frames.filter((frame) => frame.pose.bellAt).length;
+        expect([0, motion.frames.length]).toContain(setDown);
     });
 
     it.each(motions)(

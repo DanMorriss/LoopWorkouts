@@ -287,6 +287,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
             },
         ],
     },
+    // Feet wide enough that the shins stand upright with the bar at its lowest
     'builtin:sumo-deadlift': {
         view: 'front',
         props: ['barbell'],
@@ -298,9 +299,9 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 pose: {
                     hips: [0, -42],
                     torso: 180,
-                    arms: frontHands(13, -31),
-                    handsForward: 14,
-                    legs: [reach(-34, -11.5, 'cw'), reach(34, -11.5, 'ccw')],
+                    arms: frontHands(13, -36),
+                    handsForward: 22,
+                    legs: [reach(-51, -11.5, 'cw'), reach(51, -11.5, 'ccw')],
                 },
             },
             {
@@ -308,11 +309,11 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 hold: 300,
                 ms: 1300,
                 pose: {
-                    hips: [0, -95.5],
+                    hips: [0, -88],
                     torso: 180,
-                    arms: frontHands(19, -84),
+                    arms: frontHands(19, -78),
                     handsForward: 12,
-                    legs: [reach(-34, -11.5, 'cw'), reach(34, -11.5, 'ccw')],
+                    legs: [reach(-51, -11.5, 'cw'), reach(51, -11.5, 'ccw')],
                 },
             },
         ],
@@ -2886,7 +2887,8 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 pose: {
                     hips: [0, -57],
                     torso: 180,
-                    arms: [reach(-4, -54, 'ccw'), reach(4, -54, 'cw')],
+                    arms: [reach(-4, -54, 'cw'), reach(4, -54, 'ccw')],
+                    elbowsOut: 1,
                     handsForward: 18,
                     heldBy: 0.5,
                     legs: [reach(-52, -11.5, 'cw'), reach(52, -11.5, 'ccw')],
@@ -2899,9 +2901,9 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 pose: {
                     hips: [0, -87],
                     torso: 180,
-                    arms: [reach(-4, -140, 'ccw'), reach(4, -140, 'cw')],
+                    arms: [reach(-4, -140, 'cw'), reach(4, -140, 'ccw')],
                     handsForward: 22,
-                    elbowsOut: 0.5,
+                    elbowsOut: 1,
                     heldBy: 0.5,
                     legs: [reach(-52, -11.5, 'cw'), reach(52, -11.5, 'ccw')],
                 },
@@ -3045,14 +3047,14 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
         props: ['kettlebell'],
         frames: [
             {
-                label: 'In front of the chin',
+                label: 'In front of the forehead',
                 ms: 600,
                 pose: {
                     ...FRONT_STANDING,
                     heldBy: 0.5,
-                    handsForward: 24,
+                    handsForward: 20,
                     elbowsDown: 1,
-                    arms: [reach(-5, -152, 'ccw'), reach(5, -152, 'cw')],
+                    arms: [reach(-5, -200, 'ccw'), reach(5, -200, 'cw')],
                 },
             },
             {
@@ -3062,9 +3064,9 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 pose: {
                     ...FRONT_STANDING,
                     heldBy: 0.5,
-                    handsForward: [-8, 12],
+                    handsForward: [-6, 14],
                     elbowsForward: 1,
-                    arms: [reach(-28, -178, 'ccw'), reach(-16, -178, 'cw')],
+                    arms: [reach(-30, -195, 'ccw'), reach(-14, -195, 'cw')],
                 },
             },
             {
@@ -3074,9 +3076,9 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 pose: {
                     ...FRONT_STANDING,
                     heldBy: 0.5,
-                    handsForward: -20,
+                    handsForward: -18,
                     elbowsForward: 1,
-                    arms: [reach(-6, -176, 'ccw'), reach(6, -176, 'cw')],
+                    arms: [reach(-6, -195, 'ccw'), reach(6, -195, 'cw')],
                 },
             },
             {
@@ -3086,9 +3088,9 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 pose: {
                     ...FRONT_STANDING,
                     heldBy: 0.5,
-                    handsForward: [12, -8],
+                    handsForward: [14, -6],
                     elbowsForward: 1,
-                    arms: [reach(16, -178, 'ccw'), reach(28, -178, 'cw')],
+                    arms: [reach(14, -195, 'ccw'), reach(30, -195, 'cw')],
                 },
             },
         ],

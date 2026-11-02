@@ -260,6 +260,27 @@ describe('skeletonOf, placing the hands in 3D', () => {
         });
     });
 
+    it('raises the body between thighs out to the sides, the legs staying put', () => {
+        const sumo: Pose = {
+            hips: [0, -57],
+            torso: 180,
+            arms: standing.arms,
+            legs: [
+                { reach: [-52, -11.5], bend: 'cw' },
+                { reach: [52, -11.5], bend: 'ccw' },
+            ],
+        };
+        const wide = skeletonOf(sumo, front(sumo));
+        const upright = skeletonOf(standing, side(standing));
+
+        // Above the hip joints the thighs hang from, with the shoulders and arms
+        expect(wide.hips[1] - wide.legs[0].root[1]).toBeGreaterThan(5);
+        expect(wide.shoulders[1] - wide.hips[1]).toBeCloseTo(BODY.torso, 4);
+        wide.legs.forEach((leg) => expectLengths(leg, BODY.thigh, BODY.shin));
+        // Not standing up straight
+        expect(upright.hips[1] - upright.legs[0].root[1]).toBeCloseTo(0, 4);
+    });
+
     it('puts a kettlebell in the hand that holds it, between the hands, or set down', () => {
         const pose: Pose = {
             ...standing,

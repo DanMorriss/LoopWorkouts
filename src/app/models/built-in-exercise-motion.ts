@@ -3047,14 +3047,14 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
         props: ['kettlebell'],
         frames: [
             {
-                label: 'In front of the forehead',
+                label: 'In front of the chest',
                 ms: 600,
                 pose: {
                     ...FRONT_STANDING,
                     heldBy: 0.5,
-                    handsForward: 20,
+                    handsForward: 24,
                     elbowsDown: 1,
-                    arms: [reach(-5, -200, 'ccw'), reach(5, -200, 'cw')],
+                    arms: [reach(-5, -166, 'ccw'), reach(5, -166, 'cw')],
                 },
             },
             {

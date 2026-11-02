@@ -71,6 +71,13 @@ export interface Skeleton {
 export const SHOULDER_SPREAD = 17;
 export const HIP_SPREAD = 9;
 const NECK = 9;
+/** How far the body rides up between the thighs with them straight out to the sides, in cm. */
+const SEAT_LIFT = 7;
+
+const smooth = (t: number) => {
+    const clamped = Math.min(1, Math.max(0, t));
+    return clamped * clamped * (3 - 2 * clamped);
+};
 
 export const add3 = (a: Vec3, b: Vec3): Vec3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 export const sub3 = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -259,12 +266,32 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         return length3(forwards) > 0.2 ? normalize3(forwards) : forward;
     };
 
-    const arms = clearLegs(motion, [turnLimb(arm(0)), turnLimb(arm(1))], legs, hips);
+    // With the thighs out to the sides (a sumo stance), the body rides up between them, as the
+    // hips sit between the thighs rather than above them; the legs stay where they are
+    const outwards =
+        legs
+            .map((leg) => Math.abs(dot3(normalize3(sub3(leg.mid, leg.root)), right)))
+            .reduce((total, out) => total + out, 0) / 2;
+    const seat = scale3(up, SEAT_LIFT * smooth((outwards - 0.3) / 0.6));
+    const raise = (point: Vec3) => add3(point, seat);
+    const raiseLimb = (limb: Limb3): Limb3 => ({
+        ...limb,
+        root: raise(limb.root),
+        mid: raise(limb.mid),
+        end: raise(limb.end),
+    });
+    const arms = clearLegs(
+        motion,
+        [raiseLimb(turnLimb(arm(0))), raiseLimb(turnLimb(arm(1)))],
+        legs,
+        hips
+    );
+    const raisedShoulders = raise(turnedShoulders);
     const bellAt = pose.bellAt;
     return {
-        hips,
-        shoulders: turnedShoulders,
-        neck: add3(turnedShoulders, scale3(headUp, NECK)),
+        hips: raise(hips),
+        shoulders: raisedShoulders,
+        neck: add3(raisedShoulders, scale3(headUp, NECK)),
         up,
         forward: turnDir(forward),
         right: turnDir(right),
@@ -273,7 +300,7 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         arms,
         legs,
         feet: [foot(0), foot(1)],
-        bar: turn(lift(view, solved.bar)),
+        bar: raise(turn(lift(view, solved.bar))),
         palmsIn: pose.palmsIn ?? 0,
         bell: bellAt
             ? add3(lift(view, [bellAt[0], bellAt[1]]), scale3(right, bellAt[2]))

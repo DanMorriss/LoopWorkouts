@@ -140,8 +140,8 @@ export type Prop =
  * pulley to each hand, as in a cable curl, or with `bar`, a cable to the middle of a bar that
  * long, held in both hands, as in a lat pulldown).
  *
- * Or two bars to hold, either side of the body at `at` (in 3D `apart` apart, each turned
- * `turn` degrees in from running front to back, as a dip station's), or a landmine: a bar
+ * Or two bars to hold, either side of the body at `at` (in 3D `apart` apart, parallel, running
+ * front to back, as a dip station's), or a landmine: a bar
  * from a pivot on the floor at `at`, through the hands, loaded beyond them.
  *
  * In 3D, `aside` moves a cushion or frame that far to the figure's left, in cm (a bench beside
@@ -151,7 +151,7 @@ export type Kit =
     | { readonly kind: 'pad'; readonly from: Point; readonly to: Point; readonly aside?: number }
     | { readonly kind: 'frame'; readonly from: Point; readonly to: Point; readonly aside?: number }
     | { readonly kind: 'bar'; readonly at: Point }
-    | { readonly kind: 'bars'; readonly at: Point; readonly apart: number; readonly turn: number }
+    | { readonly kind: 'bars'; readonly at: Point; readonly apart: number }
     | { readonly kind: 'landmine'; readonly at: Point }
     | { readonly kind: 'block'; readonly from: Point; readonly to: Point }
     | {

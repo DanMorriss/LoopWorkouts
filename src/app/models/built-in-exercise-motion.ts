@@ -1204,7 +1204,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
     },
     'builtin:dip': {
         view: 'side',
-        kit: [{ kind: 'bars', at: [8, -120], apart: 54, turn: 45 }],
+        kit: [{ kind: 'bars', at: [8, -120], apart: 54 }],
         frames: [
             {
                 label: 'Arms straight',

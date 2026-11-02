@@ -500,23 +500,11 @@ export class FigureScene {
                 this.rod(from, to, 1.8, this.metalMaterial);
                 points.push(from, to);
             } else if (piece.kind === 'bars') {
-                // Either side, turned in towards the front, each on a post at its back end. The
-                // figure faces +x, its right +z, from either view
-                const [forwards, across]: Vec3[] = [
-                    [1, 0, 0],
-                    [0, 0, 1],
-                ];
+                // Either side, running front to back, each on a post at its back end. The figure
+                // faces +x, its right +z, from either view
                 for (const side of [-1, 1]) {
-                    const middle = add3(lift(piece.at), scale3(across, (side * piece.apart) / 2));
-                    const radians = (piece.turn * Math.PI) / 180;
-                    const way = add3(
-                        scale3(forwards, Math.cos(radians)),
-                        scale3(across, -side * Math.sin(radians))
-                    );
-                    const [front, back] = [
-                        add3(middle, scale3(way, 30)),
-                        add3(middle, scale3(way, -30)),
-                    ];
+                    const middle = add3(lift(piece.at), [0, 0, (side * piece.apart) / 2]);
+                    const [front, back] = [add3(middle, [30, 0, 0]), add3(middle, [-30, 0, 0])];
                     this.rod(back, front, 1.8, this.metalMaterial);
                     this.rod(back, [back[0], 0, back[2]], 1.6, this.metalMaterial);
                     points.push(front, back);

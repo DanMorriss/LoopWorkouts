@@ -821,11 +821,13 @@ export class FigureScene {
         const restHipY = model.joints.hip[1];
         const [shoulderZ, shoulderY] = model.joints.shoulder;
         const tall = (BODY.torso - 4) / (shoulderY - restHipY);
-        // How far each thigh is bent forwards at the hip, from hanging straight down
+        // How far each thigh is bent forwards at the hip, from hanging straight down. A thigh
+        // out to the side counts as hanging, however high, so a wide squat's knees, above the
+        // hips, don't fold the seat away as a knee raised to the chest would
         const bent = skeleton.legs.map((leg) => {
             const thigh = normalize3(sub3(leg.mid, leg.root));
-            const degrees =
-                (Math.atan2(dot3(thigh, bodyForward), -dot3(thigh, up)) * 180) / Math.PI;
+            const down = -dot3(thigh, up) + Math.abs(dot3(thigh, bodyRight));
+            const degrees = (Math.atan2(dot3(thigh, bodyForward), down) * 180) / Math.PI;
             return Math.min(140, Math.max(-40, degrees));
         }) as [number, number];
         this.shapeTorso(skeleton.twist, bent, restHipY, model.levels.armpit);

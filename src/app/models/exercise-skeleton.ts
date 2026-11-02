@@ -180,7 +180,8 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
             end = add3(end, scale3(right, placed.side * pose.handsOut[index]));
         }
         if (!side && pose.handsForward) {
-            end = add3(end, scale3(forward, pose.handsForward));
+            const by = pose.handsForward;
+            end = add3(end, scale3(forward, typeof by === 'number' ? by : by[index]));
         }
         let towards = sub3(placed.mid, scale3(add3(placed.root, end), 0.5));
         if (pose.elbowsOut) {
@@ -203,7 +204,15 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
                 scale3(normalize3(downwards), pose.elbowsDown)
             );
         }
-        if (end === placed.end && !pose.elbowsOut && !pose.elbowsDown) {
+        if (pose.elbowsForward) {
+            const along = normalize3(sub3(end, placed.root));
+            const forwards = sub3(forward, scale3(along, dot3(forward, along)));
+            towards = add3(
+                scale3(normalize3(towards), 1 - pose.elbowsForward),
+                scale3(normalize3(forwards), pose.elbowsForward)
+            );
+        }
+        if (end === placed.end && !pose.elbowsOut && !pose.elbowsDown && !pose.elbowsForward) {
             return placed;
         }
         end = within(placed.root, end, BODY.upperArm + BODY.forearm);

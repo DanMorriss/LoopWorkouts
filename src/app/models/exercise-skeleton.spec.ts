@@ -172,6 +172,43 @@ describe('skeletonOf, placing the hands in 3D', () => {
         });
     });
 
+    it('brings each hand forwards by its own amount when given one for each', () => {
+        const pose: Pose = {
+            ...standing,
+            hips: [0, -99.5],
+            arms: [
+                { reach: [-6, -160], bend: 'ccw' },
+                { reach: [6, -160], bend: 'cw' },
+            ],
+        };
+        const flat = skeletonOf(pose, front(pose));
+        const each = skeletonOf({ ...pose, handsForward: [-8, 12] }, front(pose));
+
+        expect(each.arms[0].end[0] - flat.arms[0].end[0]).toBeCloseTo(-8, 4);
+        expect(each.arms[1].end[0] - flat.arms[1].end[0]).toBeCloseTo(12, 4);
+        each.arms.forEach((arm) => expectLengths(arm, BODY.upperArm, BODY.forearm));
+    });
+
+    it('points the elbows forwards with elbowsForward, the hands staying put', () => {
+        // Hands beside the head, as in a kettlebell halo
+        const pose: Pose = {
+            ...standing,
+            hips: [0, -99.5],
+            arms: [
+                { reach: [-26, -176], bend: 'ccw' },
+                { reach: [26, -176], bend: 'cw' },
+            ],
+        };
+        const drawn = skeletonOf(pose, front(pose));
+        const forwards = skeletonOf({ ...pose, elbowsForward: 1 }, front(pose));
+
+        forwards.arms.forEach((arm, i) => {
+            close(arm.end, drawn.arms[i].end);
+            expectLengths(arm, BODY.upperArm, BODY.forearm);
+            expect(arm.mid[0]).toBeGreaterThan(arm.root[0] + 10);
+        });
+    });
+
     it('points the elbows down the body with elbowsDown, the hands staying put', () => {
         // Hands in front of the shoulders, from the front, as an Arnold press starts
         const pose: Pose = {

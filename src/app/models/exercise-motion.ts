@@ -68,9 +68,10 @@ export interface Pose {
     readonly handsApart?: number;
     /**
      * Only for the 3D figure: how far in front of where they're drawn the hands are, in cm.
-     * From the front only, where a drawing can't show it (hands meeting in front of the chest).
+     * From the front only, where a drawing can't show it (hands meeting in front of the chest);
+     * one for each hand if they differ (one in front of the head, one behind it).
      */
-    readonly handsForward?: number;
+    readonly handsForward?: number | readonly [near: number, far: number];
     /**
      * Only for the 3D figure: how far the elbows point out to the sides rather than the way
      * they're drawn, from 0 to 1, the hands staying put (as in a face pull).
@@ -82,6 +83,11 @@ export interface Pose {
      * Arnold press starts).
      */
     readonly elbowsDown?: number;
+    /**
+     * Only for the 3D figure: how far the elbows point forwards rather than the way they're
+     * drawn, from 0 to 1, the hands staying put (round the head, as in a kettlebell halo).
+     */
+    readonly elbowsForward?: number;
     /**
      * Only for the 3D figure: how far each hand is moved out to its own side, in cm, the elbow
      * bending to reach; negative is across the body (a hand reaching under it, say). From the
@@ -656,6 +662,20 @@ function lerpLimb(a: Limb, b: Limb, t: number): Limb {
     return t < 0.5 ? a : b;
 }
 
+/** One value or one for each hand, `t` of the way from `a` to `b`. */
+function lerpEach(
+    a: number | readonly [number, number],
+    b: number | readonly [number, number],
+    t: number
+): number | readonly [number, number] {
+    if (typeof a === 'number' && typeof b === 'number') {
+        return lerp(a, b, t);
+    }
+    const [a0, a1] = typeof a === 'number' ? [a, a] : a;
+    const [b0, b1] = typeof b === 'number' ? [b, b] : b;
+    return [lerp(a0, b0, t), lerp(a1, b1, t)];
+}
+
 /** The pose `t` of the way (0 to 1) from `a` to `b`. */
 export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
     const footAngle = VIEWS[view].footAngle;
@@ -671,7 +691,10 @@ export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
         ...(a.shrug || b.shrug ? { shrug: lerp(a.shrug ?? 0, b.shrug ?? 0, t) } : {}),
         ...(a.twist || b.twist ? { twist: lerp(a.twist ?? 0, b.twist ?? 0, t) } : {}),
         ...(a.handsForward || b.handsForward
-            ? { handsForward: lerp(a.handsForward ?? 0, b.handsForward ?? 0, t) }
+            ? { handsForward: lerpEach(a.handsForward ?? 0, b.handsForward ?? 0, t) }
+            : {}),
+        ...(a.elbowsForward || b.elbowsForward
+            ? { elbowsForward: lerp(a.elbowsForward ?? 0, b.elbowsForward ?? 0, t) }
             : {}),
         ...(a.elbowsOut || b.elbowsOut
             ? { elbowsOut: lerp(a.elbowsOut ?? 0, b.elbowsOut ?? 0, t) }

@@ -46,7 +46,8 @@
     }
 </div>
 
-@if (mainLabels().length === 0 && supportingLabels().length === 0) {
+<!-- With figureOnly, just the figure, and no "No muscles listed." -->
+@if (!figureOnly() && mainLabels().length === 0 && supportingLabels().length === 0) {
     <p class="body-map__none">No muscles listed.</p>
 }
 @if (mainLabels().length > 0) {

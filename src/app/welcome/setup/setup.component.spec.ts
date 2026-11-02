@@ -90,6 +90,8 @@ describe('SetupComponent (NAV-4)', () => {
         expect(heading()).toBe('Which body should the muscle maps show?');
         await choose('Female');
         expect(settings().bodyFigure()).toBe('female');
+        expect(element.querySelector('app-body-map svg')).not.toBeNull();
+        expect(element.textContent).not.toContain('No muscles listed.');
         await press('Next');
 
         expect(heading()).toBe('Do you lift in kilograms or pounds?');

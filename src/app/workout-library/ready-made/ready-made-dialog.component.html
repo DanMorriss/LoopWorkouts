@@ -32,39 +32,7 @@
 
         <section class="preview__section" aria-labelledby="ready-made-steps">
             <h3 id="ready-made-steps" class="preview__heading">What's in it</h3>
-            <p class="preview__repeats">{{ repeats() }}</p>
-            <ul class="preview__lines">
-                @for (line of lines(); track $index) {
-                    @switch (line.kind) {
-                        @case ('heading') {
-                            <li class="preview__part">{{ line.text }}</li>
-                        }
-                        @case ('step') {
-                            <li class="preview__line">
-                                <span class="preview__name">{{ line.name }}</span>
-                                {{ ' ' }}
-                                <span class="preview__amount">{{ line.amount }}</span>
-                            </li>
-                        }
-                        @case ('superset') {
-                            <li class="preview__line preview__line--superset">
-                                <span class="preview__name">{{ line.name }}</span>
-                                {{ ' ' }}
-                                <span class="preview__amount">{{ line.amount }}</span>
-                                <ul class="preview__lines preview__lines--inner">
-                                    @for (step of line.steps; track $index) {
-                                        <li class="preview__line">
-                                            <span class="preview__name">{{ step.name }}</span>
-                                            {{ ' ' }}
-                                            <span class="preview__amount">{{ step.amount }}</span>
-                                        </li>
-                                    }
-                                </ul>
-                            </li>
-                        }
-                    }
-                }
-            </ul>
+            <app-workout-outline [workout]="workout" />
         </section>
 
         <section class="preview__section" aria-labelledby="ready-made-muscles">

@@ -15,6 +15,14 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MUSCLE_LABELS, MuscleGroup } from '../models/exercise';
 import { Workout } from '../models/workout';
 import { musclesMissed, musclesWorked } from '../models/workout-muscles';
+import {
+    BUILT_IN_WORKOUTS,
+    builtInWorkoutEquipment,
+    copyOfBuiltIn,
+} from '../models/built-in-workouts';
+import { canDoWith } from '../models/exercise';
+import { listMuscles, workoutToFillGaps } from '../models/fill-gaps';
+import { SettingsStore } from '../shared/state/settings-store.service';
 import { HOLD_MS, WorkoutCardComponent } from './workout-card/workout-card.component';
 import { WorkoutDetailsDialogComponent } from './workout-details/workout-details-dialog.component';
 import { changeSmoothly } from '../shared/layout-change';
@@ -46,6 +54,7 @@ export class WorkoutLibraryComponent {
     router = inject(Router);
     private readonly run = inject(ActiveRunService);
     private readonly exercises = inject(ExerciseStore);
+    private readonly settings = inject(SettingsStore);
     private host = inject<ElementRef<HTMLElement>>(ElementRef);
     private injector = inject(Injector);
     private readonly undo = inject(UndoService);
@@ -91,6 +100,50 @@ export class WorkoutLibraryComponent {
             light: named(worked.supporting),
         };
     });
+
+    /**
+     * A ready-made workout to add for the muscles left out (LIB-7): of those not in the library
+     * already (by title) and, with Only what I have on, doable with your equipment, the one that
+     * does most for them. Null when there are no gaps, or no ready-made workout helps.
+     */
+    protected readonly gapFiller = computed(() => {
+        const worked = musclesWorked(this.workoutStore.workouts(), (id) => this.exercises.byId(id));
+        if (!worked.hasExercises) {
+            return null;
+        }
+        const titles = new Set(
+            this.workoutStore.workouts().map((workout) => workout.title.trim().toLowerCase())
+        );
+        const kit = this.settings.myEquipment();
+        const onlyMine = this.settings.onlyMyEquipment();
+        const candidates = BUILT_IN_WORKOUTS.filter(
+            (workout) =>
+                !titles.has(workout.title.toLowerCase()) &&
+                (!onlyMine || canDoWith({ equipment: builtInWorkoutEquipment(workout) }, kit))
+        );
+        const best = workoutToFillGaps(candidates, musclesMissed(worked), worked.supporting, (id) =>
+            this.exercises.byId(id)
+        );
+        return (
+            best && {
+                workout: best.workout,
+                fills: `Adds ${listMuscles(best.fills.map((muscle) => MUSCLE_LABELS[muscle]))}.`,
+            }
+        );
+    });
+
+    /** Adds the suggested ready-made workout as a copy of your own, with Undo. */
+    protected addGapFiller() {
+        const suggestion = this.gapFiller();
+        if (!suggestion) {
+            return;
+        }
+        const added = this.workoutStore.addWorkout(copyOfBuiltIn(suggestion.workout));
+        this.undo.offerUndo({
+            message: `Added "${added.title}" to your workouts`,
+            undo: () => this.workoutStore.deleteWorkout(added.id),
+        });
+    }
 
     protected openDetails(workoutId: string) {
         this.openWorkoutMenuId.set(null);

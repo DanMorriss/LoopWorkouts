@@ -10,7 +10,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { outline, repeatsText } from '../../models/workout-outline';
+import { WorkoutOutlineComponent } from '../../shared/components/workout-outline/workout-outline.component';
 import { musclesWorked } from '../../models/workout-muscles';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { growFromClick } from '../../shared/dialog-origin';
@@ -24,7 +24,7 @@ import type { ReadyMadeCard } from './ready-made.component';
  */
 @Component({
     selector: 'app-ready-made-dialog',
-    imports: [BodyMapComponent, CdkTrapFocus, MatIconModule],
+    imports: [BodyMapComponent, CdkTrapFocus, MatIconModule, WorkoutOutlineComponent],
     templateUrl: './ready-made-dialog.component.html',
     styleUrl: './ready-made-dialog.component.scss',
 })
@@ -37,8 +37,6 @@ export class ReadyMadeDialogComponent {
     private readonly exercises = inject(ExerciseStore);
     private readonly dialogCard = viewChild.required<ElementRef<HTMLElement>>('dialogCard');
 
-    protected readonly lines = computed(() => outline(this.card().workout));
-    protected readonly repeats = computed(() => repeatsText(this.card().workout));
     protected readonly muscles = computed(() =>
         musclesWorked([this.card().workout], (id) => this.exercises.byId(id))
     );

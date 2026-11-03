@@ -59,6 +59,12 @@
             }
         </section>
 
+        <!-- Its steps, to see what's in it without opening Edit -->
+        <section class="details__section" aria-labelledby="workout-details-steps">
+            <h3 id="workout-details-steps" class="details__heading">What's in it</h3>
+            <app-workout-outline [workout]="workout()" />
+        </section>
+
         <div class="details__actions">
             <button type="button" class="btn-pill details__edit" (click)="editRequested.emit()">
                 <mat-icon aria-hidden="true">edit</mat-icon>

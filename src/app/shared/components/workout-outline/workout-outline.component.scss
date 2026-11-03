@@ -1,0 +1,53 @@
+:host {
+    display: block;
+}
+
+.outline__repeats {
+    margin: 0 0 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.outline__lines {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    // A superset's steps, set in under it
+    &--inner {
+        grid-column: 1 / -1;
+        margin: 0.25rem 0 0 0.9rem;
+        padding-left: 0.6rem;
+        border-left: 2px solid var(--border-soft);
+    }
+}
+
+// A part of the workout, as its heading reads in Create
+.outline__part {
+    margin: 0.8rem 0 0.2rem;
+    color: var(--glow-text);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+// An exercise at the left, its sets at the right, wrapping under it when there's no room
+.outline__line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0 0.75rem;
+    padding: 0.3rem 0;
+}
+
+.outline__name {
+    color: var(--text-strong);
+    overflow-wrap: anywhere;
+}
+
+.outline__amount {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: right;
+}

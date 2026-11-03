@@ -11,6 +11,8 @@ import { DeletionStore } from '../shared/state/deletion-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 import { makeWorkout as baseWorkout, reps, SimpleWorkout } from '../shared/testing/make-workout';
 import { WorkoutLibraryComponent } from './workout-library.component';
+import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment } from '../models/built-in-workouts';
+import { SettingsStore } from '../shared/state/settings-store.service';
 
 // A new workout to add: the shared test workout without its id
 function makeWorkout(overrides: Partial<SimpleWorkout> = {}): Omit<Workout, 'id'> {
@@ -176,6 +178,44 @@ describe('WorkoutLibraryComponent', () => {
                 click(card(index).querySelector('.workout-card__menu-item--details'));
             };
             const dialog = () => el('[role="dialog"]');
+
+            it("lists what's in it at the bottom, so it can be read without Edit", () => {
+                store.addWorkout({
+                    title: 'Legs',
+                    repeats: 2,
+                    blocks: [
+                        { kind: 'heading', text: 'Main' },
+                        {
+                            kind: 'group',
+                            rounds: 3,
+                            restSeconds: 60,
+                            steps: [{ kind: 'reps', reps: 10, name: 'Back squat' }],
+                        },
+                        {
+                            kind: 'group',
+                            rounds: 1,
+                            restSeconds: 0,
+                            steps: [{ kind: 'work', seconds: 30, name: '' }],
+                        },
+                    ],
+                });
+                fixture.detectChanges();
+                openDetails(2);
+
+                const headings = Array.from(dialog()!.querySelectorAll('h3'), (h) =>
+                    h.textContent!.trim()
+                );
+                expect(headings).toEqual(['Muscles it works', 'History', "What's in it"]);
+                expect(dialog()!.querySelector('.outline__repeats')?.textContent?.trim()).toBe(
+                    '2 rounds of all of it'
+                );
+                const lines = Array.from(
+                    dialog()!.querySelectorAll('.outline__part, .outline__line'),
+                    (line) => line.textContent!.replace(/\s+/g, ' ').trim()
+                );
+                // An unnamed step goes by its kind, as in the history
+                expect(lines).toEqual(['Main', 'Back squat 3 × 10, rest 1:00', 'Work 0:30']);
+            });
 
             it("opens from its options, saying when it hasn't been done yet", () => {
                 openDetails(0);
@@ -445,6 +485,55 @@ describe('WorkoutLibraryComponent', () => {
 
         it('lists the ones only worked as a supporting muscle apart', () => {
             expect(muscles(1)).toBe('Shoulders Triceps Lower back Adductors Hamstrings');
+        });
+
+        describe('a ready-made workout for them (LIB-7)', () => {
+            const suggested = () => el('.library__gap-filler-name')?.textContent!.trim();
+
+            it('suggests the one that does most for them, saying what it adds', () => {
+                expect(el('.library__gap-filler-label')?.textContent?.trim()).toBe(
+                    'Or add a ready-made workout for them:'
+                );
+                expect(suggested()).toBe('Kettlebell full body');
+                expect(el('.library__gap-filler-fills')?.textContent?.trim()).toBe(
+                    'Adds Shoulders, Biceps, Forearms and 5 more.'
+                );
+            });
+
+            it('adds it to the end with Undo, then suggests another for what is left', () => {
+                click(el('.library__gap-filler-add'));
+
+                expect(store.workouts().map((w) => w.title)).toEqual([
+                    'Legs',
+                    'Push',
+                    'Kettlebell full body',
+                ]);
+                expect(TestBed.inject(UndoService).offer()?.message).toBe(
+                    'Added "Kettlebell full body" to your workouts'
+                );
+                expect(suggested()).not.toBe('Kettlebell full body');
+
+                TestBed.inject(UndoService).undo();
+                fixture.detectChanges();
+                expect(store.workouts().map((w) => w.title)).toEqual(['Legs', 'Push']);
+                expect(suggested()).toBe('Kettlebell full body');
+            });
+
+            it('with Only what I have on, suggests only what your equipment allows', () => {
+                TestBed.inject(SettingsStore).update({ onlyMyEquipment: true, myEquipment: [] });
+                fixture.detectChanges();
+
+                const workout = BUILT_IN_WORKOUTS.find((w) => w.title === suggested())!;
+                expect(builtInWorkoutEquipment(workout)).toEqual(['none']);
+            });
+
+            it("doesn't suggest one already in your workouts", () => {
+                store.addWorkout(makeWorkout({ title: 'Kettlebell full body', steps: [reps(5)] }));
+                fixture.detectChanges();
+
+                expect(suggested()).toBeTruthy();
+                expect(suggested()).not.toBe('Kettlebell full body');
+            });
         });
     });
 });

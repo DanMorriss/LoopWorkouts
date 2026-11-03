@@ -2,6 +2,30 @@ import { outline, repeatsText } from './workout-outline';
 import { UNTIL_STOPPED } from './workout';
 
 describe('outline', () => {
+    it('names an unnamed step by its kind, as the history does', () => {
+        expect(
+            outline({
+                blocks: [
+                    {
+                        kind: 'group',
+                        rounds: 1,
+                        restSeconds: 0,
+                        steps: [{ kind: 'reps', reps: 8, name: ' ' }],
+                    },
+                    {
+                        kind: 'group',
+                        rounds: 1,
+                        restSeconds: 0,
+                        steps: [{ kind: 'work', seconds: 45, name: '' }],
+                    },
+                ],
+            })
+        ).toEqual([
+            { kind: 'step', name: 'Reps', amount: '8' },
+            { kind: 'step', name: 'Work', amount: '0:45' },
+        ]);
+    });
+
     it('writes out headings, exercises with their sets, and supersets with their steps', () => {
         expect(
             outline({

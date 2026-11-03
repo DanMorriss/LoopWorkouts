@@ -133,6 +133,30 @@
                         }
                     </ul>
                 }
+                <!-- A ready-made workout to add for them (LIB-7) -->
+                @if (gapFiller(); as suggestion) {
+                    <div class="library__gap-filler">
+                        <p class="library__gap-filler-label">
+                            Or add a ready-made workout for them:
+                        </p>
+                        <p class="library__gap-filler-name">{{ suggestion.workout.title }}</p>
+                        <p class="library__gap-filler-description">
+                            {{ suggestion.workout.description }}
+                        </p>
+                        <p class="library__gap-filler-fills">{{ suggestion.fills }}</p>
+                        <button
+                            type="button"
+                            class="btn-pill library__gap-filler-add"
+                            [attr.aria-label]="
+                                'Add ' + suggestion.workout.title + ' to my workouts'
+                            "
+                            (click)="$event.stopPropagation(); addGapFiller()"
+                        >
+                            <mat-icon aria-hidden="true">add</mat-icon>
+                            Add to my workouts
+                        </button>
+                    </div>
+                }
             }
         </section>
     }

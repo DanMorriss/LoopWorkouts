@@ -2,6 +2,7 @@ import {
     afterNextRender,
     Component,
     computed,
+    DestroyRef,
     DOCUMENT,
     inject,
     Injector,
@@ -66,6 +67,24 @@ export class SignInComponent {
         this.codeForm.code().touched() ? this.codeForm.code().errors().at(0)?.message : undefined
     );
 
+    /** The provider being gone to, until the page has left for it. */
+    private leavingFor: string | null = null;
+
+    constructor() {
+        // Back from Google without signing in, the browser can show this page as it was
+        // left, still "Going to Google…" with the buttons off; so it's put back as it was.
+        const view = this.document.defaultView;
+        const shown = (event: PageTransitionEvent) => {
+            if (event.persisted && this.leavingFor) {
+                this.leavingFor = null;
+                this.busy.set(false);
+                this.message.set('');
+            }
+        };
+        view?.addEventListener('pageshow', shown);
+        inject(DestroyRef).onDestroy(() => view?.removeEventListener('pageshow', shown));
+    }
+
     /** Whether `provider` is offered, being set up in Supabase (SIGN_IN_PROVIDERS). */
     protected offers(provider: SignInProvider): boolean {
         return SIGN_IN_PROVIDERS.includes(provider);
@@ -75,8 +94,10 @@ export class SignInComponent {
     protected async signInWith(provider: SignInProvider) {
         const name = PROVIDER_NAMES[provider];
         this.busy.set(true);
+        this.leavingFor = name;
         this.message.set(`Going to ${name}…`);
         if (!(await this.account.signInWith(provider))) {
+            this.leavingFor = null;
             this.busy.set(false);
             this.message.set(`Couldn't reach ${name}. Check your connection and try again.`);
         }

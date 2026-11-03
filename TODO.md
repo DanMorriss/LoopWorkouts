@@ -35,13 +35,15 @@ Eighteen ready-made workouts are on the Ready-made workouts page, opened from Wo
 
 - [ ] **Dan to review the first batch:** the exercises, sets, reps and rests of each, and their descriptions. Ids are fixed once released, so rename before merging if a title changes.
 - [ ] **Dan to review the second batch** (2026-11-03): Tabata, Kettlebell AMRAP, Dumbbell upper and lower, Gym full body, Gym extras, Pull-up bar and dips, and Step circuit. As for the first, ids are fixed once released.
+- [ ] **Dan to review the ready-made plans** (2026-11-03): the six in `src/app/models/built-in-plans.ts`. Ids are fixed once released.
+- [ ] **Mobility days in the ready-made plans,** once there are mobility workouts: rest days are left empty for now.
 - [ ] **More batches, once there are exercises for them:** a band workout (only Band pull-apart uses a band so far), rings, and mobility or stretching (there are no stretches yet), which need new built-in exercises first (see `docs/writing-exercises.md`). Each must pass `built-in-workouts.spec.ts`.
 
 ### Setup and profile (NAV-4, SET-7)
 
 The setup after the welcome screen and the synced profile are in `docs/features/home-and-navigation.md` and `docs/features/settings.md`.
 
-- [ ] **More goals, once there are more workouts:** Training for is only Muscle or Fitness (Dan, 2026-11-02). A goal such as "Get stronger" or "Lose weight" needs its own weekly aims (`WEEKLY_AIMS`) and its own first workout (`FIRST_CHOICES` in `home/first-workout.ts`).
+- [ ] **More goals, once there are more workouts:** Training for is only Muscle or Fitness (Dan, 2026-11-02). A goal such as "Get stronger" or "Lose weight" needs its own weekly aims (`WEEKLY_AIMS`) and its own ready-made plans (`goals` in `models/built-in-plans.ts`).
 - [ ] **Devices from before the setup:** they're never asked, so they have no name to greet by unless it's given on You → Profile. If that's wanted, a card on Today ("Add your name") that can be closed.
 - [ ] **The female 3D figure:** picking Female in the setup changes the body map, but the 3D demos still draw the male figure (see Exercise demos).
 

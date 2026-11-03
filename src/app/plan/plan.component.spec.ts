@@ -170,6 +170,14 @@ describe('PlanComponent', () => {
         expect(link.getAttribute('href')).toBe('/library');
     });
 
+    it('links to the ready-made plans, coming back here (PLN-6)', async () => {
+        await open();
+
+        const link = el().querySelector('.plan__ready-made')!;
+        expect(text(link)).toBe('Start from a ready-made plan');
+        expect(link.getAttribute('href')).toBe('/ready-made-plans?from=plan');
+    });
+
     it('offers Add new workouts first when picking, which goes to the Workouts tab (PLN-5)', async () => {
         await open();
 

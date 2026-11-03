@@ -2,6 +2,7 @@ import { afterNextRender, Component, computed, inject, Injector, signal } from '
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { PageSlide } from '../nav/page-slide';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { MAX_WORKOUTS_A_DAY, PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../models/plan';
 import {
@@ -45,6 +46,7 @@ export class PlanComponent {
     private readonly history = inject(HistoryStore);
     private readonly injector = inject(Injector);
     private readonly router = inject(Router);
+    protected readonly slide = inject(PageSlide);
     private readonly now = Date.now();
 
     protected readonly today = weekdayOf(this.now);

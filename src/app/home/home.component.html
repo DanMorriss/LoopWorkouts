@@ -13,9 +13,9 @@
             <app-get-started class="home__card" />
         }
         <!-- The weekly plan's workouts for today (PLN-2) -->
-        <app-due-today #dueToday class="home__card" />
-        <!-- With a planned workout still to do today, that's what to do next -->
-        @if (hasHistory() && !dueToday.due().length) {
+        <app-due-today class="home__card" />
+        <!-- With a week planned, the plan says what's next; the suggestion is for an unplanned one -->
+        @if (hasHistory() && !hasPlan()) {
             <app-suggested-workout class="home__card" />
         }
     </div>

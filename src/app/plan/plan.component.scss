@@ -112,3 +112,18 @@
 .plan__workouts-link {
     margin-bottom: 1rem;
 }
+
+// A whole week, ready-made (PLN-6), under the hint
+.plan__ready-made {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin: -0.5rem 0 0.5rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}

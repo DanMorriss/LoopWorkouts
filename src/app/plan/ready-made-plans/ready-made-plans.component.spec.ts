@@ -1,0 +1,90 @@
+import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
+import { PlanStore } from '../../shared/state/plan-store.service';
+import { SettingsStore } from '../../shared/state/settings-store.service';
+import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { UndoService } from '../../shared/undo/undo.service';
+import { ReadyMadePlansComponent } from './ready-made-plans.component';
+
+describe('ReadyMadePlansComponent (PLN-6)', () => {
+    let harness: RouterTestingHarness;
+
+    beforeEach(async () => {
+        localStorage.clear();
+        TestBed.configureTestingModule({
+            providers: [
+                provideRouter([
+                    { path: 'home', children: [] },
+                    { path: 'plan', children: [] },
+                    { path: 'ready-made-plans', component: ReadyMadePlansComponent },
+                ]),
+            ],
+        });
+        harness = await RouterTestingHarness.create();
+    });
+    afterEach(() => localStorage.clear());
+
+    async function open(url = '/ready-made-plans') {
+        await harness.navigateByUrl(url);
+        harness.fixture.detectChanges();
+        await harness.fixture.whenStable();
+    }
+
+    const el = (): HTMLElement => harness.routeNativeElement!;
+    const titles = () =>
+        [...el().querySelectorAll('.plan-card__title')].map((t) => t.textContent!.trim());
+
+    it('lists every plan, those for your goal first', async () => {
+        TestBed.inject(SettingsStore).update({ trainingGoal: 'fitness' });
+        await open();
+
+        expect(el().querySelector('h2')!.textContent!.trim()).toBe('Ready-made plans');
+        expect(titles()).toEqual([
+            'Fitness, 4 days',
+            'Kettlebell, 3 days',
+            'No equipment, 3 days',
+            '3-day beginner gym',
+            'Push, pull, legs',
+            'Dumbbells at home, 4 days',
+        ]);
+        expect(el().querySelector('.plan-card__meta')!.textContent!.trim()).toBe(
+            'Mon, Tue, Thu and Sat · Kettlebell'
+        );
+    });
+
+    it('hides those needing what you have not got, with Only what I have on', async () => {
+        TestBed.inject(SettingsStore).update({ myEquipment: [], onlyMyEquipment: true });
+        await open();
+
+        expect(titles()).toEqual(['No equipment, 3 days']);
+        expect(el().textContent).toContain("5 more need equipment you haven't picked.");
+    });
+
+    it('goes back to Today, or to the Plan page it was opened from', async () => {
+        await open();
+        expect(el().querySelector('.back-link')!.getAttribute('href')).toBe('/home');
+
+        // Opened afresh from the Plan page
+        await open('/plan');
+        await open('/ready-made-plans?from=plan');
+        expect(el().querySelector('.back-link')!.getAttribute('href')).toBe('/plan');
+    });
+
+    it('uses one, then goes to Today, with Undo', async () => {
+        await open();
+        el().querySelector<HTMLButtonElement>('[aria-label="Use Push, pull, legs"]')!.click();
+        await harness.fixture.whenStable();
+
+        expect(TestBed.inject(Router).url).toBe('/home');
+        expect(
+            TestBed.inject(WorkoutStore)
+                .workouts()
+                .map((w) => w.title)
+        ).toEqual(['Gym push', 'Gym pull', 'Gym legs', 'Gym extras']);
+        expect(TestBed.inject(PlanStore).hasPlan()).toBe(true);
+        expect(TestBed.inject(UndoService).offer()?.message).toBe(
+            'Your week is planned: Push, pull, legs'
+        );
+    });
+});

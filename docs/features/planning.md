@@ -1,6 +1,6 @@
 # Planning
 
-Built (PLN-1–5): a weekly plan of which workouts you do on which days, the same every week, on a Plan page opened from Today; this week's progress on it there; what's due today on Today; and the week at a glance at the top of Today, the way in to the plan. Kept simple on purpose: no multi-week programmes.
+Built (PLN-1–7): a weekly plan of which workouts you do on which days, the same every week, on a Plan page opened from Today; this week's progress on it there; what's due today on Today; and the week at a glance at the top of Today, the way in to the plan. Kept simple on purpose: no multi-week programmes.
 
 ## Stories
 
@@ -9,6 +9,8 @@ Built (PLN-1–5): a weekly plan of which workouts you do on which days, the sam
 - **PLN-3** As a user I want to see whether I kept to the plan this week.
 - **PLN-4** As a user I want to see my week at a glance where I see what to do today, and change the plan from there, as the plan is my schedule rather than part of my workouts.
 - **PLN-5** As a user planning my week, I want a way to add new workouts when the ones I have aren't enough.
+- **PLN-6** As a user I want to start from a ready-made week, so my workouts and my plan are set up in one go.
+- **PLN-7** As a new user I want Today to offer me a ready-made week for my goal and equipment, to use in one tap.
 
 ## Rules
 
@@ -17,7 +19,7 @@ Built (PLN-1–5): a weekly plan of which workouts you do on which days, the sam
 - One plan, of seven days, **Monday to Sunday**, each with any number of your workouts (up to 10), in the order they were added. A workout can be on several days, but only once on each.
 - It's the same every week: nothing moves or carries over.
 - **Edit plan** on Today's week (or **Plan your week**, with nothing planned; see PLN-4) opens the **Plan page** at `/plan`. It slides in over Today, as an exercise does over the Exercises list; **‹ Today** or a swipe right goes back. The Today tab stays chosen while it's open. Until 2026-11-03 it was opened by a **Plan** button beside + New on the Library, and went back to it.
-- Top to bottom: ‹ Today, the title **Plan**, "Which workouts you do on which days, the same every week. Your week and what's due show on Today.", how this week's going (see below), then a section per day, each with its name (today's says "· today"), **Add**, and its workouts, or "Nothing planned".
+- Top to bottom: ‹ Today, the title **Plan**, "Which workouts you do on which days, the same every week. Your week and what's due show on Today.", **Start from a ready-made plan** (PLN-6), how this week's going (see below), then a section per day, each with its name (today's says "· today"), **Add**, and its workouts, or "Nothing planned".
 - **Add** opens a dialog, "Plan on Thursday": first **Add new workouts** (PLN-5), which closes it and goes to the **Workouts** tab, where workouts are made or added from the ready-made ones (nothing's planned; the plan's a tap away on Today again); then your workouts, in their order on Workouts; one already planned that day says "Planned" and can't be picked. Picking a workout adds it to the end of the day, and focus goes back to that day's Add. ✕, Escape or a tap outside close it, focus back on Add.
 - **✕** by a workout ("Take Legs off Saturday" to screen readers) takes it off that day straight away; focus goes to that day's Add.
 - Screen readers hear each change: "Push planned on Thursday", "Legs taken off Saturday".
@@ -49,11 +51,32 @@ Built (PLN-1–5): a weekly plan of which workouts you do on which days, the sam
 - With nothing planned: "Nothing planned yet. Choose which days you do your workouts, and Today shows what's due each day." and **Plan your week**, the page's main button, opening the Plan page (NAV-6).
 - With no workouts at all, there's no week: Today's **Get started** card offers workouts to add first (NAV-6, see [home-and-navigation](home-and-navigation.md)).
 
+### Ready-made plans (PLN-6, PLN-7)
+
+- A **ready-made plan** is a week of ready-made workouts (LIB-6, see [library](library.md)), the same every week. Days with nothing on are rest days, left empty for now; mobility days can come once there are mobility workouts.
+- The first six, each made for building muscle, fitness, or both:
+
+    | Plan                      | Goal    | Days                                                                         |
+    | ------------------------- | ------- | ---------------------------------------------------------------------------- |
+    | 3-day beginner gym        | Muscle  | Gym full body Mon, Wed and Fri                                               |
+    | Push, pull, legs          | Muscle  | Gym push Mon, Gym pull Wed, Gym legs Fri, Gym extras Sat                     |
+    | Dumbbells at home, 4 days | Muscle  | Dumbbell upper Mon and Thu, Dumbbell lower Tue and Fri                       |
+    | Kettlebell, 3 days        | Both    | Kettlebell full body Mon and Fri; Kettlebell swing ladder and Core in 15 Wed |
+    | No equipment, 3 days      | Both    | Bodyweight basics Mon, Cardio intervals Wed, Core in 15 and Tabata Fri       |
+    | Fitness, 4 days           | Fitness | Tabata Mon, Kettlebell AMRAP Tue, 20-minute AMRAP Thu, Cardio intervals Sat  |
+
+- **The Ready-made plans page** (`/ready-made-plans`), from Today's **Or use a ready-made plan** (with nothing planned), Get started's **See all ready-made plans**, or the Plan page's **Start from a ready-made plan**, under its hint. It slides in over the page it came from, with ‹ Today or ‹ Plan to go back (or a swipe right); the Today tab stays chosen.
+    - "A week of ready-made workouts, the same every week. Using one adds the workouts you haven't got, and replaces your plan, with Undo.", then **Only what I have** and **My equipment**, as on the Exercises list and ready-made workouts (one setting), and how many it hides ("5 more need equipment you haven't picked.").
+    - The plans, as cards: those made for your goal (Training for) alone first, then those that suit it among others, then the rest, each in the order above. Each card: its title, what it's for, its training days and what it needs ("Mon, Wed and Fri · Machine, Dumbbells, Bench"), the week day by day, Monday first, a rest day saying "Rest", and **Use this plan**.
+- **Using a plan** adds a copy of each of its workouts you haven't got, at the end of your workouts; one you have already, by title (ignoring case and spaces at the ends), is used as it is, not copied again. Then it **replaces your plan** with its week, dated now, so it syncs as the latest. From the page, Today opens to show the week. The Undo bar says "Your week is planned: Push, pull, legs", and **Undo** puts back the plan it replaced and deletes the workouts it added. There's no "Are you sure?", as elsewhere.
+- **On Today with no workouts** (PLN-7), Get started offers the first plan for your goal that your equipment allows (see [home-and-navigation](home-and-navigation.md)). No-equipment plans suit both goals, so there's always one.
+- Nothing new is saved: using a plan makes ordinary workouts and an ordinary plan, which sync and back up as they always have.
+
 ### Due today (PLN-2)
 
 - On **Today**, under the week: a **Due today** card listing today's planned workouts not yet run today, in the plan's order, each with **Start**. The first's Start is the page's main button; the others' are smaller.
 - When some have been run today: "Done today: Legs" under the list. When all have: "✓ All done: Push, Legs" in place of the list.
-- While any are due, the **suggested next workout** isn't shown: the plan says what's next. It's back once they're all done, or on a day with nothing planned.
+- With a week planned, the **suggested next workout** isn't shown on Today: the plan says what's next. It shows only with nothing planned this week (since 2026-11-03; until then, it came back once today's were all done, or on a day with nothing planned).
 - With nothing planned today, there's no card, and Today is as it was.
 
 ## Acceptance criteria
@@ -67,12 +90,16 @@ Built (PLN-1–5): a weekly plan of which workouts you do on which days, the sam
 - Given Legs planned on Friday and then deleted, then Friday says "Nothing planned".
 - Given Push and Legs planned today, when I open Today, then Due today lists Push then Legs, each with Start (Push's the main button), and there's no suggested workout; when I've run Legs, then only Push is listed, with "Done today: Legs"; when I've run both, then it says "All done: Push, Legs" and the suggested workout is back.
 - Given nothing planned today, when I open Today, then there's no Due today.
-- Given a workout and nothing planned, when I open Today, then This week says "Nothing planned yet." with Plan your week as the main button.
+- Given a workout and nothing planned, when I open Today, then This week says "Nothing planned yet." with Plan your week as the main button, and Or use a ready-made plan.
+- Given Training for Fitness, when I open the Ready-made plans page, then Fitness 4 days is first, then Kettlebell 3 days and No equipment 3 days, then the rest; with Only what I have on and no equipment picked, then only No equipment 3 days, saying 5 more need equipment I haven't picked.
+- Given Legs planned on Saturday, when I use Dumbbells at home, 4 days, then Dumbbell upper and Dumbbell lower are added to my workouts, the week is Mon and Thu upper, Tue and Fri lower, Saturday's Legs is off it, and Today opens with Undo; when I press Undo, then Legs is back on Saturday and the two workouts are gone.
+- Given a workout called Dumbbell upper already, when I use Dumbbells at home, 4 days, then mine is planned on Mon and Thu, not a second copy.
+- Given a week planned, when I open Today, then there's no suggested next workout.
 - Given today is Sunday, Legs on Monday (not run), Push on Wednesday (run), and Legs and Push today, when I open Today, then the week shows Monday missed, Wednesday done, Sunday planned and outlined as today, the other days free, and "1 of 4 done this week".
 - Given today is Thursday, Legs on Thursday and Saturday, none run, then it says "0 of 2 done this week · Next: Legs on Saturday".
 - Given a plan changed on this device after one on my other device, when they sync, then both have this one.
 
 ## Platform notes
 
-- **Web:** the plan is `WeekPlan` in `src/app/models/plan.ts`, with `thisWeek()` and `dueToday()` working out where each planned workout is from the history, by the device's calendar (`weekdayOf()`, `startOfWeek()`). It's kept by `PlanStore` (`src/app/shared/state/plan-store.service.ts`) in localStorage as `week-plan`, each change dated by the sync clock. It syncs as the record of kind `plan`, id `week` (`src/app/sync/sync-records.ts`), and is `plan` in backups from version 13. The page is `PlanComponent` (`src/app/plan/`), and Today's cards `WeekStripComponent` (`src/app/home/week-strip/`, a day's mark from `markFor()`) and `DueTodayComponent` (`src/app/home/due-today/`). Picking a workout uses `WorkoutChoiceDialogComponent` (`src/app/shared/components/workout-choice-dialog/`), shared with an exercise's Add to workout.
+- **Web:** the plan is `WeekPlan` in `src/app/models/plan.ts`, with `thisWeek()` and `dueToday()` working out where each planned workout is from the history, by the device's calendar (`weekdayOf()`, `startOfWeek()`). It's kept by `PlanStore` (`src/app/shared/state/plan-store.service.ts`) in localStorage as `week-plan`, each change dated by the sync clock. It syncs as the record of kind `plan`, id `week` (`src/app/sync/sync-records.ts`), and is `plan` in backups from version 13. The page is `PlanComponent` (`src/app/plan/`), and Today's cards `WeekStripComponent` (`src/app/home/week-strip/`, a day's mark from `markFor()`) and `DueTodayComponent` (`src/app/home/due-today/`). The ready-made plans are `BUILT_IN_PLANS` in `src/app/models/built-in-plans.ts` (with `plansFor()`, `firstPlan()`, `builtInPlanEquipment()` and `trainingDays()`), checked by `built-in-plans.spec.ts`; using one is `ReadyMadePlans.use()` (`src/app/shared/state/ready-made-plans.service.ts`), which returns its undo, with the whole week set by `PlanStore.replace()`; the page is `ReadyMadePlansComponent` (`src/app/plan/ready-made-plans/`), each plan shown by `PlanCardComponent` (`src/app/plan/plan-card/`), shared with Today's Get started. Picking a workout uses `WorkoutChoiceDialogComponent` (`src/app/shared/components/workout-choice-dialog/`), shared with an exercise's Add to workout.
 - **iOS:** the page maps onto a `List` with a `Section` per day and `.swipeActions` (or an ✕ button) to take a workout off; Add onto a `.sheet` or `Menu` of your workouts. The week starts on Monday whatever the device's `Calendar` says, as on the web. The week is a row of seven views at the top of the Today tab, with Edit plan pushing the plan; Due today is a section under it.

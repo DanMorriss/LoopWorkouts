@@ -38,6 +38,18 @@ export class PlanStore {
     }
 
     /**
+     * Sets every day at once, Monday first, e.g. from a ready-made plan (PLN-6) or putting one
+     * back with Undo. Dated now, as any change is, so it syncs as the latest.
+     */
+    replace(days: readonly (readonly string[])[]) {
+        const plan = this._plan();
+        this.save({
+            days: plan.days.map((_, i) => [...(days[i] ?? [])].slice(0, MAX_WORKOUTS_A_DAY)),
+            updatedAt: this.clock.now(plan.updatedAt),
+        });
+    }
+
+    /**
      * Takes another copy's plan (from a backup or another device) if it changed more recently
      * than this one. Returns whether it did.
      */

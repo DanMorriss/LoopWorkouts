@@ -1,0 +1,69 @@
+@use 'type' as *;
+
+:host {
+    display: block;
+}
+
+.plan-card {
+    display: grid;
+    gap: 0.4rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.8rem;
+    background: var(--control);
+
+    p {
+        margin: 0;
+    }
+}
+
+.plan-card__title {
+    margin: 0;
+    @include display;
+    color: var(--text-strong);
+    font-size: 1.05rem;
+}
+
+.plan-card__description {
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.plan-card__meta {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.plan-card__days {
+    display: grid;
+    gap: 0.15rem;
+    margin: 0.3rem 0;
+    padding: 0;
+    list-style: none;
+}
+
+// A day at the left, its workouts at the right
+.plan-card__day {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.plan-card__day-name {
+    color: var(--text-muted);
+}
+
+.plan-card__day-workouts {
+    color: var(--text-strong);
+}
+
+.plan-card__day--rest .plan-card__day-workouts {
+    color: var(--text-muted);
+}
+
+.plan-card__use {
+    justify-self: start;
+    margin-top: 0.3rem;
+}

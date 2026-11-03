@@ -8,6 +8,12 @@
             Which workouts you do on which days, the same every week. Your week and what's due show
             on Today.
         </p>
+        <a
+            href="/ready-made-plans?from=plan"
+            class="plan__ready-made"
+            (click)="slide.follow($event, '/ready-made-plans?from=plan', 'in')"
+            >Start from a ready-made plan</a
+        >
         @if (weekSoFar()) {
             <p class="plan__so-far">{{ weekSoFar() }}</p>
         }

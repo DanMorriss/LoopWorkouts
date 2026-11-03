@@ -356,7 +356,7 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('with a suggested workout and the week planned', async () => {
+            it('with the week planned', async () => {
                 const push = store.addWorkout({
                     title: 'Push',
                     repeats: 3,
@@ -370,7 +370,7 @@ for (const theme of ['dark', 'light'] as const) {
                     ]),
                 });
                 const now = Date.now();
-                // Push was done today, as planned, so the suggestion shows in place of Due today
+                // Push was done today, as planned, so Due today says all done
                 TestBed.inject(HistoryStore).record({
                     id: 'run-0',
                     workoutId: push.id,
@@ -397,8 +397,46 @@ for (const theme of ['dark', 'light'] as const) {
                 plan.add(weekdayOf(now), push.id);
                 plan.add(6, push.id);
                 await open('/home');
-                expect(fixture.nativeElement.querySelector('.suggestion')).not.toBeNull();
                 expect(fixture.nativeElement.querySelector('.week__days')).not.toBeNull();
+                await expectNoViolations();
+            });
+
+            it('with a suggested workout, nothing planned', async () => {
+                const push = store.addWorkout({
+                    title: 'Push',
+                    repeats: 3,
+                    blocks: asOneGroup([
+                        {
+                            kind: 'reps',
+                            reps: 5,
+                            name: 'Bench press',
+                            exerciseId: 'builtin:bench-press',
+                        },
+                    ]),
+                });
+                const now = Date.now();
+                TestBed.inject(HistoryStore).record({
+                    id: 'run-0',
+                    workoutId: push.id,
+                    title: 'Push',
+                    startedAt: now - 60_000,
+                    endedAt: now,
+                    activeSeconds: 60,
+                    roundsCompleted: 1,
+                    totalRounds: 1,
+                    outcome: 'finished',
+                });
+                await open('/home');
+                expect(fixture.nativeElement.querySelector('.suggestion')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.week__ready-made')).not.toBeNull();
+                await expectNoViolations();
+            });
+        });
+
+        describe('ready-made plans', () => {
+            it('the list, each with its week and Use this plan', async () => {
+                await open('/ready-made-plans');
+                expect(fixture.nativeElement.querySelectorAll('app-plan-card').length).toBe(6);
                 await expectNoViolations();
             });
         });

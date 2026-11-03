@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { DueTodayComponent } from './due-today/due-today.component';
+import { GetStartedComponent } from './get-started/get-started.component';
 import { WeekStripComponent } from './week-strip/week-strip.component';
 import { SuggestedWorkoutComponent } from '../history/suggested-workout/suggested-workout.component';
 import { HistoryStore } from '../shared/state/history-store.service';
@@ -11,11 +11,17 @@ import { WorkoutStore } from '../shared/state/workout-store.service';
  * Today, where the app opens, greeting you by name (NAV-4) for the time of day: the week's plan
  * (PLN-4), the way in to changing it; the weekly plan's workouts due today (PLN-2); and the
  * workout to do next (PRG-9) once none are. How the week's going for each muscle is on Progress.
- * Before any workout, a way to your workouts instead.
+ * With no workouts yet, a way to add some first (NAV-6), as there's nothing to plan without them;
+ * with some but nothing planned, the week asks to be planned.
  */
 @Component({
     selector: 'app-home',
-    imports: [DueTodayComponent, RouterLink, SuggestedWorkoutComponent, WeekStripComponent],
+    imports: [
+        DueTodayComponent,
+        GetStartedComponent,
+        SuggestedWorkoutComponent,
+        WeekStripComponent,
+    ],
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss',
 })

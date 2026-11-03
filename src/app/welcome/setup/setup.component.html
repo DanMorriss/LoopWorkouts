@@ -5,16 +5,14 @@
         @if (checking()) {
             <p class="setup__checking" role="status">Getting your profile…</p>
         } @else {
-            @if (number(); as number) {
-                <!-- How far through: said once, in words; the bar is for the eye -->
-                <p class="setup__count">Question {{ number }} of {{ questionCount }}</p>
-                <div class="setup__progress" aria-hidden="true">
-                    <span
-                        class="setup__progress-fill"
-                        [style.width.%]="(number / questionCount) * 100"
-                    ></span>
-                </div>
-            }
+            <!-- How far through: said once, in words; the bar is for the eye -->
+            <p class="setup__count">Question {{ number() }} of {{ questionCount }}</p>
+            <div class="setup__progress" aria-hidden="true">
+                <span
+                    class="setup__progress-fill"
+                    [style.width.%]="(number() / questionCount) * 100"
+                ></span>
+            </div>
 
             @switch (step()) {
                 @case ('name') {
@@ -147,49 +145,18 @@
                         }
                     </div>
                 }
-
-                @case ('start') {
-                    <h2 #heading class="setup__question" tabindex="-1">{{ doneTitle() }}</h2>
-                    <p class="setup__hint">
-                        You can change any of it on You, under Profile. Here's a workout to start
-                        with:
-                    </p>
-                    @if (first(); as first) {
-                        <div class="setup__workout">
-                            <h3 class="setup__workout-name">{{ first.workout.title }}</h3>
-                            <p class="setup__workout-description">
-                                {{ first.workout.description }}
-                            </p>
-                            <p class="setup__workout-meta">{{ first.needs }}</p>
-                        </div>
-                    }
-                    <div class="setup__finish">
-                        <button type="button" class="btn-main" (click)="startFirst()">
-                            Start it
-                        </button>
-                        <button type="button" class="btn-pill" (click)="finish('/home')">
-                            Go to Today
-                        </button>
-                        <button type="button" class="setup__link" (click)="finish('/ready-made')">
-                            See all the ready-made workouts
-                        </button>
-                    </div>
-                }
             }
 
             @if (number() > 1) {
                 <div class="setup__actions">
                     <button type="button" class="btn-pill" (click)="back()">Back</button>
+                    <!-- On the last question it's Done, which goes on to Today -->
                     <button type="button" class="btn-main btn-main--small" (click)="next()">
-                        Next
+                        {{ number() === questionCount ? 'Done' : 'Next' }}
                     </button>
                 </div>
             }
-            @if (number() > 0) {
-                <button type="button" class="setup__skip" (click)="finish('/home')">
-                    Skip for now
-                </button>
-            }
+            <button type="button" class="setup__skip" (click)="finish()">Skip for now</button>
         }
     </div>
 </div>

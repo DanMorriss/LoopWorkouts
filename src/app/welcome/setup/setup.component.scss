@@ -157,8 +157,7 @@
     margin-top: 1.5rem;
 }
 
-.setup__skip,
-.setup__link {
+.setup__skip {
     align-self: center;
     min-height: 44px;
     margin-top: 0.75rem;
@@ -176,42 +175,4 @@
         outline: 2px solid var(--accent);
         outline-offset: 2px;
     }
-}
-
-.setup__link {
-    color: var(--accent);
-}
-
-.setup__workout {
-    padding: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.9rem;
-    background: var(--control);
-}
-
-.setup__workout-name {
-    margin: 0 0 0.3rem;
-    color: var(--text-strong);
-    font-size: 1.05rem;
-}
-
-.setup__workout-description {
-    margin: 0 0 0.4rem;
-    color: var(--text);
-    font-size: 0.9rem;
-    line-height: 1.45;
-}
-
-.setup__workout-meta {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-}
-
-.setup__finish {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.6rem;
-    margin-top: 1.25rem;
 }

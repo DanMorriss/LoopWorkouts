@@ -1,4 +1,5 @@
 import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
@@ -22,12 +23,19 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
 /**
  * The weekly plan (PLN-1): Monday to Sunday, the workouts planned on each, the same every week,
  * with where each is this week (PLN-3): done, missed, due today or to come. Each day adds a
- * workout from your workouts, or takes one off. It slides in over Today, from its week (PLN-4),
+ * workout from your workouts, or takes one off; the dialog's **Add new workouts** goes to the
+ * Workouts tab to add more (PLN-5). It slides in over Today, from its week (PLN-4),
  * and back off with ‹ Today or a swipe right.
  */
 @Component({
     selector: 'app-plan',
-    imports: [BackLinkComponent, MatIconModule, SwipeBackDirective, WorkoutChoiceDialogComponent],
+    imports: [
+        BackLinkComponent,
+        MatIconModule,
+        RouterLink,
+        SwipeBackDirective,
+        WorkoutChoiceDialogComponent,
+    ],
     templateUrl: './plan.component.html',
     styleUrl: './plan.component.scss',
 })
@@ -36,6 +44,7 @@ export class PlanComponent {
     private readonly workouts = inject(WorkoutStore);
     private readonly history = inject(HistoryStore);
     private readonly injector = inject(Injector);
+    private readonly router = inject(Router);
     private readonly now = Date.now();
 
     protected readonly today = weekdayOf(this.now);
@@ -94,12 +103,15 @@ export class PlanComponent {
         return this.days()[day].workouts.length < MAX_WORKOUTS_A_DAY;
     }
 
+    /** A workout picked for the day; or, picking Add new workouts (null), on to Workouts. */
     protected add(day: number, workoutId: string | null) {
         this.addingTo.set(null);
-        if (workoutId !== null) {
-            this.planStore.add(day, workoutId);
-            this.announcement.set(`${this.names().get(workoutId)} planned on ${WEEKDAYS[day]}`);
+        if (workoutId === null) {
+            void this.router.navigateByUrl('/library');
+            return;
         }
+        this.planStore.add(day, workoutId);
+        this.announcement.set(`${this.names().get(workoutId)} planned on ${WEEKDAYS[day]}`);
         this.focusAfterRender(`plan-add-${day}`);
     }
 

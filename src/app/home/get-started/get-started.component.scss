@@ -1,0 +1,76 @@
+@use 'type' as *;
+
+:host {
+    display: block;
+}
+
+// A card, as the week and Due today are
+.start {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--panel-border);
+    border-radius: 0.9rem;
+    background: var(--card);
+}
+
+.start__label {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.start__lead {
+    margin: 0;
+    color: var(--text);
+}
+
+// The workout offered, as the setup showed it
+.start__workout {
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.8rem;
+    background: var(--control);
+}
+
+.start__name {
+    margin: 0 0 0.3rem;
+    @include display;
+    color: var(--text-strong);
+    font-size: 1.05rem;
+}
+
+.start__description {
+    margin: 0 0 0.4rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.start__needs {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.start__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+}
+
+// A text link, tall enough to tap
+.start__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}

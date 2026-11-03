@@ -2,9 +2,9 @@ import {
     BUILT_IN_WORKOUTS,
     BuiltInWorkout,
     builtInWorkoutEquipment,
-} from '../../models/built-in-workouts';
-import { canDoWith, Equipment } from '../../models/exercise';
-import { TrainingGoal } from '../../models/muscle-balance';
+} from '../models/built-in-workouts';
+import { canDoWith, Equipment } from '../models/exercise';
+import { TrainingGoal } from '../models/muscle-balance';
 
 /**
  * The ready-made workouts to start with, best first, for each goal: building muscle, the one
@@ -21,7 +21,7 @@ const FIRST_CHOICES: Record<TrainingGoal, readonly string[]> = {
     fitness: ['builtin:kettlebell-full-body', 'builtin:20-minute-amrap'],
 };
 
-/** The ready-made workout the setup (NAV-4) offers to start with, for your goal and equipment. */
+/** The ready-made workout Today offers to start with (NAV-4), for your goal and equipment. */
 export function firstWorkout(goal: TrainingGoal, kit: readonly Equipment[]): BuiltInWorkout {
     const fits = FIRST_CHOICES[goal]
         .map((id) => BUILT_IN_WORKOUTS.find((workout) => workout.id === id))

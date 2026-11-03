@@ -13,6 +13,7 @@
         }
         @if (!hasWorkouts()) {
             <p class="plan__hint">Make a workout in Workouts first, then plan it here.</p>
+            <a routerLink="/library" class="btn-pill plan__workouts-link">Go to your workouts</a>
         }
 
         @for (day of days(); track day.day) {
@@ -83,6 +84,7 @@
             <app-workout-choice-dialog
                 animate.leave="dialog-leave"
                 [heading]="'Plan on ' + days()[addingTo()!].name"
+                newLabel="Add new workouts"
                 [choices]="choices()"
                 (closed)="closeAdding()"
                 (picked)="add(addingTo()!, $event)"

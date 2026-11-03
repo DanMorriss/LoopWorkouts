@@ -3,6 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { HistoryEntry, LoggedSet } from '../models/history';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { HistoryStore } from '../shared/state/history-store.service';
+import { UndoService } from '../shared/undo/undo.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
@@ -83,12 +84,57 @@ describe('HomeComponent', () => {
         ]);
     });
 
-    it('shows no logo, and before any workout a way to your workouts', () => {
-        create();
+    describe('getting started, with no workouts (NAV-6)', () => {
+        it('shows no logo, and offers a workout for your goal and equipment to add first', () => {
+            TestBed.inject(SettingsStore).update({
+                trainingGoal: 'fitness',
+                myEquipment: ['kettlebell'],
+            });
+            create();
 
-        expect(element().querySelector('app-loop-logo')).toBeNull();
-        expect(element().querySelector('.home__empty a')!.getAttribute('href')).toBe('/library');
-        expect(element().querySelector('app-muscles-this-week')).toBeNull();
+            expect(element().querySelector('app-loop-logo')).toBeNull();
+            expect(text('.start__label')).toEqual(['Get started']);
+            expect(text('.start__lead')).toEqual([
+                "Add some workouts, then plan which days you do them. Here's one to start with:",
+            ]);
+            expect(text('.start__name')).toEqual(['Kettlebell full body']);
+            expect(
+                [...element().querySelectorAll('.start__actions a')].map((link) => [
+                    link.textContent!.trim(),
+                    link.getAttribute('href'),
+                ])
+            ).toEqual([
+                ['Browse ready-made workouts', '/ready-made'],
+                ['Or make your own', '/setup'],
+            ]);
+            expect(element().querySelector('app-week-strip')).toBeNull();
+        });
+
+        it('adds it with Undo, then asks for the week to be planned', async () => {
+            create();
+            // On the page, so focus can move
+            document.body.appendChild(element());
+            (element().querySelector('.start__actions .btn-main') as HTMLButtonElement).click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const workouts = TestBed.inject(WorkoutStore).workouts();
+            expect(workouts.map((workout) => workout.title)).toEqual(['Bodyweight basics']);
+            expect(TestBed.inject(UndoService).offer()?.message).toBe(
+                'Added "Bodyweight basics" to your workouts'
+            );
+            expect(element().querySelector('app-get-started')).toBeNull();
+            const plan = element().querySelector<HTMLElement>('.week__plan')!;
+            expect(plan.textContent!.trim()).toBe('Plan your week');
+            expect(plan.classList).toContain('btn-main');
+            expect(document.activeElement).toBe(plan);
+
+            TestBed.inject(UndoService).undo();
+            fixture.detectChanges();
+            expect(TestBed.inject(WorkoutStore).workouts()).toEqual([]);
+            expect(element().querySelector('app-get-started')).not.toBeNull();
+            element().remove();
+        });
     });
 
     it('suggests the saved workout for the least worked muscles, and starts it, leaving the muscles to Progress', () => {
@@ -108,7 +154,7 @@ describe('HomeComponent', () => {
             'For Chest (0 of 10 sets), the least worked this week.',
         ]);
         expect(element().querySelector('app-muscles-this-week')).toBeNull();
-        expect(element().querySelector('.home__empty')).toBeNull();
+        expect(element().querySelector('app-get-started')).toBeNull();
 
         const router = TestBed.inject(Router);
         vi.spyOn(router, 'navigate').mockResolvedValue(true);
@@ -147,7 +193,7 @@ describe('HomeComponent', () => {
 
             expect(text('.week__label')).toEqual(['This week']);
             expect(text('.week__empty')).toEqual([
-                'Nothing planned yet. Choose which workouts you do on which days.',
+                "Nothing planned yet. Choose which days you do your workouts, and Today shows what's due each day.",
             ]);
             const link = element().querySelector('.week__plan')!;
             expect(link.textContent!.trim()).toBe('Plan your week');
@@ -272,7 +318,7 @@ describe('HomeComponent', () => {
             ]);
             // The first is the page's main button
             expect(starts[0].classList).toContain('btn-main');
-            expect(element().querySelector('.home__empty')).toBeNull();
+            expect(element().querySelector('app-get-started')).toBeNull();
         });
 
         it('leaves out one run today, saying so, and hides the suggestion while any are left', () => {

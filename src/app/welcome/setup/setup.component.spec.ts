@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AUTH_STORAGE_KEY } from '../../account/account-client';
-import { ActiveRunService } from '../../shared/run/active-run.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { UndoService } from '../../shared/undo/undo.service';
 import {
     FakeSyncStarter,
     fakeSyncStarter,
@@ -63,7 +63,7 @@ describe('SetupComponent (NAV-4)', () => {
         localStorage.clear();
     });
 
-    it('asks one question at a time, saving each answer, then offers a workout', async () => {
+    it('asks one question at a time, saving each answer, then goes on to Today, all set', async () => {
         await create();
         expect(element.textContent).toContain('Question 1 of 5');
         expect(heading()).toBe('What should we call you?');
@@ -97,12 +97,17 @@ describe('SetupComponent (NAV-4)', () => {
         expect(heading()).toBe('Do you lift in kilograms or pounds?');
         await choose('Pounds');
         expect(settings().weightUnit()).toBe('lb');
-        await press('Next');
+        // The last question's Next is Done, which goes straight on to Today
+        await press('Done');
 
-        expect(heading()).toBe("You're all set, Sam");
-        expect(element.textContent).toContain('Kettlebell full body');
-        expect(element.textContent).not.toContain('Question');
         expect(settings().hasProfile()).toBe(true);
+        expect(localStorage.getItem('setup')).toBeNull();
+        expect(navigate).toHaveBeenCalledWith('/home', { replaceUrl: true });
+        expect(TestBed.inject(UndoService).offer()?.message).toBe(
+            "You're all set, Sam. Change any of it on You, under Profile."
+        );
+        // Nothing's added or started for you: Today offers a workout to add
+        expect(TestBed.inject(WorkoutStore).workouts()).toEqual([]);
     });
 
     it('goes back to the question before, as it was answered', async () => {
@@ -116,28 +121,14 @@ describe('SetupComponent (NAV-4)', () => {
         expect(element.querySelector<HTMLInputElement>('input:checked')!.value).toBe('fitness');
     });
 
-    it("isn't asked again once skipped, and opens Home", async () => {
+    it("isn't asked again once skipped, and opens Today, saying nothing", async () => {
         await create();
         await press('Skip for now');
 
         expect(localStorage.getItem('setup')).toBeNull();
         expect(settings().hasProfile()).toBe(true);
         expect(navigate).toHaveBeenCalledWith('/home', { replaceUrl: true });
-    });
-
-    it('adds the workout offered to the library and starts it', async () => {
-        await create();
-        const start = vi.spyOn(TestBed.inject(ActiveRunService), 'start').mockReturnValue();
-        for (let i = 0; i < 5; i++) {
-            await press('Next');
-        }
-        await press('Start it');
-
-        const workouts = TestBed.inject(WorkoutStore).workouts();
-        expect(workouts.map((w) => w.title)).toEqual(['Bodyweight basics']);
-        expect(start).toHaveBeenCalledWith(workouts[0]);
-        expect(localStorage.getItem('setup')).toBeNull();
-        expect(navigate).toHaveBeenCalledWith('/workout', { replaceUrl: true });
+        expect(TestBed.inject(UndoService).offer()).toBeNull();
     });
 
     it('signed in, takes the profile the account already has, asking nothing', async () => {

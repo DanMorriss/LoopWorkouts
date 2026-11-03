@@ -352,7 +352,7 @@ for (const theme of ['dark', 'light'] as const) {
             it('before any workout', async () => {
                 localStorage.setItem('welcomed', 'guest');
                 await open('/home');
-                expect(fixture.nativeElement.querySelector('.home__empty')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('app-get-started')).not.toBeNull();
                 await expectNoViolations();
             });
 
@@ -769,7 +769,10 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('the setup, its name, equipment and body questions, and the workout to start with', async () => {
+            it('the setup, its name, equipment and body questions, then Today, all set and getting started', async () => {
+                // Welcomed as a guest, as the welcome screen does before the setup
+                localStorage.setItem('welcomed', 'guest');
+                localStorage.setItem('setup', 'due');
                 await open('/welcome/setup');
                 await expectNoViolations();
 
@@ -787,11 +790,13 @@ for (const theme of ['dark', 'light'] as const) {
                 expect(fixture.nativeElement.querySelector('app-body-map')).not.toBeNull();
                 await expectNoViolations();
 
+                // Units, then Done: on to Today, with the notice and a workout to add
                 click('.setup__actions .btn-main');
                 await settle();
                 click('.setup__actions .btn-main');
                 await settle();
-                expect(fixture.nativeElement.querySelector('.setup__workout')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('app-get-started')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.undo-bar')).not.toBeNull();
                 await expectNoViolations();
             });
         });

@@ -144,6 +144,20 @@ describe('AccountComponent', () => {
             expect(button('Continue with Google').disabled).toBe(true);
         });
 
+        it('is ready again when come back to from Google without signing in', async () => {
+            await press('Continue with Google');
+            await type('account-email', 'me@example.com');
+            expect(button('Email me a sign-in link').disabled).toBe(true);
+
+            // Back from Google: the browser shows the page as it was left
+            window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+            await settle();
+
+            expect(status()).toBe('');
+            expect(button('Continue with Google').disabled).toBe(false);
+            expect(button('Email me a sign-in link').disabled).toBe(false);
+        });
+
         it("says when Google can't be reached, and can be tried again", async () => {
             client.auth.signInWithOAuth.mockRejectedValueOnce(new Error('offline'));
 

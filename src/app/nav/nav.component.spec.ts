@@ -86,7 +86,7 @@ describe('NavComponent', () => {
             await go('/workout');
 
             expect(back()!.getAttribute('href')).toBe('/history');
-            expect(back()!.getAttribute('aria-label')).toBe('Back to History');
+            expect(back()!.getAttribute('aria-label')).toBe('Back to Progress');
         });
 
         it('keeps the address of the page you came from, e.g. a muscle filter', async () => {
@@ -97,11 +97,11 @@ describe('NavComponent', () => {
             expect(back()!.getAttribute('aria-label')).toBe('Back to Exercises');
         });
 
-        it('names setup for the library tab it belongs to', async () => {
+        it('names setup for the Workouts tab it belongs to', async () => {
             await go('/setup');
             await go('/workout');
 
-            expect(back()!.getAttribute('aria-label')).toBe('Back to Library');
+            expect(back()!.getAttribute('aria-label')).toBe('Back to Workouts');
         });
 
         it('goes to the library when the workout page was opened directly', async () => {

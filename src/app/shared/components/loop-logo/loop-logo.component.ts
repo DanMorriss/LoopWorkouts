@@ -3,7 +3,7 @@ import { injectPrefersReducedMotion } from '../../reduced-motion';
 
 /**
  * The ∞ logo: the loop draws itself in, then a light travels round it. It was the home page
- * until the tab bar took over getting about; now it's in Account, under About. Decoration
+ * until the tab bar took over getting about; now it's on You, under About. Decoration
  * only, so screen readers skip it. Sized by its host's width.
  */
 @Component({

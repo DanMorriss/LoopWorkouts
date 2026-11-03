@@ -136,7 +136,7 @@ export class ReadyMadeComponent {
         const added = this.workouts.addWorkout(copyOfBuiltIn(card.workout));
         this.close();
         this.undo.offerUndo({
-            message: `Added "${added.title}" to your library`,
+            message: `Added "${added.title}" to your workouts`,
             undo: () => this.workouts.deleteWorkout(added.id),
         });
     }

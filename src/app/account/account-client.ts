@@ -9,14 +9,14 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export const SUPABASE_URL = 'https://cpgacyzlfyskifzhkotu.supabase.co';
 export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_YnL-skDr7iSBsqSqaIbWBg_vE-kGXQa';
 
-/** Where signing in (an email link, or Google) brings you back to: the Account tab. */
+/** Where signing in (an email link, or Google) brings you back to: the You tab. */
 export const SIGN_IN_PATH = '/account';
 
 /** Who else can sign you in (SYN-7). */
 export type SignInProvider = 'google' | 'apple';
 
 /**
- * Those offered on the Account tab: each set up in Supabase (Authentication → Providers)
+ * Those offered on the You tab: each set up in Supabase (Authentication → Providers)
  * first. Apple waits on an Apple Developer account; add it here once it's set up.
  */
 export const SIGN_IN_PROVIDERS: readonly SignInProvider[] = ['google'];
@@ -28,7 +28,7 @@ export const AUTH_STORAGE_KEY = 'sb-cpgacyzlfyskifzhkotu-auth-token';
 export type AccountClient = Pick<SupabaseClient, 'auth' | 'rpc'>;
 
 /**
- * Gives the Supabase client, loading its code only when it's first needed (the Account tab,
+ * Gives the Supabase client, loading its code only when it's first needed (the You tab,
  * or sync once signed in), so it stays out of the app's first load. There's one client, which
  * accounts and sync share. Tests provide a fake.
  */

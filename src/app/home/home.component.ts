@@ -1,19 +1,21 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DueTodayComponent } from './due-today/due-today.component';
-import { MusclesThisWeekComponent } from '../history/muscles-this-week/muscles-this-week.component';
+import { WeekStripComponent } from './week-strip/week-strip.component';
 import { SuggestedWorkoutComponent } from '../history/suggested-workout/suggested-workout.component';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
+import { WorkoutStore } from '../shared/state/workout-store.service';
 
 /**
- * Where the app opens, greeting you by name (NAV-4) for the time of day: the weekly plan's workouts due today (PLN-2), the workout to do next
- * (PRG-9) once none are, and the muscles worked this week (PRG-6, PRG-8), the same cards as the
- * history page's. Before any workout, a way to the library instead.
+ * Today, where the app opens, greeting you by name (NAV-4) for the time of day: the week's plan
+ * (PLN-4), the way in to changing it; the weekly plan's workouts due today (PLN-2); and the
+ * workout to do next (PRG-9) once none are. How the week's going for each muscle is on Progress.
+ * Before any workout, a way to your workouts instead.
  */
 @Component({
     selector: 'app-home',
-    imports: [DueTodayComponent, MusclesThisWeekComponent, RouterLink, SuggestedWorkoutComponent],
+    imports: [DueTodayComponent, RouterLink, SuggestedWorkoutComponent, WeekStripComponent],
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss',
 })
@@ -23,7 +25,10 @@ export class HomeComponent {
     /** When Home opened: the greeting's for then, not changing under you. */
     private readonly openedAt = new Date();
 
+    private readonly workouts = inject(WorkoutStore);
+
     protected readonly hasHistory = computed(() => this.history.entries().length > 0);
+    protected readonly hasWorkouts = computed(() => this.workouts.workouts().length > 0);
     protected readonly greeting = computed(() => {
         const name = this.settings.name();
         const hello = greetingFor(this.openedAt.getHours());

@@ -74,6 +74,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | NAV-2  | Open on what to do next and how my week is going                         | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-3  | Choose to sign in or carry on as a guest, the first time                 | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-4  | Set up my name, goal, equipment, body and units once, as I start         | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
+| NAV-5  | Tabs named for what I come to them for: Today, Workouts, Progress, You   | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | A11Y-1 | Use every feature with a screen reader, keyboard or reduced motion       | ✅  | —   | [accessibility](accessibility.md)             |
 | EXR-1  | Exercises as things in their own right, used across workouts             | ✅  | —   | [exercises](exercises.md)                     |
 | EXR-2  | Pick an exercise, built-in or my own, or make a new one                  | ✅  | —   | [exercises](exercises.md)                     |
@@ -109,8 +110,9 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | SYN-8  | Delete my account and what the server keeps                              | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
 | SYN-9  | Clear everything from this device                                        | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
 | PLN-1  | Set which workouts I do on which days                                    | ✅  | —   | [planning](planning.md)                       |
-| PLN-2  | See what's due today on Home                                             | ✅  | —   | [planning](planning.md)                       |
+| PLN-2  | See what's due today on Today                                            | ✅  | —   | [planning](planning.md)                       |
 | PLN-3  | See whether I kept to the plan this week                                 | ✅  | —   | [planning](planning.md)                       |
+| PLN-4  | See my week at a glance on Today, and change the plan from there         | ✅  | —   | [planning](planning.md)                       |
 
 What's saved on the device, and in what shape, is in [data](data.md). Where the app is heading, and why the planned stories are in the order they are, is in [direction](../direction.md).
 

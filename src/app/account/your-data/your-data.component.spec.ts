@@ -113,7 +113,7 @@ describe('YourDataComponent', () => {
             expect(TestBed.inject(UndoService).offer()).toMatchObject({
                 message: 'Added 2 workouts.',
                 quiet: true,
-                link: { label: 'View library', url: '/library' },
+                link: { label: 'View workouts', url: '/library' },
             });
         });
 
@@ -146,7 +146,7 @@ describe('YourDataComponent', () => {
             expect(
                 importLink({ ...NOTHING, ok: true, workoutsUpdated: 1, entriesAdded: 3 })
             ).toEqual({
-                label: 'View library',
+                label: 'View workouts',
                 url: '/library',
             });
             expect(

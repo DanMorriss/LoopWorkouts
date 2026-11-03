@@ -17,7 +17,7 @@ export { SIGN_IN_PATH };
 /**
  * Signing in to an account (SYN-3), by an email link or the code in the same email, or with
  * Google or Apple (SYN-7); signing out and deleting the account (SYN-8). Signing out and deleting leave this device's data as
- * it is. Made when the Account tab first opens, which loads Supabase's code.
+ * it is. Made when the You tab first opens, which loads Supabase's code.
  */
 @Service()
 export class AccountService {
@@ -93,7 +93,7 @@ export class AccountService {
     }
 
     /**
-     * Goes to Google or Apple to sign in, which come back to the Account tab signed in (the
+     * Goes to Google or Apple to sign in, which come back to the You tab signed in (the
      * account's tokens in the address, as an email link's are). An account with the same
      * email, made by email or the other, is the same account. Gives false if it couldn't
      * start (offline, say); otherwise the page is on its way there.

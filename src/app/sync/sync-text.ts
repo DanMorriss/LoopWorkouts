@@ -1,7 +1,7 @@
 import { SyncStatus } from './sync-starter.service';
 
 /**
- * How sync is going, for the Account tab: e.g. "Synced at 12:30.", or "Last synced on 27
+ * How sync is going, for the You tab: e.g. "Synced at 12:30.", or "Last synced on 27
  * October." if that wasn't today, by this device's clock and in its language.
  */
 export function syncText(status: SyncStatus, now = Date.now()): string {

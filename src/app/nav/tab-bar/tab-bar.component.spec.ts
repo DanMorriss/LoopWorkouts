@@ -35,18 +35,18 @@ describe('TabBarComponent', () => {
     it('is a main navigation linking to every page, labelled under its icon', () => {
         expect(element.querySelector('nav')!.getAttribute('aria-label')).toBe('Main');
         expect(tabs().map((tab) => [label(tab), tab.getAttribute('href')])).toEqual([
-            ['Home', '/home'],
+            ['Today', '/home'],
+            ['Workouts', '/library'],
             ['Exercises', '/exercises'],
-            ['Library', '/library'],
-            ['History', '/history'],
-            ['Account', '/account'],
+            ['Progress', '/history'],
+            ['You', '/account'],
         ]);
     });
 
     it('marks the page you are on, and slides the highlight to it', async () => {
         await go('/history');
 
-        expect(current().filter(([, mark]) => mark)).toEqual([['History', 'page']]);
+        expect(current().filter(([, mark]) => mark)).toEqual([['Progress', 'page']]);
         expect(element.querySelector('.tab-bar__tab--chosen')!.getAttribute('href')).toBe(
             '/history'
         );
@@ -55,24 +55,36 @@ describe('TabBarComponent', () => {
         );
     });
 
-    it('marks Library while making a workout, as the place you are in', async () => {
-        await go('/setup');
+    it('marks Workouts while making a workout or browsing the ready-made ones', async () => {
+        for (const url of ['/setup', '/ready-made']) {
+            await go(url);
+            expect(current().filter(([, mark]) => mark)).toEqual([['Workouts', 'true']]);
+        }
+    });
 
-        expect(tabs()[2].getAttribute('aria-current')).toBe('true');
+    it('marks Today on the weekly plan, which slides in over it', async () => {
+        await go('/plan');
+        expect(current().filter(([, mark]) => mark)).toEqual([['Today', 'true']]);
+    });
+
+    it('marks Workouts on its own page, as the place you are in', async () => {
+        await go('/library');
+
+        expect(tabs()[1].getAttribute('aria-current')).toBe('page');
     });
 
     it("marks Exercises on an exercise's page, and keeps the filter's address out of it", async () => {
         await go('/exercises/builtin:squat');
-        expect(tabs()[1].getAttribute('aria-current')).toBe('true');
+        expect(tabs()[2].getAttribute('aria-current')).toBe('true');
 
         await go('/exercises?muscles=quads');
-        expect(tabs()[1].getAttribute('aria-current')).toBe('page');
+        expect(tabs()[2].getAttribute('aria-current')).toBe('page');
     });
 
-    it('marks Account in Settings and the legal pages, which slide in over it', async () => {
+    it('marks You in Settings and the legal pages, which slide in over it', async () => {
         for (const url of ['/settings', '/privacy', '/terms']) {
             await go(url);
-            expect(current().filter(([, mark]) => mark)).toEqual([['Account', 'true']]);
+            expect(current().filter(([, mark]) => mark)).toEqual([['You', 'true']]);
         }
     });
 

@@ -50,7 +50,7 @@ For a landing page or a store listing.
 >
 > **Know how to do every move.** Nearly 100 built-in exercises, each with an animated 3D demo you can turn round. Or start from a ready-made workout for bodyweight, kettlebell, dumbbells or the gym.
 >
-> **Plan your week.** Choose which workout goes on which day, and Home shows what's due today.
+> **Plan your week.** Choose which workout goes on which day, and Today shows your week and what's due.
 >
 > **Yours, on every device.** No account needed: it works offline in your browser and can be added to your home screen. Sign in with email or Google and your workouts and history sync across devices, stored in Europe.
 >
@@ -82,7 +82,7 @@ Change the middle for each community: time-limit rounds and "7 rounds + 3" for C
 In order. Each step's to-do is in TODO.md under Launch.
 
 1. **Shared links show a picture and a description.** Done (this file's PR).
-2. **Know whether it's working:** privacy-friendly analytics and a way to send feedback from the app. Done: Vercel Web Analytics (named in the privacy notice; tag links with `?ref=` to see which places bring people), and an email link under Account → About.
+2. **Know whether it's working:** privacy-friendly analytics and a way to send feedback from the app. Done: Vercel Web Analytics (named in the privacy notice; tag links with `?ref=` to see which places bring people), and an email link under You → About.
 3. **Clear the iPhone checks and the legal review** in Known issues, so first visits go well.
 4. **Soft launch:** friends and the gym. Watch a few people use it without helping.
 5. **Communities:** Reddit and others where it solves a real problem, with the posts above.

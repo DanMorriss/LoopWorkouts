@@ -6,10 +6,10 @@
     <div
         class="m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-6 shadow-xl shadow-(color:--shadow)"
     >
-        <app-back-link url="/library" label="Library" />
+        <app-back-link url="/library" label="Workouts" />
         <h2 class="ready__title">Ready-made workouts</h2>
         <p class="ready__hint">
-            Pick one to see what's in it. Added to your library, it's yours to start, change or
+            Pick one to see what's in it. Added to your workouts, it's yours to start, change or
             plan.
         </p>
 
@@ -42,7 +42,7 @@
                                 <span class="ready__meta">
                                     {{ card.meta }}
                                     @if (card.inLibrary) {
-                                        <span class="ready__in-library">· In your library</span>
+                                        <span class="ready__in-library">· In your workouts</span>
                                     }
                                 </span>
                             </button>

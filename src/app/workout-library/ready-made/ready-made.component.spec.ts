@@ -117,9 +117,9 @@ describe('ReadyMadeComponent', () => {
             allSteps(builtIn).map((s) => s.exerciseId)
         );
         expect(dialog()).toBeNull();
-        expect(text(card('Core in 15'))).toContain('In your library');
+        expect(text(card('Core in 15'))).toContain('In your workouts');
         expect(TestBed.inject(UndoService).offer()?.message).toBe(
-            'Added "Core in 15" to your library'
+            'Added "Core in 15" to your workouts'
         );
 
         TestBed.inject(UndoService).undo();

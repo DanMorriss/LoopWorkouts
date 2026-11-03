@@ -22,12 +22,7 @@
     gap: 0.75rem;
 }
 
-// Plan sits with + New at the right, the title taking the room left
-.library__plan {
-    margin-left: auto;
-}
-
-// The page's title, in the display face, as on Exercises and History
+// The page's title, in the display face, as on Exercises and Progress
 .library__title {
     margin: 0;
     @include display;

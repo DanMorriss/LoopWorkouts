@@ -7,7 +7,7 @@ export const MAX_NAME_LENGTH = 40;
 
 /**
  * Your profile (NAV-4, SET-7): who you are and what you train with, asked once when you start
- * and kept on Account → Profile. Unlike the rest of the settings it's synced, as one record of
+ * and kept on You → Profile. Unlike the rest of the settings it's synced, as one record of
  * its own like the weekly plan, so a device you sign in on has it already.
  */
 export interface Profile {

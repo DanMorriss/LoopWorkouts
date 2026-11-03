@@ -50,7 +50,7 @@
 - Given a run on its first step, when I end it, then nothing is logged, and the summary says "Nothing to log".
 - Given a run, on another page, when I swipe its bar right past halfway, then it ends as End workout does, and its summary opens (see [home-and-navigation](home-and-navigation.md)).
 - Given a run in round 2 of 3, when I end it, then it's logged as stopped, "1 of 3 rounds", with the time spent less pauses.
-- Given a run going, when I open History, then the alarms carry on, and it's logged when it finishes even though I'm not on the workout page.
+- Given a run going, when I open Progress, then the alarms carry on, and it's logged when it finishes even though I'm not on the workout page.
 - Given a run going, when I start another workout, then the first is logged as stopped.
 - Given a run going, when the tab closes, then it's logged as stopped; when it's reopened and the run finishes, then that entry becomes finished.
 

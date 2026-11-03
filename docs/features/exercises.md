@@ -29,7 +29,7 @@ Built: exercises are in the data (#86), with the built-in list, your own exercis
     - optional: other names (e.g. "Press-ups" for "Push-ups"), equipment, a one-line description, how-to steps, and tips
 - Rest isn't an exercise.
 - A step **doesn't need an exercise**: an unnamed timed or rep step is still allowed, as now. It just isn't tracked (no history or progress of its own).
-- An exercise has **no weight unit of its own**: weights always show in the unit chosen in Account → Profile (SET-4).
+- An exercise has **no weight unit of its own**: weights always show in the unit chosen in You → Profile (SET-4).
 - There are two kinds:
     - **Built-in** (EXR-6): shipped with the app. Their names and details are fixed, but each can be **hidden** from the picker.
     - **Your own** (EXR-9): made by you, editable, and saved and synced as your data. Only these can be renamed (EXR-3) or deleted.
@@ -59,11 +59,11 @@ The component is built (`BodyMapComponent`); it goes on the exercise pages when 
 - Muscle groups follow the diagram's shapes: chest, shoulders, biceps, triceps, forearms, abs, obliques, traps, upper back, lower back, glutes, abductors, adductors, quads, hamstrings, calves, shins, neck. (The diagram can't show front, side and rear shoulders, or lats, apart, so they aren't separate groups.)
 - **Abductors are the upper glute on the back.** The diagram has no abductor shapes, but on the back it draws the glutes as two shapes a side: the gluteus maximus, and above and outside it the gluteus medius, the hip's main abductor. So the medius is shaded as the abductors and the maximus as the glutes. Abductors aren't shown on the front.
 - Its shades are colour tokens with a contrast check like the others, in both themes: each label's text is at least 4.5:1 on its shade; main stands out 3:1 from unworked and from the page; and the three shades are at least 2:1 apart in lightness, not just hue (the labels carry the meaning, so the figure needn't be 3:1 throughout). In the dark theme main is the brightest; in light, the darkest.
-- **Male or female figure**, from the **Sex** chosen in Account → Profile (SET-5). The diagram has both, with the same muscle groups, so the choice changes only the drawing. Every side is drawn in the same 1:2 box, so front and back match in size whatever the drawing's own canvas.
+- **Male or female figure**, from the **Sex** chosen in You → Profile (SET-5). The diagram has both, with the same muscle groups, so the choice changes only the drawing. Every side is drawn in the same 1:2 box, so front and back match in size whatever the drawing's own canvas.
 
 ### The Exercises list (EXR-6)
 
-The **Exercises** tab, after Library. Top to bottom:
+The **Exercises** tab, after Workouts. Top to bottom:
 
 - **Exercises** and a **New** button at its right (the filled main button, small enough to sit by the title), which opens the exercise dialog for a new exercise of your own (see below). Saving it makes it and goes to its page; Cancel makes nothing.
 - **Search**: finds by name and other names, as the picker does (case, spaces and a plural "s" don't count), best match first. A match on another name says so on its card ("Also called Press-up").
@@ -199,7 +199,7 @@ Past logged sets are linked the same way. Unnamed steps stay unnamed and aren't 
 - Given my note "Elbows in" on Push-up, when a step linked to Push-up is running, then the note shows under the ring and is read out with the step.
 
 - Given a back squat (main quads and glutes; supporting hamstrings, adductors and lower back), then the quads and glutes are shaded strongest, the others softer, and the labels read "Main: Quads, Glutes" and "Supporting: Hamstrings, Adductors, Lower back".
-- Given Female chosen as the sex in Account → Profile, then the body map draws the female figure.
+- Given Female chosen as the sex in You → Profile, then the body map draws the female figure.
 - Given an exercise with no muscles, then the body map says "No muscles listed."
 - Given an exercise that works the abductors, then the upper glute on the back is shaded, and the gluteus maximus isn't.
 

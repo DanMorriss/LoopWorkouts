@@ -45,7 +45,7 @@ export class NavComponent {
                 this.url() === '/' || isOnPage(this.url(), '/workout') ? FALLBACK : this.url(),
         }
     );
-    /** The back link's place and name, e.g. "/history" and "Back to History". */
+    /** The back link's place and name, e.g. "/history" and "Back to Progress". */
     protected readonly back = computed(() => {
         const url = this.lastPage();
         const tab = TABS.find(
@@ -53,7 +53,7 @@ export class NavComponent {
         );
         return {
             url,
-            label: `Back to ${tab?.label ?? 'Library'}`,
+            label: `Back to ${tab?.label ?? 'Workouts'}`,
         };
     });
 

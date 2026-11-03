@@ -23,7 +23,7 @@
                             What should we call you?
                         </h2>
                         <p class="setup__hint" id="setup-name-hint">
-                            Home greets you by it. You can leave it empty.
+                            Today greets you by it. You can leave it empty.
                         </p>
                         <label class="picker-field">
                             <span class="picker-field__label">Your name</span>
@@ -151,8 +151,8 @@
                 @case ('start') {
                     <h2 #heading class="setup__question" tabindex="-1">{{ doneTitle() }}</h2>
                     <p class="setup__hint">
-                        You can change any of it on Account, under Profile. Here's a workout to
-                        start with:
+                        You can change any of it on You, under Profile. Here's a workout to start
+                        with:
                     </p>
                     @if (first(); as first) {
                         <div class="setup__workout">
@@ -168,7 +168,7 @@
                             Start it
                         </button>
                         <button type="button" class="btn-pill" (click)="finish('/home')">
-                            Go to Home
+                            Go to Today
                         </button>
                         <button type="button" class="setup__link" (click)="finish('/ready-made')">
                             See all the ready-made workouts

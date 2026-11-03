@@ -123,7 +123,7 @@
 
 ### Weights (BLD-7)
 
-- A rep step has a **Weight** wheel beside its Reps wheel, labelled with the unit chosen in Account → Profile: "Weight (kg)" or "Weight (lb)".
+- A rep step has a **Weight** wheel beside its Reps wheel, labelled with the unit chosen in You → Profile: "Weight (kg)" or "Weight (lb)".
 - It starts at **–** (none, read out as "none"), for bodyweight moves, which then show just "20 reps".
 - It goes up in steps of **0.5**: to 300 kg, or 660 lb. Typing a number works, with a decimal point (or comma) for halves, e.g. "62.5".
 - A collapsed rep step shows the weight with the reps: "10 reps @ 60 kg". A step with only a weight still asks before it's deleted.
@@ -132,7 +132,7 @@
 ### Saving
 
 - The main button says **Start workout** for a new workout and **Save & start workout** when editing. It saves the workout to the library, starts it, and opens the workout page.
-- **Save** (BLD-15) sits to its left, a smaller pill, so Start stays the main one. It saves the workout as Start does, without starting it, empties the form and goes back to the library, with the workout highlighted, in view and focused, and screen readers hear "Saved Sprints" (see [library](library.md)). It's held back by the same checks as Start.
+- **Save** (BLD-15) sits to its left, a smaller pill, so Start stays the main one. It saves the workout as Start does, without starting it, empties the form and goes back to Workouts, with the workout highlighted, in view and focused, and screen readers hear "Saved Sprints" (see [library](library.md)). It's held back by the same checks as Start.
 - Saving a new workout gives it the next id (one more than the highest saved).
 - Editing replaces the saved workout, keeping its id. If it's been deleted meanwhile, it's saved as a new one.
 
@@ -168,7 +168,7 @@
 - Given a rep step of 10 reps at 22.5 kg, when I start, then it's saved with weight 22.5; given one left at –, then it's saved with no weight.
 - Given weights in lb, when I pick 135, then it's saved as 61.235 kg, and shows as 135 lb.
 - Given a step saved at 20.412 kg (45 lb), when I edit only the title, then the weight stays 20.412.
-- Given a new workout "Sprints" with a timed step of 0:30, when I press Save, then it's in the library, nothing is running, and the library opens with Sprints highlighted and focused.
+- Given a new workout "Sprints" with a timed step of 0:30, when I press Save, then it's in the library, nothing is running, and Workouts opens with Sprints highlighted and focused.
 - Given a saved workout being edited, when I rename it and press Save, then the library still has one of it, renamed, and nothing is running.
 - Given only a rest step, then Save is disabled, as Start is.
 

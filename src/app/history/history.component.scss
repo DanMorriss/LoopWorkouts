@@ -22,10 +22,19 @@
 }
 
 // Where the cards for the muscles worked and the workout to do next sit, when there are any
-.history__muscles:not(:empty),
-.history__suggestion:not(:empty) {
+.history__muscles:not(:empty) {
     display: block;
     margin: 0 0 1.25rem;
+}
+
+// The log's heading, as the cards' labels are
+.history__log-title {
+    margin: 0 0 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 .history__day + .history__day {

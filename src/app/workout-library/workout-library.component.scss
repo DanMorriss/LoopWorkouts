@@ -77,6 +77,49 @@
     list-style: none;
 }
 
+// The ready-made workout suggested for the muscles left out (LIB-7), as a card under them
+.library__gap-filler {
+    display: grid;
+    justify-items: start;
+    gap: 0.3rem;
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.8rem;
+    background: var(--card);
+
+    p {
+        margin: 0;
+    }
+}
+
+.library__gap-filler-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.library__gap-filler-name {
+    @include display;
+    color: var(--text-strong);
+    font-size: 1.05rem;
+}
+
+.library__gap-filler-description {
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.library__gap-filler-fills {
+    color: var(--text-strong);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.library__gap-filler-add {
+    margin-top: 0.4rem;
+}
+
 .library__muscle {
     text-decoration: none;
 }

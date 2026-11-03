@@ -494,9 +494,9 @@ describe('WorkoutLibraryComponent', () => {
                 expect(el('.library__gap-filler-label')?.textContent?.trim()).toBe(
                     'Or add a ready-made workout for them:'
                 );
-                expect(suggested()).toBe('Kettlebell full body');
+                expect(suggested()).toBe('Gym extras');
                 expect(el('.library__gap-filler-fills')?.textContent?.trim()).toBe(
-                    'Adds Shoulders, Biceps, Forearms and 5 more.'
+                    'Adds Forearms, Abs, Obliques and 7 more.'
                 );
             });
 
@@ -506,17 +506,17 @@ describe('WorkoutLibraryComponent', () => {
                 expect(store.workouts().map((w) => w.title)).toEqual([
                     'Legs',
                     'Push',
-                    'Kettlebell full body',
+                    'Gym extras',
                 ]);
                 expect(TestBed.inject(UndoService).offer()?.message).toBe(
-                    'Added "Kettlebell full body" to your workouts'
+                    'Added "Gym extras" to your workouts'
                 );
-                expect(suggested()).not.toBe('Kettlebell full body');
+                expect(suggested()).not.toBe('Gym extras');
 
                 TestBed.inject(UndoService).undo();
                 fixture.detectChanges();
                 expect(store.workouts().map((w) => w.title)).toEqual(['Legs', 'Push']);
-                expect(suggested()).toBe('Kettlebell full body');
+                expect(suggested()).toBe('Gym extras');
             });
 
             it('with Only what I have on, suggests only what your equipment allows', () => {
@@ -528,11 +528,11 @@ describe('WorkoutLibraryComponent', () => {
             });
 
             it("doesn't suggest one already in your workouts", () => {
-                store.addWorkout(makeWorkout({ title: 'Kettlebell full body', steps: [reps(5)] }));
+                store.addWorkout(makeWorkout({ title: 'Gym extras', steps: [reps(5)] }));
                 fixture.detectChanges();
 
                 expect(suggested()).toBeTruthy();
-                expect(suggested()).not.toBe('Kettlebell full body');
+                expect(suggested()).not.toBe('Gym extras');
             });
         });
     });

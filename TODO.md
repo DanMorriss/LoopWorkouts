@@ -31,10 +31,11 @@ Every built-in exercise has an animated figure, at the top of How to do it (see 
 
 ### Ready-made workouts (LIB-6)
 
-Ten ready-made workouts are on the Ready-made workouts page, opened from Workouts (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
+Eighteen ready-made workouts are on the Ready-made workouts page, opened from Workouts (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
 
 - [ ] **Dan to review the first batch:** the exercises, sets, reps and rests of each, and their descriptions. Ids are fixed once released, so rename before merging if a title changes.
-- [ ] **More batches, once reviewed:** e.g. a band workout, pull-up bar and rings, a beginner gym full body, mobility or stretching, and longer runs of intervals. Each must pass `built-in-workouts.spec.ts`.
+- [ ] **Dan to review the second batch** (2026-11-03): Tabata, Kettlebell AMRAP, Dumbbell upper and lower, Gym full body, Gym extras, Pull-up bar and dips, and Step circuit. As for the first, ids are fixed once released.
+- [ ] **More batches, once there are exercises for them:** a band workout (only Band pull-apart uses a band so far), rings, and mobility or stretching (there are no stretches yet), which need new built-in exercises first (see `docs/writing-exercises.md`). Each must pass `built-in-workouts.spec.ts`.
 
 ### Setup and profile (NAV-4, SET-7)
 

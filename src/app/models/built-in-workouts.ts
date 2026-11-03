@@ -13,7 +13,7 @@ import {
 } from './workout';
 
 /** Which part of the ready-made list a workout is in, by what it needs. */
-export type BuiltInWorkoutGroup = 'bodyweight' | 'kettlebell' | 'dumbbells' | 'gym';
+export type BuiltInWorkoutGroup = 'bodyweight' | 'kettlebell' | 'dumbbells' | 'gym' | 'other';
 
 /** Each part's heading, in the order they're listed. */
 export const BUILT_IN_WORKOUT_GROUPS: readonly { group: BuiltInWorkoutGroup; label: string }[] = [
@@ -21,6 +21,7 @@ export const BUILT_IN_WORKOUT_GROUPS: readonly { group: BuiltInWorkoutGroup; lab
     { group: 'kettlebell', label: 'Kettlebell' },
     { group: 'dumbbells', label: 'Dumbbells' },
     { group: 'gym', label: 'Gym' },
+    { group: 'other', label: 'Other kit' },
 ];
 
 /**
@@ -143,6 +144,24 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
             rest(60),
         ],
     },
+    // Second batch (2026-11-03): more for fitness, a two-day dumbbell split, a first gym
+    // workout, the small muscles, and kit that had none (a pull-up bar, dip bars, a step)
+    {
+        id: 'builtin:tabata',
+        title: 'Tabata',
+        description: 'Four moves, each 8 rounds of 20 seconds hard and 10 easy. About 20 minutes.',
+        group: 'bodyweight',
+        repeats: 1,
+        blocks: [
+            sets(8, 10, timed('jump-squat', 20)),
+            rest(60),
+            sets(8, 10, timed('mountain-climber', 20)),
+            rest(60),
+            sets(8, 10, timed('burpee', 20)),
+            rest(60),
+            sets(8, 10, timed('jumping-jack', 20)),
+        ],
+    },
     {
         id: 'builtin:core-in-15',
         title: 'Core in 15',
@@ -188,6 +207,21 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
         blocks: [sets(7, 45, repsEachSet('kettlebell-swing', [10, 15, 20, 25, 20, 15, 10]))],
     },
     {
+        id: 'builtin:kettlebell-amrap',
+        title: 'Kettlebell AMRAP',
+        description:
+            'As many rounds as you can in 15 minutes: thrusters, swings, rows, pull-throughs.',
+        group: 'kettlebell',
+        repeats: UNTIL_STOPPED,
+        timeLimitSeconds: 15 * 60,
+        blocks: [
+            once(reps('kettlebell-thruster', 8)),
+            once(reps('kettlebell-swing', 15)),
+            once(reps('chainsaw-row', 8, { eachSide: true })),
+            once(reps('plank-pull-through', 10)),
+        ],
+    },
+    {
         id: 'builtin:dumbbell-full-body',
         title: 'Dumbbell full body',
         description: 'Every main muscle with a pair of dumbbells and a bench, finishing on arms.',
@@ -200,6 +234,35 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
             sets(3, 60, reps('single-leg-romanian-deadlift', 8, { eachSide: true })),
             sets(3, 60, reps('dumbbell-shoulder-press', 10)),
             superset(3, 60, reps('dumbbell-curl', 10), reps('skull-crusher', 12)),
+        ],
+    },
+    {
+        id: 'builtin:dumbbell-upper',
+        title: 'Dumbbell upper',
+        description: 'Chest, back, shoulders and arms. Pairs with Dumbbell lower over the week.',
+        group: 'dumbbells',
+        repeats: 1,
+        blocks: [
+            sets(3, 90, reps('dumbbell-bench-press', 10)),
+            sets(3, 90, reps('dumbbell-row', 10, { eachSide: true })),
+            sets(3, 60, reps('arnold-press', 10)),
+            superset(3, 60, reps('lateral-raise', 12), reps('rear-delt-fly', 12)),
+            superset(3, 60, reps('hammer-curl', 10), reps('overhead-triceps-extension', 12)),
+        ],
+    },
+    {
+        id: 'builtin:dumbbell-lower',
+        title: 'Dumbbell lower',
+        description: 'Legs, glutes, grip and core. Pairs with Dumbbell upper over the week.',
+        group: 'dumbbells',
+        repeats: 1,
+        blocks: [
+            sets(3, 90, reps('goblet-squat', 12)),
+            sets(3, 90, reps('bulgarian-split-squat', 8, { eachSide: true })),
+            sets(3, 60, reps('single-leg-romanian-deadlift', 8, { eachSide: true })),
+            sets(3, 60, reps('glute-bridge', 15)),
+            sets(2, 60, timed('farmers-carry', 45)),
+            superset(3, 45, timed('side-plank', 30, { eachSide: true }), reps('dead-bug', 10)),
         ],
     },
     {
@@ -245,6 +308,68 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
             heading('Accessories'),
             sets(3, 90, reps('leg-press', 12)),
             superset(3, 60, reps('leg-curl', 12), reps('seated-calf-raise', 15)),
+        ],
+    },
+    {
+        id: 'builtin:gym-full-body',
+        title: 'Gym full body',
+        description: 'A first gym workout: machines and dumbbells for every main muscle.',
+        group: 'gym',
+        repeats: 1,
+        blocks: [
+            sets(3, 90, reps('leg-press', 10)),
+            sets(3, 90, reps('dumbbell-bench-press', 10)),
+            sets(3, 90, reps('lat-pulldown', 10)),
+            sets(3, 60, reps('leg-curl', 12)),
+            sets(3, 60, reps('dumbbell-shoulder-press', 10)),
+            sets(2, 45, timed('plank', 30)),
+        ],
+    },
+    {
+        id: 'builtin:gym-extras',
+        title: 'Gym extras',
+        description: 'Hips, calves, lower back and grip: the muscles the big lifts leave out.',
+        group: 'gym',
+        repeats: 1,
+        blocks: [
+            superset(3, 60, reps('hip-abduction', 15), reps('hip-adduction', 15)),
+            sets(3, 60, reps('back-extension', 12)),
+            sets(3, 60, reps('seated-calf-raise', 15)),
+            superset(3, 60, reps('shrug', 12), timed('farmers-carry', 40)),
+        ],
+    },
+    {
+        id: 'builtin:pull-up-bar-and-dips',
+        title: 'Pull-up bar and dips',
+        description:
+            'Pull-ups, dips and leg raises: upper body and core on a pull-up bar and dip bars.',
+        group: 'other',
+        repeats: 1,
+        blocks: [
+            sets(4, 120, reps('pull-up', 6)),
+            sets(3, 120, reps('dip', 8)),
+            sets(3, 90, reps('chin-up', 6)),
+            sets(2, 60, reps('diamond-push-up', 10)),
+            superset(3, 60, reps('hanging-leg-raise', 10), timed('dead-hang', 30)),
+        ],
+    },
+    {
+        id: 'builtin:step-circuit',
+        title: 'Step circuit',
+        description:
+            'Step-ups, box jumps and calf raises on a step or box, four rounds, for fitness.',
+        group: 'other',
+        repeats: 1,
+        blocks: [
+            superset(
+                4,
+                90,
+                reps('step-up', 10, { eachSide: true }),
+                reps('box-jump', 8),
+                reps('calf-raise', 15),
+                reps('push-up', 10),
+                timed('mountain-climber', 30)
+            ),
         ],
     },
 ];

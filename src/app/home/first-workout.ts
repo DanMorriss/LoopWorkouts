@@ -8,12 +8,13 @@ import { TrainingGoal } from '../models/muscle-balance';
 
 /**
  * The ready-made workouts to start with, best first, for each goal: building muscle, the one
- * using the most of what you have; for fitness, a full body circuit or a quick, hard one.
- * The last of each needs nothing, so there's always one you can do.
+ * using the most of what you have (in a gym, the whole-body one for beginners); for fitness, a
+ * full body circuit or a quick, hard one. The last of each needs nothing, so there's always one
+ * you can do.
  */
 const FIRST_CHOICES: Record<TrainingGoal, readonly string[]> = {
     muscle: [
-        'builtin:gym-push',
+        'builtin:gym-full-body',
         'builtin:dumbbell-full-body',
         'builtin:kettlebell-full-body',
         'builtin:bodyweight-basics',

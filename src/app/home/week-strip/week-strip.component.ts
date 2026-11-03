@@ -29,8 +29,8 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
 /**
  * The week on Today (PLN-4): Monday to Sunday, each day marked done, missed, planned or free,
  * today picked out, how many of the week's planned workouts are done and the next one to come,
- * and **Edit plan**, which slides the weekly plan in. With nothing planned, a way to plan the
- * week instead.
+ * and **Edit plan**, which slides the weekly plan in. With nothing planned, Plan your week, as
+ * the page's main button (NAV-6).
  */
 @Component({
     selector: 'app-week-strip',
@@ -67,11 +67,12 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                 <p class="week__so-far">{{ soFar() }}</p>
             } @else {
                 <p class="week__empty">
-                    Nothing planned yet. Choose which workouts you do on which days.
+                    Nothing planned yet. Choose which days you do your workouts, and Today shows
+                    what's due each day.
                 </p>
                 <a
                     href="/plan"
-                    class="btn-pill week__plan"
+                    class="btn-main week__plan"
                     (click)="slide.follow($event, '/plan', 'in')"
                     >Plan your week</a
                 >

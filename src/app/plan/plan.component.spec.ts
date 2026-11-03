@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../models/history';
 import { asOneGroup, Workout } from '../models/workout';
@@ -116,7 +116,8 @@ describe('PlanComponent', () => {
 
         await click('#plan-add-3');
         expect(text(el().querySelector('.choice__title')!)).toBe('Plan on Thursday');
-        el().querySelectorAll<HTMLButtonElement>('.choice__choice')[1].click();
+        // After Add new workouts, first: Legs, then Push
+        el().querySelectorAll<HTMLButtonElement>('.choice__choice')[2].click();
         await render();
 
         expect(TestBed.inject(PlanStore).plan().days[3]).toEqual([push.id]);
@@ -132,7 +133,7 @@ describe('PlanComponent', () => {
 
         await click('#plan-add-3');
 
-        const legsChoice = el().querySelector<HTMLButtonElement>('.choice__choice')!;
+        const legsChoice = el().querySelectorAll<HTMLButtonElement>('.choice__choice')[1];
         expect(text(legsChoice)).toContain('Planned');
         expect(legsChoice.disabled).toBe(true);
     });
@@ -164,5 +165,25 @@ describe('PlanComponent', () => {
 
         expect(el().textContent).toContain('Make a workout in Workouts first');
         expect(el().querySelector('.plan__add')).toBeNull();
+        const link = el().querySelector('.plan__workouts-link')!;
+        expect(text(link)).toBe('Go to your workouts');
+        expect(link.getAttribute('href')).toBe('/library');
+    });
+
+    it('offers Add new workouts first when picking, which goes to the Workouts tab (PLN-5)', async () => {
+        await open();
+
+        await click('#plan-add-3');
+        const choices = [...el().querySelectorAll<HTMLButtonElement>('.choice__choice')];
+        expect(choices.map((choice) => text(choice.querySelector('.choice__name')!))).toEqual([
+            'Add new workouts',
+            'Legs',
+            'Push',
+        ]);
+        choices[0].click();
+        await render();
+
+        expect(TestBed.inject(Router).url).toBe('/library');
+        expect(TestBed.inject(PlanStore).plan().days[3]).toEqual([]);
     });
 });

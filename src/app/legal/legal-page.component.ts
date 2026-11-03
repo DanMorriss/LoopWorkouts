@@ -19,7 +19,7 @@ const BACK_URL = '/account';
                 class="m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-5 shadow-xl shadow-(color:--shadow)"
                 aria-labelledby="legal-title"
             >
-                <app-back-link [url]="backUrl" label="Account" />
+                <app-back-link [url]="backUrl" label="You" />
                 <h2 class="legal__title" id="legal-title">{{ heading() }}</h2>
                 <p class="legal__updated">Last updated {{ updated() }}</p>
                 <ng-content />

@@ -5,7 +5,7 @@ import { TABS } from './tabs';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 
 /**
- * The tabs along the bottom: Home, Exercises, Library, History and Account, as on an iPhone. A
+ * The tabs along the bottom: Today, Workouts, Exercises, Progress and You, as on an iPhone. A
  * highlight sits behind the chosen one and slides to the next. Not on the workout page,
  * which has the whole screen; the workout shows in the bar above the tabs everywhere else.
  */

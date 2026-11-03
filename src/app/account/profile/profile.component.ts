@@ -27,7 +27,7 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
                 (change)="setName($event)"
             />
         </label>
-        <p class="profile__hint" id="name-hint">What Home greets you by</p>
+        <p class="profile__hint" id="name-hint">What Today greets you by</p>
 
         <!-- Which figure the body maps draw -->
         <fieldset class="segmented profile__picker" aria-describedby="sex-hint">

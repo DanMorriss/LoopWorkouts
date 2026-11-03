@@ -1,12 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { HistoryEntry, LoggedSet } from '../models/history';
+import { ActiveRunService } from '../shared/run/active-run.service';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { greetingFor, HomeComponent } from './home.component';
 import { asOneGroup } from '../models/workout';
+import { markFor } from './week-strip/week-strip.component';
 
 const NOW = new Date(2026, 9, 18, 12, 0).getTime();
 const HOUR = 60 * 60 * 1000;
@@ -81,7 +83,7 @@ describe('HomeComponent', () => {
         ]);
     });
 
-    it('shows no logo, and before any workout a way to the library', () => {
+    it('shows no logo, and before any workout a way to your workouts', () => {
         create();
 
         expect(element().querySelector('app-loop-logo')).toBeNull();
@@ -89,9 +91,9 @@ describe('HomeComponent', () => {
         expect(element().querySelector('app-muscles-this-week')).toBeNull();
     });
 
-    it('shows the suggested next workout, then the muscles worked this week', () => {
+    it('suggests the saved workout for the least worked muscles, and starts it, leaving the muscles to Progress', () => {
         const workouts = TestBed.inject(WorkoutStore);
-        workouts.addWorkout({
+        const push = workouts.addWorkout({
             title: 'Push',
             repeats: 3,
             blocks: asOneGroup([
@@ -102,12 +104,129 @@ describe('HomeComponent', () => {
         create();
 
         expect(text('.suggestion__title')).toEqual(['Push']);
-        expect(text('.muscles-week__title')).toEqual(['Muscles worked this week']);
+        expect(text('.suggestion__reason')).toEqual([
+            'For Chest (0 of 10 sets), the least worked this week.',
+        ]);
+        expect(element().querySelector('app-muscles-this-week')).toBeNull();
         expect(element().querySelector('.home__empty')).toBeNull();
-        const order = [...element().querySelectorAll('.suggestion, .muscles-week')].map(
-            (el) => el.className || el.tagName.toLowerCase()
-        );
-        expect(order).toEqual(['suggestion', 'muscles-week']);
+
+        const router = TestBed.inject(Router);
+        vi.spyOn(router, 'navigate').mockResolvedValue(true);
+        (element().querySelector('[aria-label="Start Push"]') as HTMLButtonElement).click();
+
+        expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(push.id);
+        expect(router.navigate).toHaveBeenCalledWith(['/workout']);
+    });
+
+    describe('this week (PLN-4)', () => {
+        function addWorkout(title: string) {
+            return TestBed.inject(WorkoutStore).addWorkout({
+                title,
+                repeats: 1,
+                blocks: asOneGroup([{ kind: 'reps', reps: 5, name: 'Back squat' }]),
+            });
+        }
+        const days = () =>
+            [...element().querySelectorAll('.week__day')].map((day) => ({
+                letter: day.querySelector('.week__letter')!.textContent!.trim(),
+                mark: [...day.classList]
+                    .filter((name) => name.startsWith('week__day--') && name !== 'week__day--today')
+                    .map((name) => name.replace('week__day--', ''))[0],
+                today: day.getAttribute('aria-current') === 'date',
+            }));
+
+        it("isn't there before there's a workout to plan", () => {
+            create();
+
+            expect(element().querySelector('app-week-strip')).toBeNull();
+        });
+
+        it('with nothing planned, offers to plan the week', () => {
+            addWorkout('Legs');
+            create();
+
+            expect(text('.week__label')).toEqual(['This week']);
+            expect(text('.week__empty')).toEqual([
+                'Nothing planned yet. Choose which workouts you do on which days.',
+            ]);
+            const link = element().querySelector('.week__plan')!;
+            expect(link.textContent!.trim()).toBe('Plan your week');
+            expect(link.getAttribute('href')).toBe('/plan');
+            expect(element().querySelector('.week__days')).toBeNull();
+        });
+
+        it('shows each day Monday first, marked, with today picked out, and Edit plan', () => {
+            // NOW is a Sunday, the plan's day 6
+            const legs = addWorkout('Legs');
+            const push = addWorkout('Push');
+            const plan = TestBed.inject(PlanStore);
+            plan.add(0, legs.id);
+            plan.add(2, push.id);
+            plan.add(6, legs.id);
+            plan.add(6, push.id);
+            // Wednesday's Push was done; Monday's Legs wasn't
+            TestBed.inject(HistoryStore).record({
+                ...entry,
+                workoutId: push.id,
+                startedAt: NOW - 4 * 24 * HOUR,
+            });
+            create();
+
+            expect(days()).toEqual([
+                { letter: 'M', mark: 'missed', today: false },
+                { letter: 'T', mark: 'free', today: false },
+                { letter: 'W', mark: 'done', today: false },
+                { letter: 'T', mark: 'free', today: false },
+                { letter: 'F', mark: 'free', today: false },
+                { letter: 'S', mark: 'free', today: false },
+                { letter: 'S', mark: 'planned', today: true },
+            ]);
+            expect(text('.week__day .sr-only')).toEqual([
+                'Monday: Legs, missed',
+                'Tuesday: nothing planned',
+                'Wednesday: Push, done',
+                'Thursday: nothing planned',
+                'Friday: nothing planned',
+                'Saturday: nothing planned',
+                'Sunday, today: Legs, due today; Push, due today',
+            ]);
+            expect(text('.week__so-far')).toEqual(['1 of 4 done this week']);
+            const edit = element().querySelector('.week__edit')!;
+            expect(edit.textContent!.trim()).toBe('Edit plan');
+            expect(edit.getAttribute('href')).toBe('/plan');
+        });
+
+        it('names the next workout to come, and says when the week is all done', () => {
+            vi.setSystemTime(NOW - 3 * 24 * HOUR); // Thursday
+            const legs = addWorkout('Legs');
+            const plan = TestBed.inject(PlanStore);
+            plan.add(3, legs.id);
+            plan.add(5, legs.id);
+            create();
+
+            expect(text('.week__so-far')).toEqual([
+                '0 of 2 done this week · Next: Legs on Saturday',
+            ]);
+            fixture.destroy();
+
+            TestBed.inject(PlanStore).remove(5, legs.id);
+            TestBed.inject(HistoryStore).record({
+                ...entry,
+                workoutId: legs.id,
+                startedAt: NOW - 3 * 24 * HOUR - HOUR,
+            });
+            create();
+
+            expect(text('.week__so-far')).toEqual(['Done for the week']);
+        });
+
+        it('marks a day by all its workouts: done once all are, missed if any were', () => {
+            expect(markFor([])).toBe('free');
+            expect(markFor(['done', 'done'])).toBe('done');
+            expect(markFor(['done', 'missed'])).toBe('missed');
+            expect(markFor(['done', 'today'])).toBe('planned');
+            expect(markFor(['to come'])).toBe('planned');
+        });
     });
 
     describe('due today (PLN-2)', () => {

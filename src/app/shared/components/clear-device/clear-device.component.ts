@@ -10,7 +10,7 @@ import {
 import { DeviceDataService } from '../../state/device-data.service';
 
 /**
- * Clear this device (SYN-9), in Account → Your data. It can't be undone,
+ * Clear this device (SYN-9), on You → Your data. It can't be undone,
  * so rather than going ahead with an Undo, as deleting does elsewhere, the button first opens
  * a warning in place, with Clear everything and Cancel.
  */

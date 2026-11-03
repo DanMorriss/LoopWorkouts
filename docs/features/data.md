@@ -199,7 +199,7 @@ The run in progress in a tab moves too (`activeTimerId`, `activeTimerStartedAt` 
 }
 ```
 
-`theme` is `dark`, `light` or `system`. `countdownBeeps` is the Countdown beeps switch (ALM-5), on by default. `weightUnit` is `kg` or `lb`. `bodyFigure` is `male` or `female`. `myEquipment` is the equipment you have, picked on the Exercises page or the ready-made workouts, in the order it's offered there (unknown pieces are dropped); `onlyMyEquipment` is its Only what I have switch, which filters both. `eachSideFirst` is `left` (the default) or `right`, and `switchSidesSeconds` 0 (Off) to 30, 5 by default (BLD-10); anything else is the default. `name` is what Home greets you by (SET-7), trimmed and at most 40 characters, `''` if not given. `name`, `bodyFigure`, `trainingGoal`, `weightUnit` and `myEquipment` are the profile, which syncs as one record (kind `profile`, id `me`, with those fields and `updatedAt`); `profileUpdatedAt` is when any of them last changed, by the sync clock, or 0 if never here (a device not set up, or signed out of), when it isn't sent. A backup's `settings` has `name` but not `profileUpdatedAt`.
+`theme` is `dark`, `light` or `system`. `countdownBeeps` is the Countdown beeps switch (ALM-5), on by default. `weightUnit` is `kg` or `lb`. `bodyFigure` is `male` or `female`. `myEquipment` is the equipment you have, picked on the Exercises page or the ready-made workouts, in the order it's offered there (unknown pieces are dropped); `onlyMyEquipment` is its Only what I have switch, which filters both. `eachSideFirst` is `left` (the default) or `right`, and `switchSidesSeconds` 0 (Off) to 30, 5 by default (BLD-10); anything else is the default. `name` is what Today greets you by (SET-7), trimmed and at most 40 characters, `''` if not given. `name`, `bodyFigure`, `trainingGoal`, `weightUnit` and `myEquipment` are the profile, which syncs as one record (kind `profile`, id `me`, with those fields and `updatedAt`); `profileUpdatedAt` is when any of them last changed, by the sync clock, or 0 if never here (a device not set up, or signed out of), when it isn't sent. A backup's `settings` has `name` but not `profileUpdatedAt`.
 
 ### `sb-cpgacyzlfyskifzhkotu-auth-token`: who's signed in
 
@@ -211,7 +211,7 @@ While signed in (SYN-3): the account's user id, the last `seq` fetched from the 
 
 ### `synced-at`: when this device last synced
 
-In ms since the epoch, by the device's clock, for the Account tab. Signing out removes it.
+In ms since the epoch, by the device's clock, for the You tab. Signing out removes it.
 
 ### `welcomed`: the welcome screen's been answered
 
@@ -219,7 +219,7 @@ In ms since the epoch, by the device's clock, for the Account tab. Signing out r
 
 ### `setup`: the setup's still to do
 
-`due` once a device new to the app is sent to the welcome screen, and `asking` once the setup's questions (NAV-4) start: while it's there, Home opens the setup. Finishing or skipping it removes it. Missing on a device in use before the setup came in, which isn't asked. Signing out and Clear this device remove it.
+`due` once a device new to the app is sent to the welcome screen, and `asking` once the setup's questions (NAV-4) start: while it's there, Today opens the setup. Finishing or skipping it removes it. Missing on a device in use before the setup came in, which isn't asked. Signing out and Clear this device remove it.
 
 ### `clock-offset`: how far this device's clock is from the server's
 
@@ -244,7 +244,7 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 
 ## Backup file
 
-**Export backup** in Account saves everything as one JSON file, e.g. `loop-workouts-2026-10-21.json`; **Import backup** reads one back (see [backup-and-sync](backup-and-sync.md) for how it merges):
+**Export backup** on You saves everything as one JSON file, e.g. `loop-workouts-2026-10-21.json`; **Import backup** reads one back (see [backup-and-sync](backup-and-sync.md) for how it merges):
 
 ```json
 {
@@ -289,7 +289,7 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 - **Version 5 and older** files have no time limits, so nothing needs converting.
 - **Version 4 and older** files have no `hiddenExercises`, so nothing in them is hidden.
 - **Version 2** files (from before exercises) have no `exercises` or `exerciseNotes`, and their steps and sets aren't linked; they're linked by name as they're imported.
-- **A file written by hand** (e.g. by an AI from a plan, with the prompt in Account) can leave out everything but `app`, `version` and `workouts` (`libraryOrder` and `plan` too), and its workouts and exercises of your own can leave out `id` and `updatedAt`: one with no id is new, and is given a random id and dated now when it's imported (see [backup-and-sync](backup-and-sync.md#bringing-in-a-plan-with-ai-syn-6)). Its steps need no `exerciseId`, since they're linked by name.
+- **A file written by hand** (e.g. by an AI from a plan, with the prompt on You) can leave out everything but `app`, `version` and `workouts` (`libraryOrder` and `plan` too), and its workouts and exercises of your own can leave out `id` and `updatedAt`: one with no id is new, and is given a random id and dated now when it's imported (see [backup-and-sync](backup-and-sync.md#bringing-in-a-plan-with-ai-syn-6)). Its steps need no `exerciseId`, since they're linked by name.
 - A file that isn't JSON, doesn't say `"app": "Loop Workouts"`, lacks a `workouts` list, has a `history` that isn't a list, or is over 50 MB isn't a backup.
 
 ## Broken data

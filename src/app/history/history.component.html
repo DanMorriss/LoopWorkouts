@@ -2,12 +2,15 @@
     <div
         class="m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-6 shadow-xl shadow-(color:--shadow)"
     >
-        <h2 class="history__title">History</h2>
+        <h2 class="history__title">Progress</h2>
 
         @if (groups().length === 0) {
             <div class="history__empty">
-                <p>No workouts yet. Finished and stopped workouts show up here.</p>
-                <a routerLink="/library" class="btn-pill history__button">Go to the library</a>
+                <p>
+                    Nothing here yet. Do a workout, and how your week is going and what you've done
+                    show up here.
+                </p>
+                <a routerLink="/library" class="btn-pill history__button">Go to your workouts</a>
             </div>
         } @else {
             <p class="history__summary">
@@ -17,13 +20,14 @@
 
             <app-muscles-this-week class="history__muscles" />
 
-            <app-suggested-workout class="history__suggestion" />
+            <!-- Every workout done, newest first, under the muscles they worked -->
+            <h3 class="history__log-title">Log</h3>
 
             @for (group of groups(); track group.key) {
                 <section class="history__day" [attr.aria-labelledby]="'day-' + group.key">
-                    <h3 class="history__day-label" [id]="'day-' + group.key">
+                    <h4 class="history__day-label" [id]="'day-' + group.key">
                         {{ group.label || (group.date | date: 'EEEE d MMMM') }}
-                    </h3>
+                    </h4>
                     <ul class="history__list">
                         @for (entry of group.entries; track entry.id) {
                             <li

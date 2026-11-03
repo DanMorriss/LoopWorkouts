@@ -58,7 +58,7 @@ describe('the Privacy notice and Terms of use', () => {
         const back = harness.routeNativeElement!.querySelector<HTMLAnchorElement>('.back-link')!;
 
         expect(back.getAttribute('href')).toBe('/account');
-        expect(back.textContent).toContain('Account');
+        expect(back.textContent).toContain('You');
         back.click();
 
         expect(navigate).toHaveBeenCalledWith('/account', 'out');

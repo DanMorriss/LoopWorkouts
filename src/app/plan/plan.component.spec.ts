@@ -156,13 +156,13 @@ describe('PlanComponent', () => {
         expect(days()[4]).toBe('Friday: Nothing planned');
     });
 
-    it('says to make a workout first when the library is empty, with no Add', async () => {
+    it('says to make a workout first when there are none, with no Add', async () => {
         const workouts = TestBed.inject(WorkoutStore);
         workouts.deleteWorkout(legs.id);
         workouts.deleteWorkout(push.id);
         await open();
 
-        expect(el().textContent).toContain('Make a workout in the library first');
+        expect(el().textContent).toContain('Make a workout in Workouts first');
         expect(el().querySelector('.plan__add')).toBeNull();
     });
 });

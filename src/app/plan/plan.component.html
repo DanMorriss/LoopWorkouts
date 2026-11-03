@@ -1,21 +1,18 @@
-<div
-    class="flex justify-center"
-    [appSwipeBack]="'/library'"
-    [swipeBackDisabled]="addingTo() !== null"
->
+<div class="flex justify-center" [appSwipeBack]="'/home'" [swipeBackDisabled]="addingTo() !== null">
     <div
         class="m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-6 shadow-xl shadow-(color:--shadow)"
     >
-        <app-back-link url="/library" label="Library" />
+        <app-back-link url="/home" label="Today" />
         <h2 class="plan__title">Plan</h2>
         <p class="plan__hint">
-            Which workouts you do on which days, the same every week. What's due shows on Home.
+            Which workouts you do on which days, the same every week. Your week and what's due show
+            on Today.
         </p>
         @if (weekSoFar()) {
             <p class="plan__so-far">{{ weekSoFar() }}</p>
         }
         @if (!hasWorkouts()) {
-            <p class="plan__hint">Make a workout in the library first, then plan it here.</p>
+            <p class="plan__hint">Make a workout in Workouts first, then plan it here.</p>
         }
 
         @for (day of days(); track day.day) {

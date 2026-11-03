@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry, LoggedSet } from '../models/history';
-import { ActiveRunService } from '../shared/run/active-run.service';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { UndoService } from '../shared/undo/undo.service';
@@ -84,10 +83,13 @@ describe('HistoryComponent', () => {
             }
         )!;
 
-    it('says there are no workouts yet, and links to the library', () => {
+    it('is titled Progress, and says there is nothing yet, linking to your workouts', () => {
         create();
 
-        expect(fixture.nativeElement.textContent).toContain('No workouts yet');
+        expect(fixture.nativeElement.querySelector('h2').textContent.trim()).toBe('Progress');
+        expect(fixture.nativeElement.textContent).toContain(
+            "Nothing here yet. Do a workout, and how your week is going and what you've done show up here."
+        );
         expect(fixture.nativeElement.querySelector('a').getAttribute('href')).toBe('/library');
     });
 
@@ -313,16 +315,8 @@ describe('HistoryComponent', () => {
         expect(labels.at(-1)).toBe('Upper back');
     });
 
-    it('suggests the saved workout for the least worked muscles, and starts it', () => {
-        const workouts = TestBed.inject(WorkoutStore);
-        workouts.addWorkout({
-            title: 'Legs',
-            repeats: 3,
-            blocks: asOneGroup([
-                { kind: 'reps', reps: 5, name: 'Back squat', exerciseId: 'builtin:back-squat' },
-            ]),
-        });
-        const push = workouts.addWorkout({
+    it('shows the muscles worked this week, then the log, and leaves the suggestion to Today', () => {
+        TestBed.inject(WorkoutStore).addWorkout({
             title: 'Push',
             repeats: 3,
             blocks: asOneGroup([
@@ -338,17 +332,19 @@ describe('HistoryComponent', () => {
         };
         create(makeEntry({ sets: [squat, { ...squat, round: 1 }] }));
 
-        expect(text('.suggestion__title')).toEqual(['Push']);
-        expect(text('.suggestion__reason')).toEqual([
-            'For Chest (0 of 10 sets), the least worked this week.',
-        ]);
-
-        const router = TestBed.inject(Router);
-        vi.spyOn(router, 'navigate').mockResolvedValue(true);
-        button('Start Push').click();
-
-        expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(push.id);
-        expect(router.navigate).toHaveBeenCalledWith(['/workout']);
+        const element = fixture.nativeElement as HTMLElement;
+        expect(element.querySelector('.suggestion')).toBeNull();
+        const order = [
+            ...element.querySelectorAll(
+                'app-muscles-this-week, .history__log-title, .history__day'
+            ),
+        ].map((el) =>
+            el.tagName.toLowerCase() === 'app-muscles-this-week'
+                ? 'muscles'
+                : el.className.split(' ')[0]
+        );
+        expect(order).toEqual(['muscles', 'history__log-title', 'history__day']);
+        expect(element.querySelector('.history__log-title')!.textContent!.trim()).toBe('Log');
     });
 
     /** Opens an entry's ⋮ menu and picks an item, e.g. "Delete". */

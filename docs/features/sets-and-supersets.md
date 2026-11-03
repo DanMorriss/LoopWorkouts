@@ -56,7 +56,7 @@ This adds what that needs: sets and rest on an exercise, exercises done one side
 - On a timed step (e.g. side plank), a **"Switch sides" countdown** runs between the two, in the rest colour. It isn't a set and isn't logged. How long it is, is a setting: **Switch sides**, Off or 1 to 30 seconds, **5 seconds** to begin with. Off goes straight from one side to the other.
 - Both settings are in Settings under a new **Workouts** heading, are kept per device as other settings are, and go in backups (see [settings](settings.md) once built).
 - The reps (or time) and weight are for **each side**: "2 × 10 each side" is 10 left and 10 right per set.
-- A left and right together count as **one set** wherever sets are counted (e.g. "2 × 10 each side", the muscle bars' sets a week, PRG-8), though each side is logged on its own (see History).
+- A left and right together count as **one set** wherever sets are counted (e.g. "2 × 10 each side", the muscle bars' sets a week, PRG-8), though each side is logged on its own (see [history](history.md)).
 
 ### Vary each set (BLD-11)
 

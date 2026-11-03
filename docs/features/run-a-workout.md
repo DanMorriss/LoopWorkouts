@@ -87,7 +87,7 @@
 
 ### Changing reps or weight mid-workout (RUN-6)
 
-- While a rep step is waiting, the **reps and weight on the face are wheels**: closed, each is just its number in the face's text, with a short faint line under it (no box) that says it can be changed, with its unit beside it ("reps", "kg"). Tapping one opens it there, over the ring, as wheels open anywhere else: **Reps** 1–100, and **Weight** none, then halves, in the unit chosen in Account → Profile. No weight shows as "+", to add one. Screen readers hear them as spin buttons named "reps" and "Weight, kg".
+- While a rep step is waiting, the **reps and weight on the face are wheels**: closed, each is just its number in the face's text, with a short faint line under it (no box) that says it can be changed, with its unit beside it ("reps", "kg"). Tapping one opens it there, over the ring, as wheels open anywhere else: **Reps** 1–100, and **Weight** none, then halves, in the unit chosen in You → Profile. No weight shows as "+", to add one. Screen readers hear them as spin buttons named "reps" and "Weight, kg".
 - A change applies at once, to **this set, the rest of this workout's rounds, and the saved workout**, so next time starts from there. If the workout has been deleted from the library meanwhile, only this workout changes.
 - On a step whose sets vary (BLD-11), it applies to **this set only**, in this workout and the saved one: set 2 changed to 47.5 kg leaves sets 1 and 3 as they were. Each set's face shows its own reps and weight, and Next during a rest says the next set's, e.g. "then Leg press · set 2 of 3 · 10 reps @ 45 kg".
 - On a step done each side, a change is for both sides of the set.
@@ -129,7 +129,7 @@
     - **Swapped** (RUN-11): each step swapped, e.g. "Back squat for Goblet squat", and "Use Goblet squat next time?" with **No, just this time** and **Yes, use next time** (for a workout still in the library). Yes puts the swapped step (its exercise, name and weight) on the saved workout and says "Saved: next time it's Goblet squat."; No leaves it, saying "Next time it's Back squat again.", as the machine's likely free next time. Focus moves to what it says. A step swapped back to what it was isn't listed.
     - **Muscles worked**: the body map, shaded by this workout's sets (PRG-11).
     - A **Note** box, saved to this workout in the history as you leave it.
-    - The **suggested next workout**, as on the history page, without its Start button (PRG-9; see [progress](progress.md)).
+    - The **suggested next workout**, as on Today, without its Start button (PRG-9; see [progress](progress.md)).
     - Buttons: **Done** (the main one: on to the history, with this workout highlighted), and **Back to workout** for a workout ended early or one that runs until stopped. Escape does the same as Back to workout, where there is one.
 - **Change reps or weight** (shown when there are rep sets) turns each rep set into a Reps and a Weight wheel, so a set logged wrongly can be corrected (e.g. the last set was 8, not 10). Each step's sets are under its name, grouped as the lines are: under the workout's headings, and a superset's steps together under "Superset" (or "Giant set"). Timed sets ran as set, so they can't be changed. A change goes into this workout's history entry at once, and then asks "**Use these settings next time?**":
     - **Yes, use next time**: each rep step of the saved workout starts next time from its sets in this workout, each set as it was last done (both sides as one) and any not done as it was. Sets that came out the same stay one Reps and Weight; sets that differ turn on Vary each set (BLD-11), so a pyramid worked out mid-workout is kept. A step given a Next time step-up with **Apply** keeps the step-up instead, before or after Yes. It says "Saved: next time starts from these.", adding ", with the step-ups you applied" when there are any.
@@ -139,7 +139,7 @@
 
 ### No workout
 
-- The workout page with no workout running says "No workout selected." with a link to choose one from the library.
+- The workout page with no workout running says "No workout selected." with a link, "Choose one from your workouts".
 
 ## Acceptance criteria
 

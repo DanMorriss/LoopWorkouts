@@ -22,8 +22,8 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
 /**
  * The weekly plan (PLN-1): Monday to Sunday, the workouts planned on each, the same every week,
  * with where each is this week (PLN-3): done, missed, due today or to come. Each day adds a
- * workout from the library, or takes one off. It slides in over the Library, and back off with
- * ‹ Library or a swipe right.
+ * workout from your workouts, or takes one off. It slides in over Today, from its week (PLN-4),
+ * and back off with ‹ Today or a swipe right.
  */
 @Component({
     selector: 'app-plan',

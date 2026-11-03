@@ -20,7 +20,7 @@ export interface SyncStatus {
 /**
  * Starts sync (SYN-3, SYN-4) once this device is signed in, loading its code (and Supabase's)
  * only then, so neither adds to the app's first load. Holds how sync is going, for the
- * Account tab.
+ * You tab.
  */
 @Service()
 export class SyncStarter {

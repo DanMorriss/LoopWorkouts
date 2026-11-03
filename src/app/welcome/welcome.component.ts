@@ -7,7 +7,7 @@ import { WELCOMED_KEY } from './welcome-first';
 
 /**
  * The welcome screen (NAV-3), where a device new to the app starts: what the app is, then
- * signing in (as on the Account tab), or going on as a guest, with everything kept on this
+ * signing in (as on the You tab), or going on as a guest, with everything kept on this
  * device. Either way it's not asked again here, and Home opens. No tab bar, so it's one
  * choice.
  */
@@ -41,7 +41,7 @@ import { WELCOMED_KEY } from './welcome-first';
                         Continue as guest
                     </button>
                     <p class="welcome__hint" id="welcome-guest-hint">
-                        Everything stays on this device. You can sign in any time from Account.
+                        Everything stays on this device. You can sign in any time from the You tab.
                     </p>
                 </div>
             </div>

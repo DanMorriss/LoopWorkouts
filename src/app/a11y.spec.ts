@@ -356,8 +356,8 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('with a suggested workout and the muscles worked this week', async () => {
-                store.addWorkout({
+            it('with a suggested workout and the week planned', async () => {
+                const push = store.addWorkout({
                     title: 'Push',
                     repeats: 3,
                     blocks: asOneGroup([
@@ -370,10 +370,11 @@ for (const theme of ['dark', 'light'] as const) {
                     ]),
                 });
                 const now = Date.now();
+                // Push was done today, as planned, so the suggestion shows in place of Due today
                 TestBed.inject(HistoryStore).record({
                     id: 'run-0',
-                    workoutId: 'workout-1',
-                    title: 'Legs',
+                    workoutId: push.id,
+                    title: 'Push',
                     startedAt: now - 60_000,
                     endedAt: now,
                     activeSeconds: 60,
@@ -390,9 +391,14 @@ for (const theme of ['dark', 'light'] as const) {
                         },
                     ],
                 });
+                // Planned on two days, one of them today, so the week shows each kind of day
+                const plan = TestBed.inject(PlanStore);
+                plan.add(0, push.id);
+                plan.add(weekdayOf(now), push.id);
+                plan.add(6, push.id);
                 await open('/home');
                 expect(fixture.nativeElement.querySelector('.suggestion')).not.toBeNull();
-                expect(fixture.nativeElement.querySelector('.muscles-week')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.week__days')).not.toBeNull();
                 await expectNoViolations();
             });
         });

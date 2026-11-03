@@ -209,7 +209,7 @@ describe('SettingsComponent', () => {
         const back = fixture.nativeElement.querySelector('.back-link') as HTMLAnchorElement;
 
         expect(back.getAttribute('href')).toBe('/account');
-        expect(back.textContent).toContain('Account');
+        expect(back.textContent).toContain('You');
     });
 
     describe('keep screen on', () => {

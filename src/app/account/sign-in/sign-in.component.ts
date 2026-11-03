@@ -19,7 +19,7 @@ const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple
 /**
  * Signing in (SYN-3, SYN-7): with Google (and Apple, once it's set up), which go there and
  * come back signed in, or by an email link, then the code from the same email typed here.
- * Shown signed out on the Account tab and on the welcome screen, each with its own `intro`.
+ * Shown signed out on the You tab and on the welcome screen, each with its own `intro`.
  * Says what it's doing under itself, read out as it changes.
  */
 @Component({
@@ -31,7 +31,7 @@ const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple
 export class SignInComponent {
     /** Why sign in, over the buttons, and what the email field is described by. */
     readonly intro = input.required<string>();
-    /** Signed in here, with the code; Google and email links come back to the Account tab. */
+    /** Signed in here, with the code; Google and email links come back to the You tab. */
     readonly signedIn = output<void>();
 
     protected readonly account = inject(AccountService);
@@ -90,7 +90,7 @@ export class SignInComponent {
         return SIGN_IN_PROVIDERS.includes(provider);
     }
 
-    /** Off to Google or Apple to sign in, coming back to the Account tab signed in (SYN-7). */
+    /** Off to Google or Apple to sign in, coming back to the You tab signed in (SYN-7). */
     protected async signInWith(provider: SignInProvider) {
         const name = PROVIDER_NAMES[provider];
         this.busy.set(true);

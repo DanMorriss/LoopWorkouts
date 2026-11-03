@@ -70,7 +70,7 @@ describe('WorkoutLibraryComponent', () => {
         beforeEach(() => create());
 
         it('shows the empty message and no cards', () => {
-            expect(text()).toContain('Nothing in the library yet');
+            expect(text()).toContain('No workouts yet. Make one');
             expect(all('.workout-card')).toHaveLength(0);
         });
 
@@ -113,7 +113,7 @@ describe('WorkoutLibraryComponent', () => {
 
         it('shows a card per workout with its title and padded times', () => {
             expect(all('.workout-card')).toHaveLength(2);
-            expect(text()).not.toContain('Nothing in the library yet');
+            expect(text()).not.toContain('No workouts yet. Make one');
             expect(card(0).textContent).toContain('Sprints');
             expect(card(0).textContent).toContain('01:05 - 00:20 x 4');
         });
@@ -134,7 +134,7 @@ describe('WorkoutLibraryComponent', () => {
         });
 
         it('has a title, as the other pages do', () => {
-            expect(el('h2.library__title')?.textContent?.trim()).toBe('Library');
+            expect(el('h2.library__title')?.textContent?.trim()).toBe('Workouts');
             expect(el('.library__top .library-add-button')?.getAttribute('aria-label')).toBe(
                 'New workout'
             );
@@ -394,7 +394,7 @@ describe('WorkoutLibraryComponent', () => {
                 deleteFromMenu(0);
                 deleteFromMenu(0);
 
-                expect(text()).toContain('Nothing in the library yet');
+                expect(text()).toContain('No workouts yet. Make one');
                 expect(undo().offer()?.message).toBe('Deleted a workout');
             });
 

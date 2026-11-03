@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { LegalPageComponent } from './legal-page.component';
 
 /**
- * /privacy, linked from Account. Kept true to what the app does: change it in the same PR as
+ * /privacy, linked from You. Kept true to what the app does: change it in the same PR as
  * anything that stores more, or sends anything off the device (e.g. sync, in Phase 4).
  */
 @Component({

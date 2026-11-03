@@ -20,7 +20,7 @@ export function hasSignInTokens(location: Pick<Location, 'hash' | 'search'>): bo
 }
 
 /**
- * Sends a sign-in coming back to the Account tab, where Supabase's code reads it, if it's
+ * Sends a sign-in coming back to the You tab, where Supabase's code reads it, if it's
  * landed anywhere else: Supabase goes to the site's home page instead of /account when it
  * doesn't take the address it was given, and nothing else picks the tokens up. Run before the
  * first navigation, so the router starts there.

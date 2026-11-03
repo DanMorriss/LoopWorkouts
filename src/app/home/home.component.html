@@ -4,6 +4,10 @@
     >
         <h2 class="home__greeting">{{ greeting() }}</h2>
 
+        <!-- The week's plan (PLN-4), the way in to changing it, once there's a workout to plan -->
+        @if (hasWorkouts()) {
+            <app-week-strip class="home__card" />
+        }
         <!-- The weekly plan's workouts for today (PLN-2) -->
         <app-due-today #dueToday class="home__card" />
         @if (hasHistory()) {
@@ -11,11 +15,10 @@
             @if (!dueToday.due().length) {
                 <app-suggested-workout class="home__card" />
             }
-            <app-muscles-this-week class="home__card" />
         } @else if (!dueToday.due().length) {
             <div class="home__empty">
-                <p>Do a workout, and what to do next and the muscles you've worked show here.</p>
-                <a routerLink="/library" class="btn-pill">Go to the library</a>
+                <p>Do a workout, and what to do next shows here.</p>
+                <a routerLink="/library" class="btn-pill">Go to your workouts</a>
             </div>
         }
     </div>

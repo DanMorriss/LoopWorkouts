@@ -22,7 +22,7 @@ import { hasSignInTokens } from './sign-in-landing';
 import { YourDataComponent } from './your-data/your-data.component';
 
 /**
- * The Account tab (SYN-3, SYN-7, SYN-8, SYN-9): signing in (SignInComponent), who's
+ * The You tab (SYN-3, SYN-7, SYN-8, SYN-9): signing in (SignInComponent), who's
  * signed in and how sync is going, signing out and deleting the account; then your profile
  * (sex and weight units), Settings, which slides in over it, your data (backups and Clear
  * this device), and About.
@@ -80,12 +80,12 @@ export class AccountComponent {
         });
     }
 
-    /** Signed in with the code: on to Home. */
+    /** Signed in with the code: on to Today. */
     protected signedIn() {
         this.goHome();
     }
 
-    /** Signed in, so on to Home, in place of the Account tab (and the tokens in its address). */
+    /** Signed in, so on to Today, in place of the You tab (and the tokens in its address). */
     private goHome() {
         void this.account.goHomeSignedIn(this.router);
     }

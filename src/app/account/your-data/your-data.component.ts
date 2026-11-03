@@ -75,7 +75,7 @@ export function importLink(result: ImportResult): UndoOffer['link'] {
         return undefined;
     }
     if (result.workoutsAdded + result.workoutsUpdated > 0) {
-        return { label: 'View library', url: '/library' };
+        return { label: 'View workouts', url: '/library' };
     }
     if (result.exercisesAdded + result.exercisesUpdated > 0) {
         return { label: 'View exercises', url: '/exercises' };

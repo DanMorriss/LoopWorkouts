@@ -2,18 +2,9 @@
     @let existingWorkouts = isExistingWorkouts();
     <!-- The title, as on the other pages, with the way to add a workout at its right -->
     <div class="library__top">
-        <h2 class="library__title">Library</h2>
+        <h2 class="library__title">Workouts</h2>
         <!-- One way to add a workout at a time: an empty library has "Create a workout" instead -->
         @if (existingWorkouts) {
-            <!-- The weekly plan (PLN-1), which slides in over the library -->
-            <a
-                href="/plan"
-                class="btn-pill library__plan"
-                (click)="$event.stopPropagation(); slide.follow($event, '/plan', 'in')"
-            >
-                <mat-icon aria-hidden="true">calendar_month</mat-icon>
-                Plan
-            </a>
             <button
                 type="button"
                 class="btn-main btn-main--small library-add-button"
@@ -28,7 +19,7 @@
 
     @if (!existingWorkouts) {
         <div class="flex flex-col items-center justify-center">
-            <p>Nothing in the library yet. Make a workout, or start with a ready-made one.</p>
+            <p>No workouts yet. Make one, or start with a ready-made one.</p>
             <button
                 type="button"
                 class="btn-main library-create-button mt-12"
@@ -96,7 +87,7 @@
         >
             <span class="library__ready-made-text">
                 <span class="library__ready-made-title">Ready-made workouts</span>
-                <span class="library__ready-made-hint">Need ideas? Add one to your library.</span>
+                <span class="library__ready-made-hint">Need ideas? Add one to your workouts.</span>
             </span>
             <mat-icon aria-hidden="true">chevron_right</mat-icon>
         </a>

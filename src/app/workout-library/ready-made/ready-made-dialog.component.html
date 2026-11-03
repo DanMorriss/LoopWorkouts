@@ -27,7 +27,7 @@
             }
         </ul>
         @if (card().inLibrary) {
-            <p class="preview__note">You have a workout called this in your library already.</p>
+            <p class="preview__note">You have a workout called this in your workouts already.</p>
         }
 
         <section class="preview__section" aria-labelledby="ready-made-steps">
@@ -78,7 +78,7 @@
             </button>
             <button type="button" class="btn-pill preview__add" (click)="added.emit()">
                 <mat-icon aria-hidden="true">add</mat-icon>
-                Add to library
+                Add to my workouts
             </button>
             <button
                 type="button"

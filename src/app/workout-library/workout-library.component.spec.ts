@@ -179,6 +179,44 @@ describe('WorkoutLibraryComponent', () => {
             };
             const dialog = () => el('[role="dialog"]');
 
+            it("lists what's in it at the bottom, so it can be read without Edit", () => {
+                store.addWorkout({
+                    title: 'Legs',
+                    repeats: 2,
+                    blocks: [
+                        { kind: 'heading', text: 'Main' },
+                        {
+                            kind: 'group',
+                            rounds: 3,
+                            restSeconds: 60,
+                            steps: [{ kind: 'reps', reps: 10, name: 'Back squat' }],
+                        },
+                        {
+                            kind: 'group',
+                            rounds: 1,
+                            restSeconds: 0,
+                            steps: [{ kind: 'work', seconds: 30, name: '' }],
+                        },
+                    ],
+                });
+                fixture.detectChanges();
+                openDetails(2);
+
+                const headings = Array.from(dialog()!.querySelectorAll('h3'), (h) =>
+                    h.textContent!.trim()
+                );
+                expect(headings).toEqual(['Muscles it works', 'History', "What's in it"]);
+                expect(dialog()!.querySelector('.outline__repeats')?.textContent?.trim()).toBe(
+                    '2 rounds of all of it'
+                );
+                const lines = Array.from(
+                    dialog()!.querySelectorAll('.outline__part, .outline__line'),
+                    (line) => line.textContent!.replace(/\s+/g, ' ').trim()
+                );
+                // An unnamed step goes by its kind, as in the history
+                expect(lines).toEqual(['Main', 'Back squat 3 × 10, rest 1:00', 'Work 0:30']);
+            });
+
             it("opens from its options, saying when it hasn't been done yet", () => {
                 openDetails(0);
 

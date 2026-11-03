@@ -12,6 +12,14 @@ function clock(seconds: number): string {
     return formatTime(Math.floor(seconds / 60), seconds % 60).replace(/^0(?=\d:)/, '');
 }
 
+/** A step's name; an unnamed one by its kind, as the history names it: "Work" or "Reps". */
+function nameOf(step: Step): string {
+    if (step.kind === 'rest') {
+        return 'Rest';
+    }
+    return step.name.trim() || (step.kind === 'reps' ? 'Reps' : 'Work');
+}
+
 /** One set of a step: "10", "10 each side", "0:45", "0:30 each side". */
 function amountOf(step: Step): string {
     const amount = step.kind === 'reps' ? String(step.reps) : clock(step.seconds);
@@ -51,7 +59,7 @@ export function outline(workout: Pick<Workout, 'blocks'>): OutlineLine[] {
             const step = block.steps.find((s) => s.kind !== 'rest') ?? block.steps[0];
             return {
                 kind: 'step',
-                name: step.kind === 'rest' ? 'Rest' : step.name,
+                name: nameOf(step),
                 amount: setsOf(step, block.rounds, block.restSeconds),
             };
         }
@@ -61,7 +69,7 @@ export function outline(workout: Pick<Workout, 'blocks'>): OutlineLine[] {
             name: supersetName(block.steps),
             amount: block.rounds > 1 ? `${block.rounds} rounds${restText}` : 'Once',
             steps: block.steps.map((step) => ({
-                name: step.kind === 'rest' ? 'Rest' : step.name,
+                name: nameOf(step),
                 amount: step.kind === 'rest' ? clock(step.seconds) : amountOf(step),
             })),
         };

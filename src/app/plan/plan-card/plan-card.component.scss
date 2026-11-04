@@ -1,4 +1,4 @@
-@use 'type' as *;
+@use 'showcase-card' as *;
 
 :host {
     display: block;
@@ -7,11 +7,7 @@
 .plan-card {
     display: grid;
     gap: 0.9rem;
-    padding: 1rem;
-    border: 1px solid var(--border-soft);
-    border-radius: 0.9rem;
-    background:
-        radial-gradient(120% 80% at 100% 0%, var(--accent-soft), transparent 60%), var(--control);
+    @include showcase-card;
 
     p {
         margin: 0;
@@ -20,10 +16,7 @@
 
 // The title and what it's for at the left, how many days a week at the right
 .plan-card__head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
-    gap: 0.75rem;
+    @include showcase-head;
 }
 
 .plan-card__intro {
@@ -32,43 +25,23 @@
 }
 
 .plan-card__title {
-    margin: 0;
-    @include display;
-    color: var(--text-strong);
-    font-size: 1.1rem;
-    line-height: 1.25;
+    @include showcase-title;
 }
 
 .plan-card__description {
-    color: var(--text);
-    font-size: 0.9rem;
-    line-height: 1.45;
+    @include showcase-description;
 }
 
 .plan-card__count {
-    display: grid;
-    justify-items: center;
-    min-width: 3.5rem;
-    padding: 0.45rem 0.5rem 0.4rem;
-    border: 1px solid var(--accent-line);
-    border-radius: 0.7rem;
-    background: var(--accent-soft);
-    text-align: center;
+    @include count-badge;
 }
 
 .plan-card__count-number {
-    @include display;
-    color: var(--glow-text);
-    font-size: 1.6rem;
-    line-height: 1;
+    @include count-number;
 }
 
 .plan-card__count-label {
-    margin-top: 0.2rem;
-    color: var(--text-muted);
-    @include small-type(0.65rem);
-    line-height: 1.15;
-    max-width: 3rem;
+    @include count-label;
 }
 
 // The week: a day to a column, Monday first, each workout a numbered, coloured mark
@@ -203,36 +176,19 @@
 
 // What it needs, as quiet tags after an icon
 .plan-card__kit {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border-soft);
+    @include kit-row;
 }
 
 .plan-card__kit-icon {
-    flex: none;
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
-    color: var(--text-muted);
+    @include kit-icon;
 }
 
 .plan-card__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    @include tags;
 }
 
 .plan-card__tag {
-    padding: 0.15rem 0.55rem;
-    border: 1px solid var(--border-soft);
-    border-radius: 999px;
-    color: var(--text);
-    @include small-type(0.75rem);
+    @include tag;
 }
 
 .plan-card__use {

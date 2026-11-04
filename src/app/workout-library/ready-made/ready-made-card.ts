@@ -7,6 +7,8 @@ export interface ReadyMadeCard {
     workout: BuiltInWorkout;
     /** What it needs, to filter by: Only what I have. */
     needs: EquipmentNeed[];
+    /** How many different exercises it has. */
+    exercises: number;
     /** "5 exercises · Dumbbells, bench". */
     meta: string;
     /** What it needs, as on an exercise's page: "Dumbbells", "Bench". */
@@ -31,6 +33,7 @@ export function readyMadeCard(workout: BuiltInWorkout, titles: ReadonlySet<strin
         workout,
         needs,
         equipment,
+        exercises,
         meta: `${exercises} exercises · ${equipment.join(', ')}`,
         inLibrary: titles.has(workout.title.toLowerCase()),
     };

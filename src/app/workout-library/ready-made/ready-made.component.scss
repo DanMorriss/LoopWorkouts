@@ -1,5 +1,6 @@
 @use 'type' as *;
 @use 'interaction' as *;
+@use 'showcase-card' as *;
 
 :host {
     display: block;
@@ -42,31 +43,30 @@
     list-style: none;
 }
 
-// A workout: its name, what it is, then how many exercises and what it needs
+// A workout, as a ready-made plan's card is: its name and what it is by how many exercises,
+// the muscles it mainly works, then what it needs, and whether it's in your workouts
 .ready__card {
     display: grid;
-    gap: 0.2rem;
+    gap: 0.8rem;
     width: 100%;
     min-height: 44px;
-    padding: 0.75rem 0.9rem;
-    border: 1px solid var(--border-soft);
-    border-radius: 0.75rem;
-    background: var(--card);
+    @include showcase-card;
     color: var(--text);
     font: inherit;
     text-align: left;
     text-decoration: none;
     cursor: pointer;
     transition:
+        border-color 0.2s ease,
         background-color 0.2s ease,
         scale 0.2s ease-out;
 
     @include hover {
-        background: var(--control-hover);
+        border-color: var(--accent-line);
     }
 
     @include pressed-scale {
-        background: var(--control-hover);
+        border-color: var(--accent-line);
     }
 
     &:focus-visible {
@@ -75,21 +75,110 @@
     }
 }
 
+.ready__head {
+    @include showcase-head;
+}
+
+.ready__intro {
+    display: grid;
+    gap: 0.3rem;
+}
+
 .ready__name {
-    color: var(--text-strong);
-    font-weight: 600;
+    @include showcase-title;
 }
 
 .ready__description {
-    font-size: 0.9rem;
-    line-height: 1.4;
+    @include showcase-description;
 }
 
-.ready__meta {
+.ready__count {
+    @include count-badge;
+}
+
+.ready__count-number {
+    @include count-number;
+}
+
+.ready__count-label {
+    @include count-label;
+}
+
+// Its main muscles, each with a dot in the body map's main-muscle colour
+.ready__works {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.45rem;
+}
+
+.ready__works-label {
+    margin-right: 0.1rem;
+    color: var(--text-muted);
+    @include small-type(0.75rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.ready__muscle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--text-strong);
+    font-size: 0.85rem;
+
+    &::before {
+        content: '';
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: var(--muscle-main);
+        box-shadow: 0 0 0.4rem var(--glow-soft);
+    }
+}
+
+.ready__more {
     color: var(--text-muted);
     font-size: 0.8rem;
 }
 
+.ready__kit {
+    @include kit-row;
+}
+
+.ready__kit-icon {
+    @include kit-icon;
+}
+
+.ready__tags {
+    @include tags;
+    flex: 1 1 auto;
+}
+
+.ready__tag {
+    @include tag;
+}
+
 .ready__in-library {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.15rem;
     color: var(--glow-text);
+    @include small-type(0.75rem);
+    font-weight: 600;
+
+    .icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+}
+
+// It opens its own page
+.ready__chevron {
+    flex: none;
+    margin-right: -0.3rem;
+    color: var(--text-muted);
 }

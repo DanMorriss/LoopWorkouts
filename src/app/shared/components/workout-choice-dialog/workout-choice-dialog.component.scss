@@ -27,21 +27,8 @@
     padding: 1.2rem;
 }
 
-.choice__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
-}
-
-.choice__close {
-    flex-shrink: 0;
-    margin: -0.35rem -0.35rem 0 0;
-}
-
 .choice__title {
-    margin: 0;
-    padding-top: 0.35rem;
+    margin: 0 0 0.5rem;
     @include display;
     font-size: 1.3rem;
     color: var(--text-strong);
@@ -94,7 +81,7 @@
 }
 
 // With no hint between them, the list keeps its distance from the title
-.choice__header + .choice__choices,
-.choice__header + .choice__none {
+.choice__title + .choice__choices,
+.choice__title + .choice__none {
     margin-top: 1rem;
 }

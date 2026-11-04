@@ -99,7 +99,7 @@ describe('ReadyMadeComponent', () => {
         expect(text(dialog()!)).toContain('Superset 3 rounds, rest 1:00');
         expect(dialog()!.querySelector('app-body-map')).not.toBeNull();
 
-        await press('.preview__close');
+        await press('.dialog-back');
         expect(dialog()).toBeNull();
         expect(document.activeElement).toBe(card('Gym legs'));
     });

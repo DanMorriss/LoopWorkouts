@@ -121,13 +121,17 @@
     margin: 0 0 0.75rem;
 }
 
-// Under Plan your week, the other way: a whole week, ready-made
-.week__ready-made {
-    display: inline-flex;
+// With nothing planned, a ready-made plan (the main button) and Plan your week, side by side
+// and centred, as the other pages' buttons are; one over the other, each across the card,
+// where they don't fit side by side
+.week__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    min-height: 44px;
-    margin-left: 1rem;
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+    gap: 0.6rem;
+
+    > * {
+        flex: 1 1 auto;
+    }
 }

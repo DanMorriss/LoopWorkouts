@@ -2,9 +2,13 @@
 @use 'type' as *;
 
 // The title, the cards and the muscles under them share the cards' columns, so the title
-// and New line up with the edges of the cards, however many columns fit
+// and New line up with the edges of the cards: one column on a phone, two side by side where
+// they fit, centred as the other pages are. No more than two, so on a wide screen the page
+// stays together in the middle rather than spreading across it.
 .library-screen {
     display: grid;
+    max-width: calc(2 * 420px + 1rem + 2rem);
+    margin-inline: auto;
     grid-template-columns: repeat(auto-fit, minmax(280px, 420px));
     justify-content: center;
     align-content: start;
@@ -50,11 +54,9 @@
     }
 }
 
-// Under the cards, lined up with the first column's
+// Under the cards, across all their columns
 .library__muscles {
     margin-top: 2rem;
-    justify-self: start;
-    width: min(100%, 420px);
 }
 
 .library__muscles-title {
@@ -124,14 +126,12 @@
     text-decoration: none;
 }
 
-// The way to the ready-made workouts, under the cards, lined up with the first column's
+// The way to the ready-made workouts, under the cards, across all their columns
 .library__ready-made {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    justify-self: start;
-    width: min(100%, 420px);
     min-height: 44px;
     margin-top: 1rem;
     padding: 0.75rem 0.9rem;

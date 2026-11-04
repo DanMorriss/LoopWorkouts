@@ -14,6 +14,7 @@
         aria-labelledby="exercise-editor-title"
         (click)="$event.stopPropagation()"
     >
+        <app-dialog-back (back)="cancel()" />
         <form class="editor__form" novalidate (submit)="save($event)">
             <h2 id="exercise-editor-title" class="editor__title">
                 {{ title() }}
@@ -209,9 +210,6 @@
             </p>
 
             <div class="editor__actions">
-                <button type="button" class="btn-pill editor__cancel" (click)="cancel()">
-                    Cancel
-                </button>
                 <button type="submit" class="btn-pill editor__save">Save</button>
             </div>
         </form>

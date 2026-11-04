@@ -295,11 +295,11 @@ describe('ExerciseEditorComponent', () => {
         });
     });
 
-    it('closes without saving on Cancel or Escape', async () => {
+    it('closes without saving on ‹ Back or Escape', async () => {
         await open(BUILT_IN_EXERCISES[0]);
         await fill('#exercise-editor-note', 'Not kept');
 
-        button('Cancel').click();
+        el('.dialog-back').click();
         el('.editor-overlay').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
 
         expect(host.closed).toBe(2);

@@ -40,7 +40,7 @@
     - **Muscles it works**: the body map, shaded for the main and supporting muscles of its steps' exercises, with the muscles listed under it. A muscle that's main in one exercise and supporting in another counts as main. With no step linked to an exercise: "None of its steps is an exercise yet. Pick exercises for them in Edit to see the muscles they work."
     - **History**: "Done once" or "Done 6 times", then its five latest runs, newest first, each its day ("Tue 21 Oct"), rounds and time (as in the history, e.g. "4 rounds · 24:10"), and each a link to that run on the Progress page. With more than five, **All in Progress** goes there. Never done: "Not done yet."
     - **What's in it**, last (since 2026-11-03; until then only Edit showed the steps): written out as a ready-made workout's preview is (see below), how many times it goes round ("Once through", "3 rounds of all of it", "As many rounds as you can in 20:00"), then its headings, each exercise with its sets ("Back squat 3 × 10, rest 1:00"), and each superset with its rounds and steps set in under it. An unnamed step goes by its kind, as in the history: "Work" or "Reps".
-    - **Edit** opens it in setup; **Done**, Escape or a tap outside closes it, with focus back on the card's ⋮.
+    - **‹ Workouts** at its top (staying there as it scrolls), Escape or a tap outside closes it; **Edit** at the bottom opens it in setup. Closing puts focus back on the card's ⋮.
 - **Missing muscle groups** (LIB-5), under the cards, once any workout has a step linked to an exercise:
     - The muscle groups that no exercise in any workout works, even as a supporting muscle: "None of your workouts work these. Pick one to find exercises for it."
     - Then those only ever worked as a supporting muscle: "Only lightly, as a supporting muscle:".
@@ -67,7 +67,7 @@
     - The title, the description, and what it needs as chips.
     - **What's in it**: how many times it goes round ("Once through", "3 rounds of all of it", "As many rounds as you can in 20:00"), then its headings, and each exercise with its sets, e.g. "Goblet squat 3 × 10, rest 1:00", "Back squat 3 sets: 12, 10, 8, rest 2:30", "Side plank 2 × 0:30 each side", and each superset with its rounds and its steps set in under it.
     - **Muscles it works**: the body map, as in a workout's Details.
-    - **Add and start**, **Add to my workouts** and **Close** (Escape or a tap outside close it too, with focus back on its card).
+    - **Add and start**, then **Add to my workouts** under it; **‹ Ready-made** at its top (staying there as it scrolls), Escape or a tap outside close it, with focus back on its card.
 - **Add to my workouts** saves a copy as a new workout of your own, at the end of your workouts, which is then like any other: start it, edit it, plan it, delete it. The page stays open, to add more, and the Undo bar says "Added "Gym legs" to your workouts", with Undo taking it out again. **Add and start** does the same and starts it, opening the workout page.
 - Its steps have **no weights**, as everyone's are their own: Last time and the suggested weight fill in from the first run.
 - A card whose title is already one of your workouts' says **In your workouts**, and its preview says so too, as adding it again makes a second copy.

@@ -31,8 +31,8 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
 /**
  * The week on Today (PLN-4): Monday to Sunday, each day marked done, missed, planned or free,
  * today picked out, how many of the week's planned workouts are done and the next one to come,
- * and **Edit plan**, which slides the weekly plan in. With nothing planned, Plan your week, as
- * the page's main button (NAV-6), or a ready-made plan (PLN-6).
+ * and **Edit plan**, which slides the weekly plan in. With nothing planned, a ready-made plan
+ * (PLN-6), as the page's main button, or Plan your week (NAV-6).
  */
 @Component({
     selector: 'app-week-strip',
@@ -77,18 +77,22 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                     Nothing planned yet. Choose which days you do your workouts, and Today shows
                     what's due each day.
                 </p>
-                <a
-                    href="/plan"
-                    class="btn-main week__plan"
-                    (click)="slide.follow($event, '/plan', 'in')"
-                    >Plan your week</a
-                >
-                <a
-                    href="/ready-made-plans"
-                    class="week__ready-made"
-                    (click)="slide.follow($event, '/ready-made-plans', 'in')"
-                    >Or use a ready-made plan</a
-                >
+                <!-- A whole week, ready-made (PLN-6), as the main way: one tap to a plan.
+                     Or plan your own workouts yourself. Side by side, the pill's height. -->
+                <div class="week__actions">
+                    <a
+                        href="/ready-made-plans"
+                        class="btn-main btn-main--small week__ready-made"
+                        (click)="slide.follow($event, '/ready-made-plans', 'in')"
+                        >Ready-made plan</a
+                    >
+                    <a
+                        href="/plan"
+                        class="btn-pill week__plan"
+                        (click)="slide.follow($event, '/plan', 'in')"
+                        >Plan your week</a
+                    >
+                </div>
             }
         </section>
     `,

@@ -16,6 +16,7 @@
         aria-describedby="ready-made-description"
         (click)="$event.stopPropagation()"
     >
+        <app-dialog-back label="Ready-made" (back)="closed.emit()" />
         <!-- Focus starts here, so it opens at the top rather than at the buttons below -->
         <h2 id="ready-made-title" class="preview__title" tabindex="-1" cdkFocusInitial>
             {{ workout.title }}
@@ -41,13 +42,6 @@
         </section>
 
         <div class="preview__actions">
-            <button type="button" class="btn-pill preview__close" (click)="closed.emit()">
-                Close
-            </button>
-            <button type="button" class="btn-pill preview__add" (click)="added.emit()">
-                <mat-icon aria-hidden="true">add</mat-icon>
-                Add to my workouts
-            </button>
             <button
                 type="button"
                 class="btn-main btn-main--small preview__start"
@@ -55,6 +49,10 @@
             >
                 <mat-icon aria-hidden="true">play_arrow</mat-icon>
                 Add and start
+            </button>
+            <button type="button" class="btn-pill preview__add" (click)="added.emit()">
+                <mat-icon aria-hidden="true">add</mat-icon>
+                Add to my workouts
             </button>
         </div>
     </div>

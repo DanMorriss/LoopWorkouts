@@ -254,9 +254,9 @@ describe('WorkoutLibraryComponent', () => {
                 );
             });
 
-            it('closes with Done, putting focus back on the options button', async () => {
+            it('closes with ‹ Workouts, putting focus back on the options button', async () => {
                 openDetails(0);
-                click(dialog()!.querySelector('.details__done'));
+                click(dialog()!.querySelector('.dialog-back'));
                 await settle();
 
                 expect(document.activeElement).toBe(

@@ -1,6 +1,7 @@
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { afterNextRender, Component, ElementRef, input, output, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { DialogBackComponent } from '../dialog-back/dialog-back.component';
 import { growFromClick } from '../../dialog-origin';
 
 /** A workout to pick: its name, a word on it (e.g. "6 steps"), and whether it can be. */
@@ -16,12 +17,12 @@ let nextId = 0;
 /**
  * A dialog to pick one of the library's workouts: to add an exercise to (EXR-12), or to plan on
  * a day (PLN-1). With `newLabel`, a row for a new workout comes first, which picks null. Focus
- * starts on the first row and is trapped inside while it's open; ✕, Escape or a click outside
+ * starts on the first row and is trapped inside while it's open; ‹ Back, Escape or a click outside
  * close it. Where it's used, it has animate.leave="dialog-leave".
  */
 @Component({
     selector: 'app-workout-choice-dialog',
-    imports: [CdkTrapFocus, MatIconModule],
+    imports: [CdkTrapFocus, DialogBackComponent, MatIconModule],
     template: `
         <div
             class="choice-overlay dialog-overlay"
@@ -40,17 +41,8 @@ let nextId = 0;
                 [attr.aria-describedby]="hint() ? id + '-hint' : null"
                 (click)="$event.stopPropagation()"
             >
-                <div class="choice__header">
-                    <h2 class="choice__title" [id]="id + '-title'">{{ heading() }}</h2>
-                    <button
-                        type="button"
-                        class="btn-icon choice__close"
-                        aria-label="Close"
-                        (click)="closed.emit()"
-                    >
-                        <mat-icon aria-hidden="true">close</mat-icon>
-                    </button>
-                </div>
+                <app-dialog-back (back)="closed.emit()" />
+                <h2 class="choice__title" [id]="id + '-title'">{{ heading() }}</h2>
                 @if (hint()) {
                     <p class="choice__hint" [id]="id + '-hint'">{{ hint() }}</p>
                 }

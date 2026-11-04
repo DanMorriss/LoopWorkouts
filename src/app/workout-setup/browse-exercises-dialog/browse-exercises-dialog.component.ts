@@ -11,6 +11,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { DialogBackComponent } from '../../shared/components/dialog-back/dialog-back.component';
 import { Exercise, MuscleGroup } from '../../models/exercise';
 import { findByName } from '../../models/exercise-links';
 import {
@@ -29,13 +30,14 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
  * them (search, Only what I have, the main-muscle chips, a card each with its muscles and
  * equipment), over Create so the workout being made stays as it is. Picking a card emits it.
  * Hidden ones are left out, as the picker leaves them out, unless their whole name is typed.
- * Focus starts on the search box and is trapped inside while it's open; ✕, Escape or a click
+ * Focus starts on the search box and is trapped inside while it's open; ‹ Back, Escape or a click
  * outside close it. Where it's used, it has animate.leave="dialog-leave".
  */
 @Component({
     selector: 'app-browse-exercises-dialog',
     imports: [
         CdkTrapFocus,
+        DialogBackComponent,
         MatIconModule,
         EquipmentFilterComponent,
         ExerciseCardComponent,
@@ -59,17 +61,8 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
                 aria-describedby="browse-hint"
                 (click)="$event.stopPropagation()"
             >
-                <div class="browse__header">
-                    <h2 id="browse-title" class="browse__title">Browse exercises</h2>
-                    <button
-                        type="button"
-                        class="btn-icon browse__close"
-                        aria-label="Close"
-                        (click)="closed.emit()"
-                    >
-                        <mat-icon aria-hidden="true">close</mat-icon>
-                    </button>
-                </div>
+                <app-dialog-back (back)="closed.emit()" />
+                <h2 id="browse-title" class="browse__title">Browse exercises</h2>
                 <p id="browse-hint" class="browse__hint">Pick one for step {{ stepNumber() }}.</p>
 
                 <label class="picker-field browse__search" for="browse-search">

@@ -79,30 +79,13 @@
     color: var(--text-strong);
 }
 
-// The main action across the card, the other two side by side under it, so they don't wrap
-// unevenly on a phone
+// The main action across the card, Add to my workouts under it
 .preview__actions {
     display: grid;
-    grid-template-areas:
-        'start start'
-        'add close';
-    grid-template-columns: 1fr 1fr;
     gap: 0.6rem;
     margin-top: 1.5rem;
 
     > * {
         justify-content: center;
     }
-}
-
-.preview__start {
-    grid-area: start;
-}
-
-.preview__add {
-    grid-area: add;
-}
-
-.preview__close {
-    grid-area: close;
 }

@@ -1936,7 +1936,7 @@ describe('WorkoutSetupComponent', () => {
             expect(el('app-body-map', dialog)).not.toBeNull();
             expect(el('.exercise__steps', dialog)).not.toBeNull();
 
-            el('.details__done').click();
+            el('.dialog-back').click();
             fixture.detectChanges();
             await fixture.whenStable();
 
@@ -2096,7 +2096,7 @@ describe('WorkoutSetupComponent', () => {
                 await editSquats();
                 await press('Swap Back squat');
 
-                el('.swap__close').click();
+                el('.dialog-back').click();
                 fixture.detectChanges();
                 await fixture.whenStable();
 
@@ -2212,7 +2212,7 @@ describe('WorkoutSetupComponent', () => {
                 typeName(0, 'Back squat');
                 await press('Browse exercises for step 1');
 
-                el<HTMLButtonElement>('.browse__close').click();
+                el<HTMLButtonElement>('.dialog-back').click();
                 fixture.detectChanges();
                 await fixture.whenStable();
 

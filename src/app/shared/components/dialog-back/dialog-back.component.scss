@@ -1,0 +1,41 @@
+@use 'interaction' as *;
+
+// Held at the top of the dialog's card as the rest scrolls, pulled out over the card's
+// padding (1.2rem in every dialog) so what scrolls under it is covered right to the edges
+:host {
+    position: sticky;
+    top: -1.2rem;
+    z-index: 2;
+    display: block;
+    margin: -1.2rem -1.2rem 0.25rem;
+    padding: 0.6rem 1.2rem 0;
+    background: var(--raised);
+}
+
+// As the back link at the top of a page (nav/back-link), but a button: it closes the dialog
+.dialog-back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-left: -0.4rem;
+    padding: 0 0.5rem 0 0;
+    border: 0;
+    background: transparent;
+    color: var(--glow-text);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+
+    @include hover {
+        text-decoration: underline;
+    }
+
+    @include pressed {
+        text-decoration: underline;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}

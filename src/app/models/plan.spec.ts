@@ -1,7 +1,9 @@
 import {
+    copyPlan,
     dueToday,
     EMPTY_PLAN,
     isWeekPlan,
+    plannedKey,
     startOfWeek,
     thisWeek,
     WeekPlan,
@@ -31,6 +33,30 @@ describe('the weekly plan (PLN-1)', () => {
         expect(isWeekPlan(plan([[''], [], [], [], [], [], []]))).toBe(false);
         expect(isWeekPlan({ days: EMPTY_PLAN.days })).toBe(false);
         expect(isWeekPlan(null)).toBe(false);
+        // When each was planned is optional, so plans from before it still read
+        expect(
+            isWeekPlan({ ...plan([['a'], [], [], [], [], [], []]), plannedAt: { '0:a': 5 } })
+        ).toBe(true);
+        expect(isWeekPlan({ ...plan([['a'], [], [], [], [], [], []]), plannedAt: 'soon' })).toBe(
+            false
+        );
+    });
+
+    it('copies when each was planned, only for workouts still planned, and only real times', () => {
+        expect(
+            copyPlan({
+                days: [['a'], [], [], [], [], [], []],
+                updatedAt: 1,
+                plannedAt: { '0:a': 5, '0:gone': 6, '1:a': 7 },
+            })
+        ).toEqual({ days: [['a'], [], [], [], [], [], []], updatedAt: 1, plannedAt: { '0:a': 5 } });
+        expect(
+            copyPlan({
+                days: [['a'], [], [], [], [], [], []],
+                updatedAt: 1,
+                plannedAt: { '0:a': -1 },
+            })
+        ).toEqual({ days: [['a'], [], [], [], [], [], []], updatedAt: 1 });
     });
 });
 
@@ -61,6 +87,35 @@ describe('this week (PLN-3)', () => {
             [],
             [],
         ]);
+    });
+
+    it("doesn't count a workout planned once its day had gone by: it starts next week", () => {
+        const late: WeekPlan = {
+            ...week,
+            plannedAt: {
+                // Monday's legs planned on Tuesday, too late for this week
+                [plannedKey(0, 'legs')]: day(27, 9),
+                // Tuesday's push planned on Monday, in time: it was missed
+                [plannedKey(1, 'push')]: day(26, 20),
+                // Today's pull planned this morning, in time for today
+                [plannedKey(2, 'pull')]: wednesday(7),
+            },
+        };
+
+        const statuses = thisWeek(late, [], wednesday(), all).map((planned) =>
+            planned.map((item) => `${item.workoutId} ${item.status}`)
+        );
+
+        expect(statuses[0]).toEqual(['legs next week']);
+        expect(statuses[1]).toEqual(['push missed']);
+        expect(statuses[2]).toEqual(['pull today', 'legs today']);
+    });
+
+    it('still counts one done that day, however late it was planned', () => {
+        const late: WeekPlan = { ...week, plannedAt: { [plannedKey(0, 'legs')]: day(27, 9) } };
+        expect(
+            thisWeek(late, [{ workoutId: 'legs', startedAt: day(26, 18) }], wednesday(), all)[0]
+        ).toEqual([{ workoutId: 'legs', status: 'done' }]);
     });
 
     it('leaves out workouts no longer in the library', () => {

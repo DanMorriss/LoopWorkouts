@@ -56,7 +56,10 @@
 
 ### Ready-made workouts (LIB-6)
 
-- Workouts that come with the app, made of built-in exercises (see [exercises](exercises.md)), in groups by what they need: **No equipment**, **Kettlebell**, **Dumbbells**, **Gym**. They're written into the app, not saved as your data: they don't sync, can't be changed or deleted, and can be improved in any release. Their ids (`builtin:<title-in-kebab-case>`) never change once released.
+- Workouts that come with the app, made of built-in exercises (see [exercises](exercises.md)), in groups by what they need: **No equipment**, **Kettlebell**, **Dumbbells**, **Gym** and **Other kit** (a pull-up bar, dip bars or a step; since the second batch, 2026-11-03).
+    - **The first batch** (10): Bodyweight basics, 20-minute AMRAP, Cardio intervals and Core in 15; Kettlebell full body and Kettlebell swing ladder; Dumbbell full body; Gym push, Gym pull and Gym legs.
+    - **The second batch** (8, 2026-11-03), for the gaps the first left: **Tabata** (no equipment: four moves, 8 × 20 s hard and 10 s easy) and **Kettlebell AMRAP** (15 minutes), for fitness; **Dumbbell upper** and **Dumbbell lower**, a two-day split at home; **Gym full body**, a first gym workout of machines and dumbbells; **Gym extras**, for the hips, calves, lower back and grip the big lifts leave out; and, in Other kit, **Pull-up bar and dips** and **Step circuit**, for kit no workout used before.
+    - Still to come, once there are exercises for them: a band workout, and mobility or stretching (see TODO). They're written into the app, not saved as your data: they don't sync, can't be changed or deleted, and can be improved in any release. Their ids (`builtin:<title-in-kebab-case>`) never change once released.
 - The page: its title, "Ready-made workouts", a line on what it's for, then **Only what I have** and **My equipment**, the same switch and pieces as on the Exercises list (one setting, so it's set once for both). Then the groups, each with its workouts as cards: the title, a one-line description, and "5 exercises · Dumbbells, Bench" (or "No equipment").
 - **Only what I have** on hides any workout needing a piece you haven't picked, as the Exercises list hides exercises, and says how many are hidden: "4 more need equipment you haven't picked." A group left empty isn't shown. No-equipment workouts always show.
 - What a workout **needs** is every need of its exercises, once; a choice (a dumbbell or a kettlebell) that's met by a piece it needs anyway is left out, as it changes nothing about who can do it.
@@ -91,11 +94,11 @@
 - Given a workout of Back squat only, when I open its Details, then the body map shades the quads and glutes as main, and the hamstrings, adductors and lower back as supporting.
 - Given workouts of Back squat and Bench press, then Missing muscle groups lists Biceps, Forearms, Abs, Obliques, Traps, Upper back, Abductors, Calves, Shins and Neck, and, apart, Shoulders, Triceps, Lower back, Adductors and Hamstrings as only lightly worked.
 - Given no step linked to an exercise, then there's no Missing muscle groups section.
-- Given workouts of Back squat and Bench press, then under the lists Kettlebell full body is suggested, "Adds Shoulders, Biceps, Forearms and 5 more."; when I press Add to my workouts, then it's at the end of my workouts, the Undo bar offers Undo, and another is suggested for what's left; when I press Undo, then it's gone and Kettlebell full body is suggested again.
+- Given workouts of Back squat and Bench press, then under the lists Gym extras is suggested, "Adds Forearms, Abs, Obliques and 7 more."; when I press Add to my workouts, then it's at the end of my workouts, the Undo bar offers Undo, and another is suggested for what's left; when I press Undo, then it's gone and Gym extras is suggested again.
 - Given Only what I have on with no equipment picked, then the workout suggested needs no equipment.
 - Given a workout called Kettlebell full body already, then something else is suggested.
 - Given no workouts, then Browse ready-made workouts shows under Create a workout; given workouts, then Ready-made workouts shows under the cards.
-- Given the ready-made workouts, then they're listed under No equipment, Kettlebell, Dumbbells and Gym.
+- Given the ready-made workouts, then they're listed under No equipment, Kettlebell, Dumbbells, Gym and Other kit.
 - Given only a kettlebell picked and Only what I have on, then only the No equipment and Kettlebell workouts show, and it says how many more need equipment I haven't picked.
 - Given Gym legs previewed, then it reads "Back squat 3 sets: 12, 10, 8, rest 2:30" and shows the muscles it works.
 - Given a ready-made workout previewed, when I press Add to my workouts, then a copy is at the end of my workouts, its card says In your workouts, and Undo takes it out again.

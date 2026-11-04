@@ -2,6 +2,7 @@ import { afterNextRender, Component, computed, inject, Injector, signal } from '
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { PageSlide } from '../nav/page-slide';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { MAX_WORKOUTS_A_DAY, PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../models/plan';
 import {
@@ -18,6 +19,7 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
     missed: 'Missed',
     today: 'Due',
     'to come': '',
+    'next week': 'From next week',
 };
 
 /**
@@ -45,6 +47,7 @@ export class PlanComponent {
     private readonly history = inject(HistoryStore);
     private readonly injector = inject(Injector);
     private readonly router = inject(Router);
+    protected readonly slide = inject(PageSlide);
     private readonly now = Date.now();
 
     protected readonly today = weekdayOf(this.now);
@@ -71,11 +74,15 @@ export class PlanComponent {
         }))
     );
 
-    /** "2 of 5 done this week", counting only days gone by and today. */
+    /**
+     * "2 of 5 done this week", counting only days gone by and today, and not those planned once
+     * their day had gone by (from next week).
+     */
     protected readonly weekSoFar = computed(() => {
         const sofar = this.days()
             .filter(({ day }) => day <= this.today)
-            .flatMap(({ workouts }) => workouts);
+            .flatMap(({ workouts }) => workouts)
+            .filter((item) => item.status !== 'next week');
         const done = sofar.filter((item) => item.status === 'done').length;
         return sofar.length ? `${done} of ${sofar.length} done so far this week` : '';
     });

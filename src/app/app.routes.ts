@@ -50,6 +50,14 @@ export const routes: Routes = [
         loadComponent: () => import('./plan/plan.component').then((m) => m.PlanComponent),
     },
     {
+        // The ready-made plans (PLN-6), from Today or the Plan page
+        path: 'ready-made-plans',
+        loadComponent: () =>
+            import('./plan/ready-made-plans/ready-made-plans.component').then(
+                (m) => m.ReadyMadePlansComponent
+            ),
+    },
+    {
         path: 'exercises',
         canActivate: [historyLoaded],
         loadComponent: () =>

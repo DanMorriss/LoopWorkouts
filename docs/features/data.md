@@ -57,7 +57,7 @@ When a workout was last moved in the library (LIB-3), in ms since 1970, or missi
 
 ### `week-plan`: the weekly plan
 
-The weekly plan (PLN-1, see [planning](planning.md)): `{ "days": [[…], …], "updatedAt": … }`, seven lists of workout ids, Monday first, up to 10 each, and when it last changed in ms since 1970 (0 if it never has). It merges as a record of its own: another copy's plan is taken only if it changed more recently. A broken one is read as an empty plan.
+The weekly plan (PLN-1, see [planning](planning.md)): `{ "days": [[…], …], "updatedAt": …, "plannedAt": { "0:<workout id>": …, … } }`, seven lists of workout ids, Monday first, up to 10 each, when it last changed in ms since 1970 (0 if it never has), and, optionally, when each workout was put on its day, by the device's clock, keyed by the day (0 for Monday) and the workout's id (PLN-3, since 2026-11-04). `plannedAt` leaves out workouts planned before it came in; it's dropped for any no longer planned, and any time that isn't one. It syncs and backs up with the plan; a copy of the app from before it reads the plan without it. It merges as a record of its own: another copy's plan is taken only if it changed more recently. A broken one is read as an empty plan.
 
 ### `history`: the history
 

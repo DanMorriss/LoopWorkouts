@@ -68,7 +68,7 @@ describe('ReadyMadeComponent', () => {
     it('lists every ready-made workout, in its group', async () => {
         await open();
 
-        expect(groups()).toEqual(['No equipment', 'Kettlebell', 'Dumbbells', 'Gym']);
+        expect(groups()).toEqual(['No equipment', 'Kettlebell', 'Dumbbells', 'Gym', 'Other kit']);
         expect(names()).toEqual(BUILT_IN_WORKOUTS.map((w) => w.title));
         expect(text(card('Dumbbell full body'))).toContain('7 exercises · Dumbbells, Bench');
         expect(text(card('Bodyweight basics'))).toContain('No equipment');
@@ -84,7 +84,7 @@ describe('ReadyMadeComponent', () => {
         expect(groups()).toEqual(['No equipment', 'Kettlebell']);
         expect(names()).not.toContain('Gym push');
         const hidden = BUILT_IN_WORKOUTS.filter(
-            (w) => w.group === 'dumbbells' || w.group === 'gym'
+            (w) => w.group === 'dumbbells' || w.group === 'gym' || w.group === 'other'
         ).length;
         expect(text()).toContain(`${hidden} more need equipment you haven't picked.`);
     });

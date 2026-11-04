@@ -75,6 +75,34 @@ describe('BUILT_IN_WORKOUTS', () => {
         );
         expect(canDoWith({ equipment: needs('Dumbbell full body') }, ['dumbbells'])).toBe(false);
         expect(canDoWith({ equipment: needs('Gym push') }, ['dumbbells', 'bench'])).toBe(false);
+        expect(canDoWith({ equipment: needs('Dumbbell upper') }, ['dumbbells', 'bench'])).toBe(
+            true
+        );
+        expect(canDoWith({ equipment: needs('Dumbbell lower') }, ['dumbbells', 'bench'])).toBe(
+            true
+        );
+        expect(canDoWith({ equipment: needs('Kettlebell AMRAP') }, ['kettlebell'])).toBe(true);
+        // Other kit: each needs only its own piece
+        expect(needs('Pull-up bar and dips')).toEqual(['pull-up bar', 'parallel bars']);
+        expect(needs('Step circuit')).toEqual(['step']);
+    });
+
+    it('fills the gaps the first batch left (the second batch, 2026-11-03)', () => {
+        // Every piece of equipment someone can pick for themselves, but the most specialised,
+        // has a ready-made workout using it
+        const used = new Set(BUILT_IN_WORKOUTS.flatMap((w) => builtInWorkoutEquipment(w)).flat());
+        for (const piece of ['pull-up bar', 'parallel bars', 'step', 'machine', 'cable'] as const) {
+            expect(used.has(piece), piece).toBe(true);
+        }
+        // The small muscles the big lifts leave out are some workout's main muscles
+        const main = new Set(
+            BUILT_IN_WORKOUTS.flatMap((w) => allSteps(w))
+                .map((step) => BUILT_IN_EXERCISES.find((e) => e.id === step.exerciseId))
+                .flatMap((exercise) => exercise?.mainMuscles ?? [])
+        );
+        for (const muscle of ['abductors', 'adductors', 'forearms', 'traps', 'calves'] as const) {
+            expect(main.has(muscle), muscle).toBe(true);
+        }
     });
 });
 

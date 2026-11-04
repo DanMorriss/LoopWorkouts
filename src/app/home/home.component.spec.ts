@@ -84,8 +84,8 @@ describe('HomeComponent', () => {
         ]);
     });
 
-    describe('getting started, with no workouts (NAV-6)', () => {
-        it('shows no logo, and offers a workout for your goal and equipment to add first', () => {
+    describe('getting started, with no workouts (NAV-6, PLN-7)', () => {
+        it('shows no logo, and offers a ready-made week for your goal and equipment', () => {
             TestBed.inject(SettingsStore).update({
                 trainingGoal: 'fitness',
                 myEquipment: ['kettlebell'],
@@ -95,43 +95,60 @@ describe('HomeComponent', () => {
             expect(element().querySelector('app-loop-logo')).toBeNull();
             expect(text('.start__label')).toEqual(['Get started']);
             expect(text('.start__lead')).toEqual([
-                "Add some workouts, then plan which days you do them. Here's one to start with:",
+                "Start with a week of workouts, planned for you. Here's one for your goal and equipment:",
             ]);
-            expect(text('.start__name')).toEqual(['Kettlebell full body']);
+            expect(text('.plan-card__title')).toEqual(['Fitness, 4 days']);
+            expect(text('.plan-card__day')).toEqual([
+                'Mon Tabata',
+                'Tue Kettlebell AMRAP',
+                'Wed Rest',
+                'Thu 20-minute AMRAP',
+                'Fri Rest',
+                'Sat Cardio intervals',
+                'Sun Rest',
+            ]);
+            expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
             expect(
                 [...element().querySelectorAll('.start__actions a')].map((link) => [
                     link.textContent!.trim(),
                     link.getAttribute('href'),
                 ])
             ).toEqual([
-                ['Browse ready-made workouts', '/ready-made'],
-                ['Or make your own', '/setup'],
+                ['See all ready-made plans', '/ready-made-plans'],
+                ['Or pick your own workouts', '/library'],
             ]);
             expect(element().querySelector('app-week-strip')).toBeNull();
         });
 
-        it('adds it with Undo, then asks for the week to be planned', async () => {
+        it('uses it in one tap: its workouts added and the week planned, with Undo', async () => {
             create();
             // On the page, so focus can move
             document.body.appendChild(element());
-            (element().querySelector('.start__actions .btn-main') as HTMLButtonElement).click();
+            expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
+            (element().querySelector('.plan-card__use') as HTMLButtonElement).click();
             fixture.detectChanges();
             await fixture.whenStable();
 
             const workouts = TestBed.inject(WorkoutStore).workouts();
-            expect(workouts.map((workout) => workout.title)).toEqual(['Bodyweight basics']);
+            expect(workouts.map((workout) => workout.title)).toEqual([
+                'Bodyweight basics',
+                'Cardio intervals',
+                'Core in 15',
+                'Tabata',
+            ]);
             expect(TestBed.inject(UndoService).offer()?.message).toBe(
-                'Added "Bodyweight basics" to your workouts'
+                'Your week is planned: No equipment, 3 days'
             );
             expect(element().querySelector('app-get-started')).toBeNull();
-            const plan = element().querySelector<HTMLElement>('.week__plan')!;
-            expect(plan.textContent!.trim()).toBe('Plan your week');
-            expect(plan.classList).toContain('btn-main');
-            expect(document.activeElement).toBe(plan);
+            expect(element().querySelector('.week__days')).not.toBeNull();
+            // Used on a Sunday, its Mon, Wed and Fri have gone by: it starts next week
+            expect(text('.week__so-far')).toEqual(['Your plan starts next week']);
+            expect(document.activeElement).toBe(element().querySelector('.week__edit'));
 
             TestBed.inject(UndoService).undo();
             fixture.detectChanges();
             expect(TestBed.inject(WorkoutStore).workouts()).toEqual([]);
+            expect(TestBed.inject(PlanStore).hasPlan()).toBe(false);
             expect(element().querySelector('app-get-started')).not.toBeNull();
             element().remove();
         });
@@ -206,10 +223,13 @@ describe('HomeComponent', () => {
             const legs = addWorkout('Legs');
             const push = addWorkout('Push');
             const plan = TestBed.inject(PlanStore);
+            // Planned last week, so this week's days count
+            vi.setSystemTime(NOW - 7 * 24 * HOUR);
             plan.add(0, legs.id);
             plan.add(2, push.id);
             plan.add(6, legs.id);
             plan.add(6, push.id);
+            vi.setSystemTime(NOW);
             // Wednesday's Push was done; Monday's Legs wasn't
             TestBed.inject(HistoryStore).record({
                 ...entry,
@@ -240,6 +260,27 @@ describe('HomeComponent', () => {
             const edit = element().querySelector('.week__edit')!;
             expect(edit.textContent!.trim()).toBe('Edit plan');
             expect(edit.getAttribute('href')).toBe('/plan');
+        });
+
+        it("doesn't count days already gone when they were planned: the plan starts next week", () => {
+            // NOW is a Sunday, so Monday and Wednesday have gone by
+            const legs = addWorkout('Legs');
+            const plan = TestBed.inject(PlanStore);
+            plan.add(0, legs.id);
+            plan.add(2, legs.id);
+            create();
+
+            expect(days().map((d) => d.mark)).toEqual([
+                'free',
+                'free',
+                'free',
+                'free',
+                'free',
+                'free',
+                'free',
+            ]);
+            expect(text('.week__day .sr-only')[0]).toBe('Monday: Legs, from next week');
+            expect(text('.week__so-far')).toEqual(['Your plan starts next week']);
         });
 
         it('names the next workout to come, and says when the week is all done', () => {
@@ -331,7 +372,7 @@ describe('HomeComponent', () => {
             expect(element().querySelector('.suggestion')).toBeNull();
         });
 
-        it('says all done once each has been run today, with the suggestion back', () => {
+        it('says all done once each has been run today, leaving what is next to the plan', () => {
             const { push, legs } = planToday();
             const history = TestBed.inject(HistoryStore);
             history.record({ ...entry, workoutId: legs.id });
@@ -339,7 +380,8 @@ describe('HomeComponent', () => {
             create();
 
             expect(text('.due__all-done')).toEqual(['check All done: Push, Legs']);
-            expect(element().querySelector('.suggestion')).not.toBeNull();
+            // With a week planned, the week says what's next, not the suggestion
+            expect(element().querySelector('.suggestion')).toBeNull();
         });
 
         it('shows nothing on a day with nothing planned', () => {

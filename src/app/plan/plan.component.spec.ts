@@ -78,11 +78,14 @@ describe('PlanComponent', () => {
 
     it('lists Monday to Sunday, today marked, with where each planned workout is this week', async () => {
         const plan = TestBed.inject(PlanStore);
+        // Planned last week, so this week's days count
+        vi.setSystemTime(NOW - 7 * 24 * 60 * 60 * 1000);
         plan.add(0, legs.id);
         plan.add(1, push.id);
         plan.add(2, legs.id);
         plan.add(2, push.id);
         plan.add(4, legs.id);
+        vi.setSystemTime(NOW);
         const run: HistoryEntry = {
             id: 'run-1',
             workoutId: legs.id,
@@ -109,6 +112,15 @@ describe('PlanComponent', () => {
             'Sunday: Nothing planned',
         ]);
         expect(text(el().querySelector('.plan__so-far')!)).toBe('1 of 4 done so far this week');
+    });
+
+    it('says a workout planned once its day had gone by starts next week, not counting it', async () => {
+        // NOW is a Wednesday: Monday has gone by
+        TestBed.inject(PlanStore).add(0, legs.id);
+        await open();
+
+        expect(days()[0]).toBe('Monday: Legs From next week');
+        expect(el().querySelector('.plan__so-far')).toBeNull();
     });
 
     it('plans a workout from the library on a day, then focuses that day again', async () => {
@@ -168,6 +180,14 @@ describe('PlanComponent', () => {
         const link = el().querySelector('.plan__workouts-link')!;
         expect(text(link)).toBe('Go to your workouts');
         expect(link.getAttribute('href')).toBe('/library');
+    });
+
+    it('links to the ready-made plans, coming back here (PLN-6)', async () => {
+        await open();
+
+        const link = el().querySelector('.plan__ready-made')!;
+        expect(text(link)).toBe('Start from a ready-made plan');
+        expect(link.getAttribute('href')).toBe('/ready-made-plans?from=plan');
     });
 
     it('offers Add new workouts first when picking, which goes to the Workouts tab (PLN-5)', async () => {

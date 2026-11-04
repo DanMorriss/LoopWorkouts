@@ -23,6 +23,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
     done: 'done',
     missed: 'missed',
     today: 'due today',
+    'next week': 'from next week',
     'to come': 'to come',
 };
 
@@ -30,7 +31,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
  * The week on Today (PLN-4): Monday to Sunday, each day marked done, missed, planned or free,
  * today picked out, how many of the week's planned workouts are done and the next one to come,
  * and **Edit plan**, which slides the weekly plan in. With nothing planned, Plan your week, as
- * the page's main button (NAV-6).
+ * the page's main button (NAV-6), or a ready-made plan (PLN-6).
  */
 @Component({
     selector: 'app-week-strip',
@@ -75,6 +76,12 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                     class="btn-main week__plan"
                     (click)="slide.follow($event, '/plan', 'in')"
                     >Plan your week</a
+                >
+                <a
+                    href="/ready-made-plans"
+                    class="week__ready-made"
+                    (click)="slide.follow($event, '/ready-made-plans', 'in')"
+                    >Or use a ready-made plan</a
                 >
             }
         </section>
@@ -125,9 +132,17 @@ export class WeekStripComponent {
         })
     );
 
-    /** "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". */
+    /**
+     * "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". Workouts
+     * planned once their day had gone by aren't counted: they start next week.
+     */
     protected readonly soFar = computed(() => {
-        const all = this.week().flat();
+        const all = this.week()
+            .flat()
+            .filter((item) => item.status !== 'next week');
+        if (all.length === 0) {
+            return 'Your plan starts next week';
+        }
         const done = all.filter((item) => item.status === 'done').length;
         if (done === all.length) {
             return all.length === 1 ? 'Done for the week' : `All ${all.length} done this week`;
@@ -143,8 +158,12 @@ export class WeekStripComponent {
     });
 }
 
-/** A day's mark from its workouts: done once they all are, missed if any were, free if none. */
-export function markFor(statuses: readonly PlannedStatus[]): DayMark {
+/**
+ * A day's mark from its workouts: done once they all are, missed if any were, free if none.
+ * Those from next week (planned once the day had gone by) don't count for this week.
+ */
+export function markFor(all: readonly PlannedStatus[]): DayMark {
+    const statuses = all.filter((status) => status !== 'next week');
     if (statuses.length === 0) {
         return 'free';
     }

@@ -1,5 +1,12 @@
 import { computed, inject, Service, signal } from '@angular/core';
-import { copyPlan, EMPTY_PLAN, isWeekPlan, MAX_WORKOUTS_A_DAY, WeekPlan } from '../../models/plan';
+import {
+    copyPlan,
+    EMPTY_PLAN,
+    isWeekPlan,
+    MAX_WORKOUTS_A_DAY,
+    plannedKey,
+    WeekPlan,
+} from '../../models/plan';
 import { SyncClock } from './sync-clock.service';
 
 const STORAGE_KEY = 'week-plan';
@@ -23,7 +30,7 @@ export class PlanStore {
         if (!ids || ids.includes(workoutId) || ids.length >= MAX_WORKOUTS_A_DAY) {
             return;
         }
-        this.change(day, [...ids, workoutId]);
+        this.change(day, [...ids, workoutId], { [plannedKey(day, workoutId)]: Date.now() });
     }
 
     /** Takes `workoutId` off `day`. */
@@ -38,6 +45,37 @@ export class PlanStore {
     }
 
     /**
+     * Sets every day at once, Monday first, e.g. from a ready-made plan (PLN-6). A workout
+     * already on its day keeps when it was planned; the rest are planned now. Dated now, as any
+     * change is, so it syncs as the latest.
+     */
+    replace(days: readonly (readonly string[])[]) {
+        const plan = this._plan();
+        const now = Date.now();
+        const plannedAt: Record<string, number> = {};
+        const newDays = plan.days.map((_, day) =>
+            [...(days[day] ?? [])].slice(0, MAX_WORKOUTS_A_DAY)
+        );
+        newDays.forEach((ids, day) =>
+            ids.forEach((id) => {
+                const key = plannedKey(day, id);
+                plannedAt[key] = plan.days[day].includes(id) ? (plan.plannedAt?.[key] ?? now) : now;
+            })
+        );
+        this.save(
+            copyPlan({ days: newDays, updatedAt: this.clock.now(plan.updatedAt), plannedAt })
+        );
+    }
+
+    /**
+     * Puts back a plan as it was, days and when each was planned, e.g. with Undo. Dated now, so
+     * it syncs as the latest.
+     */
+    restore(earlier: WeekPlan) {
+        this.save(copyPlan({ ...earlier, updatedAt: this.clock.now(this._plan().updatedAt) }));
+    }
+
+    /**
      * Takes another copy's plan (from a backup or another device) if it changed more recently
      * than this one. Returns whether it did.
      */
@@ -49,12 +87,16 @@ export class PlanStore {
         return true;
     }
 
-    private change(day: number, ids: string[]) {
+    /** Sets `day`'s workouts, with when any new ones were planned; copyPlan() drops the rest. */
+    private change(day: number, ids: string[], planned: Record<string, number> = {}) {
         const plan = this._plan();
-        this.save({
-            days: plan.days.map((other, i) => (i === day ? ids : other)),
-            updatedAt: this.clock.now(plan.updatedAt),
-        });
+        this.save(
+            copyPlan({
+                days: plan.days.map((other, i) => (i === day ? ids : other)),
+                updatedAt: this.clock.now(plan.updatedAt),
+                plannedAt: { ...plan.plannedAt, ...planned },
+            })
+        );
     }
 
     private save(plan: WeekPlan) {

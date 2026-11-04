@@ -93,8 +93,9 @@
     color: var(--accent);
 }
 
-// Gone by without it: the name steps back
-.plan__workout--missed .plan__workout-name {
+// Gone by without it, or planned once its day had gone (from next week): the name steps back
+.plan__workout--missed .plan__workout-name,
+.plan__workout--later .plan__workout-name {
     color: var(--text-muted);
 }
 
@@ -111,4 +112,19 @@
 // With no workouts yet, the way to them, under the hint saying so
 .plan__workouts-link {
     margin-bottom: 1rem;
+}
+
+// A whole week, ready-made (PLN-6), under the hint
+.plan__ready-made {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin: -0.5rem 0 0.5rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
 }

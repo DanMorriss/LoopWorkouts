@@ -15,10 +15,7 @@ const BACK_URL = '/account';
     imports: [BackLinkComponent, SwipeBackDirective],
     template: `
         <div class="flex justify-center" [appSwipeBack]="backUrl">
-            <article
-                class="m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-5 shadow-xl shadow-(color:--shadow)"
-                aria-labelledby="legal-title"
-            >
+            <article class="w-full max-w-md p-4" aria-labelledby="legal-title">
                 <app-back-link [url]="backUrl" label="You" />
                 <h2 class="legal__title" id="legal-title">{{ heading() }}</h2>
                 <p class="legal__updated">Last updated {{ updated() }}</p>

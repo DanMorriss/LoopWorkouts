@@ -1,5 +1,6 @@
 import { afterNextRender, Component, computed, EnvironmentInjector, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PageSlide } from '../../nav/page-slide';
 import { firstPlan } from '../../models/built-in-plans';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
 import { ReadyMadePlans } from '../../shared/state/ready-made-plans.service';
@@ -24,7 +25,12 @@ import { UndoService } from '../../shared/undo/undo.service';
             <app-plan-card [plan]="plan()" [main]="true" (used)="use()" />
             <!-- The other ways, as on This week once there are workouts: side by side -->
             <div class="start__actions">
-                <a routerLink="/ready-made-plans" class="btn-pill">More plans</a>
+                <a
+                    href="/ready-made-plans"
+                    class="btn-pill"
+                    (click)="slide.follow($event, '/ready-made-plans', 'in')"
+                    >More plans</a
+                >
                 <a routerLink="/library" class="btn-pill">Pick your own workouts</a>
             </div>
         </section>
@@ -32,6 +38,7 @@ import { UndoService } from '../../shared/undo/undo.service';
     styleUrl: './get-started.component.scss',
 })
 export class GetStartedComponent {
+    protected readonly slide = inject(PageSlide);
     private readonly settings = inject(SettingsStore);
     private readonly readyMade = inject(ReadyMadePlans);
     private readonly undo = inject(UndoService);

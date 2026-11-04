@@ -449,11 +449,9 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('a workout previewed', async () => {
-                await open('/ready-made');
-                click('[data-ready-made="builtin:gym-legs"]');
-                await settle();
-                expect(fixture.nativeElement.querySelector('[role="dialog"]')).not.toBeNull();
+            it('a workout, on its page', async () => {
+                await open('/ready-made/gym-legs');
+                expect(fixture.nativeElement.querySelector('.preview__add')).not.toBeNull();
                 await expectNoViolations();
             });
         });

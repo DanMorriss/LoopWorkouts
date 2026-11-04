@@ -45,6 +45,14 @@ export const routes: Routes = [
             ),
     },
     {
+        // A ready-made workout, e.g. /ready-made/gym-legs, over the list of them
+        path: 'ready-made/:id',
+        loadComponent: () =>
+            import(
+                './workout-library/ready-made/ready-made-workout/ready-made-workout.component'
+            ).then((m) => m.ReadyMadeWorkoutComponent),
+    },
+    {
         path: 'plan',
         canActivate: [historyLoaded],
         loadComponent: () => import('./plan/plan.component').then((m) => m.PlanComponent),

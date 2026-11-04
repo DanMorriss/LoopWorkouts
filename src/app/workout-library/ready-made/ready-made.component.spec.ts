@@ -1,12 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { BUILT_IN_WORKOUTS } from '../../models/built-in-workouts';
-import { allSteps } from '../../models/workout';
+import { BUILT_IN_WORKOUTS, copyOfBuiltIn } from '../../models/built-in-workouts';
 import { PageSlide } from '../../nav/page-slide';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
-import { UndoService } from '../../shared/undo/undo.service';
 import { ReadyMadeComponent } from './ready-made.component';
 
 describe('ReadyMadeComponent', () => {
@@ -51,20 +49,9 @@ describe('ReadyMadeComponent', () => {
     const groups = () => Array.from(el().querySelectorAll('.ready__group')).map((h) => text(h));
     const names = () => Array.from(el().querySelectorAll('.ready__name')).map((n) => text(n));
     const card = (title: string) =>
-        Array.from(el().querySelectorAll<HTMLButtonElement>('.ready__card')).find((c) =>
+        Array.from(el().querySelectorAll<HTMLAnchorElement>('.ready__card')).find((c) =>
             text(c).startsWith(title)
         )!;
-    const dialog = () => el().querySelector('[role="dialog"]');
-
-    async function preview(title: string) {
-        card(title).click();
-        await render();
-    }
-
-    async function press(selector: string) {
-        el().querySelector<HTMLButtonElement>(selector)!.click();
-        await render();
-    }
 
     it('lists every ready-made workout, in its group', async () => {
         await open();
@@ -90,51 +77,21 @@ describe('ReadyMadeComponent', () => {
         expect(text()).toContain(`${hidden} more need equipment you haven't picked.`);
     });
 
-    it('previews a workout: what it needs, its exercises and sets, and its muscles', async () => {
-        await open();
-        await preview('Gym legs');
-
-        expect(dialog()).not.toBeNull();
-        expect(text(dialog()!)).toContain('Once through');
-        expect(text(dialog()!)).toContain('Back squat 3 sets: 12, 10, 8, rest 2:30');
-        expect(text(dialog()!)).toContain('Superset 3 rounds, rest 1:00');
-        expect(dialog()!.querySelector('app-body-map')).not.toBeNull();
-
-        await press('.dialog-back');
-        expect(dialog()).toBeNull();
-        expect(document.activeElement).toBe(card('Gym legs'));
-    });
-
-    it('adds a copy to the library, with Undo, and slides back out to Workouts with it', async () => {
+    it('slides each one in on its own page, with a link to it', async () => {
         await open();
         const slide = vi.spyOn(TestBed.inject(PageSlide), 'navigate').mockImplementation(() => {});
-        await preview('Core in 15');
-        await press('.preview__add');
 
-        expect(store.workouts().map((w) => w.title)).toEqual(['Core in 15']);
-        const added = store.workouts()[0];
-        const builtIn = BUILT_IN_WORKOUTS.find((w) => w.title === 'Core in 15')!;
-        expect(added.id).not.toBe(builtIn.id);
-        expect(allSteps(added).map((s) => s.exerciseId)).toEqual(
-            allSteps(builtIn).map((s) => s.exerciseId)
-        );
-        expect(dialog()).toBeNull();
-        expect(slide).toHaveBeenCalledWith(`/library?added=${added.id}`, 'out');
-        expect(TestBed.inject(UndoService).offer()?.message).toBe(
-            'Added "Core in 15" to your workouts'
-        );
+        expect(card('Gym legs').getAttribute('href')).toBe('/ready-made/gym-legs');
+        card('Gym legs').click();
 
-        TestBed.inject(UndoService).undo();
-        expect(store.workouts()).toEqual([]);
+        expect(slide).toHaveBeenCalledWith('/ready-made/gym-legs', 'in');
     });
 
-    it('adds and starts one straight away', async () => {
+    it('says which are in your workouts already', async () => {
+        store.addWorkout({ ...copyOfBuiltIn(BUILT_IN_WORKOUTS[0]) });
         await open();
-        await preview('Cardio intervals');
-        await press('.preview__start');
 
-        expect(store.workouts().map((w) => w.title)).toEqual(['Cardio intervals']);
-        expect(store.activeWorkout()?.id).toBe(store.workouts()[0].id);
-        expect(TestBed.inject(Router).url).toBe('/workout');
+        expect(text(card(BUILT_IN_WORKOUTS[0].title))).toContain('In your workouts');
+        expect(text(card(BUILT_IN_WORKOUTS[1].title))).not.toContain('In your workouts');
     });
 });

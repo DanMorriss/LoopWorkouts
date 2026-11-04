@@ -66,4 +66,9 @@
 .plan-card__use {
     justify-self: start;
     margin-top: 0.3rem;
+
+    // As the page's main button (Today), centred as the other pages' main buttons are
+    &.btn-main {
+        justify-self: center;
+    }
 }

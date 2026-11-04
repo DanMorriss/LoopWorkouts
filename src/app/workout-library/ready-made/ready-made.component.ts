@@ -18,6 +18,7 @@ import {
 import { canDoWith, capitalise, equipmentPhrases } from '../../models/exercise';
 import { allSteps } from '../../models/workout';
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
+import { PageSlide } from '../../nav/page-slide';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { EquipmentFilterComponent } from '../../shared/components/equipment-filter/equipment-filter.component';
 import { ActiveRunService } from '../../shared/run/active-run.service';
@@ -39,7 +40,8 @@ export interface ReadyMadeCard {
 
 /**
  * The ready-made workouts (LIB-6), in groups by what they need: each opens a preview, from
- * which it's added to the library as a copy of your own, to start, change or plan. With Only
+ * which it's added to the library as a copy of your own, to start, change or plan; adding it
+ * slides back out to Workouts with it picked out. With Only
  * what I have on, those needing anything you haven't got are hidden. It slides in over the
  * Library, and back off with ‹ Library or a swipe right.
  */
@@ -60,6 +62,7 @@ export class ReadyMadeComponent {
     private readonly run = inject(ActiveRunService);
     private readonly router = inject(Router);
     private readonly undo = inject(UndoService);
+    private readonly slide = inject(PageSlide);
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly injector = inject(Injector);
 
@@ -131,14 +134,18 @@ export class ReadyMadeComponent {
         }
     }
 
-    /** Copies it into the library, staying here with Undo, so more can be added. */
+    /**
+     * Copies it into the library, with Undo, and slides back out to Workouts, as ‹ Workouts
+     * does, with the new one picked out there.
+     */
     protected add(card: ReadyMadeCard) {
         const added = this.workouts.addWorkout(copyOfBuiltIn(card.workout));
-        this.close();
+        this.previewing.set(null);
         this.undo.offerUndo({
             message: `Added "${added.title}" to your workouts`,
             undo: () => this.workouts.deleteWorkout(added.id),
         });
+        this.slide.navigate(`/library?added=${added.id}`, 'out');
     }
 
     /** Copies it into the library and starts it straight away. */

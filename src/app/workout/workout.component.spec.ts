@@ -2194,7 +2194,7 @@ describe('WorkoutComponent', () => {
                 );
                 expect(component.isRepsActive()).toBe(true);
 
-                (dialog.querySelector('.details__done') as HTMLElement).click();
+                (dialog.querySelector('.dialog-back') as HTMLElement).click();
                 fixture.detectChanges();
                 await fixture.whenStable();
 
@@ -2202,15 +2202,17 @@ describe('WorkoutComponent', () => {
                 expect(document.activeElement).toBe(info());
             });
 
-            it('closes them with ✕ at the top right, without scrolling down to Done', async () => {
+            it('closes them with ‹ Back at the top, as every dialog does', async () => {
                 advance(3000);
                 info()!.focus();
                 info()!.click();
                 fixture.detectChanges();
 
-                const close = el('.details__header .details__close') as HTMLButtonElement;
-                expect(close.getAttribute('aria-label')).toBe('Close');
-                close.click();
+                const dialog = el('app-exercise-details-dialog [role="dialog"]')!;
+                expect(dialog.firstElementChild!.tagName).toBe('APP-DIALOG-BACK');
+                const back = dialog.querySelector('.dialog-back') as HTMLButtonElement;
+                expect(back.textContent!.trim()).toMatch(/\bBack$/);
+                back.click();
                 fixture.detectChanges();
                 await fixture.whenStable();
 
@@ -2254,7 +2256,7 @@ describe('WorkoutComponent', () => {
                         'Push-up'
                     );
 
-                    (dialog.querySelector('.details__done') as HTMLElement).click();
+                    (dialog.querySelector('.dialog-back') as HTMLElement).click();
                     fixture.detectChanges();
                     await fixture.whenStable();
 
@@ -4515,7 +4517,7 @@ describe('WorkoutComponent', () => {
 
         it('closes with ✕, swapping nothing, with focus back on the (i)', async () => {
             openSwap();
-            (el('.swap__close') as HTMLElement).click();
+            (el('.dialog-back') as HTMLElement).click();
             fixture.detectChanges();
             await fixture.whenStable();
 

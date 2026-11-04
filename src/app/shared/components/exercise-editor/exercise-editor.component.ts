@@ -34,6 +34,7 @@ import {
 import { ExerciseStore } from '../../state/exercise-store.service';
 import { WorkoutStore } from '../../state/workout-store.service';
 import { BodyMapComponent } from '../body-map/body-map.component';
+import { DialogBackComponent } from '../dialog-back/dialog-back.component';
 import { growFromClick } from '../../dialog-origin';
 
 /** What the editor holds: an exercise's details (used only for your own) and your note. */
@@ -60,11 +61,12 @@ const NO_TEXT: ExerciseText = { description: '', steps: [], tips: [] };
  * renamed one's steps take the new name in every workout. Muscles are picked from chips, or
  * by tapping the body map. A built-in one can't change, so it shows its description and only
  * the note can be written (EXR-10). With `isNew`, the exercise is a blank one of your own,
- * made when it's saved. Focus is trapped inside while it's open.
+ * made when it's saved. Focus is trapped inside while it's open. ‹ Back at its top, Escape
+ * or a click outside close it without saving.
  */
 @Component({
     selector: 'app-exercise-editor',
-    imports: [CdkTrapFocus, FormField, MatIconModule, BodyMapComponent],
+    imports: [CdkTrapFocus, DialogBackComponent, FormField, MatIconModule, BodyMapComponent],
     templateUrl: './exercise-editor.component.html',
     styleUrl: './exercise-editor.component.scss',
 })

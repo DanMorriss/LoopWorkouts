@@ -313,7 +313,7 @@ describe('ExercisePageComponent', () => {
             await open('/exercises/back-squat');
 
             await click('#exercise-page-add');
-            await click('.choice__close');
+            await click('.dialog-back');
 
             expect(el().querySelector('app-workout-choice-dialog')).toBeNull();
             expect(document.activeElement).toBe(el().querySelector('#exercise-page-add'));

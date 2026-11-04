@@ -141,7 +141,7 @@ describe('BrowseExercisesDialogComponent', () => {
     it('closes with ✕, Escape or a click outside', async () => {
         await create();
 
-        (el().querySelector('.browse__close') as HTMLButtonElement).click();
+        (el().querySelector('.dialog-back') as HTMLButtonElement).click();
         el()
             .querySelector('.browse')!
             .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));

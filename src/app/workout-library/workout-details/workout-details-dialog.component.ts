@@ -16,6 +16,7 @@ import { describeRounds, formatDuration } from '../../history/history-format';
 import { Workout } from '../../models/workout';
 import { musclesWorked } from '../../models/workout-muscles';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
+import { DialogBackComponent } from '../../shared/components/dialog-back/dialog-back.component';
 import { WorkoutOutlineComponent } from '../../shared/components/workout-outline/workout-outline.component';
 import { growFromClick } from '../../shared/dialog-origin';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
@@ -28,7 +29,8 @@ const RECENT_RUNS = 5;
  * A workout's details, from its options in the library: the muscles its exercises work, on
  * the body map; its history, with its latest runs linking to them on the Progress page; and
  * what's in it, each step and its sets, so it can be read without opening Edit.
- * Focus starts on its title and is trapped inside while it's open.
+ * Focus starts on its title and is trapped inside while it's open. ‹ Workouts at its top,
+ * Escape or a click outside close it.
  */
 @Component({
     selector: 'app-workout-details-dialog',
@@ -36,6 +38,7 @@ const RECENT_RUNS = 5;
         BodyMapComponent,
         CdkTrapFocus,
         DatePipe,
+        DialogBackComponent,
         MatIconModule,
         RouterLink,
         WorkoutOutlineComponent,

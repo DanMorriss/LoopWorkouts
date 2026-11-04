@@ -108,14 +108,17 @@ describe('HomeComponent', () => {
                 'Sun Rest',
             ]);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
+            for (const link of element().querySelectorAll('.start__actions a')) {
+                expect(link.classList).toContain('btn-pill');
+            }
             expect(
                 [...element().querySelectorAll('.start__actions a')].map((link) => [
                     link.textContent!.trim(),
                     link.getAttribute('href'),
                 ])
             ).toEqual([
-                ['See all ready-made plans', '/ready-made-plans'],
-                ['Or pick your own workouts', '/library'],
+                ['More plans', '/ready-made-plans'],
+                ['Pick your own workouts', '/library'],
             ]);
             expect(element().querySelector('app-week-strip')).toBeNull();
         });
@@ -204,17 +207,56 @@ describe('HomeComponent', () => {
             expect(element().querySelector('app-week-strip')).toBeNull();
         });
 
-        it('with nothing planned, offers to plan the week', () => {
+        it('with nothing planned, offers a ready-made week, more plans, or planning your own', () => {
+            TestBed.inject(SettingsStore).update({
+                trainingGoal: 'fitness',
+                myEquipment: ['kettlebell'],
+            });
             addWorkout('Legs');
             create();
 
             expect(text('.week__label')).toEqual(['This week']);
             expect(text('.week__empty')).toEqual([
-                "Nothing planned yet. Choose which days you do your workouts, and Today shows what's due each day.",
+                "Nothing planned yet. Here's a week for your goal and equipment, which adds its workouts to yours, or plan your own and Today shows what's due each day.",
             ]);
-            const link = element().querySelector('.week__plan')!;
-            expect(link.textContent!.trim()).toBe('Plan your week');
-            expect(link.getAttribute('href')).toBe('/plan');
+            expect(text('app-week-strip .plan-card__title')).toEqual(['Fitness, 4 days']);
+            expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
+            expect(
+                [...element().querySelectorAll('.week__actions a')].map((link) => [
+                    link.textContent!.trim(),
+                    link.getAttribute('href'),
+                    link.classList.contains('btn-pill'),
+                ])
+            ).toEqual([
+                ['More plans', '/ready-made-plans', true],
+                ['Make your own plan', '/plan', true],
+            ]);
+            expect(element().querySelector('.week__days')).toBeNull();
+        });
+
+        it('uses the ready-made week in one tap, alongside your workouts, with Undo', async () => {
+            const legs = addWorkout('Legs');
+            create();
+            document.body.appendChild(element());
+            expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
+            (element().querySelector('.plan-card__use') as HTMLButtonElement).click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const titles = TestBed.inject(WorkoutStore)
+                .workouts()
+                .map((workout) => workout.title);
+            expect(titles[0]).toBe('Legs');
+            expect(titles).toContain('Bodyweight basics');
+            expect(TestBed.inject(UndoService).offer()?.message).toBe(
+                'Your week is planned: No equipment, 3 days'
+            );
+            expect(element().querySelector('.week__days')).not.toBeNull();
+            expect(document.activeElement).toBe(element().querySelector('.week__edit'));
+
+            TestBed.inject(UndoService).undo();
+            fixture.detectChanges();
+            expect(TestBed.inject(WorkoutStore).workouts()).toEqual([legs]);
             expect(element().querySelector('.week__days')).toBeNull();
         });
 

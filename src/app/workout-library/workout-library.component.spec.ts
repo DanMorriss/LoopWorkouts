@@ -254,9 +254,9 @@ describe('WorkoutLibraryComponent', () => {
                 );
             });
 
-            it('closes with Done, putting focus back on the options button', async () => {
+            it('closes with ‹ Workouts, putting focus back on the options button', async () => {
                 openDetails(0);
-                click(dialog()!.querySelector('.details__done'));
+                click(dialog()!.querySelector('.dialog-back'));
                 await settle();
 
                 expect(document.activeElement).toBe(
@@ -279,11 +279,11 @@ describe('WorkoutLibraryComponent', () => {
         });
 
         describe('arriving from Save in Create (BLD-15)', () => {
-            async function arriveFrom(saved: string) {
+            async function arriveFrom(saved: string, param: 'saved' | 'added' = 'saved') {
                 fixture.destroy();
                 // The snapshot keeps the map it made for the first render, so replace it
                 Object.defineProperty(TestBed.inject(ActivatedRoute).snapshot, 'queryParamMap', {
-                    value: convertToParamMap({ saved }),
+                    value: convertToParamMap({ [param]: saved }),
                 });
                 create();
                 await settle();
@@ -296,6 +296,14 @@ describe('WorkoutLibraryComponent', () => {
                 expect(card(0).classList).not.toContain('workout-card--highlighted');
                 expect(document.activeElement).toBe(card(1).querySelector('.workout-card__start'));
                 expect(el('[aria-live]')?.textContent).toContain('Saved Untitled workout');
+            });
+
+            it('does the same for a ready-made one just added, saying it was added', async () => {
+                await arriveFrom(second.id, 'added');
+
+                expect(card(1).classList).toContain('workout-card--highlighted');
+                expect(document.activeElement).toBe(card(1).querySelector('.workout-card__start'));
+                expect(el('[aria-live]')?.textContent).toContain('Added Untitled workout');
             });
 
             it('highlights nothing for a workout no longer in the library', async () => {

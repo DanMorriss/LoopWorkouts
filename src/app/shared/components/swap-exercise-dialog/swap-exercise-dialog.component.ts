@@ -11,6 +11,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { DialogBackComponent } from '../dialog-back/dialog-back.component';
 import { Equipment, Exercise, MeasuredBy } from '../../../models/exercise';
 import { findByName, searchExercises } from '../../../models/exercise-links';
 import { swapSuggestions } from './swap-suggestions';
@@ -24,12 +25,12 @@ import { hint } from '../../../workout-setup/exercise-picker/exercise-picker.com
  * taken, or while setting a workout up (BLD-14): the closest few by the muscles they work,
  * doable with your equipment, and a search of the rest. Only exercises measured as the step
  * is (reps or time) are offered, as the step keeps its reps or time. Focus starts on the
- * search box and is trapped inside while it's open; ✕, Escape or a click outside close it.
+ * search box and is trapped inside while it's open; ‹ Back, Escape or a click outside close it.
  * Where it's used, it has animate.leave="dialog-leave".
  */
 @Component({
     selector: 'app-swap-exercise-dialog',
-    imports: [CdkTrapFocus, MatIconModule],
+    imports: [CdkTrapFocus, DialogBackComponent, MatIconModule],
     template: `
         <div
             class="swap-overlay dialog-overlay"
@@ -47,17 +48,8 @@ import { hint } from '../../../workout-setup/exercise-picker/exercise-picker.com
                 aria-labelledby="swap-title"
                 (click)="$event.stopPropagation()"
             >
-                <div class="swap__header">
-                    <h2 id="swap-title" class="swap__title">Swap {{ exercise().name }}</h2>
-                    <button
-                        type="button"
-                        class="btn-icon swap__close"
-                        aria-label="Close"
-                        (click)="closed.emit()"
-                    >
-                        <mat-icon aria-hidden="true">close</mat-icon>
-                    </button>
-                </div>
+                <app-dialog-back (back)="closed.emit()" />
+                <h2 id="swap-title" class="swap__title">Swap {{ exercise().name }}</h2>
                 @if (hint()) {
                     <p class="swap__hint">{{ hint() }}</p>
                 }

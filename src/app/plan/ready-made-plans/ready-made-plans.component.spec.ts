@@ -48,9 +48,13 @@ describe('ReadyMadePlansComponent (PLN-6)', () => {
             'Push, pull, legs',
             'Dumbbells at home, 4 days',
         ]);
-        expect(el().querySelector('.plan-card__meta')!.textContent!.trim()).toBe(
-            'Mon, Tue, Thu and Sat · Kettlebell'
-        );
+        const first = el().querySelector('app-plan-card')!;
+        const text = (selector: string) =>
+            [...first.querySelectorAll(selector)].map((t) =>
+                t.textContent!.replace(/\s+/g, ' ').trim()
+            );
+        expect(text('.plan-card__count')).toEqual(['4 days a week']);
+        expect(text('.plan-card__tag')).toEqual(['Kettlebell']);
     });
 
     it('hides those needing what you have not got, with Only what I have on', async () => {

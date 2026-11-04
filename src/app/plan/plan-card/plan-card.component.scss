@@ -6,22 +6,37 @@
 
 .plan-card {
     display: grid;
-    gap: 0.4rem;
+    gap: 0.9rem;
     padding: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.8rem;
-    background: var(--control);
+    border: 1px solid var(--border-soft);
+    border-radius: 0.9rem;
+    background:
+        radial-gradient(120% 80% at 100% 0%, var(--accent-soft), transparent 60%), var(--control);
 
     p {
         margin: 0;
     }
 }
 
+// The title and what it's for at the left, how many days a week at the right
+.plan-card__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.75rem;
+}
+
+.plan-card__intro {
+    display: grid;
+    gap: 0.3rem;
+}
+
 .plan-card__title {
     margin: 0;
     @include display;
     color: var(--text-strong);
-    font-size: 1.05rem;
+    font-size: 1.1rem;
+    line-height: 1.25;
 }
 
 .plan-card__description {
@@ -30,42 +45,198 @@
     line-height: 1.45;
 }
 
-.plan-card__meta {
-    color: var(--text-muted);
-    font-size: 0.85rem;
+.plan-card__count {
+    display: grid;
+    justify-items: center;
+    min-width: 3.5rem;
+    padding: 0.45rem 0.5rem 0.4rem;
+    border: 1px solid var(--accent-line);
+    border-radius: 0.7rem;
+    background: var(--accent-soft);
+    text-align: center;
 }
 
-.plan-card__days {
+.plan-card__count-number {
+    @include display;
+    color: var(--glow-text);
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.plan-card__count-label {
+    margin-top: 0.2rem;
+    color: var(--text-muted);
+    @include small-type(0.65rem);
+    line-height: 1.15;
+    max-width: 3rem;
+}
+
+// The week: a day to a column, Monday first, each workout a numbered, coloured mark
+.plan-card__week {
     display: grid;
-    gap: 0.15rem;
-    margin: 0.3rem 0;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.3rem;
+    margin: 0;
     padding: 0;
     list-style: none;
 }
 
-// A day at the left, its workouts at the right
 .plan-card__day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0 0.55rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.65rem;
+    // A training day takes on its (first) workout's colour, faintly
+    border-color: color-mix(in srgb, var(--c, var(--border-soft)) 45%, transparent);
+    background: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--c, transparent) 16%, transparent),
+        color-mix(in srgb, var(--c, transparent) 4%, transparent)
+    );
+}
+
+.plan-card__day--rest {
+    border-style: dashed;
+    border-color: var(--border-soft);
+    background: transparent;
+}
+
+.plan-card__day-letter {
+    color: var(--text-strong);
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    .plan-card__day--rest & {
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+}
+
+.plan-card__day-marks {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.15rem;
+    min-height: 1.5rem;
+}
+
+// A workout's number in its colour, in the week and the list alike
+.plan-card__mark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 0.7rem color-mix(in srgb, var(--c) 45%, transparent);
+    color: var(--plan-ink);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+
+    // Two on a day share its column, smaller
+    .plan-card__day-marks &:not(:only-child) {
+        width: 1.1rem;
+        height: 1.1rem;
+        font-size: 0.65rem;
+    }
+}
+
+.plan-card--c1 {
+    --c: var(--plan-1);
+}
+
+.plan-card--c2 {
+    --c: var(--plan-2);
+}
+
+.plan-card--c3 {
+    --c: var(--plan-3);
+}
+
+.plan-card--c4 {
+    --c: var(--plan-4);
+}
+
+// A rest day: a short, quiet dash
+.plan-card__rest {
+    width: 0.6rem;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--border);
+}
+
+// Its workouts, each with the days it's on
+.plan-card__workouts {
     display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr);
-    gap: 0.5rem;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.plan-card__workout {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.6rem;
     font-size: 0.9rem;
 }
 
-.plan-card__day-name {
-    color: var(--text-muted);
-}
-
-.plan-card__day-workouts {
+.plan-card__workout-name {
     color: var(--text-strong);
+    font-weight: 600;
 }
 
-.plan-card__day--rest .plan-card__day-workouts {
+.plan-card__workout-days {
     color: var(--text-muted);
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+// What it needs, as quiet tags after an icon
+.plan-card__kit {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-soft);
+}
+
+.plan-card__kit-icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: var(--text-muted);
+}
+
+.plan-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.plan-card__tag {
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    color: var(--text);
+    @include small-type(0.75rem);
 }
 
 .plan-card__use {
     justify-self: start;
-    margin-top: 0.3rem;
 
     // As the page's main button (Today), centred as the other pages' main buttons are
     &.btn-main {

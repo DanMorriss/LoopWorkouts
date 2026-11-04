@@ -128,6 +128,22 @@
             </span>
             <mat-icon class="account__link-chevron" aria-hidden="true">chevron_right</mat-icon>
         </a>
+        <!-- The questions people ask (NAV-7), sliding in as Settings does -->
+        <a
+            href="/help"
+            class="account__link account__link--next"
+            aria-describedby="help-link-hint"
+            (click)="slide.follow($event, '/help', 'in')"
+        >
+            <mat-icon class="account__link-icon" aria-hidden="true">help_outline</mat-icon>
+            <span class="account__link-text">
+                <span class="account__link-name">Help</span>
+                <span class="account__hint" id="help-link-hint">
+                    Questions and answers, from planning to sound
+                </span>
+            </span>
+            <mat-icon class="account__link-chevron" aria-hidden="true">chevron_right</mat-icon>
+        </a>
 
         <section class="account__section" aria-labelledby="data-heading">
             <h3 class="account__heading" id="data-heading">Your data</h3>

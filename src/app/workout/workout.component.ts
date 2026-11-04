@@ -1,3 +1,4 @@
+import { HelpLinkComponent } from '../shared/components/help-link/help-link.component';
 import {
     afterNextRender,
     AnimationCallbackEvent,
@@ -101,6 +102,7 @@ const MAX_ROUND_DOTS = 15;
     imports: [
         RouterLink,
         MatIconModule,
+        HelpLinkComponent,
         WheelPickerComponent,
         WorkoutSummaryComponent,
         ExerciseDetailsDialogComponent,

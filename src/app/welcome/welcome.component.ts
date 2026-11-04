@@ -1,3 +1,4 @@
+import { HelpLinkComponent } from '../shared/components/help-link/help-link.component';
 import { Component, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountService } from '../account/account.service';
@@ -13,7 +14,7 @@ import { WELCOMED_KEY } from './welcome-first';
  */
 @Component({
     selector: 'app-welcome',
-    imports: [LoopLogoComponent, SignInComponent],
+    imports: [HelpLinkComponent, LoopLogoComponent, SignInComponent],
     template: `
         <div class="flex justify-center">
             <div
@@ -42,6 +43,7 @@ import { WELCOMED_KEY } from './welcome-first';
                     </button>
                     <p class="welcome__hint" id="welcome-guest-hint">
                         Everything stays on this device. You can sign in any time from the You tab.
+                        <app-help-link topic="lose-workouts" />
                     </p>
                 </div>
             </div>

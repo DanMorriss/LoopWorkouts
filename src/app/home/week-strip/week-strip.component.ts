@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { PageSlide } from '../../nav/page-slide';
+import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { HistoryStore } from '../../shared/state/history-store.service';
@@ -35,7 +36,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
  */
 @Component({
     selector: 'app-week-strip',
-    imports: [IconComponent],
+    imports: [HelpLinkComponent, IconComponent],
     template: `
         <section class="week" aria-labelledby="week-title">
             <div class="week__head">
@@ -65,7 +66,12 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                         </li>
                     }
                 </ol>
-                <p class="week__so-far">{{ soFar() }}</p>
+                <p class="week__so-far">
+                    {{ soFar() }}
+                    @if (startsNextWeek()) {
+                        <app-help-link topic="starts-next-week" />
+                    }
+                </p>
             } @else {
                 <p class="week__empty">
                     Nothing planned yet. Choose which days you do your workouts, and Today shows
@@ -131,6 +137,12 @@ export class WeekStripComponent {
             };
         })
     );
+
+    /** Whether everything planned this week is from next week: the plan hasn't started. */
+    protected readonly startsNextWeek = computed(() => {
+        const all = this.week().flat();
+        return all.length > 0 && all.every((item) => item.status === 'next week');
+    });
 
     /**
      * "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". Workouts

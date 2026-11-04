@@ -86,6 +86,11 @@ export const routes: Routes = [
             import('./settings/settings.component').then((m) => m.SettingsComponent),
     },
     {
+        // Help (NAV-7): the questions people ask, from You or a ? link
+        path: 'help',
+        loadComponent: () => import('./help/help.component').then((m) => m.HelpComponent),
+    },
+    {
         path: 'privacy',
         loadComponent: () => import('./legal/privacy.component').then((m) => m.PrivacyComponent),
     },

@@ -38,6 +38,10 @@ describe('WelcomeComponent (NAV-3)', () => {
         expect(element.querySelector('app-sign-in')).not.toBeNull();
         expect(element.textContent).toContain('Continue with Google');
         expect(element.textContent).toContain('Everything stays on this device.');
+        // With a ? to Help on what a guest's data means
+        const help = element.querySelector('#welcome-guest-hint app-help-link a')!;
+        expect(help.getAttribute('href')).toBe('/help?q=lose-workouts');
+        expect(help.getAttribute('aria-label')).toBe('Help: Will I lose my workouts?');
     });
 
     it("goes Home as a guest, and isn't asked again on this device", async () => {

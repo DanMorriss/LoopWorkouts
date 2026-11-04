@@ -776,6 +776,32 @@ for (const theme of ['dark', 'light'] as const) {
             });
         });
 
+        describe('help', () => {
+            it('as first opened, and opened on a question', async () => {
+                await open('/help');
+                await expectNoViolations();
+
+                await open('/help?q=plan-statuses');
+                expect(fixture.nativeElement.querySelector('#help-plan-statuses').open).toBe(true);
+                await expectNoViolations();
+            });
+
+            it('searching, and finding nothing', async () => {
+                await open('/help');
+                const box = fixture.nativeElement.querySelector('input[type="search"]');
+                box.value = 'sound';
+                box.dispatchEvent(new Event('input'));
+                await settle();
+                await expectNoViolations();
+
+                box.value = 'zzqx';
+                box.dispatchEvent(new Event('input'));
+                await settle();
+                expect(fixture.nativeElement.querySelector('.help__none')).not.toBeNull();
+                await expectNoViolations();
+            });
+        });
+
         describe('settings', () => {
             it('as first opened', async () => {
                 await open('/settings');

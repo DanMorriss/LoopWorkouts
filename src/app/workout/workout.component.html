@@ -401,9 +401,12 @@
 
             <!-- After a refresh the browser blocks sound until the page is tapped again -->
             @if (soundLocked()) {
-                <button type="button" class="btn-pill sound-prompt" (click)="alarms.unlock()">
-                    Tap to turn on sound
-                </button>
+                <div class="sound-prompt flex items-center justify-center gap-1">
+                    <button type="button" class="btn-pill" (click)="alarms.unlock()">
+                        Tap to turn on sound
+                    </button>
+                    <app-help-link topic="no-sound" />
+                </div>
             }
         }
 

@@ -39,6 +39,14 @@ Eighteen ready-made workouts are on the Ready-made workouts page, opened from Wo
 - [ ] **Mobility days in the ready-made plans,** once there are mobility workouts: rest days are left empty for now.
 - [ ] **More batches, once there are exercises for them:** a band workout (only Band pull-apart uses a band so far), rings, and mobility or stretching (there are no stretches yet), which need new built-in exercises first (see `docs/writing-exercises.md`). Each must pass `built-in-workouts.spec.ts`.
 
+### Help (NAV-7)
+
+- [ ] **Watch which questions people email about,** and add them to Help (`src/app/help/help-topics.ts`), most asked first.
+- [ ] **A tour of the app** (Dan, 2026-11-04), once the tidying up is done: a short walk through Today, Workouts, Exercises, Progress and You, pointing at each tab and its main parts.
+    - **Runs once, the first time:** straight after the setup (NAV-4), as the welcome screen and setup do, finishing on Today. It can be skipped, and isn't shown again once finished or skipped (a flag in localStorage, as `welcomed` and `setup` are; see `docs/features/data.md`).
+    - **Can be run again from You,** e.g. a "Take the tour" row beside Help.
+    - **When it's in, remove the ? links** (`HelpLinkComponent`, `src/app/shared/components/help-link/`) from the workout page, the Plan page, Today's week and the welcome screen. The tour does their job, and Help stays on You. Update NAV-7 in `docs/features/home-and-navigation.md` to match.
+
 ### Setup and profile (NAV-4, SET-7)
 
 The setup after the welcome screen and the synced profile are in `docs/features/home-and-navigation.md` and `docs/features/settings.md`.

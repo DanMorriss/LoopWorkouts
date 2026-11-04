@@ -3,7 +3,7 @@
  * workouts, the exercises, how you're getting on, and you. A tab is chosen on its own page, the
  * pages under it, and any pages it `holds`: the weekly plan and the ready-made plans belong to Today, where its week
  * shows; making a workout and the ready-made workouts to Workouts, where they're started from;
- * and Settings and the legal pages to You, which they slide in over. The paths are the ones the
+ * and Settings, Help and the legal pages to You, which they slide in over. The paths are the ones the
  * pages have always had (an email sign-in link comes back to /account, for one), so links and
  * bookmarks keep working.
  */
@@ -21,7 +21,7 @@ export const TABS = [
         path: '/account',
         label: 'You',
         icon: 'account_circle',
-        holds: ['/settings', '/privacy', '/terms'],
+        holds: ['/settings', '/help', '/privacy', '/terms'],
     },
 ] as const;
 

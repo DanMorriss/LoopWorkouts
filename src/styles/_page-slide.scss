@@ -1,5 +1,5 @@
-// Going into an exercise from the Exercises list (or Settings, Privacy or Terms from Account, or
-// the Plan from the Library)
+// Going into an exercise from the Exercises list (or Settings, Help, Privacy or Terms from
+// Account, the Plan from Today, or the ready-made workouts from Workouts)
 // slides its page in from the right, over the list, which moves a little way left and fades; going back,
 // the page leaves to the right and the list comes back (PageSlide, src/app/nav/page-slide.ts).
 // The two have different names, so each keeps its own place on screen rather than the browser
@@ -15,7 +15,10 @@
 
     app-exercise-page,
     app-plan,
+    // The ready-made workouts over the library: a preview open on them goes with them
+    app-ready-made,
     app-settings,
+    app-help,
     app-privacy,
     app-terms {
         view-transition-name: slide-over;

@@ -3,6 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { BUILT_IN_WORKOUTS } from '../../models/built-in-workouts';
 import { allSteps } from '../../models/workout';
+import { PageSlide } from '../../nav/page-slide';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
@@ -104,8 +105,9 @@ describe('ReadyMadeComponent', () => {
         expect(document.activeElement).toBe(card('Gym legs'));
     });
 
-    it('adds a copy to the library, with Undo, and stays to add more', async () => {
+    it('adds a copy to the library, with Undo, and slides back out to Workouts with it', async () => {
         await open();
+        const slide = vi.spyOn(TestBed.inject(PageSlide), 'navigate').mockImplementation(() => {});
         await preview('Core in 15');
         await press('.preview__add');
 
@@ -117,7 +119,7 @@ describe('ReadyMadeComponent', () => {
             allSteps(builtIn).map((s) => s.exerciseId)
         );
         expect(dialog()).toBeNull();
-        expect(text(card('Core in 15'))).toContain('In your workouts');
+        expect(slide).toHaveBeenCalledWith(`/library?added=${added.id}`, 'out');
         expect(TestBed.inject(UndoService).offer()?.message).toBe(
             'Added "Core in 15" to your workouts'
         );

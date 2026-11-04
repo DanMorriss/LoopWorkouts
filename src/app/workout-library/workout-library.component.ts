@@ -34,7 +34,7 @@ import { UndoService } from '../shared/undo/undo.service';
 
 /**
  * The user's workouts. Arriving from Create's Save, `?saved=<id>` highlights that workout and
- * brings it into view (BLD-15).
+ * brings it into view (BLD-15); from adding a ready-made one, `?added=<id>` does the same.
  */
 @Component({
     selector: 'app-workout-library',
@@ -76,11 +76,14 @@ export class WorkoutLibraryComponent {
     protected readonly highlightedId = signal<string | null>(null);
 
     constructor() {
-        const saved = inject(ActivatedRoute).snapshot.queryParamMap.get('saved');
-        const workout = saved ? this.workoutStore.findWorkoutById(saved) : null;
+        const params = inject(ActivatedRoute).snapshot.queryParamMap;
+        const added = params.get('added');
+        const id = params.get('saved') ?? added;
+        const workout = id ? this.workoutStore.findWorkoutById(id) : null;
         if (workout) {
+            const name = workout.title.trim() || 'Untitled workout';
             this.highlightedId.set(workout.id);
-            this.bringIntoView(workout.id, `Saved ${workout.title.trim() || 'Untitled workout'}`);
+            this.bringIntoView(workout.id, added ? `Added ${name}` : `Saved ${name}`);
         }
     }
 

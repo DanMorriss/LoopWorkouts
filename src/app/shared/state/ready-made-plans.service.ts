@@ -35,7 +35,7 @@ export class ReadyMadePlans {
         }
         this.planStore.replace(plan.days.map((day) => day.map((id) => ids.get(id)!)));
         return () => {
-            this.planStore.replace(before.days);
+            this.planStore.restore(before);
             added.forEach((id) => this.workouts.deleteWorkout(id));
         };
     }

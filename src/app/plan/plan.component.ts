@@ -19,6 +19,7 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
     missed: 'Missed',
     today: 'Due',
     'to come': '',
+    'next week': 'From next week',
 };
 
 /**
@@ -73,11 +74,15 @@ export class PlanComponent {
         }))
     );
 
-    /** "2 of 5 done this week", counting only days gone by and today. */
+    /**
+     * "2 of 5 done this week", counting only days gone by and today, and not those planned once
+     * their day had gone by (from next week).
+     */
     protected readonly weekSoFar = computed(() => {
         const sofar = this.days()
             .filter(({ day }) => day <= this.today)
-            .flatMap(({ workouts }) => workouts);
+            .flatMap(({ workouts }) => workouts)
+            .filter((item) => item.status !== 'next week');
         const done = sofar.filter((item) => item.status === 'done').length;
         return sofar.length ? `${done} of ${sofar.length} done so far this week` : '';
     });

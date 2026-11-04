@@ -141,6 +141,8 @@ describe('HomeComponent', () => {
             );
             expect(element().querySelector('app-get-started')).toBeNull();
             expect(element().querySelector('.week__days')).not.toBeNull();
+            // Used on a Sunday, its Mon, Wed and Fri have gone by: it starts next week
+            expect(text('.week__so-far')).toEqual(['Your plan starts next week']);
             expect(document.activeElement).toBe(element().querySelector('.week__edit'));
 
             TestBed.inject(UndoService).undo();
@@ -221,10 +223,13 @@ describe('HomeComponent', () => {
             const legs = addWorkout('Legs');
             const push = addWorkout('Push');
             const plan = TestBed.inject(PlanStore);
+            // Planned last week, so this week's days count
+            vi.setSystemTime(NOW - 7 * 24 * HOUR);
             plan.add(0, legs.id);
             plan.add(2, push.id);
             plan.add(6, legs.id);
             plan.add(6, push.id);
+            vi.setSystemTime(NOW);
             // Wednesday's Push was done; Monday's Legs wasn't
             TestBed.inject(HistoryStore).record({
                 ...entry,
@@ -255,6 +260,27 @@ describe('HomeComponent', () => {
             const edit = element().querySelector('.week__edit')!;
             expect(edit.textContent!.trim()).toBe('Edit plan');
             expect(edit.getAttribute('href')).toBe('/plan');
+        });
+
+        it("doesn't count days already gone when they were planned: the plan starts next week", () => {
+            // NOW is a Sunday, so Monday and Wednesday have gone by
+            const legs = addWorkout('Legs');
+            const plan = TestBed.inject(PlanStore);
+            plan.add(0, legs.id);
+            plan.add(2, legs.id);
+            create();
+
+            expect(days().map((d) => d.mark)).toEqual([
+                'free',
+                'free',
+                'free',
+                'free',
+                'free',
+                'free',
+                'free',
+            ]);
+            expect(text('.week__day .sr-only')[0]).toBe('Monday: Legs, from next week');
+            expect(text('.week__so-far')).toEqual(['Your plan starts next week']);
         });
 
         it('names the next workout to come, and says when the week is all done', () => {

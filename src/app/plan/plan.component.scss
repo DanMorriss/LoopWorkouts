@@ -93,8 +93,9 @@
     color: var(--accent);
 }
 
-// Gone by without it: the name steps back
-.plan__workout--missed .plan__workout-name {
+// Gone by without it, or planned once its day had gone (from next week): the name steps back
+.plan__workout--missed .plan__workout-name,
+.plan__workout--later .plan__workout-name {
     color: var(--text-muted);
 }
 

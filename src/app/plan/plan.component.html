@@ -57,6 +57,7 @@
                                 [class.plan__workout--done]="planned.status === 'done'"
                                 [class.plan__workout--missed]="planned.status === 'missed'"
                                 [class.plan__workout--today]="planned.status === 'today'"
+                                [class.plan__workout--later]="planned.status === 'next week'"
                             >
                                 <span class="plan__workout-name">{{ planned.name }}</span>
                                 @if (statusText[planned.status]; as status) {

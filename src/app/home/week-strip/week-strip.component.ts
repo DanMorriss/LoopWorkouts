@@ -23,6 +23,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
     done: 'done',
     missed: 'missed',
     today: 'due today',
+    'next week': 'from next week',
     'to come': 'to come',
 };
 
@@ -131,9 +132,17 @@ export class WeekStripComponent {
         })
     );
 
-    /** "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". */
+    /**
+     * "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". Workouts
+     * planned once their day had gone by aren't counted: they start next week.
+     */
     protected readonly soFar = computed(() => {
-        const all = this.week().flat();
+        const all = this.week()
+            .flat()
+            .filter((item) => item.status !== 'next week');
+        if (all.length === 0) {
+            return 'Your plan starts next week';
+        }
         const done = all.filter((item) => item.status === 'done').length;
         if (done === all.length) {
             return all.length === 1 ? 'Done for the week' : `All ${all.length} done this week`;
@@ -149,8 +158,12 @@ export class WeekStripComponent {
     });
 }
 
-/** A day's mark from its workouts: done once they all are, missed if any were, free if none. */
-export function markFor(statuses: readonly PlannedStatus[]): DayMark {
+/**
+ * A day's mark from its workouts: done once they all are, missed if any were, free if none.
+ * Those from next week (planned once the day had gone by) don't count for this week.
+ */
+export function markFor(all: readonly PlannedStatus[]): DayMark {
+    const statuses = all.filter((status) => status !== 'next week');
     if (statuses.length === 0) {
         return 'free';
     }

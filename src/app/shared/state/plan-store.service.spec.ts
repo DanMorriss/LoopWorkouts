@@ -30,10 +30,40 @@ describe('PlanStore', () => {
             days: [['legs'], [], ['push'], [], [], [], []],
             // Each change after the last, as the sync clock dates them
             updatedAt: 5_001,
+            // And when each was planned, so a day already gone by isn't counted as missed
+            plannedAt: { '0:legs': 5_000, '2:push': 5_000 },
         });
         expect(store.hasPlan()).toBe(true);
         TestBed.resetTestingModule();
         expect(createStore().plan().days[2]).toEqual(['push']);
+    });
+
+    it('replaces the whole week, keeping when those already there were planned', () => {
+        const now = vi.spyOn(Date, 'now').mockReturnValue(1_000);
+        const store = createStore();
+        store.add(0, 'legs');
+        store.add(2, 'push');
+
+        now.mockReturnValue(9_000);
+        store.replace([['legs'], ['pull'], [], [], [], [], []]);
+
+        expect(store.plan().days).toEqual([['legs'], ['pull'], [], [], [], [], []]);
+        expect(store.plan().plannedAt).toEqual({ '0:legs': 1_000, '1:pull': 9_000 });
+    });
+
+    it('puts an earlier plan back as it was, dated now', () => {
+        const now = vi.spyOn(Date, 'now').mockReturnValue(1_000);
+        const store = createStore();
+        store.add(3, 'legs');
+        const before = store.plan();
+
+        now.mockReturnValue(9_000);
+        store.replace([['push'], [], [], [], [], [], []]);
+        store.restore(before);
+
+        expect(store.plan().days).toEqual(before.days);
+        expect(store.plan().plannedAt).toEqual({ '3:legs': 1_000 });
+        expect(store.plan().updatedAt).toBeGreaterThan(before.updatedAt);
     });
 
     it('takes a workout off a day, leaving the others', () => {

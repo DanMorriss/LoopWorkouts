@@ -24,6 +24,17 @@ export interface WeekPlan {
     days: string[][];
     /** When it last changed, in ms since the epoch, or 0 if it never has. */
     updatedAt: number;
+    /**
+     * When each workout was put on its day, by the device's clock, keyed by `plannedKey()`, so a
+     * day already gone by when it was planned isn't counted as missed (PLN-3). Missing for
+     * those planned before this came in (2026-11-04), which count as they always did.
+     */
+    plannedAt?: Record<string, number>;
+}
+
+/** The key of a workout on a day in `plannedAt`: "2:workout-id" for Wednesday. */
+export function plannedKey(day: number, workoutId: string): string {
+    return `${day}:${workoutId}`;
 }
 
 export const EMPTY_PLAN: WeekPlan = { days: WEEKDAYS.map(() => []), updatedAt: 0 };
@@ -44,13 +55,31 @@ export function isWeekPlan(value: unknown): value is WeekPlan {
                 day.every((id) => typeof id === 'string' && id !== '')
         ) &&
         Number.isSafeInteger(plan['updatedAt']) &&
-        (plan['updatedAt'] as number) >= 0
+        (plan['updatedAt'] as number) >= 0 &&
+        (plan['plannedAt'] === undefined ||
+            (typeof plan['plannedAt'] === 'object' && plan['plannedAt'] !== null))
     );
 }
 
-/** A copy of a plan, so a saved or fetched one shares nothing with what's kept. */
+/**
+ * A copy of a plan, so a saved or fetched one shares nothing with what's kept. Of
+ * `plannedAt`, only the times of workouts still planned, and only those that are times, are
+ * kept; with none, it's left out.
+ */
 export function copyPlan(plan: WeekPlan): WeekPlan {
-    return { days: plan.days.map((day) => [...day]), updatedAt: plan.updatedAt };
+    const days = plan.days.map((day) => [...day]);
+    const plannedAt: Record<string, number> = {};
+    days.forEach((ids, day) =>
+        ids.forEach((id) => {
+            const at = plan.plannedAt?.[plannedKey(day, id)];
+            if (Number.isSafeInteger(at) && at! >= 0) {
+                plannedAt[plannedKey(day, id)] = at!;
+            }
+        })
+    );
+    return Object.keys(plannedAt).length
+        ? { days, updatedAt: plan.updatedAt, plannedAt }
+        : { days, updatedAt: plan.updatedAt };
 }
 
 /** Which day of the week `time` is on the device's calendar, from 0 for Monday. */
@@ -73,9 +102,10 @@ export function startOfWeek(time: number): number {
 
 /**
  * Where a planned workout is this week (PLN-3): done (it was run that day, finished or
- * stopped), missed (its day has gone by without it), due today, or still to come.
+ * stopped), missed (its day has gone by without it), due today, still to come, or from next
+ * week (its day had already gone by this week when it was planned, so it isn't counted).
  */
-export type PlannedStatus = 'done' | 'missed' | 'today' | 'to come';
+export type PlannedStatus = 'done' | 'missed' | 'today' | 'to come' | 'next week';
 
 export interface PlannedWorkout {
     workoutId: string;
@@ -102,17 +132,32 @@ export function thisWeek(
         }
     }
     return plan.days.map((ids, day) =>
-        ids.filter(exists).map((workoutId) => ({
-            workoutId,
-            status: ran.has(`${day}/${workoutId}`)
-                ? 'done'
-                : day < today
-                  ? 'missed'
-                  : day === today
-                    ? 'today'
-                    : 'to come',
-        }))
+        ids.filter(exists).map((workoutId): PlannedWorkout => {
+            if (ran.has(`${day}/${workoutId}`)) {
+                return { workoutId, status: 'done' };
+            }
+            if (day === today) {
+                return { workoutId, status: 'today' };
+            }
+            if (day > today) {
+                return { workoutId, status: 'to come' };
+            }
+            // Planned once its day this week had gone by: it starts next week
+            const plannedAt = plan.plannedAt?.[plannedKey(day, workoutId)];
+            const dayEnded = dayAfter(monday, day);
+            return {
+                workoutId,
+                status: plannedAt !== undefined && plannedAt >= dayEnded ? 'next week' : 'missed',
+            };
+        })
     );
+}
+
+/** The start of the day after `monday`'s `day` (from 0), on the device's calendar. */
+function dayAfter(monday: number, day: number): number {
+    const date = new Date(monday);
+    date.setDate(date.getDate() + day + 1);
+    return date.getTime();
 }
 
 /** The workouts planned for today and not yet run today (PLN-2), in the plan's order. */

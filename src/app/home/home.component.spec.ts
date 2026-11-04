@@ -108,14 +108,17 @@ describe('HomeComponent', () => {
                 'Sun Rest',
             ]);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
+            for (const link of element().querySelectorAll('.start__actions a')) {
+                expect(link.classList).toContain('btn-pill');
+            }
             expect(
                 [...element().querySelectorAll('.start__actions a')].map((link) => [
                     link.textContent!.trim(),
                     link.getAttribute('href'),
                 ])
             ).toEqual([
-                ['See all ready-made plans', '/ready-made-plans'],
-                ['Or pick your own workouts', '/library'],
+                ['More plans', '/ready-made-plans'],
+                ['Pick your own workouts', '/library'],
             ]);
             expect(element().querySelector('app-week-strip')).toBeNull();
         });

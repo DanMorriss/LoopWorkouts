@@ -22,9 +22,10 @@ import { UndoService } from '../../shared/undo/undo.service';
                 equipment:
             </p>
             <app-plan-card [plan]="plan()" [main]="true" (used)="use()" />
+            <!-- The other ways, as on This week once there are workouts: side by side -->
             <div class="start__actions">
-                <a routerLink="/ready-made-plans" class="btn-pill">See all ready-made plans</a>
-                <a routerLink="/library" class="start__link">Or pick your own workouts</a>
+                <a routerLink="/ready-made-plans" class="btn-pill">More plans</a>
+                <a routerLink="/library" class="btn-pill">Pick your own workouts</a>
             </div>
         </section>
     `,

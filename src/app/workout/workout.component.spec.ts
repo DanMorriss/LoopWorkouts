@@ -1796,7 +1796,7 @@ describe('WorkoutComponent', () => {
         const REST_AT = (s: number) => [`440@${s}`];
         const FINISH_AT = (s: number) => [`523.25@${s}`, `659.25@${s + 0.2}`, `783.99@${s + 0.4}`];
         const prompt = () =>
-            fixture.nativeElement.querySelector('.sound-prompt') as HTMLButtonElement | null;
+            fixture.nativeElement.querySelector('.sound-prompt button') as HTMLButtonElement | null;
 
         function unlockSound() {
             TestBed.inject(AlarmService).unlock();
@@ -1806,6 +1806,10 @@ describe('WorkoutComponent', () => {
         it('asks for a tap when the browser is blocking sound, and hides once it is on', () => {
             start(workout());
             expect(prompt()?.textContent?.trim()).toBe('Tap to turn on sound');
+            // With a ? beside it, to Help on why there's no sound
+            const help = fixture.nativeElement.querySelector('.sound-prompt app-help-link a');
+            expect(help.getAttribute('href')).toBe('/help?q=no-sound');
+            expect(help.getAttribute('aria-label')).toBe('Help: Why is there no sound?');
 
             prompt()!.click();
             fixture.detectChanges();

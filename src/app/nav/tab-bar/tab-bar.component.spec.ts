@@ -82,7 +82,7 @@ describe('TabBarComponent', () => {
     });
 
     it('marks You in Settings and the legal pages, which slide in over it', async () => {
-        for (const url of ['/settings', '/privacy', '/terms']) {
+        for (const url of ['/settings', '/help', '/privacy', '/terms']) {
             await go(url);
             expect(current().filter(([, mark]) => mark)).toEqual([['You', 'true']]);
         }

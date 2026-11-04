@@ -1,0 +1,58 @@
+<div class="flex justify-center" [appSwipeBack]="'/account'">
+    <div
+        class="m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-6 shadow-xl shadow-(color:--shadow)"
+    >
+        <app-back-link url="/account" label="You" />
+        <h2 class="help__title">Help</h2>
+
+        <label class="picker-field help__search">
+            <span class="picker-field__label">Search help</span>
+            <input
+                class="picker-field__input"
+                type="search"
+                autocomplete="off"
+                placeholder="e.g. sound, plan, backup"
+                [value]="query()"
+                (input)="search($event)"
+            />
+        </label>
+        <p class="sr-only" role="status">{{ resultText() }}</p>
+
+        @for (section of sections(); track section.id) {
+            <section class="help__section" [attr.aria-labelledby]="'help-section-' + section.id">
+                <h3 class="help__heading" [id]="'help-section-' + section.id">
+                    {{ section.title }}
+                </h3>
+                @for (topic of section.topics; track topic.id) {
+                    <!-- Open when a ? link asked for it, or when searching, to read at once -->
+                    <details
+                        class="help__topic"
+                        [id]="'help-' + topic.id"
+                        [open]="topic.id === opened() || !!query().trim()"
+                    >
+                        <summary class="help__question">{{ topic.question }}</summary>
+                        <div class="help__answer">
+                            @for (paragraph of topic.answer; track $index) {
+                                <p>{{ paragraph }}</p>
+                            }
+                            @if (topic.link; as link) {
+                                <a class="help__link" [routerLink]="link.url">{{ link.label }}</a>
+                            }
+                        </div>
+                    </details>
+                }
+            </section>
+        } @empty {
+            <p class="help__none">
+                Nothing matches "{{ query().trim() }}". Try other words, or email us below.
+            </p>
+        }
+
+        <p class="help__more">
+            Didn't find your answer? Email
+            <a href="mailto:dan@loopworkouts.com?subject=Loop%20Workouts%20help"
+                >dan&#64;loopworkouts.com</a
+            >, and we'll help.
+        </p>
+    </div>
+</div>

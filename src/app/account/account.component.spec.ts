@@ -358,6 +358,23 @@ describe('AccountComponent', () => {
             expect(navigate).toHaveBeenCalledWith('/settings', 'in');
         });
 
+        it('links to Help under Settings, sliding it in (NAV-7)', () => {
+            const navigate = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            const links = element.querySelectorAll<HTMLAnchorElement>('.account__link');
+            const help = links[1];
+
+            expect(help.getAttribute('href')).toBe('/help');
+            expect(help.textContent).toContain('Help');
+            expect(
+                element.querySelector('#' + help.getAttribute('aria-describedby'))!.textContent
+            ).toContain('Questions and answers, from planning to sound');
+            help.click();
+
+            expect(navigate).toHaveBeenCalledWith('/help', 'in');
+        });
+
         it('has your profile, with sex and weight units', () => {
             expect(element.querySelector('#profile-heading')!.textContent).toBe('Profile');
             expect(element.querySelector('app-profile input[name="bodyFigure"]')).not.toBeNull();

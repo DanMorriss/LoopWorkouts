@@ -1,0 +1,115 @@
+@use 'type' as *;
+@use 'interaction' as *;
+
+:host {
+    display: block;
+}
+
+.help__title {
+    margin: 0 0 0.75rem;
+    @include display;
+    font-size: 1.6rem;
+    color: var(--text-strong);
+}
+
+.help__search {
+    margin-bottom: 0.5rem;
+}
+
+.help__section {
+    margin-top: 1.25rem;
+}
+
+.help__heading {
+    margin: 0 0 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.help__topic {
+    border-bottom: 1px solid var(--border-soft);
+}
+
+// The question, a row to tap, with a chevron that turns as it opens
+.help__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 44px;
+    padding: 0.6rem 0;
+    color: var(--text-strong);
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+        display: none;
+    }
+
+    &::after {
+        content: '';
+        flex-shrink: 0;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-right: 2px solid var(--text-muted);
+        border-bottom: 2px solid var(--text-muted);
+        transform: rotate(45deg);
+        transition: transform 0.2s ease;
+    }
+
+    @include hover {
+        text-decoration: underline;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}
+
+.help__topic[open] .help__question::after {
+    transform: rotate(-135deg);
+}
+
+.help__answer {
+    padding: 0 0 0.9rem;
+    color: var(--text);
+    line-height: 1.5;
+
+    p {
+        margin: 0 0 0.5rem;
+    }
+}
+
+// A way to do what it says, as a text link
+.help__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.help__none,
+.help__more {
+    margin: 1.25rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+
+    // In a line of text, so underlined, not told apart by colour alone
+    a {
+        color: var(--accent);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .help__question::after {
+        transition: none;
+    }
+}

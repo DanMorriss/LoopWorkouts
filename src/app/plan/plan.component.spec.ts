@@ -120,6 +120,10 @@ describe('PlanComponent', () => {
         await open();
 
         expect(days()[0]).toBe('Monday: Legs From next week');
+        // With a ? beside it, to Help on what it means
+        expect(
+            el().querySelector('.plan__workout--later app-help-link a')!.getAttribute('href')
+        ).toBe('/help?q=plan-statuses');
         expect(el().querySelector('.plan__so-far')).toBeNull();
     });
 

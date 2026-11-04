@@ -102,6 +102,12 @@
     }
 }
 
+// A second row straight under the first, sharing its border
+.account__link--next {
+    margin-top: 0;
+    border-top: 0;
+}
+
 .account__link-text {
     display: flex;
     flex: 1;

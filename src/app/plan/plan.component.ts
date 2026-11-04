@@ -2,6 +2,7 @@ import { afterNextRender, Component, computed, inject, Injector, signal } from '
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { HelpLinkComponent } from '../shared/components/help-link/help-link.component';
 import { PageSlide } from '../nav/page-slide';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { MAX_WORKOUTS_A_DAY, PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../models/plan';
@@ -33,6 +34,7 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
     selector: 'app-plan',
     imports: [
         BackLinkComponent,
+        HelpLinkComponent,
         MatIconModule,
         RouterLink,
         SwipeBackDirective,

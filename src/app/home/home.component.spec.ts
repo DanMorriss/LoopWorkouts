@@ -281,6 +281,9 @@ describe('HomeComponent', () => {
             ]);
             expect(text('.week__day .sr-only')[0]).toBe('Monday: Legs, from next week');
             expect(text('.week__so-far')).toEqual(['Your plan starts next week']);
+            expect(
+                element().querySelector('.week__so-far app-help-link a')!.getAttribute('href')
+            ).toBe('/help?q=starts-next-week');
         });
 
         it('names the next workout to come, and says when the week is all done', () => {

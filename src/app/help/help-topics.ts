@@ -142,7 +142,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'own-plan',
                 question: 'How do I plan my own week?',
                 answer: [
-                    'On Today, press Edit plan (or Plan your week). Press Add on a day and pick a workout; take one off with its ✕.',
+                    'On Today, press Edit plan (or Make your own plan). Press Add on a day and pick a workout; take one off with its ✕.',
                     'Need more workouts? Add new workouts, at the top of the list, takes you to Workouts to make one or add a ready-made one.',
                 ],
                 link: { label: 'Open the plan', url: '/plan' },
@@ -404,7 +404,9 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
             {
                 id: 'where-plan',
                 question: 'The plan',
-                answer: ["On Today: press Edit plan, or Plan your week if nothing's planned yet."],
+                answer: [
+                    "On Today: press Edit plan, or Make your own plan if nothing's planned yet.",
+                ],
                 link: { label: 'Open the plan', url: '/plan' },
             },
             {

@@ -38,7 +38,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
  * today picked out, how many of the week's planned workouts are done and the next one to come,
  * and **Edit plan**, which slides the weekly plan in. With nothing planned, a ready-made week
  * for your goal and equipment, used in one tap (PLN-6) as on Get started; or More plans, or
- * Plan your week (NAV-6).
+ * Make your own plan (NAV-6).
  */
 @Component({
     selector: 'app-week-strip',
@@ -97,7 +97,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                         href="/plan"
                         class="btn-pill week__plan"
                         (click)="slide.follow($event, '/plan', 'in')"
-                        >Plan your week</a
+                        >Make your own plan</a
                     >
                 </div>
             }

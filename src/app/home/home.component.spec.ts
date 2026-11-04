@@ -226,7 +226,7 @@ describe('HomeComponent', () => {
                 ])
             ).toEqual([
                 ['More plans', '/ready-made-plans', true],
-                ['Plan your week', '/plan', true],
+                ['Make your own plan', '/plan', true],
             ]);
             expect(element().querySelector('.week__days')).toBeNull();
         });

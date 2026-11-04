@@ -50,7 +50,7 @@ Built (PLN-1–7): a weekly plan of which workouts you do on which days, the sam
     - **Today** is outlined, in the accent colour, and its letter is bold.
 - Under the days: "**2 of 5 done this week · Next: Pull on Thursday**", counting every workout planned this week (but not those from next week, PLN-3), and naming the first workout on the next day after today with something planned (none on Sunday, or with nothing after today). Once every one is done: "**All 5 done this week**", or "**Done for the week**" with just one. With everything planned once its day had gone by (a plan started late in the week): "**Your plan starts next week**", and those days show as free; screen readers hear e.g. "Monday: Legs, from next week".
 - Screen readers hear the days as a list, each day in full, e.g. "Monday: Legs, missed", "Wednesday, today: Push, due today", "Saturday: nothing planned"; today is the list's current date.
-- With nothing planned: "Nothing planned yet. Here's a week for your goal and equipment, which adds its workouts to yours, or plan your own and Today shows what's due each day." The ready-made plan for your goal and equipment (as Get started picks, PLN-7) follows as a card, with **Use this plan** as the page's main button: one tap adds its workouts (using yours of the same name) and plans the week, with Undo, and focus moves to Edit plan. Under it, side by side, **More plans** (the Ready-made plans page, PLN-6) and **Plan your week** (the Plan page, NAV-6). Until 2026-11-04 Plan your week was the main button, with "Or use a ready-made plan" as a link beside it.
+- With nothing planned: "Nothing planned yet. Here's a week for your goal and equipment, which adds its workouts to yours, or plan your own and Today shows what's due each day." The ready-made plan for your goal and equipment (as Get started picks, PLN-7) follows as a card, with **Use this plan** as the page's main button: one tap adds its workouts (using yours of the same name) and plans the week, with Undo, and focus moves to Edit plan. Under it, side by side, **More plans** (the Ready-made plans page, PLN-6) and **Make your own plan** (the Plan page, NAV-6). Until 2026-11-04 it was **Plan your week**, the main button, with "Or use a ready-made plan" as a link beside it.
 - With no workouts at all, there's no week: Today's **Get started** card offers workouts to add first (NAV-6, see [home-and-navigation](home-and-navigation.md)).
 
 ### Ready-made plans (PLN-6, PLN-7)
@@ -83,7 +83,7 @@ Built (PLN-1–7): a weekly plan of which workouts you do on which days, the sam
 
 ## Acceptance criteria
 
-- Given Legs and Push in my workouts, when I press Edit plan (or Plan your week) on Today, then the Plan page slides in with ‹ Today; when I press Add on Thursday and pick Push, then Thursday lists Push, focus is on Thursday's Add, and screen readers hear "Push planned on Thursday".
+- Given Legs and Push in my workouts, when I press Edit plan (or Make your own plan) on Today, then the Plan page slides in with ‹ Today; when I press Add on Thursday and pick Push, then Thursday lists Push, focus is on Thursday's Add, and screen readers hear "Push planned on Thursday".
 - Given Legs planned on Thursday, when I press Add on Thursday, then Legs says "Planned" and can't be picked.
 - Given the Plan page, when I press Add on Thursday, then Add new workouts is first; when I press it, then Workouts opens and nothing's planned.
 - Given no workouts, when I open Plan, then it says to make one first, with Go to your workouts, and no Add.
@@ -92,7 +92,7 @@ Built (PLN-1–7): a weekly plan of which workouts you do on which days, the sam
 - Given Legs planned on Friday and then deleted, then Friday says "Nothing planned".
 - Given Push and Legs planned today, when I open Today, then Due today lists Push then Legs, each with Start (Push's the main button), and there's no suggested workout; when I've run Legs, then only Push is listed, with "Done today: Legs"; when I've run both, then it says "All done: Push, Legs" and the suggested workout is back.
 - Given nothing planned today, when I open Today, then there's no Due today.
-- Given a workout and nothing planned, when I open Today, then This week says "Nothing planned yet." with the ready-made week for my goal and equipment and its Use this plan as the main button, and More plans and Plan your week under it.
+- Given a workout and nothing planned, when I open Today, then This week says "Nothing planned yet." with the ready-made week for my goal and equipment and its Use this plan as the main button, and More plans and Make your own plan under it.
 - Given Training for Fitness, when I open the Ready-made plans page, then Fitness 4 days is first, then Kettlebell 3 days and No equipment 3 days, then the rest; with Only what I have on and no equipment picked, then only No equipment 3 days, saying 5 more need equipment I haven't picked.
 - Given Legs planned on Saturday, when I use Dumbbells at home, 4 days, then Dumbbell upper and Dumbbell lower are added to my workouts, the week is Mon and Thu upper, Tue and Fri lower, Saturday's Legs is off it, and Today opens with Undo; when I press Undo, then Legs is back on Saturday and the two workouts are gone.
 - Given a workout called Dumbbell upper already, when I use Dumbbells at home, 4 days, then mine is planned on Mon and Thu, not a second copy.

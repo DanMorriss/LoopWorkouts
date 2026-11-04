@@ -20,9 +20,7 @@ import { PlanCardComponent } from '../plan-card/plan-card.component';
     imports: [BackLinkComponent, EquipmentFilterComponent, PlanCardComponent, SwipeBackDirective],
     template: `
         <div class="flex justify-center" [appSwipeBack]="back.url">
-            <div
-                class="m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-6 shadow-xl shadow-(color:--shadow)"
-            >
+            <div class="w-full max-w-md p-4">
                 <app-back-link [url]="back.url" [label]="back.label" />
                 <h2 class="plans__title">Ready-made plans</h2>
                 <p class="plans__hint">

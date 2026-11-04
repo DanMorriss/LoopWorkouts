@@ -17,9 +17,7 @@ import { WELCOMED_KEY } from './welcome-first';
     imports: [HelpLinkComponent, LoopLogoComponent, SignInComponent],
     template: `
         <div class="flex justify-center">
-            <div
-                class="welcome m-4 w-full max-w-md rounded-xl border border-(--panel-border) bg-(--panel) p-6 shadow-xl shadow-(color:--shadow)"
-            >
+            <div class="welcome w-full max-w-md p-4">
                 <app-loop-logo class="welcome__logo" />
                 <h2 class="welcome__title">Welcome to Loop Workouts</h2>
                 <p class="welcome__pitch">

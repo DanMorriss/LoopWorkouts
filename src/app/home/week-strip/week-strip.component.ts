@@ -1,4 +1,11 @@
-import { afterNextRender, Component, computed, EnvironmentInjector, inject } from '@angular/core';
+import {
+    afterNextRender,
+    ApplicationRef,
+    Component,
+    computed,
+    EnvironmentInjector,
+    inject,
+} from '@angular/core';
 import { firstPlan } from '../../models/built-in-plans';
 import { PageSlide } from '../../nav/page-slide';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
@@ -11,6 +18,7 @@ import { ReadyMadePlans } from '../../shared/state/ready-made-plans.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { morphHome } from '../home-morph';
 
 /** How a day of the strip looks: everything on it done, some missed, still to do, or free. */
 export type DayMark = 'done' | 'missed' | 'planned' | 'free';
@@ -115,6 +123,7 @@ export class WeekStripComponent {
     private readonly undo = inject(UndoService);
     /** The app's, not this card's part, which is gone by the time focus moves on. */
     private readonly injector = inject(EnvironmentInjector);
+    private readonly appRef = inject(ApplicationRef);
     private readonly now = Date.now();
     private readonly today = weekdayOf(this.now);
 
@@ -142,10 +151,13 @@ export class WeekStripComponent {
      */
     protected use() {
         const plan = this.suggestedPlan();
-        const undo = this.readyMade.use(plan);
-        this.undo.offerUndo({ message: `Your week is planned: ${plan.title}`, undo });
-        afterNextRender(() => document.querySelector<HTMLElement>('.week__edit')?.focus(), {
-            injector: this.injector,
+        // The card grows or shrinks into the week, rather than the page jumping
+        morphHome(this.appRef, () => {
+            const undo = this.readyMade.use(plan);
+            this.undo.offerUndo({ message: `Your week is planned: ${plan.title}`, undo });
+            afterNextRender(() => document.querySelector<HTMLElement>('.week__edit')?.focus(), {
+                injector: this.injector,
+            });
         });
     }
 

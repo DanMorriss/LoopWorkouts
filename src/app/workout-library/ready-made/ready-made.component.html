@@ -1,8 +1,4 @@
-<div
-    class="flex justify-center"
-    [appSwipeBack]="'/library'"
-    [swipeBackDisabled]="previewing() !== null"
->
+<div class="flex justify-center" [appSwipeBack]="'/library'">
     <div class="w-full max-w-md p-4">
         <app-back-link url="/library" label="Workouts" />
         <h2 class="ready__title">Ready-made workouts</h2>
@@ -24,12 +20,11 @@
                 <ul class="ready__list">
                     @for (card of section.cards; track card.workout.id) {
                         <li>
-                            <button
-                                type="button"
+                            <a
                                 class="ready__card"
-                                aria-haspopup="dialog"
+                                [href]="card.url"
                                 [attr.data-ready-made]="card.workout.id"
-                                (click)="open(card)"
+                                (click)="slide.follow($event, card.url, 'in')"
                             >
                                 <span class="ready__name">{{ card.workout.title }}</span>
                                 {{ ' ' }}
@@ -43,7 +38,7 @@
                                         <span class="ready__in-library">· In your workouts</span>
                                     }
                                 </span>
-                            </button>
+                            </a>
                         </li>
                     }
                 </ul>
@@ -51,13 +46,3 @@
         }
     </div>
 </div>
-
-@if (previewing(); as card) {
-    <app-ready-made-dialog
-        animate.leave="dialog-leave"
-        [card]="card"
-        (closed)="close()"
-        (added)="add(card)"
-        (started)="addAndStart(card)"
-    />
-}

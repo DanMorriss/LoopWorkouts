@@ -1,0 +1,62 @@
+@use 'type' as *;
+
+:host {
+    display: block;
+    color: var(--text);
+}
+
+.preview__title {
+    margin: 0 0 0.4rem;
+    @include display;
+    font-size: 1.6rem;
+    color: var(--text-strong);
+}
+
+.preview__description,
+.preview__note {
+    margin: 0 0 0.6rem;
+    line-height: 1.45;
+}
+
+.preview__note {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.preview__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0 0 0.6rem;
+    padding: 0;
+    list-style: none;
+}
+
+.preview__chip {
+    padding: 0.2rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--control);
+    font-size: 0.8rem;
+}
+
+.preview__section {
+    margin-top: 1.1rem;
+}
+
+.preview__heading {
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+    color: var(--text-strong);
+}
+
+// The main action across the page, Add to my workouts under it
+.preview__actions {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+
+    > * {
+        justify-content: center;
+    }
+}

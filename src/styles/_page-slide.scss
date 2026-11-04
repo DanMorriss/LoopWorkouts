@@ -1,27 +1,19 @@
-// Going into an exercise from the Exercises list (or Settings, Help, Privacy or Terms from
-// Account, the Plan from Today, or the ready-made workouts from Workouts)
-// slides its page in from the right, over the list, which moves a little way left and fades; going back,
-// the page leaves to the right and the list comes back (PageSlide, src/app/nav/page-slide.ts).
-// The two have different names, so each keeps its own place on screen rather than the browser
-// moving one into the other's (the page and the list needn't be scrolled the same). Names only
-// apply while it runs.
+// Going into a page further in (an exercise from the Exercises list, Settings from You, the
+// ready-made plans from Today, …) slides it in from the right, over the page it came from, which
+// moves a little way left and fades; going back, the page leaves to the right and the one under
+// it comes back (PageSlide, src/app/nav/page-slide.ts). The two have different names, so each
+// keeps its own place on screen rather than the browser moving one into the other's (they
+// needn't be scrolled the same). Names only apply while it runs.
 
 :root.page-sliding {
-    app-exercise-list,
-    app-account,
-    app-workout-library {
-        view-transition-name: slide-under;
-    }
-
-    app-exercise-page,
-    app-plan,
-    // The ready-made workouts over the library: a preview open on them goes with them
-    app-ready-made,
-    app-settings,
-    app-help,
-    app-privacy,
-    app-terms {
-        view-transition-name: slide-over;
+    // The two pages are named slide-over and slide-under by PageSlide as it goes, whichever
+    // they are, so any page can slide in over any other. The one over is painted as the page
+    // is, at least a screen tall, so the one under doesn't show through it as it moves.
+    .page-slide-over {
+        min-height: 100dvh;
+        background-color: var(--page-bg);
+        background-image: var(--page-paint);
+        background-attachment: fixed;
     }
 
     // Its own picture, kept over the pages as they move under it

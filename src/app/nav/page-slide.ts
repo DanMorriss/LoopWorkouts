@@ -12,6 +12,9 @@ export const SLIDING_CLASS = 'page-sliding';
  */
 export const FADING_CLASS = 'page-fading';
 
+/** On the page sliding over another while it slides, painting it as the page is. */
+const OVER_CLASS = 'page-slide-over';
+
 /** Into a page further in (`in`, e.g. an exercise from the list), or back out of it (`out`). */
 export type SlideWay = 'in' | 'out';
 
@@ -20,8 +23,9 @@ export type SlideWay = 'in' | 'out';
  * Account) slides the page across, as a phone does: the new page comes in from the right over
  * the list, which moves a little way left and fades; going back, the page leaves to the right
  * and the list comes back. Every other navigation changes page at once, so this starts its own
- * view transition around those, as WorkoutMorph does for the workout. The names it moves
- * (styles/_page-slide.scss) only apply under SLIDING_CLASS.
+ * view transition around those, as WorkoutMorph does for the workout. It names the two pages
+ * itself for the slide (slide-over for the one further in, slide-under for the one it's over;
+ * styles/_page-slide.scss moves them), so any page can slide in over any other.
  */
 @Service()
 export class PageSlide {
@@ -63,19 +67,37 @@ export class PageSlide {
     navigate(url: string, way: SlideWay, velocity?: number) {
         const top = way === 'in' ? 0 : this.listScroll;
         this.listScroll = way === 'in' ? window.scrollY : 0;
+        // The page going further in slides over, and the one it's over slides under, whichever
+        // pages they are: named on each as it's pictured, before going and once there
+        const named: HTMLElement[] = [];
+        const name = (part: 'slide-over' | 'slide-under') => {
+            const page = routedPage();
+            if (page) {
+                page.style.setProperty('view-transition-name', part);
+                page.classList.toggle(OVER_CLASS, part === 'slide-over');
+                named.push(page);
+            }
+        };
+        // With reduced motion the pages cross-fade instead, briefly, so it's still clear
+        // the page changed
+        const reduced = reducedMotion();
+        const slides = !!document.startViewTransition && !reduced;
         const go = async () => {
             await this.router.navigateByUrl(url);
             // Render now, so the new page is what's scrolled (and what the browser slides in)
             this.appRef.tick();
+            if (slides) {
+                name(way === 'in' ? 'slide-over' : 'slide-under');
+            }
             window.scrollTo({ top, behavior: 'instant' });
         };
         if (!document.startViewTransition) {
             void go();
             return;
         }
-        // With reduced motion the pages cross-fade instead, briefly, so it's still clear
-        // the page changed
-        const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (slides) {
+            name(way === 'in' ? 'slide-under' : 'slide-over');
+        }
         const root = document.documentElement;
         const classes = reduced ? [FADING_CLASS] : [SLIDING_CLASS, `${SLIDING_CLASS}--${way}`];
         root.classList.add(...classes);
@@ -98,6 +120,10 @@ export class PageSlide {
         // Interrupted (e.g. another view transition starting) rejects `ready`; nothing waits on it
         transition.ready.catch(() => undefined);
         transition.finished.finally(() => {
+            for (const page of named) {
+                page.style.removeProperty('view-transition-name');
+                page.classList.remove(OVER_CLASS);
+            }
             root.classList.remove(...classes);
             root.style.removeProperty('--slide-easing');
             root.style.removeProperty('--slide-duration');
@@ -137,3 +163,12 @@ export class PageSlide {
 
 /** The spring a page slides in on: --ease-spring, a 0.3s response with no bounce. */
 const SLIDE_SPRING = springCurve(0.3);
+
+function reducedMotion(): boolean {
+    return matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/** The page the router is showing: the element it puts after its outlet in <main>. */
+function routedPage(): HTMLElement | null {
+    return document.querySelector<HTMLElement>('main router-outlet + *');
+}

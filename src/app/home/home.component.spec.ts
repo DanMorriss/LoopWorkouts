@@ -84,6 +84,20 @@ describe('HomeComponent', () => {
         ]);
     });
 
+    /**
+     * Presses Use this plan, and waits for the card to change into the week: it's made inside
+     * a view transition, so the card can grow or shrink into it (morphHome).
+     */
+    async function useThePlan() {
+        const start = vi.spyOn(document, 'startViewTransition');
+        (element().querySelector('.plan-card__use') as HTMLButtonElement).click();
+        expect(document.documentElement.classList).toContain('home-morphing');
+        await start.mock.results[0].value.updateCallbackDone;
+        fixture.detectChanges();
+        await fixture.whenStable();
+        start.mockRestore();
+    }
+
     describe('getting started, with no workouts (NAV-6, PLN-7)', () => {
         it('shows no logo, and offers a ready-made week for your goal and equipment', () => {
             TestBed.inject(SettingsStore).update({
@@ -126,9 +140,7 @@ describe('HomeComponent', () => {
             // On the page, so focus can move
             document.body.appendChild(element());
             expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
-            (element().querySelector('.plan-card__use') as HTMLButtonElement).click();
-            fixture.detectChanges();
-            await fixture.whenStable();
+            await useThePlan();
 
             const workouts = TestBed.inject(WorkoutStore).workouts();
             expect(workouts.map((workout) => workout.title)).toEqual([
@@ -237,9 +249,7 @@ describe('HomeComponent', () => {
             create();
             document.body.appendChild(element());
             expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
-            (element().querySelector('.plan-card__use') as HTMLButtonElement).click();
-            fixture.detectChanges();
-            await fixture.whenStable();
+            await useThePlan();
 
             const titles = TestBed.inject(WorkoutStore)
                 .workouts()

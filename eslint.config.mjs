@@ -11,8 +11,7 @@ const maxLines = (max) => ['error', { max, skipBlankLines: true, skipComments: t
 // Already over when the limit came in. Each can only come down: lower its number as it shrinks,
 // and remove it once it's under the limit. Never raise one or add another.
 const OVER_THE_LIMIT = {
-    'workout-setup/workout-setup.component.html': 1005,
-    'workout-setup/workout-setup.component.ts': 1394,
+    'workout-setup/workout-setup.component.html': 902,
 };
 
 export default [

@@ -36,6 +36,7 @@ import {
     work,
 } from '../shared/testing/make-workout';
 import { WorkoutSetupComponent } from './workout-setup.component';
+import { WorkoutSetupForm } from './workout-setup-form';
 import { LeaveCheck } from '../nav/leave-check';
 import { PageSlide } from '../nav/page-slide';
 
@@ -564,7 +565,7 @@ describe('WorkoutSetupComponent', () => {
                 chooseTime(1, 'seconds', '30'); // only rest
 
                 expect(button('Save').disabled).toBe(true);
-                await fixture.componentInstance['saveOnly']();
+                await fixture.debugElement.injector.get(WorkoutSetupForm).saveOnly();
 
                 expect(store.workouts()).toEqual([]);
                 expect(navigate).not.toHaveBeenCalled();

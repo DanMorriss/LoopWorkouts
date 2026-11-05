@@ -1,10 +1,14 @@
 <div class="flex justify-center">
     <div class="w-full max-w-md p-4">
         <app-back-link [url]="back().url" [label]="back().label" />
-        <form [formRoot]="workoutForm">
+        <form [formRoot]="setup.workoutForm">
             <label class="picker-field" for="title">
                 <span class="picker-field__label">Workout Title</span>
-                <input class="picker-field__input" id="title" [formField]="workoutForm.title" />
+                <input
+                    class="picker-field__input"
+                    id="title"
+                    [formField]="setup.workoutForm.title"
+                />
             </label>
 
             <div class="steps-title">
@@ -12,8 +16,8 @@
                 <!-- Shows on hover or focus, and on a tap for touch screens; Escape hides it -->
                 <span
                     class="info"
-                    (mouseenter)="infoOpen.set(true)"
-                    (mouseleave)="infoOpen.set(false)"
+                    (mouseenter)="setup.infoOpen.set(true)"
+                    (mouseleave)="setup.infoOpen.set(false)"
                 >
                     <button
                         type="button"
@@ -21,16 +25,16 @@
                         class="info__button"
                         aria-label="About steps"
                         aria-describedby="steps-info-tip"
-                        (focus)="infoOpen.set(true)"
-                        (blur)="infoOpen.set(false)"
-                        (click)="infoOpen.set(true)"
-                        (keydown.escape)="infoOpen.set(false)"
+                        (focus)="setup.infoOpen.set(true)"
+                        (blur)="setup.infoOpen.set(false)"
+                        (click)="setup.infoOpen.set(true)"
+                        (keydown.escape)="setup.infoOpen.set(false)"
                     >
                         <mat-icon aria-hidden="true">info_outline</mat-icon>
                     </button>
                     <span
                         class="info__tip"
-                        [class.info__tip--open]="infoOpen()"
+                        [class.info__tip--open]="setup.infoOpen()"
                         id="steps-info-tip"
                         role="tooltip"
                     >
@@ -39,17 +43,17 @@
                     </span>
                 </span>
             </div>
-            @if (stepCount() > 0) {
+            @if (setup.stepCount() > 0) {
                 <div class="steps-toolbar">
                     <button
                         type="button"
                         class="btn-pill steps-toggle-all"
-                        (click)="setAllExpanded(!anyExpanded())"
+                        (click)="setup.setAllExpanded(!setup.anyExpanded())"
                     >
                         <mat-icon aria-hidden="true">{{
-                            anyExpanded() ? 'unfold_less' : 'unfold_more'
+                            setup.anyExpanded() ? 'unfold_less' : 'unfold_more'
                         }}</mat-icon>
-                        {{ anyExpanded() ? 'Collapse all' : 'Expand all' }}
+                        {{ setup.anyExpanded() ? 'Collapse all' : 'Expand all' }}
                     </button>
                 </div>
             } @else {
@@ -57,7 +61,7 @@
             }
 
             <!-- Says what happened after a step is added, moved or deleted -->
-            <div class="sr-only" aria-live="polite">{{ stepAnnouncement() }}</div>
+            <div class="sr-only" aria-live="polite">{{ setup.stepAnnouncement() }}</div>
 
             <!-- Steps can be dragged by their handle; the up/down buttons do the same from a keyboard -->
             <ol
@@ -65,16 +69,16 @@
                 aria-labelledby="steps-heading"
                 cdkDropList
                 cdkDropListLockAxis="y"
-                [cdkDropListSortPredicate]="canDropAt"
-                (cdkDropListDropped)="dropStep($event)"
+                [cdkDropListSortPredicate]="drag.canDropAt"
+                (cdkDropListDropped)="drag.dropStep($event)"
             >
                 <!-- Rows stay put and the values move between them: moving a row in the page
                      would reset its wheels' scroll, which is how they show their value -->
-                @for (step of workoutForm.steps; track $index; let i = $index) {
+                @for (step of setup.workoutForm.steps; track $index; let i = $index) {
                     @let key = step().value().key;
                     @let kind = step().value().kind;
-                    @let time = amountText(step().value());
-                    @let expanded = isExpanded(key);
+                    @let time = setup.amountText(step().value());
+                    @let expanded = setup.isExpanded(key);
                     <!-- Each set its own reps and weight, or time, in a row of its own (BLD-11) -->
                     @let rowsShown =
                         (kind === 'reps' || kind === 'work') &&
@@ -90,24 +94,26 @@
                         [class.step--heading]="kind === 'heading'"
                         [class.step--superset]="kind === 'superset'"
                         [class.step--in-superset]="inSuperset"
-                        [class.step--hidden]="isHidden(step().value())"
+                        [class.step--hidden]="drag.isHidden(step().value())"
                         [class.step--collapsed]="!expanded"
                         cdkDrag
                         [cdkDragData]="key"
-                        (cdkDragStarted)="dragStarted()"
-                        (cdkDragMoved)="drop.moved($event)"
-                        (cdkDragReleased)="drop.released($event)"
+                        (cdkDragStarted)="drag.dragStarted()"
+                        (cdkDragMoved)="drag.drop.moved($event)"
+                        (cdkDragReleased)="drag.drop.released($event)"
                     >
                         <!-- What follows the pointer: a compact card, as the wheels don't copy well.
                              Held where the step was grabbed (grabbedAt), not by its corner. A
                              superset's names its steps, which it takes with it. -->
                         <app-step-drag-preview
                             [kind]="kind"
-                            [badge]="kind === 'superset' ? supersetName(i) : ''"
-                            [name]="summaryName(i)"
+                            [badge]="kind === 'superset' ? setup.supersetName(i) : ''"
+                            [name]="setup.summaryName(i)"
                             [time]="time"
-                            [style.translate]="-grabbedAt().x + 'px ' + -grabbedAt().y + 'px'"
-                            [style.max-width.px]="grabbedAt().width || null"
+                            [style.translate]="
+                                -drag.grabbedAt().x + 'px ' + -drag.grabbedAt().y + 'px'
+                            "
+                            [style.max-width.px]="drag.grabbedAt().width || null"
                             *cdkDragPreview
                         />
                         <!-- Where it will land -->
@@ -125,36 +131,36 @@
                                         ? 'Drag to move it with its steps'
                                         : 'Drag to reorder'
                                 "
-                                (pointerdown)="grabStep($event, key)"
+                                (pointerdown)="drag.grabStep($event, key)"
                             >
                                 <mat-icon>drag_indicator</mat-icon>
                             </span>
                             @if (kind === 'superset') {
                                 <!-- What it's called goes by how many exercises it has -->
                                 <span class="step__heading-badge" [id]="'step-' + key + '-title'">
-                                    <span aria-hidden="true">{{ supersetName(i) }}</span>
-                                    <span class="sr-only">{{ stepTitle(i) }}</span>
+                                    <span aria-hidden="true">{{ setup.supersetName(i) }}</span>
+                                    <span class="sr-only">{{ setup.stepTitle(i) }}</span>
                                 </span>
                             } @else if (kind === 'heading') {
                                 <!-- A label, not a step: no kind to change, and no number -->
                                 <span class="step__heading-badge" [id]="'step-' + key + '-title'">
                                     <span aria-hidden="true">Heading</span>
-                                    <span class="sr-only">{{ stepTitle(i) }}</span>
+                                    <span class="sr-only">{{ setup.stepTitle(i) }}</span>
                                 </span>
                             } @else {
                                 <!-- The step's kind, and a menu to change it -->
                                 <app-step-kind-menu
                                     [kind]="kind"
                                     [stepKey]="key"
-                                    [stepNumber]="stepNumber(i)"
-                                    [open]="kindMenuFor() === key"
-                                    (toggled)="toggleKindMenu(key)"
-                                    (closed)="kindMenuFor.set(null)"
-                                    (picked)="setStepKind(i, $event)"
+                                    [stepNumber]="setup.stepNumber(i)"
+                                    [open]="setup.kindMenuFor() === key"
+                                    (toggled)="setup.toggleKindMenu(key)"
+                                    (closed)="setup.kindMenuFor.set(null)"
+                                    (picked)="setup.setStepKind(i, $event)"
                                 />
                                 <span class="step__number" [id]="'step-' + key + '-title'">
-                                    <span aria-hidden="true">{{ stepNumber(i) }}</span>
-                                    <span class="sr-only">{{ stepTitle(i) }}</span>
+                                    <span aria-hidden="true">{{ setup.stepNumber(i) }}</span>
+                                    <span class="sr-only">{{ setup.stepTitle(i) }}</span>
                                 </span>
                             }
                             <!-- Opens and closes the step; closed, it shows the step in one line -->
@@ -162,10 +168,10 @@
                                 type="button"
                                 class="step__toggle"
                                 [id]="'step-' + key + '-toggle'"
-                                [attr.aria-label]="toggleLabel(i)"
+                                [attr.aria-label]="setup.toggleLabel(i)"
                                 [attr.aria-expanded]="expanded"
                                 [attr.aria-controls]="expanded ? 'step-' + key + '-body' : null"
-                                (click)="toggleStep(key)"
+                                (click)="setup.toggleStep(key)"
                             >
                                 @if (!expanded && kind === 'heading') {
                                     <!-- As a section title, so a collapsed workout reads as its plan -->
@@ -174,7 +180,9 @@
                                     }}</span>
                                 } @else if (!expanded) {
                                     <span class="step__summary">
-                                        <span class="step__summary-name">{{ summaryName(i) }}</span>
+                                        <span class="step__summary-name">{{
+                                            setup.summaryName(i)
+                                        }}</span>
                                         <span class="step__summary-time">{{ time }}</span>
                                     </span>
                                 }
@@ -189,9 +197,9 @@
                                         type="button"
                                         class="btn-icon step__action"
                                         [id]="'step-' + key + '-up'"
-                                        [attr.aria-label]="'Move ' + stepTitle(i) + ' up'"
-                                        [disabled]="!canMove(i, -1)"
-                                        (click)="moveStep(i, -1)"
+                                        [attr.aria-label]="'Move ' + setup.stepTitle(i) + ' up'"
+                                        [disabled]="!setup.canMove(i, -1)"
+                                        (click)="setup.moveStep(i, -1)"
                                     >
                                         <mat-icon aria-hidden="true">arrow_upward</mat-icon>
                                     </button>
@@ -199,9 +207,9 @@
                                         type="button"
                                         class="btn-icon step__action"
                                         [id]="'step-' + key + '-down'"
-                                        [attr.aria-label]="'Move ' + stepTitle(i) + ' down'"
-                                        [disabled]="!canMove(i, 1)"
-                                        (click)="moveStep(i, 1)"
+                                        [attr.aria-label]="'Move ' + setup.stepTitle(i) + ' down'"
+                                        [disabled]="!setup.canMove(i, 1)"
+                                        (click)="setup.moveStep(i, 1)"
                                     >
                                         <mat-icon aria-hidden="true">arrow_downward</mat-icon>
                                     </button>
@@ -209,8 +217,8 @@
                                         type="button"
                                         class="btn-icon btn-icon--danger step__action step__action--delete"
                                         [id]="'step-' + key + '-delete'"
-                                        [attr.aria-label]="'Delete ' + stepTitle(i)"
-                                        (click)="deleteStep(i)"
+                                        [attr.aria-label]="'Delete ' + setup.stepTitle(i)"
+                                        (click)="setup.deleteStep(i)"
                                     >
                                         <mat-icon aria-hidden="true">close</mat-icon>
                                     </button>
@@ -247,13 +255,13 @@
                                                 class="picker-field__input"
                                                 [id]="'step-' + key + '-name'"
                                                 [formField]="step.name"
-                                                [placeholder]="nameExamples[kind]"
+                                                [placeholder]="setup.nameExamples[kind]"
                                                 [attr.aria-describedby]="'step-' + key + '-title'"
                                             />
                                         </label>
                                     } @else {
                                         <!-- Finds an exercise as you type, or makes a new one -->
-                                        @let exercise = exerciseFor(step().value());
+                                        @let exercise = exercises.exerciseFor(step().value());
                                         <div class="picker-field">
                                             <label
                                                 class="picker-field__label"
@@ -267,8 +275,10 @@
                                                     [inputId]="'step-' + key + '-name'"
                                                     [formField]="step.name"
                                                     [(exerciseId)]="step.exerciseId().value"
-                                                    (exerciseChange)="exerciseChanged(key, $event)"
-                                                    [placeholder]="nameExamples[kind]"
+                                                    (exerciseChange)="
+                                                        exercises.exerciseChanged(key, $event)
+                                                    "
+                                                    [placeholder]="setup.nameExamples[kind]"
                                                     [describedBy]="
                                                         'step-' +
                                                         key +
@@ -284,9 +294,15 @@
                                                     class="btn-icon"
                                                     [id]="'step-' + key + '-browse'"
                                                     [attr.aria-label]="
-                                                        'Browse exercises for step ' + stepNumber(i)
+                                                        'Browse exercises for step ' +
+                                                        setup.stepNumber(i)
                                                     "
-                                                    (click)="startBrowse(key, stepNumber(i))"
+                                                    (click)="
+                                                        exercises.startBrowse(
+                                                            key,
+                                                            setup.stepNumber(i)
+                                                        )
+                                                    "
                                                 >
                                                     <mat-icon aria-hidden="true"
                                                         >manage_search</mat-icon
@@ -308,14 +324,17 @@
                                                         }}
                                                         <!-- Why its kind just changed, e.g. to timed
                                                              for Plank -->
-                                                        @if (kindNoteFor(step().value()); as why) {
+                                                        @if (
+                                                            exercises.kindNoteFor(step().value());
+                                                            as why
+                                                        ) {
                                                             <span
                                                                 class="step__exercise-note step__kind-note"
                                                             >
                                                                 {{ why }}
                                                             </span>
                                                         }
-                                                        @if (noteFor(exercise); as note) {
+                                                        @if (exercises.noteFor(exercise); as note) {
                                                             <span class="step__exercise-note">
                                                                 Your note: {{ note }}
                                                             </span>
@@ -334,7 +353,9 @@
                                                             [attr.aria-label]="
                                                                 'Details of ' + exercise.name
                                                             "
-                                                            (click)="showDetails(exercise, key)"
+                                                            (click)="
+                                                                exercises.showDetails(exercise, key)
+                                                            "
                                                         >
                                                             <mat-icon aria-hidden="true"
                                                                 >info</mat-icon
@@ -350,7 +371,13 @@
                                                             [attr.aria-label]="
                                                                 'Swap ' + exercise.name
                                                             "
-                                                            (click)="startSwap(exercise, key, kind)"
+                                                            (click)="
+                                                                exercises.startSwap(
+                                                                    exercise,
+                                                                    key,
+                                                                    kind
+                                                                )
+                                                            "
                                                         >
                                                             <mat-icon aria-hidden="true"
                                                                 >swap_horiz</mat-icon
@@ -363,12 +390,17 @@
                                                             [id]="'step-' + key + '-exercise'"
                                                             [attr.aria-label]="
                                                                 (isBuiltIn(exercise)
-                                                                    ? noteFor(exercise)
+                                                                    ? exercises.noteFor(exercise)
                                                                         ? 'Edit your note on '
                                                                         : 'Add a note to '
                                                                     : 'Edit ') + exercise.name
                                                             "
-                                                            (click)="openExercise(exercise, key)"
+                                                            (click)="
+                                                                exercises.openExercise(
+                                                                    exercise,
+                                                                    key
+                                                                )
+                                                            "
                                                         >
                                                             <mat-icon aria-hidden="true">{{
                                                                 isBuiltIn(exercise)
@@ -377,7 +409,7 @@
                                                             }}</mat-icon>
                                                             {{
                                                                 isBuiltIn(exercise)
-                                                                    ? noteFor(exercise)
+                                                                    ? exercises.noteFor(exercise)
                                                                         ? 'Edit note'
                                                                         : 'Add note'
                                                                     : 'Edit'
@@ -393,92 +425,40 @@
                                         <!-- Each set's own, in the rows under Vary each set -->
                                     } @else if (kind === 'reps') {
                                         <div class="picker-row">
-                                            <div class="picker-field">
-                                                <span
-                                                    class="picker-field__label"
-                                                    [id]="'step-' + key + '-reps-label'"
-                                                >
-                                                    Reps
-                                                </span>
-                                                <app-wheel-picker
-                                                    [id]="'step-' + key + '-reps'"
-                                                    [formField]="step.reps"
-                                                    [options]="repOptions"
-                                                    [labelledBy]="
-                                                        'step-' +
-                                                        key +
-                                                        '-title step-' +
-                                                        key +
-                                                        '-reps-label'
-                                                    "
-                                                />
-                                            </div>
+                                            <app-labelled-wheel
+                                                [wheelId]="'step-' + key + '-reps'"
+                                                label="Reps"
+                                                [field]="step.reps"
+                                                [options]="setup.repOptions"
+                                                [context]="'step-' + key + '-title'"
+                                            />
 
                                             <!-- Optional: left at – for bodyweight moves -->
-                                            <div class="picker-field">
-                                                <span
-                                                    class="picker-field__label"
-                                                    [id]="'step-' + key + '-weight-label'"
-                                                >
-                                                    Weight ({{ weightUnit }})
-                                                </span>
-                                                <app-wheel-picker
-                                                    [id]="'step-' + key + '-weight'"
-                                                    [formField]="step.weight"
-                                                    [options]="weightOptions"
-                                                    [labelledBy]="
-                                                        'step-' +
-                                                        key +
-                                                        '-title step-' +
-                                                        key +
-                                                        '-weight-label'
-                                                    "
-                                                />
-                                            </div>
+                                            <app-labelled-wheel
+                                                [wheelId]="'step-' + key + '-weight'"
+                                                [label]="'Weight (' + setup.weightUnit + ')'"
+                                                [field]="step.weight"
+                                                [options]="setup.weightOptions"
+                                                [context]="'step-' + key + '-title'"
+                                            />
                                         </div>
                                     } @else if (kind === 'work' || kind === 'rest') {
                                         <div class="picker-row">
-                                            <div class="picker-field">
-                                                <span
-                                                    class="picker-field__label"
-                                                    [id]="'step-' + key + '-minutes-label'"
-                                                >
-                                                    Minutes
-                                                </span>
-                                                <app-wheel-picker
-                                                    [id]="'step-' + key + '-minutes'"
-                                                    [formField]="step.minutes"
-                                                    [options]="minuteOptions"
-                                                    [labelledBy]="
-                                                        'step-' +
-                                                        key +
-                                                        '-title step-' +
-                                                        key +
-                                                        '-minutes-label'
-                                                    "
-                                                />
-                                            </div>
+                                            <app-labelled-wheel
+                                                [wheelId]="'step-' + key + '-minutes'"
+                                                label="Minutes"
+                                                [field]="step.minutes"
+                                                [options]="setup.minuteOptions"
+                                                [context]="'step-' + key + '-title'"
+                                            />
 
-                                            <div class="picker-field">
-                                                <span
-                                                    class="picker-field__label"
-                                                    [id]="'step-' + key + '-seconds-label'"
-                                                >
-                                                    Seconds
-                                                </span>
-                                                <app-wheel-picker
-                                                    [id]="'step-' + key + '-seconds'"
-                                                    [formField]="step.seconds"
-                                                    [options]="secondOptions"
-                                                    [labelledBy]="
-                                                        'step-' +
-                                                        key +
-                                                        '-title step-' +
-                                                        key +
-                                                        '-seconds-label'
-                                                    "
-                                                />
-                                            </div>
+                                            <app-labelled-wheel
+                                                [wheelId]="'step-' + key + '-seconds'"
+                                                label="Seconds"
+                                                [field]="step.seconds"
+                                                [options]="setup.secondOptions"
+                                                [context]="'step-' + key + '-title'"
+                                            />
                                         </div>
                                     }
 
@@ -500,8 +480,8 @@
                                                     <app-wheel-picker
                                                         [id]="'step-' + key + '-sets'"
                                                         [value]="step().value().sets"
-                                                        (valueChange)="setSets(i, $event)"
-                                                        [options]="setOptions"
+                                                        (valueChange)="setup.setSets(i, $event)"
+                                                        [options]="setup.setOptions"
                                                         [labelledBy]="
                                                             'step-' +
                                                             key +
@@ -558,58 +538,34 @@
                                                     (mm:ss)
                                                 </span>
                                                 <div class="picker-row">
-                                                    <div class="picker-field">
-                                                        <span
-                                                            class="sr-only"
-                                                            [id]="
-                                                                'step-' +
-                                                                key +
-                                                                '-rest-minutes-label'
-                                                            "
-                                                        >
-                                                            Minutes
-                                                        </span>
-                                                        <app-wheel-picker
-                                                            [id]="'step-' + key + '-rest-minutes'"
-                                                            [formField]="step.restMinutes"
-                                                            [options]="minuteOptions"
-                                                            [labelledBy]="
-                                                                'step-' +
-                                                                key +
-                                                                '-title step-' +
-                                                                key +
-                                                                '-rest-label step-' +
-                                                                key +
-                                                                '-rest-minutes-label'
-                                                            "
-                                                        />
-                                                    </div>
-                                                    <div class="picker-field">
-                                                        <span
-                                                            class="sr-only"
-                                                            [id]="
-                                                                'step-' +
-                                                                key +
-                                                                '-rest-seconds-label'
-                                                            "
-                                                        >
-                                                            Seconds
-                                                        </span>
-                                                        <app-wheel-picker
-                                                            [id]="'step-' + key + '-rest-seconds'"
-                                                            [formField]="step.restSeconds"
-                                                            [options]="secondOptions"
-                                                            [labelledBy]="
-                                                                'step-' +
-                                                                key +
-                                                                '-title step-' +
-                                                                key +
-                                                                '-rest-label step-' +
-                                                                key +
-                                                                '-rest-seconds-label'
-                                                            "
-                                                        />
-                                                    </div>
+                                                    <app-labelled-wheel
+                                                        [wheelId]="'step-' + key + '-rest-minutes'"
+                                                        label="Minutes"
+                                                        [hideLabel]="true"
+                                                        [field]="step.restMinutes"
+                                                        [options]="setup.minuteOptions"
+                                                        [context]="
+                                                            'step-' +
+                                                            key +
+                                                            '-title step-' +
+                                                            key +
+                                                            '-rest-label'
+                                                        "
+                                                    />
+                                                    <app-labelled-wheel
+                                                        [wheelId]="'step-' + key + '-rest-seconds'"
+                                                        label="Seconds"
+                                                        [hideLabel]="true"
+                                                        [field]="step.restSeconds"
+                                                        [options]="setup.secondOptions"
+                                                        [context]="
+                                                            'step-' +
+                                                            key +
+                                                            '-title step-' +
+                                                            key +
+                                                            '-rest-label'
+                                                        "
+                                                    />
                                                 </div>
                                             </div>
                                         }
@@ -628,7 +584,7 @@
                                                     <app-toggle-switch
                                                         [id]="'step-' + key + '-vary'"
                                                         [checked]="step().value().vary"
-                                                        (checkedChange)="setVary(i, $event)"
+                                                        (checkedChange)="setup.setVary(i, $event)"
                                                         [labelledBy]="
                                                             'step-' +
                                                             key +
@@ -654,7 +610,7 @@
                                                         let j = $index
                                                     ) {
                                                         @let rowId = 'step-' + key + '-set-' + j;
-                                                        @let rowOpen = isSetRowOpen(key, j);
+                                                        @let rowOpen = setup.isSetRowOpen(key, j);
                                                         <li class="wheel-row">
                                                             <span
                                                                 class="sr-only"
@@ -672,9 +628,14 @@
                                                                         ? rowId + '-wheels'
                                                                         : null
                                                                 "
-                                                                (click)="toggleSetRow(key, j)"
+                                                                (click)="setup.toggleSetRow(key, j)"
                                                             >
-                                                                {{ setRowText(step().value(), j) }}
+                                                                {{
+                                                                    setup.setRowText(
+                                                                        step().value(),
+                                                                        j
+                                                                    )
+                                                                }}
                                                                 <mat-icon
                                                                     class="wheel-row__chevron"
                                                                     aria-hidden="true"
@@ -688,136 +649,79 @@
                                                                     animate.enter="step__body--opening"
                                                                 >
                                                                     @if (kind === 'reps') {
-                                                                        <div class="picker-field">
-                                                                            <span
-                                                                                class="picker-field__label"
-                                                                                [id]="
-                                                                                    rowId +
-                                                                                    '-reps-label'
-                                                                                "
-                                                                            >
-                                                                                Reps
-                                                                            </span>
-                                                                            <app-wheel-picker
-                                                                                [id]="
-                                                                                    rowId + '-reps'
-                                                                                "
-                                                                                [formField]="
-                                                                                    row.reps
-                                                                                "
-                                                                                [options]="
-                                                                                    repOptions
-                                                                                "
-                                                                                [labelledBy]="
-                                                                                    'step-' +
-                                                                                    key +
-                                                                                    '-title ' +
-                                                                                    rowId +
-                                                                                    '-name ' +
-                                                                                    rowId +
-                                                                                    '-reps-label'
-                                                                                "
-                                                                            />
-                                                                        </div>
-                                                                        <div class="picker-field">
-                                                                            <span
-                                                                                class="picker-field__label"
-                                                                                [id]="
-                                                                                    rowId +
-                                                                                    '-weight-label'
-                                                                                "
-                                                                            >
-                                                                                Weight ({{
-                                                                                    weightUnit
-                                                                                }})
-                                                                            </span>
-                                                                            <app-wheel-picker
-                                                                                [id]="
-                                                                                    rowId +
-                                                                                    '-weight'
-                                                                                "
-                                                                                [formField]="
-                                                                                    row.weight
-                                                                                "
-                                                                                [options]="
-                                                                                    weightOptions
-                                                                                "
-                                                                                [labelledBy]="
-                                                                                    'step-' +
-                                                                                    key +
-                                                                                    '-title ' +
-                                                                                    rowId +
-                                                                                    '-name ' +
-                                                                                    rowId +
-                                                                                    '-weight-label'
-                                                                                "
-                                                                            />
-                                                                        </div>
+                                                                        <app-labelled-wheel
+                                                                            [wheelId]="
+                                                                                rowId + '-reps'
+                                                                            "
+                                                                            label="Reps"
+                                                                            [field]="row.reps"
+                                                                            [options]="
+                                                                                setup.repOptions
+                                                                            "
+                                                                            [context]="
+                                                                                'step-' +
+                                                                                key +
+                                                                                '-title ' +
+                                                                                rowId +
+                                                                                '-name'
+                                                                            "
+                                                                        />
+                                                                        <app-labelled-wheel
+                                                                            [wheelId]="
+                                                                                rowId + '-weight'
+                                                                            "
+                                                                            [label]="
+                                                                                'Weight (' +
+                                                                                setup.weightUnit +
+                                                                                ')'
+                                                                            "
+                                                                            [field]="row.weight"
+                                                                            [options]="
+                                                                                setup.weightOptions
+                                                                            "
+                                                                            [context]="
+                                                                                'step-' +
+                                                                                key +
+                                                                                '-title ' +
+                                                                                rowId +
+                                                                                '-name'
+                                                                            "
+                                                                        />
                                                                     } @else {
-                                                                        <div class="picker-field">
-                                                                            <span
-                                                                                class="picker-field__label"
-                                                                                [id]="
-                                                                                    rowId +
-                                                                                    '-minutes-label'
-                                                                                "
-                                                                            >
-                                                                                Minutes
-                                                                            </span>
-                                                                            <app-wheel-picker
-                                                                                [id]="
-                                                                                    rowId +
-                                                                                    '-minutes'
-                                                                                "
-                                                                                [formField]="
-                                                                                    row.minutes
-                                                                                "
-                                                                                [options]="
-                                                                                    minuteOptions
-                                                                                "
-                                                                                [labelledBy]="
-                                                                                    'step-' +
-                                                                                    key +
-                                                                                    '-title ' +
-                                                                                    rowId +
-                                                                                    '-name ' +
-                                                                                    rowId +
-                                                                                    '-minutes-label'
-                                                                                "
-                                                                            />
-                                                                        </div>
-                                                                        <div class="picker-field">
-                                                                            <span
-                                                                                class="picker-field__label"
-                                                                                [id]="
-                                                                                    rowId +
-                                                                                    '-seconds-label'
-                                                                                "
-                                                                            >
-                                                                                Seconds
-                                                                            </span>
-                                                                            <app-wheel-picker
-                                                                                [id]="
-                                                                                    rowId +
-                                                                                    '-seconds'
-                                                                                "
-                                                                                [formField]="
-                                                                                    row.seconds
-                                                                                "
-                                                                                [options]="
-                                                                                    secondOptions
-                                                                                "
-                                                                                [labelledBy]="
-                                                                                    'step-' +
-                                                                                    key +
-                                                                                    '-title ' +
-                                                                                    rowId +
-                                                                                    '-name ' +
-                                                                                    rowId +
-                                                                                    '-seconds-label'
-                                                                                "
-                                                                            />
-                                                                        </div>
+                                                                        <app-labelled-wheel
+                                                                            [wheelId]="
+                                                                                rowId + '-minutes'
+                                                                            "
+                                                                            label="Minutes"
+                                                                            [field]="row.minutes"
+                                                                            [options]="
+                                                                                setup.minuteOptions
+                                                                            "
+                                                                            [context]="
+                                                                                'step-' +
+                                                                                key +
+                                                                                '-title ' +
+                                                                                rowId +
+                                                                                '-name'
+                                                                            "
+                                                                        />
+                                                                        <app-labelled-wheel
+                                                                            [wheelId]="
+                                                                                rowId + '-seconds'
+                                                                            "
+                                                                            label="Seconds"
+                                                                            [field]="row.seconds"
+                                                                            [options]="
+                                                                                setup.secondOptions
+                                                                            "
+                                                                            [context]="
+                                                                                'step-' +
+                                                                                key +
+                                                                                '-title ' +
+                                                                                rowId +
+                                                                                '-name'
+                                                                            "
+                                                                        />
                                                                     }
                                                                 </div>
                                                             }
@@ -831,35 +735,35 @@
                                     <!-- Supersets (BLD-12): a step to add to one, and joining the
                                          next exercise to one, or making one with it; or taking a
                                          step out of one -->
-                                    @if (kind === 'superset' || inSuperset || canJoin(i)) {
+                                    @if (kind === 'superset' || inSuperset || setup.canJoin(i)) {
                                         <div class="step__group-actions">
                                             @if (kind === 'superset') {
                                                 <button
                                                     type="button"
                                                     class="btn-pill"
                                                     [id]="'step-' + key + '-add'"
-                                                    [disabled]="stepCount() >= maxSteps"
+                                                    [disabled]="setup.stepCount() >= setup.maxSteps"
                                                     [attr.aria-label]="
                                                         'Add a step to the ' +
-                                                        supersetName(i).toLowerCase()
+                                                        setup.supersetName(i).toLowerCase()
                                                     "
-                                                    (click)="addToSuperset(i)"
+                                                    (click)="setup.addToSuperset(i)"
                                                 >
                                                     <mat-icon aria-hidden="true">add</mat-icon>
                                                     Step
                                                 </button>
                                             }
-                                            @if (canJoin(i)) {
+                                            @if (setup.canJoin(i)) {
                                                 <button
                                                     type="button"
                                                     class="btn-pill"
                                                     [id]="'step-' + key + '-join'"
                                                     [attr.aria-label]="
                                                         'Join ' +
-                                                        stepTitle(i) +
+                                                        setup.stepTitle(i) +
                                                         ' with the next step'
                                                     "
-                                                    (click)="joinWithNext(i)"
+                                                    (click)="setup.joinWithNext(i)"
                                                 >
                                                     <mat-icon aria-hidden="true">link</mat-icon>
                                                     Join with next
@@ -871,9 +775,9 @@
                                                     class="btn-pill"
                                                     [id]="'step-' + key + '-take-out'"
                                                     [attr.aria-label]="
-                                                        'Take ' + stepTitle(i) + ' out'
+                                                        'Take ' + setup.stepTitle(i) + ' out'
                                                     "
-                                                    (click)="takeOut(i)"
+                                                    (click)="setup.takeOut(i)"
                                                 >
                                                     <mat-icon aria-hidden="true">link_off</mat-icon>
                                                     Take out
@@ -895,9 +799,9 @@
                     type="button"
                     id="add-step"
                     class="btn-add btn-add--reps add-step"
-                    [disabled]="stepCount() >= maxSteps"
+                    [disabled]="setup.stepCount() >= setup.maxSteps"
                     aria-label="Add step"
-                    (click)="addStep()"
+                    (click)="setup.addStep()"
                 >
                     <mat-icon aria-hidden="true">add</mat-icon>
                     Step
@@ -906,20 +810,22 @@
                     type="button"
                     id="add-heading"
                     class="btn-add btn-add--heading add-heading"
-                    [disabled]="headingCount() >= maxHeadings"
+                    [disabled]="setup.headingCount() >= setup.maxHeadings"
                     aria-label="Add heading"
-                    (click)="addHeading()"
+                    (click)="setup.addHeading()"
                 >
                     <mat-icon aria-hidden="true">add</mat-icon>
                     Heading
                 </button>
             </div>
-            @if (stepCount() >= maxSteps) {
-                <p class="setup-hint">That's the most steps a workout can have ({{ maxSteps }}).</p>
-            }
-            @if (headingCount() >= maxHeadings) {
+            @if (setup.stepCount() >= setup.maxSteps) {
                 <p class="setup-hint">
-                    That's the most headings a workout can have ({{ maxHeadings }}).
+                    That's the most steps a workout can have ({{ setup.maxSteps }}).
+                </p>
+            }
+            @if (setup.headingCount() >= setup.maxHeadings) {
+                <p class="setup-hint">
+                    That's the most headings a workout can have ({{ setup.maxHeadings }}).
                 </p>
             }
 
@@ -929,22 +835,22 @@
             <fieldset class="segmented mb-4" aria-labelledby="repeat-heading">
                 <div
                     class="segmented__options"
-                    [style.--count]="repeatModes.length"
-                    [style.--chosen]="chosenRepeatIndex()"
+                    [style.--count]="setup.repeatModes.length"
+                    [style.--chosen]="setup.chosenRepeatIndex()"
                 >
                     <span class="segmented__thumb" aria-hidden="true"></span>
-                    @for (mode of repeatModes; track mode.value; let i = $index) {
+                    @for (mode of setup.repeatModes; track mode.value; let i = $index) {
                         <label
                             class="segmented__option"
-                            [class.segmented__option--chosen]="i === chosenRepeatIndex()"
+                            [class.segmented__option--chosen]="i === setup.chosenRepeatIndex()"
                         >
                             <input
                                 type="radio"
                                 name="repeatMode"
                                 class="segmented__input"
                                 [value]="mode.value"
-                                [checked]="repeatMode() === mode.value"
-                                (change)="setRepeatMode(mode.value)"
+                                [checked]="setup.repeatMode() === mode.value"
+                                (change)="setup.setRepeatMode(mode.value)"
                             />
                             <span class="segmented__label">{{ mode.label }}</span>
                         </label>
@@ -952,61 +858,52 @@
                 </div>
             </fieldset>
 
-            @if (repeatMode() === 'time') {
+            @if (setup.repeatMode() === 'time') {
                 <div class="picker-row mb-2">
-                    <div class="picker-field">
-                        <span class="picker-field__label" id="limit-minutes-label"> Minutes </span>
-                        <app-wheel-picker
-                            id="limit-minutes"
-                            [formField]="workoutForm.limitMinutes"
-                            [options]="minuteOptions"
-                            labelledBy="limit-minutes-label"
-                        />
-                    </div>
-                    <div class="picker-field">
-                        <span class="picker-field__label" id="limit-seconds-label"> Seconds </span>
-                        <app-wheel-picker
-                            id="limit-seconds"
-                            [formField]="workoutForm.limitSeconds"
-                            [options]="secondOptions"
-                            labelledBy="limit-seconds-label"
-                        />
-                    </div>
+                    <app-labelled-wheel
+                        wheelId="limit-minutes"
+                        label="Minutes"
+                        [field]="setup.workoutForm.limitMinutes"
+                        [options]="setup.minuteOptions"
+                    />
+                    <app-labelled-wheel
+                        wheelId="limit-seconds"
+                        label="Seconds"
+                        [field]="setup.workoutForm.limitSeconds"
+                        [options]="setup.secondOptions"
+                    />
                 </div>
                 <p class="setup-hint mb-4">As many rounds as you can before time's up.</p>
-                @if (noTimeLimitError(); as error) {
+                @if (setup.noTimeLimitError(); as error) {
                     <mat-error>{{ error.message }}</mat-error>
                 }
             } @else {
                 <!-- The switch and the ∞ at the end of the wheel are two ways to set the same thing -->
                 <div class="picker-row mb-4">
-                    <div class="picker-field">
-                        <span class="picker-field__label" id="repeats-label">Rounds</span>
-                        <app-wheel-picker
-                            id="repeats"
-                            [formField]="workoutForm.repeats"
-                            [options]="repeatOptions"
-                            labelledBy="repeats-label"
-                        />
-                    </div>
+                    <app-labelled-wheel
+                        wheelId="repeats"
+                        label="Rounds"
+                        [field]="setup.workoutForm.repeats"
+                        [options]="setup.repeatOptions"
+                    />
 
                     <div class="picker-field">
                         <span class="picker-field__label" id="untilStopped-label"
                             >Until stopped</span
                         >
                         <app-infinity-switch
-                            [checked]="untilStopped()"
-                            (checkedChange)="setUntilStopped($event)"
+                            [checked]="setup.untilStopped()"
+                            (checkedChange)="setup.setUntilStopped($event)"
                             labelledBy="untilStopped-label"
                         />
                     </div>
                 </div>
             }
 
-            @if (noTimeError(); as error) {
+            @if (setup.noTimeError(); as error) {
                 <mat-error>{{ error.message }}</mat-error>
             }
-            @if (noSetAmountError(); as error) {
+            @if (setup.noSetAmountError(); as error) {
                 <mat-error>{{ error.message }}</mat-error>
             }
             <!-- Start is the main one; Save keeps it in the library for later (BLD-15) -->
@@ -1014,15 +911,15 @@
                 <button
                     class="btn-pill setup-save"
                     type="button"
-                    [disabled]="workoutForm().invalid()"
-                    (click)="saveOnly()"
+                    [disabled]="setup.workoutForm().invalid()"
+                    (click)="setup.saveOnly()"
                 >
                     <mat-icon aria-hidden="true">bookmark_add</mat-icon>
                     Save
                 </button>
-                <button class="btn-main" type="submit" [disabled]="workoutForm().invalid()">
+                <button class="btn-main" type="submit" [disabled]="setup.workoutForm().invalid()">
                     <mat-icon aria-hidden="true">play_arrow</mat-icon>
-                    {{ editingWorkoutId() ? 'Save & start workout' : 'Start workout' }}
+                    {{ setup.editingWorkoutId() ? 'Save & start workout' : 'Start workout' }}
                 </button>
             </div>
         </form>
@@ -1039,43 +936,43 @@
     />
 }
 
-@if (exerciseInDetails(); as opened) {
+@if (exercises.exerciseInDetails(); as opened) {
     <app-exercise-details-dialog
         animate.leave="dialog-leave"
         [exercise]="opened.exercise"
         [canPickAnother]="true"
-        (closed)="closeDetails()"
-        (pickAnother)="pickAnother()"
+        (closed)="exercises.closeDetails()"
+        (pickAnother)="exercises.pickAnother()"
     />
 }
 
-@if (exerciseInEditor(); as opened) {
+@if (exercises.exerciseInEditor(); as opened) {
     <app-exercise-editor
         animate.leave="dialog-leave"
         [exercise]="opened.exercise"
-        (closed)="closeExercise()"
-        (saved)="exerciseSaved($event)"
+        (closed)="exercises.closeExercise()"
+        (saved)="exercises.exerciseSaved($event)"
     />
 }
 
 <!-- A step's exercise picked from the whole list (BLD-16) -->
-@if (browsing(); as opened) {
+@if (exercises.browsing(); as opened) {
     <app-browse-exercises-dialog
         animate.leave="dialog-leave"
         [stepNumber]="opened.stepNumber"
-        (closed)="closeBrowse()"
-        (picked)="browsedTo($event)"
+        (closed)="exercises.closeBrowse()"
+        (picked)="exercises.browsedTo($event)"
     />
 }
 
 <!-- Another exercise for the same muscles (BLD-14) -->
-@if (swapping(); as opened) {
+@if (exercises.swapping(); as opened) {
     <app-swap-exercise-dialog
         animate.leave="dialog-leave"
         [exercise]="opened.exercise"
         [measuredBy]="opened.measuredBy"
         hint="Keeps the step's reps or time, at the weight you did it at last time."
-        (closed)="closeSwap()"
-        (picked)="swapFor($event)"
+        (closed)="exercises.closeSwap()"
+        (picked)="exercises.swapFor($event)"
     />
 }

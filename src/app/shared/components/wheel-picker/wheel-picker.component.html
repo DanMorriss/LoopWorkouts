@@ -13,7 +13,7 @@
     (scrollend)="settle()"
     (keydown)="onKeydown($event)"
     (pointerdown)="onPointerDown($event)"
-    (pointermove)="onPointerMove($event)"
+    (pointermove)="mouseDrag.move($event)"
     (pointerup)="onPointerUp($event)"
     (pointercancel)="onPointerUp($event)"
     (touchend)="release()"

@@ -29,6 +29,9 @@ import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { criticallyDampedSpring } from '../../shared/spring';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { counted } from '../../shared/format-count';
+import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
+import { ShowcaseKitComponent } from '../../shared/components/showcase/showcase-kit.component';
+import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
 
 /**
  * One workout in the library list, in the ready-made cards' look: its title and what's in it,
@@ -42,7 +45,12 @@ import { counted } from '../../shared/format-count';
  */
 @Component({
     selector: 'li[appWorkoutCard]',
-    imports: [MatIconModule],
+    imports: [
+        MatIconModule,
+        ShowcaseCountComponent,
+        ShowcaseKitComponent,
+        ShowcaseMusclesComponent,
+    ],
     templateUrl: './workout-card.component.html',
     styleUrl: './workout-card.component.scss',
     host: {

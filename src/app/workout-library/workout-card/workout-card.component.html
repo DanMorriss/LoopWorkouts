@@ -34,34 +34,22 @@
                 </span>
                 <span class="workout-card__summary">{{ summary().text }} {{ rounds() }}</span>
             </span>
-            <span class="workout-card__count">
-                <span class="workout-card__count-number">{{ count().number }}</span>
-                {{ ' ' }}
-                <span class="workout-card__count-label">{{ count().label }}</span>
-            </span>
+            <app-showcase-count
+                class="workout-card__count"
+                [number]="count().number"
+                [label]="count().label"
+            />
         </span>
         @if (muscles().shown.length) {
-            <span class="workout-card__works" aria-hidden="true">
-                <span class="workout-card__works-label">Works</span>
-                @for (muscle of muscles().shown; track muscle) {
-                    <span class="workout-card__muscle">{{ muscle }}</span>
-                }
-                @if (muscles().more) {
-                    <span class="workout-card__more">+{{ muscles().more }} more</span>
-                }
-            </span>
+            <app-showcase-muscles
+                class="workout-card__works"
+                aria-hidden="true"
+                [muscles]="muscles().shown"
+                [more]="muscles().more"
+            />
         }
         @if (equipment().length) {
-            <span class="workout-card__kit" aria-hidden="true">
-                <mat-icon class="workout-card__kit-icon">{{
-                    equipment().includes('No equipment') ? 'self_improvement' : 'fitness_center'
-                }}</mat-icon>
-                <span class="workout-card__tags">
-                    @for (need of equipment(); track need) {
-                        <span class="workout-card__tag">{{ need }}</span>
-                    }
-                </span>
-            </span>
+            <app-showcase-kit aria-hidden="true" [needs]="equipment()" />
         }
     </a>
     <span class="sr-only" [id]="'workout-summary-' + workout().id">

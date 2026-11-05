@@ -5,6 +5,8 @@ import { WEEKDAYS } from '../../models/plan';
 import { PageSlide } from '../../nav/page-slide';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { readyMadeSlug } from '../../workout-library/ready-made/ready-made-card';
+import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
+import { ShowcaseKitComponent } from '../../shared/components/showcase/showcase-kit.component';
 
 /**
  * Where a plan's card was when one of its workouts was opened: Today, the Ready-made plans
@@ -24,7 +26,7 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
  */
 @Component({
     selector: 'app-plan-card',
-    imports: [IconComponent],
+    imports: [IconComponent, ShowcaseCountComponent, ShowcaseKitComponent],
     template: `
         <article class="plan-card" [attr.aria-labelledby]="headingId()">
             <div class="plan-card__head">
@@ -37,11 +39,11 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
                     }
                     <p class="plan-card__description">{{ plan().description }}</p>
                 </div>
-                <p class="plan-card__count">
-                    <span class="plan-card__count-number">{{ trainingDayCount() }}</span>
-                    {{ ' ' }}
-                    <span class="plan-card__count-label">days a week</span>
-                </p>
+                <app-showcase-count
+                    class="plan-card__count"
+                    [number]="trainingDayCount()"
+                    label="days a week"
+                />
             </div>
 
             <ol class="plan-card__week" aria-hidden="true">
@@ -89,19 +91,7 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
                 }
             </ul>
 
-            <div class="plan-card__kit">
-                <app-icon class="plan-card__kit-icon">{{
-                    needs().length ? 'fitness_center' : 'self_improvement'
-                }}</app-icon>
-                <span class="sr-only">Needs: </span>
-                <ul class="plan-card__tags">
-                    @for (need of needs(); track need) {
-                        <li class="plan-card__tag">{{ need }}</li>
-                    } @empty {
-                        <li class="plan-card__tag">No equipment</li>
-                    }
-                </ul>
-            </div>
+            <app-showcase-kit [needs]="needs()" />
 
             <button
                 type="button"
@@ -129,12 +119,13 @@ export class PlanCardComponent {
 
     protected readonly headingId = computed(() => `plan-card-${this.plan().id.split(':')[1]}`);
 
-    /** What it needs: "Machine", "Dumbbells", "Bench"; none for no equipment. */
-    protected readonly needs = computed(() =>
-        equipmentPhrases(builtInPlanEquipment(this.plan()))
+    /** What it needs: "Machine", "Dumbbells", "Bench", or "No equipment". */
+    protected readonly needs = computed(() => {
+        const needs = equipmentPhrases(builtInPlanEquipment(this.plan()))
             .map(capitalise)
-            .filter((need) => need !== 'No equipment')
-    );
+            .filter((need) => need !== 'No equipment');
+        return needs.length ? needs : ['No equipment'];
+    });
 
     protected readonly trainingDayCount = computed(
         () => this.plan().days.filter((day) => day.length > 0).length

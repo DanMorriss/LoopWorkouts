@@ -1045,7 +1045,7 @@ describe('WorkoutComponent', () => {
             ]);
             // And the summary groups them the same way
             const summary = Array.from(
-                fixture.nativeElement.querySelectorAll('.summary__part, .summary__lines li'),
+                fixture.nativeElement.querySelectorAll('.set-lines__heading, .summary__lines li'),
                 (el: Element) => el.querySelector('[aria-hidden]')?.textContent ?? el.textContent
             ).map((line) => line!.replace(/\s+/g, ' ').trim());
             expect(summary).toEqual(['Warmup', 'Bike: 0:01', 'Core', 'Plank: 0:01']);
@@ -1080,10 +1080,10 @@ describe('WorkoutComponent', () => {
             // And the summary groups them the same way
             const summary = Array.from(
                 fixture.nativeElement.querySelectorAll(
-                    '.summary__lines > li, .summary__superset-lines li'
+                    '.set-lines__list > li, .set-lines__superset-lines li'
                 ),
                 (el: Element) =>
-                    el.querySelector('.summary__superset-name')?.textContent ??
+                    el.querySelector('.set-lines__superset-name')?.textContent ??
                     el.querySelector('[aria-hidden]')!.textContent
             ).map((line) => line!.replace(/\s+/g, ' ').trim());
             expect(summary).toEqual(['Bike: 0:01', 'Superset', 'Plank: 0:01', 'Hollow hold: 0:01']);

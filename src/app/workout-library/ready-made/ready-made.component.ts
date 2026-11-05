@@ -11,6 +11,9 @@ import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { readyMadeCard, readyMadeSlug } from './ready-made-card';
+import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
+import { ShowcaseKitComponent } from '../../shared/components/showcase/showcase-kit.component';
+import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
 
 /**
  * The ready-made workouts (LIB-6), in groups by what they need: each slides in its own page
@@ -20,7 +23,15 @@ import { readyMadeCard, readyMadeSlug } from './ready-made-card';
  */
 @Component({
     selector: 'app-ready-made',
-    imports: [BackLinkComponent, EquipmentFilterComponent, IconComponent, SwipeBackDirective],
+    imports: [
+        BackLinkComponent,
+        EquipmentFilterComponent,
+        IconComponent,
+        ShowcaseCountComponent,
+        ShowcaseKitComponent,
+        ShowcaseMusclesComponent,
+        SwipeBackDirective,
+    ],
     templateUrl: './ready-made.component.html',
     styleUrl: './ready-made.component.scss',
 })

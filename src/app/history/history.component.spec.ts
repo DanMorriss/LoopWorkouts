@@ -160,7 +160,7 @@ describe('HistoryComponent', () => {
 
         const items = Array.from(
             fixture.nativeElement.querySelectorAll(
-                '.entry__section, .entry__sets li [aria-hidden]'
+                '.set-lines__heading, .entry__sets li [aria-hidden]'
             ),
             (el: Element) => el.textContent!.replace(/\s+/g, ' ').trim()
         );
@@ -172,7 +172,7 @@ describe('HistoryComponent', () => {
             'Step-down: 10 reps',
         ]);
         // Headings within the entry, for screen readers
-        expect(fixture.nativeElement.querySelectorAll('h4.entry__section')).toHaveLength(2);
+        expect(fixture.nativeElement.querySelectorAll('h4.set-lines__heading')).toHaveLength(2);
     });
 
     it('puts the lines of a superset together under its name, as it was when it ran (BLD-12)', () => {
@@ -191,15 +191,15 @@ describe('HistoryComponent', () => {
 
         // Squats on its own, then the superset's name with its lines in a list under it
         const items = Array.from(
-            fixture.nativeElement.querySelectorAll('.entry__sets > li'),
+            fixture.nativeElement.querySelectorAll('.set-lines__list > li'),
             (el: Element) =>
-                el.querySelector('.entry__superset-name')?.textContent ??
+                el.querySelector('.set-lines__superset-name')?.textContent ??
                 el.querySelector('[aria-hidden]')!.textContent
         );
         expect(items).toEqual(['Squats: 10 reps', 'Superset']);
         expect(
             Array.from(
-                fixture.nativeElement.querySelectorAll('.entry__superset-lines li'),
+                fixture.nativeElement.querySelectorAll('.set-lines__superset-lines li'),
                 (el: Element) => el.querySelector('[aria-hidden]')!.textContent
             )
         ).toEqual(['Bench: 2 × 8', 'Row: 2 × 8']);

@@ -86,52 +86,6 @@
     @include showcase-description;
 }
 
-.ready__count {
-    @include count-badge;
-}
-
-.ready__count-number {
-    @include count-number;
-}
-
-.ready__count-label {
-    @include count-label;
-}
-
-// Its main muscles, each with a dot in the body map's main-muscle colour
-.ready__works {
-    @include muscles-row;
-}
-
-.ready__works-label {
-    @include muscles-label;
-}
-
-.ready__muscle {
-    @include muscle;
-}
-
-.ready__more {
-    @include muscles-more;
-}
-
-.ready__kit {
-    @include kit-row;
-}
-
-.ready__kit-icon {
-    @include kit-icon;
-}
-
-.ready__tags {
-    @include tags;
-    flex: 1 1 auto;
-}
-
-.ready__tag {
-    @include tag;
-}
-
 .ready__in-library {
     display: inline-flex;
     flex: none;

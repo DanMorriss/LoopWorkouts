@@ -115,52 +115,6 @@
     overflow-wrap: anywhere;
 }
 
-.workout-card__count {
-    @include count-badge;
-}
-
-.workout-card__count-number {
-    @include count-number;
-}
-
-.workout-card__count-label {
-    @include count-label;
-}
-
-.workout-card__works {
-    @include muscles-row;
-}
-
-.workout-card__works-label {
-    @include muscles-label;
-}
-
-.workout-card__muscle {
-    @include muscle;
-}
-
-.workout-card__more {
-    @include muscles-more;
-}
-
-// What it needs, above a faint rule
-.workout-card__kit {
-    @include kit-row;
-}
-
-.workout-card__kit-icon {
-    @include kit-icon;
-}
-
-.workout-card__tags {
-    @include tags;
-    flex: 1 1 auto;
-}
-
-.workout-card__tag {
-    @include tag;
-}
-
 // The way to start it: big, in the middle of the card's foot
 .workout-card__start {
     display: flex;

@@ -55,7 +55,7 @@ describe('ReadyMadePlansComponent (PLN-6)', () => {
                 t.textContent!.replace(/\s+/g, ' ').trim()
             );
         expect(text('.plan-card__count')).toEqual(['4 days a week']);
-        expect(text('.plan-card__tag')).toEqual(['Kettlebell']);
+        expect(text('.showcase-tag')).toEqual(['Kettlebell']);
     });
 
     it('hides those needing what you have not got, with Only what I have on', async () => {

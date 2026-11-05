@@ -11,7 +11,7 @@ import {
     output,
     untracked,
 } from '@angular/core';
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { form, FormField, maxLength } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
@@ -27,6 +27,7 @@ import {
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { exercisePath, isBuiltIn } from '../../models/exercise';
+import { SetLinesComponent } from '../set-lines/set-lines.component';
 
 /**
  * One workout in the history, with a ⋮ menu to add, edit or remove its note, or delete it.
@@ -36,7 +37,7 @@ import { exercisePath, isBuiltIn } from '../../models/exercise';
  */
 @Component({
     selector: 'li[appHistoryEntry]',
-    imports: [DatePipe, FormField, MatIconModule, NgTemplateOutlet, RouterLink],
+    imports: [DatePipe, FormField, MatIconModule, RouterLink, SetLinesComponent],
     templateUrl: './history-entry.component.html',
     styleUrl: './history-entry.component.scss',
     host: {

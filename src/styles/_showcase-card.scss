@@ -1,22 +1,15 @@
 @use 'type' as *;
 
-// The look the ready-made cards share, plans and workouts alike, so they read as one family:
-// a card lit faintly from its top right, a count badge by the title, and quiet tags. A mixin
-// rather than a global class, so it's only in those pages' own styles.
+// The look the ready-made cards share, plans and workouts alike, so they read as one family: a
+// card lit faintly from its top right, with its title and what it's for at the left. A mixin
+// rather than a global class, so it's only in those pages' own styles. Its count, muscles and
+// tags are components (shared/components/showcase).
 //
 //   @use 'showcase-card' as *;
 //   .thing { @include showcase-card; }
-//   .thing__count { @include count-badge; }
-//   .thing__count-number { @include count-number; }
-//   .thing__count-label { @include count-label; }
-//   .thing__kit { @include kit-row; }
-//   .thing__kit-icon { @include kit-icon; }
-//   .thing__tags { @include tags; }
-//   .thing__tag { @include tag; }
-//   .thing__works { @include muscles-row; }
-//   .thing__works-label { @include muscles-label; }
-//   .thing__muscle { @include muscle; }
-//   .thing__more { @include muscles-more; }
+//   .thing__head { @include showcase-head; }
+//   .thing__title { @include showcase-title; }
+//   .thing__description { @include showcase-description; }
 
 @mixin showcase-card {
     padding: 1rem;
@@ -46,105 +39,4 @@
     color: var(--text);
     font-size: 0.9rem;
     line-height: 1.45;
-}
-
-// A big number over what it counts: "3 days a week", "5 exercises"
-@mixin count-badge {
-    display: grid;
-    justify-items: center;
-    align-content: start;
-    min-width: 3.5rem;
-    padding: 0.45rem 0.5rem 0.4rem;
-    border: 1px solid var(--accent-line);
-    border-radius: 0.7rem;
-    background: var(--accent-soft);
-    text-align: center;
-}
-
-@mixin count-number {
-    @include display;
-    color: var(--glow-text);
-    font-size: 1.6rem;
-    line-height: 1;
-}
-
-@mixin count-label {
-    margin-top: 0.2rem;
-    max-width: 3.6rem;
-    color: var(--text-muted);
-    @include small-type(0.65rem);
-    line-height: 1.15;
-}
-
-// A row of tags after an icon, e.g. what it needs, above a faint rule
-@mixin kit-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--border-soft);
-}
-
-@mixin kit-icon {
-    flex: none;
-    width: 20px;
-    height: 20px;
-    font-size: 20px;
-    color: var(--text-muted);
-}
-
-@mixin tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-@mixin tag {
-    padding: 0.15rem 0.55rem;
-    border: 1px solid var(--border-soft);
-    border-radius: 999px;
-    color: var(--text);
-    @include small-type(0.75rem);
-}
-
-// The main muscles it works, each with a dot in the body map's main-muscle colour
-@mixin muscles-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.3rem 0.45rem;
-}
-
-@mixin muscles-label {
-    margin-right: 0.1rem;
-    color: var(--text-muted);
-    @include small-type(0.75rem);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-@mixin muscle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    color: var(--text-strong);
-    font-size: 0.85rem;
-
-    &::before {
-        content: '';
-        width: 0.45rem;
-        height: 0.45rem;
-        border-radius: 50%;
-        background: var(--muscle-main);
-        box-shadow: 0 0 0.4rem var(--glow-soft);
-    }
-}
-
-@mixin muscles-more {
-    color: var(--text-muted);
-    font-size: 0.8rem;
 }

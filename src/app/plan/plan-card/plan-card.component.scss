@@ -33,18 +33,6 @@
     @include showcase-description;
 }
 
-.plan-card__count {
-    @include count-badge;
-}
-
-.plan-card__count-number {
-    @include count-number;
-}
-
-.plan-card__count-label {
-    @include count-label;
-}
-
 // The week: a day to a column, Monday first, each workout a numbered, coloured mark
 .plan-card__week {
     display: grid;
@@ -201,23 +189,6 @@
 // It opens its own page
 .plan-card__workout-open {
     color: var(--text-muted);
-}
-
-// What it needs, as quiet tags after an icon
-.plan-card__kit {
-    @include kit-row;
-}
-
-.plan-card__kit-icon {
-    @include kit-icon;
-}
-
-.plan-card__tags {
-    @include tags;
-}
-
-.plan-card__tag {
-    @include tag;
 }
 
 .plan-card__use {

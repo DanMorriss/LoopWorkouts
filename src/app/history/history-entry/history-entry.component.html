@@ -4,37 +4,19 @@
         <span class="entry__title" [id]="'entry-title-' + id()">{{ name() }}</span>
         <span class="entry__detail">{{ time }} · {{ duration() }} · {{ rounds() }}</span>
         <!-- Under the workout's headings as they were when it ran, if it had any -->
-        @for (section of sections(); track $index) {
-            @if (section.heading) {
-                <h4 class="entry__section">{{ section.heading }}</h4>
-            }
-            <ul class="entry__sets">
-                @for (item of section.items; track $index) {
-                    @if (item.superset) {
-                        <!-- A superset's lines together under its name (BLD-12) -->
-                        <li class="entry__superset">
-                            <span class="entry__superset-name">{{ item.superset }}</span>
-                            <ul class="entry__superset-lines">
-                                @for (line of item.lines; track $index) {
-                                    <li>
-                                        <ng-container
-                                            [ngTemplateOutlet]="setLine"
-                                            [ngTemplateOutletContext]="{ $implicit: line }"
-                                        />
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+        @if (sections().length) {
+            <app-set-lines class="entry__sets" [sections]="sections()">
+                <ng-template let-line>
+                    @if (line.path) {
+                        <a class="entry__exercise" [routerLink]="line.path">{{ line.name }}</a
+                        ><span aria-hidden="true">: {{ line.text }}</span>
+                        <span class="sr-only">, {{ line.spoken }}</span>
                     } @else {
-                        <li>
-                            <ng-container
-                                [ngTemplateOutlet]="setLine"
-                                [ngTemplateOutletContext]="{ $implicit: item.lines[0] }"
-                            />
-                        </li>
+                        <span aria-hidden="true">{{ line.name }}: {{ line.text }}</span>
+                        <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
                     }
-                }
-            </ul>
+                </ng-template>
+            </app-set-lines>
         }
         @if (entry().note && !editing()) {
             <p class="entry__note"><span class="sr-only">Note: </span>{{ entry().note }}</p>
@@ -120,14 +102,3 @@
         </div>
     </form>
 }
-
-<ng-template #setLine let-line>
-    @if (line.path) {
-        <a class="entry__exercise" [routerLink]="line.path">{{ line.name }}</a
-        ><span aria-hidden="true">: {{ line.text }}</span>
-        <span class="sr-only">, {{ line.spoken }}</span>
-    } @else {
-        <span aria-hidden="true">{{ line.name }}: {{ line.text }}</span>
-        <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
-    }
-</ng-template>

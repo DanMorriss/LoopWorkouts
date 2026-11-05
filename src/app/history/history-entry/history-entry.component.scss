@@ -61,33 +61,14 @@
 
 // One line per rep step, e.g. "Squats: 3 × 10 @ 60 kg"
 .entry__sets {
+    --set-heading-size: 0.85rem;
+    --set-heading-gap: 0.4rem;
+    --set-superset-indent: 0.5rem;
     margin: 0.1rem 0 0;
-    padding: 0;
-    list-style: none;
     color: var(--text);
     font-size: 0.85rem;
     font-variant-numeric: tabular-nums;
     overflow-wrap: anywhere;
-}
-
-// A superset's name, with its lines under it, set in a little and joined by a line
-.entry__superset-name {
-    color: var(--text-muted);
-}
-
-.entry__superset-lines {
-    margin: 0 0 0 0.2rem;
-    padding-left: 0.5rem;
-    border-left: 2px solid var(--border-strong);
-    list-style: none;
-}
-
-// A heading of the workout's, e.g. "Warmup", over the lines of its part
-.entry__section {
-    margin: 0.4rem 0 0;
-    color: var(--text-strong);
-    font-size: 0.85rem;
-    font-weight: 600;
 }
 
 // The exercise's name goes to its page, with its progress (PRG-4)

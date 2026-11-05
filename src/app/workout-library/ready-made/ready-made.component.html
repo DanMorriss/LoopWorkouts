@@ -35,44 +35,21 @@
                                         }}</span>
                                     </span>
                                     {{ ' ' }}
-                                    <span class="ready__count">
-                                        <span class="ready__count-number">{{
-                                            card.exercises
-                                        }}</span>
-                                        {{ ' ' }}
-                                        <span class="ready__count-label">{{
-                                            card.exercises === 1 ? 'exercise' : 'exercises'
-                                        }}</span>
-                                    </span>
+                                    <app-showcase-count
+                                        class="ready__count"
+                                        [number]="card.exercises"
+                                        [label]="card.exercises === 1 ? 'exercise' : 'exercises'"
+                                    />
                                 </span>
                                 @if (card.muscles.length) {
-                                    <span class="ready__works">
-                                        <span class="ready__works-label">Works</span>
-                                        {{ ' ' }}
-                                        @for (muscle of card.muscles; track muscle) {
-                                            <span class="ready__muscle">{{ muscle }}</span>
-                                            {{ ' ' }}
-                                        }
-                                        @if (card.moreMuscles) {
-                                            <span class="ready__more"
-                                                >+{{ card.moreMuscles }} more</span
-                                            >
-                                        }
-                                    </span>
+                                    <app-showcase-muscles
+                                        class="ready__works"
+                                        [muscles]="card.muscles"
+                                        [more]="card.moreMuscles"
+                                    />
                                 }
-                                <span class="ready__kit">
-                                    <app-icon class="ready__kit-icon">{{
-                                        card.equipment.includes('No equipment')
-                                            ? 'self_improvement'
-                                            : 'fitness_center'
-                                    }}</app-icon>
-                                    <span class="sr-only">. Needs: </span>
-                                    <span class="ready__tags">
-                                        @for (need of card.equipment; track need) {
-                                            <span class="ready__tag">{{ need }}</span>
-                                            {{ ' ' }}
-                                        }
-                                    </span>
+                                <span class="sr-only">. </span>
+                                <app-showcase-kit [needs]="card.equipment">
                                     @if (card.inLibrary) {
                                         <span class="ready__in-library">
                                             <app-icon>check</app-icon>
@@ -80,7 +57,7 @@
                                         </span>
                                     }
                                     <app-icon class="ready__chevron">chevron_right</app-icon>
-                                </span>
+                                </app-showcase-kit>
                             </a>
                         </li>
                     }

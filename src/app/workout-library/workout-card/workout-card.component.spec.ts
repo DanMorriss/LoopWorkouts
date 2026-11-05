@@ -57,7 +57,8 @@ describe('WorkoutCardComponent', () => {
     const card = (): HTMLElement => fixture.nativeElement.querySelector('li');
     const el = (selector: string): HTMLElement => card().querySelector(selector)!;
     /** What screen readers hear about it, after its name. */
-    const spoken = () => card().querySelector('.sr-only')!.textContent!.trim().replace(/\s+/g, ' ');
+    const spoken = () =>
+        card().querySelector('[id^="workout-summary-"]')!.textContent!.trim().replace(/\s+/g, ' ');
     const set = (changes: Partial<{ workout: Workout; menuOpen: boolean }>) => {
         if (changes.workout) host.workout.set(changes.workout);
         if (changes.menuOpen !== undefined) host.menuOpen.set(changes.menuOpen);
@@ -119,8 +120,8 @@ describe('WorkoutCardComponent', () => {
         it('names its main muscles and what it needs, for the eye and for screen readers', () => {
             set({ workout: linked('builtin:plank') });
 
-            expect(texts('.workout-card__muscle')).toContain('Abs');
-            expect(texts('.workout-card__tag')).toEqual(['No equipment']);
+            expect(texts('.showcase-muscle')).toContain('Abs');
+            expect(texts('.showcase-tag')).toEqual(['No equipment']);
             expect(spoken()).toContain('. Works ');
             expect(spoken()).toContain('Abs');
             expect(spoken()).toContain('. Needs No equipment');
@@ -130,7 +131,7 @@ describe('WorkoutCardComponent', () => {
             set({ workout: sprints });
 
             expect(card().querySelector('.workout-card__works')).toBeNull();
-            expect(card().querySelector('.workout-card__tag')).toBeNull();
+            expect(card().querySelector('.showcase-tag')).toBeNull();
             expect(spoken()).not.toContain('Works');
             expect(card().querySelector('.workout-card__start')).not.toBeNull();
         });

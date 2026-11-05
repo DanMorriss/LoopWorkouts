@@ -11,6 +11,7 @@ import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../../shared/state/workout-store.service';
+import { SetLinesComponent } from '../../../history/set-lines/set-lines.component';
 
 /** One rep step's sets, for correcting them one by one. */
 interface SetGroup {
@@ -45,7 +46,7 @@ export function ownExerciseName(exercises: ExerciseStore) {
  */
 @Component({
     selector: 'app-summary-sets',
-    imports: [MatIconModule, NgTemplateOutlet, WheelPickerComponent],
+    imports: [MatIconModule, NgTemplateOutlet, SetLinesComponent, WheelPickerComponent],
     templateUrl: './summary-sets.component.html',
     styleUrl: './summary-sets.component.scss',
 })

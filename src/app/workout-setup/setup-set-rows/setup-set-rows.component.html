@@ -1,0 +1,64 @@
+@let step = field();
+@let key = step().value().key;
+@let kind = step().value().kind;
+<ol class="wheel-rows" [attr.aria-labelledby]="'step-' + key + '-vary-label'">
+    @for (row of step.setRows; track $index; let j = $index) {
+        @let rowId = 'step-' + key + '-set-' + j;
+        @let rowOpen = setup.isSetRowOpen(key, j);
+        <li class="wheel-row">
+            <span class="sr-only" [id]="rowId + '-name'"
+                >{{ inSuperset() ? 'Round' : 'Set' }} {{ j + 1 }}</span
+            >
+            <button
+                type="button"
+                class="wheel-row__toggle"
+                [id]="rowId"
+                [attr.aria-expanded]="rowOpen"
+                [attr.aria-controls]="rowOpen ? rowId + '-wheels' : null"
+                (click)="setup.toggleSetRow(key, j)"
+            >
+                {{ setup.setRowText(step().value(), j) }}
+                <mat-icon class="wheel-row__chevron" aria-hidden="true">expand_more</mat-icon>
+            </button>
+            @if (rowOpen) {
+                <div
+                    class="picker-row wheel-row__wheels"
+                    [id]="rowId + '-wheels'"
+                    animate.enter="step__body--opening"
+                >
+                    @if (kind === 'reps') {
+                        <app-labelled-wheel
+                            [wheelId]="rowId + '-reps'"
+                            label="Reps"
+                            [field]="row.reps"
+                            [options]="setup.repOptions"
+                            [context]="'step-' + key + '-title ' + rowId + '-name'"
+                        />
+                        <app-labelled-wheel
+                            [wheelId]="rowId + '-weight'"
+                            [label]="'Weight (' + setup.weightUnit + ')'"
+                            [field]="row.weight"
+                            [options]="setup.weightOptions"
+                            [context]="'step-' + key + '-title ' + rowId + '-name'"
+                        />
+                    } @else {
+                        <app-labelled-wheel
+                            [wheelId]="rowId + '-minutes'"
+                            label="Minutes"
+                            [field]="row.minutes"
+                            [options]="setup.minuteOptions"
+                            [context]="'step-' + key + '-title ' + rowId + '-name'"
+                        />
+                        <app-labelled-wheel
+                            [wheelId]="rowId + '-seconds'"
+                            label="Seconds"
+                            [field]="row.seconds"
+                            [options]="setup.secondOptions"
+                            [context]="'step-' + key + '-title ' + rowId + '-name'"
+                        />
+                    }
+                </div>
+            }
+        </li>
+    }
+</ol>

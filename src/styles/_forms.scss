@@ -92,3 +92,16 @@
 .wheel-row__wheels {
     padding: 0 0.9rem 0.75rem;
 }
+
+// Opening, it takes its full height at once, and what's below slides down out of its way
+// (WorkoutSetupForm.toggleStep): only opacity and transforms animate, never its height,
+// which would lay the page out again every frame. A fade, so it stays with reduced motion.
+.step__body--opening {
+    animation: step-body-in 0.2s ease-out;
+}
+
+@keyframes step-body-in {
+    from {
+        opacity: 0;
+    }
+}

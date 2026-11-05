@@ -8,12 +8,6 @@ import tseslint from 'typescript-eslint';
 const MAX_LINES = 300;
 const maxLines = (max) => ['error', { max, skipBlankLines: true, skipComments: true }];
 
-// Already over when the limit came in. Each can only come down: lower its number as it shrinks,
-// and remove it once it's under the limit. Never raise one or add another.
-const OVER_THE_LIMIT = {
-    'workout-setup/workout-setup.component.html': 902,
-};
-
 export default [
     { ignores: ['**/*.spec.ts'] },
     {
@@ -32,8 +26,4 @@ export default [
         ],
         rules: { 'max-lines': maxLines(MAX_LINES) },
     },
-    ...Object.entries(OVER_THE_LIMIT).map(([file, max]) => ({
-        files: [`src/app/${file}`],
-        rules: { 'max-lines': maxLines(max) },
-    })),
 ];

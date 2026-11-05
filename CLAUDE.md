@@ -30,7 +30,7 @@ The compiler fails on unused locals and parameters, and the build on its budgets
 
 Duplication is the main way this codebase degrades, usually as one feature copying another. Before adding a component, style block or helper, look in these places. When something you need nearly exists, extend it. On writing the second copy of anything over a few lines, extract it in the same PR instead.
 
-- **Components:** `shared/components/`: `dialog` (every dialog over the page), `search-field`, `equipment-chips`, `equipment-filter`, `showcase` (a card's count, muscles and kit), `help-link`, `icon`, `infinity-switch`, `toggle-switch`, `wheel-picker`, `workout-choice-dialog`, `workout-outline`, `body-map` and more; `nav/back-link`; `exercises/exercise-card`; `exercises/muscle-chips`; `history/set-lines`.
+- **Components:** `shared/components/`: `dialog` (every dialog over the page), `search-field`, `equipment-chips`, `equipment-filter`, `showcase` (a card's count, muscles and kit), `wheel-picker` and `labelled-wheel`, `help-link`, `icon`, `infinity-switch`, `toggle-switch`, `wheel-picker`, `workout-choice-dialog`, `workout-outline`, `body-map` and more; `nav/back-link`; `exercises/exercise-card`; `exercises/muscle-chips`; `history/set-lines`.
 - **Styles:** `src/styles/`: `_buttons` (`.btn-main`, `.btn-pill`, `.btn-icon`), `_forms` (`.picker-field`), `_menu`, `_segmented`, `_info`, `_dialog`; and these mixins: `_type` (`display`, `small-type`, `page-title`, `page-hint`, `dialog-title`), `_interaction` (`hover`, `pressed`, `hit-area`, `link-button`), `_chip`, `_showcase-card`. Don't write new button, chip or menu styles in a component.
 - **Helpers:** `shared/format-time.ts` (`formatSeconds`), `shared/format-count.ts` (`counted`), `shared/focus-after-render.ts`, `shared/reduced-motion.ts`, `shared/gesture.ts`, `shared/spring.ts`, `ExerciseStore.shownFor`, `models/` (e.g. `stepKindName`, `exerciseHint`).
 - **Tests:** `shared/testing/` (`makeWorkout`, `fakeReducedMotion`, fake sync, account and audio).
@@ -46,7 +46,7 @@ Helpers that aren't about one component don't belong in a component's file, as i
 - Signal Forms (`@angular/forms/signals`) for forms.
 - `@if`, `@for`, `@switch`; `[class]` and `[style]`, never `ngClass`, `ngStyle` or `CommonModule`. Keep logic out of templates, and don't assume globals such as `new Date()` are there.
 - Lazy-load feature routes. Use `NgOptimizedImage` for static images.
-- Strict TypeScript, no `any` (use `unknown`), and small components with one job. A component that's grown large should lose parts when next changed, not gain more. `npm run lint` fails a component or directive, or its template, over 300 lines of code. Split it rather than raising the limit. The files already over have their own limits in `eslint.config.mjs`: those only come down, so lower one when its file shrinks, and never raise one or add another.
+- Strict TypeScript, no `any` (use `unknown`), and small components with one job. A component that's grown large should lose parts when next changed, not gain more. `npm run lint` fails a component or directive, or its template, over 300 lines of code. Split it rather than raising the limit or adding an exception: logic that only reads goes to a service for the page or plain functions, a gesture to a plain class beside the component (e.g. `card-gestures.ts`), and markup to a child with its styles, whose host can be `display: contents` to keep the layout.
 - Inline templates for small components. Paths to external files are relative to the component.
 
 ## Styling

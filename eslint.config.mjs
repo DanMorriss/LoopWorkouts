@@ -11,11 +11,8 @@ const maxLines = (max) => ['error', { max, skipBlankLines: true, skipComments: t
 // Already over when the limit came in. Each can only come down: lower its number as it shrinks,
 // and remove it once it's under the limit. Never raise one or add another.
 const OVER_THE_LIMIT = {
-    'shared/components/wheel-picker/wheel-picker.component.ts': 364,
-    'workout-library/workout-card/workout-card.component.ts': 344,
     'workout-setup/workout-setup.component.html': 1005,
     'workout-setup/workout-setup.component.ts': 1394,
-    'workout/workout-summary/workout-summary.component.ts': 341,
     'workout/workout.component.html': 388,
     'workout/workout.component.ts': 853,
 };

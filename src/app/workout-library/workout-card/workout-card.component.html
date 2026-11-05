@@ -9,10 +9,10 @@
 <div
     #face
     class="workout-card__face"
-    (pointerdown)="press($event)"
-    (pointermove)="move($event)"
-    (pointerup)="release($event)"
-    (pointercancel)="release($event)"
+    (pointerdown)="gestures.press($event)"
+    (pointermove)="gestures.move($event)"
+    (pointerup)="gestures.release($event)"
+    (pointercancel)="gestures.release($event)"
     (contextmenu)="openMenuFromRightClick($event)"
 >
     <a

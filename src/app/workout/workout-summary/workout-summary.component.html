@@ -15,44 +15,44 @@
             #grabber
             class="summary__grabber"
             aria-hidden="true"
-            (pointerdown)="grab($event)"
-            (pointermove)="drag($event)"
-            (pointerup)="letGo($event)"
-            (pointercancel)="letGo($event)"
+            (pointerdown)="sheetDrag.grab($event)"
+            (pointermove)="sheetDrag.drag($event)"
+            (pointerup)="sheetDrag.letGo($event)"
+            (pointercancel)="sheetDrag.letGo($event)"
         ></div>
     }
     <!-- Scrolled to the top, a finger moving down anywhere here drags the sheet too -->
     <div
         class="summary__body"
-        (scroll)="onBodyScroll($event)"
-        (touchstart)="onBodyTouchStart($event)"
-        (touchmove)="onBodyTouchMove($event)"
-        (touchend)="onBodyTouchEnd($event)"
-        (touchcancel)="onBodyTouchEnd($event)"
+        (scroll)="sheetDrag.onBodyScroll($event)"
+        (touchstart)="sheetDrag.onBodyTouchStart($event)"
+        (touchmove)="sheetDrag.onBodyTouchMove($event)"
+        (touchend)="sheetDrag.onBodyTouchEnd($event)"
+        (touchcancel)="sheetDrag.onBodyTouchEnd($event)"
     >
         <!-- Focus starts here, so it's read from the top. Scrolled to the top, the heading and
              title drag the sheet too, as a sheet's top does on a phone -->
         <h2
             id="summary-heading"
             class="summary__heading"
-            [class.summary__head--draggable]="headDraggable()"
+            [class.summary__head--draggable]="sheetDrag.headDraggable()"
             tabindex="-1"
             cdkFocusInitial
-            (pointerdown)="grabByHead($event)"
-            (pointermove)="drag($event)"
-            (pointerup)="letGo($event)"
-            (pointercancel)="letGo($event)"
+            (pointerdown)="sheetDrag.grabByHead($event)"
+            (pointermove)="sheetDrag.drag($event)"
+            (pointerup)="sheetDrag.letGo($event)"
+            (pointercancel)="sheetDrag.letGo($event)"
         >
             {{ heading() }}
         </h2>
         @if (title()) {
             <p
                 class="summary__title"
-                [class.summary__head--draggable]="headDraggable()"
-                (pointerdown)="grabByHead($event)"
-                (pointermove)="drag($event)"
-                (pointerup)="letGo($event)"
-                (pointercancel)="letGo($event)"
+                [class.summary__head--draggable]="sheetDrag.headDraggable()"
+                (pointerdown)="sheetDrag.grabByHead($event)"
+                (pointermove)="sheetDrag.drag($event)"
+                (pointerup)="sheetDrag.letGo($event)"
+                (pointercancel)="sheetDrag.letGo($event)"
             >
                 {{ title() }}
             </p>

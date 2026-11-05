@@ -23,7 +23,8 @@ import {
 import { canDoWith } from '../models/exercise';
 import { listMuscles, workoutToFillGaps } from '../models/fill-gaps';
 import { SettingsStore } from '../shared/state/settings-store.service';
-import { HOLD_MS, WorkoutCardComponent } from './workout-card/workout-card.component';
+import { HOLD_MS } from './workout-card/card-gestures';
+import { WorkoutCardComponent } from './workout-card/workout-card.component';
 import { changeSmoothly } from '../shared/layout-change';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';

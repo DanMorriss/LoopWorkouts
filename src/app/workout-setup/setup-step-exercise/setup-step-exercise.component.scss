@@ -1,5 +1,7 @@
-// A timed or rep step's exercise: its name box, with Browse (BLD-16) beside it, and the line
-// under it saying which exercise the step is
+// In the step's own layout, as if its parts were directly on it
+:host {
+    display: contents;
+}
 
 // Which exercise the step is, under its name, with buttons for its details and to edit it
 // or add a note; they go under the line when there isn't room beside it

@@ -1,0 +1,103 @@
+@let step = field();
+@let i = index();
+@let key = step().value().key;
+@let kind = step().value().kind;
+@let time = setup.amountText(step().value());
+@let expanded = setup.isExpanded(key);
+
+<!-- Pointer only, so hidden from screen readers: they use the move buttons.
+                                 A superset's takes its steps with it. -->
+<span
+    class="step__handle"
+    cdkDragHandle
+    aria-hidden="true"
+    [title]="kind === 'superset' ? 'Drag to move it with its steps' : 'Drag to reorder'"
+    (pointerdown)="drag.grabStep($event, key)"
+>
+    <mat-icon>drag_indicator</mat-icon>
+</span>
+@if (kind === 'superset') {
+    <!-- What it's called goes by how many exercises it has -->
+    <span class="step__heading-badge" [id]="'step-' + key + '-title'">
+        <span aria-hidden="true">{{ setup.supersetName(i) }}</span>
+        <span class="sr-only">{{ setup.stepTitle(i) }}</span>
+    </span>
+} @else if (kind === 'heading') {
+    <!-- A label, not a step: no kind to change, and no number -->
+    <span class="step__heading-badge" [id]="'step-' + key + '-title'">
+        <span aria-hidden="true">Heading</span>
+        <span class="sr-only">{{ setup.stepTitle(i) }}</span>
+    </span>
+} @else {
+    <!-- The step's kind, and a menu to change it -->
+    <app-step-kind-menu
+        [kind]="kind"
+        [stepKey]="key"
+        [stepNumber]="setup.stepNumber(i)"
+        [open]="setup.kindMenuFor() === key"
+        (toggled)="setup.toggleKindMenu(key)"
+        (closed)="setup.kindMenuFor.set(null)"
+        (picked)="setup.setStepKind(i, $event)"
+    />
+    <span class="step__number" [id]="'step-' + key + '-title'">
+        <span aria-hidden="true">{{ setup.stepNumber(i) }}</span>
+        <span class="sr-only">{{ setup.stepTitle(i) }}</span>
+    </span>
+}
+<!-- Opens and closes the step; closed, it shows the step in one line -->
+<button
+    type="button"
+    class="step__toggle"
+    [id]="'step-' + key + '-toggle'"
+    [attr.aria-label]="setup.toggleLabel(i)"
+    [attr.aria-expanded]="expanded"
+    [attr.aria-controls]="expanded ? 'step-' + key + '-body' : null"
+    (click)="setup.toggleStep(key)"
+>
+    @if (!expanded && kind === 'heading') {
+        <!-- As a section title, so a collapsed workout reads as its plan -->
+        <span class="step__summary step__summary--heading">{{
+            step().value().name.trim() || 'Heading'
+        }}</span>
+    } @else if (!expanded) {
+        <span class="step__summary">
+            <span class="step__summary-name">{{ setup.summaryName(i) }}</span>
+            <span class="step__summary-time">{{ time }}</span>
+        </span>
+    }
+    <mat-icon class="step__chevron" aria-hidden="true">expand_more</mat-icon>
+</button>
+<!-- Only on an open step, so a closed one fits on one line on a phone -->
+@if (expanded) {
+    <div class="step__actions">
+        <button
+            type="button"
+            class="btn-icon step__action"
+            [id]="'step-' + key + '-up'"
+            [attr.aria-label]="'Move ' + setup.stepTitle(i) + ' up'"
+            [disabled]="!setup.canMove(i, -1)"
+            (click)="setup.moveStep(i, -1)"
+        >
+            <mat-icon aria-hidden="true">arrow_upward</mat-icon>
+        </button>
+        <button
+            type="button"
+            class="btn-icon step__action"
+            [id]="'step-' + key + '-down'"
+            [attr.aria-label]="'Move ' + setup.stepTitle(i) + ' down'"
+            [disabled]="!setup.canMove(i, 1)"
+            (click)="setup.moveStep(i, 1)"
+        >
+            <mat-icon aria-hidden="true">arrow_downward</mat-icon>
+        </button>
+        <button
+            type="button"
+            class="btn-icon btn-icon--danger step__action step__action--delete"
+            [id]="'step-' + key + '-delete'"
+            [attr.aria-label]="'Delete ' + setup.stepTitle(i)"
+            (click)="setup.deleteStep(i)"
+        >
+            <mat-icon aria-hidden="true">close</mat-icon>
+        </button>
+    </div>
+}

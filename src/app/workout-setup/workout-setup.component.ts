@@ -1,35 +1,26 @@
-import {
-    CdkDrag,
-    CdkDragHandle,
-    CdkDragPlaceholder,
-    CdkDragPreview,
-    CdkDropList,
-} from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragPlaceholder, CdkDragPreview, CdkDropList } from '@angular/cdk/drag-drop';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormField, FormRoot } from '@angular/forms/signals';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { isBuiltIn } from '../models/exercise';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { LeaveCheck, LeaveQuestion } from '../nav/leave-check';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
 import { ExerciseEditorComponent } from '../shared/components/exercise-editor/exercise-editor.component';
 import { InfinitySwitchComponent } from '../shared/components/infinity-switch/infinity-switch.component';
 import { SwapExerciseDialogComponent } from '../shared/components/swap-exercise-dialog/swap-exercise-dialog.component';
-import { ToggleSwitchComponent } from '../shared/components/toggle-switch/toggle-switch.component';
 import { LabelledWheelComponent } from '../shared/components/wheel-picker/labelled-wheel.component';
-import { WheelPickerComponent } from '../shared/components/wheel-picker/wheel-picker.component';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { BrowseExercisesDialogComponent } from './browse-exercises-dialog/browse-exercises-dialog.component';
-import { ExercisePickerComponent } from './exercise-picker/exercise-picker.component';
 import { SetupDrag } from './setup-drag';
 import { SetupExercises } from './setup-exercises';
 import { StepDragPreviewComponent } from './step-drag-preview/step-drag-preview.component';
-import { StepKindMenuComponent } from './step-kind-menu/step-kind-menu.component';
 import { BACK_PAGE } from './step-model';
 import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-changes-dialog.component';
+import { SetupStepBodyComponent } from './setup-step-body/setup-step-body.component';
+import { SetupStepHeaderComponent } from './setup-step-header/setup-step-header.component';
 import { WorkoutSetupForm } from './workout-setup-form';
 
 /**
@@ -39,11 +30,7 @@ import { WorkoutSetupForm } from './workout-setup-form';
 @Component({
     selector: 'app-workout-setup',
     templateUrl: './workout-setup.component.html',
-    styleUrls: [
-        './workout-setup.component.scss',
-        './workout-setup-exercise.scss',
-        './workout-setup-supersets.scss',
-    ],
+    styleUrls: ['./workout-setup.component.scss', './workout-setup-supersets.scss'],
     providers: [WorkoutSetupForm, SetupExercises, SetupDrag],
     host: {
         '(window:beforeunload)': 'warnBeforeUnload($event)',
@@ -54,22 +41,19 @@ import { WorkoutSetupForm } from './workout-setup-form';
         UnsavedChangesDialogComponent,
         CdkDropList,
         CdkDrag,
-        CdkDragHandle,
         CdkDragPreview,
         CdkDragPlaceholder,
         FormRoot,
         FormField,
-        WheelPickerComponent,
         LabelledWheelComponent,
         InfinitySwitchComponent,
-        ToggleSwitchComponent,
-        ExercisePickerComponent,
         ExerciseEditorComponent,
         ExerciseDetailsDialogComponent,
         SwapExerciseDialogComponent,
         BrowseExercisesDialogComponent,
         StepDragPreviewComponent,
-        StepKindMenuComponent,
+        SetupStepHeaderComponent,
+        SetupStepBodyComponent,
         MatFormFieldModule,
         MatIconModule,
     ],
@@ -81,7 +65,6 @@ export class WorkoutSetupComponent {
     protected readonly setup = inject(WorkoutSetupForm);
     protected readonly exercises = inject(SetupExercises);
     protected readonly drag = inject(SetupDrag);
-    protected readonly isBuiltIn = isBuiltIn;
 
     protected readonly back = signal({ url: '/library', label: 'Workouts' });
     /** The warning about leaving with unsaved changes is open. */

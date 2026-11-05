@@ -1,0 +1,102 @@
+@let step = field();
+@let i = index();
+@let key = step().value().key;
+@let kind = step().value().kind;
+<!-- Finds an exercise as you type, or makes a new one -->
+@let exercise = exercises.exerciseFor(step().value());
+<div class="picker-field">
+    <label class="picker-field__label" [for]="'step-' + key + '-name'"> Exercise (optional) </label>
+    <div class="step__name-row">
+        <app-exercise-picker
+            class="step__name-picker"
+            [inputId]="'step-' + key + '-name'"
+            [formField]="step.name"
+            [(exerciseId)]="step.exerciseId().value"
+            (exerciseChange)="exercises.exerciseChanged(key, $event)"
+            [placeholder]="setup.nameExamples[kind === 'work' ? 'work' : 'reps']"
+            [describedBy]="'step-' + key + '-title step-' + key + '-exercise-status'"
+        />
+        <!-- The exercises as the Exercises page lists
+                                                     them, to pick from (BLD-16) -->
+        <button
+            type="button"
+            class="btn-icon"
+            [id]="'step-' + key + '-browse'"
+            [attr.aria-label]="'Browse exercises for step ' + setup.stepNumber(i)"
+            (click)="exercises.startBrowse(key, setup.stepNumber(i))"
+        >
+            <mat-icon aria-hidden="true">manage_search</mat-icon>
+        </button>
+    </div>
+</div>
+@if (exercise || step().value().name.trim()) {
+    <div class="step__exercise">
+        <p class="step__exercise-status" [id]="'step-' + key + '-exercise-status'">
+            @if (exercise) {
+                {{ isBuiltIn(exercise) ? 'Built-in exercise' : 'Your own exercise' }}
+                <!-- Why its kind just changed, e.g. to timed
+                                                             for Plank -->
+                @if (exercises.kindNoteFor(step().value()); as why) {
+                    <span class="step__exercise-note step__kind-note">
+                        {{ why }}
+                    </span>
+                }
+                @if (exercises.noteFor(exercise); as note) {
+                    <span class="step__exercise-note"> Your note: {{ note }} </span>
+                }
+            } @else {
+                A new exercise of your own, made when the workout is saved
+            }
+        </p>
+        @if (exercise) {
+            <div class="step__exercise-actions">
+                <button
+                    type="button"
+                    class="btn-pill step__exercise-details"
+                    [id]="'step-' + key + '-details'"
+                    [attr.aria-label]="'Details of ' + exercise.name"
+                    (click)="exercises.showDetails(exercise, key)"
+                >
+                    <mat-icon aria-hidden="true">info</mat-icon>
+                    Details
+                </button>
+                <!-- Another exercise for the same
+                                                             muscles (BLD-14) -->
+                <button
+                    type="button"
+                    class="btn-pill step__exercise-swap"
+                    [id]="'step-' + key + '-swap'"
+                    [attr.aria-label]="'Swap ' + exercise.name"
+                    (click)="exercises.startSwap(exercise, key, kind)"
+                >
+                    <mat-icon aria-hidden="true">swap_horiz</mat-icon>
+                    Swap
+                </button>
+                <button
+                    type="button"
+                    class="btn-pill step__exercise-edit"
+                    [id]="'step-' + key + '-exercise'"
+                    [attr.aria-label]="
+                        (isBuiltIn(exercise)
+                            ? exercises.noteFor(exercise)
+                                ? 'Edit your note on '
+                                : 'Add a note to '
+                            : 'Edit ') + exercise.name
+                    "
+                    (click)="exercises.openExercise(exercise, key)"
+                >
+                    <mat-icon aria-hidden="true">{{
+                        isBuiltIn(exercise) ? 'edit_note' : 'edit'
+                    }}</mat-icon>
+                    {{
+                        isBuiltIn(exercise)
+                            ? exercises.noteFor(exercise)
+                                ? 'Edit note'
+                                : 'Add note'
+                            : 'Edit'
+                    }}
+                </button>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,16 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 0;
+    // In here rather than a gap on the step, so it opens and shuts with the rest
+    padding-top: 0.75rem;
+}
+
+// + Step, Join with next and Take out
+.step__group-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}

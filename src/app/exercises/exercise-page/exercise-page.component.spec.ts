@@ -345,7 +345,7 @@ describe('ExercisePageComponent', () => {
         });
 
         it('opens Create with it added to the workout picked, or a new one', async () => {
-            const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+            vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
             const legs = TestBed.inject(WorkoutStore)
                 .workouts()
                 .find((w) => w.title === 'Legs')!;

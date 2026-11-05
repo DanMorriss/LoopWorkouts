@@ -1,0 +1,7 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "ignore": ["src/app/shared/testing/**", "src/test-setup.ts", "tools/**", "vitest-base.config.mts"],
+    "ignoreExportsUsedInFile": true,
+    "ignoreBinaries": ["ng"],
+    "exclude": ["duplicates"]
+}

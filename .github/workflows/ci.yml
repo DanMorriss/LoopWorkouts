@@ -1,5 +1,6 @@
-# Checks every pull request (and every push to main): formatting, unit tests
-# (including the axe accessibility checks) and the production build.
+# Checks every pull request (and every push to main): formatting, component size, unused code,
+# unit tests (including the axe accessibility checks) and the production build, whose budgets
+# and compiler options fail it too.
 name: CI
 
 on:
@@ -34,6 +35,12 @@ jobs:
 
       - name: Check formatting
         run: npm run format:check
+
+      - name: Check component size
+        run: npm run lint
+
+      - name: Check for unused code
+        run: npm run unused
 
       # The tests run in a real browser (Vitest browser mode with Playwright)
       - name: Install Chromium for the tests

@@ -1,6 +1,6 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Equipment, EQUIPMENT_CHOICES, equipmentLabel } from '../../../models/exercise';
+import { EquipmentChipsComponent } from '../equipment-chips/equipment-chips.component';
 import { SettingsStore } from '../../state/settings-store.service';
 import { ToggleSwitchComponent } from '../toggle-switch/toggle-switch.component';
 import { counted } from '../../format-count';
@@ -12,7 +12,7 @@ import { counted } from '../../format-count';
  */
 @Component({
     selector: 'app-equipment-filter',
-    imports: [MatIconModule, ToggleSwitchComponent],
+    imports: [EquipmentChipsComponent, MatIconModule, ToggleSwitchComponent],
     template: `
         <div class="kit__row">
             <div class="kit__text">
@@ -41,21 +41,7 @@ import { counted } from '../../format-count';
                 <legend class="kit__legend">
                     What you have. {{ things() }} that need nothing always show.
                 </legend>
-                <div class="kit__chips">
-                    @for (equipment of choices; track equipment) {
-                        <button
-                            type="button"
-                            class="kit__chip"
-                            [attr.aria-pressed]="has(equipment)"
-                            (click)="toggle(equipment)"
-                        >
-                            @if (has(equipment)) {
-                                <mat-icon class="kit__chip-icon" aria-hidden="true">check</mat-icon>
-                            }
-                            {{ label(equipment) }}
-                        </button>
-                    }
-                </div>
+                <app-equipment-chips />
             </fieldset>
         }
     `,
@@ -68,8 +54,6 @@ export class EquipmentFilterComponent {
     readonly things = input.required<string>();
 
     protected readonly settings = inject(SettingsStore);
-    protected readonly choices = EQUIPMENT_CHOICES;
-    protected readonly label = equipmentLabel;
     protected readonly open = signal(false);
 
     protected readonly summary = computed(() => {
@@ -82,17 +66,5 @@ export class EquipmentFilterComponent {
 
     protected setOnlyMine(only: boolean) {
         this.settings.update({ onlyMyEquipment: only });
-    }
-
-    protected has(equipment: Equipment): boolean {
-        return this.settings.myEquipment().includes(equipment);
-    }
-
-    protected toggle(equipment: Equipment) {
-        const mine = this.has(equipment)
-            ? this.settings.myEquipment().filter((e) => e !== equipment)
-            : [...this.settings.myEquipment(), equipment];
-        // In the order it's offered, as it's saved
-        this.settings.update({ myEquipment: EQUIPMENT_CHOICES.filter((e) => mine.includes(e)) });
     }
 }

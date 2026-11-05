@@ -28,8 +28,8 @@ npm run build
 
 Duplication is the main way this codebase degrades, usually as one feature copying another. Before adding a component, style block or helper, look in these places. When something you need nearly exists, extend it. On writing the second copy of anything over a few lines, extract it in the same PR instead.
 
-- **Components:** `shared/components/`: `dialog-back`, `equipment-filter`, `help-link`, `icon`, `infinity-switch`, `toggle-switch`, `wheel-picker`, `workout-choice-dialog`, `workout-outline`, `body-map` and more; `nav/back-link`; `exercises/exercise-card`; `exercises/muscle-chips`.
-- **Styles:** `src/styles/`: `_buttons` (`.btn-main`, `.btn-pill`, `.btn-icon`), `_forms` (`.picker-field`), `_menu`, `_segmented`, `_info`, `_dialog`; and these mixins: `_type` (`display`, `small-type`, `page-title`, `page-hint`), `_interaction` (`hover`, `pressed`, `hit-area`), `_chip`, `_showcase-card`. Don't write new button, chip or menu styles in a component.
+- **Components:** `shared/components/`: `dialog` (every dialog over the page), `search-field`, `equipment-chips`, `equipment-filter`, `help-link`, `icon`, `infinity-switch`, `toggle-switch`, `wheel-picker`, `workout-choice-dialog`, `workout-outline`, `body-map` and more; `nav/back-link`; `exercises/exercise-card`; `exercises/muscle-chips`.
+- **Styles:** `src/styles/`: `_buttons` (`.btn-main`, `.btn-pill`, `.btn-icon`), `_forms` (`.picker-field`), `_menu`, `_segmented`, `_info`, `_dialog`; and these mixins: `_type` (`display`, `small-type`, `page-title`, `page-hint`, `dialog-title`), `_interaction` (`hover`, `pressed`, `hit-area`, `link-button`), `_chip`, `_showcase-card`. Don't write new button, chip or menu styles in a component.
 - **Helpers:** `shared/format-time.ts` (`formatSeconds`), `shared/format-count.ts` (`counted`), `shared/focus-after-render.ts`, `shared/reduced-motion.ts`, `shared/gesture.ts`, `shared/spring.ts`, `ExerciseStore.shownFor`, `models/` (e.g. `stepKindName`, `exerciseHint`).
 - **Tests:** `shared/testing/` (`makeWorkout`, `fakeReducedMotion`, fake sync, account and audio).
 
@@ -56,7 +56,7 @@ Helpers that aren't about one component don't belong in a component's file, as i
 
 ## Accessibility
 
-It must pass axe and meet WCAG AA: focus management, contrast, ARIA, and 44px touch targets (`hit-area`). Dialogs trap focus, start on a sensible element, and close by `app-dialog-back`, Escape and a click outside. When something opens, closes or disappears, say where focus goes, and test it. Respect reduced motion in anything that moves. `a11y.spec.ts` holds the axe checks: keep new ones light, as they run under a time limit.
+It must pass axe and meet WCAG AA: focus management, contrast, ARIA, and 44px touch targets (`hit-area`). Dialogs use `app-dialog`, which traps focus and closes by ‹ Back, Escape and a click outside; give them a sensible element to start on (`cdkFocusInitial`). When something opens, closes or disappears, say where focus goes, and test it. Respect reduced motion in anything that moves. `a11y.spec.ts` holds the axe checks: keep new ones light, as they run under a time limit.
 
 ## Before raising a PR
 

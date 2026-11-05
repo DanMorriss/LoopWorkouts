@@ -14,16 +14,16 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { AUTH_STORAGE_KEY } from '../../account/account-client';
-import { BodyFigure, Equipment, EQUIPMENT_CHOICES, equipmentLabel } from '../../models/exercise';
+import { BodyFigure } from '../../models/exercise';
 import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
 import { likelyWeightUnit, MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
-import { IconComponent } from '../../shared/components/icon/icon.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { SyncStarter } from '../../sync/sync-starter.service';
 import { SETUP_KEY } from '../welcome-first';
 import { UndoService } from '../../shared/undo/undo.service';
+import { EquipmentChipsComponent } from '../../shared/components/equipment-chips/equipment-chips.component';
 
 /** The questions, in the order they're asked. */
 const QUESTIONS = ['name', 'goal', 'equipment', 'body', 'units'] as const;
@@ -42,7 +42,7 @@ export const PROFILE_WAIT_MS = 8000;
  */
 @Component({
     selector: 'app-setup',
-    imports: [BodyMapComponent, IconComponent],
+    imports: [BodyMapComponent, EquipmentChipsComponent],
     templateUrl: './setup.component.html',
     styleUrl: './setup.component.scss',
 })
@@ -82,9 +82,6 @@ export class SetupComponent {
             hint: `Stay fit and active: ${aimText('fitness')}`,
         },
     ];
-
-    protected readonly equipmentChoices = EQUIPMENT_CHOICES;
-    protected readonly equipmentLabel = equipmentLabel;
 
     protected readonly bodies: { value: BodyFigure; label: string }[] = [
         { value: 'male', label: 'Male' },
@@ -145,18 +142,6 @@ export class SetupComponent {
     protected back() {
         const at = QUESTIONS.indexOf(this.step());
         this.go(at > 0 ? QUESTIONS[at - 1] : 'name');
-    }
-
-    protected has(equipment: Equipment): boolean {
-        return this.settings.myEquipment().includes(equipment);
-    }
-
-    protected toggle(equipment: Equipment) {
-        const mine = this.has(equipment)
-            ? this.settings.myEquipment().filter((e) => e !== equipment)
-            : [...this.settings.myEquipment(), equipment];
-        // In the order it's offered, as it's saved
-        this.settings.update({ myEquipment: EQUIPMENT_CHOICES.filter((e) => mine.includes(e)) });
     }
 
     /**

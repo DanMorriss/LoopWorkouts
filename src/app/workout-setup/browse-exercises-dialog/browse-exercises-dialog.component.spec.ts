@@ -143,10 +143,10 @@ describe('BrowseExercisesDialogComponent', () => {
 
         (el().querySelector('.dialog-back') as HTMLButtonElement).click();
         el()
-            .querySelector('.browse')!
+            .querySelector('.dialog-card')!
             .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-        (el().querySelector('.browse-overlay') as HTMLElement).click();
-        (el().querySelector('.browse') as HTMLElement).click();
+        (el().querySelector('.dialog-overlay') as HTMLElement).click();
+        (el().querySelector('.dialog-card') as HTMLElement).click();
 
         expect(closed).toBe(3);
     });

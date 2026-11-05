@@ -1,24 +1,13 @@
-import { CdkTrapFocus } from '@angular/cdk/a11y';
-import {
-    afterNextRender,
-    Component,
-    computed,
-    ElementRef,
-    inject,
-    input,
-    output,
-    signal,
-    viewChild,
-} from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { DialogBackComponent } from '../dialog-back/dialog-back.component';
+import { DialogComponent } from '../dialog/dialog.component';
 import { Equipment, Exercise, exerciseHint, MeasuredBy } from '../../../models/exercise';
 import { searchExercises } from '../../../models/exercise-links';
 import { swapSuggestions } from './swap-suggestions';
-import { growFromClick } from '../../dialog-origin';
 import { ExerciseStore } from '../../state/exercise-store.service';
 import { SettingsStore } from '../../state/settings-store.service';
 import { counted } from '../../format-count';
+import { SearchFieldComponent } from '../search-field/search-field.component';
 
 /**
  * Something to do instead of a step's exercise: mid-workout (RUN-11), e.g. when the machine is
@@ -30,75 +19,49 @@ import { counted } from '../../format-count';
  */
 @Component({
     selector: 'app-swap-exercise-dialog',
-    imports: [CdkTrapFocus, DialogBackComponent, MatIconModule],
+    imports: [DialogComponent, MatIconModule, SearchFieldComponent],
     template: `
-        <div
-            class="swap-overlay dialog-overlay"
-            role="presentation"
-            (click)="closed.emit()"
-            (keydown.escape)="closed.emit()"
-        >
-            <div
-                #card
-                class="swap dialog-card"
-                cdkTrapFocus
-                [cdkTrapFocusAutoCapture]="true"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="swap-title"
-                (click)="$event.stopPropagation()"
-            >
-                <app-dialog-back (back)="closed.emit()" />
-                <h2 id="swap-title" class="swap__title">Swap {{ exercise().name }}</h2>
-                @if (hint()) {
-                    <p class="swap__hint">{{ hint() }}</p>
-                }
+        <app-dialog labelledBy="swap-title" [width]="440" (closed)="closed.emit()">
+            <h2 id="swap-title" class="swap__title">Swap {{ exercise().name }}</h2>
+            @if (hint()) {
+                <p class="swap__hint">{{ hint() }}</p>
+            }
 
-                <label class="picker-field swap__search" for="swap-search">
-                    <span class="picker-field__label">Search exercises</span>
-                    <span class="swap__search-box">
-                        <mat-icon class="swap__search-icon" aria-hidden="true">search</mat-icon>
-                        <input
-                            id="swap-search"
-                            class="picker-field__input swap__search-input"
-                            type="search"
-                            autocomplete="off"
-                            placeholder="Name, e.g. squat"
-                            cdkFocusInitial
-                            [value]="query()"
-                            (input)="onSearch($event)"
-                        />
-                    </span>
-                </label>
+            <app-search-field
+                class="swap__search"
+                inputId="swap-search"
+                label="Search exercises"
+                [focusFirst]="true"
+                [(value)]="query"
+            />
 
-                <h3 class="swap__heading" id="swap-list-heading" aria-live="polite">
-                    {{ heading() }}
-                </h3>
-                @if (options().length) {
-                    <ul class="swap__options" aria-labelledby="swap-list-heading">
-                        @for (option of options(); track option.id) {
-                            <li>
-                                <button
-                                    type="button"
-                                    class="menu__item swap__option"
-                                    (click)="picked.emit(option)"
-                                >
-                                    <mat-icon aria-hidden="true">swap_horiz</mat-icon>
-                                    <span class="swap__text">
-                                        <span class="swap__name">{{ option.name }}</span>
-                                        @if (hintOf(option); as line) {
-                                            <span class="swap__detail">{{ line }}</span>
-                                        }
-                                    </span>
-                                </button>
-                            </li>
-                        }
-                    </ul>
-                } @else {
-                    <p class="swap__none">{{ emptyText() }}</p>
-                }
-            </div>
-        </div>
+            <h3 class="swap__heading" id="swap-list-heading" aria-live="polite">
+                {{ heading() }}
+            </h3>
+            @if (options().length) {
+                <ul class="swap__options" aria-labelledby="swap-list-heading">
+                    @for (option of options(); track option.id) {
+                        <li>
+                            <button
+                                type="button"
+                                class="menu__item swap__option"
+                                (click)="picked.emit(option)"
+                            >
+                                <mat-icon aria-hidden="true">swap_horiz</mat-icon>
+                                <span class="swap__text">
+                                    <span class="swap__name">{{ option.name }}</span>
+                                    @if (hintOf(option); as line) {
+                                        <span class="swap__detail">{{ line }}</span>
+                                    }
+                                </span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <p class="swap__none">{{ emptyText() }}</p>
+            }
+        </app-dialog>
     `,
     styleUrl: './swap-exercise-dialog.component.scss',
 })
@@ -170,15 +133,4 @@ export class SwapExerciseDialogComponent {
             ? `No exercise measured in ${this.measuredBy() === 'reps' ? 'reps' : 'time'} matches that.`
             : 'Nothing else works the same muscles. Search for one above.'
     );
-
-    protected onSearch(event: Event) {
-        this.query.set((event.target as HTMLInputElement).value);
-    }
-
-    private readonly card = viewChild.required<ElementRef<HTMLElement>>('card');
-
-    constructor() {
-        // Grows out of the Swap button that opened it, and shrinks back into it
-        afterNextRender(() => growFromClick(this.card().nativeElement));
-    }
 }

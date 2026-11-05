@@ -72,26 +72,11 @@
                         Pick all you can use. Exercises and workouts show what you can do with it,
                         and those that need nothing always show. Pick none to see everything.
                     </p>
-                    <div
-                        class="setup__chips"
+                    <app-equipment-chips
                         role="group"
                         aria-labelledby="setup-question"
                         aria-describedby="setup-equipment-hint"
-                    >
-                        @for (equipment of equipmentChoices; track equipment) {
-                            <button
-                                type="button"
-                                class="setup__chip"
-                                [attr.aria-pressed]="has(equipment)"
-                                (click)="toggle(equipment)"
-                            >
-                                @if (has(equipment)) {
-                                    <app-icon class="setup__chip-icon">check</app-icon>
-                                }
-                                {{ equipmentLabel(equipment) }}
-                            </button>
-                        }
-                    </div>
+                    />
                 }
 
                 @case ('body') {

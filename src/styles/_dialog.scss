@@ -1,10 +1,9 @@
 // Dialogs over the page (the exercise editor, an exercise's details): the page dims and its
 // blur thickens behind as the card settles into place from just smaller, on the app's spring,
 // growing out of the button that opened it (growFromClick, src/app/shared/dialog-origin.ts).
-// Closing goes back the way it came: the same path, on the mirror of the curve. In a
-// dialog's template, the overlay is .dialog-overlay and the card .dialog-card; where it's
-// used, the dialog's element has animate.leave="dialog-leave", which keeps it on the page
-// while it goes.
+// Closing goes back the way it came: the same path, on the mirror of the curve. DialogComponent
+// (shared/components/dialog) has the overlay and the card, and their look; where a dialog is
+// used, its element has animate.leave="dialog-leave", which keeps it on the page while it goes.
 
 .dialog-overlay {
     animation: dialog-dim-in 0.2s ease-out;

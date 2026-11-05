@@ -31,6 +31,37 @@
     }
 }
 
+// A button that reads as a link: a disclosure such as "My equipment: none", or "Hidden".
+@mixin link-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--glow-text);
+    font: inherit;
+    font-size: 0.8rem;
+    text-align: left;
+    cursor: pointer;
+
+    @include hover {
+        text-decoration: underline;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    .mat-icon {
+        width: 1.2rem;
+        height: 1.2rem;
+        font-size: 1.2rem;
+    }
+}
+
 @mixin hover {
     @media (hover: hover) {
         &:hover {

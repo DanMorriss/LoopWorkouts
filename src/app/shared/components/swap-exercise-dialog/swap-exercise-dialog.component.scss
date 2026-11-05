@@ -1,37 +1,7 @@
 @use 'type' as *;
 
-// Over the workout like the exercise's details, scrolling within itself
-.swap-overlay {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    background: var(--overlay);
-    backdrop-filter: blur(6px);
-    padding: 1rem;
-    z-index: 40;
-
-    @media (prefers-reduced-transparency: reduce) {
-        backdrop-filter: none;
-    }
-}
-
-.swap {
-    width: min(440px, 100%);
-    max-height: calc(100dvh - 2rem);
-    overflow-y: auto;
-    border-radius: 0.9rem;
-    border: 1px solid var(--border);
-    background: var(--raised);
-    box-shadow: 0 18px 40px var(--shadow);
-    padding: 1.2rem;
-}
-
 .swap__title {
-    margin: 0 0 0.5rem;
-    @include display;
-    font-size: 1.3rem;
-    color: var(--text-strong);
+    @include dialog-title;
     overflow-wrap: anywhere;
 }
 
@@ -40,24 +10,6 @@
     color: var(--text-muted);
     font-size: 0.85rem;
     line-height: 1.5;
-}
-
-.swap__search-box {
-    position: relative;
-    display: block;
-}
-
-.swap__search-icon {
-    position: absolute;
-    top: 50%;
-    left: 0.8rem;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.swap__search-input {
-    padding-left: 2.6rem;
 }
 
 .swap__heading {

@@ -1,0 +1,15 @@
+@use 'chip' as *;
+
+:host {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.equipment-chip {
+    @include chip;
+}
+
+.equipment-chip__icon {
+    @include chip-icon;
+}

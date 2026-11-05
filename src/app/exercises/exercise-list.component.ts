@@ -25,6 +25,7 @@ import {
 } from './exercise-card/exercise-card.component';
 import { filterExercises } from './exercise-filter';
 import { MuscleChipsComponent } from './muscle-chips/muscle-chips.component';
+import { SearchFieldComponent } from '../shared/components/search-field/search-field.component';
 
 /**
  * Every exercise, built-in and your own, to browse and search (EXR-6). The list can be cut
@@ -35,6 +36,7 @@ import { MuscleChipsComponent } from './muscle-chips/muscle-chips.component';
     selector: 'app-exercise-list',
     imports: [
         MatIconModule,
+        SearchFieldComponent,
         EquipmentFilterComponent,
         BodyMapComponent,
         ExerciseEditorComponent,
@@ -105,9 +107,6 @@ export class ExerciseListComponent {
             this.selectedMuscles().length > 0 ||
             this.onlyMyEquipment()
     );
-    protected onSearch(event: Event) {
-        this.query.set((event.target as HTMLInputElement).value);
-    }
 
     protected pickMuscle(muscle: MuscleGroup) {
         const next = this.selectedMuscles().includes(muscle)

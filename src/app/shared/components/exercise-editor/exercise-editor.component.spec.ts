@@ -300,7 +300,7 @@ describe('ExerciseEditorComponent', () => {
         await fill('#exercise-editor-note', 'Not kept');
 
         el('.dialog-back').click();
-        el('.editor-overlay').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        el('.dialog-overlay').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
 
         expect(host.closed).toBe(2);
         expect(exercises.noteFor(BUILT_IN_EXERCISES[0].id)).toBeUndefined();

@@ -32,6 +32,14 @@
     line-height: 1.5;
 }
 
+// A dialog's title
+@mixin dialog-title {
+    margin: 0 0 0.5rem;
+    @include display;
+    font-size: 1.3rem;
+    color: var(--text-strong);
+}
+
 @mixin display {
     font-family: var(--font-display);
     font-weight: 400;

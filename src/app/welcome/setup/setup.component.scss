@@ -130,20 +130,6 @@
     line-height: 1.4;
 }
 
-.setup__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.setup__chip {
-    @include chip;
-}
-
-.setup__chip-icon {
-    @include chip-icon;
-}
-
 .setup__body {
     display: block;
     width: min(16rem, 100%);

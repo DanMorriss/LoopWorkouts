@@ -7,8 +7,8 @@ import { IconComponent } from '../icon/icon.component';
  * are left the same way. Held at the top of the card while the rest scrolls under it, so it's
  * always in reach. Escape and a click outside still close the dialog too.
  *
- * Goes first in the dialog's card, e.g.
- * `<app-dialog-back label="Workouts" (back)="closed.emit()" />`. Screen readers hear
+ * DialogComponent puts it first in its card. With a label, e.g.
+ * `<app-dialog-back label="Workouts" (back)="closed.emit()" />`, screen readers hear
  * "Back to Workouts".
  */
 @Component({

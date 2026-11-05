@@ -81,7 +81,7 @@ Check the diff, not only that it works:
 
 - **Zoneless tests:** a wheel's first jump to its value fires its scroll a frame later, so wait two `requestAnimationFrame`s before pressing a freshly shown wheel. A smooth glide can be cut short in the test browser, so use `fakeReducedMotion(true)` when a test changes a wheel from code and then saves.
 - **Signal Forms:** array rows are tracked by a hidden symbol on each object, which spreading copies, so a new row made with `{...otherRow}` shares its identity (NG01904): copy named fields instead. Closing a form inside its submission action leaves it stuck submitting.
-- **Full test runs:** gesture tests and axe checks can fail under load and pass alone; run one alone before believing it. Don't kill a running `ng test` and start another straight away.
+- **Full test runs:** `maxWorkers` is 2 in `vitest-base.config.mts` on purpose: with more pages, the 3D demos' software WebGL starves the others of frames, and timing tests fail at random, without the run getting any quicker. Don't raise it. If a timing test fails anyway, look for a new cause before rerunning. Don't kill a running `ng test` and start another straight away.
 - **Dev server:** a new Angular entry-point import can give lazy pages a second copy of Angular (NG0203). Restart `ng serve` before debugging that.
 - **Drag and drop:** the CDK sorts by top edge, so hide a row by shrinking it in place, not with `display: none`. Check real drags with Playwright against `ng serve`, as simulated drags in Vitest are unreliable.
 - **Built-in content:** ids of ready-made workouts, plans and exercises are fixed once released. See `docs/writing-exercises.md`.

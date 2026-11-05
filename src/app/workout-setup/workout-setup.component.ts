@@ -2,6 +2,7 @@ import {
     afterNextRender,
     Component,
     computed,
+    DestroyRef,
     DOCUMENT,
     effect,
     ElementRef,
@@ -68,6 +69,9 @@ import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { ExercisePickerComponent } from './exercise-picker/exercise-picker.component';
 import { InfinitySwitchComponent } from '../shared/components/infinity-switch/infinity-switch.component';
 import { ToggleSwitchComponent } from '../shared/components/toggle-switch/toggle-switch.component';
+import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { LeaveCheck, LeaveQuestion } from '../nav/leave-check';
+import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-changes-dialog.component';
 import { UndoService } from '../shared/undo/undo.service';
 import { DropSpring } from '../shared/drop-spring';
 import { changeSmoothly } from '../shared/layout-change';
@@ -176,6 +180,14 @@ function pickerOptions(
 
 const padded = (n: number) => n.toString().padStart(2, '0');
 
+/**
+ * A page Create can go back to, with a workout's id captured for its details: /library/<id>, or
+ * an exercise's page, /library/<id>/<name>, /ready-made-plans/<workout>/<name> or
+ * /exercises/<name> (with the list's filter or where it goes back to).
+ */
+const BACK_PAGE =
+    /^(?:\/library\/([^/?#]+)|\/library\/[^/?#]+\/[^/?#]+|(?:\/exercises|\/ready-made-plans\/[^/?#]+)\/[^/?#]+(?:\?[^#]*)?)$/;
+
 /** What the name box suggests for each kind of step. */
 const NAME_EXAMPLES: Record<StepKind, string> = {
     work: 'e.g. Squats',
@@ -192,9 +204,12 @@ const NAME_EXAMPLES: Record<StepKind, string> = {
         './workout-setup-supersets.scss',
     ],
     host: {
+        '(window:beforeunload)': 'warnBeforeUnload($event)',
         '(document:click)': 'closePopups($event)',
     },
     imports: [
+        BackLinkComponent,
+        UnsavedChangesDialogComponent,
         CdkDropList,
         CdkDrag,
         CdkDragHandle,
@@ -378,7 +393,44 @@ export class WorkoutSetupComponent {
                   .find((error) => error.kind === 'noTime')
     );
 
+    protected readonly back = signal({ url: '/library', label: 'Workouts' });
+
+    /** The form as it opened or was last saved, to tell if it's been changed since. */
+    private readonly savedState = signal('');
+    private readonly hasChanges = computed(
+        () => JSON.stringify(this.model()) !== this.savedState()
+    );
+    /** The warning about leaving with unsaved changes is open. */
+    protected readonly leaveAsked = signal(false);
+    private leaving: { answer: Promise<boolean>; give: (leave: boolean) => void } | null = null;
+    protected readonly unsavedHint = computed(() => {
+        const name = this.model().title.trim();
+        if (!this.editingWorkoutId()) {
+            return "This workout hasn't been saved.";
+        }
+        return name
+            ? `Your changes to ${name} haven't been saved.`
+            : "Your changes haven't been saved.";
+    });
+    /** For LeaveCheck: nothing to ask with no changes; otherwise opens the warning. */
+    private readonly askToLeave: LeaveQuestion = () => {
+        if (!this.hasChanges()) {
+            return null;
+        }
+        if (!this.leaving) {
+            let give!: (leave: boolean) => void;
+            const answer = new Promise<boolean>((resolve) => (give = resolve));
+            this.leaving = { answer, give };
+            this.leaveAsked.set(true);
+        }
+        return this.leaving.answer;
+    };
+
     constructor() {
+        const leaveCheck = inject(LeaveCheck);
+        leaveCheck.set(this.askToLeave);
+        inject(DestroyRef).onDestroy(() => leaveCheck.clear(this.askToLeave));
+
         // An effect rather than a derived signal, so the number is caught even when nothing
         // reads it before the wheel moves on to ∞
         effect(() => {
@@ -391,6 +443,7 @@ export class WorkoutSetupComponent {
         // Not just the snapshot: the page stays open when only the query changes, e.g. Create
         // from the menu while editing, which goes from ?editId=1 to a new workout
         this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+            this.back.set(this.backFrom(params.get('from')));
             if (this.addedExercise) {
                 // Only ?add= taken off the address, after adding it: the form stays as it is
                 this.addedExercise = false;
@@ -410,6 +463,39 @@ export class WorkoutSetupComponent {
                 });
             }
         });
+    }
+
+    /**
+     * Where ‹ goes: the page it was opened from (`?from=`), if that's a workout's details or an
+     * exercise's page, otherwise Workouts. With unsaved changes, LeaveCheck asks first.
+     */
+    private backFrom(from: string | null): { url: string; label: string } {
+        const page = from?.match(BACK_PAGE);
+        if (!from || !page) {
+            return { url: '/library', label: 'Workouts' };
+        }
+        const workoutId = page[1];
+        const label = workoutId
+            ? this.workoutStore.findWorkoutById(workoutId)?.title.trim() || 'Workout'
+            : 'Exercise';
+        return { url: from, label };
+    }
+
+    /** The answer to the warning: discarding counts the form as unchanged, so it isn't asked again. */
+    protected answerLeaving(leave: boolean) {
+        this.leaveAsked.set(false);
+        if (leave) {
+            this.savedState.set(JSON.stringify(this.model()));
+        }
+        this.leaving?.give(leave);
+        this.leaving = null;
+    }
+
+    /** Closing or reloading the tab: the browser's own question, if there are changes. */
+    protected warnBeforeUnload(event: BeforeUnloadEvent) {
+        if (this.hasChanges()) {
+            event.preventDefault();
+        }
     }
 
     /** An exercise was just added from ?add=, which is being taken off the address. */
@@ -470,6 +556,7 @@ export class WorkoutSetupComponent {
             this.model.set(this.emptySetup());
             this.expandedKeys.set(this.allKeys());
         }
+        this.savedState.set(JSON.stringify(this.model()));
     }
 
     protected setRepeatMode(repeatMode: RepeatMode) {

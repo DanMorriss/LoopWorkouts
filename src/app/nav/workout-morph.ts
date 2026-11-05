@@ -1,6 +1,7 @@
 import { ApplicationRef, inject, Service } from '@angular/core';
 import { Router } from '@angular/router';
 import { isOnPage } from './current-url';
+import { LeaveCheck } from './leave-check';
 import { letInputThrough } from './let-input-through';
 import { FADING_CLASS } from './page-slide';
 
@@ -17,6 +18,7 @@ export const MORPHING_CLASS = 'workout-morphing';
 @Service()
 export class WorkoutMorph {
     private readonly router = inject(Router);
+    private readonly leaveCheck = inject(LeaveCheck);
     private readonly appRef = inject(ApplicationRef);
 
     /**
@@ -47,6 +49,16 @@ export class WorkoutMorph {
      * decides which picture is the bar's.
      */
     navigate(url: string) {
+        // Before the morph starts, as the screen is frozen during one
+        const asking = this.leaveCheck.confirm();
+        if (asking) {
+            void asking.then((leave) => {
+                if (leave) {
+                    this.navigate(url);
+                }
+            });
+            return;
+        }
         if (!document.startViewTransition) {
             void this.router.navigateByUrl(url);
             return;

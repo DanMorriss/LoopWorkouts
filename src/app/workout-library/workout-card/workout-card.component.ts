@@ -12,6 +12,9 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
+import { workoutEquipment } from '../../models/built-in-workouts';
+import { capitalise, equipmentPhrases, MUSCLE_LABELS } from '../../models/exercise';
+import { MUSCLES_ON_A_CARD, musclesWorked } from '../../models/workout-muscles';
 import {
     allSteps,
     repStepsPerRound,
@@ -19,14 +22,17 @@ import {
     runsUntilStopped,
     Workout,
 } from '../../models/workout';
+import { PageSlide } from '../../nav/page-slide';
 import { formatTime } from '../../shared/format-time';
 import { project, rubberband, VelocityTracker } from '../../shared/gesture';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { criticallyDampedSpring } from '../../shared/spring';
+import { ExerciseStore } from '../../shared/state/exercise-store.service';
 
 /**
- * One workout in the library list: pressing it starts the workout. It can also be swiped to
- * the left to delete it, or held to pick it up: it lifts, and can then be dragged to another
+ * One workout in the library list, in the ready-made cards' look: its title and what's in it,
+ * how many exercises, the muscles it mainly works and what it needs. Pressing it slides in its
+ * details, and its play button starts it. It can also be swiped to the left to delete it, or held to pick it up: it lifts, and can then be dragged to another
  * place (the library's drop list does that), or let go of where it is for its options, as on
  * an iPhone. A right-click opens them too, and so does the ⋮ button, for keyboards, screen
  * readers and anyone who doesn't know the gestures; its menu has Move up and Move down as
@@ -58,15 +64,62 @@ export class WorkoutCardComponent {
     readonly started = output<void>();
     readonly menuToggled = output<void>();
     readonly menuClosed = output<void>();
-    readonly detailsRequested = output<void>();
     readonly editRequested = output<void>();
     /** Move up (-1) or down (1) a place. */
     readonly moveRequested = output<-1 | 1>();
     readonly deleteRequested = output<void>();
 
+    private readonly exercises = inject(ExerciseStore);
+    private readonly slide = inject(PageSlide);
+
+    protected readonly detailsUrl = computed(() => `/library/${this.workout().id}`);
     protected readonly title = computed(() => this.workout().title.trim());
     /** Used in accessible names, e.g. "Start Sprints" or "Start workout". */
     protected readonly name = computed(() => this.title() || 'workout');
+    /** Its work and rep steps' names in order, each once. */
+    private readonly namedExercises = computed(() => [
+        ...new Set(
+            allSteps(this.workout())
+                .filter((step) => step.kind !== 'rest')
+                .map((step) => step.name.trim())
+                .filter(Boolean)
+        ),
+    ]);
+    /** The big number by its title: how many exercises, or steps if none is named. */
+    protected readonly count = computed(() => {
+        const exercises = this.namedExercises().length;
+        const number = exercises || allSteps(this.workout()).length;
+        const thing = exercises ? 'exercise' : 'step';
+        return { number, label: number === 1 ? thing : `${thing}s` };
+    });
+    private readonly worked = computed(() =>
+        musclesWorked([this.workout()], (id) => this.exercises.byId(id))
+    );
+    /** Its main muscles, the first few, then how many more; none with no exercise to go on. */
+    protected readonly muscles = computed(() => {
+        const { main } = this.worked();
+        return {
+            shown: main.slice(0, MUSCLES_ON_A_CARD).map((muscle) => MUSCLE_LABELS[muscle]),
+            more: Math.max(0, main.length - MUSCLES_ON_A_CARD),
+        };
+    });
+    /** What it needs: "Dumbbells", "Bench", or "No equipment"; none with no exercise to go on. */
+    protected readonly equipment = computed(() =>
+        this.worked().hasExercises
+            ? equipmentPhrases(
+                  workoutEquipment(this.workout(), (id) => this.exercises.byId(id))
+              ).map(capitalise)
+            : []
+    );
+    /** The muscles and equipment for screen readers, added to its summary. */
+    protected readonly spokenWorks = computed(() => {
+        const { shown, more } = this.muscles();
+        const muscles = shown.length
+            ? `. Works ${shown.join(', ')}${more ? ` and ${more} more` : ''}`
+            : '';
+        const needs = this.equipment().length ? `. Needs ${this.equipment().join(', ')}` : '';
+        return muscles + needs;
+    });
     /**
      * A one-line summary: its exercises, the steps' names in order, e.g. "Squats, Bench press
      * + 1 more". With no step named, "01:05 - 00:20" for one work step (and maybe one rest),
@@ -76,14 +129,7 @@ export class WorkoutCardComponent {
      */
     protected readonly summary = computed(() => {
         const steps = allSteps(this.workout());
-        const namedExercises: string[] = [];
-        for (const step of steps) {
-            if (step.kind === 'rest') continue;
-            const name = step.name.trim();
-            if (name && !namedExercises.includes(name)) {
-                namedExercises.push(name);
-            }
-        }
+        const namedExercises = this.namedExercises();
         if (namedExercises.length > 0) {
             const preview = namedExercises.slice(0, 2);
             const remainder = namedExercises.length - preview.length;
@@ -125,7 +171,7 @@ export class WorkoutCardComponent {
             ? 'repeated until stopped'
             : `repeated ${repeats} times`;
     });
-    // Gestures on the card, as on an iPhone list. A tap starts the workout. A swipe to the
+    // Gestures on the card, as on an iPhone list. A tap opens its details. A swipe to the
     // left follows the finger, showing Delete behind; let go, and where the flick would carry
     // it decides: past halfway it carries on off the card and deletes (with Undo), otherwise
     // it springs back, from the finger's speed either way. Holding still on it lifts it: moved
@@ -146,7 +192,7 @@ export class WorkoutCardComponent {
         tracker: VelocityTracker;
     } | null = null;
     private holdTimer: ReturnType<typeof setTimeout> | undefined;
-    /** The press was a swipe or a hold, so the click that ends it doesn't start the workout. */
+    /** The press was a swipe or a hold, so the click that ends it does nothing. */
     private swallowClick = false;
     /** Counts presses, so a swipe's spring knows if a new press caught the card mid-way. */
     private presses = 0;
@@ -163,14 +209,29 @@ export class WorkoutCardComponent {
     }
 
     protected start(event: Event) {
-        if (this.swallowClick) {
-            this.swallowClick = false;
-            event.preventDefault();
-            // Nor does it reach the library, which would close the options a hold just opened
-            event.stopPropagation();
+        if (!this.swallowed(event)) {
+            this.started.emit();
+        }
+    }
+
+    /** Slides in its details, unless the press was a swipe or a hold. */
+    protected open(event: MouseEvent) {
+        if (this.swallowed(event)) {
             return;
         }
-        this.started.emit();
+        this.slide.follow(event, this.detailsUrl(), 'in');
+    }
+
+    /** Whether this click only ends a swipe or a hold, so it's dropped. */
+    private swallowed(event: Event): boolean {
+        if (!this.swallowClick) {
+            return false;
+        }
+        this.swallowClick = false;
+        event.preventDefault();
+        // Nor does it reach the library, which would close the options a hold just opened
+        event.stopPropagation();
+        return true;
     }
 
     /** A right-click opens the options, as the ⋮ button does. */

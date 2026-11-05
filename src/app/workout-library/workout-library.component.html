@@ -69,7 +69,6 @@
                 (started)="startWorkout(workout)"
                 (menuToggled)="toggleWorkoutMenu(workout.id)"
                 (menuClosed)="closeWorkoutMenu(workout.id)"
-                (detailsRequested)="openDetails(workout.id)"
                 (editRequested)="navigateToEditWorkout(workout.id)"
                 (moveRequested)="moveWorkout(workout, $event)"
                 (deleteRequested)="deleteWorkout(workout)"
@@ -161,12 +160,3 @@
         </section>
     }
 </div>
-
-@if (detailsWorkout(); as workout) {
-    <app-workout-details-dialog
-        animate.leave="dialog-leave"
-        [workout]="workout"
-        (closed)="closeDetails()"
-        (editRequested)="navigateToEditWorkout(workout.id)"
-    />
-}

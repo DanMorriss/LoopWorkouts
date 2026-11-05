@@ -70,6 +70,12 @@ describe('ReadyMadeWorkoutComponent', () => {
         expect(text()).not.toContain('You have a workout called this');
     });
 
+    it('has no exercise links from the list of ready-made workouts', async () => {
+        await open('gym-legs');
+
+        expect(el().querySelector('.outline__link')).toBeNull();
+    });
+
     it('goes back to the ready-made workouts with ‹ Ready-made', async () => {
         await open('gym-legs');
         const back = el().querySelector('.back-link')!;
@@ -97,6 +103,16 @@ describe('ReadyMadeWorkoutComponent', () => {
 
             expect(text(back)).toBe(label);
             expect(back.getAttribute('href')).toBe(url);
+        });
+
+        it('links each exercise to its page, which comes back here', async () => {
+            await openFrom('today');
+            const links = Array.from(el().querySelectorAll('.outline__link'));
+
+            expect(links.map((a) => text(a))).toContain('Back squat');
+            expect(links[0].getAttribute('href')).toBe(
+                '/ready-made-plans/gym-legs/back-squat?from=today'
+            );
         });
 
         it('shows the workout to look at, with nothing to add', async () => {

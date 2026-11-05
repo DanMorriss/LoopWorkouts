@@ -1,0 +1,100 @@
+import { DatePipe } from '@angular/common';
+import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatIconModule } from '@angular/material/icon';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
+import { describeRounds, formatDuration } from '../../history/history-format';
+import { exerciseSlug } from '../../models/exercise';
+import { Workout } from '../../models/workout';
+import { musclesWorked } from '../../models/workout-muscles';
+import { BackLinkComponent } from '../../nav/back-link/back-link.component';
+import { PageSlide } from '../../nav/page-slide';
+import { SwipeBackDirective } from '../../nav/swipe-back.directive';
+import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
+import { WorkoutOutlineComponent } from '../../shared/components/workout-outline/workout-outline.component';
+import { ExerciseStore } from '../../shared/state/exercise-store.service';
+import { HistoryStore } from '../../shared/state/history-store.service';
+import { WorkoutStore } from '../../shared/state/workout-store.service';
+
+/** How many of its latest runs it lists. */
+const RECENT_RUNS = 5;
+
+/**
+ * A workout's details (LIB-4), at /library/<its id>, from its card in the library: the
+ * muscles its exercises work, on the body map; its history, with its latest runs linking to them
+ * on the Progress page; and what's in it, each step and its sets, so it can be read without
+ * opening Edit, each exercise sliding in its page. It slides in over Workouts, and back off with
+ * ‹ Workouts or a swipe right, with focus back on the card (`?details=<its id>`).
+ */
+@Component({
+    selector: 'app-workout-details',
+    imports: [
+        BackLinkComponent,
+        BodyMapComponent,
+        DatePipe,
+        MatIconModule,
+        RouterLink,
+        SwipeBackDirective,
+        WorkoutOutlineComponent,
+    ],
+    templateUrl: './workout-details.component.html',
+    styleUrl: './workout-details.component.scss',
+})
+export class WorkoutDetailsComponent {
+    private readonly exercises = inject(ExerciseStore);
+    private readonly history = inject(HistoryStore);
+    private readonly workouts = inject(WorkoutStore);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    private readonly slide = inject(PageSlide);
+
+    private readonly id = toSignal(
+        this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
+        { initialValue: '' }
+    );
+
+    protected readonly back = `/library?details=${this.route.snapshot.paramMap.get('id') ?? ''}`;
+
+    /** It, or null for a link to one there isn't, such as one deleted since. */
+    protected readonly workout = computed(() => this.workouts.findWorkoutById(this.id()));
+
+    protected readonly name = computed(() => this.workout()?.title.trim() || 'Untitled workout');
+    protected readonly muscles = computed(() => {
+        const workout = this.workout();
+        return musclesWorked(workout ? [workout] : [], (id) => this.exercises.byId(id));
+    });
+    /** Its runs, newest first, as the history keeps them. */
+    private readonly runs = computed(() =>
+        this.history.entries().filter((entry) => entry.workoutId === this.id())
+    );
+    protected readonly timesDone = computed(() => {
+        const count = this.runs().length;
+        return count === 1 ? 'Done once' : `Done ${count} times`;
+    });
+    protected readonly recentRuns = computed(() =>
+        this.runs()
+            .slice(0, RECENT_RUNS)
+            .map((entry) => ({
+                id: entry.id,
+                startedAt: entry.startedAt,
+                text: `${describeRounds(entry)} · ${formatDuration(entry.activeSeconds)}`,
+            }))
+    );
+    protected readonly moreRuns = computed(() => this.runs().length > RECENT_RUNS);
+
+    /** An exercise's page, under this workout so it comes back here; none for one that's gone. */
+    protected readonly exerciseUrl = (exerciseId: string) => {
+        const exercise = this.exercises.byId(exerciseId);
+        return exercise ? `/library/${this.id()}/${exerciseSlug(exercise)}` : null;
+    };
+
+    protected edit(workout: Workout) {
+        const url = this.router.serializeUrl(
+            this.router.createUrlTree(['/setup'], {
+                queryParams: { editId: workout.id, from: `/library/${workout.id}` },
+            })
+        );
+        this.slide.navigate(url, 'in');
+    }
+}

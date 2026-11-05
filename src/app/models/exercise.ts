@@ -268,7 +268,12 @@ export function capitalise(text: string): string {
 
 /** Where an exercise's page is: /exercises/back-squat for a built-in one, by id for your own. */
 export function exercisePath(exercise: Exercise): string {
-    return `/exercises/${isBuiltIn(exercise) ? exercise.id.slice('builtin:'.length) : exercise.id}`;
+    return `/exercises/${exerciseSlug(exercise)}`;
+}
+
+/** The last part of an exercise page's address: "back-squat", or your own one's id. */
+export function exerciseSlug(exercise: Exercise): string {
+    return isBuiltIn(exercise) ? exercise.id.slice('builtin:'.length) : exercise.id;
 }
 
 /**

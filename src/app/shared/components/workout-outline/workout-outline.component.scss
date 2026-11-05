@@ -1,3 +1,5 @@
+@use 'interaction' as *;
+
 :host {
     display: block;
 }
@@ -44,6 +46,45 @@
 .outline__name {
     color: var(--text-strong);
     overflow-wrap: anywhere;
+}
+
+// An exercise with a page: underlined, and its whole line presses (::after)
+.outline__line {
+    position: relative;
+}
+
+.outline__link {
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 2px;
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0 -0.5rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s ease;
+    }
+
+    @include hover {
+        &::after {
+            background: var(--control);
+        }
+    }
+
+    @include pressed {
+        &::after {
+            background: var(--control);
+        }
+    }
+
+    &:focus-visible {
+        outline: none;
+
+        &::after {
+            outline: 2px solid var(--accent);
+        }
+    }
 }
 
 .outline__amount {

@@ -3,6 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import axe from 'axe-core';
 import { AppComponent } from './app.component';
 import { routes } from './app.routes';
+import { LeaveCheck } from './nav/leave-check';
 import {
     FakeAccountClient,
     fakeAccountClient,
@@ -573,7 +574,19 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it("with a workout's details open, its muscles and runs", async () => {
+            it('leaving Create with unsaved changes', async () => {
+                await open('/setup');
+                const title = fixture.nativeElement.querySelector('#title') as HTMLInputElement;
+                title.value = 'Sprints';
+                title.dispatchEvent(new Event('input', { bubbles: true }));
+                await settle();
+                void TestBed.inject(LeaveCheck).confirm();
+                await settle();
+                expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).not.toBeNull();
+                await expectNoViolations();
+            });
+
+            it("a workout's details, its muscles and runs", async () => {
                 const legs = store.addWorkout(
                     makeWorkout({ title: 'Legs', steps: [reps(10, 'Back squat')] })
                 );
@@ -589,12 +602,8 @@ for (const theme of ['dark', 'light'] as const) {
                     totalRounds: 3,
                     outcome: 'finished',
                 });
-                await open('/library');
-                click('.workout-card__action--menu');
-                await settle();
-                click('.workout-card__menu-item--details');
-                await settle();
-                expect(fixture.nativeElement.querySelector('[role="dialog"]')).not.toBeNull();
+                await open(`/library/${legs.id}`);
+                expect(fixture.nativeElement.querySelector('.details__title')).not.toBeNull();
                 await expectNoViolations();
             });
         });

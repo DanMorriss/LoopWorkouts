@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { BUILT_IN_WORKOUTS, copyOfBuiltIn } from '../../../models/built-in-workouts';
+import { exerciseSlug } from '../../../models/exercise';
 import { musclesWorked } from '../../../models/workout-muscles';
 import { BackLinkComponent } from '../../../nav/back-link/back-link.component';
 import { PageSlide } from '../../../nav/page-slide';
@@ -25,6 +26,7 @@ import { readyMadeCard } from '../ready-made-card';
  *
  * From a ready-made plan's card (PLN-6), at /ready-made-plans/<its name>, it's the same page
  * without the buttons, as the workout comes with the plan, and goes back to where the card is.
+ * Its exercises link to their pages there, which come back to it.
  */
 @Component({
     selector: 'app-ready-made-workout',
@@ -59,6 +61,23 @@ export class ReadyMadeWorkoutComponent {
     protected readonly back = this.inPlan
         ? backToPlanCard(this.route.snapshot.queryParamMap.get('from'))
         : { url: '/ready-made', label: 'Ready-made' };
+
+    /**
+     * From a plan's card, an exercise's page, under this workout so it comes back here, and on
+     * to where the card was; none for one that's gone.
+     */
+    protected readonly exerciseUrl = (exerciseId: string) => {
+        const exercise = this.exercises.byId(exerciseId);
+        const from = this.route.snapshot.queryParamMap.get('from');
+        return exercise
+            ? this.router.serializeUrl(
+                  this.router.createUrlTree(
+                      ['/ready-made-plans', this.slug(), exerciseSlug(exercise)],
+                      { queryParams: from ? { from } : {} }
+                  )
+              )
+            : null;
+    };
 
     /** It as its card shows it, or null for a link to one there isn't. */
     protected readonly card = computed(() => {

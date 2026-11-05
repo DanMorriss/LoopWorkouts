@@ -36,6 +36,8 @@ import {
     work,
 } from '../shared/testing/make-workout';
 import { WorkoutSetupComponent } from './workout-setup.component';
+import { LeaveCheck } from '../nav/leave-check';
+import { PageSlide } from '../nav/page-slide';
 
 /** The step a new workout starts with, as `shown()` reads it. */
 const blankStep = { kind: 'Reps', name: '', time: '0 reps' };
@@ -233,6 +235,170 @@ describe('WorkoutSetupComponent', () => {
 
     afterEach(() => localStorage.clear());
 
+    describe('leaving with unsaved changes', () => {
+        const dialog = () =>
+            fixture.nativeElement.querySelector('[role="alertdialog"]') as HTMLElement | null;
+        const confirm = () => TestBed.inject(LeaveCheck).confirm();
+        const render = async () => {
+            fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+        };
+
+        it('asks nothing of a new workout left as it opened', async () => {
+            await setup();
+            await create({ empty: true });
+
+            expect(confirm()).toBeNull();
+            expect(dialog()).toBeNull();
+        });
+
+        it('asks nothing of a saved workout only looked at', async () => {
+            await setup();
+            const legs = store.addWorkout({
+                title: 'Legs',
+                repeats: 1,
+                blocks: [
+                    {
+                        kind: 'group',
+                        rounds: 3,
+                        restSeconds: 60,
+                        steps: [{ kind: 'reps', reps: 10, name: 'Back squat', weight: 62.3 }],
+                    },
+                ],
+            });
+            await create({ empty: true });
+            queryParamMap.next(convertToParamMap({ editId: legs.id }));
+            await render();
+
+            expect(confirm()).toBeNull();
+        });
+
+        it('asks once changed, naming it, and not when changed back', async () => {
+            await setup();
+            const legs = store.addWorkout({ title: 'Legs', repeats: 1, blocks: [] });
+            await create({ empty: true });
+            queryParamMap.next(convertToParamMap({ editId: legs.id }));
+            await render();
+
+            await typeTitle('Legs day');
+            const answer = confirm();
+            await render();
+
+            expect(answer).not.toBeNull();
+            expect(dialog()!.textContent).toContain("Your changes to Legs day haven't been saved.");
+            expect(document.activeElement).toBe(dialog()!.querySelector('.unsaved__keep'));
+
+            dialog()!.querySelector<HTMLElement>('.unsaved__keep')!.click();
+            expect(await answer).toBe(false);
+            await typeTitle('Legs');
+            expect(confirm()).toBeNull();
+        });
+
+        it('leaves with Discard changes, and does not ask again', async () => {
+            await setup();
+            await create({ empty: true });
+            await typeTitle('Sprints');
+            const answer = confirm();
+            await render();
+
+            expect(dialog()!.textContent).toContain("This workout hasn't been saved.");
+            dialog()!.querySelector<HTMLElement>('.unsaved__discard')!.click();
+
+            expect(await answer).toBe(true);
+            expect(confirm()).toBeNull();
+            expect(store.workouts()).toEqual([]);
+        });
+
+        it('keeps editing on Escape, and asks one question at a time', async () => {
+            await setup();
+            await create({ empty: true });
+            await typeTitle('Sprints');
+            const answer = confirm();
+            expect(confirm()).toBe(answer);
+            await render();
+
+            dialog()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+            expect(await answer).toBe(false);
+            expect(el<HTMLInputElement>('#title').value).toBe('Sprints');
+        });
+
+        it('has the browser ask too, on closing the tab, only with changes', async () => {
+            await setup();
+            await create({ empty: true });
+            const closing = () => {
+                const event = new Event('beforeunload', { cancelable: true });
+                window.dispatchEvent(event);
+                return event.defaultPrevented;
+            };
+
+            expect(closing()).toBe(false);
+            await typeTitle('Sprints');
+            expect(closing()).toBe(true);
+        });
+    });
+
+    describe('going back', () => {
+        const backLink = () => fixture.nativeElement.querySelector('.back-link') as HTMLElement;
+        const opened = async (params: Record<string, string>) => {
+            await setup(params);
+            await create({ empty: true });
+        };
+
+        it('goes to Workouts, from a new workout or anywhere it does not know', async () => {
+            await opened({});
+            expect(backLink().textContent).toContain('Workouts');
+            expect(backLink().getAttribute('href')).toBe('/library');
+
+            for (const from of ['https://example.com', '//example.com', '/account', '/library']) {
+                queryParamMap.next(convertToParamMap({ from }));
+                fixture.detectChanges();
+                await fixture.whenStable();
+                expect(backLink().getAttribute('href')).toBe('/library');
+            }
+        });
+
+        it("goes to a workout's details, with its title, if opened from them", async () => {
+            await setup();
+            const legs = store.addWorkout({ title: 'Legs', repeats: 1, blocks: [] });
+            await create({ empty: true });
+            queryParamMap.next(convertToParamMap({ from: `/library/${legs.id}` }));
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(backLink().textContent).toContain('Legs');
+            expect(backLink().getAttribute('href')).toBe(`/library/${legs.id}`);
+        });
+
+        it("goes to an exercise's page, keeping the list's filter", async () => {
+            await opened({ from: '/exercises/plank?muscles=abs' });
+
+            expect(backLink().textContent).toContain('Exercise');
+            expect(backLink().getAttribute('href')).toBe('/exercises/plank?muscles=abs');
+        });
+
+        it("goes to an exercise's page under a ready-made plan's workout", async () => {
+            const from = '/ready-made-plans/gym-legs/back-squat?from=today';
+            await opened({ from });
+
+            expect(backLink().textContent).toContain('Exercise');
+            expect(backLink().getAttribute('href')).toBe(from);
+        });
+
+        it('slides back without saving', async () => {
+            await opened({});
+            const saved = store.workouts().length;
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            backLink().click();
+
+            expect(slide).toHaveBeenCalledWith('/library', 'out');
+            expect(store.workouts()).toHaveLength(saved);
+        });
+    });
+
     describe('creating a workout', () => {
         beforeEach(async () => {
             await setup();
@@ -369,6 +535,15 @@ describe('WorkoutSetupComponent', () => {
                 expect(button('Save').type).toBe('button');
                 expect(button('Save').classList).toContain('btn-pill');
                 expect(submitButton().classList).toContain('btn-main');
+            });
+
+            it('asks nothing about unsaved changes once saved', async () => {
+                typeTitle('Sprints');
+                chooseTime(0, 'seconds', '30');
+
+                await press('Save');
+
+                expect(TestBed.inject(LeaveCheck).confirm()).toBeNull();
             });
 
             it('saves the workout without starting it, and goes back to the library with it highlighted', async () => {

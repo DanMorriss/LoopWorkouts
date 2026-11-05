@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Routes } from '@angular/router';
+import { confirmLeaving } from './nav/leave-check';
 import { HistoryStore } from './shared/state/history-store.service';
 import { welcomeFirst } from './welcome/welcome-first';
 
@@ -27,6 +28,7 @@ export const routes: Routes = [
     },
     {
         path: 'setup',
+        canDeactivate: [confirmLeaving],
         loadComponent: () =>
             import('./workout-setup/workout-setup.component').then((m) => m.WorkoutSetupComponent),
     },
@@ -35,6 +37,15 @@ export const routes: Routes = [
         loadComponent: () =>
             import('./workout-library/workout-library.component').then(
                 (m) => m.WorkoutLibraryComponent
+            ),
+    },
+    {
+        // A workout's details, over the library
+        path: 'library/:id',
+        canActivate: [historyLoaded],
+        loadComponent: () =>
+            import('./workout-library/workout-details/workout-details.component').then(
+                (m) => m.WorkoutDetailsComponent
             ),
     },
     {
@@ -66,6 +77,16 @@ export const routes: Routes = [
             ),
     },
     {
+        // One of its exercises, over a ready-made plan's workout, and back to it
+        path: 'ready-made-plans/:workoutId/:id',
+        canActivate: [historyLoaded],
+        data: { inPlan: true },
+        loadComponent: () =>
+            import('./exercises/exercise-page/exercise-page.component').then(
+                (m) => m.ExercisePageComponent
+            ),
+    },
+    {
         // One of a ready-made plan's workouts, from its card: only to look at, and back there
         path: 'ready-made-plans/:id',
         data: { inPlan: true },
@@ -73,6 +94,15 @@ export const routes: Routes = [
             import(
                 './workout-library/ready-made/ready-made-workout/ready-made-workout.component'
             ).then((m) => m.ReadyMadeWorkoutComponent),
+    },
+    {
+        // One of its exercises, over a workout's details, and back to them
+        path: 'library/:workoutId/:id',
+        canActivate: [historyLoaded],
+        loadComponent: () =>
+            import('./exercises/exercise-page/exercise-page.component').then(
+                (m) => m.ExercisePageComponent
+            ),
     },
     {
         path: 'exercises',

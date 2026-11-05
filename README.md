@@ -74,8 +74,8 @@ src/app/
   help/                Help: the questions and answers, and their search (slides in over You)
   workout-setup/       Create or edit a workout (Signal Forms)
   workout-library/     The Workouts tab: saved workouts, and the ready-made ones
-    workout-card/      One workout: tap to start, swipe to delete, hold to drag (or let go for options)
-    workout-details/   A workout's muscles and history, from its options
+    workout-card/      One workout: tap for its details, play to start, swipe to delete, hold to drag (or let go for options)
+    workout-details/   A workout's muscles and history, its own page, from its options
   workout/             The running workout: ring, countdown, announcements
     workout-state.ts   Works out phase, time left and round from elapsed time
     fit-name.ts        Fits a step's name to the face: wraps, then shrinks only as far as it must

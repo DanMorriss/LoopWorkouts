@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
 import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
+import { LeaveCheck } from './leave-check';
 import { FADING_CLASS, PageSlide, SLIDING_CLASS } from './page-slide';
 
 @Component({ template: '' })
@@ -72,6 +73,67 @@ describe('PageSlide', () => {
 
         expect(root.classList).toContain(`${SLIDING_CLASS}--out`);
         await landed('/exercises?muscles=quads');
+    });
+
+    it('asks before starting, if the page has a question, and only goes on a yes', async () => {
+        fakeReducedMotion(false);
+        const start = vi.spyOn(document, 'startViewTransition');
+        const check = TestBed.inject(LeaveCheck);
+        let answer!: (leave: boolean) => void;
+        const question = () => new Promise<boolean>((resolve) => (answer = resolve));
+
+        check.set(question);
+        slide.navigate('/exercises/back-squat', 'in');
+        expect(start).not.toHaveBeenCalled();
+        answer(false);
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(start).not.toHaveBeenCalled();
+        expect(router.url).toBe('/exercises');
+
+        slide.navigate('/exercises/back-squat', 'in');
+        check.clear(question);
+        answer(true);
+        await landed('/exercises/back-squat');
+        expect(start).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps sliding when it cuts another slide short', async () => {
+        fakeReducedMotion(false);
+        const start = vi.spyOn(document, 'startViewTransition');
+
+        slide.navigate('/exercises/back-squat', 'in');
+        const first = start.mock.results[0].value as ViewTransition;
+        await first.ready.catch(() => undefined);
+        slide.navigate('/exercises', 'out');
+        const second = start.mock.results[1].value as ViewTransition;
+        await first.finished.catch(() => undefined);
+
+        expect(root.classList).toContain(SLIDING_CLASS);
+        expect(root.classList).toContain(`${SLIDING_CLASS}--out`);
+        expect(root.classList).not.toContain(`${SLIDING_CLASS}--in`);
+        await second.finished.catch(() => undefined);
+        expect(root.classList).not.toContain(SLIDING_CLASS);
+    });
+
+    it('brings each page back scrolled where it was left, however many deep', async () => {
+        fakeReducedMotion(false);
+        const scrollY = vi.spyOn(window, 'scrollY', 'get');
+        const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+        const go = async (url: string, way: 'in' | 'out', from: number) => {
+            scrollY.mockReturnValue(from);
+            scrollTo.mockClear();
+            slide.navigate(url, way);
+            await landed(url);
+            await vi.waitFor(() => expect(scrollTo).toHaveBeenCalled());
+            return (scrollTo.mock.calls[0][0] as ScrollToOptions).top;
+        };
+
+        await router.navigateByUrl('/library');
+        expect(await go('/library/legs', 'in', 300)).toBe(0);
+        expect(await go('/library/legs/plank', 'in', 120)).toBe(0);
+        expect(await go('/library/legs', 'out', 0)).toBe(120);
+        expect(await go('/library?details=legs', 'out', 0)).toBe(300);
     });
 
     it("carries on at a swipe's speed, and takes it and the names off once it's over", async () => {

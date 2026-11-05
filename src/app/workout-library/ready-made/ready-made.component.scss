@@ -106,41 +106,19 @@
 
 // Its main muscles, each with a dot in the body map's main-muscle colour
 .ready__works {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.3rem 0.45rem;
+    @include muscles-row;
 }
 
 .ready__works-label {
-    margin-right: 0.1rem;
-    color: var(--text-muted);
-    @include small-type(0.75rem);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    @include muscles-label;
 }
 
 .ready__muscle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    color: var(--text-strong);
-    font-size: 0.85rem;
-
-    &::before {
-        content: '';
-        width: 0.45rem;
-        height: 0.45rem;
-        border-radius: 50%;
-        background: var(--muscle-main);
-        box-shadow: 0 0 0.4rem var(--glow-soft);
-    }
+    @include muscle;
 }
 
 .ready__more {
-    color: var(--text-muted);
-    font-size: 0.8rem;
+    @include muscles-more;
 }
 
 .ready__kit {

@@ -131,6 +131,8 @@
 
 ### Saving
 
+- **‹** at the top goes back without saving, sliding the page off, to where it was opened from: **‹ Workouts** from New, a card's Edit or anywhere else, the workout's title from Edit in its details, or **‹ Exercise** from an exercise's Add to workout (since 2026-11-05). Create also slides in now. There's no swipe back here, as its rows are dragged and its wheels turned.
+- **Leaving with unsaved changes** (since 2026-11-05), by ‹, the tab bar, the workout's bar or the browser's back button, asks first: "Discard your changes?", saying "Your changes to Legs haven't been saved." or "This workout hasn't been saved.", with **Keep editing** as the main button, where focus starts, and **Discard changes**. **‹ Back**, Escape or a tap outside keep editing. Changes are anything different from how the form opened: looking around, opening and closing steps, or changing something and changing it back asks nothing, and nor does a new workout left empty. Closing or reloading the tab gets the browser's own question, where the browser offers one.
 - The main button says **Start workout** for a new workout and **Save & start workout** when editing. It saves the workout to the library, starts it, and opens the workout page.
 - **Save** (BLD-15) sits to its left, a smaller pill, so Start stays the main one. It saves the workout as Start does, without starting it, empties the form and goes back to Workouts, with the workout highlighted, in view and focused, and screen readers hear "Saved Sprints" (see [library](library.md)). It's held back by the same checks as Start.
 - Saving a new workout gives it the next id (one more than the highest saved).

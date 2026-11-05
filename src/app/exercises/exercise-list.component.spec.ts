@@ -229,7 +229,7 @@ describe('ExerciseListComponent', () => {
         name.dispatchEvent(new Event('input'));
         await render();
         el()
-            .querySelector('.editor form')!
+            .querySelector('app-exercise-editor form')!
             .dispatchEvent(new Event('submit', { cancelable: true }));
         await render();
 

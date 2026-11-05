@@ -1,8 +1,6 @@
-import { CdkTrapFocus } from '@angular/cdk/a11y';
-import { afterNextRender, Component, ElementRef, input, output, viewChild } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { DialogBackComponent } from '../dialog-back/dialog-back.component';
-import { growFromClick } from '../../dialog-origin';
+import { DialogComponent } from '../dialog/dialog.component';
 
 /** A workout to pick: its name, a word on it (e.g. "6 steps"), and whether it can be. */
 export interface WorkoutChoice {
@@ -22,66 +20,53 @@ let nextId = 0;
  */
 @Component({
     selector: 'app-workout-choice-dialog',
-    imports: [CdkTrapFocus, DialogBackComponent, MatIconModule],
+    imports: [DialogComponent, MatIconModule],
     template: `
-        <div
-            class="choice-overlay dialog-overlay"
-            role="presentation"
-            (click)="closed.emit()"
-            (keydown.escape)="closed.emit()"
+        <app-dialog
+            [labelledBy]="id + '-title'"
+            [describedBy]="hint() ? id + '-hint' : null"
+            [width]="420"
+            (closed)="closed.emit()"
         >
-            <div
-                #card
-                class="choice dialog-card"
-                cdkTrapFocus
-                [cdkTrapFocusAutoCapture]="true"
-                role="dialog"
-                aria-modal="true"
-                [attr.aria-labelledby]="id + '-title'"
-                [attr.aria-describedby]="hint() ? id + '-hint' : null"
-                (click)="$event.stopPropagation()"
-            >
-                <app-dialog-back (back)="closed.emit()" />
-                <h2 class="choice__title" [id]="id + '-title'">{{ heading() }}</h2>
-                @if (hint()) {
-                    <p class="choice__hint" [id]="id + '-hint'">{{ hint() }}</p>
-                }
-                @if (newLabel() || choices().length) {
-                    <ul class="choice__choices">
-                        @if (newLabel(); as label) {
-                            <li>
-                                <button
-                                    type="button"
-                                    class="menu__item choice__choice"
-                                    cdkFocusInitial
-                                    (click)="picked.emit(null)"
-                                >
-                                    <mat-icon aria-hidden="true">add</mat-icon>
-                                    <span class="choice__name">{{ label }}</span>
-                                </button>
-                            </li>
-                        }
-                        @for (choice of choices(); track choice.id; let first = $first) {
-                            <li>
-                                <button
-                                    type="button"
-                                    class="menu__item choice__choice"
-                                    [disabled]="choice.disabled"
-                                    [attr.cdkFocusInitial]="first && !newLabel() ? '' : null"
-                                    (click)="picked.emit(choice.id)"
-                                >
-                                    <mat-icon aria-hidden="true">view_list</mat-icon>
-                                    <span class="choice__name">{{ choice.name }}</span>
-                                    <span class="choice__detail">{{ choice.detail }}</span>
-                                </button>
-                            </li>
-                        }
-                    </ul>
-                } @else {
-                    <p class="choice__none">{{ emptyText() }}</p>
-                }
-            </div>
-        </div>
+            <h2 class="choice__title" [id]="id + '-title'">{{ heading() }}</h2>
+            @if (hint()) {
+                <p class="choice__hint" [id]="id + '-hint'">{{ hint() }}</p>
+            }
+            @if (newLabel() || choices().length) {
+                <ul class="choice__choices">
+                    @if (newLabel(); as label) {
+                        <li>
+                            <button
+                                type="button"
+                                class="menu__item choice__choice"
+                                cdkFocusInitial
+                                (click)="picked.emit(null)"
+                            >
+                                <mat-icon aria-hidden="true">add</mat-icon>
+                                <span class="choice__name">{{ label }}</span>
+                            </button>
+                        </li>
+                    }
+                    @for (choice of choices(); track choice.id; let first = $first) {
+                        <li>
+                            <button
+                                type="button"
+                                class="menu__item choice__choice"
+                                [disabled]="choice.disabled"
+                                [attr.cdkFocusInitial]="first && !newLabel() ? '' : null"
+                                (click)="picked.emit(choice.id)"
+                            >
+                                <mat-icon aria-hidden="true">view_list</mat-icon>
+                                <span class="choice__name">{{ choice.name }}</span>
+                                <span class="choice__detail">{{ choice.detail }}</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <p class="choice__none">{{ emptyText() }}</p>
+            }
+        </app-dialog>
     `,
     styleUrl: './workout-choice-dialog.component.scss',
 })
@@ -98,10 +83,4 @@ export class WorkoutChoiceDialogComponent {
     readonly picked = output<string | null>();
 
     protected readonly id = `workout-choice-${nextId++}`;
-    private readonly card = viewChild.required<ElementRef<HTMLElement>>('card');
-
-    constructor() {
-        // Grows out of the button that opened it, and shrinks back into it
-        afterNextRender(() => growFromClick(this.card().nativeElement));
-    }
 }

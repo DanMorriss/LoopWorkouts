@@ -1,5 +1,4 @@
 @use 'interaction' as *;
-@use 'chip' as *;
 
 :host {
     display: block;
@@ -30,33 +29,7 @@
 
 // A link-like disclosure: the equipment you have, opening the chips to change it
 .kit__edit {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    min-height: 44px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--glow-text);
-    font: inherit;
-    font-size: 0.8rem;
-    text-align: left;
-    cursor: pointer;
-
-    @include hover {
-        text-decoration: underline;
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-    }
-
-    .mat-icon {
-        width: 1.2rem;
-        height: 1.2rem;
-        font-size: 1.2rem;
-    }
+    @include link-button;
 }
 
 .kit__pick {
@@ -70,18 +43,4 @@
     padding: 0;
     color: var(--text-muted);
     font-size: 0.8rem;
-}
-
-.kit__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-}
-
-.kit__chip {
-    @include chip;
-}
-
-.kit__chip-icon {
-    @include chip-icon;
 }

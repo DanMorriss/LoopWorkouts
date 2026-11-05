@@ -14,21 +14,7 @@
             </button>
         </div>
 
-        <label class="picker-field exercises__search" for="exercise-search">
-            <span class="picker-field__label">Search</span>
-            <span class="exercises__search-box">
-                <mat-icon class="exercises__search-icon" aria-hidden="true">search</mat-icon>
-                <input
-                    id="exercise-search"
-                    class="picker-field__input exercises__search-input"
-                    type="search"
-                    autocomplete="off"
-                    placeholder="Name, e.g. squat"
-                    [value]="query()"
-                    (input)="onSearch($event)"
-                />
-            </span>
-        </label>
+        <app-search-field class="exercises__search" inputId="exercise-search" [(value)]="query" />
 
         <app-equipment-filter class="exercises__kit" idPrefix="exercise-list" things="Exercises" />
 

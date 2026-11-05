@@ -1,15 +1,4 @@
-import { CdkTrapFocus } from '@angular/cdk/a11y';
-import {
-    afterNextRender,
-    Component,
-    computed,
-    ElementRef,
-    inject,
-    input,
-    linkedSignal,
-    output,
-    viewChild,
-} from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, output } from '@angular/core';
 import { form, FormField, maxLength, validate } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -34,8 +23,7 @@ import {
 import { ExerciseStore } from '../../state/exercise-store.service';
 import { WorkoutStore } from '../../state/workout-store.service';
 import { BodyMapComponent } from '../body-map/body-map.component';
-import { DialogBackComponent } from '../dialog-back/dialog-back.component';
-import { growFromClick } from '../../dialog-origin';
+import { DialogComponent } from '../dialog/dialog.component';
 
 /** What the editor holds: an exercise's details (used only for your own) and your note. */
 interface ExerciseEditorModel {
@@ -66,7 +54,7 @@ const NO_TEXT: ExerciseText = { description: '', steps: [], tips: [] };
  */
 @Component({
     selector: 'app-exercise-editor',
-    imports: [CdkTrapFocus, DialogBackComponent, FormField, MatIconModule, BodyMapComponent],
+    imports: [DialogComponent, FormField, MatIconModule, BodyMapComponent],
     templateUrl: './exercise-editor.component.html',
     styleUrl: './exercise-editor.component.scss',
 })
@@ -80,11 +68,8 @@ export class ExerciseEditorComponent {
 
     private readonly exercises = inject(ExerciseStore);
     private readonly workouts = inject(WorkoutStore);
-    private readonly card = viewChild.required<ElementRef<HTMLElement>>('card');
 
     constructor() {
-        // Grows out of the button that opened it, and shrinks back into it
-        afterNextRender(() => growFromClick(this.card().nativeElement));
         void this.exercises.loadText();
     }
 

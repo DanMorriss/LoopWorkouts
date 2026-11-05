@@ -144,7 +144,7 @@ describe('ExercisePageComponent', () => {
             note.value = 'Pause at the bottom';
             note.dispatchEvent(new Event('input'));
             el()
-                .querySelector('.editor form')!
+                .querySelector('app-exercise-editor form')!
                 .dispatchEvent(new Event('submit', { cancelable: true }));
             await render();
 

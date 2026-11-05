@@ -343,7 +343,9 @@ for (const theme of ['dark', 'light'] as const) {
                 box.dispatchEvent(new Event('input'));
                 await settle();
                 expect(
-                    fixture.nativeElement.querySelectorAll('.browse .exercise-card').length
+                    fixture.nativeElement.querySelectorAll(
+                        'app-browse-exercises-dialog .exercise-card'
+                    ).length
                 ).toBeGreaterThan(0);
                 await expectNoViolations();
             });
@@ -858,7 +860,7 @@ for (const theme of ['dark', 'light'] as const) {
                 await settle();
                 click('.setup__actions .btn-main');
                 await settle();
-                click('.setup__chip');
+                click('app-equipment-chips button');
                 await settle();
                 await expectNoViolations();
 

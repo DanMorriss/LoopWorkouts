@@ -26,57 +26,13 @@
     margin-bottom: 0.9rem;
 }
 
-.exercises__search-box {
-    position: relative;
-    display: block;
-}
-
-.exercises__search-icon {
-    position: absolute;
-    top: 50%;
-    left: 0.8rem;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.exercises__search-input {
-    padding-left: 2.6rem;
-}
-
 .exercises__kit {
     margin-bottom: 0.9rem;
 }
 
-// A link-like disclosure: the equipment you have, opening the chips to change it
+// A link-like disclosure: the hidden exercises
 .exercises__hidden-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    min-height: 44px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--glow-text);
-    font: inherit;
-    font-size: 0.8rem;
-    text-align: left;
-    cursor: pointer;
-
-    @include hover {
-        text-decoration: underline;
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-    }
-
-    .mat-icon {
-        width: 1.2rem;
-        height: 1.2rem;
-        font-size: 1.2rem;
-    }
+    @include link-button;
 }
 
 .exercises__chips {

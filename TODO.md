@@ -66,14 +66,14 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 From the review of 2026-11-05; how to keep it from coming back is in `CLAUDE.md`.
 
 - [ ] **Share the swipe gesture:** `RunBarComponent` and `SwipeBackDirective` are nearly the same code, and `CardGestures` a variant of it. Needs an iPhone check once shared, as it's all touch.
-- [ ] **Split `WorkoutSetupComponent` (1,800 lines, and 1,100 of template):** start with a labelled wheel for Create's 14 wheels, then a step's row, with the form's logic moved out to plain functions.
+- [ ] **Split `WorkoutSetupComponent`'s template (900 lines), and `WorkoutSetupForm` (900 lines):** a step's row as child components, with their styles.
 - [ ] **Share the rest of an exercise list:** the Exercises page and Browse in Create repeat their count, empty message and list styles, and how they filter.
 - [ ] **Move `shared/` off the `workout/` folder:** `AlarmService`, `ActiveRunService` and `WorkoutStore` import from `workout/alarm-schedule` and `workout/workout-state`, which belong in `models/` or `shared/run/`.
 
 ## 2. Known issues
 
 - [ ] **Leaving Create may be slow:** on the dev server, leaving `/setup` took about 1.5s before the next page came, by ‹ or the tab bar alike, against 0.35s from a workout's details, with almost no long tasks, so something seems to be waiting (measured 2026-11-05; the browser may have been throttling some of those timings). Check it on a Vercel preview, and find the cause if it's there too.
-- [ ] **A theme test can fail in a full run:** Settings' "copes with a second choice made mid-fade" failed once in a full `ng test` run on 2026-11-05, and passes alone.
+- [ ] **Timing tests fail in full local runs, a different mix each time:** on 2026-11-05, Settings' "copes with a second choice made mid-fade", the ∞ switch's "greys out at once" (its wait for a 0.3s fade times out), `workout-morph`'s "opens the workout inside a view transition" and the exercise demo's turning test, as well as the wheel's "quick mouse flick". They pass alone. Now that CI fails on any of them, look at why they're slow under load, starting with the waits.
 - [ ] **Swipe-to-delete tests fail more in full runs:** the workout card's "deletes once swiped past halfway" and "short, fast flick" tests failed in several full `ng test` runs on the branch that redesigned the card (2026-11-05), though they pass alone. If they fail on CI, look at that card rather than rerunning.
 - [ ] **Focus isn't put back after a page slides back:** going back from a page that slid in (`PageSlide`) doesn't return focus to what opened it, such as a ready-made workout's card or a workout on a ready-made plan's card, so a keyboard or screen reader user starts again from the top of the page. Fix it in `PageSlide`, for every page, rather than page by page.
 - [ ] **Enter in a step's name box may save before its kind follows the exercise:** a step becomes the kind its exercise is measured by when the box is left or Enter is pressed (the input's `change` event). Enter with nothing highlighted in the list also submits the form; Chrome fires `change` first, so the step saves as its new kind, but other browsers may save the old one. Check in Safari; if it saves the old kind, have the picker settle the step on Enter before letting the submit through.

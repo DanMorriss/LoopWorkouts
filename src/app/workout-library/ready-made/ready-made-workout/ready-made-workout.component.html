@@ -1,6 +1,6 @@
-<div class="flex justify-center" [appSwipeBack]="'/ready-made'">
+<div class="flex justify-center" [appSwipeBack]="back.url">
     <div class="w-full max-w-md p-4">
-        <app-back-link url="/ready-made" label="Ready-made" />
+        <app-back-link [url]="back.url" [label]="back.label" />
 
         @if (card(); as card) {
             @let workout = card.workout;
@@ -27,16 +27,19 @@
                 <app-body-map [main]="muscles().main" [supporting]="muscles().supporting" />
             </section>
 
-            <div class="preview__actions">
-                <button type="button" class="btn-main preview__start" (click)="addAndStart()">
-                    <mat-icon aria-hidden="true">play_arrow</mat-icon>
-                    Add and start
-                </button>
-                <button type="button" class="btn-pill preview__add" (click)="add()">
-                    <mat-icon aria-hidden="true">add</mat-icon>
-                    Add to my workouts
-                </button>
-            </div>
+            <!-- From a plan's card it's only to look at: it comes with Use this plan -->
+            @if (!inPlan) {
+                <div class="preview__actions">
+                    <button type="button" class="btn-main preview__start" (click)="addAndStart()">
+                        <mat-icon aria-hidden="true">play_arrow</mat-icon>
+                        Add and start
+                    </button>
+                    <button type="button" class="btn-pill preview__add" (click)="add()">
+                        <mat-icon aria-hidden="true">add</mat-icon>
+                        Add to my workouts
+                    </button>
+                </div>
+            }
         } @else {
             <h2 class="preview__title">Workout not found</h2>
             <p class="preview__description">There's no ready-made workout at this link.</p>

@@ -439,6 +439,12 @@ for (const theme of ['dark', 'light'] as const) {
                 expect(fixture.nativeElement.querySelectorAll('app-plan-card').length).toBe(6);
                 await expectNoViolations();
             });
+
+            it('one of their workouts, on its own page', async () => {
+                await open('/ready-made-plans/gym-legs?from=plans');
+                expect(fixture.nativeElement.querySelector('.preview__title')).not.toBeNull();
+                await expectNoViolations();
+            });
         });
 
         describe('ready-made workouts', () => {

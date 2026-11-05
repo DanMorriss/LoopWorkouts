@@ -22,6 +22,9 @@ import { readyMadeCard } from '../ready-made-card';
  * Add to my workouts. It slides in over the ready-made workouts, as an exercise does over the
  * Exercises list, and back off with ‹ Ready-made or a swipe right. Adding it slides back out
  * to Workouts, with it picked out there.
+ *
+ * From a ready-made plan's card (PLN-6), at /ready-made-plans/<its name>, it's the same page
+ * without the buttons, as the workout comes with the plan, and goes back to where the card is.
  */
 @Component({
     selector: 'app-ready-made-workout',
@@ -43,10 +46,19 @@ export class ReadyMadeWorkoutComponent {
     private readonly undo = inject(UndoService);
     protected readonly slide = inject(PageSlide);
 
+    private readonly route = inject(ActivatedRoute);
+
     private readonly slug = toSignal(
-        inject(ActivatedRoute).paramMap.pipe(map((params) => params.get('id') ?? '')),
+        this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
         { initialValue: '' }
     );
+
+    /** Opened from a ready-made plan's card, rather than the list of ready-made workouts. */
+    protected readonly inPlan = this.route.snapshot.data['inPlan'] === true;
+
+    protected readonly back = this.inPlan
+        ? backToPlanCard(this.route.snapshot.queryParamMap.get('from'))
+        : { url: '/ready-made', label: 'Ready-made' };
 
     /** It as its card shows it, or null for a link to one there isn't. */
     protected readonly card = computed(() => {
@@ -89,5 +101,17 @@ export class ReadyMadeWorkoutComponent {
         const added = this.workouts.addWorkout(copyOfBuiltIn(card.workout));
         this.run.start(added);
         void this.router.navigate(['/workout']);
+    }
+}
+
+/** Back to where a plan's card was (PlanWorkoutFrom): Today, or the Ready-made plans page. */
+function backToPlanCard(from: string | null) {
+    switch (from) {
+        case 'today':
+            return { url: '/home', label: 'Today' };
+        case 'plan':
+            return { url: '/ready-made-plans?from=plan', label: 'Plans' };
+        default:
+            return { url: '/ready-made-plans', label: 'Plans' };
     }
 }

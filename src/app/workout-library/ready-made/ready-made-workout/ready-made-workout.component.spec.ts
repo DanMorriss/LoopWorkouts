@@ -22,6 +22,11 @@ describe('ReadyMadeWorkoutComponent', () => {
                     { path: 'ready-made', children: [] },
                     { path: 'workout', children: [] },
                     { path: 'ready-made/:id', component: ReadyMadeWorkoutComponent },
+                    {
+                        path: 'ready-made-plans/:id',
+                        component: ReadyMadeWorkoutComponent,
+                        data: { inPlan: true },
+                    },
                 ]),
             ],
         });
@@ -71,6 +76,37 @@ describe('ReadyMadeWorkoutComponent', () => {
 
         expect(text(back)).toBe('chevron_left Ready-made');
         expect(back.getAttribute('href')).toBe('/ready-made');
+    });
+
+    describe("from a ready-made plan's card", () => {
+        async function openFrom(from: string) {
+            const harness = await RouterTestingHarness.create();
+            await harness.navigateByUrl(`/ready-made-plans/gym-legs?from=${from}`);
+            fixture = harness.fixture;
+            await render();
+        }
+
+        it.each([
+            ['today', 'chevron_left Today', '/home'],
+            ['plans', 'chevron_left Plans', '/ready-made-plans'],
+            ['plan', 'chevron_left Plans', '/ready-made-plans?from=plan'],
+            ['elsewhere', 'chevron_left Plans', '/ready-made-plans'],
+        ])('goes back from %s to where the card was', async (from, label, url) => {
+            await openFrom(from);
+            const back = el().querySelector('.back-link')!;
+
+            expect(text(back)).toBe(label);
+            expect(back.getAttribute('href')).toBe(url);
+        });
+
+        it('shows the workout to look at, with nothing to add', async () => {
+            await openFrom('plans');
+
+            expect(text(el().querySelector('.preview__title')!)).toBe('Gym legs');
+            expect(text()).toContain('Back squat 3 sets: 12, 10, 8, rest 2:30');
+            expect(el().querySelector('.preview__add')).toBeNull();
+            expect(el().querySelector('.preview__start')).toBeNull();
+        });
     });
 
     it('says when one of the same name is in your workouts already', async () => {

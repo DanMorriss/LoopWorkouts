@@ -13,6 +13,10 @@
 //   .thing__kit-icon { @include kit-icon; }
 //   .thing__tags { @include tags; }
 //   .thing__tag { @include tag; }
+//   .thing__works { @include muscles-row; }
+//   .thing__works-label { @include muscles-label; }
+//   .thing__muscle { @include muscle; }
+//   .thing__more { @include muscles-more; }
 
 @mixin showcase-card {
     padding: 1rem;
@@ -104,4 +108,43 @@
     border-radius: 999px;
     color: var(--text);
     @include small-type(0.75rem);
+}
+
+// The main muscles it works, each with a dot in the body map's main-muscle colour
+@mixin muscles-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.45rem;
+}
+
+@mixin muscles-label {
+    margin-right: 0.1rem;
+    color: var(--text-muted);
+    @include small-type(0.75rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+@mixin muscle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--text-strong);
+    font-size: 0.85rem;
+
+    &::before {
+        content: '';
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: var(--muscle-main);
+        box-shadow: 0 0 0.4rem var(--glow-soft);
+    }
+}
+
+@mixin muscles-more {
+    color: var(--text-muted);
+    font-size: 0.8rem;
 }

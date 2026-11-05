@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { asOneGroup, UNTIL_STOPPED, Workout } from '../../models/workout';
 import { makeWorkout, reps, rest, work } from '../../shared/testing/make-workout';
 import { WorkoutCardComponent } from './workout-card.component';
+import { PageSlide } from '../../nav/page-slide';
 import { fakeReducedMotion } from '../../shared/testing/fake-reduced-motion';
 
 const sprints = makeWorkout({
@@ -28,7 +29,6 @@ const sprints = makeWorkout({
                 (started)="events.push('started')"
                 (menuToggled)="events.push('menuToggled')"
                 (menuClosed)="events.push('menuClosed')"
-                (detailsRequested)="events.push('detailsRequested')"
                 (editRequested)="events.push('editRequested')"
                 (moveRequested)="events.push('moveRequested ' + $event)"
                 (deleteRequested)="events.push('deleteRequested')"
@@ -63,6 +63,78 @@ describe('WorkoutCardComponent', () => {
         if (changes.menuOpen !== undefined) host.menuOpen.set(changes.menuOpen);
         fixture.detectChanges();
     };
+
+    describe('pressing it', () => {
+        it('slides in its details from anywhere but its buttons, a link to them', () => {
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            const open = el('.workout-card__open');
+
+            expect(open.getAttribute('href')).toBe(`/library/${sprints.id}`);
+            expect(open.getAttribute('aria-label')).toBe('Details of Sprints');
+            open.click();
+
+            expect(slide).toHaveBeenCalledWith(`/library/${sprints.id}`, 'in');
+            expect(host.events).toEqual([]);
+        });
+
+        it('starts it with the play button, without opening its details', () => {
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            el('.workout-card__start').click();
+
+            expect(host.events).toEqual(['started']);
+            expect(slide).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('in the ready-made cards look', () => {
+        const linked = (...exerciseIds: string[]): Workout => ({
+            ...sprints,
+            blocks: exerciseIds.map((exerciseId, i) => ({
+                kind: 'group',
+                rounds: 3,
+                restSeconds: 60,
+                steps: [{ kind: 'reps', reps: 10, name: `Exercise ${i}`, exerciseId }],
+            })),
+        });
+        const texts = (selector: string) =>
+            Array.from(card().querySelectorAll(selector), (node) =>
+                node.textContent!.replace(/\s+/g, ' ').trim()
+            );
+
+        it('counts its exercises, or its steps with none named', () => {
+            set({ workout: linked('builtin:plank') });
+            expect(texts('.workout-card__count')).toEqual(['1 exercise']);
+
+            set({ workout: linked('builtin:plank', 'builtin:back-squat') });
+            expect(texts('.workout-card__count')).toEqual(['2 exercises']);
+
+            set({ workout: sprints });
+            expect(texts('.workout-card__count')).toEqual(['2 steps']);
+        });
+
+        it('names its main muscles and what it needs, for the eye and for screen readers', () => {
+            set({ workout: linked('builtin:plank') });
+
+            expect(texts('.workout-card__muscle')).toContain('Abs');
+            expect(texts('.workout-card__tag')).toEqual(['No equipment']);
+            expect(spoken()).toContain('. Works ');
+            expect(spoken()).toContain('Abs');
+            expect(spoken()).toContain('. Needs No equipment');
+        });
+
+        it('says nothing of muscles or equipment with no exercise to go on', () => {
+            set({ workout: sprints });
+
+            expect(card().querySelector('.workout-card__works')).toBeNull();
+            expect(card().querySelector('.workout-card__tag')).toBeNull();
+            expect(spoken()).not.toContain('Works');
+            expect(card().querySelector('.workout-card__start')).not.toBeNull();
+        });
+    });
 
     it('shows a time limit in place of the rounds', () => {
         set({ workout: { ...sprints, repeats: UNTIL_STOPPED, timeLimitSeconds: 1200 } });
@@ -154,20 +226,20 @@ describe('WorkoutCardComponent', () => {
         set({ menuOpen: true });
         expect(card().classList).toContain('workout-card--menu-open');
         expect(el('.workout-card__action--menu').getAttribute('aria-expanded')).toBe('true');
+        expect(card().querySelector('.workout-card__menu-item--details')).toBeNull();
         el('.workout-card__menu-item--edit').click();
         el('.workout-card__menu-item--danger').click();
 
         expect(host.events).toEqual(['menuToggled', 'editRequested', 'deleteRequested']);
     });
 
-    it('offers its details, and moving up and down, in its options', () => {
+    it('offers moving up and down in its options', () => {
         set({ menuOpen: true });
 
-        el('.workout-card__menu-item--details').click();
         el('.workout-card__menu-item--up').click();
         el('.workout-card__menu-item--down').click();
 
-        expect(host.events).toEqual(['detailsRequested', 'moveRequested -1', 'moveRequested 1']);
+        expect(host.events).toEqual(['moveRequested -1', 'moveRequested 1']);
     });
 
     it("can't move up when it's first, or down when it's last", () => {
@@ -247,6 +319,19 @@ describe('WorkoutCardComponent', () => {
             swipe(-60);
 
             await vi.waitFor(() => expect(host.events).toEqual(['deleteRequested']));
+        });
+
+        it('opens nothing after a swipe', async () => {
+            fakeReducedMotion(true);
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            swipe(-60, { letGo: false });
+            await new Promise((resolve) => setTimeout(resolve, 120));
+            pointer('pointerup', 240);
+            el('.workout-card__open').click();
+
+            expect(slide).not.toHaveBeenCalled();
         });
 
         it('springs back, without deleting or starting, when let go short of halfway', async () => {

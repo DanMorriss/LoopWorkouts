@@ -1,5 +1,5 @@
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
-import { EquipmentNeed } from './exercise';
+import { EquipmentNeed, Exercise } from './exercise';
 import {
     Block,
     RepSetAmount,
@@ -381,10 +381,18 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
  * which changes nothing about who can do it, and reads more simply.
  */
 export function builtInWorkoutEquipment(workout: Pick<BuiltInWorkout, 'blocks'>): EquipmentNeed[] {
+    return workoutEquipment(workout, (id) => BUILT_IN_EXERCISES.find((e) => e.id === id));
+}
+
+/** What any workout needs, as `builtInWorkoutEquipment()` has it, from its steps' exercises. */
+export function workoutEquipment(
+    workout: Pick<BuiltInWorkout, 'blocks'>,
+    byId: (id: string) => Pick<Exercise, 'equipment'> | undefined
+): EquipmentNeed[] {
     const needs: EquipmentNeed[] = [];
     const seen = new Set<string>();
     for (const step of allSteps(workout)) {
-        const found = BUILT_IN_EXERCISES.find((e) => e.id === step.exerciseId);
+        const found = step.exerciseId ? byId(step.exerciseId) : undefined;
         for (const need of found?.equipment ?? []) {
             const key = JSON.stringify(need);
             if (need !== 'none' && !seen.has(key)) {

@@ -1,47 +1,18 @@
 @use 'interaction' as *;
 @use 'type' as *;
 
-// Over the page like an exercise's details in setup, scrolling within itself
-.details-overlay {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    background: var(--overlay);
-    backdrop-filter: blur(6px);
-    padding: 1rem;
-    z-index: 40;
-
-    // No blur where the system asks for less see-through; the dimming is darker instead
-    @media (prefers-reduced-transparency: reduce) {
-        backdrop-filter: none;
-    }
-}
-
-.details {
-    width: min(480px, 100%);
-    max-height: calc(100dvh - 2rem);
-    overflow-y: auto;
-    border-radius: 0.9rem;
-    border: 1px solid var(--border);
-    background: var(--raised);
-    box-shadow: 0 18px 40px var(--shadow);
-    padding: 1.2rem;
+:host {
+    display: block;
     color: var(--text);
 }
 
-// The workout's name, in the display face
+// The workout's name, in the display face, as other pages that slide in have theirs
 .details__title {
     margin: 0 0 0.5rem;
     @include display;
-    font-size: 1.3rem;
+    font-size: 1.6rem;
     color: var(--text-strong);
     overflow-wrap: anywhere;
-
-    // Focused by the dialog, not by the user, so no ring
-    &:focus {
-        outline: none;
-    }
 }
 
 .details__section {

@@ -277,7 +277,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'workout-steps',
                 question: "How do I see what's in a workout without editing it?",
                 answer: [
-                    "On Workouts, open a workout's ⋮ menu and choose Details. What's in it, at the bottom, lists every step and its sets.",
+                    "On Workouts, press a workout to open its details. What's in it, at the bottom, lists every step and its sets.",
                 ],
             },
             {

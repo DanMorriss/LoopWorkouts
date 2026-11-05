@@ -13,6 +13,7 @@ import {
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
 import { PageSlide } from '../../nav/page-slide';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
+import { BUILT_IN_WORKOUTS } from '../../models/built-in-workouts';
 import { Exercise, exercisePath, isBuiltIn } from '../../models/exercise';
 import { exerciseUsage } from '../../models/exercise-links';
 import { allSteps, MAX_STEPS } from '../../models/workout';
@@ -31,6 +32,8 @@ import { UndoService } from '../../shared/undo/undo.service';
  *
  * Built-in exercises are at /exercises/<name>, e.g. /exercises/back-squat, and your own at
  * /exercises/<id>. It slides in over the list, and back off with ‹ Exercises or a swipe right.
+ * From a workout's details it's at /library/<workout>/<name>, and goes back to them instead; from a ready-made plan's workout, at
+ * /ready-made-plans/<workout>/<name>, back to that.
  */
 @Component({
     selector: 'app-exercise-page',
@@ -61,13 +64,48 @@ export class ExercisePageComponent {
     private readonly musclesQuery = serialiseMusclesParam(
         parseMusclesParam(this.route.snapshot.queryParamMap.get('muscles'))
     );
-    /** The list to go back to, e.g. "/exercises?muscles=quads". */
-    protected readonly backUrl = this.router.serializeUrl(
-        this.router.createUrlTree(['/exercises'], {
-            queryParams: this.musclesQuery ? { muscles: this.musclesQuery } : {},
-        })
-    );
+    /** Where to go back to, and what it's called. */
+    private readonly back = this.backLink();
+    protected readonly backUrl = this.back.url;
+    protected readonly backLabel = this.back.label;
     protected readonly slide = inject(PageSlide);
+
+    /**
+     * The workout it was opened from: your own's details (/library/<workout>/<exercise>), or a
+     * ready-made plan's workout (/ready-made-plans/<workout>/<exercise>, which keeps where that
+     * goes back to); otherwise the list, e.g. "/exercises?muscles=quads".
+     */
+    private backLink(): { url: string; label: string } {
+        const { paramMap, queryParamMap, data } = this.route.snapshot;
+        const workoutId = paramMap.get('workoutId');
+        if (workoutId && data['inPlan']) {
+            const from = queryParamMap.get('from');
+            return {
+                url: this.router.serializeUrl(
+                    this.router.createUrlTree(['/ready-made-plans', workoutId], {
+                        queryParams: from ? { from } : {},
+                    })
+                ),
+                label:
+                    BUILT_IN_WORKOUTS.find((w) => w.id === `builtin:${workoutId}`)?.title ||
+                    'Workout',
+            };
+        }
+        if (workoutId) {
+            return {
+                url: `/library/${workoutId}`,
+                label: this.workouts.findWorkoutById(workoutId)?.title.trim() || 'Workout',
+            };
+        }
+        return {
+            url: this.router.serializeUrl(
+                this.router.createUrlTree(['/exercises'], {
+                    queryParams: this.musclesQuery ? { muscles: this.musclesQuery } : {},
+                })
+            ),
+            label: 'Exercises',
+        };
+    }
 
     protected readonly exercise = computed(
         () =>
@@ -146,9 +184,15 @@ export class ExercisePageComponent {
             return;
         }
         this.adding.set(false);
-        void this.router.navigate(['/setup'], {
-            queryParams: workoutId ? { editId: workoutId, add: exercise.id } : { add: exercise.id },
-        });
+        const queryParams = {
+            ...(workoutId ? { editId: workoutId } : {}),
+            add: exercise.id,
+            from: this.router.url,
+        };
+        this.slide.navigate(
+            this.router.serializeUrl(this.router.createUrlTree(['/setup'], { queryParams })),
+            'in'
+        );
     }
 
     protected toggleHidden() {

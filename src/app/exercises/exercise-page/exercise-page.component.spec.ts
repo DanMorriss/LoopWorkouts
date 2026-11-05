@@ -10,6 +10,7 @@ import { DeletionStore } from '../../shared/state/deletion-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { makeWorkout } from '../../shared/testing/make-workout';
 import { ExercisePageComponent } from './exercise-page.component';
+import { PageSlide } from '../../nav/page-slide';
 
 describe('ExercisePageComponent', () => {
     let harness: RouterTestingHarness;
@@ -24,6 +25,14 @@ describe('ExercisePageComponent', () => {
                 provideRouter([
                     { path: 'exercises', children: [] },
                     { path: 'exercises/:id', component: ExercisePageComponent },
+                    { path: 'library/:workoutId', children: [] },
+                    { path: 'library/:workoutId/:id', component: ExercisePageComponent },
+                    { path: 'ready-made-plans/:id', children: [] },
+                    {
+                        path: 'ready-made-plans/:workoutId/:id',
+                        component: ExercisePageComponent,
+                        data: { inPlan: true },
+                    },
                 ]),
             ],
         });
@@ -52,6 +61,53 @@ describe('ExercisePageComponent', () => {
         el().querySelector<HTMLElement>(selector)!.click();
         await render();
     };
+
+    describe("from a ready-made plan's workout", () => {
+        it('goes back to it, keeping where that goes back to', async () => {
+            await open('/ready-made-plans/gym-legs/back-squat?from=today');
+            const back = el().querySelector('.back-link')!;
+
+            expect(text('.exercise__name')).toBe('Back squat');
+            expect(back.getAttribute('href')).toBe('/ready-made-plans/gym-legs?from=today');
+            expect(back.textContent).toContain('Gym legs');
+        });
+
+        it('adds to a workout, and Create comes back here', async () => {
+            await open('/ready-made-plans/gym-legs/back-squat?from=today');
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            await click('#exercise-page-add');
+            await click('.choice__choice');
+
+            const params = new URL(slide.mock.lastCall![0], location.origin).searchParams;
+            expect(params.get('from')).toBe('/ready-made-plans/gym-legs/back-squat?from=today');
+        });
+    });
+
+    describe("from a workout's details", () => {
+        it('goes back to them, with the workout named', async () => {
+            const legs = TestBed.inject(WorkoutStore).addWorkout({
+                title: 'Legs',
+                repeats: 1,
+                blocks: [],
+            });
+            await open(`/library/${legs.id}/back-squat`);
+
+            expect(text('.exercise__name')).toBe('Back squat');
+            const back = el().querySelector('.back-link')!;
+            expect(back.getAttribute('href')).toBe(`/library/${legs.id}`);
+            expect(back.textContent).toContain('Legs');
+        });
+
+        it('still goes back, for a workout that has gone', async () => {
+            await open('/library/gone/back-squat');
+            const back = el().querySelector('.back-link')!;
+
+            expect(back.getAttribute('href')).toBe('/library/gone');
+            expect(back.textContent).toContain('Workout');
+        });
+    });
 
     describe('a built-in exercise', () => {
         const backSquat = BUILT_IN_EXERCISES.find((e) => e.id === 'builtin:back-squat')!;
@@ -294,18 +350,25 @@ describe('ExercisePageComponent', () => {
                 .workouts()
                 .find((w) => w.title === 'Legs')!;
             await open('/exercises/back-squat');
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            const opened = () => new URL(slide.mock.lastCall![0], location.origin).searchParams;
 
             await click('#exercise-page-add');
             el().querySelectorAll<HTMLButtonElement>('.choice__choice')[1].click();
             await render();
-            expect(navigate).toHaveBeenLastCalledWith(['/setup'], {
-                queryParams: { editId: legs.id, add: 'builtin:back-squat' },
+            expect(Object.fromEntries(opened())).toEqual({
+                editId: legs.id,
+                add: 'builtin:back-squat',
+                from: '/exercises/back-squat',
             });
 
             await click('#exercise-page-add');
             await click('.choice__choice');
-            expect(navigate).toHaveBeenLastCalledWith(['/setup'], {
-                queryParams: { add: 'builtin:back-squat' },
+            expect(Object.fromEntries(opened())).toEqual({
+                add: 'builtin:back-squat',
+                from: '/exercises/back-squat',
             });
         });
 

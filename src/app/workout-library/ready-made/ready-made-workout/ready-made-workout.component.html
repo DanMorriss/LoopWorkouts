@@ -19,7 +19,10 @@
 
             <section class="preview__section" aria-labelledby="ready-made-steps">
                 <h3 id="ready-made-steps" class="preview__heading">What's in it</h3>
-                <app-workout-outline [workout]="workout" />
+                <app-workout-outline
+                    [workout]="workout"
+                    [exerciseUrl]="inPlan ? exerciseUrl : undefined"
+                />
             </section>
 
             <section class="preview__section" aria-labelledby="ready-made-muscles">

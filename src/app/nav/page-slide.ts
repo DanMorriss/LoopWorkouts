@@ -1,6 +1,7 @@
 import { ApplicationRef, inject, Service } from '@angular/core';
 import { Router } from '@angular/router';
 import { spring, springCurve } from '../shared/spring';
+import { LeaveCheck } from './leave-check';
 import { letInputThrough } from './let-input-through';
 
 /** On <html> while a page slides, naming the parts that move. */
@@ -31,10 +32,13 @@ export type SlideWay = 'in' | 'out';
 export class PageSlide {
     private readonly router = inject(Router);
     private readonly appRef = inject(ApplicationRef);
-    /** How far down the list was scrolled when an exercise was opened from it. */
-    private listScroll = 0;
+    private readonly leaveCheck = inject(LeaveCheck);
+    /** How far down each page was scrolled when another slid in over it, to come back to. */
+    private readonly scrolled = new Map<string, number>();
     /** See takeCaught(). */
     private caught = 0;
+    /** The slide going on, or the last to have gone. */
+    private latest?: ViewTransition;
 
     /**
      * For a link's (click): goes to `url`, sliding `way`. A click that opens a new tab or
@@ -62,11 +66,24 @@ export class PageSlide {
      * where the finger left it too, as the old picture is taken with the page still moved
      * along (SwipeBackDirective).
      *
-     * The page going in opens at its top, and the list comes back scrolled where it was left.
+     * The page going in opens at its top, and the one coming back is scrolled where it was left,
+     * however many pages deep it was.
      */
     navigate(url: string, way: SlideWay, velocity?: number) {
-        const top = way === 'in' ? 0 : this.listScroll;
-        this.listScroll = way === 'in' ? window.scrollY : 0;
+        // Before the slide starts, as the screen is frozen during one
+        const asking = this.leaveCheck.confirm();
+        if (asking) {
+            void asking.then((leave) => {
+                if (leave) {
+                    this.navigate(url, way, velocity);
+                }
+            });
+            return;
+        }
+        if (way === 'in') {
+            this.scrolled.set(pathOf(this.router.url), window.scrollY);
+        }
+        const top = way === 'in' ? 0 : (this.scrolled.get(pathOf(url)) ?? 0);
         // The page going further in slides over, and the one it's over slides under, whichever
         // pages they are: named on each as it's pictured, before going and once there
         const named: HTMLElement[] = [];
@@ -111,6 +128,7 @@ export class PageSlide {
             root.style.setProperty('--slide-duration', `${timing.duration}ms`);
         }
         const transition = document.startViewTransition(go);
+        this.latest = transition;
         // A press mid-slide ends it and lands, rather than doing nothing till it's over. On a
         // page sliding in, it notes where the page was, so a swipe back can take it from there.
         letInputThrough(
@@ -123,6 +141,12 @@ export class PageSlide {
             for (const page of named) {
                 page.style.removeProperty('view-transition-name');
                 page.classList.remove(OVER_CLASS);
+            }
+            // Cut short by another slide, it leaves that one's look alone, as that's what
+            // makes the new one slide; only this one's way is its own to take off
+            if (this.latest !== transition) {
+                root.classList.remove(...classes.filter((name) => name !== SLIDING_CLASS));
+                return;
             }
             root.classList.remove(...classes);
             root.style.removeProperty('--slide-easing');
@@ -166,6 +190,11 @@ const SLIDE_SPRING = springCurve(0.3);
 
 function reducedMotion(): boolean {
     return matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/** A url's page, without its query or fragment. */
+function pathOf(url: string): string {
+    return url.split(/[?#]/)[0];
 }
 
 /** The page the router is showing: the element it puts after its outlet in <main>. */

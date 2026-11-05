@@ -4,7 +4,7 @@
     [swipeBackDisabled]="editing() || adding()"
 >
     <div class="w-full max-w-md p-4">
-        <app-back-link [url]="backUrl" label="Exercises" />
+        <app-back-link [url]="backUrl" [label]="backLabel" />
 
         @if (exercise(); as exercise) {
             <h2 class="exercise__name">{{ exercise.name }}</h2>

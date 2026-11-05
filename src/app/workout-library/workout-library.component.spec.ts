@@ -3,13 +3,12 @@ import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
-import { HistoryEntry } from '../models/history';
 import { Workout } from '../models/workout';
-import { HistoryStore } from '../shared/state/history-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { DeletionStore } from '../shared/state/deletion-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 import { makeWorkout as baseWorkout, reps, SimpleWorkout } from '../shared/testing/make-workout';
+import { PageSlide } from '../nav/page-slide';
 import { WorkoutLibraryComponent } from './workout-library.component';
 import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment } from '../models/built-in-workouts';
 import { SettingsStore } from '../shared/state/settings-store.service';
@@ -76,10 +75,13 @@ describe('WorkoutLibraryComponent', () => {
             expect(all('.workout-card')).toHaveLength(0);
         });
 
-        it('goes to setup from the "Create a workout" button', () => {
+        it('slides in setup from the "Create a workout" button', () => {
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
             click(el('.library-create-button'));
 
-            expect(navigate).toHaveBeenCalledWith(['/setup']);
+            expect(slide).toHaveBeenCalledWith('/setup', 'in');
         });
 
         it('shows only "Create a workout", not New as well, so there is one way to add one', () => {
@@ -129,10 +131,13 @@ describe('WorkoutLibraryComponent', () => {
             expect(card(1).textContent).toContain('Untitled workout');
         });
 
-        it('goes to setup from the New button at the top', () => {
+        it('slides in setup from the New button at the top', () => {
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
             click(el('.library-add-button'));
 
-            expect(navigate).toHaveBeenCalledWith(['/setup']);
+            expect(slide).toHaveBeenCalledWith('/setup', 'in');
         });
 
         it('has a title, as the other pages do', () => {
@@ -173,104 +178,16 @@ describe('WorkoutLibraryComponent', () => {
         });
 
         describe('details', () => {
-            const openDetails = (index: number) => {
-                click(card(index).querySelector('.workout-card__action--menu'));
-                click(card(index).querySelector('.workout-card__menu-item--details'));
-            };
-            const dialog = () => el('[role="dialog"]');
-
-            it("lists what's in it at the bottom, so it can be read without Edit", () => {
-                store.addWorkout({
-                    title: 'Legs',
-                    repeats: 2,
-                    blocks: [
-                        { kind: 'heading', text: 'Main' },
-                        {
-                            kind: 'group',
-                            rounds: 3,
-                            restSeconds: 60,
-                            steps: [{ kind: 'reps', reps: 10, name: 'Back squat' }],
-                        },
-                        {
-                            kind: 'group',
-                            rounds: 1,
-                            restSeconds: 0,
-                            steps: [{ kind: 'work', seconds: 30, name: '' }],
-                        },
-                    ],
+            it('come back with focus on its card', async () => {
+                fixture.destroy();
+                Object.defineProperty(TestBed.inject(ActivatedRoute).snapshot, 'queryParamMap', {
+                    value: convertToParamMap({ details: first.id }),
+                    configurable: true,
                 });
-                fixture.detectChanges();
-                openDetails(2);
-
-                const headings = Array.from(dialog()!.querySelectorAll('h3'), (h) =>
-                    h.textContent!.trim()
-                );
-                expect(headings).toEqual(['Muscles it works', 'History', "What's in it"]);
-                expect(dialog()!.querySelector('.outline__repeats')?.textContent?.trim()).toBe(
-                    '2 rounds of all of it'
-                );
-                const lines = Array.from(
-                    dialog()!.querySelectorAll('.outline__part, .outline__line'),
-                    (line) => line.textContent!.replace(/\s+/g, ' ').trim()
-                );
-                // An unnamed step goes by its kind, as in the history
-                expect(lines).toEqual(['Main', 'Back squat 3 × 10, rest 1:00', 'Work 0:30']);
-            });
-
-            it("opens from its options, saying when it hasn't been done yet", () => {
-                openDetails(0);
-
-                expect(dialog()?.textContent).toContain('Sprints');
-                expect(dialog()?.textContent).toContain('Not done yet.');
-                expect(dialog()?.textContent).toContain('None of its steps is an exercise yet');
-            });
-
-            it('lists its runs, newest first, linking to them in the history', () => {
-                const run = (startedAt: number): HistoryEntry => ({
-                    id: `${startedAt}-${first.id}`,
-                    workoutId: first.id,
-                    title: 'Sprints',
-                    startedAt,
-                    endedAt: startedAt + 300_000,
-                    activeSeconds: 300,
-                    roundsCompleted: 4,
-                    totalRounds: 4,
-                    outcome: 'finished',
-                    updatedAt: startedAt,
-                });
-                const history = TestBed.inject(HistoryStore);
-                history.record(run(Date.UTC(2026, 9, 20, 12)));
-                history.record(run(Date.UTC(2026, 9, 24, 12)));
-                openDetails(0);
-
-                expect(dialog()?.textContent).toContain('Done 2 times');
-                const runs = Array.from(dialog()!.querySelectorAll('.details__run'));
-                expect(runs.map((a) => a.textContent!.replace(/\s+/g, ' ').trim())).toEqual([
-                    'Sat 24 Oct 4 rounds · 5:00',
-                    'Tue 20 Oct 4 rounds · 5:00',
-                ]);
-                expect(runs[0].getAttribute('href')).toBe(
-                    `/history?run=${Date.UTC(2026, 9, 24, 12)}-${first.id}`
-                );
-            });
-
-            it('closes with ‹ Workouts, putting focus back on the options button', async () => {
-                openDetails(0);
-                click(dialog()!.querySelector('.dialog-back'));
+                create();
                 await settle();
 
-                expect(document.activeElement).toBe(
-                    card(0).querySelector('.workout-card__action--menu')
-                );
-            });
-
-            it('edits the workout from its Edit button', () => {
-                openDetails(1);
-                click(dialog()!.querySelector('.details__edit'));
-
-                expect(navigate).toHaveBeenCalledWith(['/setup'], {
-                    queryParams: { editId: second.id },
-                });
+                expect(document.activeElement).toBe(card(0).querySelector('.workout-card__open'));
             });
         });
 
@@ -322,7 +239,7 @@ describe('WorkoutLibraryComponent', () => {
             const startButton = (index: number) =>
                 card(index).querySelector<HTMLElement>('.workout-card__start')!;
 
-            it('starts in one press of its card, and goes to the workout page', () => {
+            it('starts in one press of its play button, and goes to the workout page', () => {
                 click(startButton(0));
 
                 expect(store.activeWorkout()).toEqual(first);
@@ -369,13 +286,14 @@ describe('WorkoutLibraryComponent', () => {
                 expect(all('.workout-card__menu')).toHaveLength(0);
             });
 
-            it('edits the workout by going to setup with its id', () => {
+            it('edits the workout by sliding in setup with its id', () => {
+                const slide = vi
+                    .spyOn(TestBed.inject(PageSlide), 'navigate')
+                    .mockImplementation(() => {});
                 click(menuButton(1));
                 click(card(1).querySelector('.workout-card__menu-item--edit'));
 
-                expect(navigate).toHaveBeenCalledWith(['/setup'], {
-                    queryParams: { editId: second.id },
-                });
+                expect(slide).toHaveBeenCalledWith(`/setup?editId=${second.id}`, 'in');
             });
 
             it('closes on Escape and puts focus back on its button', async () => {

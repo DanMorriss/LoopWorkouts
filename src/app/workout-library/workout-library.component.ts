@@ -24,7 +24,6 @@ import { canDoWith } from '../models/exercise';
 import { listMuscles, workoutToFillGaps } from '../models/fill-gaps';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { HOLD_MS, WorkoutCardComponent } from './workout-card/workout-card.component';
-import { WorkoutDetailsDialogComponent } from './workout-details/workout-details-dialog.component';
 import { changeSmoothly } from '../shared/layout-change';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
@@ -35,19 +34,13 @@ import { UndoService } from '../shared/undo/undo.service';
 /**
  * The user's workouts. Arriving from Create's Save, `?saved=<id>` highlights that workout and
  * brings it into view (BLD-15); from adding a ready-made one, `?added=<id>` does the same.
+ * Back from a workout's details, `?details=<id>` puts focus back on its card.
  */
 @Component({
     selector: 'app-workout-library',
     templateUrl: './workout-library.component.html',
     styleUrl: './workout-library.component.scss',
-    imports: [
-        CdkDrag,
-        CdkDropList,
-        MatIconModule,
-        RouterLink,
-        WorkoutCardComponent,
-        WorkoutDetailsDialogComponent,
-    ],
+    imports: [CdkDrag, CdkDropList, MatIconModule, RouterLink, WorkoutCardComponent],
 })
 export class WorkoutLibraryComponent {
     workoutStore = inject(WorkoutStore);
@@ -60,12 +53,6 @@ export class WorkoutLibraryComponent {
     private readonly undo = inject(UndoService);
     protected readonly slide = inject(PageSlide);
     protected openWorkoutMenuId = signal<string | null>(null);
-    /** The workout whose details are open, if any. */
-    private readonly detailsId = signal<string | null>(null);
-    protected readonly detailsWorkout = computed(() => {
-        const id = this.detailsId();
-        return id ? this.workoutStore.findWorkoutById(id) : null;
-    });
     /** What screen readers hear once a workout has moved. */
     protected readonly announcement = signal('');
     protected readonly holdMs = HOLD_MS;
@@ -84,6 +71,10 @@ export class WorkoutLibraryComponent {
             const name = workout.title.trim() || 'Untitled workout';
             this.highlightedId.set(workout.id);
             this.bringIntoView(workout.id, added ? `Added ${name}` : `Saved ${name}`);
+        }
+        const details = this.workoutStore.findWorkoutById(params.get('details') ?? '');
+        if (details) {
+            this.focusAfterRender(`[data-workout="${details.id}"] .workout-card__open`);
         }
     }
 
@@ -146,20 +137,6 @@ export class WorkoutLibraryComponent {
             message: `Added "${added.title}" to your workouts`,
             undo: () => this.workoutStore.deleteWorkout(added.id),
         });
-    }
-
-    protected openDetails(workoutId: string) {
-        this.openWorkoutMenuId.set(null);
-        this.detailsId.set(workoutId);
-    }
-
-    /** Back to the card's ⋮ button, where the details were opened from. */
-    protected closeDetails() {
-        const id = this.detailsId();
-        this.detailsId.set(null);
-        if (id) {
-            this.focusAfterRender(`[data-menu-for="${id}"]`);
-        }
     }
 
     /**
@@ -264,7 +241,7 @@ export class WorkoutLibraryComponent {
         );
     }
 
-    // The element that had focus is removed when a menu or dialog closes,
+    // The element that had focus is removed when a menu closes or a page changes,
     // so move focus somewhere sensible instead of losing it to the page
     private focusAfterRender(selector: string) {
         afterNextRender(
@@ -281,12 +258,11 @@ export class WorkoutLibraryComponent {
     }
 
     navigateToCreateWorkout() {
-        this.router.navigate(['/setup']);
+        this.slide.navigate('/setup', 'in');
     }
 
     navigateToEditWorkout(workoutId: string) {
         this.openWorkoutMenuId.set(null);
-        this.detailsId.set(null);
-        this.router.navigate(['/setup'], { queryParams: { editId: workoutId } });
+        this.slide.navigate(`/setup?editId=${workoutId}`, 'in');
     }
 }

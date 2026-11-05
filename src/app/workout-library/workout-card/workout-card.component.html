@@ -4,8 +4,8 @@
     Delete
 </div>
 
-<!-- The card itself, which slides with a swipe. Pressing it starts the workout; holding it
-     lifts it, to drag or let go of for its options. A right-click opens them, as ⋮ does -->
+<!-- The card itself, which slides with a swipe. Pressing it opens its details, and its play
+     button starts it; holding it lifts it, to drag or let go of for its options. A right-click opens them, as ⋮ does -->
 <div
     #face
     class="workout-card__face"
@@ -15,24 +15,69 @@
     (pointercancel)="release($event)"
     (contextmenu)="openMenuFromRightClick($event)"
 >
+    <a
+        class="workout-card__open"
+        draggable="false"
+        [href]="detailsUrl()"
+        [attr.aria-label]="'Details of ' + name()"
+        [attr.aria-describedby]="'workout-summary-' + workout().id"
+        (click)="open($event)"
+    >
+        <!-- All for the eye: the link's name and description say it for screen readers -->
+        <span class="workout-card__head" aria-hidden="true">
+            <span class="workout-card__intro">
+                <span
+                    class="workout-card__title"
+                    [class.workout-card__title--placeholder]="!title()"
+                >
+                    {{ title() || 'Untitled workout' }}
+                </span>
+                <span class="workout-card__summary">{{ summary().text }} {{ rounds() }}</span>
+            </span>
+            <span class="workout-card__count">
+                <span class="workout-card__count-number">{{ count().number }}</span>
+                {{ ' ' }}
+                <span class="workout-card__count-label">{{ count().label }}</span>
+            </span>
+        </span>
+        @if (muscles().shown.length) {
+            <span class="workout-card__works" aria-hidden="true">
+                <span class="workout-card__works-label">Works</span>
+                @for (muscle of muscles().shown; track muscle) {
+                    <span class="workout-card__muscle">{{ muscle }}</span>
+                }
+                @if (muscles().more) {
+                    <span class="workout-card__more">+{{ muscles().more }} more</span>
+                }
+            </span>
+        }
+        @if (equipment().length) {
+            <span class="workout-card__kit" aria-hidden="true">
+                <mat-icon class="workout-card__kit-icon">{{
+                    equipment().includes('No equipment') ? 'self_improvement' : 'fitness_center'
+                }}</mat-icon>
+                <span class="workout-card__tags">
+                    @for (need of equipment(); track need) {
+                        <span class="workout-card__tag">{{ need }}</span>
+                    }
+                </span>
+            </span>
+        }
+    </a>
+    <span class="sr-only" [id]="'workout-summary-' + workout().id">
+        {{ summary().spoken }}, {{ spokenRounds() }}{{ spokenWorks() }}
+    </span>
+
+    <!-- Over the link, which covers the whole card: the middle starts it, the ⋮ at the right -->
     <button
         type="button"
-        class="workout-card__start"
+        class="btn-main btn-main--round workout-card__start"
         [attr.aria-label]="'Start ' + name()"
         [attr.aria-describedby]="'workout-summary-' + workout().id"
         (click)="start($event)"
     >
-        <mat-icon class="workout-card__play" aria-hidden="true">play_arrow</mat-icon>
-        <span class="workout-card__text" aria-hidden="true">
-            <span class="workout-card__title" [class.workout-card__title--placeholder]="!title()">
-                {{ title() || 'Untitled workout' }}
-            </span>
-            <span class="workout-card__summary">{{ summary().text }} {{ rounds() }}</span>
-        </span>
+        <mat-icon aria-hidden="true">play_arrow</mat-icon>
     </button>
-    <span class="sr-only" [id]="'workout-summary-' + workout().id">
-        {{ summary().spoken }}, {{ spokenRounds() }}
-    </span>
 
     <div
         class="workout-card__menu-wrap"
@@ -59,14 +104,6 @@
                 role="group"
                 [attr.aria-label]="'Options for ' + name()"
             >
-                <button
-                    type="button"
-                    class="menu__item workout-card__menu-item--details"
-                    (click)="detailsRequested.emit()"
-                >
-                    <mat-icon aria-hidden="true">info</mat-icon>
-                    Details
-                </button>
                 <button
                     type="button"
                     class="menu__item workout-card__menu-item--edit"

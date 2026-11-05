@@ -4,8 +4,20 @@ import { runsUntilStopped, Step, supersetName, Workout } from './workout';
 /** One line of a workout written out: a heading, a step, or a superset and its steps. */
 export type OutlineLine =
     | { kind: 'heading'; text: string }
-    | { kind: 'step'; name: string; amount: string }
-    | { kind: 'superset'; name: string; amount: string; steps: { name: string; amount: string }[] };
+    | ({ kind: 'step' } & OutlineStep)
+    | { kind: 'superset'; name: string; amount: string; steps: OutlineStep[] };
+
+/** A step as written out, with the exercise it's linked to, if any. */
+export interface OutlineStep {
+    name: string;
+    amount: string;
+    exerciseId?: string;
+}
+
+/** A step's linked exercise, as a line's field, or nothing for one with none. */
+function linkOf(step: Step): Pick<OutlineStep, 'exerciseId'> {
+    return step.kind !== 'rest' && step.exerciseId ? { exerciseId: step.exerciseId } : {};
+}
 
 /** "1:30", "0:45": a time as it's written in a plan. */
 function clock(seconds: number): string {
@@ -61,6 +73,7 @@ export function outline(workout: Pick<Workout, 'blocks'>): OutlineLine[] {
                 kind: 'step',
                 name: nameOf(step),
                 amount: setsOf(step, block.rounds, block.restSeconds),
+                ...linkOf(step),
             };
         }
         const restText = block.restSeconds > 0 ? `, rest ${clock(block.restSeconds)}` : '';
@@ -71,6 +84,7 @@ export function outline(workout: Pick<Workout, 'blocks'>): OutlineLine[] {
             steps: block.steps.map((step) => ({
                 name: nameOf(step),
                 amount: step.kind === 'rest' ? clock(step.seconds) : amountOf(step),
+                ...linkOf(step),
             })),
         };
     });

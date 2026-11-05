@@ -5,6 +5,9 @@ import { allSteps, Workout } from './workout';
 /** Every muscle group, in the order the app lists them. */
 export const ALL_MUSCLES = Object.keys(MUSCLE_LABELS) as MuscleGroup[];
 
+/** How many of a workout's main muscles its card names, before "+2 more". */
+export const MUSCLES_ON_A_CARD = 4;
+
 /** Which muscles some workouts work: main ones, and the ones they only ever support. */
 export interface MusclesWorked {
     main: MuscleGroup[];

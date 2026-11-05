@@ -42,6 +42,27 @@
     margin: 1rem 0 0;
 }
 
+// The card under the pointer stands out: the others in the list dim. Not while its options are
+// open, which sit over the card below, or while one's being dragged
+.library-list > .workout-card {
+    transition: opacity 0.2s ease;
+}
+
+@media (hover: hover) {
+    .library-list:has(> .workout-card:hover):not(:has(.workout-card--menu-open)):not(
+            .cdk-drop-list-dragging
+        )
+        > .workout-card:not(:hover) {
+        opacity: 0.45;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .library-list > .workout-card {
+        transition: none;
+    }
+}
+
 // The other cards slide aside to make room for a dragged one, on the app's spring (and it
 // settles into place on the same: styles/_drag.scss)
 .library-list.cdk-drop-list-dragging > :not(.cdk-drag-placeholder) {

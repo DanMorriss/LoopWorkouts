@@ -1,5 +1,6 @@
 <div class="flex justify-center">
     <div class="w-full max-w-md p-4">
+        <app-back-link [url]="back().url" [label]="back().label" />
         <form [formRoot]="workoutForm">
             <label class="picker-field" for="title">
                 <span class="picker-field__label">Workout Title</span>
@@ -1027,6 +1028,16 @@
         </form>
     </div>
 </div>
+
+<!-- Leaving with unsaved changes -->
+@if (leaveAsked()) {
+    <app-unsaved-changes-dialog
+        animate.leave="dialog-leave"
+        [hint]="unsavedHint()"
+        (keepEditing)="answerLeaving(false)"
+        (discard)="answerLeaving(true)"
+    />
+}
 
 @if (exerciseInDetails(); as opened) {
     <app-exercise-details-dialog

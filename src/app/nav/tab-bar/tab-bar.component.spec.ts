@@ -56,7 +56,13 @@ describe('TabBarComponent', () => {
     });
 
     it('marks Workouts while making a workout or browsing the ready-made ones', async () => {
-        for (const url of ['/setup', '/ready-made', '/ready-made/gym-legs']) {
+        for (const url of [
+            '/setup',
+            '/ready-made',
+            '/ready-made/gym-legs',
+            '/library/some-workout',
+            '/library/some-workout/plank',
+        ]) {
             await go(url);
             expect(current().filter(([, mark]) => mark)).toEqual([['Workouts', 'true']]);
         }

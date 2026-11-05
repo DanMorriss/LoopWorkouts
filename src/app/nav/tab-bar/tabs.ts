@@ -24,5 +24,3 @@ export const TABS = [
         holds: ['/settings', '/help', '/privacy', '/terms'],
     },
 ] as const;
-
-export type Tab = (typeof TABS)[number];

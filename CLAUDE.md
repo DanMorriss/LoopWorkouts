@@ -12,11 +12,13 @@ Node is pinned in `.nvmrc`. CI (`.github/workflows/ci.yml`) runs these, and all 
 npm ci
 npx playwright install --with-deps chromium   # for the tests
 npm run format:check                          # npm run format to fix
+npm run lint                                  # component size
+npm run unused                                # exports and dependencies nothing uses
 npx ng test --watch=false --no-progress
 npm run build
 ```
 
-`npx tsc -p tsconfig.app.json --noEmit --noUnusedLocals --noUnusedParameters` finds leftovers CI doesn't.
+The compiler fails on unused locals and parameters, and the build on its budgets.
 
 ## Where things are
 
@@ -44,7 +46,7 @@ Helpers that aren't about one component don't belong in a component's file, as i
 - Signal Forms (`@angular/forms/signals`) for forms.
 - `@if`, `@for`, `@switch`; `[class]` and `[style]`, never `ngClass`, `ngStyle` or `CommonModule`. Keep logic out of templates, and don't assume globals such as `new Date()` are there.
 - Lazy-load feature routes. Use `NgOptimizedImage` for static images.
-- Strict TypeScript, no `any` (use `unknown`), and small components with one job. A component that's grown large should lose parts when next changed, not gain more. `workout-setup` and `workout` are already too big; see `TODO.md`.
+- Strict TypeScript, no `any` (use `unknown`), and small components with one job. A component that's grown large should lose parts when next changed, not gain more. `npm run lint` fails a component or directive, or its template, over 300 lines of code. Split it rather than raising the limit. The files already over have their own limits in `eslint.config.mjs`: those only come down, so lower one when its file shrinks, and never raise one or add another.
 - Inline templates for small components. Paths to external files are relative to the component.
 
 ## Styling
@@ -52,7 +54,7 @@ Helpers that aren't about one component don't belong in a component's file, as i
 - **Every colour is a token** in `src/styles.scss`, set for both dark and light themes; `theme-contrast.spec.ts` checks them. For a see-through version use `color-mix(in srgb, var(--token) 30%, transparent)`. No raw hex or `rgba()` in a component's styles.
 - **Each class means one thing in a file.** A class name is on one kind of element, and defined in one place. Using the same name for two things lets the styles of one leak onto the other, and a parent's class beats a child's `:host` styles. The same goes for classes on a child component's element: only set spacing there.
 - **Mixins, not global classes,** for what only some pages need: the global styles are part of the first download.
-- **Budgets:** a component's styles warn at 4 kB and the initial bundle at 500 kB. Treat a new build warning as a thing to fix, by moving a part into a child component rather than raising the limit. Anything on every page uses `app-icon`, not `mat-icon`.
+- **Budgets:** a component's styles fail the build over 4 kB, and the initial bundle over 500 kB. Fix that by moving a part into a child component rather than raising the limit. Anything on every page uses `app-icon`, not `mat-icon`.
 
 ## Accessibility
 
@@ -64,7 +66,7 @@ Check the diff, not only that it works:
 
 1. **Duplication:** does this repeat something that exists? Search for it, and for what it's similar to.
 2. **Leftovers:** anything now unused, including exports only their own test uses. Search the whole repo, not only `src/app` (`src/test-setup.ts` and `tools/` use things too).
-3. **The rules above,** especially colours, one meaning per class, and no new budget warnings.
+3. **The rules above,** especially colours, one meaning per class, and no build warnings.
 4. **Look at it:** for a visual change, run the app and look, in both themes and at phone width. Tests don't see layout.
 5. **Docs in the same PR:** `TODO.md` (tick what's done; add any limitation to Known issues) and `docs/features/` (the feature's file and its status in the README) if behaviour changed. Search `README.md` and `docs/` for anything now out of date.
 
@@ -87,4 +89,4 @@ Check the diff, not only that it works:
 
 ## Reviewing the whole codebase
 
-When asked for a review: search for what the rules ban; run the unused-code check above; look for blocks repeated across files, including SCSS and templates, not just TypeScript; check every build warning; and read what changed most since the last review. Check each finding by reading the code, and confirm a suspected visual bug in the running app. Report findings by value, and don't change code until asked.
+When asked for a review: search for what the rules ban; run the unused-code check above, whose `knip.json` skips test helpers and doesn't count tests as a use; look for blocks repeated across files, including SCSS and templates, not just TypeScript; check every build warning; and read what changed most since the last review. Check each finding by reading the code, and confirm a suspected visual bug in the running app. Report findings by value, and don't change code until asked.

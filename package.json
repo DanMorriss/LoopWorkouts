@@ -8,7 +8,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "format": "prettier --write \"src/**/*.{ts,html,scss,css}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\""
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\"",
+    "lint": "eslint src/app",
+    "unused": "knip --production"
   },
   "private": true,
   "engines": {
@@ -22,7 +24,6 @@
     "@angular/forms": "^22.2.3",
     "@angular/material": "^22.2.3",
     "@angular/platform-browser": "^22.2.3",
-    "@angular/platform-browser-dynamic": "^22.2.3",
     "@angular/router": "^22.2.3",
     "@supabase/supabase-js": "^2.118.0",
     "@tailwindcss/postcss": "^4.0.8",
@@ -37,14 +38,18 @@
     "@angular/compiler-cli": "^22.2.3",
     "@types/three": "^0.187.0",
     "@vitest/browser-playwright": "^5.0.3",
+    "angular-eslint": "^22.6.0",
     "autoprefixer": "^10.4.20",
     "axe-core": "^4.10.3",
+    "eslint": "^10.14.0",
+    "knip": "^6.44.1",
     "playwright": "^1.63.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.0.12",
     "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
     "vitest": "^5.0.3"
   },
   "allowScripts": {

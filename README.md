@@ -48,10 +48,12 @@ Other commands:
 | `npm test`                                | Unit tests with Vitest in headless Chromium, re-running as you edit |
 | `npx ng test --watch=false`               | Run the tests once (what CI runs)                                   |
 | `npm run format:check` / `npm run format` | Check or apply Prettier formatting                                  |
+| `npm run lint`                            | Check that no component is over 300 lines of code                   |
+| `npm run unused`                          | Check for exports and dependencies the app doesn't use              |
 
 ## Tests
 
-Every pull request runs the format check, these tests and the production build in GitHub Actions (`.github/workflows/ci.yml`).
+Every pull request runs the format, component size and unused code checks, these tests and the production build (which fails over its size budgets) in GitHub Actions (`.github/workflows/ci.yml`).
 
 There are around 1,260 unit tests, run with [Vitest](https://vitest.dev) in browser mode: a real headless Chromium via Playwright, so layout and colour contrast are checked as a browser renders them. Workout tests use Vitest's fake clock (`vi.useFakeTimers()`). As well as the usual component and service tests, they include:
 

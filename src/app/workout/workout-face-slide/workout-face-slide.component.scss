@@ -1,0 +1,166 @@
+@use 'interaction' as *;
+@use 'type' as *;
+@use '../workout-colours' as *;
+@use '../workout-face-info' as *;
+
+// In the face's own layout, as if its parts were directly on the slide
+:host {
+    display: contents;
+}
+
+// The face holds text of several sizes, each tracked for its own
+* {
+    @include display-tracking;
+}
+
+.workout-face__info {
+    @include face-info;
+}
+
+// The step's name: on one line if it fits, otherwise two even lines (three for the longest),
+// shrunk as far as it needs to be by fitName(). Kept clear of the circle's curve, which is
+// narrower up here.
+.workout-face__label {
+    min-width: 0;
+    line-height: 1.1;
+    text-wrap: balance;
+    overflow-wrap: normal;
+    // Past the smallest it shrinks to, its last line ends in "…"
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+}
+
+// The name, with the (i) for its exercise's details beside it, which the name makes room for
+.workout-face__name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    max-width: 78cqi;
+    margin-inline: auto;
+}
+
+// The kind's icon, on its own line above the step's name
+.workout-face__kind {
+    display: block;
+    width: auto;
+    height: auto;
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+// A rep step's count and weight, each a wheel with its unit beside it. Closed, a wheel is
+// just its number in the face's text, with a short faint line under it to say it can be
+// changed (like a field to fill in, without boxing the number); open, it's the wheel as
+// anywhere else, over the ring.
+.workout-face__amount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+}
+
+app-wheel-picker:not(.wheel-picker--open) {
+    --wheel-background: linear-gradient(#{rgba($face-muted, 0.5)}, #{rgba($face-muted, 0.5)}) bottom
+        center / 55% 2px no-repeat;
+    --wheel-border: 1px solid transparent;
+    // The face's own text colour ("inherit" in a custom property would leave it unset)
+    --wheel-color: currentColor;
+}
+
+// The rep count, as big as the face has room for on a narrow phone
+.workout-face__count {
+    --wheel-row: min(4.4rem, 15.4vw);
+    --wheel-font: min(4rem, 14vw);
+    width: 2.6ch;
+    font-size: min(4rem, 14vw);
+}
+
+.workout-face__weight {
+    --wheel-row: 2.1rem;
+    --wheel-font: 1.5rem;
+    width: 4.5ch;
+    font-size: 1.5rem;
+}
+
+// No weight yet: a "+" to add one, quieter than a weight
+.workout-face__weight--none:not(.wheel-picker--open) {
+    --wheel-color: #{$face-muted};
+}
+
+.workout-face__weight-unit {
+    font-size: 1.25rem;
+}
+
+// Which side of an exercise done each side, under its name: as plain to see as the name
+.workout-face__side {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+// What's after the rest, under its countdown
+.workout-face__then {
+    max-width: 15em;
+    margin-inline: auto;
+    color: $face-muted;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    text-wrap: balance;
+}
+
+.workout-face__reps {
+    font-size: 1.5rem;
+}
+
+.workout-face__last-time {
+    font-size: 0.8rem;
+    line-height: 1.3;
+    // Not the theme's muted text, which in the dark theme is pale, for a dark page
+    color: $face-muted;
+    margin-top: 0.2rem;
+}
+
+// A suggestion, so quieter than the wheels, but still a button you can see is one
+.workout-face__next-weight {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    min-height: 28px;
+    margin-top: 0.3rem;
+    padding: 0 0.6rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: none;
+    color: $face-muted;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+
+    mat-icon {
+        width: 1rem;
+        height: 1rem;
+        font-size: 1rem;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $face-muted;
+        outline-offset: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    // Each of timed work's last seconds pops in a little large and settles
+    .workout-face__pop {
+        animation: tick-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+}
+
+@keyframes tick-pop {
+    from {
+        transform: scale(1.18);
+    }
+}

@@ -20,6 +20,9 @@ import {
     work,
 } from '../shared/testing/make-workout';
 import { WorkoutComponent } from './workout.component';
+import { WorkoutFaceSlideComponent } from './workout-face-slide/workout-face-slide.component';
+import { WorkoutView } from './workout-view';
+import { By } from '@angular/platform-browser';
 
 // 3s work, 2s rest, 2 rounds unless a test says otherwise
 const makeWorkout = (overrides: Partial<SimpleWorkout> = {}) =>
@@ -34,6 +37,10 @@ describe('WorkoutComponent', () => {
         vi.useRealTimers();
     });
     let component: WorkoutComponent;
+    const view = () => fixture.debugElement.injector.get(WorkoutView);
+    const faceSlide = () =>
+        fixture.debugElement.query(By.directive(WorkoutFaceSlideComponent))
+            .componentInstance as WorkoutFaceSlideComponent;
     let fixture: ComponentFixture<WorkoutComponent>;
     let store: WorkoutStore;
     let audio: FakeAudioContext;
@@ -99,8 +106,8 @@ describe('WorkoutComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        expect(component.isWorkActive()).toBe(false);
-        expect(component.isRestActive()).toBe(false);
+        expect(view().isWorkActive()).toBe(false);
+        expect(view().isRestActive()).toBe(false);
         expect(text()).toContain('No workout selected');
         expect(fixture.nativeElement.querySelector('.workout-ring')).toBeNull();
         const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
@@ -112,7 +119,7 @@ describe('WorkoutComponent', () => {
         it('starts with the work time showing, zero-padded', async () => {
             start(makeWorkout({ workMinutes: 1, workSeconds: 5 }));
 
-            expect(component.isWorkActive()).toBe(true);
+            expect(view().isWorkActive()).toBe(true);
             expect(text()).toContain('01:05');
             fixture.destroy();
         });
@@ -139,11 +146,11 @@ describe('WorkoutComponent', () => {
 
         it('reports progress through the work phase', async () => {
             start(makeWorkout({ workSeconds: 4 }));
-            expect(component.progress()).toBe(0);
+            expect(view().progress()).toBe(0);
 
             advance(2000);
 
-            expect(component.progress()).toBe(0.5);
+            expect(view().progress()).toBe(0.5);
             fixture.destroy();
         });
     });
@@ -153,11 +160,11 @@ describe('WorkoutComponent', () => {
             start(makeWorkout({ workSeconds: 3, restSeconds: 2 }));
 
             advance(2999);
-            expect(component.isWorkActive()).toBe(true);
+            expect(view().isWorkActive()).toBe(true);
 
             advance(1);
-            expect(component.isWorkActive()).toBe(false);
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isWorkActive()).toBe(false);
+            expect(view().isRestActive()).toBe(true);
             expect(text()).toContain('Rest');
             expect(text()).toContain('00:02');
             fixture.destroy();
@@ -168,9 +175,9 @@ describe('WorkoutComponent', () => {
 
             advance(3000 + 2000);
 
-            expect(component.isRestActive()).toBe(false);
-            expect(component.isWorkActive()).toBe(true);
-            expect(component.repeats()).toBe(1);
+            expect(view().isRestActive()).toBe(false);
+            expect(view().isWorkActive()).toBe(true);
+            expect(view().repeats()).toBe(1);
             expect(text()).toContain('00:03');
             fixture.destroy();
         });
@@ -180,9 +187,9 @@ describe('WorkoutComponent', () => {
 
             advance(3000);
 
-            expect(component.isRestActive()).toBe(false);
-            expect(component.isWorkActive()).toBe(true);
-            expect(component.repeats()).toBe(1);
+            expect(view().isRestActive()).toBe(false);
+            expect(view().isWorkActive()).toBe(true);
+            expect(view().repeats()).toBe(1);
             expect(text()).toContain('00:03');
             fixture.destroy();
         });
@@ -194,9 +201,9 @@ describe('WorkoutComponent', () => {
 
             advance(3000);
 
-            expect(component.isComplete()).toBe(true);
-            expect(component.isRestActive()).toBe(false);
-            expect(component.progress()).toBe(1);
+            expect(view().isComplete()).toBe(true);
+            expect(view().isRestActive()).toBe(false);
+            expect(view().progress()).toBe(1);
             expect(text()).toContain("You're finished!");
             fixture.destroy();
         });
@@ -205,10 +212,10 @@ describe('WorkoutComponent', () => {
             start(makeWorkout({ workSeconds: 3, restSeconds: 2, repeats: 2 }));
 
             advance(3000 + 2000 + 3000 - 1);
-            expect(component.isComplete()).toBe(false);
+            expect(view().isComplete()).toBe(false);
 
             advance(1);
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             fixture.destroy();
         });
 
@@ -218,9 +225,9 @@ describe('WorkoutComponent', () => {
             advance(1000);
             advance(10000);
 
-            expect(component.isComplete()).toBe(true);
-            expect(component.isWorkActive()).toBe(false);
-            expect(component.isRestActive()).toBe(false);
+            expect(view().isComplete()).toBe(true);
+            expect(view().isWorkActive()).toBe(false);
+            expect(view().isRestActive()).toBe(false);
             fixture.destroy();
         });
     });
@@ -305,7 +312,7 @@ describe('WorkoutComponent', () => {
 
             await advanceAndRoll(6000);
 
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             expect(text()).not.toContain('Last one!');
             expect(dots()).toEqual([]);
             fixture.destroy();
@@ -329,14 +336,14 @@ describe('WorkoutComponent', () => {
     it('shows only the work phase when a different workout is made active during rest', async () => {
         start(makeWorkout({ workSeconds: 3, restSeconds: 5 }));
         advance(3000);
-        expect(component.isRestActive()).toBe(true);
+        expect(view().isRestActive()).toBe(true);
 
         store.setActiveWorkout(makeWorkout({ id: 'workout-2', title: 'Second', workSeconds: 20 }));
         fixture.detectChanges();
         await roll();
 
-        expect(component.isWorkActive()).toBe(true);
-        expect(component.isRestActive()).toBe(false);
+        expect(view().isWorkActive()).toBe(true);
+        expect(view().isRestActive()).toBe(false);
         expect(fixture.nativeElement.querySelector('.workout-face').textContent).not.toContain(
             'Rest'
         );
@@ -391,8 +398,8 @@ describe('WorkoutComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        expect(component.isWorkActive()).toBe(true);
-        expect(component.repeats()).toBe(2);
+        expect(view().isWorkActive()).toBe(true);
+        expect(view().repeats()).toBe(2);
         expect(text()).toContain('00:28');
         fixture.destroy();
         localStorage.clear();
@@ -411,8 +418,8 @@ describe('WorkoutComponent', () => {
             fixture.detectChanges();
 
             // 46s in: 30s work + 10s rest done, 6s into round 2
-            expect(component.isWorkActive()).toBe(true);
-            expect(component.repeats()).toBe(2);
+            expect(view().isWorkActive()).toBe(true);
+            expect(view().repeats()).toBe(2);
             expect(text()).toContain('00:24');
             fixture.destroy();
         });
@@ -425,7 +432,7 @@ describe('WorkoutComponent', () => {
             vi.spyOn(Date, 'now').mockReturnValue(startedAt + 20000);
             advance(250);
 
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             expect(text()).toContain("You're finished!");
             fixture.destroy();
         });
@@ -767,7 +774,7 @@ describe('WorkoutComponent', () => {
             document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
             fixture.detectChanges();
 
-            expect(component.isPaused()).toBe(false);
+            expect(view().isPaused()).toBe(false);
             fixture.destroy();
         });
 
@@ -780,7 +787,7 @@ describe('WorkoutComponent', () => {
 
             expect(text()).toContain('00:07');
             expect(text()).toContain('Paused');
-            expect(component.isPaused()).toBe(true);
+            expect(view().isPaused()).toBe(true);
             fixture.destroy();
         });
 
@@ -790,8 +797,8 @@ describe('WorkoutComponent', () => {
 
             advance(60000);
 
-            expect(component.isWorkActive()).toBe(true);
-            expect(component.isRestActive()).toBe(false);
+            expect(view().isWorkActive()).toBe(true);
+            expect(view().isRestActive()).toBe(false);
             fixture.destroy();
         });
 
@@ -874,7 +881,7 @@ describe('WorkoutComponent', () => {
 
             expect(fixture.nativeElement.querySelector('app-workout-summary')).not.toBeNull();
             expect(store.activeWorkout()).not.toBeNull();
-            expect(component.isPaused()).toBe(true);
+            expect(view().isPaused()).toBe(true);
             fixture.destroy();
         });
 
@@ -906,10 +913,10 @@ describe('WorkoutComponent', () => {
                 start(makeWorkout({ workSeconds: 10 }));
 
                 expect(pressSpace()).toBe(true);
-                expect(component.isPaused()).toBe(true);
+                expect(view().isPaused()).toBe(true);
 
                 pressSpace();
-                expect(component.isPaused()).toBe(false);
+                expect(view().isPaused()).toBe(false);
                 fixture.destroy();
             });
 
@@ -928,7 +935,7 @@ describe('WorkoutComponent', () => {
                 start(makeWorkout());
 
                 expect(pressSpace(button('Pause')!)).toBe(false);
-                expect(component.isPaused()).toBe(false);
+                expect(view().isPaused()).toBe(false);
                 fixture.destroy();
             });
 
@@ -938,7 +945,7 @@ describe('WorkoutComponent', () => {
 
                 pressSpace(document.body, { repeat: true });
 
-                expect(component.isPaused()).toBe(true);
+                expect(view().isPaused()).toBe(true);
                 fixture.destroy();
             });
 
@@ -948,7 +955,7 @@ describe('WorkoutComponent', () => {
                 pressSpace(document.body, { shiftKey: true });
                 pressSpace(document.body, { ctrlKey: true });
 
-                expect(component.isPaused()).toBe(false);
+                expect(view().isPaused()).toBe(false);
                 fixture.destroy();
             });
 
@@ -957,7 +964,7 @@ describe('WorkoutComponent', () => {
                 advance(1000);
 
                 expect(pressSpace()).toBe(false);
-                expect(component.isPaused()).toBe(false);
+                expect(view().isPaused()).toBe(false);
                 fixture.destroy();
             });
 
@@ -1379,7 +1386,7 @@ describe('WorkoutComponent', () => {
 
             advance(7000 + 5000);
 
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             fixture.destroy();
         });
 
@@ -1505,7 +1512,7 @@ describe('WorkoutComponent', () => {
 
             advance(60 * 60 * 1000);
 
-            expect(component.isComplete()).toBe(false);
+            expect(view().isComplete()).toBe(false);
             expect(text()).toContain('round 721 of ∞');
             expect(
                 fixture.nativeElement.querySelector('.workout-control--main button')
@@ -1574,7 +1581,7 @@ describe('WorkoutComponent', () => {
             start(amrap());
             advance(64_000);
 
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             expect(summaryText()).toContain("Time's up");
             expect(summaryText()).toContain('12 rounds + 1 in 1:04');
             expect(entries()[0]).toEqual(
@@ -1600,7 +1607,7 @@ describe('WorkoutComponent', () => {
             expect(text()).toContain('00:05 left');
 
             advance(5000);
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             fixture.destroy();
         });
 
@@ -1681,7 +1688,7 @@ describe('WorkoutComponent', () => {
             advance(3000);
             expect(skipButton()!.getAttribute('aria-label')).toBe('Skip rest');
             advance(2000);
-            expect(component.isRepsActive()).toBe(true);
+            expect(view().isRepsActive()).toBe(true);
             expect(skipButton()!.getAttribute('aria-label')).toBe('Skip step');
             fixture.destroy();
         });
@@ -1692,11 +1699,11 @@ describe('WorkoutComponent', () => {
 
             pressSkip();
 
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(text()).toContain('00:10');
             pressSkip();
-            expect(component.isWorkActive()).toBe(true);
-            expect(component.roundNumber()).toBe(2);
+            expect(view().isWorkActive()).toBe(true);
+            expect(view().roundNumber()).toBe(2);
             fixture.destroy();
         });
 
@@ -1706,7 +1713,7 @@ describe('WorkoutComponent', () => {
 
             pressSkip(); // 20s of the plank; the rest at the end of the last round is skipped
 
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             expect(entries()[0]).toEqual(
                 expect.objectContaining({
                     outcome: 'finished',
@@ -1739,7 +1746,7 @@ describe('WorkoutComponent', () => {
 
             expect(text()).toContain('00:19 left');
             advance(19_000);
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             // 20s of time is 4 rounds; the 4s saved are the 5th round's work as well
             expect(entries()[0]).toEqual(
                 expect.objectContaining({
@@ -1780,7 +1787,7 @@ describe('WorkoutComponent', () => {
 
             pressSkip();
 
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(text()).toContain('00:02');
             endWorkout();
             expect(entries()[0].sets).toBeUndefined();
@@ -2020,7 +2027,7 @@ describe('WorkoutComponent', () => {
             advance(1900);
 
             // 3s of work done: the rest is on the face and the phone in the beep's tick
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(vibrate.mock.calls).toEqual([['rest']]);
             fixture.destroy();
         });
@@ -2063,7 +2070,7 @@ describe('WorkoutComponent', () => {
             expect(lastHold()).toBe(true);
 
             advance(1000);
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             expect(lastHold()).toBe(false);
             fixture.destroy();
         });
@@ -2090,7 +2097,7 @@ describe('WorkoutComponent', () => {
         store.resume();
         TestBed.tick();
         advance(1000);
-        expect(component.isComplete()).toBe(true);
+        expect(view().isComplete()).toBe(true);
         expect(vi.getTimerCount()).toBe(0);
         fixture.destroy();
     });
@@ -2192,7 +2199,7 @@ describe('WorkoutComponent', () => {
                 expect(dialog.querySelector('.details__pick-another')!.textContent).toContain(
                     'Swap exercise'
                 );
-                expect(component.isRepsActive()).toBe(true);
+                expect(view().isRepsActive()).toBe(true);
 
                 (dialog.querySelector('.dialog-back') as HTMLElement).click();
                 fixture.detectChanges();
@@ -2218,7 +2225,7 @@ describe('WorkoutComponent', () => {
 
                 expect(el('app-exercise-details-dialog')).toBeNull();
                 expect(document.activeElement).toBe(info());
-                expect(component.isRepsActive()).toBe(true);
+                expect(view().isRepsActive()).toBe(true);
             });
 
             describe('while paused', () => {
@@ -2262,7 +2269,7 @@ describe('WorkoutComponent', () => {
 
                     expect(el('app-exercise-details-dialog')).toBeNull();
                     expect(document.activeElement).toBe(pausedInfo());
-                    expect(component.isPaused()).toBe(true);
+                    expect(view().isPaused()).toBe(true);
                 });
 
                 it('closes the details with Escape, staying paused', async () => {
@@ -2278,7 +2285,7 @@ describe('WorkoutComponent', () => {
                     await fixture.whenStable();
 
                     expect(el('app-exercise-details-dialog')).toBeNull();
-                    expect(component.isPaused()).toBe(true);
+                    expect(view().isPaused()).toBe(true);
                 });
             });
 
@@ -2294,7 +2301,7 @@ describe('WorkoutComponent', () => {
                 fixture.detectChanges();
 
                 // Space would otherwise press Done
-                expect(component.isRepsActive()).toBe(true);
+                expect(view().isRepsActive()).toBe(true);
             });
         });
 
@@ -2302,7 +2309,7 @@ describe('WorkoutComponent', () => {
             start(circuit());
             advance(3000);
 
-            expect(component.isRepsActive()).toBe(true);
+            expect(view().isRepsActive()).toBe(true);
             expect(text()).toContain('Push-ups');
             expect(text()).toContain('20 reps');
             expect(ring().classList).toContain('workout-ring--reps');
@@ -2310,7 +2317,7 @@ describe('WorkoutComponent', () => {
 
             advance(10 * 60 * 1000);
 
-            expect(component.isRepsActive()).toBe(true);
+            expect(view().isRepsActive()).toBe(true);
             fixture.destroy();
         });
 
@@ -2557,7 +2564,7 @@ describe('WorkoutComponent', () => {
             mainButton().click();
             fixture.detectChanges();
 
-            expect(component.isPaused()).toBe(true);
+            expect(view().isPaused()).toBe(true);
             expect(fixture.nativeElement.querySelector('.workout-paused').textContent).toContain(
                 'Paused · 20 reps'
             );
@@ -2592,11 +2599,11 @@ describe('WorkoutComponent', () => {
 
             pressDone();
 
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(text()).toContain('00:02');
             advance(2000);
-            expect(component.isWorkActive()).toBe(true);
-            expect(component.roundNumber()).toBe(2);
+            expect(view().isWorkActive()).toBe(true);
+            expect(view().roundNumber()).toBe(2);
             fixture.destroy();
         });
 
@@ -2718,7 +2725,7 @@ describe('WorkoutComponent', () => {
                     );
                 fixture.detectChanges();
 
-                expect(component.isRepsActive()).toBe(true);
+                expect(view().isRepsActive()).toBe(true);
                 fixture.destroy();
             });
         });
@@ -2728,8 +2735,8 @@ describe('WorkoutComponent', () => {
             advance(3000);
             pressDone(); // round 1: 20 push-ups
             advance(2000 + 3000);
-            component['setReps'](15);
-            component['setWeight'](10);
+            faceSlide()['setReps'](15);
+            faceSlide()['setWeight'](10);
             fixture.detectChanges();
             pressDone(); // round 2: 15 at 10 kg, then finished
 
@@ -2805,8 +2812,8 @@ describe('WorkoutComponent', () => {
             );
             fixture.detectChanges();
 
-            expect(component.isRestActive()).toBe(true);
-            expect(component.isPaused()).toBe(false);
+            expect(view().isRestActive()).toBe(true);
+            expect(view().isPaused()).toBe(false);
             fixture.destroy();
         });
 
@@ -2865,7 +2872,7 @@ describe('WorkoutComponent', () => {
             advance(2000 + 3000 + 20_000);
             pressDone(); // round 2: 20s of push-ups; its rest is skipped
 
-            expect(component.isComplete()).toBe(true);
+            expect(view().isComplete()).toBe(true);
             expect(entries()).toEqual([
                 expect.objectContaining({
                     endedAt: startedAt + 58_000,
@@ -2936,8 +2943,8 @@ describe('WorkoutComponent', () => {
             fixture.detectChanges();
             advance(2000 + 3000);
 
-            expect(component.isRepsActive()).toBe(true);
-            expect(component.roundNumber()).toBe(2);
+            expect(view().isRepsActive()).toBe(true);
+            expect(view().roundNumber()).toBe(2);
             fixture.destroy();
         });
     });
@@ -3143,7 +3150,7 @@ describe('WorkoutComponent', () => {
             (fixture.nativeElement.querySelector('.workout-next--done') as HTMLElement).click();
             fixture.detectChanges();
 
-            expect(component.summaryOpen()).toBe(true);
+            expect(view().summaryOpen()).toBe(true);
             expect(summaryText()).toContain('Personal bests');
             expect(summaryText()).toContain('Heaviest: 100 kg × 5');
             fixture.destroy();
@@ -3180,7 +3187,7 @@ describe('WorkoutComponent', () => {
         it("doesn't call equalling a best a new one", () => {
             benchOnce(80, [80, 70]);
 
-            expect(component.summaryOpen()).toBe(true);
+            expect(view().summaryOpen()).toBe(true);
             expect(summaryText()).not.toContain('Personal bests');
             fixture.destroy();
         });
@@ -3188,7 +3195,7 @@ describe('WorkoutComponent', () => {
         it("doesn't call the first time doing an exercise a personal best", () => {
             benchOnce(80, []);
 
-            expect(component.summaryOpen()).toBe(true);
+            expect(view().summaryOpen()).toBe(true);
             expect(summaryText()).not.toContain('Personal bests');
             fixture.destroy();
         });
@@ -3417,7 +3424,7 @@ describe('WorkoutComponent', () => {
             pressInSummary('Back to workout');
             TestBed.tick();
             expect(summary()).toBeNull();
-            expect(component.isPaused()).toBe(true);
+            expect(view().isPaused()).toBe(true);
             expect(document.activeElement?.getAttribute('aria-label')).toBe('Resume');
 
             endWorkout();
@@ -3427,7 +3434,7 @@ describe('WorkoutComponent', () => {
                 .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
             fixture.detectChanges();
             expect(summary()).toBeNull();
-            expect(component.isPaused()).toBe(true);
+            expect(view().isPaused()).toBe(true);
             fixture.destroy();
         });
 
@@ -3466,7 +3473,7 @@ describe('WorkoutComponent', () => {
                     expect(summary()).toBeNull();
                 });
 
-                expect(component.isPaused()).toBe(true);
+                expect(view().isPaused()).toBe(true);
             });
 
             it('follows the finger down, and fades the dimming behind as it goes', () => {
@@ -3601,7 +3608,7 @@ describe('WorkoutComponent', () => {
             );
             fixture.detectChanges();
 
-            expect(component.isPaused()).toBe(true);
+            expect(view().isPaused()).toBe(true);
             expect(summary()).not.toBeNull();
             fixture.destroy();
         });
@@ -3815,13 +3822,13 @@ describe('WorkoutComponent', () => {
             pressDone();
             await roll();
             // Resting after set 1 is part of it
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(status()).toBe('set 1 of 3');
             expect(dots()).toEqual(['current', 'left', 'left']);
             expect(text()).toContain('then Leg press · set 2 of 3 · 10 reps');
 
             await advanceAndRoll(5000);
-            expect(component.isRepsActive()).toBe(true);
+            expect(view().isRepsActive()).toBe(true);
             expect(status()).toBe('set 2 of 3');
             expect(dots()).toEqual(['done', 'current', 'left']);
             expect(said()).toBe('Leg press, 10 reps, set 2 of 3');
@@ -3834,7 +3841,7 @@ describe('WorkoutComponent', () => {
             // Resting after it, it's done: no Last one! any more
             pressDone();
             await roll();
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(status()).toBe('set 3 of 3');
             fixture.destroy();
         });
@@ -3851,11 +3858,11 @@ describe('WorkoutComponent', () => {
             expect(text()).toContain('Next: Rest · 00:05');
             pressDone();
             await roll();
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(text()).toContain('then Plank · 00:03');
             await advanceAndRoll(5000);
 
-            expect(component.isWorkActive()).toBe(true);
+            expect(view().isWorkActive()).toBe(true);
             expect(text()).toContain('Plank');
             // One set: no set line, and the workout runs once, so no round line either
             expect(status()).toBe('');
@@ -3882,13 +3889,13 @@ describe('WorkoutComponent', () => {
 
             pressDone();
             advance(5000);
-            component['setReps'](8);
+            faceSlide()['setReps'](8);
             fixture.detectChanges();
             pressDone();
             advance(5000);
 
             // Set 3 starts from set 2's change, and so does next time
-            expect(component.reps()).toBe(8);
+            expect(view().reps()).toBe(8);
             expect(allSteps(store.workouts()[0])[0]).toEqual(expect.objectContaining({ reps: 8 }));
             pressDone();
             advance(5000);
@@ -3951,7 +3958,7 @@ describe('WorkoutComponent', () => {
             pressDone();
             await roll();
 
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(status()).toBe('superset round 1 of 3');
             expect(text()).toContain('then Bench · superset round 2 of 3 · 10 reps');
             await advanceAndRoll(5000);
@@ -3970,10 +3977,10 @@ describe('WorkoutComponent', () => {
             pressDone();
             await roll();
             // The rest after the last round, before the plank
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(status()).toBe('superset round 3 of 3');
             await advanceAndRoll(5000);
-            expect(component.isWorkActive()).toBe(true);
+            expect(view().isWorkActive()).toBe(true);
             fixture.destroy();
         });
 
@@ -4135,13 +4142,13 @@ describe('WorkoutComponent', () => {
         it("runs each set at its own reps and weight, and says the next set's", () => {
             start(legDay());
 
-            expect([component.reps(), component.weight()]).toEqual([12, '40 kg']);
+            expect([view().reps(), view().weight()]).toEqual([12, '40 kg']);
             pressDone();
             expect(text()).toContain('then Leg press · set 2 of 3 · 10 reps @ 45 kg');
             advance(5000);
-            expect([component.reps(), component.weight()]).toEqual([10, '45 kg']);
+            expect([view().reps(), view().weight()]).toEqual([10, '45 kg']);
             nextSet();
-            expect([component.reps(), component.weight()]).toEqual([8, '50 kg']);
+            expect([view().reps(), view().weight()]).toEqual([8, '50 kg']);
             fixture.destroy();
         });
 
@@ -4149,12 +4156,12 @@ describe('WorkoutComponent', () => {
             start(store.addWorkout(legDay()));
             nextSet();
 
-            component['setWeight'](47.5);
+            faceSlide()['setWeight'](47.5);
             fixture.detectChanges();
-            expect(component.weight()).toBe('47.5 kg');
+            expect(view().weight()).toBe('47.5 kg');
             nextSet();
 
-            expect(component.weight()).toBe('50 kg');
+            expect(view().weight()).toBe('50 kg');
             expect(savedStep().sets!.map((set) => set.weight)).toEqual([40, 47.5, 50]);
             expect(savedStep().weight).toBe(40);
             fixture.destroy();
@@ -4173,13 +4180,13 @@ describe('WorkoutComponent', () => {
             pressDone();
             nextSet();
 
-            component['setWeight'](45);
+            faceSlide()['setWeight'](45);
             fixture.detectChanges();
             pressDone();
             pressDone();
             advance(5000);
 
-            expect(component.weight()).toBe('45 kg');
+            expect(view().weight()).toBe('45 kg');
             expect(savedStep()).toEqual({ ...alike, weight: 45 });
             fixture.destroy();
         });
@@ -4211,7 +4218,7 @@ describe('WorkoutComponent', () => {
             tryMore!.click();
             fixture.detectChanges();
 
-            expect(component.weight()).toBe('42.5 kg');
+            expect(view().weight()).toBe('42.5 kg');
             expect(savedStep().sets!.map((set) => set.weight)).toEqual([42.5, 47.5, 52.5]);
             expect(button('more on each set')).toBeUndefined();
             fixture.destroy();
@@ -4297,7 +4304,7 @@ describe('WorkoutComponent', () => {
             expect(shown()).toBe('Legs · 2 of 3');
             advance(5000);
             pressDone();
-            expect(component.isRestActive()).toBe(true);
+            expect(view().isRestActive()).toBe(true);
             expect(shown()).toBe('Legs · 2 of 3');
 
             advance(2000);
@@ -4533,7 +4540,7 @@ describe('WorkoutComponent', () => {
             );
             fixture.detectChanges();
 
-            expect(component.isRepsActive()).toBe(true);
+            expect(view().isRepsActive()).toBe(true);
         });
 
         describe('in the rest before it', () => {

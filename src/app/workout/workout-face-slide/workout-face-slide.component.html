@@ -1,0 +1,104 @@
+@let face = slide();
+@if (!face.complete) {
+    <!-- The kind's icon, on its own line, so it isn't told by colour
+                                         alone. Unnamed work shows just that above the time. -->
+    <mat-icon class="workout-face__kind" aria-hidden="true">{{ face.icon }}</mat-icon>
+    @if (face.label) {
+        <div class="workout-face__name">
+            <p class="workout-face__label">{{ face.label }}</p>
+            <!-- How the exercise is done, over the workout,
+                                                 which carries on underneath (RUN-9) -->
+            @if (face.exercise; as exercise) {
+                <button
+                    type="button"
+                    class="workout-face__info"
+                    [attr.aria-label]="'Details of ' + exercise.name"
+                    (click)="details.emit({ exercise, next: false })"
+                >
+                    <mat-icon aria-hidden="true">info</mat-icon>
+                </button>
+            }
+        </div>
+    }
+    <!-- Which side, for an exercise done one side at a time -->
+    @if (face.side) {
+        <p class="workout-face__side">{{ face.side }}</p>
+    }
+    @if (face.reps !== null) {
+        <!-- No clock to compete with, so the count is the big
+                                             thing. It and the weight are wheels: tap one to
+                                             change it, for this set, the rest of the workout
+                                             and next time. -->
+        <div class="workout-face__amount">
+            <app-wheel-picker
+                class="workout-face__count"
+                [value]="face.reps"
+                (valueChange)="setReps($event)"
+                [options]="repOptions"
+                [labelledBy]="'reps-label-' + face.key"
+            />
+            <span class="workout-face__reps" [id]="'reps-label-' + face.key">reps</span>
+        </div>
+        <div class="workout-face__amount">
+            <app-wheel-picker
+                class="workout-face__weight"
+                [class.workout-face__weight--none]="!face.weight"
+                [value]="face.weightValue"
+                (valueChange)="setWeight($event)"
+                [options]="faceWeightOptions()"
+                [labelledBy]="'weight-label-' + face.key"
+            />
+            <span class="workout-face__weight-unit" [id]="'weight-label-' + face.key"
+                ><span class="sr-only">Weight, </span>{{ weightUnit() }}</span
+            >
+        </div>
+        @if (lastTime()) {
+            <p class="workout-face__last-time">{{ lastTime() }}</p>
+        }
+        @if (nextWeight(); as next) {
+            <!-- Every set hit the reps last time, so a step
+                                                 up; a tap puts it on the wheel (PRG-5) -->
+            <button type="button" class="workout-face__next-weight" (click)="setWeight(next)">
+                <mat-icon aria-hidden="true">arrow_upward</mat-icon>
+                Try {{ next }} {{ weightUnit() }}
+            </button>
+        } @else if (eachSetStepUp(); as more) {
+            <!-- The same on a pyramid, on set 1, for every set
+                                                 alike, so it keeps its shape (BLD-11) -->
+            <button type="button" class="workout-face__next-weight" (click)="stepUpEachSet()">
+                <mat-icon aria-hidden="true">arrow_upward</mat-icon>
+                Try {{ more }} {{ weightUnit() }} more on each set
+            </button>
+        }
+    } @else if (face.pop) {
+        <!-- A fresh element each second, so it pops each time -->
+        @for (time of [face.time]; track time) {
+            <p class="workout-face__pop">
+                <app-clock-digits [time]="time" />
+            </p>
+        }
+    } @else {
+        <p><app-clock-digits [time]="face.time" /></p>
+    }
+    <!-- What's after the rest, to get ready for. "Next:" says it
+                                         to screen readers. -->
+    @if (face.then) {
+        <div class="workout-face__name">
+            <p class="workout-face__then" aria-hidden="true">then {{ face.then }}</p>
+            <!-- Its details, and Swap: the rest is when the
+                                                 machine's found taken (RUN-11) -->
+            @if (face.nextExercise; as next) {
+                <button
+                    type="button"
+                    class="workout-face__info"
+                    [attr.aria-label]="'Details of ' + next.name + ', next'"
+                    (click)="details.emit({ exercise: next, next: true })"
+                >
+                    <mat-icon aria-hidden="true">info</mat-icon>
+                </button>
+            }
+        </div>
+    }
+} @else {
+    <p>You're finished!</p>
+}

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { PageSlide } from '../../nav/page-slide';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
@@ -73,6 +74,31 @@ describe('ReadyMadePlansComponent (PLN-6)', () => {
         await open('/plan');
         await open('/ready-made-plans?from=plan');
         expect(el().querySelector('.back-link')!.getAttribute('href')).toBe('/plan');
+    });
+
+    describe('its workouts', () => {
+        const row = () =>
+            [...el().querySelectorAll<HTMLAnchorElement>('.plan-card__workout')].find((link) =>
+                link.textContent!.includes('Gym legs')
+            )!;
+
+        it('slides each in on its own page, saying where to come back to', async () => {
+            await open();
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+
+            expect(row().getAttribute('href')).toBe('/ready-made-plans/gym-legs?from=plans');
+            row().click();
+
+            expect(slide).toHaveBeenCalledWith('/ready-made-plans/gym-legs?from=plans', 'in');
+        });
+
+        it('comes back to the Plan page way, when opened from there', async () => {
+            await open('/ready-made-plans?from=plan');
+
+            expect(row().getAttribute('href')).toBe('/ready-made-plans/gym-legs?from=plan');
+        });
     });
 
     it('uses one, then goes to Today, with Undo', async () => {

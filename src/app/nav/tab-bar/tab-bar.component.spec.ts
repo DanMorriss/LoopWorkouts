@@ -67,6 +67,11 @@ describe('TabBarComponent', () => {
         expect(current().filter(([, mark]) => mark)).toEqual([['Today', 'true']]);
     });
 
+    it("marks Today on a ready-made plan's workout, which slides in over its card", async () => {
+        await go('/ready-made-plans/gym-legs?from=today');
+        expect(current().filter(([, mark]) => mark)).toEqual([['Today', 'true']]);
+    });
+
     it('marks Workouts on its own page, as the place you are in', async () => {
         await go('/library');
 

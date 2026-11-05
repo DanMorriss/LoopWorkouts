@@ -1,14 +1,23 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { BuiltInPlan, builtInPlanEquipment, planWorkouts } from '../../models/built-in-plans';
 import { capitalise, equipmentPhrases } from '../../models/exercise';
 import { WEEKDAYS } from '../../models/plan';
+import { PageSlide } from '../../nav/page-slide';
 import { IconComponent } from '../../shared/components/icon/icon.component';
+import { readyMadeSlug } from '../../workout-library/ready-made/ready-made-card';
+
+/**
+ * Where a plan's card was when one of its workouts was opened: Today, the Ready-made plans
+ * page, or that page opened from the Plan page.
+ */
+export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
 
 /**
  * A ready-made plan (PLN-6) as a card: its title and what it's for, how many days a week, the
  * week as a strip of days with each workout numbered and coloured, those workouts with their
- * days, what it needs, and Use this plan. On the Ready-made plans page, and Today's Get
- * started (NAV-6).
+ * days, what it needs, and Use this plan. On the Ready-made plans page, and Today's This week
+ * and Get started (NAV-6). Each of its workouts slides in its own page, to see what's in it,
+ * and back to where the card is.
  *
  * The strip is for the eye; the list of workouts under it says the same, so the strip is
  * hidden from screen readers.
@@ -60,15 +69,22 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
 
             <ul class="plan-card__workouts" aria-label="Its workouts">
                 @for (workout of workouts(); track workout.number) {
-                    <li class="plan-card__workout">
-                        <span
-                            [class]="'plan-card__mark plan-card--c' + workout.colour"
-                            aria-hidden="true"
-                            >{{ workout.number }}</span
+                    <li>
+                        <a
+                            class="plan-card__workout"
+                            [href]="workout.url"
+                            (click)="slide.follow($event, workout.url, 'in')"
                         >
-                        <span class="plan-card__workout-name">{{ workout.title }}</span>
-                        <span class="sr-only">: </span>
-                        <span class="plan-card__workout-days">{{ workout.days }}</span>
+                            <span
+                                [class]="'plan-card__mark plan-card--c' + workout.colour"
+                                aria-hidden="true"
+                                >{{ workout.number }}</span
+                            >
+                            <span class="plan-card__workout-name">{{ workout.title }}</span>
+                            <span class="sr-only">: </span>
+                            <span class="plan-card__workout-days">{{ workout.days }}</span>
+                            <app-icon class="plan-card__workout-open">chevron_right</app-icon>
+                        </a>
                     </li>
                 }
             </ul>
@@ -105,7 +121,11 @@ export class PlanCardComponent {
     readonly main = input(false);
     /** Its title's heading level: 3 on its own page, 4 inside a card (Today's Get started). */
     readonly headingLevel = input<3 | 4>(4);
+    /** Where its workouts' pages go back to: Today, or the Ready-made plans page. */
+    readonly workoutsFrom = input<PlanWorkoutFrom>('today');
     readonly used = output<void>();
+
+    protected readonly slide = inject(PageSlide);
 
     protected readonly headingId = computed(() => `plan-card-${this.plan().id.split(':')[1]}`);
 
@@ -128,6 +148,7 @@ export class PlanCardComponent {
         planWorkouts(this.plan()).map((workout, i) => ({
             id: workout.id,
             title: workout.title,
+            url: `/ready-made-plans/${readyMadeSlug(workout)}?from=${this.workoutsFrom()}`,
             number: i + 1,
             colour: (i % 4) + 1,
             days: WEEKDAYS.filter((_, day) => this.plan().days[day].includes(workout.id))

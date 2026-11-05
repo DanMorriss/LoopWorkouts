@@ -66,6 +66,15 @@ export const routes: Routes = [
             ),
     },
     {
+        // One of a ready-made plan's workouts, from its card: only to look at, and back there
+        path: 'ready-made-plans/:id',
+        data: { inPlan: true },
+        loadComponent: () =>
+            import(
+                './workout-library/ready-made/ready-made-workout/ready-made-workout.component'
+            ).then((m) => m.ReadyMadeWorkoutComponent),
+    },
+    {
         path: 'exercises',
         canActivate: [historyLoaded],
         loadComponent: () =>

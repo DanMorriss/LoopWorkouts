@@ -36,7 +36,12 @@ import { PlanCardComponent } from '../plan-card/plan-card.component';
                 <ul class="plans__list">
                     @for (plan of plans(); track plan.id) {
                         <li>
-                            <app-plan-card [plan]="plan" [headingLevel]="3" (used)="use(plan)" />
+                            <app-plan-card
+                                [plan]="plan"
+                                [headingLevel]="3"
+                                [workoutsFrom]="back.url === '/plan' ? 'plan' : 'plans'"
+                                (used)="use(plan)"
+                            />
                         </li>
                     }
                 </ul>

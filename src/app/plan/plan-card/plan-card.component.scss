@@ -1,3 +1,4 @@
+@use 'interaction' as *;
 @use 'showcase-card' as *;
 
 :host {
@@ -146,21 +147,44 @@
     background: var(--border);
 }
 
-// Its workouts, each with the days it's on
+// Its workouts, each with the days it's on, each a link to its page
 .plan-card__workouts {
     display: grid;
-    gap: 0.45rem;
-    margin: 0;
+    // Its rows' padding is only there to press: their text lines up with the card's
+    margin: -0.25rem -0.5rem;
     padding: 0;
     list-style: none;
 }
 
 .plan-card__workout {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 0.6rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.25rem 0.1rem 0.25rem 0.5rem;
+    border-radius: 0.6rem;
+    color: inherit;
     font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        scale 0.2s ease-out;
+
+    @include hover {
+        background: var(--control-hover);
+    }
+
+    @include pressed-scale {
+        background: var(--control-hover);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+    }
 }
 
 .plan-card__workout-name {
@@ -172,6 +196,11 @@
     color: var(--text-muted);
     font-size: 0.8rem;
     text-align: right;
+}
+
+// It opens its own page
+.plan-card__workout-open {
+    color: var(--text-muted);
 }
 
 // What it needs, as quiet tags after an icon

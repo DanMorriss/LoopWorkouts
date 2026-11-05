@@ -1,13 +1,19 @@
 import { Component, computed, inject } from '@angular/core';
 import { BUILT_IN_WORKOUT_GROUPS, BUILT_IN_WORKOUTS } from '../../models/built-in-workouts';
-import { canDoWith } from '../../models/exercise';
+import { canDoWith, MUSCLE_LABELS } from '../../models/exercise';
+import { musclesWorked } from '../../models/workout-muscles';
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
 import { PageSlide } from '../../nav/page-slide';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { EquipmentFilterComponent } from '../../shared/components/equipment-filter/equipment-filter.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
+import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { readyMadeCard, readyMadeSlug } from './ready-made-card';
+
+/** How many of a workout's main muscles its card names, before "+2 more". */
+const MUSCLES_SHOWN = 4;
 
 /**
  * The ready-made workouts (LIB-6), in groups by what they need: each slides in its own page
@@ -17,13 +23,14 @@ import { readyMadeCard, readyMadeSlug } from './ready-made-card';
  */
 @Component({
     selector: 'app-ready-made',
-    imports: [BackLinkComponent, EquipmentFilterComponent, SwipeBackDirective],
+    imports: [BackLinkComponent, EquipmentFilterComponent, IconComponent, SwipeBackDirective],
     templateUrl: './ready-made.component.html',
     styleUrl: './ready-made.component.scss',
 })
 export class ReadyMadeComponent {
     private readonly settings = inject(SettingsStore);
     private readonly workouts = inject(WorkoutStore);
+    private readonly exercises = inject(ExerciseStore);
     protected readonly slide = inject(PageSlide);
 
     private readonly titles = computed(
@@ -31,10 +38,16 @@ export class ReadyMadeComponent {
     );
 
     private readonly cards = computed(() =>
-        BUILT_IN_WORKOUTS.map((workout) => ({
-            ...readyMadeCard(workout, this.titles()),
-            url: `/ready-made/${readyMadeSlug(workout)}`,
-        }))
+        BUILT_IN_WORKOUTS.map((workout) => {
+            const main = musclesWorked([workout], (id) => this.exercises.byId(id)).main;
+            return {
+                ...readyMadeCard(workout, this.titles()),
+                url: `/ready-made/${readyMadeSlug(workout)}`,
+                // Its main muscles, the first few, then how many more
+                muscles: main.slice(0, MUSCLES_SHOWN).map((muscle) => MUSCLE_LABELS[muscle]),
+                moreMuscles: Math.max(0, main.length - MUSCLES_SHOWN),
+            };
+        })
     );
 
     /** The cards that can be done with your equipment, or all of them with Only what I have off. */

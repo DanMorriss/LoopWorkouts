@@ -58,8 +58,22 @@ describe('ReadyMadeComponent', () => {
 
         expect(groups()).toEqual(['No equipment', 'Kettlebell', 'Dumbbells', 'Gym', 'Other kit']);
         expect(names()).toEqual(BUILT_IN_WORKOUTS.map((w) => w.title));
-        expect(text(card('Dumbbell full body'))).toContain('7 exercises · Dumbbells, Bench');
-        expect(text(card('Bodyweight basics'))).toContain('No equipment');
+        const parts = (title: string, selector: string) =>
+            Array.from(card(title).querySelectorAll(selector)).map((n) => text(n));
+        expect(parts('Dumbbell full body', '.ready__count')).toEqual(['7 exercises']);
+        expect(parts('Dumbbell full body', '.ready__tag')).toEqual(['Dumbbells', 'Bench']);
+        expect(parts('Bodyweight basics', '.ready__tag')).toEqual(['No equipment']);
+    });
+
+    it('names the main muscles each works, the first four, then how many more', async () => {
+        await open();
+
+        const muscles = (title: string) =>
+            Array.from(card(title).querySelectorAll('.ready__muscle')).map((n) => text(n));
+        expect(muscles('Bodyweight basics')).toEqual(['Chest', 'Abs', 'Glutes', 'Quads']);
+        expect(card('Bodyweight basics').querySelector('.ready__more')).toBeNull();
+        expect(muscles('Dumbbell full body')).toHaveLength(4);
+        expect(text(card('Dumbbell full body').querySelector('.ready__more')!)).toBe('+4 more');
     });
 
     it('hides those needing what you have not got, with Only what I have on', async () => {

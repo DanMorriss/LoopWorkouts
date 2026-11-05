@@ -188,17 +188,27 @@ describe('WheelPickerComponent', () => {
             expect(valueInMiddle()).toBe(5);
         });
 
-        /** A mouse pressing, moving or letting go at `y`. */
-        function mouse(type: 'pointerdown' | 'pointermove' | 'pointerup', y: number) {
-            viewport().dispatchEvent(
-                new PointerEvent(type, {
-                    pointerType: 'mouse',
-                    pointerId: 1,
-                    button: 0,
-                    clientY: y,
-                    bubbles: true,
-                })
-            );
+        /**
+         * A mouse pressing, moving or letting go at `y`. How fast a flick was comes from its
+         * events' times, so give `timeStamp` where that matters: real waits can stretch on a
+         * busy machine, and a quick flick then looks like a slow one.
+         */
+        function mouse(
+            type: 'pointerdown' | 'pointermove' | 'pointerup',
+            y: number,
+            timeStamp?: number
+        ) {
+            const event = new PointerEvent(type, {
+                pointerType: 'mouse',
+                pointerId: 1,
+                button: 0,
+                clientY: y,
+                bubbles: true,
+            });
+            if (timeStamp !== undefined) {
+                Object.defineProperty(event, 'timeStamp', { value: timeStamp });
+            }
+            viewport().dispatchEvent(event);
         }
 
         const middleOf = (value: number) => {
@@ -229,14 +239,13 @@ describe('WheelPickerComponent', () => {
             await create();
             await openByPress();
 
-            // A row's worth, quickly
+            // A row's worth, quickly: one move every 10ms
             const from = middleOf(4);
-            mouse('pointerdown', from);
+            mouse('pointerdown', from, 0);
             for (let i = 1; i <= 4; i++) {
-                await wait(10);
-                mouse('pointermove', from - (rowHeight() + 10) * (i / 4));
+                mouse('pointermove', from - (rowHeight() + 10) * (i / 4), i * 10);
             }
-            mouse('pointerup', from - rowHeight() - 10);
+            mouse('pointerup', from - rowHeight() - 10, 40);
             await scrolled();
 
             expect(host.value()).toBeGreaterThan(4);

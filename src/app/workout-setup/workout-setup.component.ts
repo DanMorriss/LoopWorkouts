@@ -82,6 +82,8 @@ import {
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
+import { injectFocusAfterRender } from '../shared/focus-after-render';
+import { counted } from '../shared/format-count';
 
 /**
  * What a row in Create is: a kind of step, a heading (BLD-13), or a superset's own row, with
@@ -237,6 +239,7 @@ export class WorkoutSetupComponent {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly injector = inject(Injector);
+    private readonly focusAfterRender = injectFocusAfterRender();
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly exercises = inject(ExerciseStore);
     private readonly history = inject(HistoryStore);
@@ -655,7 +658,7 @@ export class WorkoutSetupComponent {
         }
         if (!sets) {
             if (step.kind === 'reps') {
-                return `${step.reps === 1 ? '1 rep' : `${step.reps} reps`}${weight}${eachSide}`;
+                return `${counted(step.reps, 'rep')}${weight}${eachSide}`;
             }
             return `${time}${eachSide}`;
         }
@@ -696,7 +699,7 @@ export class WorkoutSetupComponent {
         if (row.weight > 0) {
             return `${name} · ${row.reps} × ${row.weight} ${this.weightUnit}`;
         }
-        return `${name} · ${row.reps === 1 ? '1 rep' : `${row.reps} reps`}`;
+        return `${name} · ${counted(row.reps, 'rep')}`;
     }
 
     /**
@@ -1404,10 +1407,6 @@ export class WorkoutSetupComponent {
 
     private updateSteps(change: (steps: StepModel[]) => StepModel[]) {
         this.model.update((setup) => ({ ...setup, steps: change(setup.steps) }));
-    }
-
-    private focusAfterRender(id: string) {
-        afterNextRender(() => document.getElementById(id)?.focus(), { injector: this.injector });
     }
 
     private allKeys(): Set<number> {

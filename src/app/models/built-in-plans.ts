@@ -145,13 +145,3 @@ export function plansFor(
 export function firstPlan(goal: TrainingGoal, kit: readonly Equipment[]): BuiltInPlan {
     return plansFor(goal, kit, true)[0] ?? BUILT_IN_PLANS[0];
 }
-
-/** "Mon, Wed and Fri": the days with something on them. */
-export function trainingDays(plan: Pick<BuiltInPlan, 'days'>): string {
-    const days = WEEKDAYS.filter((_, day) => plan.days[day].length > 0).map((name) =>
-        name.slice(0, 3)
-    );
-    return days.length <= 1
-        ? (days[0] ?? '')
-        : `${days.slice(0, -1).join(', ')} and ${days[days.length - 1]}`;
-}

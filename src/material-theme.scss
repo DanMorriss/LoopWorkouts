@@ -21,11 +21,8 @@ $theme: mat.m2-define-light-theme(
 
 html {
     @include mat.core-theme($theme);
-    @include mat.button-theme($theme);
-    @include mat.fab-theme($theme);
     @include mat.icon-theme($theme);
     @include mat.form-field-theme($theme);
-    @include mat.tooltip-theme($theme);
 }
 
 // Text styles for <body class="mat-typography">

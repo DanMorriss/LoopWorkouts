@@ -5,6 +5,11 @@ import { copyPlan } from '../../models/plan';
 import { PlanStore } from './plan-store.service';
 import { WorkoutStore } from './workout-store.service';
 
+/** What the Undo bar says once a ready-made plan is used. */
+export function weekPlannedText(plan: BuiltInPlan): string {
+    return `Your week is planned: ${plan.title}`;
+}
+
 /**
  * Using a ready-made plan (PLN-6): its workouts are copied into yours, unless you have one of
  * the same title already, which is used instead; then your plan is replaced by its week.

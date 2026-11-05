@@ -1,7 +1,8 @@
-import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { WorkoutStore } from '../../../shared/state/workout-store.service';
+import { injectFocusAfterRender } from '../../../shared/focus-after-render';
 
 /**
  * The exercises swapped mid-workout (RUN-11), on the summary: "Swapped Smith machine squat for
@@ -75,7 +76,7 @@ import { WorkoutStore } from '../../../shared/state/workout-store.service';
 export class SummarySwapsComponent {
     private readonly run = inject(ActiveRunService);
     private readonly store = inject(WorkoutStore);
-    private readonly injector = inject(Injector);
+    private readonly focusAfterRender = injectFocusAfterRender();
 
     private readonly answers = signal<ReadonlyMap<number, 'yes' | 'no'>>(new Map());
 
@@ -103,8 +104,6 @@ export class SummarySwapsComponent {
             this.run.keepSwap(step);
         }
         this.answers.update((answers) => new Map([...answers, [step, keep ? 'yes' : 'no']]));
-        afterNextRender(() => document.getElementById(this.answerId(step))?.focus(), {
-            injector: this.injector,
-        });
+        this.focusAfterRender(this.answerId(step));
     }
 }

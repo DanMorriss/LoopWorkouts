@@ -1,4 +1,4 @@
-import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { describeSets } from '../../../history/history-format';
 import { progressionSuggestions, ProgressionSuggestion, steppedUp } from '../../../models/progress';
@@ -9,6 +9,7 @@ import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../../shared/state/workout-store.service';
 import { ownExerciseName } from '../summary-sets/summary-sets.component';
+import { injectFocusAfterRender } from '../../../shared/focus-after-render';
 
 /**
  * What to step up next time on the workout summary (PRG-10), e.g. "Squats: try 62.5 kg, up
@@ -63,7 +64,7 @@ export class SummaryStepUpsComponent {
     private readonly store = inject(WorkoutStore);
     private readonly weightUnit = inject(SettingsStore).weightUnit;
     private readonly exerciseName = ownExerciseName(inject(ExerciseStore));
-    private readonly injector = inject(Injector);
+    private readonly focusAfterRender = injectFocusAfterRender();
 
     /**
      * The step-ups applied, by step. Kept as they were: once applied, the step's reps are the
@@ -150,8 +151,6 @@ export class SummaryStepUpsComponent {
             this.run.keepStepUp(suggestion.step);
         }
         this.applied.set(next);
-        afterNextRender(() => document.getElementById(`step-up-${step}`)?.focus(), {
-            injector: this.injector,
-        });
+        this.focusAfterRender(`step-up-${step}`);
     }
 }

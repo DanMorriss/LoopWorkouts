@@ -1,13 +1,7 @@
 import { Component, computed, inject, input, model, output, signal } from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
-import {
-    capitalise,
-    equipmentPhrases,
-    Exercise,
-    isBuiltIn,
-    MUSCLE_LABELS,
-} from '../../models/exercise';
+import { Exercise, exerciseHint, isBuiltIn } from '../../models/exercise';
 import { findByName, searchExercises } from '../../models/exercise-links';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 
@@ -60,16 +54,14 @@ export class ExercisePickerComponent implements FormValueControl<string> {
 
     protected readonly options = computed((): PickerOption[] => {
         const typed = this.value().trim();
-        // Hidden ones are left out, unless their name is typed in full
         const named = findByName(typed, this.exercises.exercises());
-        const shown = this.exercises
-            .exercises()
-            .filter((exercise) => !this.exercises.isHidden(exercise.id) || exercise === named);
-        const found: PickerOption[] = searchExercises(typed, shown).map((match) => ({
-            kind: 'exercise',
-            ...match,
-            hint: hint(match.exercise),
-        }));
+        const found: PickerOption[] = searchExercises(typed, this.exercises.shownFor(typed)).map(
+            (match) => ({
+                kind: 'exercise',
+                ...match,
+                hint: exerciseHint(match.exercise),
+            })
+        );
         return typed && !named
             ? [...found, { kind: 'make', name: typed.replace(/\s+/g, ' ') }]
             : found;
@@ -172,16 +164,4 @@ export class ExercisePickerComponent implements FormValueControl<string> {
         this.open.set(false);
         this.active.set(-1);
     }
-}
-
-/**
- * What tells one exercise from another at a glance: its main muscles and what it needs,
- * e.g. "Quads, glutes · Barbell, rack". Empty for one of your own with neither yet.
- */
-export function hint(exercise: Exercise): string {
-    const muscles = exercise.mainMuscles.map((muscle) => MUSCLE_LABELS[muscle].toLowerCase());
-    return [muscles.join(', '), equipmentPhrases(exercise.equipment).join(', ')]
-        .filter((part) => part !== '')
-        .map(capitalise)
-        .join(' · ');
 }

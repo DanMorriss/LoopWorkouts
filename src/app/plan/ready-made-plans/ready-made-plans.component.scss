@@ -5,17 +5,11 @@
 }
 
 .plans__title {
-    margin: 0 0 0.5rem;
-    @include display;
-    font-size: 1.6rem;
-    color: var(--text-strong);
+    @include page-title;
 }
 
 .plans__hint {
-    margin: 0 0 0.75rem;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    line-height: 1.5;
+    @include page-hint;
 }
 
 .plans__kit {

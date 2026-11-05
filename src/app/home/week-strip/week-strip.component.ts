@@ -1,11 +1,4 @@
-import {
-    afterNextRender,
-    ApplicationRef,
-    Component,
-    computed,
-    EnvironmentInjector,
-    inject,
-} from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { firstPlan } from '../../models/built-in-plans';
 import { PageSlide } from '../../nav/page-slide';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
@@ -14,11 +7,9 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
 import { PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { PlanStore } from '../../shared/state/plan-store.service';
-import { ReadyMadePlans } from '../../shared/state/ready-made-plans.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
-import { UndoService } from '../../shared/undo/undo.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
-import { morphHome } from '../home-morph';
+import { injectUsePlanOnToday, WEEK_EDIT_ID } from '../use-plan-on-today';
 
 /** How a day of the strip looks: everything on it done, some missed, still to do, or free. */
 export type DayMark = 'done' | 'missed' | 'planned' | 'free';
@@ -56,7 +47,11 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
             <div class="week__head">
                 <h3 class="week__label" id="week-title">This week</h3>
                 @if (planned()) {
-                    <a href="/plan" class="week__edit" (click)="slide.follow($event, '/plan', 'in')"
+                    <a
+                        [id]="weekEditId"
+                        href="/plan"
+                        class="week__edit"
+                        (click)="slide.follow($event, '/plan', 'in')"
                         >Edit plan</a
                     >
                 }
@@ -119,11 +114,8 @@ export class WeekStripComponent {
     private readonly history = inject(HistoryStore);
     protected readonly slide = inject(PageSlide);
     private readonly settings = inject(SettingsStore);
-    private readonly readyMade = inject(ReadyMadePlans);
-    private readonly undo = inject(UndoService);
-    /** The app's, not this card's part, which is gone by the time focus moves on. */
-    private readonly injector = inject(EnvironmentInjector);
-    private readonly appRef = inject(ApplicationRef);
+    private readonly usePlan = injectUsePlanOnToday();
+    protected readonly weekEditId = WEEK_EDIT_ID;
     private readonly now = Date.now();
     private readonly today = weekdayOf(this.now);
 
@@ -150,15 +142,7 @@ export class WeekStripComponent {
      * The week then shows in its place, so focus moves to Edit plan.
      */
     protected use() {
-        const plan = this.suggestedPlan();
-        // The card grows or shrinks into the week, rather than the page jumping
-        morphHome(this.appRef, () => {
-            const undo = this.readyMade.use(plan);
-            this.undo.offerUndo({ message: `Your week is planned: ${plan.title}`, undo });
-            afterNextRender(() => document.querySelector<HTMLElement>('.week__edit')?.focus(), {
-                injector: this.injector,
-            });
-        });
+        this.usePlan(this.suggestedPlan());
     }
 
     /** Whether anything's planned this week, of the workouts still in the library. */

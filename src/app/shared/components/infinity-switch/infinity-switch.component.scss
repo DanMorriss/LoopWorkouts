@@ -72,7 +72,7 @@ $loop-path: path(
 
         .infinity-switch--on & {
             stroke: $on-color;
-            filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.8));
+            filter: drop-shadow(0 0 4px color-mix(in srgb, #{$on-color} 80%, transparent));
             transition:
                 stroke 0.3s ease,
                 filter 0.3s ease;
@@ -107,7 +107,7 @@ $loop-path: path(
         background: var(--glow-dot);
         box-shadow:
             0 0 6px 2px $on-color,
-            0 0 14px 4px rgba(34, 211, 238, 0.5);
+            0 0 14px 4px color-mix(in srgb, #{$on-color} 50%, transparent);
         transition: background-color 0.3s ease;
     }
 

@@ -22,6 +22,7 @@ import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
+import { counted } from '../../shared/format-count';
 
 /**
  * One exercise (EXR-7, EXR-8): what it needs, its description and your note on it, the
@@ -152,9 +153,7 @@ export class ExercisePageComponent {
             return {
                 id: workout.id,
                 name: workout.title.trim() || 'Untitled workout',
-                detail: full
-                    ? `Full, ${steps} steps`
-                    : `${steps} ${steps === 1 ? 'step' : 'steps'}`,
+                detail: full ? `Full, ${steps} steps` : counted(steps, 'step'),
                 disabled: full,
             };
         })

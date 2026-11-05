@@ -3,6 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Equipment, EQUIPMENT_CHOICES, equipmentLabel } from '../../../models/exercise';
 import { SettingsStore } from '../../state/settings-store.service';
 import { ToggleSwitchComponent } from '../toggle-switch/toggle-switch.component';
+import { counted } from '../../format-count';
 
 /**
  * Only what I have, a switch, with the equipment you have under it, opening as chips to pick
@@ -76,7 +77,7 @@ export class EquipmentFilterComponent {
         if (count === 0) {
             return 'none';
         }
-        return count === 1 ? '1 piece' : `${count} pieces`;
+        return counted(count, 'piece');
     });
 
     protected setOnlyMine(only: boolean) {

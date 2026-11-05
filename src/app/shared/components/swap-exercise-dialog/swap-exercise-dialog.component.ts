@@ -12,13 +12,13 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DialogBackComponent } from '../dialog-back/dialog-back.component';
-import { Equipment, Exercise, MeasuredBy } from '../../../models/exercise';
-import { findByName, searchExercises } from '../../../models/exercise-links';
+import { Equipment, Exercise, exerciseHint, MeasuredBy } from '../../../models/exercise';
+import { searchExercises } from '../../../models/exercise-links';
 import { swapSuggestions } from './swap-suggestions';
 import { growFromClick } from '../../dialog-origin';
 import { ExerciseStore } from '../../state/exercise-store.service';
 import { SettingsStore } from '../../state/settings-store.service';
-import { hint } from '../../../workout-setup/exercise-picker/exercise-picker.component';
+import { counted } from '../../format-count';
 
 /**
  * Something to do instead of a step's exercise: mid-workout (RUN-11), e.g. when the machine is
@@ -115,7 +115,7 @@ export class SwapExerciseDialogComponent {
     private readonly exercises = inject(ExerciseStore);
     private readonly myEquipment = inject(SettingsStore).myEquipment;
     protected readonly query = signal('');
-    protected readonly hintOf = hint;
+    protected readonly hintOf = exerciseHint;
 
     /** Exercises it could be swapped for: the same measure, not hidden, not itself. */
     private readonly candidates = computed(() =>
@@ -147,11 +147,9 @@ export class SwapExerciseDialogComponent {
     /** Found by name as the picker finds them: hidden ones only when named in full. */
     private readonly found = computed(() => {
         const typed = this.query().trim();
-        const named = findByName(typed, this.candidates());
-        const shown = this.candidates().filter(
-            (exercise) => !this.exercises.isHidden(exercise.id) || exercise === named
+        return searchExercises(typed, this.exercises.shownFor(typed, this.candidates())).map(
+            (match) => match.exercise
         );
-        return searchExercises(typed, shown).map((match) => match.exercise);
     });
     private readonly searching = computed(() => this.query().trim() !== '');
 
@@ -160,9 +158,7 @@ export class SwapExerciseDialogComponent {
     );
     protected readonly heading = computed(() =>
         this.searching()
-            ? this.found().length === 1
-                ? '1 match'
-                : `${this.found().length} matches`
+            ? counted(this.found().length, 'match', 'matches')
             : this.beyondMyEquipment()
               ? 'Same muscles, needing other equipment'
               : this.myEquipment().length

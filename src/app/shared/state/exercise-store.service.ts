@@ -122,6 +122,15 @@ export class ExerciseStore {
     }
 
     /**
+     * What a search for `typed` can offer of `among`: the hidden ones are left out, unless
+     * their whole name is what's typed.
+     */
+    shownFor(typed: string, among: readonly Exercise[] = this.exercises()): Exercise[] {
+        const named = findByName(typed, among);
+        return among.filter((exercise) => !this.isHidden(exercise.id) || exercise === named);
+    }
+
+    /**
      * Whether `name` is already another exercise's, as names are matched (see `findByName()`),
      * other names of built-in ones included. `exceptId` is the exercise being renamed.
      */

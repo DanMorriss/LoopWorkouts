@@ -23,11 +23,12 @@ import {
     Workout,
 } from '../../models/workout';
 import { PageSlide } from '../../nav/page-slide';
-import { formatTime } from '../../shared/format-time';
+import { formatSeconds } from '../../shared/format-time';
 import { project, rubberband, VelocityTracker } from '../../shared/gesture';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { criticallyDampedSpring } from '../../shared/spring';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
+import { counted } from '../../shared/format-count';
 
 /**
  * One workout in the library list, in the ready-made cards' look: its title and what's in it,
@@ -140,13 +141,13 @@ export class WorkoutCardComponent {
 
         const [first, second] = steps;
         if (steps.length <= 2 && first.kind === 'work' && (!second || second.kind === 'rest')) {
-            const work = clock(first.seconds);
-            const rest = clock(second?.kind === 'rest' ? second.seconds : 0);
+            const work = formatSeconds(first.seconds);
+            const rest = formatSeconds(second?.kind === 'rest' ? second.seconds : 0);
             return { text: `${work} - ${rest}`, spoken: `Timed ${work}, rest ${rest}` };
         }
-        const count = steps.length === 1 ? '1 step' : `${steps.length} steps`;
+        const count = counted(steps.length, 'step');
         const seconds = roundSeconds(this.workout());
-        const round = clock(seconds);
+        const round = formatSeconds(seconds);
         if (repStepsPerRound(this.workout()) === 0) {
             return { text: `${count} · ${round}`, spoken: `${count}, ${round} a round` };
         }
@@ -158,14 +159,14 @@ export class WorkoutCardComponent {
     protected readonly rounds = computed(() => {
         const { repeats, timeLimitSeconds } = this.workout();
         if (timeLimitSeconds !== undefined) {
-            return `in ${clock(timeLimitSeconds)}`;
+            return `in ${formatSeconds(timeLimitSeconds)}`;
         }
         return runsUntilStopped(this.workout()) ? 'x ∞' : `x ${repeats}`;
     });
     protected readonly spokenRounds = computed(() => {
         const { repeats, timeLimitSeconds } = this.workout();
         if (timeLimitSeconds !== undefined) {
-            return `as many rounds as possible in ${clock(timeLimitSeconds)}`;
+            return `as many rounds as possible in ${formatSeconds(timeLimitSeconds)}`;
         }
         return runsUntilStopped(this.workout())
             ? 'repeated until stopped'
@@ -419,9 +420,4 @@ const DIRECTION_THRESHOLD = 10;
 /** The part of Delete behind that a card slid `offset` px across leaves showing. */
 function revealClip(offset: number): string {
     return `inset(0 0 0 calc(100% - ${Math.max(0, -offset)}px) round 0.9rem)`;
-}
-
-/** e.g. 75 → "01:15" */
-function clock(seconds: number): string {
-    return formatTime(Math.floor(seconds / 60), seconds % 60);
 }

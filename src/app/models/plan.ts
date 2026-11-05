@@ -159,15 +159,3 @@ function dayAfter(monday: number, day: number): number {
     date.setDate(date.getDate() + day + 1);
     return date.getTime();
 }
-
-/** The workouts planned for today and not yet run today (PLN-2), in the plan's order. */
-export function dueToday(
-    plan: WeekPlan,
-    entries: readonly Pick<HistoryEntry, 'workoutId' | 'startedAt'>[],
-    now: number,
-    exists: (workoutId: string) => boolean
-): string[] {
-    return thisWeek(plan, entries, now, exists)
-        [weekdayOf(now)].filter((planned) => planned.status === 'today')
-        .map((planned) => planned.workoutId);
-}

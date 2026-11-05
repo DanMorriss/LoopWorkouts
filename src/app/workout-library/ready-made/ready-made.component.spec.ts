@@ -65,6 +65,13 @@ describe('ReadyMadeComponent', () => {
         expect(parts('Bodyweight basics', '.ready__tag')).toEqual(['No equipment']);
     });
 
+    it("lays the equipment filter out as it is elsewhere, not as a card's row of tags", async () => {
+        await open();
+
+        const filter = el().querySelector<HTMLElement>('app-equipment-filter')!;
+        expect(getComputedStyle(filter).display).toBe('block');
+    });
+
     it('names the main muscles each works, the first four, then how many more', async () => {
         await open();
 

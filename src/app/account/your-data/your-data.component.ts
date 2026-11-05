@@ -3,6 +3,7 @@ import { BackupService, ImportResult } from '../../shared/backup/backup.service'
 import { planPrompt } from '../../shared/backup/plan-prompt';
 import { ClearDeviceComponent } from '../../shared/components/clear-device/clear-device.component';
 import { UndoOffer, UndoService } from '../../shared/undo/undo.service';
+import { counted } from '../../shared/format-count';
 
 /**
  * Account → Your data: Export backup and Import backup (SYN-1, SYN-2), Copy AI prompt for
@@ -53,16 +54,12 @@ export class YourDataComponent {
     }
 }
 
-function count(n: number, thing: string, things = `${thing}s`): string {
-    return `${n} ${n === 1 ? thing : things}`;
-}
-
 /** "2 workouts, 3 exercises and 14 history entries", leaving out any there are none of. */
 function listOf(workouts: number, exercises: number, entries: number): string {
     const items = [
-        ...(workouts > 0 ? [count(workouts, 'workout')] : []),
-        ...(exercises > 0 ? [count(exercises, 'exercise')] : []),
-        ...(entries > 0 ? [count(entries, 'history entry', 'history entries')] : []),
+        ...(workouts > 0 ? [counted(workouts, 'workout')] : []),
+        ...(exercises > 0 ? [counted(exercises, 'exercise')] : []),
+        ...(entries > 0 ? [counted(entries, 'history entry', 'history entries')] : []),
     ];
     return items.length > 1
         ? `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`
@@ -105,7 +102,7 @@ export function importMessage(result: ImportResult): string {
         ...(added ? [`Added ${added}.`] : []),
         ...(updated ? [`Updated ${updated}.`] : []),
         ...(result.removed > 0
-            ? [`Removed ${count(result.removed, 'item')} deleted since on the other device.`]
+            ? [`Removed ${counted(result.removed, 'item')} deleted since on the other device.`]
             : []),
     ];
     const summary =
@@ -115,5 +112,5 @@ export function importMessage(result: ImportResult): string {
     if (result.skipped === 0) {
         return summary;
     }
-    return `${summary} ${count(result.skipped, 'item')} in it couldn't be read, so ${result.skipped === 1 ? 'it was' : 'they were'} left out.`;
+    return `${summary} ${counted(result.skipped, 'item')} in it couldn't be read, so ${result.skipped === 1 ? 'it was' : 'they were'} left out.`;
 }

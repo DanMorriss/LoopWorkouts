@@ -1,13 +1,14 @@
 import { Component, computed, ElementRef, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActiveRunService } from '../../shared/run/active-run.service';
-import { formatTime } from '../../shared/format-time';
+import { formatSeconds } from '../../shared/format-time';
 import { project, rubberband, VelocityTracker } from '../../shared/gesture';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { criticallyDampedSpring } from '../../shared/spring';
 import { injectCurrentUrl, isOnPage } from '../current-url';
 import { WorkoutMorph } from '../workout-morph';
 import { IconComponent } from '../../shared/components/icon/icon.component';
+import { stepKindName } from '../../models/workout';
 
 /** px a finger moves before it's taken as a swipe or a scroll. */
 const SLOP = 10;
@@ -58,11 +59,9 @@ export class RunBarComponent {
         if (!state || !step) {
             return '';
         }
-        const name = step.name || { work: 'Timed', rest: 'Rest', reps: 'Reps' }[step.kind];
+        const name = step.name || stepKindName(step.kind);
         const amount =
-            step.kind === 'reps'
-                ? `${step.reps} reps`
-                : formatTime(Math.floor(state.remainingSeconds / 60), state.remainingSeconds % 60);
+            step.kind === 'reps' ? `${step.reps} reps` : formatSeconds(state.remainingSeconds);
         return `${this.isPaused() ? 'Paused · ' : ''}${name} · ${amount}`;
     });
 

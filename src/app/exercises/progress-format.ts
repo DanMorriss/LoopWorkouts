@@ -1,6 +1,7 @@
 import { formatDuration, spokenDuration } from '../history/history-format';
 import { ExerciseBests, ProgressMeasure } from '../models/progress';
 import { estimateIn, WeightUnit, weightIn } from '../models/weight';
+import { counted } from '../shared/format-count';
 
 /** One personal best as the exercise page lists it, e.g. "Heaviest: 80 kg × 3". */
 export interface BestLine {
@@ -112,7 +113,7 @@ export function axisValue(value: number, measure: ProgressMeasure, unit: WeightU
 }
 
 function reps(count: number): string {
-    return `${count} ${count === 1 ? 'rep' : 'reps'}`;
+    return counted(count, 'rep');
 }
 
 /** How a workout's date reads: "18 Oct", with the year too unless it was this year. */

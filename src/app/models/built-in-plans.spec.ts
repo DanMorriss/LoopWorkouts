@@ -5,7 +5,6 @@ import {
     firstPlan,
     plansFor,
     planWorkouts,
-    trainingDays,
 } from './built-in-plans';
 import { BUILT_IN_WORKOUTS } from './built-in-workouts';
 import { MAX_WORKOUTS_A_DAY, WEEKDAYS } from './plan';
@@ -105,12 +104,5 @@ describe('firstPlan (PLN-7)', () => {
         expect(firstPlan('muscle', []).title).toBe('No equipment, 3 days');
         expect(firstPlan('fitness', ['kettlebell']).title).toBe('Fitness, 4 days');
         expect(firstPlan('fitness', []).title).toBe('No equipment, 3 days');
-    });
-});
-
-describe('trainingDays', () => {
-    it('names the days with something on', () => {
-        const plan = BUILT_IN_PLANS.find((p) => p.title === 'Push, pull, legs')!;
-        expect(trainingDays(plan)).toBe('Mon, Wed, Fri and Sat');
     });
 });

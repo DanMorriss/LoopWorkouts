@@ -2,6 +2,7 @@ import { booleanAttribute, Directive, ElementRef, inject, input } from '@angular
 import { project, rubberband, VelocityTracker } from '../shared/gesture';
 import { criticallyDampedSpring } from '../shared/spring';
 import { PageSlide } from './page-slide';
+import { prefersReducedMotion } from '../shared/reduced-motion';
 
 /** px a finger moves before it's taken as a swipe back or a scroll. */
 const SLOP = 10;
@@ -155,7 +156,7 @@ export class SwipeBackDirective {
     private settle(velocity: number) {
         const from = this.offset;
         this.moveTo(0);
-        if (Math.abs(from) < 0.5 || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (Math.abs(from) < 0.5 || prefersReducedMotion()) {
             return;
         }
         // Moving left towards 0 is moving the way it's going

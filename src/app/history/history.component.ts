@@ -17,6 +17,7 @@ import { UndoService } from '../shared/undo/undo.service';
 import { HistoryEntryComponent } from './history-entry/history-entry.component';
 import { MusclesThisWeekComponent } from './muscles-this-week/muscles-this-week.component';
 import { entryName, formatDuration } from './history-format';
+import { injectFocusAfterRender } from '../shared/focus-after-render';
 
 interface DayGroup {
     /** e.g. "2026-10-18", for tracking and ids. */
@@ -55,6 +56,7 @@ function dayKey(time: number): string {
 export class HistoryComponent {
     private readonly history = inject(HistoryStore);
     private readonly injector = inject(Injector);
+    private readonly focusAfterRender = injectFocusAfterRender();
     private readonly reducedMotion = injectPrefersReducedMotion();
     private readonly now = Date.now();
 
@@ -170,9 +172,5 @@ export class HistoryComponent {
             },
             { injector: this.injector }
         );
-    }
-
-    private focusAfterRender(id: string) {
-        afterNextRender(() => document.getElementById(id)?.focus(), { injector: this.injector });
     }
 }

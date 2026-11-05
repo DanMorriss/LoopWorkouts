@@ -1,5 +1,10 @@
 import { DestroyRef, inject, Signal, signal } from '@angular/core';
 
+/** Whether the user has asked their system for reduced motion, right now. */
+export function prefersReducedMotion(): boolean {
+    return matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 /**
  * Whether the user has asked their system for reduced motion. Updates if they change the setting.
  *

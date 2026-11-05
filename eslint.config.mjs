@@ -13,8 +13,6 @@ const maxLines = (max) => ['error', { max, skipBlankLines: true, skipComments: t
 const OVER_THE_LIMIT = {
     'workout-setup/workout-setup.component.html': 1005,
     'workout-setup/workout-setup.component.ts': 1394,
-    'workout/workout.component.html': 388,
-    'workout/workout.component.ts': 853,
 };
 
 export default [

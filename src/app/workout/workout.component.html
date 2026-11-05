@@ -1,20 +1,20 @@
 <div
     class="workout-page flex flex-col items-center justify-center"
-    [class.workout-page--paused]="isPaused()"
+    [class.workout-page--paused]="view.isPaused()"
 >
-    @if (workout()) {
+    @if (view.workout()) {
         <!-- On a phone the header shows the title instead, leaving more room for the ring -->
         <p class="workout-title text-center text-4xl text-(--text-strong)">
-            {{ workout()?.title }}
+            {{ view.workout()?.title }}
         </p>
         <!-- Fixed-height slot, so the ring doesn't jump when this line changes -->
         <!-- Read out by screen readers when the phase changes; the countdown itself stays quiet -->
-        <div class="sr-only" aria-live="polite" aria-atomic="true">{{ announcement() }}</div>
+        <div class="sr-only" aria-live="polite" aria-atomic="true">{{ view.announcement() }}</div>
         <!-- The part of the workout it's in, and which exercise of how many (RUN-10). Its
              room is kept for the whole run, so the ring doesn't move when it changes. -->
-        @if (showSection()) {
+        @if (view.showSection()) {
             <p class="workout-section">
-                @if (section(); as section) {
+                @if (view.section(); as section) {
                     @if (section.heading) {
                         <span class="workout-section__heading">{{ section.heading }}</span>
                     }
@@ -30,86 +30,17 @@
         }
         <div
             class="workout-status text-(--text-strong)"
-            [class.workout-status--steps]="stepStrip().length"
+            [class.workout-status--steps]="view.stepStrip().length"
         >
-            @if (isComplete() === false) {
+            @if (view.isComplete() === false) {
                 <!-- Keyed by round: a new round's line turns in from the right, on a drum -->
-                @for (slide of roundSlides(); track slide.key) {
+                @for (slide of view.roundSlides(); track slide.key) {
                     <div
                         class="workout-status__round"
                         (animate.enter)="rollRoundIn($event)"
                         (animate.leave)="rollRoundOut($event)"
                     >
-                        @if (slide.set; as set) {
-                            <!-- An exercise's sets, or a superset's rounds, and the whole
-                                 workout's round after them when it has more than one -->
-                            <p class="text-2xl" [class.workout-status__last]="slide.last">
-                                @if (slide.last) {
-                                    Last one!
-                                } @else {
-                                    {{ setText(set) }}
-                                }
-                                @if (slide.timeLimited) {
-                                    · round {{ slide.round }}
-                                } @else if (slide.untilStopped) {
-                                    · round {{ slide.round }} of
-                                    <span class="symbol-infinity" aria-hidden="true">∞</span>
-                                    <span class="sr-only">until stopped</span>
-                                } @else if (slide.totalRounds > 1) {
-                                    · round {{ slide.round }} of {{ slide.totalRounds }}
-                                }
-                            </p>
-                            @if (slide.timeLimited) {
-                                <p
-                                    class="workout-status__time-left"
-                                    [class.workout-status__time-left--nearly-up]="
-                                        slide.timeNearlyUp
-                                    "
-                                >
-                                    {{ slide.timeLeft }} left
-                                </p>
-                            }
-                        } @else if (slide.timeLimited) {
-                            <p class="text-2xl">round {{ slide.round }}</p>
-                            <p
-                                class="workout-status__time-left"
-                                [class.workout-status__time-left--nearly-up]="slide.timeNearlyUp"
-                            >
-                                {{ slide.timeLeft }} left
-                            </p>
-                        } @else if (slide.untilStopped) {
-                            <p class="text-2xl">
-                                round {{ slide.round }} of
-                                <span class="symbol-infinity" aria-hidden="true">∞</span>
-                                <span class="sr-only">until stopped</span>
-                            </p>
-                        } @else if (slide.totalRounds > 1) {
-                            @if (slide.last) {
-                                <p class="workout-status__last text-2xl">Last one!</p>
-                            } @else {
-                                <p class="text-2xl">
-                                    round {{ slide.round }} of {{ slide.totalRounds }}
-                                </p>
-                            }
-                        }
-                        <!-- The same count as the round line, as a picture: rounds done, this
-                             one, and those to go; and the time left of a workout of timed steps -->
-                        @if (slide.dots.length || slide.totalLeft) {
-                            <div class="workout-status__progress">
-                                @if (slide.dots.length) {
-                                    <app-round-dots [dots]="slide.dots" />
-                                }
-                                @if (slide.totalLeft) {
-                                    <p class="workout-status__time-left">
-                                        {{ slide.totalLeft }} left
-                                    </p>
-                                }
-                            </div>
-                        }
-                        <!-- The round's steps in their colours, and which one it's on -->
-                        @if (slide.strip.length) {
-                            <app-step-strip [steps]="slide.strip" />
-                        }
+                        <app-workout-round-line [slide]="slide" />
                     </div>
                 }
             }
@@ -118,162 +49,40 @@
         <!-- The ring, with Resume and End workout over it while paused -->
         <div class="workout-stage">
             <app-workout-ring
-                [phase]="ringPhase()"
-                [paused]="isPaused()"
-                [sweeps]="ringSweeps()"
-                [percent]="progressPercent()"
+                [phase]="view.ringPhase()"
+                [paused]="view.isPaused()"
+                [sweeps]="view.ringSweeps()"
+                [percent]="view.progressPercent()"
             >
                 <div class="workout-inner">
                     <div
                         class="workout-face rounded-full text-center text-4xl text-black"
                         [class]="{
-                            'flash-fade': isWorkActive(),
-                            'flash-fade-blue': isRestActive(),
-                            'workout-face--rest': isRestActive(),
-                            'bg-sky-50/50': isComplete(),
-                            'workout-face--reps': isRepsActive(),
-                            'workout-face--paused': isPaused(),
-                            'workout-face--soon': nextSoon(),
-                            'workout-face--new-round': newRound(),
+                            'flash-fade': view.isWorkActive(),
+                            'flash-fade-blue': view.isRestActive(),
+                            'workout-face--rest': view.isRestActive(),
+                            'bg-sky-50/50': view.isComplete(),
+                            'workout-face--reps': view.isRepsActive(),
+                            'workout-face--paused': view.isPaused(),
+                            'workout-face--soon': view.nextSoon(),
+                            'workout-face--new-round': view.newRound(),
                         }"
                     >
                         <!-- Keyed by step: the last step's text rolls away over the top as the
                              next one's rolls up from below, as if on a drum like the number
                              wheels; a new round turns right to left instead, and rest settles
                              in more gently -->
-                        @for (slide of faceSlides(); track slide.key) {
+                        @for (slide of view.faceSlides(); track slide.key) {
                             <div
                                 class="workout-face__content"
                                 [attr.data-step]="slide.key"
                                 (animate.enter)="rollFaceIn($event)"
                                 (animate.leave)="rollFaceOut($event)"
                             >
-                                @if (!slide.complete) {
-                                    <!-- The kind's icon, on its own line, so it isn't told by colour
-                                         alone. Unnamed work shows just that above the time. -->
-                                    <mat-icon class="workout-face__kind" aria-hidden="true">{{
-                                        slide.icon
-                                    }}</mat-icon>
-                                    @if (slide.label) {
-                                        <div class="workout-face__name">
-                                            <p class="workout-face__label">{{ slide.label }}</p>
-                                            <!-- How the exercise is done, over the workout,
-                                                 which carries on underneath (RUN-9) -->
-                                            @if (slide.exercise; as exercise) {
-                                                <button
-                                                    type="button"
-                                                    class="workout-face__info"
-                                                    [attr.aria-label]="
-                                                        'Details of ' + exercise.name
-                                                    "
-                                                    (click)="showExercise(exercise)"
-                                                >
-                                                    <mat-icon aria-hidden="true">info</mat-icon>
-                                                </button>
-                                            }
-                                        </div>
-                                    }
-                                    <!-- Which side, for an exercise done one side at a time -->
-                                    @if (slide.side) {
-                                        <p class="workout-face__side">{{ slide.side }}</p>
-                                    }
-                                    @if (slide.reps !== null) {
-                                        <!-- No clock to compete with, so the count is the big
-                                             thing. It and the weight are wheels: tap one to
-                                             change it, for this set, the rest of the workout
-                                             and next time. -->
-                                        <div class="workout-face__amount">
-                                            <app-wheel-picker
-                                                class="workout-face__count"
-                                                [value]="slide.reps"
-                                                (valueChange)="setReps($event)"
-                                                [options]="repOptions"
-                                                [labelledBy]="'reps-label-' + slide.key"
-                                            />
-                                            <span
-                                                class="workout-face__reps"
-                                                [id]="'reps-label-' + slide.key"
-                                                >reps</span
-                                            >
-                                        </div>
-                                        <div class="workout-face__amount">
-                                            <app-wheel-picker
-                                                class="workout-face__weight"
-                                                [class.workout-face__weight--none]="!slide.weight"
-                                                [value]="slide.weightValue"
-                                                (valueChange)="setWeight($event)"
-                                                [options]="faceWeightOptions()"
-                                                [labelledBy]="'weight-label-' + slide.key"
-                                            />
-                                            <span
-                                                class="workout-face__weight-unit"
-                                                [id]="'weight-label-' + slide.key"
-                                                ><span class="sr-only">Weight, </span
-                                                >{{ weightUnit() }}</span
-                                            >
-                                        </div>
-                                        @if (lastTime()) {
-                                            <p class="workout-face__last-time">{{ lastTime() }}</p>
-                                        }
-                                        @if (nextWeight(); as next) {
-                                            <!-- Every set hit the reps last time, so a step
-                                                 up; a tap puts it on the wheel (PRG-5) -->
-                                            <button
-                                                type="button"
-                                                class="workout-face__next-weight"
-                                                (click)="setWeight(next)"
-                                            >
-                                                <mat-icon aria-hidden="true">arrow_upward</mat-icon>
-                                                Try {{ next }} {{ weightUnit() }}
-                                            </button>
-                                        } @else if (eachSetStepUp(); as more) {
-                                            <!-- The same on a pyramid, on set 1, for every set
-                                                 alike, so it keeps its shape (BLD-11) -->
-                                            <button
-                                                type="button"
-                                                class="workout-face__next-weight"
-                                                (click)="stepUpEachSet()"
-                                            >
-                                                <mat-icon aria-hidden="true">arrow_upward</mat-icon>
-                                                Try {{ more }} {{ weightUnit() }} more on each set
-                                            </button>
-                                        }
-                                    } @else if (slide.pop) {
-                                        <!-- A fresh element each second, so it pops each time -->
-                                        @for (time of [slide.time]; track time) {
-                                            <p class="workout-face__pop">
-                                                <app-clock-digits [time]="time" />
-                                            </p>
-                                        }
-                                    } @else {
-                                        <p><app-clock-digits [time]="slide.time" /></p>
-                                    }
-                                    <!-- What's after the rest, to get ready for. "Next:" says it
-                                         to screen readers. -->
-                                    @if (slide.then) {
-                                        <div class="workout-face__name">
-                                            <p class="workout-face__then" aria-hidden="true">
-                                                then {{ slide.then }}
-                                            </p>
-                                            <!-- Its details, and Swap: the rest is when the
-                                                 machine's found taken (RUN-11) -->
-                                            @if (slide.nextExercise; as next) {
-                                                <button
-                                                    type="button"
-                                                    class="workout-face__info"
-                                                    [attr.aria-label]="
-                                                        'Details of ' + next.name + ', next'
-                                                    "
-                                                    (click)="showExercise(next, true)"
-                                                >
-                                                    <mat-icon aria-hidden="true">info</mat-icon>
-                                                </button>
-                                            }
-                                        </div>
-                                    }
-                                } @else {
-                                    <p>You're finished!</p>
-                                }
+                                <app-workout-face-slide
+                                    [slide]="slide"
+                                    (details)="swap.showExercise($event.exercise, $event.next)"
+                                />
                             </div>
                         }
                     </div>
@@ -282,26 +91,26 @@
 
             <!-- Paused: the ring greys out, and the way on (or out) sits in the middle of it.
                  Ending only happens from here, two presses away, so it's never hit by mistake. -->
-            @if (isPaused() && isComplete() === false) {
+            @if (view.isPaused() && view.isComplete() === false) {
                 <div class="workout-paused">
                     <!-- Which step it's paused on, with its (i) still there: pausing to read
                          how it's done is what the details are for (RUN-9) -->
-                    @if (stepLabel(); as label) {
+                    @if (view.stepLabel(); as label) {
                         <div class="workout-paused__name">
                             <p class="workout-paused__step">{{ label }}</p>
-                            @if (stepExercise(); as exercise) {
+                            @if (view.stepExercise(); as exercise) {
                                 <button
                                     type="button"
                                     class="workout-face__info workout-paused__info"
                                     [attr.aria-label]="'Details of ' + exercise.name"
-                                    (click)="showExercise(exercise)"
+                                    (click)="swap.showExercise(exercise)"
                                 >
                                     <mat-icon aria-hidden="true">info</mat-icon>
                                 </button>
                             }
                         </div>
                     }
-                    <p class="workout-paused__label">Paused · {{ pausedOn() }}</p>
+                    <p class="workout-paused__label">Paused · {{ view.pausedOn() }}</p>
                     <button
                         #resumeButton
                         type="button"
@@ -321,24 +130,24 @@
         </div>
 
         <!-- Your note on this exercise, e.g. a cue or a machine setting -->
-        @if (exerciseNote() && isComplete() === false) {
-            <app-workout-note [text]="exerciseNote()!" [muted]="isPaused()" />
+        @if (view.exerciseNote() && view.isComplete() === false) {
+            <app-workout-note [text]="view.exerciseNote()!" [muted]="view.isPaused()" />
         }
 
-        @if (upNext()) {
-            @if (isRepsActive() && !isPaused()) {
+        @if (view.upNext()) {
+            @if (view.isRepsActive() && !view.isPaused()) {
                 <!-- On a rep step it's Done: a pill in the next step's colour, with an arrow
                      on to it. Space presses it too. -->
                 <button
                     #doneButton
                     type="button"
                     class="workout-next workout-next--done"
-                    [attr.data-next]="nextKind()"
-                    [attr.aria-label]="'Done. Next: ' + upNext()"
+                    [attr.data-next]="view.nextKind()"
+                    [attr.aria-label]="'Done. Next: ' + view.upNext()"
                     aria-keyshortcuts="Space"
                     (click)="finishReps()"
                 >
-                    <span>Next: {{ upNext() }}</span>
+                    <span>Next: {{ view.upNext() }}</span>
                     <mat-icon class="workout-next__arrow" aria-hidden="true"
                         >arrow_forward</mat-icon
                     >
@@ -347,16 +156,16 @@
                 <!-- Pulses in the next step's colour as this one nears its end, to get ready -->
                 <p
                     class="workout-next"
-                    [class.workout-next--soon]="nextSoon()"
-                    [attr.data-next]="nextKind()"
+                    [class.workout-next--soon]="view.nextSoon()"
+                    [attr.data-next]="view.nextKind()"
                 >
-                    Next: {{ upNext() }}
+                    Next: {{ view.upNext() }}
                 </p>
             }
         }
 
-        @if (isComplete() === false) {
-            @if (isPaused() === false) {
+        @if (view.isComplete() === false) {
+            @if (view.isPaused() === false) {
                 <!-- Media-player controls: a big Pause in the middle and Skip to its right
                  (RUN-12), on every kind of step (on a rep step, Done is the "Next:" pill above,
                  and Skip moves on without logging the set). Resume and End workout are over the ring while paused. The
@@ -369,7 +178,7 @@
                             type="button"
                             class="btn-main btn-main--round"
                             aria-label="Pause"
-                            [attr.aria-keyshortcuts]="isRepsActive() ? null : 'Space'"
+                            [attr.aria-keyshortcuts]="view.isRepsActive() ? null : 'Space'"
                             (click)="togglePause()"
                         >
                             <mat-icon aria-hidden="true">pause</mat-icon>
@@ -380,7 +189,7 @@
                              keeping its room so Pause doesn't move. -->
                         <kbd
                             class="workout-control__key"
-                            [style.visibility]="isRepsActive() ? 'hidden' : null"
+                            [style.visibility]="view.isRepsActive() ? 'hidden' : null"
                             aria-hidden="true"
                             >Space</kbd
                         >
@@ -389,7 +198,7 @@
                         <button
                             type="button"
                             class="btn-icon workout-control__skip"
-                            [attr.aria-label]="isRestActive() ? 'Skip rest' : 'Skip step'"
+                            [attr.aria-label]="view.isRestActive() ? 'Skip rest' : 'Skip step'"
                             (click)="skip()"
                         >
                             <mat-icon aria-hidden="true">skip_next</mat-icon>
@@ -411,30 +220,30 @@
         }
 
         <!-- How it went: once finished, or ended with End workout -->
-        @if (summaryOpen()) {
+        @if (view.summaryOpen()) {
             <app-workout-summary (back)="backToWorkout()" (done)="closeSummary()" />
         }
 
-        @if (exerciseInDetails(); as exercise) {
+        @if (swap.exerciseInDetails(); as exercise) {
             <app-exercise-details-dialog
                 animate.leave="dialog-leave"
                 [exercise]="exercise"
                 [canPickAnother]="true"
                 pickAnotherLabel="Swap exercise"
-                (closed)="closeExercise()"
-                (pickAnother)="startSwap()"
+                (closed)="swap.closeExercise()"
+                (pickAnother)="swap.startSwap()"
             />
         }
 
         <!-- Something to do instead, e.g. the machine's taken (RUN-11) -->
-        @if (swapping(); as swap) {
+        @if (swap.swapping(); as swapping) {
             <app-swap-exercise-dialog
                 animate.leave="dialog-leave"
-                [exercise]="swap.exercise"
-                [measuredBy]="swap.measuredBy"
+                [exercise]="swapping.exercise"
+                [measuredBy]="swapping.measuredBy"
                 hint="For the rest of this workout. Sets done so far stay."
-                (closed)="closeSwap()"
-                (picked)="swapFor($event)"
+                (closed)="swap.closeSwap()"
+                (picked)="swap.swapFor($event)"
             />
         }
     } @else {

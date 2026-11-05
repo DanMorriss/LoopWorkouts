@@ -66,7 +66,7 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 From the review of 2026-11-05; how to keep it from coming back is in `CLAUDE.md`.
 
 - [ ] **Share the swipe gesture:** `RunBarComponent` and `SwipeBackDirective` are nearly the same code, and `CardGestures` a variant of it. Needs an iPhone check once shared, as it's all touch.
-- [ ] **Split `WorkoutSetupComponent` (1,800 lines, and 1,100 of template), then `WorkoutComponent`:** start with a labelled wheel for Create's 14 wheels, then a step's row, with the form's logic moved out to plain functions.
+- [ ] **Split `WorkoutSetupComponent` (1,800 lines, and 1,100 of template):** start with a labelled wheel for Create's 14 wheels, then a step's row, with the form's logic moved out to plain functions.
 - [ ] **Share the rest of an exercise list:** the Exercises page and Browse in Create repeat their count, empty message and list styles, and how they filter.
 - [ ] **Move `shared/` off the `workout/` folder:** `AlarmService`, `ActiveRunService` and `WorkoutStore` import from `workout/alarm-schedule` and `workout/workout-state`, which belong in `models/` or `shared/run/`.
 

@@ -1,0 +1,40 @@
+@use 'interaction' as *;
+@use 'workout-colours' as *;
+
+// The (i) for an exercise's details, on the face and while paused. Drawn small, so it doesn't
+// compete with the name, but a fingertip's size to hit.
+@mixin face-info {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: $face-muted;
+    cursor: pointer;
+    transition: scale 0.2s ease-out;
+
+    mat-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        font-size: 1.25rem;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $face-muted;
+        outline-offset: 2px;
+    }
+
+    @include hover {
+        background-color: rgb(0 0 0 / 0.06);
+    }
+
+    @include pressed-scale {
+        background-color: rgb(0 0 0 / 0.06);
+    }
+
+    @include hit-area(8px, 8px);
+}

@@ -1,0 +1,44 @@
+@use 'type' as *;
+
+// In the round's own layout, as if its parts were directly on it
+:host {
+    display: contents;
+}
+
+// body.mat-typography gives paragraphs a 12px bottom margin
+p {
+    margin: 0;
+}
+
+// The line holds text of several sizes, each tracked for its own
+* {
+    @include display-tracking;
+}
+
+.workout-status__last {
+    color: var(--glow-text);
+}
+
+.workout-status__time-left {
+    font-size: 1.1rem;
+    font-variant-numeric: tabular-nums;
+
+    &--nearly-up {
+        color: var(--glow-text);
+    }
+}
+
+// The round's time left is small enough to read in the system's face, with digits of one width
+// so it doesn't shift
+.workout-status__time-left {
+    font-family: var(--font-text);
+    font-weight: 600;
+    letter-spacing: normal;
+}
+
+// The dots and the time left share a row
+.workout-status__progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}

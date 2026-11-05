@@ -1,0 +1,65 @@
+@let line = slide();
+@if (line.set; as set) {
+    <!-- An exercise's sets, or a superset's rounds, and the whole
+                                 workout's round after them when it has more than one -->
+    <p class="text-2xl" [class.workout-status__last]="line.last">
+        @if (line.last) {
+            Last one!
+        } @else {
+            {{ setText(set) }}
+        }
+        @if (line.timeLimited) {
+            · round {{ line.round }}
+        } @else if (line.untilStopped) {
+            · round {{ line.round }} of
+            <span class="symbol-infinity" aria-hidden="true">∞</span>
+            <span class="sr-only">until stopped</span>
+        } @else if (line.totalRounds > 1) {
+            · round {{ line.round }} of {{ line.totalRounds }}
+        }
+    </p>
+    @if (line.timeLimited) {
+        <p
+            class="workout-status__time-left"
+            [class.workout-status__time-left--nearly-up]="line.timeNearlyUp"
+        >
+            {{ line.timeLeft }} left
+        </p>
+    }
+} @else if (line.timeLimited) {
+    <p class="text-2xl">round {{ line.round }}</p>
+    <p
+        class="workout-status__time-left"
+        [class.workout-status__time-left--nearly-up]="line.timeNearlyUp"
+    >
+        {{ line.timeLeft }} left
+    </p>
+} @else if (line.untilStopped) {
+    <p class="text-2xl">
+        round {{ line.round }} of
+        <span class="symbol-infinity" aria-hidden="true">∞</span>
+        <span class="sr-only">until stopped</span>
+    </p>
+} @else if (line.totalRounds > 1) {
+    @if (line.last) {
+        <p class="workout-status__last text-2xl">Last one!</p>
+    } @else {
+        <p class="text-2xl">round {{ line.round }} of {{ line.totalRounds }}</p>
+    }
+}
+<!-- The same count as the round line, as a picture: rounds done, this
+                             one, and those to go; and the time left of a workout of timed steps -->
+@if (line.dots.length || line.totalLeft) {
+    <div class="workout-status__progress">
+        @if (line.dots.length) {
+            <app-round-dots [dots]="line.dots" />
+        }
+        @if (line.totalLeft) {
+            <p class="workout-status__time-left">{{ line.totalLeft }} left</p>
+        }
+    </div>
+}
+<!-- The round's steps in their colours, and which one it's on -->
+@if (line.strip.length) {
+    <app-step-strip [steps]="line.strip" />
+}

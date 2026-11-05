@@ -17,6 +17,21 @@
 // in the system face, so the digits don't shift. Audiowide has no such digits: the workout's
 // countdown gives each one a fixed-width cell instead (ClockDigitsComponent).
 
+// A slid-in page's title, and the line or two under it saying what it's for
+@mixin page-title {
+    margin: 0 0 0.5rem;
+    @include display;
+    font-size: 1.6rem;
+    color: var(--text-strong);
+}
+
+@mixin page-hint {
+    margin: 0 0 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
 @mixin display {
     font-family: var(--font-display);
     font-weight: 400;

@@ -46,7 +46,7 @@ $on-color: var(--glow);
     .toggle-switch--on & {
         border-color: $on-color;
         background: var(--glow-soft);
-        box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+        box-shadow: 0 0 12px color-mix(in srgb, #{$on-color} 30%, transparent);
     }
 }
 

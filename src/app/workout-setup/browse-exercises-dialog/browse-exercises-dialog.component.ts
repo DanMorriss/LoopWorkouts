@@ -13,7 +13,6 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { DialogBackComponent } from '../../shared/components/dialog-back/dialog-back.component';
 import { Exercise, MuscleGroup } from '../../models/exercise';
-import { findByName } from '../../models/exercise-links';
 import {
     exerciseCard,
     ExerciseCardComponent,
@@ -128,13 +127,7 @@ export class BrowseExercisesDialogComponent {
     protected readonly muscles = signal<MuscleGroup[]>([]);
 
     protected readonly cards = computed(() => {
-        const all = this.exercises.exercises();
-        // Hidden ones are left out, unless their name is typed in full
-        const named = findByName(this.query().trim(), all);
-        const shown = all.filter(
-            (exercise) => !this.exercises.isHidden(exercise.id) || exercise === named
-        );
-        return filterExercises(shown, {
+        return filterExercises(this.exercises.shownFor(this.query().trim()), {
             query: this.query(),
             muscles: this.muscles(),
             onlyMine: this.settings.onlyMyEquipment(),

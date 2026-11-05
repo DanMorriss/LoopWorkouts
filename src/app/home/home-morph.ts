@@ -2,6 +2,7 @@ import { ApplicationRef } from '@angular/core';
 import { letInputThrough } from '../nav/let-input-through';
 import { FADING_CLASS } from '../nav/page-slide';
 import { criticallyDampedSpring } from '../shared/spring';
+import { prefersReducedMotion } from '../shared/reduced-motion';
 
 /** On <html> while Today's cards change shape, naming the parts that move. */
 export const HOME_MORPH_CLASS = 'home-morphing';
@@ -25,7 +26,7 @@ export function morphHome(appRef: ApplicationRef, change: () => void) {
         change();
         return;
     }
-    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = prefersReducedMotion();
     const root = document.documentElement;
     const name = reduced ? FADING_CLASS : HOME_MORPH_CLASS;
     root.classList.add(name);

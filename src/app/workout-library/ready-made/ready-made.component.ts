@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { BUILT_IN_WORKOUT_GROUPS, BUILT_IN_WORKOUTS } from '../../models/built-in-workouts';
-import { canDoWith, MUSCLE_LABELS } from '../../models/exercise';
+import { canDoWith, hiddenByEquipmentText, MUSCLE_LABELS } from '../../models/exercise';
 import { MUSCLES_ON_A_CARD, musclesWorked } from '../../models/workout-muscles';
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
 import { PageSlide } from '../../nav/page-slide';
@@ -65,12 +65,7 @@ export class ReadyMadeComponent {
     );
 
     /** How many are hidden by Only what I have, to say so. */
-    protected readonly hiddenText = computed(() => {
-        const hidden = this.cards().length - this.shown().length;
-        if (hidden === 0) {
-            return '';
-        }
-        const them = hidden === 1 ? '1 more needs' : `${hidden} more need`;
-        return `${them} equipment you haven't picked.`;
-    });
+    protected readonly hiddenText = computed(() =>
+        hiddenByEquipmentText(this.cards().length - this.shown().length)
+    );
 }

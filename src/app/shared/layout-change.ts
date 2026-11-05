@@ -1,5 +1,6 @@
 import { afterNextRender, Injector } from '@angular/core';
 import { criticallyDampedSpring } from './spring';
+import { prefersReducedMotion } from './reduced-motion';
 
 /** Names the slides this starts, so a newer change can stop them. */
 const SLIDE = 'layout-change';
@@ -50,7 +51,7 @@ export function captureLayout(root: HTMLElement, selector: string): () => void {
             moved.set(element, { x: was.left - now.left, y: was.top - now.top });
         }
 
-        if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (prefersReducedMotion()) {
             return;
         }
         for (const [element, by] of moved) {

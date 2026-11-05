@@ -1,4 +1,4 @@
-import { formatTime } from '../shared/format-time';
+import { formatSeconds } from '../shared/format-time';
 import { runsUntilStopped, Step, supersetName, Workout } from './workout';
 
 /** One line of a workout written out: a heading, a step, or a superset and its steps. */
@@ -21,7 +21,7 @@ function linkOf(step: Step): Pick<OutlineStep, 'exerciseId'> {
 
 /** "1:30", "0:45": a time as it's written in a plan. */
 function clock(seconds: number): string {
-    return formatTime(Math.floor(seconds / 60), seconds % 60).replace(/^0(?=\d:)/, '');
+    return formatSeconds(seconds).replace(/^0(?=\d:)/, '');
 }
 
 /** A step's name; an unnamed one by its kind, as the history names it: "Work" or "Reps". */

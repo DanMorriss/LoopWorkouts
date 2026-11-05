@@ -37,7 +37,7 @@
 
     :host(.run-bar--past-end) & {
         background: var(--danger-strong);
-        color: #fff;
+        color: var(--on-danger-strong);
     }
 }
 

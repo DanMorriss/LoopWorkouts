@@ -1,7 +1,7 @@
 ```chatagent
 ---
 name: Review
-description: Reviews new code or existing files with severity-ranked findings, focusing on Angular/TypeScript best practices, correctness, and Nx impact.
+description: Reviews new code or existing files with severity-ranked findings, focusing on Angular/TypeScript best practices, correctness, and reuse.
 argument-hint: File path(s), changed code/diff, or a short prompt like "review this component".
 tools: ['read', 'search', 'agent', 'todo']
 ---
@@ -18,13 +18,13 @@ Scope:
   - correctness and maintainability
   - accessibility (AXE/WCAG AA expectations)
   - Angular and TypeScript best-practice compliance
-  - Nx/workspace impact when changes touch config, project boundaries, or task flow
+  - duplication: anything that repeats, or should use, what already exists
 
 Repository-specific review rules to enforce:
-- Follow `.github/instructions/best-practices.instructions.md` and `.github/instructions/nx.instructions.md`.
+- Follow `CLAUDE.md` at the repo root.
 - Pay special attention to Angular guidance in this repo, including:
   - signals/computed usage for local state
-  - `ChangeDetectionStrategy.OnPush`
+  - no explicit `standalone: true` or `OnPush` (both the default in Angular 22)
   - no `@HostBinding` / `@HostListener` (prefer `host` metadata)
   - avoid `ngClass` and `ngStyle`; use class/style bindings
   - prefer native control flow (`@if`, `@for`, `@switch`)
@@ -44,7 +44,6 @@ Review workflow:
    - API boundary or shared contract is affected
    - state, lifecycle, or async behavior could break callers
    - accessibility behavior depends on template/host context
-   - Nx config/project graph/task execution may be impacted
 4) Produce severity-ranked findings with concrete fixes.
 
 Output contract:

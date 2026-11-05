@@ -4,10 +4,11 @@ import { BUILT_IN_PLANS, BuiltInPlan, plansFor } from '../../models/built-in-pla
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { EquipmentFilterComponent } from '../../shared/components/equipment-filter/equipment-filter.component';
-import { ReadyMadePlans } from '../../shared/state/ready-made-plans.service';
+import { ReadyMadePlans, weekPlannedText } from '../../shared/state/ready-made-plans.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { PlanCardComponent } from '../plan-card/plan-card.component';
+import { hiddenByEquipmentText } from '../../models/exercise';
 
 /**
  * The ready-made plans (PLN-6): a week of ready-made workouts each, those for your goal
@@ -71,19 +72,14 @@ export class ReadyMadePlansComponent {
     );
 
     /** How many Only what I have hides, to say so. */
-    protected readonly hiddenText = computed(() => {
-        const hidden = BUILT_IN_PLANS.length - this.plans().length;
-        if (hidden === 0) {
-            return '';
-        }
-        const them = hidden === 1 ? '1 more needs' : `${hidden} more need`;
-        return `${them} equipment you haven't picked.`;
-    });
+    protected readonly hiddenText = computed(() =>
+        hiddenByEquipmentText(BUILT_IN_PLANS.length - this.plans().length)
+    );
 
     /** Uses it, then on to Today to see the week, with Undo there. */
     protected async use(plan: BuiltInPlan) {
         const undo = this.readyMade.use(plan);
         await this.router.navigateByUrl('/home');
-        this.undo.offerUndo({ message: `Your week is planned: ${plan.title}`, undo });
+        this.undo.offerUndo({ message: weekPlannedText(plan), undo });
     }
 }

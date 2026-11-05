@@ -1,4 +1,4 @@
-import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
@@ -13,6 +13,7 @@ import {
 import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
+import { injectFocusAfterRender } from '../shared/focus-after-render';
 
 /** How a planned workout's place this week reads, e.g. "Done". "To come" says nothing. */
 const STATUS_TEXT: Record<PlannedStatus, string> = {
@@ -47,7 +48,7 @@ export class PlanComponent {
     private readonly planStore = inject(PlanStore);
     private readonly workouts = inject(WorkoutStore);
     private readonly history = inject(HistoryStore);
-    private readonly injector = inject(Injector);
+    private readonly focusAfterRender = injectFocusAfterRender();
     private readonly router = inject(Router);
     protected readonly slide = inject(PageSlide);
     private readonly now = Date.now();
@@ -137,9 +138,5 @@ export class PlanComponent {
         this.planStore.remove(day, workoutId);
         this.announcement.set(`${name} taken off ${WEEKDAYS[day]}`);
         this.focusAfterRender(`plan-add-${day}`);
-    }
-
-    private focusAfterRender(id: string) {
-        afterNextRender(() => document.getElementById(id)?.focus(), { injector: this.injector });
     }
 }

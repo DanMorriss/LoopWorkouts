@@ -4,6 +4,7 @@ import { isOnPage } from './current-url';
 import { LeaveCheck } from './leave-check';
 import { letInputThrough } from './let-input-through';
 import { FADING_CLASS } from './page-slide';
+import { prefersReducedMotion } from '../shared/reduced-motion';
 
 /** On <html> while the workout morphs, naming the parts that move. */
 export const MORPHING_CLASS = 'workout-morphing';
@@ -63,7 +64,7 @@ export class WorkoutMorph {
             void this.router.navigateByUrl(url);
             return;
         }
-        const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const reduced = prefersReducedMotion();
         const opening = isOnPage(url, '/workout');
         const classes = reduced
             ? [FADING_CLASS]

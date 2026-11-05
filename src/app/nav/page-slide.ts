@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { spring, springCurve } from '../shared/spring';
 import { LeaveCheck } from './leave-check';
 import { letInputThrough } from './let-input-through';
+import { prefersReducedMotion } from '../shared/reduced-motion';
 
 /** On <html> while a page slides, naming the parts that move. */
 export const SLIDING_CLASS = 'page-sliding';
@@ -97,7 +98,7 @@ export class PageSlide {
         };
         // With reduced motion the pages cross-fade instead, briefly, so it's still clear
         // the page changed
-        const reduced = reducedMotion();
+        const reduced = prefersReducedMotion();
         const slides = !!document.startViewTransition && !reduced;
         const go = async () => {
             await this.router.navigateByUrl(url);
@@ -187,10 +188,6 @@ export class PageSlide {
 
 /** The spring a page slides in on: --ease-spring, a 0.3s response with no bounce. */
 const SLIDE_SPRING = springCurve(0.3);
-
-function reducedMotion(): boolean {
-    return matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
 
 /** A url's page, without its query or fragment. */
 function pathOf(url: string): string {

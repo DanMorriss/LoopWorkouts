@@ -1,13 +1,4 @@
-import {
-    afterNextRender,
-    Component,
-    computed,
-    DOCUMENT,
-    effect,
-    inject,
-    Injector,
-    signal,
-} from '@angular/core';
+import { Component, computed, DOCUMENT, effect, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { PageSlide } from '../nav/page-slide';
@@ -20,6 +11,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { SignInComponent } from './sign-in/sign-in.component';
 import { hasSignInTokens } from './sign-in-landing';
 import { YourDataComponent } from './your-data/your-data.component';
+import { injectFocusAfterRender } from '../shared/focus-after-render';
 
 /**
  * The You tab (SYN-3, SYN-7, SYN-8, SYN-9): signing in (SignInComponent), who's
@@ -43,7 +35,7 @@ export class AccountComponent {
     protected readonly account = inject(AccountService);
     /** Into Settings, the Privacy notice and Terms of use. */
     protected readonly slide = inject(PageSlide);
-    private readonly injector = inject(Injector);
+    private readonly focus = injectFocusAfterRender();
     private readonly document = inject(DOCUMENT);
 
     /** The email signed in with, or empty when no one is. */
@@ -145,12 +137,5 @@ export class AccountComponent {
                 "Your account couldn't be deleted. Check your connection and try again."
             );
         }
-    }
-
-    /** Moves focus to an element once it's on the page. */
-    private focus(id: string) {
-        afterNextRender(() => this.document.getElementById(id)?.focus(), {
-            injector: this.injector,
-        });
     }
 }

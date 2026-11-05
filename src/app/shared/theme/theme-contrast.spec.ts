@@ -70,6 +70,12 @@ for (const theme of ['dark', 'light'] as const) {
             expect(contrastRatio(token('--text-danger'), background)).toBeGreaterThanOrEqual(4.5);
         });
 
+        it('keeps the text on solid red readable', () => {
+            expect(
+                contrastRatio(token('--on-danger-strong'), token('--danger-strong'))
+            ).toBeGreaterThanOrEqual(4.5);
+        });
+
         it('keeps the main button label readable across its whole gradient', () => {
             for (const stop of ['--cta-top', '--cta-bottom']) {
                 expect(contrastRatio(token('--cta-ink'), token(stop))).toBeGreaterThanOrEqual(4.5);

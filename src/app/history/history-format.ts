@@ -2,6 +2,7 @@ import { HistoryEntry, isTimedSet, LoggedSet, RepSet, TimedSet } from '../models
 import { roundsScore, RoundsScore } from '../models/progress';
 import { WeightUnit, weightIn } from '../models/weight';
 import { PlacedHeading, PlacedSuperset } from '../models/workout';
+import { counted } from '../shared/format-count';
 
 /** e.g. 75 → "1:15", 3725 → "1:02:05" */
 export function formatDuration(seconds: number): string {
@@ -16,7 +17,7 @@ export function formatDuration(seconds: number): string {
  * "7 rounds + 3 in 20:00", or "4 rounds · stopped before 20:00"
  */
 export function describeRounds(entry: HistoryEntry): string {
-    const rounds = (n: number) => `${n} ${n === 1 ? 'round' : 'rounds'}`;
+    const rounds = (n: number) => counted(n, 'round');
     if (entry.timeLimitSeconds !== undefined) {
         const limit = formatDuration(entry.timeLimitSeconds);
         const score = roundsScore(entry);
@@ -35,7 +36,7 @@ export function describeRounds(entry: HistoryEntry): string {
 
 /** e.g. "7 rounds + 3": full rounds, and the steps done of the next, if any. */
 export function describeScore({ rounds, steps }: RoundsScore): string {
-    const full = `${rounds} ${rounds === 1 ? 'round' : 'rounds'}`;
+    const full = counted(rounds, 'round');
     return steps > 0 ? `${full} + ${steps}` : full;
 }
 
@@ -244,13 +245,12 @@ function describeTimes(sets: readonly TimedSet[]): Pick<SetsSummary, 'text' | 's
 
 /** e.g. 45 → "45 seconds", 90 → "1 minute 30 seconds", 120 → "2 minutes" */
 export function spokenDuration(seconds: number): string {
-    const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     if (m === 0) {
-        return plural(s, 'second');
+        return counted(s, 'second');
     }
-    return s === 0 ? plural(m, 'minute') : `${plural(m, 'minute')} ${plural(s, 'second')}`;
+    return s === 0 ? counted(m, 'minute') : `${counted(m, 'minute')} ${counted(s, 'second')}`;
 }
 
 // e.g. "3 × 10", "10, 10, 8" or just "10 reps" for one set

@@ -1,11 +1,9 @@
 import {
-    afterNextRender,
     Component,
     computed,
     DestroyRef,
     DOCUMENT,
     inject,
-    Injector,
     input,
     output,
     signal,
@@ -13,6 +11,7 @@ import {
 import { email, form, FormField, pattern, required } from '@angular/forms/signals';
 import { AccountService } from '../account.service';
 import { SIGN_IN_PROVIDERS, SignInProvider } from '../account-client';
+import { injectFocusAfterRender } from '../../shared/focus-after-render';
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple: 'Apple' };
 
@@ -35,7 +34,7 @@ export class SignInComponent {
     readonly signedIn = output<void>();
 
     protected readonly account = inject(AccountService);
-    private readonly injector = inject(Injector);
+    private readonly focus = injectFocusAfterRender();
     private readonly document = inject(DOCUMENT);
 
     /** Where the email was sent, once it has been: then the code is asked for. */
@@ -161,9 +160,4 @@ export class SignInComponent {
     }
 
     /** Moves focus to an element once it's on the page. */
-    private focus(id: string) {
-        afterNextRender(() => this.document.getElementById(id)?.focus(), {
-            injector: this.injector,
-        });
-    }
 }

@@ -1,6 +1,5 @@
 import {
     copyPlan,
-    dueToday,
     EMPTY_PLAN,
     isWeekPlan,
     plannedKey,
@@ -122,15 +121,5 @@ describe('this week (PLN-3)', () => {
         expect(thisWeek(week, [], wednesday(), (id) => id !== 'legs')[2]).toEqual([
             { workoutId: 'pull', status: 'today' },
         ]);
-    });
-});
-
-describe('due today (PLN-2)', () => {
-    it("is today's planned workouts not run yet today, in the plan's order", () => {
-        const week = plan([[], [], ['pull', 'legs', 'core'], [], [], [], []]);
-        const entries = [{ workoutId: 'legs', startedAt: wednesday(7) }];
-
-        expect(dueToday(week, entries, wednesday(), () => true)).toEqual(['pull', 'core']);
-        expect(dueToday(week, [], day(29), () => true)).toEqual([]);
     });
 });

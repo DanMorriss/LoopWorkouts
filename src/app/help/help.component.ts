@@ -15,6 +15,7 @@ import { map } from 'rxjs';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { HELP_SECTIONS, searchTopics } from './help-topics';
+import { counted } from '../shared/format-count';
 
 /**
  * Help (NAV-7): the questions people ask, in sections, each opening to its answer, with a
@@ -53,7 +54,7 @@ export class HelpComponent {
             return '';
         }
         const count = this.sections().reduce((sum, section) => sum + section.topics.length, 0);
-        return count === 0 ? '' : count === 1 ? '1 answer' : `${count} answers`;
+        return count === 0 ? '' : counted(count, 'answer');
     });
 
     constructor() {

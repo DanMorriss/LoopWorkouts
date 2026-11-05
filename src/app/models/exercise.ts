@@ -301,3 +301,23 @@ export const MAX_EXERCISE_NOTE_LENGTH = 200;
 export function exerciseKey(name: string): string {
     return name.trim().replace(/\s+/g, ' ').toLowerCase().replace(/s$/, '');
 }
+
+/**
+ * What tells one exercise from another at a glance: its main muscles and what it needs,
+ * e.g. "Quads, glutes · Barbell, rack". Empty for one of your own with neither yet.
+ */
+export function exerciseHint(exercise: Exercise): string {
+    const muscles = exercise.mainMuscles.map((muscle) => MUSCLE_LABELS[muscle].toLowerCase());
+    return [muscles.join(', '), equipmentPhrases(exercise.equipment).join(', ')]
+        .filter((part) => part !== '')
+        .map(capitalise)
+        .join(' · ');
+}
+
+/** What a list says of those Only what I have hides; empty if it hides none. */
+export function hiddenByEquipmentText(hidden: number): string {
+    if (hidden === 0) {
+        return '';
+    }
+    return `${hidden === 1 ? '1 more needs' : `${hidden} more need`} equipment you haven't picked.`;
+}

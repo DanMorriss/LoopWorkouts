@@ -25,7 +25,6 @@ import {
     runsUntilStopped,
     Side,
     sideName,
-    Step,
     StepKind,
     Workout,
     workoutSeconds,
@@ -47,7 +46,7 @@ import { WorkoutSummaryComponent } from './workout-summary/workout-summary.compo
 import { ClockDigitsComponent } from './clock-digits/clock-digits.component';
 import { AlarmService } from '../shared/alarms/alarm.service';
 import { MatIconModule } from '@angular/material/icon';
-import { formatTime } from '../shared/format-time';
+import { formatSeconds } from '../shared/format-time';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
@@ -64,15 +63,11 @@ import { RoundDot, RoundDotsComponent } from './round-dots/round-dots.component'
 import { StepStripComponent, StripStep } from './step-strip/step-strip.component';
 import { WorkoutNoteComponent } from './workout-note/workout-note.component';
 import { WorkoutRingComponent } from './workout-ring/workout-ring.component';
+import { stepKindName } from '../models/workout';
 
 // Space on one of these already does something, e.g. presses the focused button
 const SPACE_HANDLED_BY =
     'button, a, input, textarea, select, [contenteditable], [role="button"], [role="spinbutton"]';
-
-/** "Timed", "Rest" or "Reps": what an unnamed step is called. */
-function kindName(step: Step): string {
-    return { work: 'Timed', rest: 'Rest', reps: 'Reps' }[step.kind];
-}
 
 /** Which set it is, e.g. "set 2 of 3", or a superset's round, "superset round 2 of 3". */
 function setText(set: GroupSet): string {
@@ -277,7 +272,7 @@ export class WorkoutComponent {
             return '';
         }
         const seconds = Math.ceil(ms / 1000);
-        return formatTime(Math.floor(seconds / 60), seconds % 60);
+        return formatSeconds(seconds);
     });
     /** The last 10 seconds of a time limit, as the countdown beeps. */
     timeNearlyUp = computed(() => {
@@ -302,7 +297,7 @@ export class WorkoutComponent {
             return '';
         }
         const seconds = Math.max(0, Math.ceil(workoutSeconds(workout) - elapsedMs / 1000));
-        return formatTime(Math.floor(seconds / 60), seconds % 60);
+        return formatSeconds(seconds);
     });
     /** The round in progress, counting from 1. */
     roundNumber = computed(() => (this.state()?.round ?? 0) + 1);
@@ -350,7 +345,7 @@ export class WorkoutComponent {
      */
     stepLabel = computed(() => {
         const step = this.state()?.step;
-        return step?.name || (step && step.kind !== 'work' ? kindName(step) : '');
+        return step?.name || (step && step.kind !== 'work' ? stepKindName(step.kind) : '');
     });
     /** "Left side" or "Right side" for a step done each side (BLD-10), or ''. */
     sideLabel = computed(() => {
@@ -441,12 +436,12 @@ export class WorkoutComponent {
         const side = workout && this.secondSide(workout, next.stepIndex);
         const name = side
             ? sideName(side)
-            : `${step.name || kindName(step)}${set ? ` · ${setText(set)}` : ''}`;
+            : `${step.name || stepKindName(step.kind)}${set ? ` · ${setText(set)}` : ''}`;
         if (step.kind === 'reps') {
             const weight = this.weightText(step);
             return `${name} · ${step.reps} reps${weight ? ` @ ${weight}` : ''}`;
         }
-        return `${name} · ${formatTime(Math.floor(step.seconds / 60), step.seconds % 60)}`;
+        return `${name} · ${formatSeconds(step.seconds)}`;
     });
 
     /**
@@ -650,9 +645,7 @@ export class WorkoutComponent {
     });
 
     private readonly remaining = computed(() => this.state()?.remainingSeconds ?? 0);
-    private readonly time = computed(() =>
-        formatTime(Math.floor(this.remaining() / 60), this.remaining() % 60)
-    );
+    private readonly time = computed(() => formatSeconds(this.remaining()));
 
     /** How many rounds the workout runs for (0 when it runs until stopped or to a time limit). */
     totalRounds = computed(() => (this.untilStopped() ? 0 : (this.workout()?.repeats ?? 0)));
@@ -748,7 +741,7 @@ export class WorkoutComponent {
                 : '';
             parts.push([section.heading, count].filter(Boolean).join(', '));
         }
-        parts.push(state.step.name || kindName(state.step));
+        parts.push(state.step.name || stepKindName(state.step.kind));
         if (this.sideLabel()) {
             parts.push(this.sideLabel().toLowerCase());
         }

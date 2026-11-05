@@ -39,7 +39,7 @@
 
     :host(.workout-card--past-delete) & {
         background: var(--danger-strong);
-        color: #fff;
+        color: var(--on-danger-strong);
     }
 }
 

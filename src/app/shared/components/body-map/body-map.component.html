@@ -56,11 +56,11 @@
         <ul class="body-map__labels" [attr.aria-labelledby]="id + '-main'">
             @for (muscle of mainList(); track muscle) {
                 <li class="body-map__label body-map__label--main">
-                    @if (linkLabels()) {
+                    @if (linksFrom(); as from) {
                         <a
                             class="body-map__link"
-                            routerLink="/exercises"
-                            [queryParams]="{ muscles: muscle }"
+                            [href]="exercisesUrl(muscle, from)"
+                            (click)="slide.follow($event, exercisesUrl(muscle, from), 'in')"
                             >{{ muscleLabel(muscle) }}</a
                         >
                     } @else {
@@ -87,11 +87,11 @@
         <ul class="body-map__labels" [attr.aria-labelledby]="id + '-supporting'">
             @for (muscle of supportingList(); track muscle) {
                 <li class="body-map__label body-map__label--supporting">
-                    @if (linkLabels()) {
+                    @if (linksFrom(); as from) {
                         <a
                             class="body-map__link"
-                            routerLink="/exercises"
-                            [queryParams]="{ muscles: muscle }"
+                            [href]="exercisesUrl(muscle, from)"
+                            (click)="slide.follow($event, exercisesUrl(muscle, from), 'in')"
                             >{{ muscleLabel(muscle) }}</a
                         >
                     } @else {

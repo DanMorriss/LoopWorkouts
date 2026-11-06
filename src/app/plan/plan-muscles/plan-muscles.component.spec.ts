@@ -90,7 +90,7 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                 'Biceps Forearms Abs Obliques Traps Upper back Abductors Calves Shins Neck'
             );
             expect(el('.plan-muscles__muscle')?.getAttribute('href')).toBe(
-                '/exercises?muscles=biceps'
+                '/exercises?muscles=biceps&from=plan'
             );
         });
 
@@ -99,8 +99,8 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                 (fixture.nativeElement as HTMLElement).querySelectorAll('.body-map__link'),
                 (a) => [a.textContent!.trim(), a.getAttribute('href')]
             );
-            expect(links).toContainEqual(['Chest', '/exercises?muscles=chest']);
-            expect(links).toContainEqual(['Triceps', '/exercises?muscles=triceps']);
+            expect(links).toContainEqual(['Chest', '/exercises?muscles=chest&from=plan']);
+            expect(links).toContainEqual(['Triceps', '/exercises?muscles=triceps&from=plan']);
             expect(fixture.nativeElement.querySelectorAll('.plan-muscles__list')).toHaveLength(1);
             expect(fixture.nativeElement.textContent).not.toContain('Only lightly');
         });

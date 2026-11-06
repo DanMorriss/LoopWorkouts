@@ -11,6 +11,7 @@ import {
     WorkoutChoiceDialogComponent,
 } from '../../shared/components/workout-choice-dialog/workout-choice-dialog.component';
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
+import { listBackLink } from '../list-from';
 import { PageSlide } from '../../nav/page-slide';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { BUILT_IN_WORKOUTS } from '../../models/built-in-workouts';
@@ -98,10 +99,15 @@ export class ExercisePageComponent {
                 label: this.workouts.findAnyWorkout(workoutId)?.title.trim() || 'Workout',
             };
         }
+        // Back to the list as it was: its muscles, and where it was opened from (`?from=plan`)
+        const from = queryParamMap.get('from');
         return {
             url: this.router.serializeUrl(
                 this.router.createUrlTree(['/exercises'], {
-                    queryParams: this.musclesQuery ? { muscles: this.musclesQuery } : {},
+                    queryParams: {
+                        ...(this.musclesQuery ? { muscles: this.musclesQuery } : {}),
+                        ...(listBackLink(from) ? { from } : {}),
+                    },
                 })
             ),
             label: 'Exercises',

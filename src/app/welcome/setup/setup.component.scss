@@ -2,6 +2,10 @@
 @use 'interaction' as *;
 @use 'type' as *;
 
+// How much of the screen the buttons cover, as far as the page scrolling under them goes;
+// html's scroll-padding-bottom (styles.scss) keeps what's focused clear of them too
+$footer-height: 8rem;
+
 :host {
     display: block;
 }
@@ -9,6 +13,8 @@
 .setup {
     display: flex;
     flex-direction: column;
+    // Room to scroll the last of a question clear of the buttons
+    padding-bottom: $footer-height;
 }
 
 .setup__checking {
@@ -136,11 +142,29 @@
     margin: 1rem auto 0;
 }
 
+// The page fades out under the buttons, rather than running sharp up to them
+.setup__footer {
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem max(1rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom))
+        max(1rem, env(safe-area-inset-left));
+    background: linear-gradient(to top, var(--page-bg) calc(100% - 1.5rem), transparent);
+}
+
+.setup__footer-buttons {
+    display: flex;
+    flex-direction: column;
+}
+
 .setup__actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1.5rem;
 }
 
 .setup__skip {

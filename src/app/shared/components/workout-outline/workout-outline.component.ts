@@ -3,16 +3,17 @@ import { Component, computed, inject, input } from '@angular/core';
 import { Workout } from '../../../models/workout';
 import { outline, repeatsText } from '../../../models/workout-outline';
 import { PageSlide } from '../../../nav/page-slide';
+import { IconComponent } from '../icon/icon.component';
 
 /**
  * A workout written out to read: how many times it goes round, then its headings, each
  * exercise with its sets, and each superset with its rounds and steps. In a ready-made
  * workout's preview (LIB-6) and a workout's details (LIB-4), where `exerciseUrl` makes each
- * exercise a link to its page, sliding in.
+ * exercise a link to its page, sliding in, with a › to show it is on a phone.
  */
 @Component({
     selector: 'app-workout-outline',
-    imports: [NgTemplateOutlet],
+    imports: [IconComponent, NgTemplateOutlet],
     template: `
         <ng-template #name let-step>
             @if (urlOf(step.exerciseId); as url) {
@@ -20,7 +21,7 @@ import { PageSlide } from '../../../nav/page-slide';
                     class="outline__name outline__link"
                     [href]="url"
                     (click)="slide.follow($event, url, 'in')"
-                    >{{ step.name }}</a
+                    >{{ step.name }} <app-icon class="outline__chevron">chevron_right</app-icon></a
                 >
             } @else {
                 <span class="outline__name">{{ step.name }}</span>
@@ -28,7 +29,7 @@ import { PageSlide } from '../../../nav/page-slide';
         </ng-template>
 
         <p class="outline__repeats">{{ repeats() }}</p>
-        <ul class="outline__lines">
+        <ul class="outline__lines" [class.outline__lines--links]="exerciseUrl()">
             @for (line of lines(); track $index) {
                 @switch (line.kind) {
                     @case ('heading') {

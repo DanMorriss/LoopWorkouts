@@ -73,7 +73,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             text(line)
         );
         // An unnamed step goes by its kind, as in the history
-        expect(lines).toEqual(['Main', 'Back squat 3 × 10, rest 1:00', 'Work 0:30']);
+        expect(lines).toEqual(['Main', 'Back squat chevron_right 3 × 10, rest 1:00', 'Work 0:30']);
     });
 
     it('links each exercise with a page, sliding it in under this workout', async () => {
@@ -107,8 +107,9 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         const links = Array.from(el().querySelectorAll<HTMLAnchorElement>('.outline__link'));
 
         expect(links.map((a) => [text(a), a.getAttribute('href')])).toEqual([
-            ['Plank', `/library/${legs.id}/plank`],
-            ['Back squat', `/library/${legs.id}/back-squat`],
+            // Each with a › (an icon font's ligature) to show it can be pressed
+            ['Plank chevron_right', `/library/${legs.id}/plank`],
+            ['Back squat chevron_right', `/library/${legs.id}/back-squat`],
         ]);
         const slide = vi.spyOn(TestBed.inject(PageSlide), 'navigate').mockImplementation(() => {});
         links[0].click();

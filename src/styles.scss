@@ -312,6 +312,11 @@ body {
     color: var(--text);
 }
 
+// The setup's buttons stay over the bottom of the screen, so what's focused stays clear of them
+html:has(.setup__footer) {
+    scroll-padding-bottom: 8rem;
+}
+
 // The page's glow, painted on a layer fixed to the screen rather than with
 // background-attachment: fixed, which iPhones ignore: there the gradient repeated every
 // screen height and left a visible line part way down a long page

@@ -23,6 +23,20 @@
         padding-left: 0.6rem;
         border-left: 2px solid var(--border-soft);
     }
+
+    // Each amount leaves room for a ›, so they line up whether or not their line has one
+    &--links // The › at the end of a linked line, in the middle of it however many lines its name takes
+.outline__chevron {
+        position: absolute;
+        top: 50%;
+        right: -0.25rem;
+        color: var(--text-muted);
+        transform: translateY(-50%);
+    }
+
+    .outline__amount {
+        padding-right: 1.25rem;
+    }
 }
 
 // A part of the workout, as its heading reads in Create

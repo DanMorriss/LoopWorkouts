@@ -1,6 +1,7 @@
 import { ApplicationRef, inject, Service } from '@angular/core';
 import { Router } from '@angular/router';
 import { spring, springCurve } from '../shared/spring';
+import { pathOf } from './current-url';
 import { LeaveCheck } from './leave-check';
 import { letInputThrough } from './let-input-through';
 import { prefersReducedMotion } from '../shared/reduced-motion';
@@ -188,11 +189,6 @@ export class PageSlide {
 
 /** The spring a page slides in on: --ease-spring, a 0.3s response with no bounce. */
 const SLIDE_SPRING = springCurve(0.3);
-
-/** A url's page, without its query or fragment. */
-function pathOf(url: string): string {
-    return url.split(/[?#]/)[0];
-}
 
 /** The page the router is showing: the element it puts after its outlet in <main>. */
 function routedPage(): HTMLElement | null {

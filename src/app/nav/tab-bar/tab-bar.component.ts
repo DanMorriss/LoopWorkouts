@@ -1,6 +1,6 @@
 import { Component, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { injectCurrentUrl, isOnPage } from '../current-url';
+import { injectCurrentUrl, isOnPage, pathOf } from '../current-url';
 import { TABS } from './tabs';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 
@@ -39,6 +39,6 @@ export class TabBarComponent {
         if (index !== this.chosen()) {
             return null;
         }
-        return this.url().split(/[?#]/)[0] === TABS[index].path ? 'page' : 'true';
+        return pathOf(this.url()) === TABS[index].path ? 'page' : 'true';
     }
 }

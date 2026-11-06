@@ -1,5 +1,11 @@
 @let muscles = planMuscles();
 @if (muscles.hasExercises) {
+    <!-- What the week works, as a workout's details shows its own -->
+    <section class="plan-muscles" aria-labelledby="plan-works-title">
+        <h3 id="plan-works-title" class="plan-muscles__title">What your plan works</h3>
+        <app-body-map [main]="muscles.main" [supporting]="muscles.supporting" />
+    </section>
+
     <section class="plan-muscles" aria-labelledby="plan-muscles-title">
         <h3 id="plan-muscles-title" class="plan-muscles__title">Missing muscle groups</h3>
         @if (muscles.missed.length === 0 && muscles.light.length === 0) {

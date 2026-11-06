@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { RouterLink } from '@angular/router';
 import { builtInWorkoutEquipment } from '../../models/built-in-workouts';
 import { canDoWith, MUSCLE_LABELS, MuscleGroup } from '../../models/exercise';
@@ -18,14 +19,15 @@ import { MAX_WORKOUTS_A_DAY, WEEKDAYS } from '../../models/plan';
 import { injectFocusAfterRender } from '../../shared/focus-after-render';
 
 /**
- * At the foot of the Plan page (LIB-5): the muscle groups the workouts in the plan don't work
- * at all, and those they only work as a supporting muscle, each linking to the Exercises list
- * cut down to it; then a ready-made workout that does most for them (LIB-7), to plan on a day as
- * it is. Nothing while no planned step is an exercise.
+ * At the foot of the Plan page: what the week's planned workouts work, on the body map; then
+ * (LIB-5) the muscle groups they don't work at all, and those they only work as a supporting
+ * muscle, each linking to the Exercises list cut down to it; then a ready-made workout that
+ * does most for them (LIB-7), to plan on a day as it is. Nothing while no planned step is an
+ * exercise.
  */
 @Component({
     selector: 'app-plan-muscles',
-    imports: [MatIconModule, RouterLink, WorkoutChoiceDialogComponent],
+    imports: [BodyMapComponent, MatIconModule, RouterLink, WorkoutChoiceDialogComponent],
     templateUrl: './plan-muscles.component.html',
     styleUrl: './plan-muscles.component.scss',
 })
@@ -55,6 +57,8 @@ export class PlanMusclesComponent {
             muscles.map((id) => ({ id, label: MUSCLE_LABELS[id] }));
         return {
             hasExercises: worked.hasExercises,
+            main: worked.main,
+            supporting: worked.supporting,
             missed: named(musclesMissed(worked)),
             light: named(worked.supporting),
         };

@@ -6,7 +6,7 @@
         <p class="plan-muscles__text">
             Supporting ones are only worked lightly. Pick a muscle to find exercises for it.
         </p>
-        <app-body-map [main]="muscles.main" [supporting]="muscles.supporting" [linkLabels]="true" />
+        <app-body-map [main]="muscles.main" [supporting]="muscles.supporting" linksFrom="plan" />
     </section>
 
     <section class="plan-muscles" aria-labelledby="plan-muscles-title">
@@ -22,8 +22,8 @@
                     <li>
                         <a
                             class="btn-pill plan-muscles__muscle"
-                            routerLink="/exercises"
-                            [queryParams]="{ muscles: muscle.id }"
+                            [href]="exercisesUrl(muscle.id)"
+                            (click)="slide.follow($event, exercisesUrl(muscle.id), 'in')"
                             >{{ muscle.label }}</a
                         >
                     </li>

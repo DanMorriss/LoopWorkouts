@@ -18,6 +18,9 @@ import { dateFormatFor, headlineBest } from './progress-format';
 import { blankOwnExercise, ExerciseStore } from '../shared/state/exercise-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { parseMusclesParam, serialiseMusclesParam } from './muscle-filter-query';
+import { listBackLink } from './list-from';
+import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import {
     CardProgress,
     exerciseCard,
@@ -42,6 +45,8 @@ import { SearchFieldComponent } from '../shared/components/search-field/search-f
         ExerciseEditorComponent,
         ExerciseCardComponent,
         MuscleChipsComponent,
+        BackLinkComponent,
+        SwipeBackDirective,
     ],
     templateUrl: './exercise-list.component.html',
     styleUrl: './exercise-list.component.scss',
@@ -56,9 +61,16 @@ export class ExerciseListComponent {
     protected readonly query = signal('');
     /** Main muscles the list is cut down to, or empty for all. */
     protected readonly selectedMuscles = signal<MuscleGroup[]>([]);
+    /** Opened from another page's muscle (`?from=plan`), which ‹ goes back to; else null. */
+    private readonly from = this.route.snapshot.queryParamMap.get('from');
+    protected readonly back = listBackLink(this.from);
+    /** What an exercise's page keeps, to come back to the list as it is: its muscles and `from`. */
     protected readonly muscleQueryParams = computed(() => {
         const muscles = serialiseMusclesParam(this.selectedMuscles());
-        return muscles ? { muscles } : {};
+        return {
+            ...(muscles ? { muscles } : {}),
+            ...(this.back && this.from ? { from: this.from } : {}),
+        };
     });
     protected readonly hiddenOpen = signal(false);
     /** A blank exercise of your own in the editor, made when it's saved. */

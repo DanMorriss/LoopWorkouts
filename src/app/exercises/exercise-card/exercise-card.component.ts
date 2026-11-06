@@ -41,7 +41,7 @@ export interface CardProgress {
 export function exerciseCard(
     exercise: Exercise,
     otherName?: string,
-    queryParams: { muscles?: string } = {}
+    queryParams: { muscles?: string; from?: string } = {}
 ): ExerciseCard {
     return {
         exercise,

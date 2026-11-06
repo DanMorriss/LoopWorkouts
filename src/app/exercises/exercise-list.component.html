@@ -1,5 +1,9 @@
-<div class="flex justify-center">
+<!-- Opened from another page's muscle, ‹ and a swipe right go back there -->
+<div class="flex justify-center" [appSwipeBack]="back?.url ?? ''" [swipeBackDisabled]="!back">
     <div class="w-full max-w-md p-4">
+        @if (back; as back) {
+            <app-back-link [url]="back.url" [label]="back.label" />
+        }
         <div class="exercises__top">
             <h2 class="exercises__title">Exercises</h2>
             <button

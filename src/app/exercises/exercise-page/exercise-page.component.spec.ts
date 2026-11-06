@@ -62,6 +62,14 @@ describe('ExercisePageComponent', () => {
         await render();
     };
 
+    it('goes back to the list as it was, the Plan page it came from included', async () => {
+        await open('/exercises/back-squat?muscles=quads&from=plan');
+
+        expect(el().querySelector('.back-link')!.getAttribute('href')).toBe(
+            '/exercises?muscles=quads&from=plan'
+        );
+    });
+
     describe("from a ready-made plan's workout", () => {
         it('goes back to it, keeping where that goes back to', async () => {
             await open('/ready-made-plans/gym-legs/back-squat?from=today');

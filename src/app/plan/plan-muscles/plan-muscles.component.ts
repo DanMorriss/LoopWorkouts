@@ -1,9 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
-import { RouterLink } from '@angular/router';
 import { builtInWorkoutEquipment } from '../../models/built-in-workouts';
-import { canDoWith, MUSCLE_LABELS } from '../../models/exercise';
+import { canDoWith, MUSCLE_LABELS, MuscleGroup } from '../../models/exercise';
+import { PageSlide } from '../../nav/page-slide';
 import { listMuscles, workoutToFillGaps } from '../../models/fill-gaps';
 import { Workout } from '../../models/workout';
 import { musclesMissed, musclesWorked } from '../../models/workout-muscles';
@@ -27,7 +27,7 @@ import { injectFocusAfterRender } from '../../shared/focus-after-render';
  */
 @Component({
     selector: 'app-plan-muscles',
-    imports: [BodyMapComponent, MatIconModule, RouterLink, WorkoutChoiceDialogComponent],
+    imports: [BodyMapComponent, MatIconModule, WorkoutChoiceDialogComponent],
     templateUrl: './plan-muscles.component.html',
     styleUrl: './plan-muscles.component.scss',
 })
@@ -37,6 +37,13 @@ export class PlanMusclesComponent {
     private readonly exercises = inject(ExerciseStore);
     private readonly settings = inject(SettingsStore);
     private readonly focusAfterRender = injectFocusAfterRender();
+    protected readonly slide = inject(PageSlide);
+
+    /** The Exercises list cut down to `muscle`, with ‹ back here. */
+    protected exercisesUrl(muscle: MuscleGroup): string {
+        return `/exercises?muscles=${muscle}&from=plan`;
+    }
+
     /** Picking the day to plan the suggestion on. */
     protected readonly choosingDay = signal(false);
 

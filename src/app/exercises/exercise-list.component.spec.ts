@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { BUILT_IN_EXERCISES } from '../models/built-in-exercises';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { HistoryStore } from '../shared/state/history-store.service';
@@ -310,4 +311,44 @@ describe('ExerciseListComponent', () => {
         expect(progress).toContain('Best 100 kg');
         expect(el().querySelectorAll('.exercise-card__progress').length).toBe(1);
     });
+});
+
+describe('ExerciseListComponent, opened from the Plan page (PLN-1)', () => {
+    beforeEach(() => {
+        localStorage.clear();
+        TestBed.configureTestingModule({
+            providers: [
+                provideRouter([
+                    { path: 'plan', children: [] },
+                    { path: 'exercises', component: ExerciseListComponent },
+                ]),
+            ],
+        });
+    });
+    afterEach(() => localStorage.clear());
+
+    async function open(url: string) {
+        const harness = await RouterTestingHarness.create();
+        await harness.navigateByUrl(url);
+        harness.fixture.detectChanges();
+        await harness.fixture.whenStable();
+        return harness.routeNativeElement!;
+    }
+
+    it('goes back to it with ‹ Plan, and keeps it in the links to exercises', async () => {
+        const page = await open('/exercises?muscles=triceps&from=plan');
+
+        const back = page.querySelector('.back-link')!;
+        expect(back.textContent).toContain('Plan');
+        expect(back.getAttribute('href')).toBe('/plan');
+        const card = page.querySelector<HTMLAnchorElement>('app-exercise-card a')!;
+        expect(card.getAttribute('href')).toMatch(/\?muscles=triceps&from=plan$/);
+    });
+
+    it.each(['/exercises', '/exercises?from=elsewhere'])(
+        "has no ‹ at %s, as a tab of its own or from a page it doesn't know",
+        async (url) => {
+            expect((await open(url)).querySelector('.back-link')).toBeNull();
+        }
+    );
 });

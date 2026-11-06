@@ -14,6 +14,10 @@ describe('profile (NAV-4)', () => {
         expect(
             readProfile({ ...profile, myEquipment: ['kettlebell', 'jetpack', 'barbell'] })
         ).toEqual({ ...profile, myEquipment: ['barbell', 'kettlebell'] });
+        expect(readProfile({ ...profile, myEquipment: ['none'] })).toEqual({
+            ...profile,
+            myEquipment: ['none'],
+        });
     });
 
     it("doesn't read a broken one", () => {

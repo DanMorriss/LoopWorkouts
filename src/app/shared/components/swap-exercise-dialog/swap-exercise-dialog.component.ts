@@ -1,7 +1,13 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DialogComponent } from '../dialog/dialog.component';
-import { Equipment, Exercise, exerciseHint, MeasuredBy } from '../../../models/exercise';
+import {
+    Equipment,
+    Exercise,
+    exerciseHint,
+    hasNoEquipment,
+    MeasuredBy,
+} from '../../../models/exercise';
 import { searchExercises } from '../../../models/exercise-links';
 import { swapSuggestions } from './swap-suggestions';
 import { ExerciseStore } from '../../state/exercise-store.service';
@@ -124,9 +130,11 @@ export class SwapExerciseDialogComponent {
             ? counted(this.found().length, 'match', 'matches')
             : this.beyondMyEquipment()
               ? 'Same muscles, needing other equipment'
-              : this.myEquipment().length
-                ? 'Same muscles, with your equipment'
-                : 'Same muscles'
+              : hasNoEquipment(this.myEquipment())
+                ? 'Same muscles, needing no equipment'
+                : this.myEquipment().length
+                  ? 'Same muscles, with your equipment'
+                  : 'Same muscles'
     );
     protected readonly emptyText = computed(() =>
         this.searching()

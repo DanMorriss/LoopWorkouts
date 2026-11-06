@@ -4,6 +4,7 @@ import { EquipmentChipsComponent } from '../equipment-chips/equipment-chips.comp
 import { SettingsStore } from '../../state/settings-store.service';
 import { ToggleSwitchComponent } from '../toggle-switch/toggle-switch.component';
 import { counted } from '../../format-count';
+import { hasNoEquipment } from '../../../models/exercise';
 
 /**
  * Only what I have, a switch, with the equipment you have under it, opening as chips to pick
@@ -57,11 +58,11 @@ export class EquipmentFilterComponent {
     protected readonly open = signal(false);
 
     protected readonly summary = computed(() => {
-        const count = this.settings.myEquipment().length;
-        if (count === 0) {
-            return 'none';
+        const mine = this.settings.myEquipment();
+        if (hasNoEquipment(mine)) {
+            return 'no equipment';
         }
-        return counted(count, 'piece');
+        return mine.length ? counted(mine.length, 'piece') : 'none picked';
     });
 
     protected setOnlyMine(only: boolean) {

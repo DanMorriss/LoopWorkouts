@@ -24,7 +24,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 **Equipment filters**
 
-- [ ] **A "No equipment" option** (Dan, 2026-11-06): someone with no equipment has no way to say so, or to show only exercises and workouts that need none. Add it to the equipment chips (`equipment-chips`), both where you pick what you have (the setup's equipment question, NAV-4, and My equipment) and in the filters that use them (`equipment-filter`, on Exercises, Workouts and the ready-made workouts). Today, Only what I have with nothing picked does show only what needs nothing, but nothing says so, and picking nothing reads as not having answered. Decide how it sits with the other chips: picking it likely clears them, and picking a piece clears it. Update `docs/features/settings.md` and `exercises.md`.
+- [x] **A "No equipment" option** (2026-11-06): first in the equipment chips, in the setup and My equipment, so on Exercises, Workouts and the ready-made plans. Saved as `["none"]`, apart from none picked; picking it takes the pieces off, and a piece takes it off.
 
 **During a workout**
 

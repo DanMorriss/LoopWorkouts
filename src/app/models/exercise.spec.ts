@@ -1,5 +1,12 @@
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
-import { canDoWith, capitalise, equipmentPhrases, exercisePath } from './exercise';
+import {
+    canDoWith,
+    capitalise,
+    equipmentPhrases,
+    exercisePath,
+    hasNoEquipment,
+    readMyEquipment,
+} from './exercise';
 
 describe('canDoWith', () => {
     it('needs every piece of equipment an exercise lists', () => {
@@ -81,5 +88,29 @@ describe('exercisePath', () => {
 
         expect(exercisePath(backSquat)).toBe('/exercises/back-squat');
         expect(exercisePath({ ...backSquat, id: 'abc' } as never)).toBe('/exercises/abc');
+    });
+});
+
+describe('readMyEquipment', () => {
+    it('keeps the pieces in the order they are offered, leaving out any not known', () => {
+        expect(readMyEquipment(['rack', 'jetpack', 'barbell'])).toEqual(['barbell', 'rack']);
+    });
+
+    it('keeps No equipment on its own, and drops it beside a piece', () => {
+        expect(readMyEquipment(['none'])).toEqual(['none']);
+        expect(readMyEquipment(['none', 'band'])).toEqual(['band']);
+        expect(readMyEquipment([])).toEqual([]);
+        expect(readMyEquipment('none')).toBeNull();
+    });
+
+    it('tells No equipment apart from none picked', () => {
+        expect(hasNoEquipment(['none'])).toBe(true);
+        expect(hasNoEquipment([])).toBe(false);
+        expect(hasNoEquipment(['band'])).toBe(false);
+    });
+
+    it('with No equipment, allows only what needs nothing', () => {
+        expect(canDoWith({ equipment: ['none'] }, ['none'])).toBe(true);
+        expect(canDoWith({ equipment: ['band'] }, ['none'])).toBe(false);
     });
 });

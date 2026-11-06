@@ -193,6 +193,35 @@ describe('ExerciseListComponent', () => {
         expect(names()).not.toContain('Back squat');
     });
 
+    it('shows only what needs nothing with No equipment, which a piece takes off', async () => {
+        await create();
+        el().querySelector<HTMLButtonElement>('.kit__edit')!.click();
+        await render();
+        const kit = () => el().querySelector('.kit__edit')!.textContent!.replace(/\s+/g, ' ');
+        expect(kit()).toContain('My equipment: none picked');
+
+        button('No equipment').click();
+        el().querySelector<HTMLButtonElement>('[role="switch"]')!.click();
+        await render();
+
+        const settings = TestBed.inject(SettingsStore);
+        expect(settings.myEquipment()).toEqual(['none']);
+        expect(kit()).toContain('My equipment: no equipment');
+        expect(button('No equipment').getAttribute('aria-pressed')).toBe('true');
+        expect(names()).toContain('Push-up');
+        expect(names()).not.toContain('Pull-up');
+
+        button('Pull-up bar').click();
+        await render();
+        expect(settings.myEquipment()).toEqual(['pull-up bar']);
+        expect(button('No equipment').getAttribute('aria-pressed')).toBe('false');
+
+        button('No equipment').click();
+        await render();
+        expect(settings.myEquipment()).toEqual(['none']);
+        expect(button('Pull-up bar').getAttribute('aria-pressed')).toBe('false');
+    });
+
     it('offers to clear the filters when nothing matches', async () => {
         await create();
         await search('zzz');

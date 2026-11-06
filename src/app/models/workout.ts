@@ -1,3 +1,4 @@
+import type { BuiltInWorkout } from './built-in-workouts';
 import { Synced } from './sync';
 
 export type TimedKind = 'work' | 'rest';
@@ -151,6 +152,35 @@ export interface Workout extends Synced {
  * what's set on Workouts rather than in Create (whether it's a favourite).
  */
 export type WorkoutFields = Omit<Workout, 'id' | 'updatedAt' | 'favourite'>;
+
+/**
+ * A ready-made workout (LIB-6) as the list has it, alongside yours: used as it is, never
+ * saved, so it's dated 0, and a favourite when it's been made one.
+ */
+export type ReadyMadeWorkout = BuiltInWorkout & Pick<Workout, 'updatedAt' | 'favourite'>;
+
+/** Whether a workout's id is a ready-made one's (LIB-6), which are `builtin:<its name>`. */
+export function isReadyMadeId(id: string): boolean {
+    return id.startsWith('builtin:');
+}
+
+/** Whether a workout is a ready-made one, which can't be changed or deleted. */
+export function isReadyMade(workout: Workout): workout is ReadyMadeWorkout {
+    return isReadyMadeId(workout.id);
+}
+
+/**
+ * The workouts A to Z by title, ignoring case, with "Untitled workout" for one with none, as
+ * the list shows it (LIB-3); on a tie, yours before a ready-made one.
+ */
+export function aToZ<T extends Workout>(workouts: readonly T[]): T[] {
+    const title = (workout: Workout) => workout.title.trim() || 'Untitled workout';
+    return [...workouts].sort(
+        (a, b) =>
+            title(a).localeCompare(title(b), undefined, { sensitivity: 'base' }) ||
+            Number(isReadyMade(a)) - Number(isReadyMade(b))
+    );
+}
 
 /** The `repeats` value for a workout that keeps going until it's stopped. */
 export const UNTIL_STOPPED = 0;

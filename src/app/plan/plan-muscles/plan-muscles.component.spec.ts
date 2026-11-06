@@ -6,7 +6,6 @@ import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { makeWorkout as baseWorkout, reps, SimpleWorkout } from '../../shared/testing/make-workout';
-import { UndoService } from '../../shared/undo/undo.service';
 import { PlanMusclesComponent } from './plan-muscles.component';
 
 function makeWorkout(overrides: Partial<SimpleWorkout> = {}): WorkoutFields {
@@ -87,9 +86,14 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
         describe('a ready-made workout for them', () => {
             const suggested = () => el('.plan-muscles__filler-name')?.textContent!.trim();
 
+            beforeEach(async () => {
+                await store.readyMadeLoaded;
+                fixture.detectChanges();
+            });
+
             it('suggests the one that does most for them, saying what it adds', () => {
                 expect(el('.plan-muscles__filler-label')?.textContent?.trim()).toBe(
-                    'Or add a ready-made workout for them, then plan it:'
+                    'Or plan a ready-made workout for them:'
                 );
                 expect(suggested()).toBe('Gym extras');
                 expect(el('.plan-muscles__filler-fills')?.textContent?.trim()).toBe(
@@ -97,24 +101,29 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                 );
             });
 
-            it('adds it to your workouts with Undo, then suggests another', () => {
+            it('plans it as it is on the day picked, then suggests another', async () => {
                 el('.plan-muscles__filler-add')!.click();
                 fixture.detectChanges();
-
-                expect(store.workouts().map((w) => w.title)).toEqual([
-                    'Legs',
-                    'Push',
-                    'Arms',
-                    'Gym extras',
-                ]);
-                expect(TestBed.inject(UndoService).offer()?.message).toBe(
-                    'Added "Gym extras" to your workouts'
+                const days = Array.from(
+                    document.querySelectorAll<HTMLButtonElement>('.choice__choice')
                 );
-                expect(suggested()).not.toBe('Gym extras');
-
-                TestBed.inject(UndoService).undo();
+                expect(days.map((day) => day.querySelector('.choice__name')!.textContent)).toEqual([
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                    'Sunday',
+                ]);
+                days[3].click();
                 fixture.detectChanges();
-                expect(suggested()).toBe('Gym extras');
+                await fixture.whenStable();
+
+                expect(plan.plan().days[3]).toEqual(['builtin:gym-extras']);
+                // Not copied: it's planned as it is
+                expect(store.workouts().map((w) => w.title)).toEqual(['Legs', 'Push', 'Arms']);
+                expect(suggested()).not.toBe('Gym extras');
             });
 
             it('with Only what I have on, suggests only what your equipment allows', () => {

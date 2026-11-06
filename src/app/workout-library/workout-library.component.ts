@@ -1,5 +1,3 @@
-import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
-import { DropSpring } from '../shared/drop-spring';
 import { PageSlide } from '../nav/page-slide';
 import {
     afterNextRender,
@@ -13,36 +11,26 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Workout } from '../models/workout';
-import { HOLD_MS } from './workout-card/card-gestures';
 import { WorkoutCardComponent } from './workout-card/workout-card.component';
 import { LibraryFilters } from './library-filters.service';
 import { LibraryFiltersComponent } from './library-filters/library-filters.component';
-import { LibraryReadyMadeComponent } from './library-ready-made/library-ready-made.component';
 import { changeSmoothly } from '../shared/layout-change';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
+import { editUrl, MakeCopy } from '../shared/state/make-copy.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 
 /**
- * The user's workouts. Arriving from Create's Save, `?saved=<id>` highlights that workout and
- * brings it into view (BLD-15); from adding a ready-made one, `?added=<id>` does the same.
- * Back from a workout's details, `?details=<id>` puts focus back on its card, and back from
- * a ready-made workout's page, `?ready-made=<its name>` on its. The ready-made workouts not
- * added yet are listed under your own (LIB-6).
+ * Every workout, yours and the ready-made ones (LIB-6), in one list, A to Z. Arriving from
+ * Create's Save, `?saved=<id>` highlights that workout and brings it into view (BLD-15). Back
+ * from a workout's details, `?details=<id>` puts focus back on its card.
  */
 @Component({
     selector: 'app-workout-library',
     templateUrl: './workout-library.component.html',
     styleUrl: './workout-library.component.scss',
-    imports: [
-        CdkDrag,
-        CdkDropList,
-        LibraryFiltersComponent,
-        LibraryReadyMadeComponent,
-        MatIconModule,
-        WorkoutCardComponent,
-    ],
+    imports: [LibraryFiltersComponent, MatIconModule, WorkoutCardComponent],
 })
 export class WorkoutLibraryComponent {
     workoutStore = inject(WorkoutStore);
@@ -51,73 +39,46 @@ export class WorkoutLibraryComponent {
     private host = inject<ElementRef<HTMLElement>>(ElementRef);
     private injector = inject(Injector);
     private readonly undo = inject(UndoService);
+    private readonly makeCopy = inject(MakeCopy);
     protected readonly slide = inject(PageSlide);
     protected readonly filters = inject(LibraryFilters);
     protected openWorkoutMenuId = signal<string | null>(null);
-    /** What screen readers hear once a workout has moved. */
+    /** What screen readers hear once a workout's saved. */
     protected readonly announcement = signal('');
-    protected readonly holdMs = HOLD_MS;
-    /** A card let go settles into its place at the finger's speed. */
-    protected readonly drop = new DropSpring();
     private readonly reducedMotion = injectPrefersReducedMotion();
     /** The workout just saved in Create, if arriving from there. */
     protected readonly highlightedId = signal<string | null>(null);
 
     constructor() {
         const params = inject(ActivatedRoute).snapshot.queryParamMap;
-        const added = params.get('added');
-        const id = params.get('saved') ?? added;
+        const id = params.get('saved');
         const workout = id ? this.workoutStore.findWorkoutById(id) : null;
         if (workout) {
-            // Just saved or added, it's shown, whatever the list was cut down to
+            // Just saved, it's shown, whatever the list was cut down to
             if (!this.filters.shown().includes(workout)) {
                 this.filters.clear();
             }
             const name = workout.title.trim() || 'Untitled workout';
             this.highlightedId.set(workout.id);
-            this.bringIntoView(workout.id, added ? `Added ${name}` : `Saved ${name}`);
+            this.bringIntoView(workout.id, `Saved ${name}`);
         }
-        // Back from a ready-made workout's page, focus goes back on its card
-        const readyMade = params.get('ready-made');
-        if (readyMade) {
-            this.focusAfterRender(`[data-ready-made="builtin:${CSS.escape(readyMade)}"]`);
-        }
-        const details = this.workoutStore.findWorkoutById(params.get('details') ?? '');
+        // A ready-made one's card is there once they've loaded, which they may not have yet
+        const details = params.get('details');
         if (details) {
-            this.focusAfterRender(`[data-workout="${details.id}"] .workout-card__open`);
+            const focusCard = () =>
+                this.focusAfterRender(
+                    `[data-workout="${CSS.escape(details)}"] .workout-card__open`
+                );
+            if (this.workoutStore.findAnyWorkout(details)) {
+                focusCard();
+            } else {
+                void this.workoutStore.readyMadeLoaded.then(focusCard);
+            }
         }
     }
 
-    protected isExistingWorkouts = computed(() => this.workoutStore.workouts().length > 0);
-
-    /**
-     * Move up or Move down, from a card's options, which stay open with focus on the same
-     * item, or on the other one once it can't move any further that way.
-     */
-    protected moveWorkout(workout: Workout, by: -1 | 1) {
-        const from = this.workoutStore.workouts().findIndex((w) => w.id === workout.id);
-        this.smoothChange(() => this.moveTo(from, from + by));
-        const to = from + by;
-        const atEnd = to === 0 || to === this.workoutStore.workouts().length - 1;
-        const item = (by === -1) === atEnd ? 'down' : 'up';
-        this.focusAfterRender(`[data-workout="${workout.id}"] .workout-card__menu-item--${item}`);
-    }
-
-    /** A card held and dragged to a new place. */
-    protected dropWorkout(event: CdkDragDrop<unknown>) {
-        this.moveTo(event.previousIndex, event.currentIndex);
-    }
-
-    private moveTo(from: number, to: number) {
-        const workouts = this.workoutStore.workouts();
-        const workout = workouts[from];
-        if (!workout || from === to || to < 0 || to >= workouts.length) {
-            return;
-        }
-        this.workoutStore.moveWorkout(from, to);
-        const name = workout.title.trim() || 'Untitled workout';
-        this.announcement.set(`Moved ${name} to ${to + 1} of ${workouts.length}`);
-    }
+    /** Whether you've any of your own, or only the ready-made ones yet. */
+    protected readonly hasOwn = computed(() => this.workoutStore.workouts().length > 0);
 
     /**
      * Deletes a workout straight away, and offers to put it back (UndoService) rather than
@@ -135,13 +96,7 @@ export class WorkoutLibraryComponent {
                 this.smoothChange(() => this.workoutStore.restoreWorkout(workout, index));
                 this.focusAfterRender(`[data-menu-for="${workout.id}"]`);
             },
-            // "Add workout" goes once the library is empty, and "Create a workout" takes its place
-            dismissed: () =>
-                this.focusAfterRender(
-                    this.workoutStore.workouts().length
-                        ? '.library-add-button'
-                        : '.library-create-button'
-                ),
+            dismissed: () => this.focusAfterRender('.library-add-button'),
         });
     }
 
@@ -212,8 +167,16 @@ export class WorkoutLibraryComponent {
         this.slide.navigate('/setup', 'in');
     }
 
-    navigateToEditWorkout(workoutId: string) {
+    navigateToEditWorkout(workout: Workout) {
         this.openWorkoutMenuId.set(null);
-        this.slide.navigate(`/setup?editId=${workoutId}`, 'in');
+        this.slide.navigate(editUrl(workout), 'in');
+    }
+
+    /** Make a copy of a ready-made workout, and open it in Create. */
+    copyWorkout(workout: Workout) {
+        const copy = this.makeCopy.of(workout.id);
+        if (copy) {
+            this.navigateToEditWorkout(copy);
+        }
     }
 }

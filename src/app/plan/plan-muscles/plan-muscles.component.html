@@ -37,12 +37,10 @@
                     }
                 </ul>
             }
-            <!-- A ready-made workout to add for them (LIB-7), to plan on a day -->
+            <!-- A ready-made workout for them (LIB-7), to plan on a day as it is -->
             @if (gapFiller(); as suggestion) {
                 <div class="plan-muscles__filler">
-                    <p class="plan-muscles__filler-label">
-                        Or add a ready-made workout for them, then plan it:
-                    </p>
+                    <p class="plan-muscles__filler-label">Or plan a ready-made workout for them:</p>
                     <p class="plan-muscles__filler-name">{{ suggestion.workout.title }}</p>
                     <p class="plan-muscles__filler-description">
                         {{ suggestion.workout.description }}
@@ -50,13 +48,24 @@
                     <p class="plan-muscles__filler-fills">{{ suggestion.fills }}</p>
                     <button
                         type="button"
+                        id="plan-muscles-add"
                         class="btn-pill plan-muscles__filler-add"
-                        [attr.aria-label]="'Add ' + suggestion.workout.title + ' to my workouts'"
-                        (click)="addGapFiller()"
+                        aria-haspopup="dialog"
+                        [attr.aria-label]="'Plan ' + suggestion.workout.title + ' on a day'"
+                        (click)="choosingDay.set(true)"
                     >
-                        <mat-icon aria-hidden="true">add</mat-icon>
-                        Add to my workouts
+                        <mat-icon aria-hidden="true">event</mat-icon>
+                        Add to a day
                     </button>
+                    @if (choosingDay()) {
+                        <app-workout-choice-dialog
+                            animate.leave="dialog-leave"
+                            [heading]="'Plan ' + suggestion.workout.title + ' on…'"
+                            [choices]="days()"
+                            (closed)="closeDays()"
+                            (picked)="planOn($event)"
+                        />
+                    }
                 </div>
             }
         }

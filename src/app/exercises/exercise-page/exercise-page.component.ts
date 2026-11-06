@@ -95,7 +95,7 @@ export class ExercisePageComponent {
         if (workoutId) {
             return {
                 url: `/library/${workoutId}`,
-                label: this.workouts.findWorkoutById(workoutId)?.title.trim() || 'Workout',
+                label: this.workouts.findAnyWorkout(workoutId)?.title.trim() || 'Workout',
             };
         }
         return {

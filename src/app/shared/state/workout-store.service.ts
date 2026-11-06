@@ -4,6 +4,7 @@ import {
     asOneGroup,
     Block,
     hasWork,
+    isReadyMadeId,
     MAX_HEADING_LENGTH,
     MAX_HEADINGS,
     MAX_REPEATS,
@@ -15,6 +16,7 @@ import {
     DEFAULT_RUN_SIDES,
     RepSetAmount,
     RepStep,
+    ReadyMadeWorkout,
     Step,
     TimedSetAmount,
     TimedStep,
@@ -23,12 +25,14 @@ import {
     WorkoutFields,
     withSteps,
 } from '../../models/workout';
+import type { BuiltInWorkout } from '../../models/built-in-workouts';
 import { MAX_WEIGHT_KG } from '../../models/weight';
 import { isLoggedSet, isTimedSet, RepSet } from '../../models/history';
 import { StepSwap } from '../../models/step-swap';
 import { StepSkip } from '../../workout/workout-state';
 import { Deletion, inOrder, LibraryOrder, mergeRecords, newId } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
+import { ReadyMadeFavourites } from './ready-made-favourites.service';
 import { SyncClock } from './sync-clock.service';
 import { ExerciseStore } from './exercise-store.service';
 import { linkSteps } from '../../models/exercise-links';
@@ -39,7 +43,9 @@ export class WorkoutStore {
     private readonly deletions = inject(DeletionStore);
     private readonly clock = inject(SyncClock);
     private readonly exercises = inject(ExerciseStore);
+    private readonly favourites = inject(ReadyMadeFavourites);
     private _workouts = signal<Workout[]>([]);
+    private readonly _builtIns = signal<readonly BuiltInWorkout[]>([]);
     private _movedAt = signal(readMovedAt());
     private _activeWorkout = signal<Workout | null>(null);
     private _activeWorkoutStartedAt = signal<number | null>(null);
@@ -52,7 +58,35 @@ export class WorkoutStore {
     private _activeSwaps = signal<StepSwap[]>([]);
     private _activeSkips = signal<StepSkip[]>([]);
 
+    /** Your own workouts, which are your data: saved, backed up and synced. */
     readonly workouts = computed(() => this._workouts());
+
+    /**
+     * Resolves once the ready-made workouts (LIB-6) are here. They load on demand, a moment
+     * after the app starts, so they're not in its first download.
+     */
+    readonly readyMadeLoaded: Promise<void> = import('../../models/built-in-workouts').then(
+        ({ BUILT_IN_WORKOUTS, copyOfBuiltIn }) => {
+            this.copyOfBuiltIn = copyOfBuiltIn;
+            this._builtIns.set(BUILT_IN_WORKOUTS);
+            this.restoreReadyMadeRun();
+        }
+    );
+    /** Makes a ready-made workout's fields into one of your own, once they've loaded. */
+    private copyOfBuiltIn: ((workout: BuiltInWorkout) => WorkoutFields) | null = null;
+
+    /** The ready-made workouts, used as they are, each a favourite if it's been made one. */
+    readonly readyMade = computed<ReadyMadeWorkout[]>(() => {
+        const favourites = this.favourites.ids();
+        return this._builtIns().map((workout) => ({
+            ...workout,
+            updatedAt: 0,
+            ...(favourites.has(workout.id) ? { favourite: true as const } : {}),
+        }));
+    });
+
+    /** Every workout there is to start or plan: yours, then the ready-made ones. */
+    readonly allWorkouts = computed<Workout[]>(() => [...this._workouts(), ...this.readyMade()]);
     /** The library's order, to sync with other copies (see `mergeLibraryOrder()`). */
     readonly libraryOrder = computed<LibraryOrder>(() => ({
         ids: this._workouts().map((workout) => workout.id),
@@ -108,25 +142,40 @@ export class WorkoutStore {
     constructor() {
         renameActiveRunKeys();
         this._workouts.set(this.loadWorkouts());
-        this._activeWorkout.set(this.loadActiveWorkout());
-        if (this._activeWorkout()) {
-            const startedAt = this.loadActiveWorkoutStartedAt();
-            this._activeWorkoutStartedAt.set(startedAt);
-            this._activeWorkoutPausedAt.set(this.loadActiveWorkoutPausedAt(startedAt));
-            // Runs from before this was saved fall back to the (possibly resumed) start time
-            const runStart = Number(sessionStorage.getItem('activeRunStartedAt'));
-            this._activeRunStartedAt.set(
-                Number.isFinite(runStart) && runStart > 0 && runStart <= startedAt
-                    ? runStart
-                    : startedAt
-            );
-            this._activeRepStepsDone.set(readCount(sessionStorage.getItem('activeRepStepsDone')));
-            this._activeRepMs.set(readCount(sessionStorage.getItem('activeRepMs')));
-            this._activeSets.set(readSets(sessionStorage.getItem('activeSets')));
-            this._activeSides.set(readSides(sessionStorage.getItem('activeSides')));
-            this._activeSwaps.set(readSwaps(sessionStorage.getItem('activeSwaps')));
-            this._activeSkips.set(readSkips(sessionStorage.getItem('activeSkips')));
+        const active = this.loadActiveWorkout();
+        if (active) {
+            this.restoreRun(active);
         }
+    }
+
+    /** A run of a ready-made workout carries on after a reload once they've loaded. */
+    private restoreReadyMadeRun() {
+        const savedId = sessionStorage.getItem('activeWorkoutId') ?? '';
+        const workout = isReadyMadeId(savedId) ? this.findAnyWorkout(savedId) : null;
+        if (workout && !this._activeWorkout()) {
+            this.restoreRun(workout);
+        }
+    }
+
+    /** Takes up the run of `workout` this tab had going, from where it was saved. */
+    private restoreRun(workout: Workout) {
+        this._activeWorkout.set(workout);
+        const startedAt = this.loadActiveWorkoutStartedAt();
+        this._activeWorkoutStartedAt.set(startedAt);
+        this._activeWorkoutPausedAt.set(this.loadActiveWorkoutPausedAt(startedAt));
+        // Runs from before this was saved fall back to the (possibly resumed) start time
+        const runStart = Number(sessionStorage.getItem('activeRunStartedAt'));
+        this._activeRunStartedAt.set(
+            Number.isFinite(runStart) && runStart > 0 && runStart <= startedAt
+                ? runStart
+                : startedAt
+        );
+        this._activeRepStepsDone.set(readCount(sessionStorage.getItem('activeRepStepsDone')));
+        this._activeRepMs.set(readCount(sessionStorage.getItem('activeRepMs')));
+        this._activeSets.set(readSets(sessionStorage.getItem('activeSets')));
+        this._activeSides.set(readSides(sessionStorage.getItem('activeSides')));
+        this._activeSwaps.set(readSwaps(sessionStorage.getItem('activeSwaps')));
+        this._activeSkips.set(readSkips(sessionStorage.getItem('activeSkips')));
     }
 
     private loadWorkouts(): Workout[] {
@@ -263,8 +312,15 @@ export class WorkoutStore {
         this.saveWorkouts();
     }
 
-    /** Marks a workout as a favourite, or not, as a change to it that syncs. */
+    /**
+     * Marks a workout as a favourite, or not: one of yours as a change to it that syncs, and a
+     * ready-made one by a record of its own (ReadyMadeFavourites).
+     */
     setFavourite(workoutId: string, favourite: boolean) {
+        if (isReadyMadeId(workoutId)) {
+            this.favourites.set(workoutId, favourite);
+            return;
+        }
         const existing = this.findWorkoutById(workoutId);
         if (!existing || (existing.favourite === true) === favourite) {
             return;
@@ -279,20 +335,6 @@ export class WorkoutStore {
             workouts.map((workout) => (workout.id === workoutId ? changed : workout))
         );
         this.saveWorkouts();
-    }
-
-    /** Moves a workout to another place in the library, e.g. dragged there. */
-    moveWorkout(from: number, to: number) {
-        const workouts = [...this._workouts()];
-        const outside = (i: number) => i < 0 || i >= workouts.length;
-        if (from === to || outside(from) || outside(to)) {
-            return;
-        }
-        const [moved] = workouts.splice(from, 1);
-        workouts.splice(to, 0, moved);
-        this._workouts.set(workouts);
-        this.saveWorkouts();
-        this.saveMovedAt(this.clock.now(this._movedAt()));
     }
 
     /**
@@ -314,8 +356,27 @@ export class WorkoutStore {
         return true;
     }
 
+    /** One of your own workouts, which can be changed or deleted. */
     findWorkoutById(workoutId: string): Workout | null {
         return this._workouts().find((workout) => workout.id === workoutId) ?? null;
+    }
+
+    /** Any workout, yours or ready-made, to start, plan or show. */
+    findAnyWorkout(workoutId: string): Workout | null {
+        return this.allWorkouts().find((workout) => workout.id === workoutId) ?? null;
+    }
+
+    /**
+     * Make a copy of a ready-made workout (LIB-6): a workout of your own, "Gym legs (copy)",
+     * to change. Null if there's no such ready-made workout.
+     */
+    copyReadyMade(workoutId: string): Workout | null {
+        const builtIn = this._builtIns().find((workout) => workout.id === workoutId);
+        if (!builtIn || !this.copyOfBuiltIn) {
+            return null;
+        }
+        const copy = this.copyOfBuiltIn(builtIn);
+        return this.addWorkout({ ...copy, title: `${copy.title} (copy)` });
     }
 
     updateWorkout(workoutId: string, workoutUpdate: WorkoutFields): Workout | null {

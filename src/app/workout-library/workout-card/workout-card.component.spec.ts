@@ -24,13 +24,11 @@ const sprints = makeWorkout({
                 appWorkoutCard
                 [workout]="workout()"
                 [menuOpen]="menuOpen()"
-                [canMoveUp]="!first()"
-                [canMoveDown]="!last()"
                 (started)="events.push('started')"
                 (menuToggled)="events.push('menuToggled')"
                 (menuClosed)="events.push('menuClosed')"
                 (editRequested)="events.push('editRequested')"
-                (moveRequested)="events.push('moveRequested ' + $event)"
+                (copyRequested)="events.push('copyRequested')"
                 (deleteRequested)="events.push('deleteRequested')"
             ></li>
         </ul>
@@ -39,8 +37,6 @@ const sprints = makeWorkout({
 class HostComponent {
     workout = signal(sprints);
     menuOpen = signal(false);
-    first = signal(false);
-    last = signal(false);
     events: string[] = [];
 }
 
@@ -234,26 +230,26 @@ describe('WorkoutCardComponent', () => {
         expect(host.events).toEqual(['menuToggled', 'editRequested', 'deleteRequested']);
     });
 
-    it('offers moving up and down in its options', () => {
-        set({ menuOpen: true });
+    describe('a ready-made workout (LIB-6)', () => {
+        const readyMade: Workout = { ...sprints, id: 'builtin:sprints' };
 
-        el('.workout-card__menu-item--up').click();
-        el('.workout-card__menu-item--down').click();
+        it('has its badge, said first to screen readers', () => {
+            expect(card().querySelector('app-ready-made-badge')).toBeNull();
+            set({ workout: readyMade });
 
-        expect(host.events).toEqual(['moveRequested -1', 'moveRequested 1']);
-    });
+            expect(el('app-ready-made-badge').textContent).toBe('Ready-made');
+            expect(spoken()).toMatch(/^Ready-made\. /);
+        });
 
-    it("can't move up when it's first, or down when it's last", () => {
-        host.first.set(true);
-        set({ menuOpen: true });
-        expect(card().querySelector('.workout-card__menu-item--up')).toBeNull();
-        expect(card().querySelector('.workout-card__menu-item--down')).not.toBeNull();
+        it('offers Make a copy in its options, and no Edit or Delete', () => {
+            set({ workout: readyMade, menuOpen: true });
 
-        host.first.set(false);
-        host.last.set(true);
-        fixture.detectChanges();
-        expect(card().querySelector('.workout-card__menu-item--up')).not.toBeNull();
-        expect(card().querySelector('.workout-card__menu-item--down')).toBeNull();
+            expect(card().querySelector('.workout-card__menu-item--edit')).toBeNull();
+            expect(card().querySelector('.workout-card__menu-item--danger')).toBeNull();
+            el('.workout-card__menu-item--copy').click();
+
+            expect(host.events).toEqual(['copyRequested']);
+        });
     });
 
     it('asks to close its options on Escape', () => {
@@ -312,6 +308,18 @@ describe('WorkoutCardComponent', () => {
             swipe(-card().offsetWidth * 0.6);
 
             await vi.waitFor(() => expect(host.events).toEqual(['deleteRequested']));
+        });
+
+        it("doesn't delete a ready-made one, which resists a swipe either way", async () => {
+            fakeReducedMotion(true);
+            set({ workout: { ...sprints, id: 'builtin:sprints' } });
+            swipe(-card().offsetWidth * 0.6, { letGo: false });
+            expect(card().classList).not.toContain('workout-card--past-delete');
+            expect(Math.abs(offset())).toBeLessThan(card().offsetWidth * 0.5);
+
+            pointer('pointerup', 300 - card().offsetWidth * 0.6);
+            await new Promise((resolve) => setTimeout(resolve, 50));
+            expect(host.events).toEqual([]);
         });
 
         it('deletes on a short, fast flick, by where it would carry', async () => {

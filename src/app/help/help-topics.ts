@@ -118,7 +118,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 question: "What's a ready-made plan?",
                 answer: [
                     'A week of ready-made workouts, the same every week, such as 3-day beginner gym or Fitness, 4 days.',
-                    "Use this plan adds the workouts you haven't got, and puts them on their days. Find the plans on Today, or on the Plan page under Start from a ready-made plan.",
+                    'Use this plan puts its ready-made workouts on their days, as they are. Find the plans on Today, or on the Plan page under Start from a ready-made plan.',
                 ],
                 link: { label: 'See the ready-made plans', url: '/ready-made-plans' },
             },
@@ -127,15 +127,15 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 question: 'What happens to my plan if I use a ready-made one?',
                 answer: [
                     "It replaces your plan. Your own workouts stay in Workouts, they're just not on the plan any more.",
-                    'Changed your mind? Press Undo in the bar at the bottom straight away: your plan comes back, and the workouts it added go.',
+                    'Changed your mind? Press Undo in the bar at the bottom straight away: your plan comes back.',
                 ],
             },
             {
                 id: 'plan-added-workouts',
-                question: 'Why did using a plan add workouts?',
+                question: 'Can I change a workout in a ready-made plan?',
                 answer: [
-                    "A plan is made of workouts, so any you don't have are added to Workouts as your own copies, to change as you like.",
-                    'A workout you have already with the same name is used, rather than adding a second copy.',
+                    "A ready-made plan's workouts are ready-made ones, planned as they are, so they can't be changed. To change one, open it on Workouts and press Make a copy: the copy is yours, to change as you like.",
+                    'Then put your copy on its days on the Plan page, in place of the ready-made one.',
                 ],
             },
             {
@@ -143,7 +143,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 question: 'How do I plan my own week?',
                 answer: [
                     'On Today, press Edit plan (or Make your own plan). Press Add on a day and pick a workout; take one off with its ✕.',
-                    'Need more workouts? Add new workouts, at the top of the list, takes you to Workouts to make one or add a ready-made one.',
+                    'The list has your workouts, then the ready-made ones. Need another? Add new workouts, at the top of the list, takes you to Workouts to make one.',
                 ],
                 link: { label: 'Open the plan', url: '/plan' },
             },
@@ -261,8 +261,8 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'ready-made-workouts',
                 question: 'Where can I find workouts to start with?',
                 answer: [
-                    "On Workouts, under your own workouts, in Ready-made: workouts for no equipment, a kettlebell, dumbbells, a gym and other kit. Press one to see what's in it; Add to my workouts copies it in, yours to change.",
-                    'Ready-made, at the top of Workouts, shows only those.',
+                    'On Workouts: the ones with the Ready-made badge, for no equipment, a kettlebell, dumbbells, a gym and other kit, listed A to Z with yours. Start one, plan it or make it a favourite as it is.',
+                    'To change one, press Make a copy, in its options or its details: the copy is yours, and opens in Create. Ready-made, at the top of Workouts, shows only those.',
                 ],
                 link: { label: 'See the ready-made workouts', url: '/library' },
             },
@@ -286,7 +286,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 question: 'What are Missing muscle groups?',
                 answer: [
                     'At the bottom of the Plan page: the muscles none of the workouts in your plan work, and those they only work lightly. Tap one to find exercises for it.',
-                    'Under them, a ready-made workout that covers the most of them, to add in one tap and then plan.',
+                    'Under them, a ready-made workout that covers the most of them, with Add to a day to plan it.',
                 ],
                 link: { label: 'Go to the Plan page', url: '/plan' },
             },

@@ -2,11 +2,8 @@ import { Signal, signal } from '@angular/core';
 import { project, rubberband, VelocityTracker } from '../../shared/gesture';
 import { criticallyDampedSpring } from '../../shared/spring';
 
-/**
- * How long a press is held, still, before the card lifts. The library's drop list waits as
- * long before it lets a drag start, so a swipe or a scroll before then stays one.
- */
-export const HOLD_MS = 500;
+/** How long a press is held, still, before the card lifts, to open its options. */
+const HOLD_MS = 500;
 
 /** How far a press moves (px) before it counts as a swipe or a scroll, and which. */
 const DIRECTION_THRESHOLD = 10;
@@ -22,6 +19,8 @@ export interface CardGesturesOptions {
     host: HTMLElement;
     reducedMotion: Signal<boolean>;
     menuOpen(): boolean;
+    /** Whether a swipe can delete it: not a ready-made workout, which resists both ways. */
+    canDelete(): boolean;
     toggleMenu(): void;
     requestDelete(): void;
 }
@@ -30,9 +29,9 @@ export interface CardGesturesOptions {
  * Gestures on the card, as on an iPhone list. A tap opens its details. A swipe to the
  * left follows the finger, showing Delete behind; let go, and where the flick would carry
  * it decides: past halfway it carries on off the card and deletes (with Undo), otherwise
- * it springs back, from the finger's speed either way. Holding still on it lifts it: moved
- * then, the drop list drags it; let go of without moving, its options open. Up and down is
- * left to the page, which scrolls.
+ * it springs back, from the finger's speed either way. Holding still on it lifts it, and let
+ * go of without moving, its options open; moved off, it's put down. Up and down is left to the
+ * page, which scrolls.
  */
 export class CardGestures {
     constructor(private readonly options: CardGesturesOptions) {}
@@ -99,7 +98,7 @@ export class CardGestures {
             axis: null,
             tracker,
         };
-        // Held still for as long as the drop list waits before a drag: it lifts
+        // Held still: it lifts, for its options
         clearTimeout(this.holdTimer);
         this.holdTimer = setTimeout(() => {
             const gesture = this.gesture;
@@ -116,9 +115,9 @@ export class CardGestures {
     move(event: PointerEvent) {
         const held = this.held;
         if (held?.pointerId === event.pointerId) {
-            // Moving off with it: the drag takes over
+            // Moving off with it: not for its options after all
             if (Math.hypot(event.clientX - held.x, event.clientY - held.y) >= DIRECTION_THRESHOLD) {
-                this.held = null;
+                this.putDown();
             }
             return;
         }
@@ -144,14 +143,16 @@ export class CardGestures {
         }
         const width = this.width();
         const pulled = gesture.startOffset + dx;
-        // Left follows the finger; right, where there's nothing to show, resists
-        const offset = pulled > 0 ? rubberband(pulled, width) : pulled;
+        // Left follows the finger; right, where there's nothing to show, resists, and so does
+        // left on a card that can't be deleted
+        const canDelete = this.options.canDelete();
+        const offset = pulled > 0 || !canDelete ? rubberband(pulled, width) : pulled;
         const wasPast = gesture.offset < -width / 2;
         gesture.offset = offset;
         gesture.tracker.add(offset, event.timeStamp);
         this.moveTo(offset);
         // A tick as it crosses the point where letting go would delete it
-        if (wasPast !== offset < -width / 2) {
+        if (canDelete && wasPast !== offset < -width / 2) {
             navigator.vibrate?.(8);
         }
     }
@@ -177,7 +178,7 @@ export class CardGestures {
         const velocity = gesture.tracker.velocity(event.timeStamp);
         const width = this.width();
         // Where the flick would come to rest decides, not where the finger let go
-        const away = gesture.offset + project(velocity) < -width / 2;
+        const away = this.options.canDelete() && gesture.offset + project(velocity) < -width / 2;
         const press = this.presses;
         await this.springTo(away ? -width : 0, gesture.offset, velocity);
         // Caught again on its way off: the new press has it now, so it isn't deleted
@@ -200,7 +201,10 @@ export class CardGestures {
         this.options.face().style.transform = offset ? `translateX(${offset}px)` : '';
         const host = this.options.host;
         host.style.setProperty('--reveal', `${Math.max(0, -offset)}px`);
-        host.classList.toggle('workout-card--past-delete', offset < -this.width() / 2);
+        host.classList.toggle(
+            'workout-card--past-delete',
+            this.options.canDelete() && offset < -this.width() / 2
+        );
     }
 
     /**

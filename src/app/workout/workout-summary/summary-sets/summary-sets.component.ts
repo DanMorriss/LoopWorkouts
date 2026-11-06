@@ -5,7 +5,7 @@ import { describeSets, sectionsOf } from '../../../history/history-format';
 import { isBuiltIn } from '../../../models/exercise';
 import { RepSet } from '../../../models/history';
 import { weightIn, weightOptions, weightToKg } from '../../../models/weight';
-import { MAX_REPS, placedHeadings, placedSupersets } from '../../../models/workout';
+import { isReadyMade, MAX_REPS, placedHeadings, placedSupersets } from '../../../models/workout';
 import { WheelPickerComponent } from '../../../shared/components/wheel-picker/wheel-picker.component';
 import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
@@ -108,13 +108,25 @@ export class SummarySetsComponent {
 
     /** null until a set is changed; then asks whether to start from them next time. */
     protected readonly nextTime = signal<'asking' | 'yes' | 'no' | null>(null);
+    /** Not of a ready-made workout, which stays as it is: Make a copy is offered instead. */
+    private readonly canKeep = computed(() => {
+        const workout = this.run.workout();
+        return workout !== null && !isReadyMade(workout);
+    });
+
+    /** A set was changed: whether to start from them next time, if that's for the asking. */
+    private changed() {
+        if (this.canKeep()) {
+            this.nextTime.set('asking');
+        }
+    }
 
     protected setReps(index: number, reps: number) {
         if (this.store.activeSets()[index]?.reps === reps) {
             return;
         }
         this.run.changeSet(index, { reps });
-        this.nextTime.set('asking');
+        this.changed();
     }
 
     protected setWeight(index: number, value: number) {
@@ -123,7 +135,7 @@ export class SummarySetsComponent {
             return;
         }
         this.run.changeSet(index, { weight });
-        this.nextTime.set('asking');
+        this.changed();
     }
 
     protected answerNextTime(use: boolean) {

@@ -10,14 +10,36 @@ export interface Synced {
 }
 
 /** The kinds of record that are synced, and so leave a deletion behind. */
-export type SyncedKind = 'workout' | 'history' | 'exercise' | 'exercise-note' | 'hidden-exercise';
+export type SyncedKind =
+    | 'workout'
+    | 'history'
+    | 'exercise'
+    | 'exercise-note'
+    | 'hidden-exercise'
+    | 'ready-made-favourite';
 const SYNCED_KINDS: readonly SyncedKind[] = [
     'workout',
     'history',
     'exercise',
     'exercise-note',
     'hidden-exercise',
+    'ready-made-favourite',
 ];
+
+/**
+ * A mark on something that isn't a record of its own, by its id, e.g. an exercise hidden from
+ * the picker, or a ready-made workout made a favourite: there while it's on, and deleted (leaving
+ * a deletion) when it's taken off. Returns null if a saved one isn't usable.
+ */
+export function readMark(value: unknown): Synced | null {
+    if (typeof value !== 'object' || value === null) {
+        return null;
+    }
+    const { id, updatedAt } = value as Record<string, unknown>;
+    return typeof id === 'string' && id !== '' && Number.isInteger(updatedAt)
+        ? { id, updatedAt: updatedAt as number }
+        : null;
+}
 
 /** A record that was deleted, kept so the deletion can reach other copies too. */
 export interface Deletion {

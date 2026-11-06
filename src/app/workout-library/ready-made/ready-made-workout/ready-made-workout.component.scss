@@ -12,15 +12,9 @@
     color: var(--text-strong);
 }
 
-.preview__description,
-.preview__note {
+.preview__description {
     margin: 0 0 0.6rem;
     line-height: 1.45;
-}
-
-.preview__note {
-    color: var(--text-muted);
-    font-size: 0.85rem;
 }
 
 .preview__chips {
@@ -48,15 +42,4 @@
     margin: 0 0 0.4rem;
     font-size: 1rem;
     color: var(--text-strong);
-}
-
-// The main action across the page, Add to my workouts under it
-.preview__actions {
-    display: grid;
-    gap: 0.6rem;
-    margin-top: 1.5rem;
-
-    > * {
-        justify-content: center;
-    }
 }

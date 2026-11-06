@@ -6,6 +6,7 @@ import { DeletionStore } from '../state/deletion-store.service';
 import { ExerciseStore } from '../state/exercise-store.service';
 import { HistoryStore } from '../state/history-store.service';
 import { SettingsStore } from '../state/settings-store.service';
+import { ReadyMadeFavourites } from '../state/ready-made-favourites.service';
 import { PlanStore } from '../state/plan-store.service';
 import { Profile } from '../../models/profile';
 import { WorkoutStore } from '../state/workout-store.service';
@@ -49,6 +50,7 @@ export type CopyToMerge = Pick<
     | 'exercises'
     | 'exerciseNotes'
     | 'hiddenExercises'
+    | 'readyMadeFavourites'
     | 'libraryOrder'
     | 'plan'
     | 'deleted'
@@ -71,6 +73,7 @@ export class BackupService {
     private readonly deletions = inject(DeletionStore);
     private readonly settings = inject(SettingsStore);
     private readonly plan = inject(PlanStore);
+    private readonly favourites = inject(ReadyMadeFavourites);
     private readonly document = inject(DOCUMENT);
 
     /** Downloads a backup of everything, once the history has loaded, and gives the file's name. */
@@ -84,6 +87,7 @@ export class BackupService {
                 exercises: this.exercises.own(),
                 exerciseNotes: this.exercises.notes(),
                 hiddenExercises: this.exercises.hidden(),
+                readyMadeFavourites: this.favourites.list(),
                 libraryOrder: this.workouts.libraryOrder(),
                 plan: this.plan.plan(),
                 deleted: [...this.deletions.all()],
@@ -171,6 +175,7 @@ export class BackupService {
             backup.hiddenExercises.map((hidden) => ({ ...hidden, id: idHere(hidden.id) })),
             backup.deleted
         );
+        this.favourites.merge(backup.readyMadeFavourites, backup.deleted);
         const linkedWorkouts = backup.workouts.map((workout) => this.linked(workout, idHere));
         const linkedHistory = backup.history.map((entry) => this.linkedSets(entry, idHere));
         const workouts = backup.fromVersion1

@@ -1,3 +1,4 @@
+import { Workout } from '../../models/workout';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import {
     Component,
@@ -38,6 +39,7 @@ import {
     REP_OPTIONS,
     SummarySetsComponent,
 } from './summary-sets/summary-sets.component';
+import { SummaryCopyComponent } from './summary-copy/summary-copy.component';
 import { SummaryStepUpsComponent } from './summary-step-ups/summary-step-ups.component';
 import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';
 import { SheetDrag } from './sheet-drag';
@@ -57,6 +59,7 @@ import { SheetDrag } from './sheet-drag';
         FormField,
         MatIconModule,
         SuggestedWorkoutComponent,
+        SummaryCopyComponent,
         SummarySetsComponent,
         SummaryStepUpsComponent,
         SummarySwapsComponent,
@@ -76,6 +79,8 @@ export class WorkoutSummaryComponent {
     readonly back = output<void>();
     /** Done: the run is over, on to it in the history. */
     readonly done = output<void>();
+    /** Make a copy, of a ready-made workout: the copy, to open in Create. */
+    readonly copied = output<Workout>();
 
     protected readonly finished = this.run.isComplete;
     protected readonly heading = computed(() => {

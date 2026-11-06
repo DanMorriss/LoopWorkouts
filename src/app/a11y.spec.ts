@@ -451,9 +451,12 @@ for (const theme of ['dark', 'light'] as const) {
         });
 
         describe('ready-made workouts', () => {
-            it('listed on Workouts, with the filters and equipment open', async () => {
+            it('listed on Workouts with their badges, the filters and equipment open', async () => {
+                await TestBed.inject(WorkoutStore).readyMadeLoaded;
                 await open('/library');
-                expect(fixture.nativeElement.querySelector('.ready-card')).not.toBeNull();
+                expect(
+                    fixture.nativeElement.querySelector('.workout-card app-ready-made-badge')
+                ).not.toBeNull();
                 click('[aria-controls="library-more-filters"]');
                 await settle();
                 click('.kit__edit');
@@ -461,9 +464,10 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('a workout, on its page', async () => {
+            it('a workout, on its Details, with Make a copy', async () => {
+                await TestBed.inject(WorkoutStore).readyMadeLoaded;
                 await open('/ready-made/gym-legs');
-                expect(fixture.nativeElement.querySelector('.preview__add')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.details__copy')).not.toBeNull();
                 await expectNoViolations();
             });
         });
@@ -557,7 +561,8 @@ for (const theme of ['dark', 'light'] as const) {
             it('after deleting a workout, with Undo offered', async () => {
                 store.addWorkout(sprints);
                 await open('/library');
-                click('.workout-card__action--menu');
+                // Your own one's, not a ready-made one's, which can't be deleted
+                click('.workout-card:not([data-workout^="builtin:"]) .workout-card__action--menu');
                 await settle();
                 click('.workout-card__menu-item--danger');
                 await settle();
@@ -565,15 +570,15 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('with a middle card moved down, its options open', async () => {
+            it("with a ready-made card's options open", async () => {
                 store.addWorkout(sprints);
-                store.addWorkout(untitled);
-                store.addWorkout(makeWorkout({ id: 'workout-3', title: 'Last' }));
+                await store.readyMadeLoaded;
                 await open('/library');
-                click('.workout-card:nth-child(2) .workout-card__action--menu');
+                click('[data-workout="builtin:gym-legs"] .workout-card__action--menu');
                 await settle();
-                click('.workout-card__menu-item--down');
-                await settle();
+                expect(
+                    fixture.nativeElement.querySelector('.workout-card__menu-item--copy')
+                ).not.toBeNull();
                 await expectNoViolations();
             });
 

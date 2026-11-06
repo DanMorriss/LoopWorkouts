@@ -1,6 +1,6 @@
 # Data
 
-What the app saves, and in what shape. Everything is on the device. Signed in, the workouts, the library's order, the history, your own exercises, notes, hidden exercises, deletions and the profile are kept with the account too, as rows of one table on the server, in the same shapes as here (see [backup-and-sync](backup-and-sync.md), Sync); the other settings and the run in progress aren't.
+What the app saves, and in what shape. Everything is on the device. Signed in, the workouts, the library's order, the history, your own exercises, notes, hidden exercises, ready-made favourites, deletions and the profile are kept with the account too, as rows of one table on the server, in the same shapes as here (see [backup-and-sync](backup-and-sync.md), Sync); the other settings and the run in progress aren't.
 
 **Ready for sync:** every workout and history entry has an id that can't clash with another device's (random, not 1, 2, 3) and an `updatedAt`, the time it last changed in ms since 1970. Deleting one leaves a marker in `deleted`. Merging two copies (a backup now, another device later) goes by id: the most recent change to each record wins, and a deletion wins over changes made before it. See [backup-and-sync](backup-and-sync.md).
 
@@ -54,11 +54,11 @@ A JSON list of workouts:
 
 ### `library-moved-at`: when the library was last reordered
 
-When a workout was last moved in the library (LIB-3), in ms since 1970, or missing if none has been. `workouts` is saved in the library's order, and with this the order merges as a record of its own: `{ "ids": [...], "updatedAt": … }`, the workouts' ids in order and this time. Another copy's order is taken only if it was moved more recently (see [backup-and-sync](backup-and-sync.md)).
+When a workout was last moved in the library (LIB-3), in ms since 1970, or missing if none has been. Since 2026-11-06 the list is A to Z and nothing moves a workout here, but an order from another device or a backup still merges in as below. `workouts` is saved in the library's order, and with this the order merges as a record of its own: `{ "ids": [...], "updatedAt": … }`, the workouts' ids in order and this time. Another copy's order is taken only if it was moved more recently (see [backup-and-sync](backup-and-sync.md)).
 
 ### `week-plan`: the weekly plan
 
-The weekly plan (PLN-1, see [planning](planning.md)): `{ "days": [[…], …], "updatedAt": …, "plannedAt": { "0:<workout id>": …, … } }`, seven lists of workout ids, Monday first, up to 10 each, when it last changed in ms since 1970 (0 if it never has), and, optionally, when each workout was put on its day, by the device's clock, keyed by the day (0 for Monday) and the workout's id (PLN-3, since 2026-11-04). `plannedAt` leaves out workouts planned before it came in; it's dropped for any no longer planned, and any time that isn't one. It syncs and backs up with the plan; a copy of the app from before it reads the plan without it. It merges as a record of its own: another copy's plan is taken only if it changed more recently. A broken one is read as an empty plan.
+The weekly plan (PLN-1, see [planning](planning.md)): `{ "days": [[…], …], "updatedAt": …, "plannedAt": { "0:<workout id>": …, … } }`, seven lists of workout ids (yours, or ready-made ones' `builtin:` ids since 2026-11-06), Monday first, up to 10 each, when it last changed in ms since 1970 (0 if it never has), and, optionally, when each workout was put on its day, by the device's clock, keyed by the day (0 for Monday) and the workout's id (PLN-3, since 2026-11-04). `plannedAt` leaves out workouts planned before it came in; it's dropped for any no longer planned, and any time that isn't one. It syncs and backs up with the plan; a copy of the app from before it reads the plan without it. It merges as a record of its own: another copy's plan is taken only if it changed more recently. A broken one is read as an empty plan.
 
 ### `history`: the history
 
@@ -139,6 +139,10 @@ A JSON list of `{ "id": "<exercise id>", "text": "Pause at the bottom", "updated
 ### `hidden-exercises`: exercises hidden from the picker
 
 A JSON list of `{ "id": "<exercise id>", "updatedAt": … }`, one per exercise hidden from the picker in Create, built-in or your own. Showing one again removes it and leaves a deletion.
+
+### `ready-made-favourites`: ready-made workouts made favourites
+
+A JSON list of `{ "id": "builtin:<its name>", "updatedAt": … }`, one per ready-made workout (LIB-6) with its heart pressed (LIB-8, since 2026-11-06), as a ready-made workout isn't your data to mark. Taking the heart off removes it and leaves a deletion, of the kind `ready-made-favourite`, as hidden exercises do. One whose id isn't a ready-made one's is dropped when loading. Your own workouts' hearts are `favourite` on the workout.
 
 ### `deleted`
 
@@ -250,13 +254,14 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 ```json
 {
     "app": "Loop Workouts",
-    "version": 13,
+    "version": 14,
     "exportedAt": 1761055200000,
     "workouts": [],
     "history": [],
     "exercises": [],
     "exerciseNotes": [],
     "hiddenExercises": [],
+    "readyMadeFavourites": [],
     "libraryOrder": { "ids": [], "updatedAt": 0 },
     "plan": { "days": [[], [], [], [], [], [], []], "updatedAt": 0 },
     "deleted": [],
@@ -276,10 +281,11 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 }
 ```
 
-- `workouts`, `history`, `exercises`, `exerciseNotes` (as `exercise-notes`), `hiddenExercises` (as `hidden-exercises`), `deleted` and `settings` are in the same shapes as above, `libraryOrder` is the library's order (see `library-moved-at`) and `plan` the weekly plan (see `week-plan`); `exportedAt` is ms since 1970.
+- `workouts`, `history`, `exercises`, `exerciseNotes` (as `exercise-notes`), `hiddenExercises` (as `hidden-exercises`), `readyMadeFavourites` (as `ready-made-favourites`), `deleted` and `settings` are in the same shapes as above, `libraryOrder` is the library's order (see `library-moved-at`) and `plan` the weekly plan (see `week-plan`); `exportedAt` is ms since 1970.
 - `version` goes up whenever the file's shape changes. A file from an older version is converted when imported; one from a newer version is turned down.
 - **Version 1** files (from before random ids) have number workout ids, no `updatedAt` and no `deleted`. They're converted as saved data is: their workouts get new random ids, so they're matched on what they are (title, steps and rounds) rather than by id.
 - **Version 3 and older** files call workouts timers: a `timers` list in place of `workouts`, `timerId` in the history and the kind `timer` in `deleted`. They're renamed as they're read.
+- **Version 13 and older** files have no `readyMadeFavourites`, and no ready-made workouts (`builtin:` ids) in their plan: nothing to convert. An older app turns a version 14 file down rather than planning workouts it can't find.
 - **Version 12 and older** files have no `plan`, so the plan here stays as it is.
 - **Version 11 and older** files have no `supersets` on history entries: nothing to convert.
 - **Version 10 and older** files have no steps whose sets vary: nothing to convert.

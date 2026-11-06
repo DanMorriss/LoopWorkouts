@@ -19,7 +19,7 @@ import {
 } from '../../models/exercise';
 import { ExerciseFinder, findByName } from '../../models/exercise-links';
 import { ExerciseMotion } from '../../models/exercise-motion';
-import { Deletion, mergeRecords, newId } from '../../models/sync';
+import { Deletion, mergeRecords, newId, readMark } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { SyncClock } from './sync-clock.service';
 import { migrateSavedData } from './migrate';
@@ -483,12 +483,4 @@ export function readExerciseNote(value: unknown): ExerciseNote | null {
 }
 
 /** Reads one exercise's place in the hidden list, or returns null if it isn't usable. */
-export function readHiddenExercise(value: unknown): HiddenExercise | null {
-    if (typeof value !== 'object' || value === null) {
-        return null;
-    }
-    const { id, updatedAt } = value as Record<string, unknown>;
-    return isText(id) && id !== '' && Number.isInteger(updatedAt)
-        ? { id, updatedAt: updatedAt as number }
-        : null;
-}
+export const readHiddenExercise: (value: unknown) => HiddenExercise | null = readMark;

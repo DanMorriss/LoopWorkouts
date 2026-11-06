@@ -1,39 +1,22 @@
 <div class="library-screen p-4 text-(--text-strong)" (click)="closeWorkoutMenus()">
-    @let existingWorkouts = isExistingWorkouts();
-    <!-- The title, as on the other pages, with the way to add a workout at its right -->
+    <!-- The title, as on the other pages, with the way to make a workout at its right -->
     <div class="library__top">
         <h2 class="library__title">Workouts</h2>
-        <!-- One way to add a workout at a time: an empty library has "Create a workout" instead -->
-        @if (existingWorkouts) {
-            <button
-                type="button"
-                class="btn-main btn-main--small library-add-button"
-                aria-label="New workout"
-                (click)="$event.stopPropagation(); navigateToCreateWorkout()"
-            >
-                <mat-icon aria-hidden="true">add</mat-icon>
-                New
-            </button>
-        }
+        <button
+            type="button"
+            class="btn-main btn-main--small library-add-button"
+            aria-label="New workout"
+            (click)="$event.stopPropagation(); navigateToCreateWorkout()"
+        >
+            <mat-icon aria-hidden="true">add</mat-icon>
+            New
+        </button>
     </div>
 
-    @if (!existingWorkouts) {
-        <div class="flex flex-col items-center justify-center">
-            <p>No workouts yet. Make one, or start with a ready-made one below.</p>
-            <button
-                type="button"
-                class="btn-main library-create-button mt-4"
-                (click)="navigateToCreateWorkout()"
-            >
-                <mat-icon aria-hidden="true">add</mat-icon>
-                Create a workout
-            </button>
-        </div>
+    @if (!hasOwn()) {
+        <p class="library__intro">Start any of these, or make your own with New.</p>
     }
 
-    <!-- Searched and filtered, the list can't be reordered: where a card would land among the
-         hidden ones is a guess -->
-    @let cutDown = filters.cutDown();
     <app-library-filters class="library__filters" (click)="$event.stopPropagation()" />
     @if (filters.shownCount(); as count) {
         <div class="library__count">
@@ -50,41 +33,24 @@
         </div>
     }
 
-    <!-- Held still for HOLD_MS a card lifts, and can be dragged to another place. Moving
-         before then is a swipe or a scroll, which the drag lets go of -->
-    <ul
-        class="library-list"
-        cdkDropList
-        cdkDropListOrientation="mixed"
-        [cdkDropListDisabled]="cutDown"
-        (cdkDropListDropped)="dropWorkout($event)"
-    >
-        @for (workout of filters.shown(); track workout.id; let first = $first, last = $last) {
+    <!-- Yours and the ready-made ones, A to Z. A ready-made one can't be changed or
+         deleted, but copied to make one of your own -->
+    <ul class="library-list">
+        @for (workout of filters.shown(); track workout.id) {
             <li
                 appWorkoutCard
-                cdkDrag
-                [cdkDragStartDelay]="holdMs"
-                [cdkDragDisabled]="openWorkoutMenuId() === workout.id"
                 [attr.data-workout]="workout.id"
                 [workout]="workout"
                 [menuOpen]="openWorkoutMenuId() === workout.id"
                 [highlighted]="highlightedId() === workout.id"
-                [canMoveUp]="!first && !cutDown"
-                [canMoveDown]="!last && !cutDown"
-                (cdkDragStarted)="closeWorkoutMenus()"
-                (cdkDragMoved)="drop.moved($event)"
-                (cdkDragReleased)="drop.released($event)"
                 (started)="startWorkout(workout)"
                 (menuToggled)="toggleWorkoutMenu(workout.id)"
                 (menuClosed)="closeWorkoutMenu(workout.id)"
-                (editRequested)="navigateToEditWorkout(workout.id)"
-                (moveRequested)="moveWorkout(workout, $event)"
+                (editRequested)="navigateToEditWorkout(workout)"
+                (copyRequested)="copyWorkout(workout)"
                 (deleteRequested)="deleteWorkout(workout)"
             ></li>
         }
     </ul>
     <div class="sr-only" aria-live="polite">{{ announcement() }}</div>
-
-    <!-- The ready-made workouts still to add (LIB-6), under your own -->
-    <app-library-ready-made class="library__ready-made" />
 </div>

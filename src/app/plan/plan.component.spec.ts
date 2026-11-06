@@ -173,17 +173,33 @@ describe('PlanComponent', () => {
         expect(days()[4]).toBe('Friday: Nothing planned');
     });
 
-    it('says to make a workout first when there are none, with no Add', async () => {
+    it('offers the ready-made workouts after yours, A to Z, each with its badge', async () => {
+        const workouts = TestBed.inject(WorkoutStore);
+        await workouts.readyMadeLoaded;
+        await open();
+
+        await click('#plan-add-3');
+        const choices = [...el().querySelectorAll<HTMLButtonElement>('.choice__choice')];
+        const names = choices.map((choice) => text(choice.querySelector('.choice__name')!));
+        expect(names.slice(0, 4)).toEqual(['Add new workouts', 'Legs', 'Push', '20-minute AMRAP']);
+        expect(names).toHaveLength(3 + workouts.readyMade().length);
+        expect(choices[2].querySelector('app-ready-made-badge')).toBeNull();
+        expect(choices[3].querySelector('app-ready-made-badge')).not.toBeNull();
+
+        choices[3].click();
+        await render();
+        expect(TestBed.inject(PlanStore).plan().days[3]).toEqual(['builtin:20-minute-amrap']);
+        expect(days()[3]).toBe('Thursday: 20-minute AMRAP');
+    });
+
+    it('can plan a ready-made workout with none of your own', async () => {
         const workouts = TestBed.inject(WorkoutStore);
         workouts.deleteWorkout(legs.id);
         workouts.deleteWorkout(push.id);
+        await workouts.readyMadeLoaded;
         await open();
 
-        expect(el().textContent).toContain('Make a workout in Workouts first');
-        expect(el().querySelector('.plan__add')).toBeNull();
-        const link = el().querySelector('.plan__workouts-link')!;
-        expect(text(link)).toBe('Go to your workouts');
-        expect(link.getAttribute('href')).toBe('/library');
+        expect(el().querySelector('#plan-add-0')).not.toBeNull();
     });
 
     it('links to the ready-made plans, coming back here (PLN-6)', async () => {

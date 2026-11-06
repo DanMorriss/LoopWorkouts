@@ -37,12 +37,13 @@ export class HomeComponent {
     private readonly planStore = inject(PlanStore);
 
     protected readonly hasHistory = computed(() => this.history.entries().length > 0);
+    /** Whether you've workouts of your own; until then, or a plan, Today offers one to start. */
     protected readonly hasWorkouts = computed(() => this.workouts.workouts().length > 0);
     /** Whether anything's planned, of the workouts still there: then the plan says what's next. */
     protected readonly hasPlan = computed(() =>
         this.planStore
             .plan()
-            .days.some((day) => day.some((id) => this.workouts.findWorkoutById(id) !== null))
+            .days.some((day) => day.some((id) => this.workouts.findAnyWorkout(id) !== null))
     );
     protected readonly greeting = computed(() => {
         const name = this.settings.name();

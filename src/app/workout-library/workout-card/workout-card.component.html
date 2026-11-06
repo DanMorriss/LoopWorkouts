@@ -32,6 +32,9 @@
                 >
                     {{ title() || 'Untitled workout' }}
                 </span>
+                @if (readyMade()) {
+                    <app-ready-made-badge class="workout-card__badge" />
+                }
                 <span class="workout-card__summary">{{ summary().text }} {{ rounds() }}</span>
             </span>
             <app-showcase-count
@@ -53,7 +56,8 @@
         }
     </a>
     <span class="sr-only" [id]="'workout-summary-' + workout().id">
-        {{ summary().spoken }}, {{ spokenRounds() }}{{ spokenWorks() }}
+        {{ readyMade() ? 'Ready-made. ' : '' }}{{ summary().spoken }}, {{ spokenRounds()
+        }}{{ spokenWorks() }}
     </span>
 
     <!-- Over the link, which covers the whole card: the heart at the left, the middle starts
@@ -95,43 +99,33 @@
                 role="group"
                 [attr.aria-label]="'Options for ' + name()"
             >
-                <button
-                    type="button"
-                    class="menu__item workout-card__menu-item--edit"
-                    (click)="editRequested.emit()"
-                >
-                    <mat-icon aria-hidden="true">edit</mat-icon>
-                    Edit
-                </button>
-                <!-- Dragging, for keyboards and screen readers (and anyone else) -->
-                @if (canMoveUp()) {
+                @if (readyMade()) {
                     <button
                         type="button"
-                        class="menu__item workout-card__menu-item--up"
-                        (click)="moveRequested.emit(-1)"
+                        class="menu__item workout-card__menu-item--copy"
+                        (click)="copyRequested.emit()"
                     >
-                        <mat-icon aria-hidden="true">arrow_upward</mat-icon>
-                        Move up
+                        <mat-icon aria-hidden="true">content_copy</mat-icon>
+                        Make a copy
                     </button>
-                }
-                @if (canMoveDown()) {
+                } @else {
                     <button
                         type="button"
-                        class="menu__item workout-card__menu-item--down"
-                        (click)="moveRequested.emit(1)"
+                        class="menu__item workout-card__menu-item--edit"
+                        (click)="editRequested.emit()"
                     >
-                        <mat-icon aria-hidden="true">arrow_downward</mat-icon>
-                        Move down
+                        <mat-icon aria-hidden="true">edit</mat-icon>
+                        Edit
+                    </button>
+                    <button
+                        type="button"
+                        class="menu__item menu__item--danger workout-card__menu-item--danger"
+                        (click)="deleteRequested.emit()"
+                    >
+                        <mat-icon aria-hidden="true">delete</mat-icon>
+                        Delete
                     </button>
                 }
-                <button
-                    type="button"
-                    class="menu__item menu__item--danger workout-card__menu-item--danger"
-                    (click)="deleteRequested.emit()"
-                >
-                    <mat-icon aria-hidden="true">delete</mat-icon>
-                    Delete
-                </button>
             </div>
         }
     </div>

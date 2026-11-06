@@ -11,47 +11,19 @@
                     <li class="preview__chip">{{ need }}</li>
                 }
             </ul>
-            @if (card.inLibrary) {
-                <p class="preview__note">
-                    You have a workout called this in your workouts already.
-                </p>
-            }
 
             <section class="preview__section" aria-labelledby="ready-made-steps">
                 <h3 id="ready-made-steps" class="preview__heading">What's in it</h3>
-                <app-workout-outline
-                    [workout]="workout"
-                    [exerciseUrl]="inPlan ? exerciseUrl : undefined"
-                />
+                <app-workout-outline [workout]="workout" [exerciseUrl]="exerciseUrl" />
             </section>
 
             <section class="preview__section" aria-labelledby="ready-made-muscles">
                 <h3 id="ready-made-muscles" class="preview__heading">Muscles it works</h3>
                 <app-body-map [main]="muscles().main" [supporting]="muscles().supporting" />
             </section>
-
-            <!-- From a plan's card it's only to look at: it comes with Use this plan -->
-            @if (!inPlan) {
-                <div class="preview__actions">
-                    <button type="button" class="btn-main preview__start" (click)="addAndStart()">
-                        <mat-icon aria-hidden="true">play_arrow</mat-icon>
-                        Add and start
-                    </button>
-                    <button type="button" class="btn-pill preview__add" (click)="add()">
-                        <mat-icon aria-hidden="true">add</mat-icon>
-                        Add to my workouts
-                    </button>
-                </div>
-            }
         } @else {
             <h2 class="preview__title">Workout not found</h2>
             <p class="preview__description">There's no ready-made workout at this link.</p>
-            <a
-                href="/ready-made"
-                class="btn-pill"
-                (click)="slide.follow($event, '/ready-made', 'out')"
-                >All ready-made workouts</a
-            >
         }
     </div>
 </div>

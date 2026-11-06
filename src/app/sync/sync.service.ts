@@ -3,6 +3,7 @@ import { DeviceDataService } from '../shared/state/device-data.service';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { AccountClient, ACCOUNT_CLIENT } from '../account/account-client';
 import { BackupService } from '../shared/backup/backup.service';
+import { ReadyMadeFavourites } from '../shared/state/ready-made-favourites.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { DeletionStore } from '../shared/state/deletion-store.service';
@@ -50,6 +51,7 @@ export class SyncService {
     private readonly exercises = inject(ExerciseStore);
     private readonly deletions = inject(DeletionStore);
     private readonly backup = inject(BackupService);
+    private readonly favourites = inject(ReadyMadeFavourites);
     private readonly plan = inject(PlanStore);
     private readonly settings = inject(SettingsStore);
     private readonly clock = inject(SyncClock);
@@ -77,6 +79,7 @@ export class SyncService {
             this.exercises.own();
             this.exercises.notes();
             this.exercises.hidden();
+            this.favourites.list();
             untracked(() => this.soon(CHANGE_DELAY_MS));
         });
         const view = this.document.defaultView;
@@ -294,6 +297,7 @@ export class SyncService {
             exercises: this.exercises.own(),
             exerciseNotes: this.exercises.notes(),
             hiddenExercises: this.exercises.hidden(),
+            readyMadeFavourites: this.favourites.list(),
             libraryOrder: this.workouts.libraryOrder(),
             plan: this.plan.plan(),
             profile: this.settings.profile(),

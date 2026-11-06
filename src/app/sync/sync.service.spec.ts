@@ -91,8 +91,9 @@ describe('SyncService', () => {
         const workout = workouts().addWorkout(newWorkout('Sprints'));
         history().record(entry('run-1', 1));
         const own = exercises().addOwn('Sled push', 'reps');
-        workouts().addWorkout(newWorkout('Hills'));
-        workouts().moveWorkout(1, 0);
+        const hills = workouts().addWorkout(newWorkout('Hills'));
+        // An order moved on another device, as it can't be here any more
+        workouts().mergeLibraryOrder({ ids: [hills.id, workout.id], updatedAt: 1 });
 
         await start();
 

@@ -2,12 +2,12 @@
     <div class="home w-full max-w-md p-4">
         <h2 class="home__greeting">{{ greeting() }}</h2>
 
-        @if (hasWorkouts()) {
+        @if (hasWorkouts() || hasPlan()) {
             <!-- The week's plan (PLN-4), the way in to changing it; with nothing planned, a
                  nudge to plan it (NAV-6) -->
             <app-week-strip class="home__card" />
         } @else {
-            <!-- Nothing to plan with yet: some workouts to add first (NAV-6) -->
+            <!-- New, with none of your own and nothing planned: a week to start with (NAV-6) -->
             <app-get-started class="home__card" />
         }
         <!-- The weekly plan's workouts for today (PLN-2) -->

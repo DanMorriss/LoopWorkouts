@@ -15,10 +15,6 @@
         @if (weekSoFar()) {
             <p class="plan__so-far">{{ weekSoFar() }}</p>
         }
-        @if (!hasWorkouts()) {
-            <p class="plan__hint">Make a workout in Workouts first, then plan it here.</p>
-            <a routerLink="/library" class="btn-pill plan__workouts-link">Go to your workouts</a>
-        }
 
         @for (day of days(); track day.day) {
             <section
@@ -33,7 +29,7 @@
                             <span class="plan__today">· today</span>
                         }
                     </h3>
-                    @if (hasWorkouts() && canAdd(day.day)) {
+                    @if (canAdd(day.day)) {
                         <button
                             type="button"
                             class="btn-pill plan__add"

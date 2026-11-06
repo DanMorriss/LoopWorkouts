@@ -89,6 +89,8 @@ describe('HomeComponent', () => {
      * a view transition, so the card can grow or shrink into it (morphHome).
      */
     async function useThePlan() {
+        // Its workouts are ready-made ones, which load on demand
+        await TestBed.inject(WorkoutStore).readyMadeLoaded;
         const start = vi.spyOn(document, 'startViewTransition');
         (element().querySelector('.plan-card__use') as HTMLButtonElement).click();
         expect(document.documentElement.classList).toContain('home-morphing');
@@ -135,20 +137,18 @@ describe('HomeComponent', () => {
             expect(element().querySelector('app-week-strip')).toBeNull();
         });
 
-        it('uses it in one tap: its workouts added and the week planned, with Undo', async () => {
+        it('uses it in one tap: the week planned with its workouts, with Undo', async () => {
             create();
             // On the page, so focus can move
             document.body.appendChild(element());
             expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
             await useThePlan();
 
-            const workouts = TestBed.inject(WorkoutStore).workouts();
-            expect(workouts.map((workout) => workout.title)).toEqual([
-                'Bodyweight basics',
-                'Cardio intervals',
-                'Core in 15',
-                'Tabata',
-            ]);
+            // Its ready-made workouts are planned as they are, not copied
+            expect(TestBed.inject(WorkoutStore).workouts()).toEqual([]);
+            expect(TestBed.inject(PlanStore).plan().days.flat()).toContain(
+                'builtin:bodyweight-basics'
+            );
             expect(TestBed.inject(UndoService).offer()?.message).toBe(
                 'Your week is planned: No equipment, 3 days'
             );
@@ -251,11 +251,10 @@ describe('HomeComponent', () => {
             expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
             await useThePlan();
 
-            const titles = TestBed.inject(WorkoutStore)
-                .workouts()
-                .map((workout) => workout.title);
-            expect(titles[0]).toBe('Legs');
-            expect(titles).toContain('Bodyweight basics');
+            expect(TestBed.inject(WorkoutStore).workouts()).toEqual([legs]);
+            expect(TestBed.inject(PlanStore).plan().days.flat()).toContain(
+                'builtin:bodyweight-basics'
+            );
             expect(TestBed.inject(UndoService).offer()?.message).toBe(
                 'Your week is planned: No equipment, 3 days'
             );

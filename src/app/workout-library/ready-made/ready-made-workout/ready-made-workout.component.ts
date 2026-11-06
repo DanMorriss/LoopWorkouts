@@ -1,53 +1,34 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
-import { BUILT_IN_WORKOUTS, copyOfBuiltIn } from '../../../models/built-in-workouts';
+import { BUILT_IN_WORKOUTS } from '../../../models/built-in-workouts';
 import { exerciseSlug } from '../../../models/exercise';
 import { musclesWorked } from '../../../models/workout-muscles';
 import { BackLinkComponent } from '../../../nav/back-link/back-link.component';
-import { PageSlide } from '../../../nav/page-slide';
 import { SwipeBackDirective } from '../../../nav/swipe-back.directive';
 import { BodyMapComponent } from '../../../shared/components/body-map/body-map.component';
 import { WorkoutOutlineComponent } from '../../../shared/components/workout-outline/workout-outline.component';
-import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
-import { WorkoutStore } from '../../../shared/state/workout-store.service';
-import { UndoService } from '../../../shared/undo/undo.service';
 import { readyMadeCard } from '../ready-made-card';
 
 /**
- * A ready-made workout (LIB-6), at /ready-made/<its name>, e.g. /ready-made/gym-legs: what it
- * is and needs, every exercise with its sets, and the muscles it works, with Add and start and
- * Add to my workouts. It slides in over Workouts, where the ready-made workouts are listed
- * under your own, as an exercise does over the Exercises list, and back off with ‹ Workouts
- * or a swipe right, with focus back on its card. Adding it slides back out to Workouts, with
- * the new one picked out there.
- *
- * From a ready-made plan's card (PLN-6), at /ready-made-plans/<its name>, it's the same page
- * without the buttons, as the workout comes with the plan, and goes back to where the card is.
- * Its exercises link to their pages there, which come back to it.
+ * One of a ready-made plan's workouts (PLN-6), from the plan's card, at
+ * /ready-made-plans/<its name>, e.g. /ready-made-plans/gym-legs: what it is and needs, every
+ * exercise with its sets, and the muscles it works, only to look at, as it comes with the
+ * plan. It slides in over the card, and back to where it was with ‹ or a swipe right. Its
+ * exercises link to their pages, which come back to it. On Workouts, a ready-made workout's
+ * page is its Details, as yours is.
  */
 @Component({
     selector: 'app-ready-made-workout',
-    imports: [
-        BackLinkComponent,
-        BodyMapComponent,
-        MatIconModule,
-        SwipeBackDirective,
-        WorkoutOutlineComponent,
-    ],
+    imports: [BackLinkComponent, BodyMapComponent, SwipeBackDirective, WorkoutOutlineComponent],
     templateUrl: './ready-made-workout.component.html',
     styleUrl: './ready-made-workout.component.scss',
 })
 export class ReadyMadeWorkoutComponent {
-    private readonly workouts = inject(WorkoutStore);
     private readonly exercises = inject(ExerciseStore);
-    private readonly run = inject(ActiveRunService);
     private readonly router = inject(Router);
-    private readonly undo = inject(UndoService);
-    protected readonly slide = inject(PageSlide);
 
     private readonly route = inject(ActivatedRoute);
 
@@ -56,15 +37,7 @@ export class ReadyMadeWorkoutComponent {
         { initialValue: '' }
     );
 
-    /** Opened from a ready-made plan's card, rather than the list of ready-made workouts. */
-    protected readonly inPlan = this.route.snapshot.data['inPlan'] === true;
-
-    protected readonly back = this.inPlan
-        ? backToPlanCard(this.route.snapshot.queryParamMap.get('from'))
-        : {
-              url: `/library?ready-made=${this.route.snapshot.paramMap.get('id') ?? ''}`,
-              label: 'Workouts',
-          };
+    protected readonly back = backToPlanCard(this.route.snapshot.queryParamMap.get('from'));
 
     /**
      * From a plan's card, an exercise's page, under this workout so it comes back here, and on
@@ -89,42 +62,13 @@ export class ReadyMadeWorkoutComponent {
         if (!workout) {
             return null;
         }
-        const titles = new Set(this.workouts.workouts().map((w) => w.title.trim().toLowerCase()));
-        return readyMadeCard(workout, titles);
+        return readyMadeCard(workout);
     });
 
     protected readonly muscles = computed(() => {
         const card = this.card();
         return musclesWorked(card ? [card.workout] : [], (id) => this.exercises.byId(id));
     });
-
-    /**
-     * Copies it into the library, with Undo, and slides back out to Workouts, as ‹ Workouts
-     * does from the list, with the new one picked out there.
-     */
-    protected add() {
-        const card = this.card();
-        if (!card) {
-            return;
-        }
-        const added = this.workouts.addWorkout(copyOfBuiltIn(card.workout));
-        this.undo.offerUndo({
-            message: `Added "${added.title}" to your workouts`,
-            undo: () => this.workouts.deleteWorkout(added.id),
-        });
-        this.slide.navigate(`/library?added=${added.id}`, 'out');
-    }
-
-    /** Copies it into the library and starts it straight away. */
-    protected addAndStart() {
-        const card = this.card();
-        if (!card) {
-            return;
-        }
-        const added = this.workouts.addWorkout(copyOfBuiltIn(card.workout));
-        this.run.start(added);
-        void this.router.navigate(['/workout']);
-    }
 }
 
 /** Back to where a plan's card was (PlanWorkoutFrom): Today, or the Ready-made plans page. */

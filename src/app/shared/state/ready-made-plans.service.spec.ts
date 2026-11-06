@@ -18,9 +18,10 @@ describe('ReadyMadePlans (PLN-6)', () => {
     afterEach(() => localStorage.clear());
 
     const titlesOn = (day: number) =>
-        planStore.plan().days[day].map((id) => workouts.findWorkoutById(id)?.title);
+        planStore.plan().days[day].map((id) => workouts.findAnyWorkout(id)?.title);
 
-    it('adds its workouts and replaces the plan with its week', () => {
+    it('replaces the plan with its week of ready-made workouts, as they are', async () => {
+        await workouts.readyMadeLoaded;
         const legs = workouts.addWorkout({
             title: 'Legs',
             repeats: 1,
@@ -30,11 +31,9 @@ describe('ReadyMadePlans (PLN-6)', () => {
 
         TestBed.inject(ReadyMadePlans).use(plan);
 
-        expect(workouts.workouts().map((w) => w.title)).toEqual([
-            'Legs',
-            'Dumbbell upper',
-            'Dumbbell lower',
-        ]);
+        // None is copied into your workouts
+        expect(workouts.workouts().map((w) => w.title)).toEqual(['Legs']);
+        expect(planStore.plan().days[0]).toEqual(['builtin:dumbbell-upper']);
         expect([0, 1, 2, 3, 4, 5, 6].map(titlesOn)).toEqual([
             ['Dumbbell upper'],
             ['Dumbbell lower'],
@@ -46,20 +45,7 @@ describe('ReadyMadePlans (PLN-6)', () => {
         ]);
     });
 
-    it('uses a workout of the same title you have already, rather than a second copy', () => {
-        const mine = workouts.addWorkout({
-            title: ' dumbbell upper ',
-            repeats: 1,
-            blocks: asOneGroup([{ kind: 'reps', reps: 5, name: 'Press' }]),
-        });
-
-        TestBed.inject(ReadyMadePlans).use(plan);
-
-        expect(workouts.workouts()).toHaveLength(2);
-        expect(planStore.plan().days[0]).toEqual([mine.id]);
-    });
-
-    it('puts everything back with Undo: the plan it replaced, and none of what it added', () => {
+    it('puts back the plan it replaced with Undo', () => {
         const legs = workouts.addWorkout({
             title: 'Legs',
             repeats: 1,

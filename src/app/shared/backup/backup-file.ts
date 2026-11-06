@@ -17,6 +17,7 @@ import {
 } from '../state/migrate';
 import { Settings } from '../state/settings-store.service';
 import { readWorkout } from '../state/workout-store.service';
+import { ReadyMadeFavourite, readReadyMadeFavourite } from '../state/ready-made-favourites.service';
 
 /**
  * Goes up when the file's shape changes; older files are converted when they're read.
@@ -44,8 +45,11 @@ import { readWorkout } from '../state/workout-store.service';
  *    Nothing to convert; an older app turns the file down rather than syncing entries back
  *    without them.
  * 13: `plan`, the weekly plan (PLN-1): the workouts planned on each day, and when it changed.
+ * 14: `readyMadeFavourites`, the ready-made workouts made favourites (LIB-8), and ready-made
+ *    workouts (`builtin:` ids) in the plan. Nothing to convert; an older app turns the file down
+ *    rather than planning workouts it can't find.
  */
-export const BACKUP_VERSION = 13;
+export const BACKUP_VERSION = 14;
 
 /** Far more than years of workouts take (about 1 KB each), so a bigger file isn't a backup. */
 export const MAX_BACKUP_BYTES = 50 * 1024 * 1024;
@@ -63,6 +67,8 @@ export interface BackupFile {
     exerciseNotes: ExerciseNote[];
     /** Exercises hidden from the picker, built-in or your own. */
     hiddenExercises: HiddenExercise[];
+    /** Ready-made workouts made favourites. */
+    readyMadeFavourites: ReadyMadeFavourite[];
     /** The library's order, taken by an import if a workout was moved there more recently. */
     libraryOrder: LibraryOrder;
     /** The weekly plan, taken by an import if it changed there more recently. */
@@ -85,6 +91,8 @@ export type ReadBackup =
           exerciseNotes: ExerciseNote[];
           /** None before version 5. */
           hiddenExercises: HiddenExercise[];
+          /** None before version 14. */
+          readyMadeFavourites: ReadyMadeFavourite[];
           /** None before version 7, or in a file written by hand. */
           libraryOrder: LibraryOrder | null;
           /** None before version 13, or in a file written by hand. */
@@ -113,6 +121,7 @@ export function makeBackup(
         | 'exercises'
         | 'exerciseNotes'
         | 'hiddenExercises'
+        | 'readyMadeFavourites'
         | 'libraryOrder'
         | 'plan'
         | 'deleted'
@@ -194,6 +203,11 @@ export function readBackup(text: string, now = Date.now()): ReadBackup {
     const hiddenExercises = (Array.isArray(file['hiddenExercises']) ? file['hiddenExercises'] : [])
         .map((item) => readHiddenExercise(item))
         .filter((hidden) => hidden !== null);
+    const readyMadeFavourites = (
+        Array.isArray(file['readyMadeFavourites']) ? file['readyMadeFavourites'] : []
+    )
+        .map((item) => readReadyMadeFavourite(item))
+        .filter((favourite) => favourite !== null);
     const libraryOrder = isLibraryOrder(file['libraryOrder'])
         ? { ids: [...file['libraryOrder'].ids], updatedAt: file['libraryOrder'].updatedAt }
         : null;
@@ -211,6 +225,7 @@ export function readBackup(text: string, now = Date.now()): ReadBackup {
         exercises,
         exerciseNotes,
         hiddenExercises,
+        readyMadeFavourites,
         libraryOrder,
         plan,
         deleted,

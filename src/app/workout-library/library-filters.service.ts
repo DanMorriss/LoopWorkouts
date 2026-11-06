@@ -1,6 +1,6 @@
 import { computed, inject, Service, signal } from '@angular/core';
-import { BUILT_IN_WORKOUTS } from '../models/built-in-workouts';
 import { MuscleGroup } from '../models/exercise';
+import { aToZ } from '../models/workout';
 import { filterWorkouts, WorkoutFilters } from '../models/workout-filter';
 import { counted } from '../shared/format-count';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
@@ -17,10 +17,10 @@ export const LIBRARY_SOURCES: readonly { value: LibrarySource; label: string }[]
 ];
 
 /**
- * What the Workouts page is searched and filtered by, and the workouts it leaves: your own,
- * and the ready-made ones (LIB-6) not in your workouts already. Kept for as long as the app's
- * open, so coming back from a workout's details finds the list as it was; Only what I have is
- * the setting shared with the Exercises list.
+ * What the Workouts page is searched and filtered by, and the workouts it leaves: yours and
+ * the ready-made ones (LIB-6), together, A to Z. Kept for as long as the app's open, so coming
+ * back from a workout's details finds the list as it was; Only what I have is the setting
+ * shared with the Exercises list.
  */
 @Service()
 export class LibraryFilters {
@@ -43,46 +43,30 @@ export class LibraryFilters {
         myEquipment: this.settings.myEquipment(),
     }));
 
-    /**
-     * The ready-made workouts to offer: those whose title isn't one of your workouts', as
-     * those are most likely copies of them already.
-     */
-    private readonly readyMadeToAdd = computed(() => {
-        const titles = new Set(
-            this.workouts.workouts().map((workout) => workout.title.trim().toLowerCase())
-        );
-        return BUILT_IN_WORKOUTS.filter((workout) => !titles.has(workout.title.toLowerCase()));
+    /** Which workouts are listed, before the search and filters. */
+    private readonly listed = computed(() => {
+        switch (this.source()) {
+            case 'mine':
+                return this.workouts.workouts();
+            case 'ready-made':
+                return this.workouts.readyMade();
+            default:
+                return this.workouts.allWorkouts();
+        }
     });
 
-    /** Your workouts shown, in the library's order. */
+    /** The workouts shown, yours and ready-made, A to Z (LIB-3). */
     readonly shown = computed(() =>
-        this.source() === 'ready-made'
-            ? []
-            : filterWorkouts(this.workouts.workouts(), this.filters(), (id) =>
-                  this.exercises.byId(id)
-              )
-    );
-
-    /** The ready-made workouts shown, in their order. */
-    readonly readyMade = computed(() =>
-        this.source() === 'mine'
-            ? []
-            : filterWorkouts(this.readyMadeToAdd(), this.filters(), (id) => this.exercises.byId(id))
+        aToZ(filterWorkouts(this.listed(), this.filters(), (id) => this.exercises.byId(id)))
     );
 
     /**
-     * Whether some of your workouts are hidden, by a search, a filter or Only what I have. They
-     * can't be reordered then, as where a card lands among the hidden ones would be a guess.
-     */
-    readonly cutDown = computed(() => this.shown().length < this.workouts.workouts().length);
-
-    /**
-     * How many show, of yours and the ready-made ones, while any is hidden: "3 of 20 workouts"
-     * or "No workouts match". Null when nothing's hidden.
+     * How many show while any is hidden: "3 of 20 workouts" or "No workouts match". Null when
+     * nothing's hidden.
      */
     readonly shownCount = computed(() => {
-        const shown = this.shown().length + this.readyMade().length;
-        const all = this.workouts.workouts().length + this.readyMadeToAdd().length;
+        const shown = this.shown().length;
+        const all = this.workouts.allWorkouts().length;
         if (shown === all) {
             return null;
         }

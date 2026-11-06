@@ -154,6 +154,43 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         );
     });
 
+    describe('of a ready-made workout (LIB-6)', () => {
+        beforeEach(async () => {
+            await store.readyMadeLoaded;
+            await open('builtin:gym-legs');
+        });
+
+        it('has its badge and description, and what is in it', () => {
+            expect(text(el().querySelector('.details__title')!)).toBe('Gym legs');
+            expect(el().querySelector('app-ready-made-badge')).not.toBeNull();
+            expect(text(el().querySelector('.details__description')!)).toContain('Squats');
+            expect(text()).toContain('Back squat');
+        });
+
+        it('has Make a copy for Edit, which opens the copy in Create, coming back to it', () => {
+            expect(el().querySelector('.details__edit')).toBeNull();
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            el().querySelector<HTMLButtonElement>('.details__copy')!.click();
+
+            const copy = store.workouts()[0];
+            expect(copy.title).toBe('Gym legs (copy)');
+            expect(slide).toHaveBeenCalledWith(
+                `/setup?editId=${copy.id}&from=%2Flibrary%2F${copy.id}`,
+                'in'
+            );
+        });
+
+        it('makes it a favourite from its heart, as a ready-made one', () => {
+            el().querySelector<HTMLElement>('.details__top .favourite-button')!.click();
+            harness.detectChanges();
+
+            expect(store.findAnyWorkout('builtin:gym-legs')?.favourite).toBe(true);
+            expect(store.workouts()).toEqual([]);
+        });
+    });
+
     it('makes it a favourite from the heart by its title, and not again', async () => {
         const sprints = addSprints();
         await open(sprints.id);

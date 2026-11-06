@@ -54,10 +54,10 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | ALM-5  | Hear the last seconds of a step counted down                             | ✅  | —   | [alarms](alarms.md)                           |
 | LIB-1  | See my saved workouts and start one                                      | ✅  | —   | [library](library.md)                         |
 | LIB-2  | Edit or delete a saved workout                                           | ✅  | —   | [library](library.md)                         |
-| LIB-3  | Put my workouts in the order I want                                      | ✅  | —   | [library](library.md)                         |
+| LIB-3  | Find a workout in the list quickly (A to Z)                              | ✅  | —   | [library](library.md)                         |
 | LIB-4  | See what a workout works, and when I did it                              | ✅  | —   | [library](library.md)                         |
 | LIB-5  | See which muscle groups my plan leaves out                               | ✅  | —   | [library](library.md)                         |
-| LIB-6  | Pick from ready-made workouts                                            | ✅  | —   | [library](library.md)                         |
+| LIB-6  | Start, plan or copy ready-made workouts                                  | ✅  | —   | [library](library.md)                         |
 | LIB-7  | Get a ready-made workout suggested for the muscles my plan leaves out    | ✅  | —   | [library](library.md)                         |
 | LIB-8  | Search and filter my workouts, and mark favourites                       | ✅  | —   | [library](library.md)                         |
 | HIS-1  | See the workouts I've done, by day                                       | ✅  | —   | [history](history.md)                         |

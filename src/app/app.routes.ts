@@ -49,18 +49,15 @@ export const routes: Routes = [
             ),
     },
     {
-        // The ready-made workouts are listed on Workouts now (LIB-6), under your own
+        // The ready-made workouts are listed on Workouts now (LIB-6), with yours
         path: 'ready-made',
         pathMatch: 'full',
         redirectTo: 'library',
     },
     {
-        // A ready-made workout, e.g. /ready-made/gym-legs, over Workouts
+        // A ready-made workout's page until 2026-11-06, which is its Details now
         path: 'ready-made/:id',
-        loadComponent: () =>
-            import(
-                './workout-library/ready-made/ready-made-workout/ready-made-workout.component'
-            ).then((m) => m.ReadyMadeWorkoutComponent),
+        redirectTo: ({ params }) => `/library/builtin:${params['id']}`,
     },
     {
         path: 'plan',
@@ -88,7 +85,6 @@ export const routes: Routes = [
     {
         // One of a ready-made plan's workouts, from its card: only to look at, and back there
         path: 'ready-made-plans/:id',
-        data: { inPlan: true },
         loadComponent: () =>
             import(
                 './workout-library/ready-made/ready-made-workout/ready-made-workout.component'

@@ -24,6 +24,12 @@
     overflow-wrap: anywhere;
 }
 
+.details__description {
+    margin: 0.5rem 0 0;
+    color: var(--text);
+    line-height: 1.45;
+}
+
 .details__section {
     margin-top: 1.25rem;
 }

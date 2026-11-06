@@ -1,0 +1,92 @@
+@use 'type' as *;
+
+:host {
+    position: fixed;
+    z-index: 50;
+    inset: 0;
+}
+
+// Takes every press on the page, which waits while the tour's on
+.tour__cover {
+    position: absolute;
+    inset: 0;
+}
+
+.tour__cover--dim {
+    background: var(--overlay);
+}
+
+// A ring round the part lit up, its shadow dimming the rest of the screen
+.tour__light {
+    position: fixed;
+    border: 2px solid var(--accent);
+    border-radius: 0.9rem;
+    box-shadow:
+        0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent),
+        0 0 0 200vmax var(--overlay);
+    pointer-events: none;
+    transition:
+        top 0.35s var(--ease-spring),
+        left 0.35s var(--ease-spring),
+        width 0.35s var(--ease-spring),
+        height 0.35s var(--ease-spring);
+}
+
+// At the bottom of the screen, over the tab bar and clear of an iPhone's home bar
+.tour__card {
+    position: fixed;
+    right: 0;
+    bottom: calc(env(safe-area-inset-bottom) + 1rem);
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: min(26rem, calc(100% - 2rem));
+    margin-inline: auto;
+    padding: 1rem 1rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--raised);
+    box-shadow: 0 18px 40px var(--shadow);
+}
+
+.tour__count {
+    margin: 0;
+    color: var(--text-muted);
+    @include small-type(0.75rem);
+    font-variant-numeric: tabular-nums;
+}
+
+.tour__title {
+    margin: 0;
+    @include dialog-title;
+    outline: none;
+}
+
+.tour__text {
+    margin: 0;
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+// Skip at the left, Back and Next at the right
+.tour__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.tour__steps {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tour__light {
+        transition: none;
+    }
+}

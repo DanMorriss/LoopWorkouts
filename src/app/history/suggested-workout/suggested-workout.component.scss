@@ -1,4 +1,5 @@
 @use 'type' as *;
+@use 'panel-card' as *;
 
 :host {
     display: block;
@@ -10,10 +11,7 @@
     flex-direction: column;
     align-items: center;
     gap: 0.35rem;
-    padding: 1rem;
-    border: 1px solid var(--panel-border);
-    border-radius: 0.9rem;
-    background: var(--card);
+    @include panel-card;
     text-align: center;
 
     p {

@@ -67,6 +67,7 @@
     <button
         type="button"
         class="btn-main btn-main--round workout-card__start"
+        data-tour="workout-start"
         [attr.aria-label]="'Start ' + name()"
         [attr.aria-describedby]="'workout-summary-' + workout().id"
         (click)="start($event)"

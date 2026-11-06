@@ -3,7 +3,7 @@
         <h2 class="history__title">Progress</h2>
 
         @if (groups().length === 0) {
-            <div class="history__empty">
+            <div class="history__empty" data-tour="progress-empty">
                 <p>
                     Nothing here yet. Do a workout, and how your week is going and what you've done
                     show up here.
@@ -16,7 +16,7 @@
                 {{ lastWeek().workouts === 1 ? 'workout' : 'workouts' }} · {{ lastWeek().time }}
             </p>
 
-            <app-time-per-week class="history__weeks" />
+            <app-time-per-week class="history__weeks" data-tour="time-per-week" />
 
             <app-muscles-this-week class="history__muscles" />
 

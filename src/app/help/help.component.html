@@ -16,6 +16,12 @@
         </label>
         <p class="sr-only" role="status">{{ resultText() }}</p>
 
+        <!-- The tour of the app (NAV-8), for any time -->
+        <button type="button" class="btn-pill help__tour" (click)="tour.start()">
+            <app-icon>explore</app-icon>
+            Take the tour
+        </button>
+
         @for (section of sections(); track section.id) {
             <section class="help__section" [attr.aria-labelledby]="'help-section-' + section.id">
                 <h3 class="help__heading" [id]="'help-section-' + section.id">

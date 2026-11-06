@@ -16,6 +16,8 @@ import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { HELP_SECTIONS, searchTopics } from './help-topics';
 import { counted } from '../shared/format-count';
+import { IconComponent } from '../shared/components/icon/icon.component';
+import { TourService } from '../tour/tour.service';
 
 /**
  * Help (NAV-7): the questions people ask, in sections, each opening to its answer, with a
@@ -24,13 +26,14 @@ import { counted } from '../shared/format-count';
  */
 @Component({
     selector: 'app-help',
-    imports: [BackLinkComponent, RouterLink, SwipeBackDirective],
+    imports: [BackLinkComponent, IconComponent, RouterLink, SwipeBackDirective],
     templateUrl: './help.component.html',
     styleUrl: './help.component.scss',
 })
 export class HelpComponent {
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly injector = inject(Injector);
+    protected readonly tour = inject(TourService);
 
     /** The question opened by a ? link, if any, as the address says. */
     protected readonly opened = toSignal(

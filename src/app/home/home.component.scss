@@ -8,6 +8,8 @@
 
 .home__greeting {
     margin: 0;
+    // Takes focus from code only, e.g. after the tour
+    outline: none;
     @include display;
     color: var(--text-strong);
     font-size: 1.4rem;

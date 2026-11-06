@@ -18,7 +18,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 **Workouts page**
 
-- [ ] **Saving an edit should get back smoothly:** from Workouts, into a workout, then editing and saving, jumps to Workouts with the edited workout in the middle (`/library?saved=<id>`). Make that a smooth transition; going back to the workout's details instead may be the better answer.
+- [x] **Saving an edit gets back smoothly** (2026-11-06): Save slides Create back out, as ‹ does, showing what was saved: an edit to the workout's Details, a new workout to Workouts with it highlighted, saying "Saved" either way.
 - [x] **Search and filters** (LIB-8, 2026-11-06): a search by name or exercise, Favourites (a heart on each card and in Details, synced with the workout), and under More filters the muscles and Only what I have. Dragging and Move up/down are off while any workout is hidden. "My own workouts" comes with the ready-made workouts listed, below.
 - [x] **List the ready-made workouts on the page** (LIB-6, 2026-11-06): one list with yours, A to Z, each with a Ready-made badge, used as they are: started, planned (Use this plan too) and favourited without copying. Make a copy, from a card's options, its Details or the summary, makes your own "(copy)" and opens it in Create. Dragging and Move up/down are gone (LIB-3), and Missing muscle groups is on the Plan page.
 

@@ -547,7 +547,10 @@ describe('WorkoutSetupComponent', () => {
                 expect(TestBed.inject(LeaveCheck).confirm()).toBeNull();
             });
 
-            it('saves the workout without starting it, and goes back to the library with it highlighted', async () => {
+            it('saves the workout without starting it, and slides back to the library with it highlighted', async () => {
+                const slide = vi
+                    .spyOn(TestBed.inject(PageSlide), 'navigate')
+                    .mockImplementation(() => {});
                 typeTitle('Sprints');
                 chooseTime(0, 'seconds', '30');
 
@@ -555,10 +558,12 @@ describe('WorkoutSetupComponent', () => {
 
                 expect(store.workouts().map((workout) => workout.title)).toEqual(['Sprints']);
                 expect(store.activeWorkout()).toBeNull();
-                expect(navigate).toHaveBeenCalledWith(['/library'], {
-                    queryParams: { saved: store.workouts()[0].id },
-                });
-                expect(shown()).toEqual({ title: '', steps: [blankStep], repeats: '1' });
+                expect(slide).toHaveBeenCalledWith(
+                    `/library?saved=${store.workouts()[0].id}`,
+                    'out'
+                );
+                // Left as it was, so it slides out showing what was saved
+                expect(shown().title).toBe('Sprints');
             });
 
             it("can't save a workout with no work time, as Start can't", async () => {
@@ -2743,10 +2748,13 @@ describe('WorkoutSetupComponent', () => {
             expect(navigate).toHaveBeenCalledWith(['/workout']);
         });
 
-        it('saves the changes with Save, without starting it, and goes back to the library', async () => {
+        it('saves the changes with Save, without starting it, and slides back to its details', async () => {
             await setup({ editId: 'workout-1' });
             store.addWorkout(savedWorkout);
             await create();
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
 
             typeTitle('Renamed');
             await press('Save');
@@ -2754,9 +2762,7 @@ describe('WorkoutSetupComponent', () => {
             expect(store.workouts()).toHaveLength(1);
             expect(store.workouts()[0]).toMatchObject({ id: 'workout-1', title: 'Renamed' });
             expect(store.activeWorkout()).toBeNull();
-            expect(navigate).toHaveBeenCalledWith(['/library'], {
-                queryParams: { saved: 'workout-1' },
-            });
+            expect(slide).toHaveBeenCalledWith('/library/workout-1?saved=1', 'out');
         });
 
         it('empties the form for a new workout when the editId goes, as Create from the menu does', async () => {

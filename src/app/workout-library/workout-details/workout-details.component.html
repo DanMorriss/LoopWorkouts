@@ -4,7 +4,7 @@
 
         @if (workout(); as workout) {
             <div class="details__top">
-                <h2 class="details__title">{{ name() }}</h2>
+                <h2 class="details__title" tabindex="-1">{{ name() }}</h2>
                 <app-favourite-button [workout]="workout" />
             </div>
             @if (readyMade(); as ready) {
@@ -71,6 +71,7 @@
                     </button>
                 }
             </div>
+            <div class="sr-only" aria-live="polite">{{ announcement() }}</div>
         } @else if (!loading()) {
             <h2 class="details__title">Workout not found</h2>
             <p class="details__empty">It may have been deleted.</p>

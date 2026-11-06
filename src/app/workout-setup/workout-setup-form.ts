@@ -29,6 +29,7 @@ import {
     Workout,
     WorkoutFields,
 } from '../models/workout';
+import { PageSlide } from '../nav/page-slide';
 import { WheelPickerOption } from '../shared/components/wheel-picker/wheel-picker.component';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
 import { counted } from '../shared/format-count';
@@ -72,6 +73,7 @@ export class WorkoutSetupForm {
     private readonly workoutStore = inject(WorkoutStore);
     private readonly run = inject(ActiveRunService);
     private readonly router = inject(Router);
+    private readonly slide = inject(PageSlide);
     private readonly injector = inject(Injector);
     private readonly focusAfterRender = injectFocusAfterRender();
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -909,14 +911,23 @@ export class WorkoutSetupForm {
     }
 
     /**
-     * Save (BLD-15), checked as Start is: saves the workout without starting it, and goes back
-     * to the library with it highlighted.
+     * Save (BLD-15), checked as Start is: saves the workout without starting it, and slides back
+     * out, as ‹ does: an edited one to its details, where the change shows, and a new one to
+     * Workouts, with it highlighted. Both say it was saved.
      */
     async saveOnly(): Promise<void> {
         await submit(this.workoutForm, async () => {
+            const editing = this.editingWorkoutId() !== null;
             const savedWorkout = this.save();
-            this.load(null);
-            await this.router.navigate(['/library'], { queryParams: { saved: savedWorkout.id } });
+            // Kept as it is, so the page slides out showing what was saved; only marked saved,
+            // so leaving doesn't ask about changes
+            this.savedState.set(JSON.stringify(this.model()));
+            this.slide.navigate(
+                editing
+                    ? `/library/${savedWorkout.id}?saved=1`
+                    : `/library?saved=${savedWorkout.id}`,
+                'out'
+            );
             return undefined;
         });
     }

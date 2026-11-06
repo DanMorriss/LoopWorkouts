@@ -134,7 +134,7 @@
 - **‹** at the top goes back without saving, sliding the page off, to where it was opened from: **‹ Workouts** from New, a card's Edit or anywhere else, the workout's title from Edit in its details, or **‹ Exercise** from an exercise's Add to workout (since 2026-11-05). Create also slides in now. There's no swipe back here, as its rows are dragged and its wheels turned.
 - **Leaving with unsaved changes** (since 2026-11-05), by ‹, the tab bar, the workout's bar or the browser's back button, asks first: "Discard your changes?", saying "Your changes to Legs haven't been saved." or "This workout hasn't been saved.", with **Keep editing** as the main button, where focus starts, and **Discard changes**. **‹ Back**, Escape or a tap outside keep editing. Changes are anything different from how the form opened: looking around, opening and closing steps, or changing something and changing it back asks nothing, and nor does a new workout left empty. Closing or reloading the tab gets the browser's own question, where the browser offers one.
 - The main button says **Start workout** for a new workout and **Save & start workout** when editing. It saves the workout to the library, starts it, and opens the workout page.
-- **Save** (BLD-15) sits to its left, a smaller pill, so Start stays the main one. It saves the workout as Start does, without starting it, empties the form and goes back to Workouts, with the workout highlighted, in view and focused, and screen readers hear "Saved Sprints" (see [library](library.md)). It's held back by the same checks as Start.
+- **Save** (BLD-15) sits to its left, a smaller pill, so Start stays the main one. It saves the workout as Start does, without starting it, and Create slides back out to the right, as ‹ does, still showing what was saved (since 2026-11-06; until then it emptied the form and Workouts came in at once). A **new** workout goes back to Workouts, with it highlighted, in view and focused; one **being edited** goes back to its Details, where the change shows, scrolled where it was left, with focus on Edit if that's in view (or on its title, e.g. for a copy just made). Either way screen readers hear "Saved Sprints" (see [library](library.md)). It's held back by the same checks as Start.
 - Saving a new workout gives it the next id (one more than the highest saved).
 - Editing replaces the saved workout, keeping its id. If it's been deleted meanwhile, it's saved as a new one.
 
@@ -171,7 +171,7 @@
 - Given weights in lb, when I pick 135, then it's saved as 61.235 kg, and shows as 135 lb.
 - Given a step saved at 20.412 kg (45 lb), when I edit only the title, then the weight stays 20.412.
 - Given a new workout "Sprints" with a timed step of 0:30, when I press Save, then it's in the library, nothing is running, and Workouts opens with Sprints highlighted and focused.
-- Given a saved workout being edited, when I rename it and press Save, then the library still has one of it, renamed, and nothing is running.
+- Given a saved workout being edited from its Details, when I rename it and press Save, then the library still has one of it, renamed, nothing is running, and its Details slide back in with the new name, saying "Saved" and its name, with focus on Edit.
 - Given only a rest step, then Save is disabled, as Start is.
 
 ## Platform notes

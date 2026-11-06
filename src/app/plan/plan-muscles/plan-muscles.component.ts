@@ -15,7 +15,7 @@ import {
     WorkoutChoice,
     WorkoutChoiceDialogComponent,
 } from '../../shared/components/workout-choice-dialog/workout-choice-dialog.component';
-import { MAX_WORKOUTS_A_DAY, WEEKDAYS } from '../../models/plan';
+import { MAX_WORKOUTS_A_DAY, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { injectFocusAfterRender } from '../../shared/focus-after-render';
 
 /**
@@ -93,16 +93,43 @@ export class PlanMusclesComponent {
     });
 
     /** The days to plan the suggestion on; one it's on already (or that's full) can't be. */
+    /**
+     * The days to plan the suggestion on, each with what's on it already: its workouts and their
+     * main muscles, so a day can be picked to suit ("Legs day: Glutes, Quads"), or "Nothing
+     * planned". One it's on already, or that's full, can't be picked.
+     */
     protected readonly days = computed((): WorkoutChoice[] => {
         const id = this.gapFiller()?.workout.id;
-        return this.plan.plan().days.map((day, i) => ({
-            id: String(i),
-            name: WEEKDAYS[i],
-            detail: id && day.includes(id) ? 'Planned' : '',
-            disabled: (id !== undefined && day.includes(id)) || day.length >= MAX_WORKOUTS_A_DAY,
-            icon: 'event',
-        }));
+        const today = weekdayOf(Date.now());
+        return this.plan.plan().days.map((day, i) => {
+            const planned = day
+                .map((workoutId) => this.workouts.findAnyWorkout(workoutId))
+                .filter((workout): workout is Workout => workout !== null);
+            const already = id !== undefined && day.includes(id);
+            const full = planned.length >= MAX_WORKOUTS_A_DAY;
+            return {
+                id: String(i),
+                name: i === today ? `${WEEKDAYS[i]} (today)` : WEEKDAYS[i],
+                note: planned.length
+                    ? planned.map((workout) => this.dayLine(workout)).join(' · ')
+                    : 'Nothing planned',
+                detail: already ? 'Planned' : full ? 'Full' : '',
+                disabled: already || full,
+                icon: 'event',
+            };
+        });
     });
+
+    /** "Legs day: Glutes, Quads": a planned workout and its main muscles, the first three. */
+    private dayLine(workout: Workout): string {
+        const name = workout.title.trim() || 'Untitled workout';
+        const { main } = musclesWorked([workout], (id) => this.exercises.byId(id));
+        if (main.length === 0) {
+            return name;
+        }
+        const shown = main.slice(0, 3).map((muscle) => MUSCLE_LABELS[muscle]);
+        return `${name}: ${shown.join(', ')}${main.length > 3 ? ' and more' : ''}`;
+    }
 
     /** Plans the suggested ready-made workout on the day picked, as it is. */
     protected planOn(day: string | null) {

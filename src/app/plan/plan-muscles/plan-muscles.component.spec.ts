@@ -9,6 +9,7 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { makeWorkout as baseWorkout, reps, SimpleWorkout } from '../../shared/testing/make-workout';
 import { PlanMusclesComponent } from './plan-muscles.component';
+import { weekdayOf } from '../../models/plan';
 
 function makeWorkout(overrides: Partial<SimpleWorkout> = {}): WorkoutFields {
     const { id: _id, updatedAt: _updatedAt, ...workout } = baseWorkout(overrides);
@@ -129,7 +130,15 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                 const days = Array.from(
                     document.querySelectorAll<HTMLButtonElement>('.choice__choice')
                 );
-                expect(days.map((day) => day.querySelector('.choice__name')!.textContent)).toEqual([
+                // Each day, today marked, with what's on it already and the muscles those work
+                const rows = days.map((day) => {
+                    const name = day.querySelector('.choice__name')!;
+                    const note = name.querySelector('.choice__note')!.textContent!.trim();
+                    return [name.textContent!.replace(note, '').trim(), note];
+                });
+                const today = weekdayOf(Date.now());
+                expect(rows[today][0]).toMatch(/\(today\)$/);
+                expect(rows.map(([name]) => name.replace(' (today)', ''))).toEqual([
                     'Monday',
                     'Tuesday',
                     'Wednesday',
@@ -137,6 +146,15 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                     'Friday',
                     'Saturday',
                     'Sunday',
+                ]);
+                expect(rows.map(([, note]) => note)).toEqual([
+                    'Legs: Glutes, Quads',
+                    'Nothing planned',
+                    'Push: Chest',
+                    'Nothing planned',
+                    'Legs: Glutes, Quads',
+                    'Nothing planned',
+                    'Nothing planned',
                 ]);
                 days[3].click();
                 fixture.detectChanges();

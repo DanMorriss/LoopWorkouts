@@ -7,10 +7,10 @@ import { Workout } from '../models/workout';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { DeletionStore } from '../shared/state/deletion-store.service';
 import { UndoService } from '../shared/undo/undo.service';
-import { makeWorkout as baseWorkout, reps, SimpleWorkout } from '../shared/testing/make-workout';
+import { makeWorkout as baseWorkout, SimpleWorkout } from '../shared/testing/make-workout';
 import { PageSlide } from '../nav/page-slide';
 import { WorkoutLibraryComponent } from './workout-library.component';
-import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment } from '../models/built-in-workouts';
+import { BUILT_IN_WORKOUTS, copyOfBuiltIn } from '../models/built-in-workouts';
 import { SettingsStore } from '../shared/state/settings-store.service';
 
 // A new workout to add: the shared test workout without its id
@@ -89,9 +89,9 @@ describe('WorkoutLibraryComponent', () => {
             expect(el('.library-add-button')).toBeNull();
         });
 
-        it('offers the ready-made workouts too', () => {
-            expect(el('.library-ready-made-button')?.getAttribute('href')).toBe('/ready-made');
-            expect(el('.library__ready-made')).toBeNull();
+        it('lists the ready-made workouts under it, to start from', () => {
+            expect(text()).toContain('start with a ready-made one below');
+            expect(all('.ready-card')).toHaveLength(BUILT_IN_WORKOUTS.length);
         });
     });
 
@@ -122,9 +122,9 @@ describe('WorkoutLibraryComponent', () => {
             expect(card(0).textContent).toContain('01:05 - 00:20 x 4');
         });
 
-        it('offers the ready-made workouts under the cards', () => {
-            expect(el('.library__ready-made')?.getAttribute('href')).toBe('/ready-made');
-            expect(el('.library-ready-made-button')).toBeNull();
+        it('lists the ready-made workouts under the cards', () => {
+            expect(el('.library-list ~ app-library-ready-made')).not.toBeNull();
+            expect(all('.ready-card')).toHaveLength(BUILT_IN_WORKOUTS.length);
         });
 
         it('labels a workout with a blank title as "Untitled workout"', () => {
@@ -215,7 +215,7 @@ describe('WorkoutLibraryComponent', () => {
 
                 expect(titles()).toEqual(['Sprints']);
                 expect(el('.library__count [role="status"]')?.textContent?.trim()).toBe(
-                    '1 of 2 workouts'
+                    `1 of ${2 + BUILT_IN_WORKOUTS.length} workouts`
                 );
             });
 
@@ -299,10 +299,6 @@ describe('WorkoutLibraryComponent', () => {
                 expect(titles()).toEqual(['Sprints']);
                 expect(el<HTMLInputElement>('#library-search')!.value).toBe('sprint');
             });
-        });
-
-        it('says nothing of muscles while no step is an exercise', () => {
-            expect(el('.library__muscles')).toBeNull();
         });
 
         describe('arriving from Save in Create (BLD-15)', () => {
@@ -497,79 +493,130 @@ describe('WorkoutLibraryComponent', () => {
         });
     });
 
-    describe('muscle groups', () => {
-        beforeEach(() => {
-            // Back squat works the quads and glutes, helped by the hamstrings, adductors and
-            // lower back; Bench press the chest, helped by the shoulders and triceps
-            store.addWorkout(makeWorkout({ title: 'Legs', steps: [reps(10, 'Back squat')] }));
-            store.addWorkout(makeWorkout({ title: 'Push', steps: [reps(10, 'Bench press')] }));
+    describe('ready-made workouts (LIB-6)', () => {
+        const groups = () => all('.library-ready__group').map((h) => h.textContent!.trim());
+        const names = () => all('.ready-card__name').map((n) => n.textContent!.trim());
+        const readyCard = (title: string) =>
+            all('.ready-card').find((c) => c.textContent!.includes(title))!;
+        function choose(source: string) {
+            const input = all('.segmented__option')
+                .find((o) => o.textContent!.includes(source))!
+                .querySelector('input')!;
+            input.click();
+            fixture.detectChanges();
+        }
+
+        it('lists every one, in its group, with what it is and needs', () => {
             create();
+
+            expect(groups()).toEqual([
+                'No equipment',
+                'Kettlebell',
+                'Dumbbells',
+                'Gym',
+                'Other kit',
+            ]);
+            expect(names()).toEqual(BUILT_IN_WORKOUTS.map((w) => w.title));
+            const parts = (title: string, selector: string) =>
+                Array.from(readyCard(title).querySelectorAll(selector), (n) =>
+                    n.textContent!.trim()
+                );
+            expect(parts('Dumbbell full body', '.showcase-tag')).toEqual(['Dumbbells', 'Bench']);
+            expect(parts('Bodyweight basics', '.showcase-tag')).toEqual(['No equipment']);
+            expect(parts('Bodyweight basics', '.showcase-muscle')).toEqual([
+                'Chest',
+                'Abs',
+                'Glutes',
+                'Quads',
+            ]);
+            expect(
+                readyCard('Dumbbell full body').querySelector('.showcase-more')?.textContent?.trim()
+            ).toBe('+4 more');
         });
 
-        const muscles = (list: number) =>
-            Array.from(all('.library__muscle-list')[list].querySelectorAll('a'), (a) =>
-                a.textContent!.trim()
-            ).join(' ');
+        it('leaves out those already in your workouts, by title', () => {
+            store.addWorkout(copyOfBuiltIn(BUILT_IN_WORKOUTS[0]));
+            create();
 
-        it('lists the muscle groups no workout works, linking to exercises for each', () => {
-            expect(el('.library__muscles-title')?.textContent).toContain('Missing muscle groups');
-            expect(muscles(0)).toBe(
-                'Biceps Forearms Abs Obliques Traps Upper back Abductors Calves Shins Neck'
+            expect(names()).not.toContain(BUILT_IN_WORKOUTS[0].title);
+            expect(names()).toHaveLength(BUILT_IN_WORKOUTS.length - 1);
+        });
+
+        it('slides each one in on its own page, with a link to it, and no play button', () => {
+            create();
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+
+            expect(readyCard('Gym legs').getAttribute('href')).toBe('/ready-made/gym-legs');
+            expect(readyCard('Gym legs').querySelector('.workout-card__start')).toBeNull();
+            readyCard('Gym legs').click();
+
+            expect(slide).toHaveBeenCalledWith('/ready-made/gym-legs', 'in');
+        });
+
+        it('comes back from one with focus on its card', async () => {
+            Object.defineProperty(TestBed.inject(ActivatedRoute).snapshot, 'queryParamMap', {
+                value: convertToParamMap({ 'ready-made': 'gym-legs' }),
+                configurable: true,
+            });
+            create();
+            await settle();
+
+            expect(document.activeElement).toBe(readyCard('Gym legs'));
+        });
+
+        it('hides those needing what you have not got, with Only what I have on', () => {
+            TestBed.inject(SettingsStore).update({
+                myEquipment: ['kettlebell'],
+                onlyMyEquipment: true,
+            });
+            create();
+
+            expect(groups()).toEqual(['No equipment', 'Kettlebell']);
+            expect(el('.library__count')?.textContent).toContain(
+                `of ${BUILT_IN_WORKOUTS.length} workouts`
             );
-            expect(el('.library__muscle')?.getAttribute('href')).toBe('/exercises?muscles=biceps');
         });
 
-        it('lists the ones only worked as a supporting muscle apart', () => {
-            expect(muscles(1)).toBe('Shoulders Triceps Lower back Adductors Hamstrings');
+        it('is searched with your own', () => {
+            store.addWorkout(makeWorkout({ title: 'Legs at home' }));
+            create();
+            const input = el<HTMLInputElement>('#library-search')!;
+            input.value = 'legs';
+            input.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+
+            expect(all('.workout-card')).toHaveLength(1);
+            expect(names()).toContain('Gym legs');
+            expect(names()).not.toContain('Tabata');
         });
 
-        describe('a ready-made workout for them (LIB-7)', () => {
-            const suggested = () => el('.library__gap-filler-name')?.textContent!.trim();
+        it('shows only your own, or only the ready-made ones, when picked', () => {
+            store.addWorkout(makeWorkout({ title: 'Sprints' }));
+            create();
 
-            it('suggests the one that does most for them, saying what it adds', () => {
-                expect(el('.library__gap-filler-label')?.textContent?.trim()).toBe(
-                    'Or add a ready-made workout for them:'
-                );
-                expect(suggested()).toBe('Gym extras');
-                expect(el('.library__gap-filler-fills')?.textContent?.trim()).toBe(
-                    'Adds Forearms, Abs, Obliques and 7 more.'
-                );
-            });
+            choose('My own');
+            expect(all('.workout-card')).toHaveLength(1);
+            expect(all('.ready-card')).toHaveLength(0);
+            expect(el('.library__count')?.textContent).toContain('1 of');
 
-            it('adds it to the end with Undo, then suggests another for what is left', () => {
-                click(el('.library__gap-filler-add'));
+            choose('Ready-made');
+            expect(all('.workout-card')).toHaveLength(0);
+            expect(all('.ready-card')).toHaveLength(BUILT_IN_WORKOUTS.length);
 
-                expect(store.workouts().map((w) => w.title)).toEqual([
-                    'Legs',
-                    'Push',
-                    'Gym extras',
-                ]);
-                expect(TestBed.inject(UndoService).offer()?.message).toBe(
-                    'Added "Gym extras" to your workouts'
-                );
-                expect(suggested()).not.toBe('Gym extras');
+            click(el('.library__clear'));
+            expect(all('.workout-card')).toHaveLength(1);
+            expect(all('.ready-card')).toHaveLength(BUILT_IN_WORKOUTS.length);
+        });
 
-                TestBed.inject(UndoService).undo();
-                fixture.detectChanges();
-                expect(store.workouts().map((w) => w.title)).toEqual(['Legs', 'Push']);
-                expect(suggested()).toBe('Gym extras');
-            });
+        it('has none as favourites', () => {
+            create();
+            click(
+                all('.library-filters__chip').find((c) => c.textContent!.includes('Favourites'))!
+            );
 
-            it('with Only what I have on, suggests only what your equipment allows', () => {
-                TestBed.inject(SettingsStore).update({ onlyMyEquipment: true, myEquipment: [] });
-                fixture.detectChanges();
-
-                const workout = BUILT_IN_WORKOUTS.find((w) => w.title === suggested())!;
-                expect(builtInWorkoutEquipment(workout)).toEqual(['none']);
-            });
-
-            it("doesn't suggest one already in your workouts", () => {
-                store.addWorkout(makeWorkout({ title: 'Gym extras', steps: [reps(5)] }));
-                fixture.detectChanges();
-
-                expect(suggested()).toBeTruthy();
-                expect(suggested()).not.toBe('Gym extras');
-            });
+            expect(all('.ready-card')).toHaveLength(0);
         });
     });
 });

@@ -19,45 +19,35 @@
 
     @if (!existingWorkouts) {
         <div class="flex flex-col items-center justify-center">
-            <p>No workouts yet. Make one, or start with a ready-made one.</p>
+            <p>No workouts yet. Make one, or start with a ready-made one below.</p>
             <button
                 type="button"
-                class="btn-main library-create-button mt-12"
+                class="btn-main library-create-button mt-4"
                 (click)="navigateToCreateWorkout()"
             >
                 <mat-icon aria-hidden="true">add</mat-icon>
                 Create a workout
             </button>
-            <a
-                href="/ready-made"
-                class="btn-pill library-ready-made-button mt-4"
-                (click)="slide.follow($event, '/ready-made', 'in')"
-            >
-                <mat-icon aria-hidden="true">auto_awesome</mat-icon>
-                Browse ready-made workouts
-            </a>
         </div>
     }
 
     <!-- Searched and filtered, the list can't be reordered: where a card would land among the
          hidden ones is a guess -->
     @let cutDown = filters.cutDown();
-    @if (existingWorkouts) {
-        <app-library-filters class="library__filters" (click)="$event.stopPropagation()" />
-        @if (cutDown) {
-            <div class="library__count">
-                <p role="status">{{ shownCount() }}</p>
-                @if (filters.active()) {
-                    <button
-                        type="button"
-                        class="library__clear"
-                        (click)="$event.stopPropagation(); filters.clear()"
-                    >
-                        Clear search and filters
-                    </button>
-                }
-            </div>
-        }
+    <app-library-filters class="library__filters" (click)="$event.stopPropagation()" />
+    @if (filters.shownCount(); as count) {
+        <div class="library__count">
+            <p role="status">{{ count }}</p>
+            @if (filters.active()) {
+                <button
+                    type="button"
+                    class="library__clear"
+                    (click)="$event.stopPropagation(); filters.clear()"
+                >
+                    Clear search and filters
+                </button>
+            }
+        </div>
     }
 
     <!-- Held still for HOLD_MS a card lifts, and can be dragged to another place. Moving
@@ -95,86 +85,6 @@
     </ul>
     <div class="sr-only" aria-live="polite">{{ announcement() }}</div>
 
-    <!-- More to add from the ready-made workouts (LIB-6), which slide in over the library -->
-    @if (existingWorkouts) {
-        <a
-            href="/ready-made"
-            class="library__ready-made"
-            (click)="$event.stopPropagation(); slide.follow($event, '/ready-made', 'in')"
-        >
-            <span class="library__ready-made-text">
-                <span class="library__ready-made-title">Ready-made workouts</span>
-                <span class="library__ready-made-hint">Need ideas? Add one to your workouts.</span>
-            </span>
-            <mat-icon aria-hidden="true">chevron_right</mat-icon>
-        </a>
-    }
-
-    <!-- The muscle groups the library's workouts leave out, to find exercises for -->
-    @let muscles = libraryMuscles();
-    @if (muscles.hasExercises) {
-        <section class="library__muscles" aria-labelledby="library-muscles-title">
-            <h3 id="library-muscles-title" class="library__muscles-title">Missing muscle groups</h3>
-            @if (muscles.missed.length === 0 && muscles.light.length === 0) {
-                <p class="library__muscles-text">Your workouts work every muscle group.</p>
-            } @else {
-                @if (muscles.missed.length > 0) {
-                    <p class="library__muscles-text">
-                        None of your workouts work these. Pick one to find exercises for it.
-                    </p>
-                    <ul class="library__muscle-list">
-                        @for (muscle of muscles.missed; track muscle.id) {
-                            <li>
-                                <a
-                                    class="btn-pill library__muscle"
-                                    routerLink="/exercises"
-                                    [queryParams]="{ muscles: muscle.id }"
-                                    >{{ muscle.label }}</a
-                                >
-                            </li>
-                        }
-                    </ul>
-                }
-                @if (muscles.light.length > 0) {
-                    <p class="library__muscles-text">Only lightly, as a supporting muscle:</p>
-                    <ul class="library__muscle-list">
-                        @for (muscle of muscles.light; track muscle.id) {
-                            <li>
-                                <a
-                                    class="btn-pill library__muscle"
-                                    routerLink="/exercises"
-                                    [queryParams]="{ muscles: muscle.id }"
-                                    >{{ muscle.label }}</a
-                                >
-                            </li>
-                        }
-                    </ul>
-                }
-                <!-- A ready-made workout to add for them (LIB-7) -->
-                @if (gapFiller(); as suggestion) {
-                    <div class="library__gap-filler">
-                        <p class="library__gap-filler-label">
-                            Or add a ready-made workout for them:
-                        </p>
-                        <p class="library__gap-filler-name">{{ suggestion.workout.title }}</p>
-                        <p class="library__gap-filler-description">
-                            {{ suggestion.workout.description }}
-                        </p>
-                        <p class="library__gap-filler-fills">{{ suggestion.fills }}</p>
-                        <button
-                            type="button"
-                            class="btn-pill library__gap-filler-add"
-                            [attr.aria-label]="
-                                'Add ' + suggestion.workout.title + ' to my workouts'
-                            "
-                            (click)="$event.stopPropagation(); addGapFiller()"
-                        >
-                            <mat-icon aria-hidden="true">add</mat-icon>
-                            Add to my workouts
-                        </button>
-                    </div>
-                }
-            }
-        </section>
-    }
+    <!-- The ready-made workouts still to add (LIB-6), under your own -->
+    <app-library-ready-made class="library__ready-made" />
 </div>

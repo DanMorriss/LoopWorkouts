@@ -14,6 +14,7 @@ import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
+import { PlanMusclesComponent } from './plan-muscles/plan-muscles.component';
 
 /** How a planned workout's place this week reads, e.g. "Done". "To come" says nothing. */
 const STATUS_TEXT: Record<PlannedStatus, string> = {
@@ -37,6 +38,7 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
         BackLinkComponent,
         HelpLinkComponent,
         MatIconModule,
+        PlanMusclesComponent,
         RouterLink,
         SwipeBackDirective,
         WorkoutChoiceDialogComponent,

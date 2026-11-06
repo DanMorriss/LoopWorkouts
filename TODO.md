@@ -20,7 +20,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 - [ ] **Saving an edit should get back smoothly:** from Workouts, into a workout, then editing and saving, jumps to Workouts with the edited workout in the middle (`/library?saved=<id>`). Make that a smooth transition; going back to the workout's details instead may be the better answer.
 - [x] **Search and filters** (LIB-8, 2026-11-06): a search by name or exercise, Favourites (a heart on each card and in Details, synced with the workout), and under More filters the muscles and Only what I have. Dragging and Move up/down are off while any workout is hidden. "My own workouts" comes with the ready-made workouts listed, below.
-- [ ] **List the ready-made workouts on the page:** with them all listed, everything below the workouts can go: the Ready-made workouts link and Missing muscle groups (which moves to the Plan page, below). Add a "My own workouts" filter with them (left out of the search and filters, as every workout on the page is your own until then), and decide whether the search and filters cover the ready-made ones too. Still to work out: what a card does for a ready-made workout that hasn't been added (LIB-6), and whether its details keep their own page. Depends on the search and filters, as the list gets long without them.
+- [x] **List the ready-made workouts on the page** (LIB-6, 2026-11-06): under your own, in their groups, leaving out any already in your workouts; a card opens its page, to add it. All, My own and Ready-made over the filters, which cut down both. The Ready-made workouts page and link are gone, and Missing muscle groups is on the Plan page.
 
 **During a workout**
 
@@ -30,7 +30,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 - [ ] **Suggest a workout on a day with none planned:** Today only suggests one with history and no week planned (`home.component.html`), so a rest day in a planned week shows nothing. Use the existing suggestion (`suggestNextWorkout` in `models/muscle-balance.ts`), but also look at the next workout planned this week and avoid overlapping its muscles too much. It needs to say why it's picking that, and not to feel like a rest day is being told off.
 - [ ] **The body map on the Plan page:** at the bottom of `plan/`, shaded for what the plan works across the week (`app-body-map`).
-- [ ] **Move Missing muscle groups to the Plan page** (LIB-5, LIB-7), from Workouts. It could say what the plan leaves out, rather than what the whole library does. Update `docs/features/library.md` and `planning.md`.
+- [x] **Move Missing muscle groups to the Plan page** (LIB-5, LIB-7, 2026-11-06): at its bottom, for the workouts in the plan; its ready-made suggestion adds to your workouts, to plan from there.
 - [ ] **Decide: Muscles this week on Today?** Today is where most people land, so it needs to be exciting. The body map is only on Progress for now (`app-muscles-this-week`), and would need thought for someone who's done nothing yet this week, when it's blank.
 
 **Progress page**
@@ -57,7 +57,7 @@ Every built-in exercise has an animated figure, at the top of How to do it (see 
 
 ### Ready-made workouts (LIB-6)
 
-Eighteen ready-made workouts are on the Ready-made workouts page, opened from Workouts (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
+Eighteen ready-made workouts are listed on Workouts, under your own (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
 
 - [ ] **Dan to review the first batch:** the exercises, sets, reps and rests of each, and their descriptions. Ids are fixed once released, so rename before merging if a title changes.
 - [ ] **Dan to review the second batch** (2026-11-03): Tabata, Kettlebell AMRAP, Dumbbell upper and lower, Gym full body, Gym extras, Pull-up bar and dips, and Step circuit. As for the first, ids are fixed once released.

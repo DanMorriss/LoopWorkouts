@@ -451,8 +451,11 @@ for (const theme of ['dark', 'light'] as const) {
         });
 
         describe('ready-made workouts', () => {
-            it('the list, with the equipment open', async () => {
-                await open('/ready-made');
+            it('listed on Workouts, with the filters and equipment open', async () => {
+                await open('/library');
+                expect(fixture.nativeElement.querySelector('.ready-card')).not.toBeNull();
+                click('[aria-controls="library-more-filters"]');
+                await settle();
                 click('.kit__edit');
                 await settle();
                 await expectNoViolations();
@@ -466,9 +469,14 @@ for (const theme of ['dark', 'light'] as const) {
         });
 
         describe('plan', () => {
-            /** Legs planned yesterday (missed) and today, Push today too and done. */
+            /**
+             * Legs planned yesterday (missed) and today, Push today too and done. Legs is back
+             * squats, so the muscle groups the plan misses show under the week.
+             */
             function planned() {
-                const legs = store.addWorkout(makeWorkout({ title: 'Legs' }));
+                const legs = store.addWorkout(
+                    makeWorkout({ title: 'Legs', steps: [reps(10, 'Back squat')] })
+                );
                 const push = store.addWorkout(makeWorkout({ title: 'Push' }));
                 const plan = TestBed.inject(PlanStore);
                 const today = weekdayOf(Date.now());
@@ -490,10 +498,11 @@ for (const theme of ['dark', 'light'] as const) {
                 });
             }
 
-            it('the week, with workouts done, missed and due', async () => {
+            it('the week, with workouts done, missed and due, and the muscles missed', async () => {
                 planned();
                 await open('/plan');
                 expect(fixture.nativeElement.querySelector('.plan__workout')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.plan-muscles')).not.toBeNull();
                 await expectNoViolations();
             });
 
@@ -553,14 +562,6 @@ for (const theme of ['dark', 'light'] as const) {
                 click('.workout-card__menu-item--danger');
                 await settle();
                 expect(fixture.nativeElement.querySelector('.undo-bar')).not.toBeNull();
-                await expectNoViolations();
-            });
-
-            it('with exercises in its workouts, and the muscle groups they miss', async () => {
-                store.addWorkout(makeWorkout({ title: 'Legs', steps: [reps(10, 'Back squat')] }));
-                store.addWorkout(sprints);
-                await open('/library');
-                expect(fixture.nativeElement.querySelector('.library__muscles')).not.toBeNull();
                 await expectNoViolations();
             });
 

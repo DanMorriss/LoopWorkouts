@@ -261,9 +261,10 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'ready-made-workouts',
                 question: 'Where can I find workouts to start with?',
                 answer: [
-                    'On Workouts, under Ready-made workouts: workouts for no equipment, a kettlebell, dumbbells, a gym and other kit. Add to my workouts copies one in, yours to change.',
+                    "On Workouts, under your own workouts, in Ready-made: workouts for no equipment, a kettlebell, dumbbells, a gym and other kit. Press one to see what's in it; Add to my workouts copies it in, yours to change.",
+                    'Ready-made, at the top of Workouts, shows only those.',
                 ],
-                link: { label: 'See the ready-made workouts', url: '/ready-made' },
+                link: { label: 'See the ready-made workouts', url: '/library' },
             },
             {
                 id: 'only-what-i-have',
@@ -284,10 +285,10 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'missing-muscles',
                 question: 'What are Missing muscle groups?',
                 answer: [
-                    'At the bottom of Workouts: the muscles none of your workouts work, and those they only work lightly. Tap one to find exercises for it.',
-                    'Under them, a ready-made workout that covers the most of them, to add in one tap.',
+                    'At the bottom of the Plan page: the muscles none of the workouts in your plan work, and those they only work lightly. Tap one to find exercises for it.',
+                    'Under them, a ready-made workout that covers the most of them, to add in one tap and then plan.',
                 ],
-                link: { label: 'Go to Workouts', url: '/library' },
+                link: { label: 'Go to the Plan page', url: '/plan' },
             },
             {
                 id: 'ai-import',

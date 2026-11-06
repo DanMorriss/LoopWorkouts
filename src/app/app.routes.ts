@@ -49,14 +49,13 @@ export const routes: Routes = [
             ),
     },
     {
+        // The ready-made workouts are listed on Workouts now (LIB-6), under your own
         path: 'ready-made',
-        loadComponent: () =>
-            import('./workout-library/ready-made/ready-made.component').then(
-                (m) => m.ReadyMadeComponent
-            ),
+        pathMatch: 'full',
+        redirectTo: 'library',
     },
     {
-        // A ready-made workout, e.g. /ready-made/gym-legs, over the list of them
+        // A ready-made workout, e.g. /ready-made/gym-legs, over Workouts
         path: 'ready-made/:id',
         loadComponent: () =>
             import(

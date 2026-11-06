@@ -1,45 +1,9 @@
-@use 'type' as *;
 @use 'interaction' as *;
 @use 'showcase-card' as *;
 
-:host {
-    display: block;
-}
-
-.ready__title {
-    @include page-title;
-}
-
-.ready__hint {
-    @include page-hint;
-}
-
-.ready__filter {
-    margin-bottom: 0.75rem;
-}
-
-.ready__section {
-    padding-top: 0.75rem;
-}
-
-.ready__group {
-    margin: 0 0 0.5rem;
-    color: var(--text-strong);
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.ready__list {
-    display: grid;
-    gap: 0.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
 // A workout, as a ready-made plan's card is: its name and what it is by how many exercises,
-// the muscles it mainly works, then what it needs, and whether it's in your workouts
-.ready__card {
+// the muscles it mainly works, then what it needs
+.ready-card {
     display: grid;
     gap: 0.8rem;
     width: 100%;
@@ -69,41 +33,25 @@
     }
 }
 
-.ready__head {
+.ready-card__head {
     @include showcase-head;
 }
 
-.ready__intro {
+.ready-card__intro {
     display: grid;
     gap: 0.3rem;
 }
 
-.ready__name {
+.ready-card__name {
     @include showcase-title;
 }
 
-.ready__description {
+.ready-card__description {
     @include showcase-description;
 }
 
-.ready__in-library {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    gap: 0.15rem;
-    color: var(--glow-text);
-    @include small-type(0.75rem);
-    font-weight: 600;
-
-    .icon {
-        width: 16px;
-        height: 16px;
-        font-size: 16px;
-    }
-}
-
 // It opens its own page
-.ready__chevron {
+.ready-card__chevron {
     flex: none;
     margin-right: -0.3rem;
     color: var(--text-muted);

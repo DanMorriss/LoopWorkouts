@@ -20,9 +20,10 @@ import { readyMadeCard } from '../ready-made-card';
 /**
  * A ready-made workout (LIB-6), at /ready-made/<its name>, e.g. /ready-made/gym-legs: what it
  * is and needs, every exercise with its sets, and the muscles it works, with Add and start and
- * Add to my workouts. It slides in over the ready-made workouts, as an exercise does over the
- * Exercises list, and back off with ‹ Ready-made or a swipe right. Adding it slides back out
- * to Workouts, with it picked out there.
+ * Add to my workouts. It slides in over Workouts, where the ready-made workouts are listed
+ * under your own, as an exercise does over the Exercises list, and back off with ‹ Workouts
+ * or a swipe right, with focus back on its card. Adding it slides back out to Workouts, with
+ * the new one picked out there.
  *
  * From a ready-made plan's card (PLN-6), at /ready-made-plans/<its name>, it's the same page
  * without the buttons, as the workout comes with the plan, and goes back to where the card is.
@@ -60,7 +61,10 @@ export class ReadyMadeWorkoutComponent {
 
     protected readonly back = this.inPlan
         ? backToPlanCard(this.route.snapshot.queryParamMap.get('from'))
-        : { url: '/ready-made', label: 'Ready-made' };
+        : {
+              url: `/library?ready-made=${this.route.snapshot.paramMap.get('id') ?? ''}`,
+              label: 'Workouts',
+          };
 
     /**
      * From a plan's card, an exercise's page, under this workout so it comes back here, and on

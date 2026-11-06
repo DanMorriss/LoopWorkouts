@@ -17,8 +17,8 @@ await phone.evaluate(() => {
     localStorage.setItem('welcomed', 'guest');
     localStorage.setItem('settings', JSON.stringify({ theme: 'dark' }));
 });
-await phone.goto('http://localhost:4300/ready-made');
-await phone.getByRole('button', { name: /Cardio intervals/ }).click();
+await phone.goto('http://localhost:4300/library');
+await phone.getByRole('link', { name: /Cardio intervals/ }).click();
 await phone.getByRole('button', { name: /Add and start/ }).click();
 await phone.waitForTimeout(14000);
 const screen = (await phone.screenshot()).toString('base64');

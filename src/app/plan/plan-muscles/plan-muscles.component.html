@@ -1,0 +1,64 @@
+@let muscles = planMuscles();
+@if (muscles.hasExercises) {
+    <section class="plan-muscles" aria-labelledby="plan-muscles-title">
+        <h3 id="plan-muscles-title" class="plan-muscles__title">Missing muscle groups</h3>
+        @if (muscles.missed.length === 0 && muscles.light.length === 0) {
+            <p class="plan-muscles__text">Your plan works every muscle group.</p>
+        } @else {
+            @if (muscles.missed.length > 0) {
+                <p class="plan-muscles__text">
+                    None of the workouts in your plan work these. Pick one to find exercises for it.
+                </p>
+                <ul class="plan-muscles__list">
+                    @for (muscle of muscles.missed; track muscle.id) {
+                        <li>
+                            <a
+                                class="btn-pill plan-muscles__muscle"
+                                routerLink="/exercises"
+                                [queryParams]="{ muscles: muscle.id }"
+                                >{{ muscle.label }}</a
+                            >
+                        </li>
+                    }
+                </ul>
+            }
+            @if (muscles.light.length > 0) {
+                <p class="plan-muscles__text">Only lightly, as a supporting muscle:</p>
+                <ul class="plan-muscles__list">
+                    @for (muscle of muscles.light; track muscle.id) {
+                        <li>
+                            <a
+                                class="btn-pill plan-muscles__muscle"
+                                routerLink="/exercises"
+                                [queryParams]="{ muscles: muscle.id }"
+                                >{{ muscle.label }}</a
+                            >
+                        </li>
+                    }
+                </ul>
+            }
+            <!-- A ready-made workout to add for them (LIB-7), to plan on a day -->
+            @if (gapFiller(); as suggestion) {
+                <div class="plan-muscles__filler">
+                    <p class="plan-muscles__filler-label">
+                        Or add a ready-made workout for them, then plan it:
+                    </p>
+                    <p class="plan-muscles__filler-name">{{ suggestion.workout.title }}</p>
+                    <p class="plan-muscles__filler-description">
+                        {{ suggestion.workout.description }}
+                    </p>
+                    <p class="plan-muscles__filler-fills">{{ suggestion.fills }}</p>
+                    <button
+                        type="button"
+                        class="btn-pill plan-muscles__filler-add"
+                        [attr.aria-label]="'Add ' + suggestion.workout.title + ' to my workouts'"
+                        (click)="addGapFiller()"
+                    >
+                        <mat-icon aria-hidden="true">add</mat-icon>
+                        Add to my workouts
+                    </button>
+                </div>
+            }
+        }
+    </section>
+}

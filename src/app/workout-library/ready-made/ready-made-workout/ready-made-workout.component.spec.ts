@@ -19,7 +19,6 @@ describe('ReadyMadeWorkoutComponent', () => {
             providers: [
                 provideRouter([
                     { path: 'library', children: [] },
-                    { path: 'ready-made', children: [] },
                     { path: 'workout', children: [] },
                     { path: 'ready-made/:id', component: ReadyMadeWorkoutComponent },
                     {
@@ -70,18 +69,18 @@ describe('ReadyMadeWorkoutComponent', () => {
         expect(text()).not.toContain('You have a workout called this');
     });
 
-    it('has no exercise links from the list of ready-made workouts', async () => {
+    it('has no exercise links from Workouts', async () => {
         await open('gym-legs');
 
         expect(el().querySelector('.outline__link')).toBeNull();
     });
 
-    it('goes back to the ready-made workouts with ‹ Ready-made', async () => {
+    it('goes back to Workouts with ‹ Workouts, saying which card to put focus on', async () => {
         await open('gym-legs');
         const back = el().querySelector('.back-link')!;
 
-        expect(text(back)).toBe('chevron_left Ready-made');
-        expect(back.getAttribute('href')).toBe('/ready-made');
+        expect(text(back)).toBe('chevron_left Workouts');
+        expect(back.getAttribute('href')).toBe('/library?ready-made=gym-legs');
     });
 
     describe("from a ready-made plan's card", () => {

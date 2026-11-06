@@ -856,7 +856,7 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
 
                 // Name, goal, then equipment, with a chip picked
-                click('.setup__form button[type="submit"]');
+                click('.setup__actions .btn-main');
                 await settle();
                 click('.setup__actions .btn-main');
                 await settle();

@@ -15,8 +15,13 @@ export function injectCurrentUrl(): Signal<string> {
     );
 }
 
+/** A url's page, without its query or fragment. */
+export function pathOf(url: string): string {
+    return url.split(/[?#]/)[0];
+}
+
 /** Whether a url is on a page, or a page under it: "/exercises/squat" is on "/exercises". */
 export function isOnPage(url: string, path: string): boolean {
-    const page = url.split(/[?#]/)[0];
+    const page = pathOf(url);
     return page === path || page.startsWith(`${path}/`);
 }

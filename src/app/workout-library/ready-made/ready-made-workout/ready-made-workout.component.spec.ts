@@ -109,7 +109,7 @@ describe('ReadyMadeWorkoutComponent', () => {
             await openFrom('today');
             const links = Array.from(el().querySelectorAll('.outline__link'));
 
-            expect(links.map((a) => text(a))).toContain('Back squat');
+            expect(links.map((a) => text(a))).toContain('Back squat chevron_right');
             expect(links[0].getAttribute('href')).toBe(
                 '/ready-made-plans/gym-legs/back-squat?from=today'
             );
@@ -119,7 +119,7 @@ describe('ReadyMadeWorkoutComponent', () => {
             await openFrom('plans');
 
             expect(text(el().querySelector('.preview__title')!)).toBe('Gym legs');
-            expect(text()).toContain('Back squat 3 sets: 12, 10, 8, rest 2:30');
+            expect(text()).toContain('Back squat chevron_right 3 sets: 12, 10, 8, rest 2:30');
             expect(el().querySelector('.preview__add')).toBeNull();
             expect(el().querySelector('.preview__start')).toBeNull();
         });

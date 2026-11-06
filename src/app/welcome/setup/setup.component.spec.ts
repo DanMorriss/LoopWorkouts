@@ -1,3 +1,4 @@
+import { userEvent } from 'vitest/browser';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { AUTH_STORAGE_KEY } from '../../account/account-client';
@@ -61,6 +62,34 @@ describe('SetupComponent (NAV-4)', () => {
     afterEach(() => {
         vi.useRealTimers();
         localStorage.clear();
+    });
+
+    it('keeps its buttons in the same place on every question', async () => {
+        await create();
+        const places = () =>
+            ['Next', 'Skip for now'].map((name) => {
+                const { top, left } = button(name).getBoundingClientRect();
+                return { name, top, left };
+            });
+        const first = places();
+
+        for (let question = 2; question <= 4; question++) {
+            await press('Next');
+            expect(places()).toEqual(first);
+        }
+        await press('Back');
+        expect(places()).toEqual(first);
+        expect(first[0].top + button('Next').offsetHeight).toBeLessThanOrEqual(window.innerHeight);
+    });
+
+    it('goes on from the name by Enter', async () => {
+        await create();
+        element.querySelector('input')!.focus();
+
+        await userEvent.keyboard('{Enter}');
+        await fixture.whenStable();
+
+        expect(heading()).toBe('What do you train for?');
     });
 
     it('asks one question at a time, saving each answer, then goes on to Today, all set', async () => {

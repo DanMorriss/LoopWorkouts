@@ -16,20 +16,11 @@ Promoting the app to new users. The words to use, what's true to say, and the pl
 
 What Dan found using the app, by page. The tour (see Help) waits on this.
 
-**Everywhere**
-
-- [ ] **A page keeps the last page's scroll:** scrolled to the bottom of Today, changing to Workouts opens it scrolled down; scrolled to the top of Workouts, going back to Today opens that at the top. All the tabs share the window's scroll, and the router isn't told to do anything with it (no `withInMemoryScrolling`). Changing tab should open the page at the top, while going back by the ‹ link at the top of a page should return to where you were on the page before. `PageSlide` already puts the scroll back when a page slides back (`nav/page-slide.ts`), so keep that and check that every ‹ link does it.
-- [ ] **Onboarding's buttons should stay put:** keep them in the same place at the bottom of the screen on every step, so people can bash through it quickly. They follow each step's content for now (`welcome/setup/`; one step has its own Next inside a form). Check the welcome screen too, and that the keyboard doesn't cover them.
-
 **Workouts page**
 
 - [ ] **Saving an edit should get back smoothly:** from Workouts, into a workout, then editing and saving, jumps to Workouts with the edited workout in the middle (`/library?saved=<id>`). Make that a smooth transition; going back to the workout's details instead may be the better answer.
 - [ ] **Search and filters:** make the page searchable and filterable, with filters including "My own workouts" and favourites. There are no favourites yet, so they're new: a flag on a workout that syncs (`docs/features/data.md`). Reuse `search-field`, and see how `equipment-filter` works. Work out how dragging behaves while a filter is on.
 - [ ] **List the ready-made workouts on the page:** with them all listed, everything below the workouts can go: the Ready-made workouts link and Missing muscle groups (which moves to the Plan page, below). Still to work out: what a card does for a ready-made workout that hasn't been added (LIB-6), and whether its details keep their own page. Depends on the search and filters, as the list gets long without them.
-
-**Workout page**
-
-- [ ] **A › on an exercise's link:** in a workout, tapping an exercise opens its details, but nothing on a phone shows it can be tapped. Put a › at the right of the row, in `workout-outline` so that every page using it gets it.
 
 **During a workout**
 
@@ -107,6 +98,7 @@ From the review of 2026-11-05; how to keep it from coming back is in `CLAUDE.md`
 
 ## 2. Known issues
 
+- [ ] **Check the setup's buttons with an iPhone's keyboard:** they're fixed to the bottom of the screen (since 2026-11-06), and tested in Chromium only. In Safari they should sit clear of the home bar, and with the keyboard up on the name question they'll probably sit behind it, leaving its Go key as the way on, which is Next.
 - [ ] **Leaving Create may be slow:** on the dev server, leaving `/setup` took about 1.5s before the next page came, by ‹ or the tab bar alike, against 0.35s from a workout's details, with almost no long tasks, so something seems to be waiting (measured 2026-11-05; the browser may have been throttling some of those timings). Check it on a Vercel preview, and find the cause if it's there too.
 - [ ] **Focus isn't put back after a page slides back:** going back from a page that slid in (`PageSlide`) doesn't return focus to what opened it, such as a ready-made workout's card or a workout on a ready-made plan's card, so a keyboard or screen reader user starts again from the top of the page. Fix it in `PageSlide`, for every page, rather than page by page.
 - [ ] **Enter in a step's name box may save before its kind follows the exercise:** a step becomes the kind its exercise is measured by when the box is left or Enter is pressed (the input's `change` event). Enter with nothing highlighted in the list also submits the form; Chrome fires `change` first, so the step saves as its new kind, but other browsers may save the old one. Check in Safari; if it saves the old kind, have the picker settle the step on Enter before letting the submit through.

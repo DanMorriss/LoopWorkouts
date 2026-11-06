@@ -124,8 +124,8 @@ $band: 15px;
 }
 
 // The leading edge, going round once in the step with the fill: a round end in the ring's
-// colour; and for timed work, a bright dot on it, so it's plain from across the room that the
-// clock is running. Not rest, whose end is round but has no dot, as it stays calm.
+// colour (timed work had a bright dot on it until 2026-11-06; the rounded end shows where the
+// fill's got to on its own).
 @keyframes tip-round {
     from {
         transform: rotate(0deg);
@@ -151,24 +151,6 @@ $band: 15px;
         height: $band;
         border-radius: 50%;
         background: var(--ring-color);
-    }
-
-    // In the middle of the band, timed work only
-    &::after {
-        display: none;
-        content: '';
-        position: absolute;
-        top: 2.5px;
-        left: calc(50% - 5px);
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: white;
-        box-shadow: 0 0 8px 2px var(--ring-color);
-
-        .workout-ring--work & {
-            display: block;
-        }
     }
 }
 

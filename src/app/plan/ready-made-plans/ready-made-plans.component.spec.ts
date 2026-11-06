@@ -107,12 +107,9 @@ describe('ReadyMadePlansComponent (PLN-6)', () => {
         await harness.fixture.whenStable();
 
         expect(TestBed.inject(Router).url).toBe('/home');
-        expect(
-            TestBed.inject(WorkoutStore)
-                .workouts()
-                .map((w) => w.title)
-        ).toEqual(['Gym push', 'Gym pull', 'Gym legs', 'Gym extras']);
-        expect(TestBed.inject(PlanStore).hasPlan()).toBe(true);
+        // Its ready-made workouts are planned as they are, not copied
+        expect(TestBed.inject(WorkoutStore).workouts()).toEqual([]);
+        expect(TestBed.inject(PlanStore).plan().days.flat()).toContain('builtin:gym-push');
         expect(TestBed.inject(UndoService).offer()?.message).toBe(
             'Your week is planned: Push, pull, legs'
         );

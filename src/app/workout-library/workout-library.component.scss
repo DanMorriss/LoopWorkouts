@@ -38,6 +38,12 @@
     margin-top: 1rem;
 }
 
+// With none of your own yet, over the ready-made ones
+.library__intro {
+    @include page-hint;
+    margin: 0.75rem 0 0;
+}
+
 // How many are shown while some are hidden, and the way to show them all again
 .library__count {
     display: flex;
@@ -67,15 +73,13 @@
 }
 
 // The card under the pointer stands out: the others in the list dim. Not while its options are
-// open, which sit over the card below, or while one's being dragged
+// open, which sit over the card below
 .library-list > .workout-card {
     transition: opacity 0.2s ease;
 }
 
 @media (hover: hover) {
-    .library-list:has(> .workout-card:hover):not(:has(.workout-card--menu-open)):not(
-            .cdk-drop-list-dragging
-        )
+    .library-list:has(> .workout-card:hover):not(:has(.workout-card--menu-open))
         > .workout-card:not(:hover) {
         opacity: 0.45;
     }
@@ -85,132 +89,4 @@
     .library-list > .workout-card {
         transition: none;
     }
-}
-
-// The other cards slide aside to make room for a dragged one, on the app's spring (and it
-// settles into place on the same: styles/_drag.scss)
-.library-list.cdk-drop-list-dragging > :not(.cdk-drag-placeholder) {
-    transition: transform var(--spring-duration) var(--ease-spring);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .library-list.cdk-drop-list-dragging > :not(.cdk-drag-placeholder) {
-        transition: none;
-    }
-}
-
-// Under the cards, across all their columns
-.library__muscles {
-    margin-top: 2rem;
-}
-
-.library__muscles-title {
-    margin: 0 0 0.5rem;
-    font-size: 1rem;
-    color: var(--text-strong);
-}
-
-.library__muscles-text {
-    margin: 0.75rem 0 0.5rem;
-    color: var(--text);
-}
-
-.library__muscle-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-// The ready-made workout suggested for the muscles left out (LIB-7), as a card under them
-.library__gap-filler {
-    display: grid;
-    justify-items: start;
-    gap: 0.3rem;
-    margin-top: 1rem;
-    padding: 0.9rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.8rem;
-    background: var(--card);
-
-    p {
-        margin: 0;
-    }
-}
-
-.library__gap-filler-label {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-}
-
-.library__gap-filler-name {
-    @include display;
-    color: var(--text-strong);
-    font-size: 1.05rem;
-}
-
-.library__gap-filler-description {
-    color: var(--text);
-    font-size: 0.9rem;
-    line-height: 1.45;
-}
-
-.library__gap-filler-fills {
-    color: var(--text-strong);
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.library__gap-filler-add {
-    margin-top: 0.4rem;
-}
-
-.library__muscle {
-    text-decoration: none;
-}
-
-// The way to the ready-made workouts, under the cards, across all their columns
-.library__ready-made {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    min-height: 44px;
-    margin-top: 1rem;
-    padding: 0.75rem 0.9rem;
-    border: 1px dashed var(--border);
-    border-radius: 0.75rem;
-    color: inherit;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-
-    @include hover {
-        background: var(--control);
-    }
-
-    @include pressed {
-        background: var(--control);
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-    }
-}
-
-.library__ready-made-text {
-    display: grid;
-    gap: 0.15rem;
-}
-
-.library__ready-made-title {
-    color: var(--text-strong);
-    font-weight: 600;
-}
-
-.library__ready-made-hint {
-    color: var(--text-muted);
-    font-size: 0.85rem;
 }

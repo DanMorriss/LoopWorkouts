@@ -7,6 +7,10 @@
                 <h2 class="details__title">{{ name() }}</h2>
                 <app-favourite-button [workout]="workout" />
             </div>
+            @if (readyMade(); as ready) {
+                <app-ready-made-badge />
+                <p class="details__description">{{ ready.description }}</p>
+            }
 
             <section class="details__section" aria-labelledby="workout-details-muscles">
                 <h3 id="workout-details-muscles" class="details__heading">Muscles it works</h3>
@@ -55,12 +59,19 @@
             </section>
 
             <div class="details__actions">
-                <button type="button" class="btn-pill details__edit" (click)="edit(workout)">
-                    <mat-icon aria-hidden="true">edit</mat-icon>
-                    Edit
-                </button>
+                @if (readyMade()) {
+                    <button type="button" class="btn-pill details__copy" (click)="copy(workout)">
+                        <mat-icon aria-hidden="true">content_copy</mat-icon>
+                        Make a copy
+                    </button>
+                } @else {
+                    <button type="button" class="btn-pill details__edit" (click)="edit(workout)">
+                        <mat-icon aria-hidden="true">edit</mat-icon>
+                        Edit
+                    </button>
+                }
             </div>
-        } @else {
+        } @else if (!loading()) {
             <h2 class="details__title">Workout not found</h2>
             <p class="details__empty">It may have been deleted.</p>
         }

@@ -1,13 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { EquipmentFilterComponent } from '../../shared/components/equipment-filter/equipment-filter.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { MuscleChipsComponent } from '../../shared/components/muscle-chips/muscle-chips.component';
 import { SearchFieldComponent } from '../../shared/components/search-field/search-field.component';
-import { LibraryFilters } from '../library-filters.service';
+import { LIBRARY_SOURCES, LibraryFilters } from '../library-filters.service';
 
 /**
- * Over the Workouts page's cards: the search, then Favourites and More filters, which opens
- * the muscles and Only what I have under them, so the cards still start high on a phone.
+ * Over the Workouts page's cards: the search, which workouts to show (All, My own or
+ * Ready-made), then Favourites and More filters, which opens the muscles and Only what I have
+ * under them, so the cards still start high on a phone.
  */
 @Component({
     selector: 'app-library-filters',
@@ -18,6 +19,32 @@ import { LibraryFilters } from '../library-filters.service';
             placeholder="Name or exercise, e.g. squat"
             [(value)]="filters.query"
         />
+        <fieldset class="segmented library-filters__source">
+            <legend class="sr-only">Show</legend>
+            <div
+                class="segmented__options"
+                [style.--count]="sources.length"
+                [style.--chosen]="chosenSource()"
+            >
+                <span class="segmented__thumb" aria-hidden="true"></span>
+                @for (source of sources; track source.value; let i = $index) {
+                    <label
+                        class="segmented__option"
+                        [class.segmented__option--chosen]="i === chosenSource()"
+                    >
+                        <input
+                            type="radio"
+                            name="librarySource"
+                            class="segmented__input"
+                            [value]="source.value"
+                            [checked]="filters.source() === source.value"
+                            (change)="filters.source.set(source.value)"
+                        />
+                        <span class="segmented__label">{{ source.label }}</span>
+                    </label>
+                }
+            </div>
+        </fieldset>
         <div class="library-filters__row">
             <button
                 type="button"
@@ -57,6 +84,10 @@ import { LibraryFilters } from '../library-filters.service';
             display: block;
         }
 
+        .library-filters__source {
+            margin-top: 0.75rem;
+        }
+
         .library-filters__row {
             display: flex;
             flex-wrap: wrap;
@@ -82,4 +113,8 @@ import { LibraryFilters } from '../library-filters.service';
 })
 export class LibraryFiltersComponent {
     protected readonly filters = inject(LibraryFilters);
+    protected readonly sources = LIBRARY_SOURCES;
+    protected readonly chosenSource = computed(() =>
+        this.sources.findIndex((source) => source.value === this.filters.source())
+    );
 }

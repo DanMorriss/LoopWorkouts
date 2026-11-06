@@ -120,7 +120,7 @@ export class WeekStripComponent {
     private readonly today = weekdayOf(this.now);
 
     private name(id: string): string {
-        return this.workouts.findWorkoutById(id)?.title.trim() || 'Untitled workout';
+        return this.workouts.findAnyWorkout(id)?.title.trim() || 'Untitled workout';
     }
 
     private readonly week = computed(() =>
@@ -128,7 +128,7 @@ export class WeekStripComponent {
             this.plan.plan(),
             this.history.entries(),
             this.now,
-            (id) => this.workouts.findWorkoutById(id) !== null
+            (id) => this.workouts.findAnyWorkout(id) !== null
         )
     );
 

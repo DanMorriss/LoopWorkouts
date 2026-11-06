@@ -1,10 +1,5 @@
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
-import {
-    BUILT_IN_WORKOUT_GROUPS,
-    BUILT_IN_WORKOUTS,
-    builtInWorkoutEquipment,
-    copyOfBuiltIn,
-} from './built-in-workouts';
+import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment, copyOfBuiltIn } from './built-in-workouts';
 import { canDoWith } from './exercise';
 import { allSteps, groupKind, MAX_HEADINGS, MAX_STEPS } from './workout';
 import { readWorkout } from '../shared/state/workout-store.service';
@@ -18,15 +13,6 @@ describe('BUILT_IN_WORKOUTS', () => {
         ids.forEach((id) => expect(id).toMatch(/^builtin:[a-z0-9]+(-[a-z0-9]+)*$/));
         const titles = BUILT_IN_WORKOUTS.map((w) => w.title.toLowerCase());
         expect(new Set(titles).size).toBe(titles.length);
-    });
-
-    it('has a workout in every group', () => {
-        for (const { group } of BUILT_IN_WORKOUT_GROUPS) {
-            expect(
-                BUILT_IN_WORKOUTS.some((w) => w.group === group),
-                group
-            ).toBe(true);
-        }
     });
 
     it.each(BUILT_IN_WORKOUTS.map((w) => [w.title, w] as const))(

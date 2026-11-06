@@ -1,14 +1,26 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import { MuscleGroup } from '../models/exercise';
+import { aToZ } from '../models/workout';
 import { filterWorkouts, WorkoutFilters } from '../models/workout-filter';
+import { counted } from '../shared/format-count';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 
+/** Which workouts the page lists: yours and the ready-made ones, or only one of them. */
+export type LibrarySource = 'all' | 'mine' | 'ready-made';
+
+export const LIBRARY_SOURCES: readonly { value: LibrarySource; label: string }[] = [
+    { value: 'all', label: 'All' },
+    { value: 'mine', label: 'My own' },
+    { value: 'ready-made', label: 'Ready-made' },
+];
+
 /**
- * What the Workouts page is searched and filtered by, and the workouts it leaves. Kept for as
- * long as the app's open, so coming back from a workout's details finds the list as it was;
- * Only what I have is the setting shared with the Exercises list and ready-made workouts.
+ * What the Workouts page is searched and filtered by, and the workouts it leaves: yours and
+ * the ready-made ones (LIB-6), together, A to Z. Kept for as long as the app's open, so coming
+ * back from a workout's details finds the list as it was; Only what I have is the setting
+ * shared with the Exercises list.
  */
 @Service()
 export class LibraryFilters {
@@ -16,6 +28,7 @@ export class LibraryFilters {
     private readonly exercises = inject(ExerciseStore);
     private readonly settings = inject(SettingsStore);
 
+    readonly source = signal<LibrarySource>('all');
     readonly query = signal('');
     readonly favourites = signal(false);
     readonly muscles = signal<MuscleGroup[]>([]);
@@ -30,20 +43,40 @@ export class LibraryFilters {
         myEquipment: this.settings.myEquipment(),
     }));
 
-    /** The workouts shown, in the library's order. */
+    /** Which workouts are listed, before the search and filters. */
+    private readonly listed = computed(() => {
+        switch (this.source()) {
+            case 'mine':
+                return this.workouts.workouts();
+            case 'ready-made':
+                return this.workouts.readyMade();
+            default:
+                return this.workouts.allWorkouts();
+        }
+    });
+
+    /** The workouts shown, yours and ready-made, A to Z (LIB-3). */
     readonly shown = computed(() =>
-        filterWorkouts(this.workouts.workouts(), this.filters(), (id) => this.exercises.byId(id))
+        aToZ(filterWorkouts(this.listed(), this.filters(), (id) => this.exercises.byId(id)))
     );
 
     /**
-     * Whether some workouts are hidden, by a search, a filter or Only what I have. The list
-     * can't be reordered then, as where a card lands among the hidden ones would be a guess.
+     * How many show while any is hidden: "3 of 20 workouts" or "No workouts match". Null when
+     * nothing's hidden.
      */
-    readonly cutDown = computed(() => this.shown().length < this.workouts.workouts().length);
+    readonly shownCount = computed(() => {
+        const shown = this.shown().length;
+        const all = this.workouts.allWorkouts().length;
+        if (shown === all) {
+            return null;
+        }
+        return shown ? `${shown} of ${counted(all, 'workout')}` : 'No workouts match';
+    });
 
     /** Whether any search or filter is on, for Clear to take off. */
     readonly active = computed(
         () =>
+            this.source() !== 'all' ||
             this.query().trim() !== '' ||
             this.favourites() ||
             this.muscles().length > 0 ||
@@ -55,8 +88,9 @@ export class LibraryFilters {
         () => this.muscles().length + (this.settings.onlyMyEquipment() ? 1 : 0)
     );
 
-    /** Takes off the search, Favourites and the muscles, and Only what I have. */
+    /** Shows everything again: All, and no search, Favourites, muscles or Only what I have. */
     clear() {
+        this.source.set('all');
         this.query.set('');
         this.favourites.set(false);
         this.muscles.set([]);

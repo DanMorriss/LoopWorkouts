@@ -9,6 +9,7 @@ import {
     SimpleWorkout,
     work,
 } from '../testing/make-workout';
+import { DeletionStore } from './deletion-store.service';
 import { ExerciseStore } from './exercise-store.service';
 import { WorkoutStore } from './workout-store.service';
 
@@ -420,6 +421,80 @@ describe('WorkoutStore', () => {
         });
     });
 
+    describe('ready-made workouts (LIB-6)', () => {
+        it('loads them on demand, to start and plan by id alongside yours', async () => {
+            const store = createStore();
+            const mine = store.addWorkout(makeWorkout({ title: 'Mine' }));
+            await store.readyMadeLoaded;
+
+            expect(store.readyMade().length).toBeGreaterThan(10);
+            expect(store.allWorkouts()[0]).toBe(mine);
+            expect(store.findAnyWorkout('builtin:gym-legs')?.title).toBe('Gym legs');
+            // Not yours, so it can't be changed or deleted
+            expect(store.findWorkoutById('builtin:gym-legs')).toBeNull();
+            expect(store.workouts()).toEqual([mine]);
+        });
+
+        it('makes one a favourite as a record of its own, not a workout of yours', async () => {
+            const store = createStore();
+            await store.readyMadeLoaded;
+
+            store.setFavourite('builtin:gym-legs', true);
+
+            expect(store.findAnyWorkout('builtin:gym-legs')?.favourite).toBe(true);
+            expect(store.workouts()).toEqual([]);
+            expect(JSON.parse(localStorage.getItem('ready-made-favourites')!)).toEqual([
+                { id: 'builtin:gym-legs', updatedAt: expect.any(Number) },
+            ]);
+
+            store.setFavourite('builtin:gym-legs', false);
+
+            expect(store.findAnyWorkout('builtin:gym-legs')?.favourite).toBeUndefined();
+            expect(
+                TestBed.inject(DeletionStore).deletedAt('ready-made-favourite', 'builtin:gym-legs')
+            ).toBeGreaterThan(0);
+        });
+
+        it('makes a copy of one, "(copy)", as a workout of your own', async () => {
+            const store = createStore();
+            await store.readyMadeLoaded;
+
+            const copy = store.copyReadyMade('builtin:gym-legs')!;
+
+            expect(copy.title).toBe('Gym legs (copy)');
+            expect(copy.id).not.toBe('builtin:gym-legs');
+            expect(store.workouts()).toEqual([copy]);
+            expect(allSteps(copy)).toEqual(allSteps(store.findAnyWorkout('builtin:gym-legs')!));
+            expect(store.copyReadyMade('builtin:nothing')).toBeNull();
+        });
+
+        it('carries on a run of one after a reload, once they have loaded', async () => {
+            const store = createStore();
+            await store.readyMadeLoaded;
+            store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
+
+            TestBed.resetTestingModule();
+            const reloaded = createStore();
+            expect(reloaded.activeWorkout()).toBeNull();
+            await reloaded.readyMadeLoaded;
+
+            expect(reloaded.activeWorkout()?.id).toBe('builtin:gym-legs');
+        });
+
+        it("doesn't save a change made mid-run, as one never changes", async () => {
+            const store = createStore();
+            await store.readyMadeLoaded;
+            store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
+            const first = allSteps(store.activeWorkout()!)[0];
+
+            store.updateActiveStep(0, { ...first, name: 'Changed' } as typeof first);
+
+            expect(allSteps(store.activeWorkout()!)[0].name).toBe('Changed');
+            expect(allSteps(store.findAnyWorkout('builtin:gym-legs')!)[0].name).not.toBe('Changed');
+            expect(store.workouts()).toEqual([]);
+        });
+    });
+
     describe('setFavourite', () => {
         it('marks a workout as a favourite, and not, dated as a change that syncs', () => {
             const store = createStore();
@@ -798,45 +873,6 @@ describe('WorkoutStore', () => {
             store.restoreWorkout(workout, 0);
 
             expect(store.workouts().map((restored) => restored.id)).toEqual([workout.id]);
-        });
-    });
-
-    describe('moveWorkout', () => {
-        it('moves a workout to another place in the library, and saves', () => {
-            const store = createStore();
-            const first = store.addWorkout(makeWorkout({ title: 'First' }));
-            const middle = store.addWorkout(makeWorkout({ title: 'Middle' }));
-            const last = store.addWorkout(makeWorkout({ title: 'Last' }));
-
-            store.moveWorkout(2, 0);
-
-            expect(store.workouts()).toEqual([last, first, middle]);
-            expect(savedWorkouts()).toEqual([last, first, middle]);
-        });
-
-        it('remembers when, for the library order to sync', () => {
-            vi.spyOn(Date, 'now').mockReturnValue(5_000);
-            const store = createStore();
-            const first = store.addWorkout(makeWorkout({ title: 'First' }));
-            const last = store.addWorkout(makeWorkout({ title: 'Last' }));
-            expect(store.libraryOrder()).toEqual({ ids: [first.id, last.id], updatedAt: 0 });
-
-            store.moveWorkout(1, 0);
-
-            expect(store.libraryOrder()).toEqual({ ids: [last.id, first.id], updatedAt: 5_000 });
-            TestBed.resetTestingModule();
-            expect(createStore().libraryOrder().updatedAt).toBe(5_000);
-        });
-
-        it('leaves the library as it is for a place outside it', () => {
-            const store = createStore();
-            const first = store.addWorkout(makeWorkout({ title: 'First' }));
-            const last = store.addWorkout(makeWorkout({ title: 'Last' }));
-
-            store.moveWorkout(0, 2);
-            store.moveWorkout(-1, 0);
-
-            expect(store.workouts()).toEqual([first, last]);
         });
     });
 

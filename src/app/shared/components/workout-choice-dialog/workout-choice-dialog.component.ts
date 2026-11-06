@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DialogComponent } from '../dialog/dialog.component';
+import { ReadyMadeBadgeComponent } from '../ready-made-badge/ready-made-badge.component';
 
 /** A workout to pick: its name, a word on it (e.g. "6 steps"), and whether it can be. */
 export interface WorkoutChoice {
@@ -8,19 +9,23 @@ export interface WorkoutChoice {
     name: string;
     detail: string;
     disabled: boolean;
+    /** A ready-made workout (LIB-6), which has its badge. */
+    readyMade?: boolean;
+    /** Its icon, if not a workout's, e.g. `event` for a day. */
+    icon?: string;
 }
 
 let nextId = 0;
 
 /**
  * A dialog to pick one of the library's workouts: to add an exercise to (EXR-12), or to plan on
- * a day (PLN-1). With `newLabel`, a row for a new workout comes first, which picks null. Focus
+ * a day (PLN-1); or, with each choice's `icon`, something else, such as the day to plan one on. With `newLabel`, a row for a new workout comes first, which picks null. Focus
  * starts on the first row and is trapped inside while it's open; ‹ Back, Escape or a click outside
  * close it. Where it's used, it has animate.leave="dialog-leave".
  */
 @Component({
     selector: 'app-workout-choice-dialog',
-    imports: [DialogComponent, MatIconModule],
+    imports: [DialogComponent, MatIconModule, ReadyMadeBadgeComponent],
     template: `
         <app-dialog
             [labelledBy]="id + '-title'"
@@ -56,8 +61,13 @@ let nextId = 0;
                                 [attr.cdkFocusInitial]="first && !newLabel() ? '' : null"
                                 (click)="picked.emit(choice.id)"
                             >
-                                <mat-icon aria-hidden="true">view_list</mat-icon>
+                                <mat-icon aria-hidden="true">{{
+                                    choice.icon ?? 'view_list'
+                                }}</mat-icon>
                                 <span class="choice__name">{{ choice.name }}</span>
+                                @if (choice.readyMade) {
+                                    <app-ready-made-badge />
+                                }
                                 <span class="choice__detail">{{ choice.detail }}</span>
                             </button>
                         </li>

@@ -1,4 +1,3 @@
-import { CdkDrag } from '@angular/cdk/drag-drop';
 import {
     Component,
     computed,
@@ -9,13 +8,13 @@ import {
     output,
     viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { workoutEquipment } from '../../models/built-in-workouts';
 import { capitalise, equipmentPhrases, MUSCLE_LABELS } from '../../models/exercise';
 import { MUSCLES_ON_A_CARD, musclesWorked } from '../../models/workout-muscles';
 import {
     allSteps,
+    isReadyMade,
     repStepsPerRound,
     roundSeconds,
     runsUntilStopped,
@@ -28,25 +27,27 @@ import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { counted } from '../../shared/format-count';
 import { CardGestures } from './card-gestures';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
+import { ReadyMadeBadgeComponent } from '../../shared/components/ready-made-badge/ready-made-badge.component';
 import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
 import { ShowcaseKitComponent } from '../../shared/components/showcase/showcase-kit.component';
 import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
 
 /**
- * One workout in the library list, in the ready-made cards' look: its title and what's in it,
+ * One workout in the list, yours or ready-made (with its badge): its title and what's in it,
  * how many exercises, the muscles it mainly works and what it needs. Pressing it slides in its
- * details, its play button starts it, and its heart makes it a favourite. It can also be swiped to the left to delete it, or held to pick it up: it lifts, and can then be dragged to another
- * place (the library's drop list does that), or let go of where it is for its options, as on
- * an iPhone. A right-click opens them too, and so does the ⋮ button, for keyboards, screen
- * readers and anyone who doesn't know the gestures; its menu has Move up and Move down as
- * well. The library decides which card's options are open (one at a time); the card shows
- * that and reports what the user does.
+ * details, its play button starts it, and its heart makes it a favourite. One of yours can be
+ * swiped to the left to delete it. Held still, it lifts, and let go of, its options open, as
+ * on an iPhone; a right-click opens them too, and so does the ⋮ button, for keyboards, screen
+ * readers and anyone who doesn't know the gestures: Edit and Delete, or Make a copy for a
+ * ready-made one. The library decides which card's options are open (one at a time); the card
+ * shows that and reports what the user does.
  */
 @Component({
     selector: 'li[appWorkoutCard]',
     imports: [
         FavouriteButtonComponent,
         MatIconModule,
+        ReadyMadeBadgeComponent,
         ShowcaseCountComponent,
         ShowcaseKitComponent,
         ShowcaseMusclesComponent,
@@ -66,25 +67,21 @@ export class WorkoutCardComponent {
     readonly menuOpen = input(false);
     /** Whether it's the workout just saved in Create, which the library points out. */
     readonly highlighted = input(false);
-    /**
-     * Whether its options offer Move up and Move down: not at the top or bottom of the
-     * library, nor while it's searched or filtered (see `LibraryFilters.cutDown`).
-     */
-    readonly canMoveUp = input(false);
-    readonly canMoveDown = input(false);
 
     readonly started = output<void>();
     readonly menuToggled = output<void>();
     readonly menuClosed = output<void>();
     readonly editRequested = output<void>();
-    /** Move up (-1) or down (1) a place. */
-    readonly moveRequested = output<-1 | 1>();
+    /** Make a copy, of a ready-made one. */
+    readonly copyRequested = output<void>();
     readonly deleteRequested = output<void>();
 
     private readonly exercises = inject(ExerciseStore);
     private readonly slide = inject(PageSlide);
 
     protected readonly detailsUrl = computed(() => `/library/${this.workout().id}`);
+    /** A ready-made workout (LIB-6), which can't be changed or deleted, only copied. */
+    protected readonly readyMade = computed(() => isReadyMade(this.workout()));
     protected readonly title = computed(() => this.workout().title.trim());
     /** Used in accessible names, e.g. "Start Sprints" or "Start workout". */
     protected readonly name = computed(() => this.title() || 'workout');
@@ -191,16 +188,13 @@ export class WorkoutCardComponent {
         host: this.host.nativeElement,
         reducedMotion: injectPrefersReducedMotion(),
         menuOpen: () => this.menuOpen(),
+        canDelete: () => !this.readyMade(),
         toggleMenu: () => this.menuToggled.emit(),
         requestDelete: () => this.deleteRequested.emit(),
     });
 
     constructor() {
         inject(DestroyRef).onDestroy(() => this.gestures.stop());
-        // Picked up and dragged: the drag has it now, so letting go won't open the options
-        inject(CdkDrag, { optional: true, self: true })
-            ?.started.pipe(takeUntilDestroyed())
-            .subscribe(() => this.gestures.putDown());
     }
 
     protected start(event: Event) {

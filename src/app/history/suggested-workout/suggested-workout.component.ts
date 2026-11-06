@@ -73,7 +73,7 @@ export class SuggestedWorkoutComponent {
             }
         }
         const suggested = suggestNextWorkout(
-            this.workouts.workouts(),
+            this.workouts.allWorkouts(),
             this.weekSets(),
             (id) => this.exercises.byId(id),
             lastDone,

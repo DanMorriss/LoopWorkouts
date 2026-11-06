@@ -18,6 +18,7 @@ function copyHere(overrides: Partial<CopyHere> = {}): CopyHere {
         exercises: [],
         exerciseNotes: [],
         hiddenExercises: [],
+        readyMadeFavourites: [],
         libraryOrder: { ids: [], updatedAt: 0 },
         plan: { days: [[], [], [], [], [], [], []], updatedAt: 0 },
         profile: profile(0),

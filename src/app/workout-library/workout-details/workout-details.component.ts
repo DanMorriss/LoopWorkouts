@@ -6,7 +6,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { describeRounds, formatDuration } from '../../history/history-format';
 import { exerciseSlug } from '../../models/exercise';
-import { Workout } from '../../models/workout';
+import { isReadyMade, isReadyMadeId, Workout } from '../../models/workout';
+import { ReadyMadeBadgeComponent } from '../../shared/components/ready-made-badge/ready-made-badge.component';
 import { musclesWorked } from '../../models/workout-muscles';
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
 import { PageSlide } from '../../nav/page-slide';
@@ -15,6 +16,7 @@ import { BodyMapComponent } from '../../shared/components/body-map/body-map.comp
 import { WorkoutOutlineComponent } from '../../shared/components/workout-outline/workout-outline.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
+import { MakeCopy } from '../../shared/state/make-copy.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
 
@@ -36,6 +38,7 @@ const RECENT_RUNS = 5;
         DatePipe,
         FavouriteButtonComponent,
         MatIconModule,
+        ReadyMadeBadgeComponent,
         RouterLink,
         SwipeBackDirective,
         WorkoutOutlineComponent,
@@ -50,6 +53,7 @@ export class WorkoutDetailsComponent {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     private readonly slide = inject(PageSlide);
+    private readonly makeCopy = inject(MakeCopy);
 
     private readonly id = toSignal(
         this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
@@ -58,8 +62,17 @@ export class WorkoutDetailsComponent {
 
     protected readonly back = `/library?details=${this.route.snapshot.paramMap.get('id') ?? ''}`;
 
-    /** It, or null for a link to one there isn't, such as one deleted since. */
-    protected readonly workout = computed(() => this.workouts.findWorkoutById(this.id()));
+    /** It, yours or ready-made, or null for a link to one there isn't, such as one deleted since. */
+    protected readonly workout = computed(() => this.workouts.findAnyWorkout(this.id()));
+    /** A ready-made one, which has its badge and description, and Make a copy for Edit. */
+    protected readonly readyMade = computed(() => {
+        const workout = this.workout();
+        return workout && isReadyMade(workout) ? workout : null;
+    });
+    /** Not found yet only because the ready-made workouts are still loading. */
+    protected readonly loading = computed(
+        () => isReadyMadeId(this.id()) && this.workouts.readyMade().length === 0
+    );
 
     protected readonly name = computed(() => this.workout()?.title.trim() || 'Untitled workout');
     protected readonly muscles = computed(() => {
@@ -90,6 +103,14 @@ export class WorkoutDetailsComponent {
         const exercise = this.exercises.byId(exerciseId);
         return exercise ? `/library/${this.id()}/${exerciseSlug(exercise)}` : null;
     };
+
+    /** Make a copy of it, and open the copy in Create, coming back to the copy's details. */
+    protected copy(workout: Workout) {
+        const copy = this.makeCopy.of(workout.id);
+        if (copy) {
+            this.edit(copy);
+        }
+    }
 
     protected edit(workout: Workout) {
         const url = this.router.serializeUrl(

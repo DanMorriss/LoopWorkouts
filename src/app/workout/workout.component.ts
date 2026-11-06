@@ -1,3 +1,5 @@
+import { editUrl } from '../shared/state/make-copy.service';
+import { Workout } from '../models/workout';
 import {
     afterNextRender,
     AnimationCallbackEvent,
@@ -324,6 +326,12 @@ export class WorkoutComponent {
     }
 
     /** The summary's Done: the run is over, on to it in the history (highlighted if logged). */
+    /** A copy made of the ready-made workout just run: the summary closes, and it opens in Create. */
+    async openCopy(copy: Workout) {
+        this.run.stop();
+        await this.router.navigateByUrl(editUrl(copy));
+    }
+
     async closeSummary() {
         const run = this.run.runId();
         this.run.stop();

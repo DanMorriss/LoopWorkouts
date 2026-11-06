@@ -451,24 +451,36 @@ for (const theme of ['dark', 'light'] as const) {
         });
 
         describe('ready-made workouts', () => {
-            it('the list, with the equipment open', async () => {
-                await open('/ready-made');
+            it('listed on Workouts with their badges, the filters and equipment open', async () => {
+                await TestBed.inject(WorkoutStore).readyMadeLoaded;
+                await open('/library');
+                expect(
+                    fixture.nativeElement.querySelector('.workout-card app-ready-made-badge')
+                ).not.toBeNull();
+                click('[aria-controls="library-more-filters"]');
+                await settle();
                 click('.kit__edit');
                 await settle();
                 await expectNoViolations();
             });
 
-            it('a workout, on its page', async () => {
+            it('a workout, on its Details, with Make a copy', async () => {
+                await TestBed.inject(WorkoutStore).readyMadeLoaded;
                 await open('/ready-made/gym-legs');
-                expect(fixture.nativeElement.querySelector('.preview__add')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.details__copy')).not.toBeNull();
                 await expectNoViolations();
             });
         });
 
         describe('plan', () => {
-            /** Legs planned yesterday (missed) and today, Push today too and done. */
+            /**
+             * Legs planned yesterday (missed) and today, Push today too and done. Legs is back
+             * squats, so the muscle groups the plan misses show under the week.
+             */
             function planned() {
-                const legs = store.addWorkout(makeWorkout({ title: 'Legs' }));
+                const legs = store.addWorkout(
+                    makeWorkout({ title: 'Legs', steps: [reps(10, 'Back squat')] })
+                );
                 const push = store.addWorkout(makeWorkout({ title: 'Push' }));
                 const plan = TestBed.inject(PlanStore);
                 const today = weekdayOf(Date.now());
@@ -490,10 +502,11 @@ for (const theme of ['dark', 'light'] as const) {
                 });
             }
 
-            it('the week, with workouts done, missed and due', async () => {
+            it('the week, with workouts done, missed and due, and the muscles missed', async () => {
                 planned();
                 await open('/plan');
                 expect(fixture.nativeElement.querySelector('.plan__workout')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.plan-muscles')).not.toBeNull();
                 await expectNoViolations();
             });
 
@@ -548,7 +561,8 @@ for (const theme of ['dark', 'light'] as const) {
             it('after deleting a workout, with Undo offered', async () => {
                 store.addWorkout(sprints);
                 await open('/library');
-                click('.workout-card__action--menu');
+                // Your own one's, not a ready-made one's, which can't be deleted
+                click('.workout-card:not([data-workout^="builtin:"]) .workout-card__action--menu');
                 await settle();
                 click('.workout-card__menu-item--danger');
                 await settle();
@@ -556,23 +570,15 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('with exercises in its workouts, and the muscle groups they miss', async () => {
-                store.addWorkout(makeWorkout({ title: 'Legs', steps: [reps(10, 'Back squat')] }));
+            it("with a ready-made card's options open", async () => {
                 store.addWorkout(sprints);
+                await store.readyMadeLoaded;
                 await open('/library');
-                expect(fixture.nativeElement.querySelector('.library__muscles')).not.toBeNull();
-                await expectNoViolations();
-            });
-
-            it('with a middle card moved down, its options open', async () => {
-                store.addWorkout(sprints);
-                store.addWorkout(untitled);
-                store.addWorkout(makeWorkout({ id: 'workout-3', title: 'Last' }));
-                await open('/library');
-                click('.workout-card:nth-child(2) .workout-card__action--menu');
+                click('[data-workout="builtin:gym-legs"] .workout-card__action--menu');
                 await settle();
-                click('.workout-card__menu-item--down');
-                await settle();
+                expect(
+                    fixture.nativeElement.querySelector('.workout-card__menu-item--copy')
+                ).not.toBeNull();
                 await expectNoViolations();
             });
 

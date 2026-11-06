@@ -12,17 +12,11 @@ import {
     allSteps,
 } from './workout';
 
-/** Which part of the ready-made list a workout is in, by what it needs. */
+/**
+ * What a ready-made workout's built around, by what it needs. They were listed in these groups
+ * on a page of their own until 2026-11-06; they're A to Z with yours now.
+ */
 export type BuiltInWorkoutGroup = 'bodyweight' | 'kettlebell' | 'dumbbells' | 'gym' | 'other';
-
-/** Each part's heading, in the order they're listed. */
-export const BUILT_IN_WORKOUT_GROUPS: readonly { group: BuiltInWorkoutGroup; label: string }[] = [
-    { group: 'bodyweight', label: 'No equipment' },
-    { group: 'kettlebell', label: 'Kettlebell' },
-    { group: 'dumbbells', label: 'Dumbbells' },
-    { group: 'gym', label: 'Gym' },
-    { group: 'other', label: 'Other kit' },
-];
 
 /**
  * A workout that comes with the app (LIB-6): never saved as it is, but copied into the

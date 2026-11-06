@@ -65,7 +65,7 @@ export class DueTodayComponent {
                 this.plan.plan(),
                 this.history.entries(),
                 this.now,
-                (id) => this.workouts.findWorkoutById(id) !== null
+                (id) => this.workouts.findAnyWorkout(id) !== null
             )[weekdayOf(this.now)]
     );
 
@@ -73,14 +73,14 @@ export class DueTodayComponent {
     readonly due = computed(() =>
         this.today()
             .filter((planned) => planned.status === 'today')
-            .map((planned) => this.workouts.findWorkoutById(planned.workoutId)!)
+            .map((planned) => this.workouts.findAnyWorkout(planned.workoutId)!)
     );
 
     /** The names of those planned today and run already. */
     protected readonly done = computed(() =>
         this.today()
             .filter((planned) => planned.status === 'done')
-            .map((planned) => this.name(this.workouts.findWorkoutById(planned.workoutId)!))
+            .map((planned) => this.name(this.workouts.findAnyWorkout(planned.workoutId)!))
     );
 
     protected name(workout: Workout): string {

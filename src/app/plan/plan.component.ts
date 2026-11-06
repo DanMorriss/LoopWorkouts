@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { HelpLinkComponent } from '../shared/components/help-link/help-link.component';
@@ -14,6 +14,8 @@ import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
+import { aToZ, isReadyMade } from '../models/workout';
+import { PlanMusclesComponent } from './plan-muscles/plan-muscles.component';
 
 /** How a planned workout's place this week reads, e.g. "Done". "To come" says nothing. */
 const STATUS_TEXT: Record<PlannedStatus, string> = {
@@ -37,7 +39,7 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
         BackLinkComponent,
         HelpLinkComponent,
         MatIconModule,
-        RouterLink,
+        PlanMusclesComponent,
         SwipeBackDirective,
         WorkoutChoiceDialogComponent,
     ],
@@ -55,13 +57,11 @@ export class PlanComponent {
 
     protected readonly today = weekdayOf(this.now);
     protected readonly statusText = STATUS_TEXT;
-    protected readonly hasWorkouts = computed(() => this.workouts.workouts().length > 0);
-
     private readonly names = computed(
         () =>
             new Map(
                 this.workouts
-                    .workouts()
+                    .allWorkouts()
                     .map((workout) => [workout.id, workout.title.trim() || 'Untitled workout'])
             )
     );
@@ -98,15 +98,19 @@ export class PlanComponent {
     protected readonly choices = computed((): WorkoutChoice[] => {
         const day = this.addingTo();
         const planned = day === null ? [] : this.planStore.plan().days[day];
-        return this.workouts.workouts().map((workout) => {
-            const already = planned.includes(workout.id);
-            return {
-                id: workout.id,
-                name: this.names().get(workout.id)!,
-                detail: already ? 'Planned' : '',
-                disabled: already,
-            };
-        });
+        // Yours A to Z, then the ready-made ones A to Z
+        return [...aToZ(this.workouts.workouts()), ...aToZ(this.workouts.readyMade())].map(
+            (workout) => {
+                const already = planned.includes(workout.id);
+                return {
+                    id: workout.id,
+                    name: this.names().get(workout.id)!,
+                    detail: already ? 'Planned' : '',
+                    disabled: already,
+                    readyMade: isReadyMade(workout),
+                };
+            }
+        );
     });
 
     protected canAdd(day: number): boolean {

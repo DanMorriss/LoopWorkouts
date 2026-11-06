@@ -221,7 +221,11 @@
 
         <!-- How it went: once finished, or ended with End workout -->
         @if (view.summaryOpen()) {
-            <app-workout-summary (back)="backToWorkout()" (done)="closeSummary()" />
+            <app-workout-summary
+                (back)="backToWorkout()"
+                (done)="closeSummary()"
+                (copied)="openCopy($event)"
+            />
         }
 
         @if (swap.exerciseInDetails(); as exercise) {

@@ -1,0 +1,77 @@
+@use 'type' as *;
+
+:host {
+    display: block;
+}
+
+// Under the week
+.plan-muscles {
+    margin-top: 1.5rem;
+}
+
+.plan-muscles__title {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    color: var(--text-strong);
+}
+
+.plan-muscles__text {
+    margin: 0.75rem 0 0.5rem;
+    color: var(--text);
+}
+
+.plan-muscles__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.plan-muscles__muscle {
+    text-decoration: none;
+}
+
+// The ready-made workout suggested for the muscles left out (LIB-7), as a card under them
+.plan-muscles__filler {
+    display: grid;
+    justify-items: start;
+    gap: 0.3rem;
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.8rem;
+    background: var(--card);
+
+    p {
+        margin: 0;
+    }
+}
+
+.plan-muscles__filler-label {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.plan-muscles__filler-name {
+    @include display;
+    color: var(--text-strong);
+    font-size: 1.05rem;
+}
+
+.plan-muscles__filler-description {
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.plan-muscles__filler-fills {
+    color: var(--text-strong);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.plan-muscles__filler-add {
+    margin-top: 0.4rem;
+}

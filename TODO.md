@@ -22,6 +22,10 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 - [ ] **Search and filters:** make the page searchable and filterable, with filters including "My own workouts" and favourites. There are no favourites yet, so they're new: a flag on a workout that syncs (`docs/features/data.md`). Reuse `search-field`, and see how `equipment-filter` works. Work out how dragging behaves while a filter is on.
 - [ ] **List the ready-made workouts on the page:** with them all listed, everything below the workouts can go: the Ready-made workouts link and Missing muscle groups (which moves to the Plan page, below). Still to work out: what a card does for a ready-made workout that hasn't been added (LIB-6), and whether its details keep their own page. Depends on the search and filters, as the list gets long without them.
 
+**Equipment filters**
+
+- [ ] **A "No equipment" option** (Dan, 2026-11-06): someone with no equipment has no way to say so, or to show only exercises and workouts that need none. Add it to the equipment chips (`equipment-chips`), both where you pick what you have (the setup's equipment question, NAV-4, and My equipment) and in the filters that use them (`equipment-filter`, on Exercises, Workouts and the ready-made workouts). Today, Only what I have with nothing picked does show only what needs nothing, but nothing says so, and picking nothing reads as not having answered. Decide how it sits with the other chips: picking it likely clears them, and picking a piece clears it. Update `docs/features/settings.md` and `exercises.md`.
+
 **During a workout**
 
 - [ ] **Make the bubble look 3D:** slightly convex, like a real bubble, and the timer bar that goes round it 3D too, with curved ends rather than flat ones. The ring is two rotating half-circles (`workout/workout-ring/`), which is why its ends are flat, so curved ends mean adding end caps or redrawing it. It's on screen for the whole workout, so check it stays smooth on a phone, in both themes and with reduced motion.

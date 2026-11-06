@@ -164,6 +164,8 @@ export class TourComponent {
         const stop = TOUR_STOPS[index];
         this.part.set(null);
         this.focusTitle();
+        // Before the page opens, so it opens with its examples
+        this.tour.sampleHistory.set(stop.sampleHistory ?? false);
         await this.router.navigateByUrl(stop.path);
         // Its tab lights up straight away, its part once it's found
         this.measure();

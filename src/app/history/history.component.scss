@@ -13,6 +13,15 @@
     font-size: 1.5rem;
 }
 
+.history__sample {
+    margin: 0 0 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px dashed var(--accent-line);
+    border-radius: 0.6rem;
+    color: var(--text);
+    font-size: 0.85rem;
+}
+
 .history__summary {
     margin: 0 0 1rem;
     color: var(--text-muted);

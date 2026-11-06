@@ -4,7 +4,7 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
 import { muscleBalance, setsByMuscle } from '../../models/muscle-balance';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
-import { HistoryStore } from '../../shared/state/history-store.service';
+import { ShownHistory } from '../shown-history';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { MuscleBarsComponent } from '../muscle-bars/muscle-bars.component';
 
@@ -50,7 +50,7 @@ export class MusclesThisWeekComponent {
     /** Just the body map, with a link to the bars on Progress (Today). */
     readonly compact = input(false);
 
-    private readonly history = inject(HistoryStore);
+    private readonly history = inject(ShownHistory);
     private readonly exercises = inject(ExerciseStore);
     protected readonly settings = inject(SettingsStore);
     private readonly now = Date.now();

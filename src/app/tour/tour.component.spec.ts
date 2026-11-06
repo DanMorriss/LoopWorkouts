@@ -20,7 +20,8 @@ class TodayPage {
 
 @Component({
     template: `<h2>Workouts</h2>
-        <button data-tour="workout-start">Start</button>`,
+        <button data-tour="new-workout">New</button>
+        <div data-tour="workout">Sprints</div>`,
 })
 class WorkoutsPage {}
 
@@ -123,7 +124,7 @@ describe('TourComponent (NAV-8)', () => {
         await start();
 
         expect(router.url).toBe('/home');
-        expect(text('.tour__count')).toBe('1 of 6');
+        expect(text('.tour__count')).toBe('1 of 7');
         expect(text('.tour__title')).toBe('Today');
         expect(text('.tour__text')).toContain('Start here: add a few workouts');
         // Getting started, and Today's tab, the way back to it
@@ -137,6 +138,20 @@ describe('TourComponent (NAV-8)', () => {
         // No Back on the first stop
         expect(button('Back')).toBeUndefined();
         expect(el().querySelector('.tour__card')!.getAttribute('role')).toBe('dialog');
+    });
+
+    it('has Progress show example workouts while it is on its stop, and only then', async () => {
+        await start();
+        for (let i = 0; i < 4; i++) {
+            button('Next')!.click();
+            await settle();
+            expect(tour.sampleHistory()).toBe(router.url === '/history');
+        }
+        expect(text('.tour__title')).toBe('Progress');
+
+        button('Next')!.click();
+        await settle();
+        expect(tour.sampleHistory()).toBe(false);
     });
 
     it('lights up the week on Today once there are workouts or a plan', async () => {
@@ -155,9 +170,25 @@ describe('TourComponent (NAV-8)', () => {
         await settle();
         expect(router.url).toBe('/library');
         expect(lit().at(-1)).toBe(tabTop('/library'));
-        expect(text('.tour__count')).toBe('2 of 6');
+        expect(text('.tour__count')).toBe('2 of 7');
         expect(text('.tour__title')).toBe('Workouts');
+        expect(text('.tour__text')).toBe('Tap a card for its details, or ▶ to start it.');
         expect(document.activeElement?.id).toBe('tour-title');
+
+        // Then making your own, on the same page
+        button('Next')!.click();
+        await settle();
+        expect(router.url).toBe('/library');
+        expect(text('.tour__title')).toBe('Your own workouts');
+        expect(lit()[0]).toBe(
+            Math.round(
+                el().querySelector('[data-tour="new-workout"]')!.getBoundingClientRect().top - 6
+            )
+        );
+
+        button('Back')!.click();
+        await settle();
+        expect(text('.tour__title')).toBe('Workouts');
 
         button('Back')!.click();
         await settle();
@@ -167,7 +198,7 @@ describe('TourComponent (NAV-8)', () => {
 
     it('ends back on Today, lighting up the whole tab bar, and Done puts focus on the greeting', async () => {
         await start();
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 6; i++) {
             button('Next')!.click();
             await settle();
         }
@@ -189,10 +220,10 @@ describe('TourComponent (NAV-8)', () => {
 
     it('skips with Escape, staying on the page with focus on its title', async () => {
         await start();
-        button('Next')!.click();
-        await settle();
-        button('Next')!.click();
-        await settle();
+        for (let i = 0; i < 3; i++) {
+            button('Next')!.click();
+            await settle();
+        }
 
         el()
             .querySelector('.tour__card')!

@@ -16,6 +16,8 @@ export interface TourStop {
     text: string;
     /** 'all' lights up the whole tab bar, rather than the tab for its page. */
     tab?: 'all';
+    /** Whether its page shows example workouts in place of an empty history (Progress). */
+    sampleHistory?: boolean;
 }
 
 export const TOUR_STOPS: readonly TourStop[] = [
@@ -37,13 +39,19 @@ export const TOUR_STOPS: readonly TourStop[] = [
     {
         path: '/library',
         title: 'Workouts',
+        parts: [{ part: 'workout', text: 'Tap a card for its details, or ▶ to start it.' }],
+        text: 'Your workouts, and ready-made ones to use as they are.',
+    },
+    {
+        path: '/library',
+        title: 'Your own workouts',
         parts: [
             {
-                part: 'workout-start',
-                text: 'Tap a card for its details, or ▶ to start it. Ready-made ones are here to use as they are.',
+                part: 'new-workout',
+                text: 'Tap + New to make your own: its exercises, sets, reps, rests and rounds.',
             },
         ],
-        text: 'Your workouts, and ready-made ones to use as they are.',
+        text: 'Make your own workout with + New.',
     },
     {
         path: '/exercises',
@@ -51,25 +59,30 @@ export const TOUR_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'exercise',
-                text: "Every exercise, with how it's done, a 3D demo and the muscles it works. Once you've done one, its progress is here too.",
+                text: "Click on an exercise to see how it's done, a 3D demo and the muscles it works.",
             },
         ],
-        text: "Every exercise, with how it's done and the muscles it works.",
+        text: "Click on an exercise to see how it's done and the muscles it works.",
     },
     {
         path: '/history',
         title: 'Progress',
         parts: [
             {
-                part: 'progress-empty',
-                text: "Once you've done a workout, your weeks, the muscles you've worked and every session show here.",
+                part: 'progress-sample',
+                text: "Once you've done a few workouts, this shows your time each week, the muscles you've worked and every workout. These are examples.",
             },
             {
                 part: 'time-per-week',
                 text: "How you're getting on: your time each week, the muscles you've worked, and every workout you've done.",
             },
+            {
+                part: 'progress-empty',
+                text: "Once you've done a workout, your weeks, the muscles you've worked and every session show here.",
+            },
         ],
         text: "How you're getting on, and every workout you've done.",
+        sampleHistory: true,
     },
     {
         path: '/account',

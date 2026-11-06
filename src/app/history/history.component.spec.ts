@@ -15,6 +15,7 @@ import {
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { HistoryComponent } from './history.component';
+import { TourService } from '../tour/tour.service';
 import { asOneGroup } from '../models/workout';
 
 // Midday on Sunday 18 October 2026, so "today" and "yesterday" can't flip mid-test
@@ -108,6 +109,32 @@ describe('HistoryComponent', () => {
             'Yesterday lunch',
             'Older',
         ]);
+    });
+
+    it('shows example workouts while the tour shows it with nothing done, never saved (NAV-8)', () => {
+        TestBed.inject(TourService).sampleHistory.set(true);
+        create();
+
+        expect(text('.history__sample')).toEqual([
+            "Examples, to show what's here. Yours will replace them.",
+        ]);
+        expect(text('.entry__title')[0]).toBe('Push day');
+        expect(fixture.nativeElement.querySelector('[data-tour="progress-sample"]')).not.toBeNull();
+        expect(history.entries()).toEqual([]);
+
+        // Once the tour moves on, the page is empty again
+        TestBed.inject(TourService).sampleHistory.set(false);
+        fixture.detectChanges();
+        expect(text('.history__sample')).toEqual([]);
+        expect(fixture.nativeElement.querySelector('.history__empty')).not.toBeNull();
+    });
+
+    it('never shows the examples beside workouts of your own', () => {
+        TestBed.inject(TourService).sampleHistory.set(true);
+        create(makeEntry({ title: 'Mine' }));
+
+        expect(text('.history__sample')).toEqual([]);
+        expect(text('.entry__title')).toEqual(['Mine']);
     });
 
     it('shows when each one started, how long it ran, and the rounds', () => {

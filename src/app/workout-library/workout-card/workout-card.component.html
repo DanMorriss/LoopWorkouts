@@ -9,6 +9,7 @@
 <div
     #face
     class="workout-card__face"
+    data-tour="workout"
     (pointerdown)="gestures.press($event)"
     (pointermove)="gestures.move($event)"
     (pointerup)="gestures.release($event)"
@@ -67,7 +68,6 @@
     <button
         type="button"
         class="btn-main btn-main--round workout-card__start"
-        data-tour="workout-start"
         [attr.aria-label]="'Start ' + name()"
         [attr.aria-describedby]="'workout-summary-' + workout().id"
         (click)="start($event)"

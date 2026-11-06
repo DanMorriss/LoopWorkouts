@@ -13,6 +13,11 @@ export class TourService {
     private readonly _offered = signal(readOffered());
     private readonly _stop = signal<number | null>(null);
 
+    /**
+     * Whether Progress shows example workouts in place of an empty history, while the tour is
+     * showing it.
+     */
+    readonly sampleHistory = signal(false);
     /** Whether Today offers the tour: until it's taken or turned down here. */
     readonly offered = this._offered.asReadonly();
     /** The stop showing, from 0, or null with the tour off. */
@@ -34,6 +39,7 @@ export class TourService {
 
     end() {
         this._stop.set(null);
+        this.sampleHistory.set(false);
     }
 
     /** Not now: Today stops offering it. */

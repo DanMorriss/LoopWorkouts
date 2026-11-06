@@ -56,7 +56,16 @@
         <ul class="body-map__labels" [attr.aria-labelledby]="id + '-main'">
             @for (muscle of mainList(); track muscle) {
                 <li class="body-map__label body-map__label--main">
-                    <span>{{ muscleLabel(muscle) }}</span>
+                    @if (linkLabels()) {
+                        <a
+                            class="body-map__link"
+                            routerLink="/exercises"
+                            [queryParams]="{ muscles: muscle }"
+                            >{{ muscleLabel(muscle) }}</a
+                        >
+                    } @else {
+                        <span>{{ muscleLabel(muscle) }}</span>
+                    }
                     @if (removableLabels()) {
                         <button
                             type="button"
@@ -78,7 +87,16 @@
         <ul class="body-map__labels" [attr.aria-labelledby]="id + '-supporting'">
             @for (muscle of supportingList(); track muscle) {
                 <li class="body-map__label body-map__label--supporting">
-                    <span>{{ muscleLabel(muscle) }}</span>
+                    @if (linkLabels()) {
+                        <a
+                            class="body-map__link"
+                            routerLink="/exercises"
+                            [queryParams]="{ muscles: muscle }"
+                            >{{ muscleLabel(muscle) }}</a
+                        >
+                    } @else {
+                        <span>{{ muscleLabel(muscle) }}</span>
+                    }
                     @if (removableLabels()) {
                         <button
                             type="button"

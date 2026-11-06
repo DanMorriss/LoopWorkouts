@@ -33,7 +33,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 **Today and Plan**
 
 - [x] **Suggest a workout on a day with none planned** (2026-11-06): "Fancy a workout today?", saying resting is fine too, with the usual suggestion steered off the next planned workout and most of its main muscles, and saying which it leaves fresh.
-- [ ] **The body map on the Plan page:** at the bottom of `plan/`, shaded for what the plan works across the week (`app-body-map`).
+- [x] **The body map on the Plan page** (2026-11-06): What your plan works, at the bottom of the Plan page over Missing muscle groups, shaded for the planned workouts' main and supporting muscles.
 - [x] **Move Missing muscle groups to the Plan page** (LIB-5, LIB-7, 2026-11-06): at its bottom, for the workouts in the plan; its ready-made suggestion adds to your workouts, to plan from there.
 - [ ] **Decide: Muscles this week on Today?** Today is where most people land, so it needs to be exciting. The body map is only on Progress for now (`app-muscles-this-week`), and would need thought for someone who's done nothing yet this week, when it's blank.
 

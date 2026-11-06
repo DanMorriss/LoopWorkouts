@@ -293,7 +293,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'missing-muscles',
                 question: 'What are Missing muscle groups?',
                 answer: [
-                    'At the bottom of the Plan page: the muscles none of the workouts in your plan work, and those they only work lightly. Tap one to find exercises for it.',
+                    'At the bottom of the Plan page, under What your plan works: the muscles none of the workouts in your plan work. Those they only work lightly are the Supporting ones on the map above. Tap any muscle to find exercises for it.',
                     'Under them, a ready-made workout that covers the most of them, with Add to a day to plan it.',
                 ],
                 link: { label: 'Go to the Plan page', url: '/plan' },

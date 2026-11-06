@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
+import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment } from '../../models/built-in-workouts';
 import { WorkoutFields } from '../../models/workout';
 import { PlanStore } from '../../shared/state/plan-store.service';
@@ -69,8 +71,21 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
             create();
         });
 
+        it('shades what the plan works on the body map, over the muscle groups it misses', () => {
+            const titles = Array.from(
+                fixture.nativeElement.querySelectorAll('.plan-muscles__title'),
+                (h: Element) => h.textContent!.trim()
+            );
+            expect(titles).toEqual(['What your plan works', 'Missing muscle groups']);
+            const map = fixture.debugElement.query(By.directive(BodyMapComponent))!;
+            expect(map.componentInstance.main()).toEqual(['chest', 'glutes', 'quads']);
+            // Arms isn't planned, so its biceps aren't shaded
+            expect(map.componentInstance.main()).not.toContain('biceps');
+            expect(map.componentInstance.supporting()).toContain('triceps');
+        });
+
         it('lists the muscle groups no planned workout works, linking to exercises for each', () => {
-            expect(el('.plan-muscles__title')?.textContent).toContain('Missing muscle groups');
+            expect(el('#plan-muscles-title')?.textContent).toContain('Missing muscle groups');
             expect(muscles(0)).toBe(
                 'Biceps Forearms Abs Obliques Traps Upper back Abductors Calves Shins Neck'
             );
@@ -79,8 +94,15 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
             );
         });
 
-        it('lists the ones only worked as a supporting muscle apart', () => {
-            expect(muscles(1)).toBe('Shoulders Triceps Lower back Adductors Hamstrings');
+        it("links the map's muscles to exercises for each, and doesn't list the supporting ones again", () => {
+            const links = Array.from(
+                (fixture.nativeElement as HTMLElement).querySelectorAll('.body-map__link'),
+                (a) => [a.textContent!.trim(), a.getAttribute('href')]
+            );
+            expect(links).toContainEqual(['Chest', '/exercises?muscles=chest']);
+            expect(links).toContainEqual(['Triceps', '/exercises?muscles=triceps']);
+            expect(fixture.nativeElement.querySelectorAll('.plan-muscles__list')).toHaveLength(1);
+            expect(fixture.nativeElement.textContent).not.toContain('Only lightly');
         });
 
         describe('a ready-made workout for them', () => {

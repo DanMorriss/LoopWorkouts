@@ -1,73 +1,71 @@
 @let muscles = planMuscles();
 @if (muscles.hasExercises) {
+    <!-- What the week works, as a workout's details shows its own -->
+    <section class="plan-muscles" aria-labelledby="plan-works-title">
+        <h3 id="plan-works-title" class="plan-muscles__title">What your plan works</h3>
+        <p class="plan-muscles__text">
+            Supporting ones are only worked lightly. Pick a muscle to find exercises for it.
+        </p>
+        <app-body-map [main]="muscles.main" [supporting]="muscles.supporting" [linkLabels]="true" />
+    </section>
+
     <section class="plan-muscles" aria-labelledby="plan-muscles-title">
         <h3 id="plan-muscles-title" class="plan-muscles__title">Missing muscle groups</h3>
-        @if (muscles.missed.length === 0 && muscles.light.length === 0) {
+        @if (muscles.missed.length === 0) {
             <p class="plan-muscles__text">Your plan works every muscle group.</p>
         } @else {
-            @if (muscles.missed.length > 0) {
-                <p class="plan-muscles__text">
-                    None of the workouts in your plan work these. Pick one to find exercises for it.
+            <p class="plan-muscles__text">
+                None of the workouts in your plan work these. Pick one to find exercises for it.
+            </p>
+            <ul class="plan-muscles__list">
+                @for (muscle of muscles.missed; track muscle.id) {
+                    <li>
+                        <a
+                            class="btn-pill plan-muscles__muscle"
+                            routerLink="/exercises"
+                            [queryParams]="{ muscles: muscle.id }"
+                            >{{ muscle.label }}</a
+                        >
+                    </li>
+                }
+            </ul>
+        }
+        <!-- A ready-made workout for them (LIB-7), to plan on a day as it is -->
+        @if (gapFiller(); as suggestion) {
+            <div class="plan-muscles__filler">
+                <p class="plan-muscles__filler-label">
+                    {{
+                        muscles.missed.length
+                            ? 'Or plan a ready-made workout for them:'
+                            : 'To work the supporting ones harder, plan a ready-made workout:'
+                    }}
                 </p>
-                <ul class="plan-muscles__list">
-                    @for (muscle of muscles.missed; track muscle.id) {
-                        <li>
-                            <a
-                                class="btn-pill plan-muscles__muscle"
-                                routerLink="/exercises"
-                                [queryParams]="{ muscles: muscle.id }"
-                                >{{ muscle.label }}</a
-                            >
-                        </li>
-                    }
-                </ul>
-            }
-            @if (muscles.light.length > 0) {
-                <p class="plan-muscles__text">Only lightly, as a supporting muscle:</p>
-                <ul class="plan-muscles__list">
-                    @for (muscle of muscles.light; track muscle.id) {
-                        <li>
-                            <a
-                                class="btn-pill plan-muscles__muscle"
-                                routerLink="/exercises"
-                                [queryParams]="{ muscles: muscle.id }"
-                                >{{ muscle.label }}</a
-                            >
-                        </li>
-                    }
-                </ul>
-            }
-            <!-- A ready-made workout for them (LIB-7), to plan on a day as it is -->
-            @if (gapFiller(); as suggestion) {
-                <div class="plan-muscles__filler">
-                    <p class="plan-muscles__filler-label">Or plan a ready-made workout for them:</p>
-                    <p class="plan-muscles__filler-name">{{ suggestion.workout.title }}</p>
-                    <p class="plan-muscles__filler-description">
-                        {{ suggestion.workout.description }}
-                    </p>
-                    <p class="plan-muscles__filler-fills">{{ suggestion.fills }}</p>
-                    <button
-                        type="button"
-                        id="plan-muscles-add"
-                        class="btn-pill plan-muscles__filler-add"
-                        aria-haspopup="dialog"
-                        [attr.aria-label]="'Plan ' + suggestion.workout.title + ' on a day'"
-                        (click)="choosingDay.set(true)"
-                    >
-                        <mat-icon aria-hidden="true">event</mat-icon>
-                        Add to a day
-                    </button>
-                    @if (choosingDay()) {
-                        <app-workout-choice-dialog
-                            animate.leave="dialog-leave"
-                            [heading]="'Plan ' + suggestion.workout.title + ' on…'"
-                            [choices]="days()"
-                            (closed)="closeDays()"
-                            (picked)="planOn($event)"
-                        />
-                    }
-                </div>
-            }
+                <p class="plan-muscles__filler-name">{{ suggestion.workout.title }}</p>
+                <p class="plan-muscles__filler-description">
+                    {{ suggestion.workout.description }}
+                </p>
+                <p class="plan-muscles__filler-fills">{{ suggestion.fills }}</p>
+                <button
+                    type="button"
+                    id="plan-muscles-add"
+                    class="btn-pill plan-muscles__filler-add"
+                    aria-haspopup="dialog"
+                    [attr.aria-label]="'Plan ' + suggestion.workout.title + ' on a day'"
+                    (click)="choosingDay.set(true)"
+                >
+                    <mat-icon aria-hidden="true">event</mat-icon>
+                    Add to a day
+                </button>
+                @if (choosingDay()) {
+                    <app-workout-choice-dialog
+                        animate.leave="dialog-leave"
+                        [heading]="'Plan ' + suggestion.workout.title + ' on…'"
+                        [choices]="days()"
+                        (closed)="closeDays()"
+                        (picked)="planOn($event)"
+                    />
+                }
+            </div>
         }
     </section>
 }

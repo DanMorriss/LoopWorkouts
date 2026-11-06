@@ -61,7 +61,7 @@
 - Screen readers hear it as the "Main" navigation; the chosen tab is the current page on its own page, and the current item on a page under it (e.g. "Workouts, current" while making a workout).
 - Pages leave room at the bottom for the bars, so the last of a page scrolls clear of them.
 - **Where a page opens:** a new page opens at its top, whichever tab you came from. Going back by a page's ‹ link (or a swipe right) returns to where that page was scrolled, however many pages deep. Staying on a page, as when a filter changes, doesn't move it, and the browser's own back and forward are left to the browser.
-- **A tab left open across an update still opens every page.** A tab running the app from before a new version went live (e.g. one the browser kept in the background) can't find the code for pages it hasn't opened yet, so it loads that page afresh, which brings in the new version. It only tries once in a few seconds, so a page that really is broken doesn't reload over and over.
+- **A tab left open across an update still opens every page.** A tab running the app from before a new version went live (e.g. one the browser kept in the background) can't find the code for pages it hasn't opened yet, so it loads that page afresh, which brings in the new version. It only tries once in a few seconds, so a page that really is broken doesn't reload over and over. The tour (NAV-8) does the same when its code can't load: the page loads afresh, and the tour can be started again (were it left on with nothing showing, Take the tour would do nothing).
 
 ### A workout in progress
 

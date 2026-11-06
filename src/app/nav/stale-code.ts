@@ -21,17 +21,21 @@ export function isStaleCode(error: unknown): boolean {
 
 /**
  * For `withNavigationErrorHandler`: when a page's code fails to load, loads that page afresh,
- * which picks up the current build. Without it the tap does nothing. Only once in a short
- * while, so a page whose code really is missing shows as broken rather than reloading forever.
+ * which picks up the current build. Without it the tap does nothing.
  */
 export function reloadOnStaleCode(navigation: NavigationError) {
-    if (!isStaleCode(navigation.error)) {
-        return;
-    }
     const window = inject(DOCUMENT).defaultView;
-    if (!window) {
-        return;
+    if (isStaleCode(navigation.error) && window) {
+        reloadForNewCode(window, navigation.url);
     }
+}
+
+/**
+ * Loads `url` afresh, picking up the current build, when some code failed to load (a page's,
+ * or the tour's). Only once in a short while, so code that really is missing shows as broken
+ * rather than reloading forever.
+ */
+export function reloadForNewCode(window: Window, url: string) {
     const now = Date.now();
     try {
         if (now - Number(window.sessionStorage.getItem(RELOADED_AT)) < RETRY_AFTER_MS) {
@@ -41,5 +45,5 @@ export function reloadOnStaleCode(navigation: NavigationError) {
     } catch {
         // Storage blocked: reload anyway, as one stale page is likelier than missing code
     }
-    window.location.assign(navigation.url);
+    window.location.assign(url);
 }

@@ -227,7 +227,7 @@ describe('HomeComponent', () => {
 
             expect(text('.week__label')).toEqual(['This week']);
             expect(text('.week__empty')).toEqual([
-                "Nothing planned yet. Here's a week for your goal and equipment, which adds its workouts to yours, or plan your own and Today shows what's due each day.",
+                "Nothing planned yet. Here's a week of ready-made workouts for your goal and equipment, or plan your own and Today shows what's due each day.",
             ]);
             expect(text('app-week-strip .plan-card__title')).toEqual(['Fitness, 4 days']);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
@@ -265,6 +265,46 @@ describe('HomeComponent', () => {
             fixture.detectChanges();
             expect(TestBed.inject(WorkoutStore).workouts()).toEqual([legs]);
             expect(element().querySelector('.week__days')).toBeNull();
+        });
+
+        describe('on a day with nothing planned', () => {
+            // A Wednesday, with Legs planned on Thursday
+            const WEDNESDAY = new Date(2026, 9, 14, 12, 0).getTime();
+
+            async function restDay() {
+                vi.setSystemTime(WEDNESDAY);
+                const legs = addWorkout('Legs');
+                TestBed.inject(WorkoutStore).addWorkout({
+                    title: 'Push',
+                    repeats: 1,
+                    blocks: asOneGroup([{ kind: 'reps', reps: 5, name: 'Bench press' }]),
+                });
+                TestBed.inject(PlanStore).add(3, legs.id);
+                await TestBed.inject(WorkoutStore).readyMadeLoaded;
+                create();
+            }
+
+            it('offers a workout, saying resting is fine too, and leaves Thursday’s muscles fresh', async () => {
+                await restDay();
+
+                expect(text('.suggestion__label')).toEqual(['Fancy a workout today?']);
+                const said = text('.suggestion__reason');
+                expect(said[0]).toBe(
+                    "Nothing's planned today, so resting is fine too. If you'd like to train:"
+                );
+                expect(said[1]).toMatch(/fresh for Legs on Thursday\.$/);
+                // Not the one planned next, which back squats are
+                expect(text('.suggestion__title')).not.toEqual(['Legs']);
+            });
+
+            it('offers nothing extra on a day with something planned', async () => {
+                await restDay();
+                fixture.destroy();
+                TestBed.inject(PlanStore).add(2, TestBed.inject(WorkoutStore).workouts()[1].id);
+                create();
+
+                expect(element().querySelector('app-suggested-workout')).toBeNull();
+            });
         });
 
         it('shows each day Monday first, marked, with today picked out, and Edit plan', () => {

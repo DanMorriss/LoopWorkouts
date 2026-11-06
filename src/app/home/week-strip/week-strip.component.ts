@@ -4,7 +4,7 @@ import { PageSlide } from '../../nav/page-slide';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
 import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import { PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
+import { nextPlannedDay, PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
@@ -85,8 +85,8 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                 <!-- A week ready-made for your goal and equipment (PLN-6), used in one tap,
                      as the main way; or the other plans, or planning your own workouts -->
                 <p class="week__empty">
-                    Nothing planned yet. Here's a week for your goal and equipment, which adds its
-                    workouts to yours, or plan your own and Today shows what's due each day.
+                    Nothing planned yet. Here's a week of ready-made workouts for your goal and
+                    equipment, or plan your own and Today shows what's due each day.
                 </p>
                 <app-plan-card [plan]="suggestedPlan()" [main]="true" (used)="use()" />
                 <div class="week__actions">
@@ -138,7 +138,7 @@ export class WeekStripComponent {
     );
 
     /**
-     * Uses it, with Undo: its workouts added (or yours of the same name), and the week planned.
+     * Uses it, with Undo: the week planned with its ready-made workouts, as they are.
      * The week then shows in its place, so focus moves to Edit plan.
      */
     protected use() {
@@ -190,9 +190,7 @@ export class WeekStripComponent {
             return all.length === 1 ? 'Done for the week' : `All ${all.length} done this week`;
         }
         const tally = `${done} of ${all.length} done this week`;
-        const nextDay = this.week().findIndex(
-            (planned, day) => day > this.today && planned.length > 0
-        );
+        const nextDay = nextPlannedDay(this.week(), this.today);
         if (nextDay < 0) {
             return tally;
         }

@@ -6,7 +6,15 @@ import { allSteps, Workout } from './workout';
 export const ALL_MUSCLES = Object.keys(MUSCLE_LABELS) as MuscleGroup[];
 
 /** How many of a workout's main muscles its card names, before "+2 more". */
-export const MUSCLES_ON_A_CARD = 4;
+const MUSCLES_ON_A_CARD = 4;
+
+/** Main muscles as a card names them: the first few, and how many more there are. */
+export function musclesOnACard(main: readonly MuscleGroup[]): { shown: string[]; more: number } {
+    return {
+        shown: main.slice(0, MUSCLES_ON_A_CARD).map((muscle) => MUSCLE_LABELS[muscle]),
+        more: Math.max(0, main.length - MUSCLES_ON_A_CARD),
+    };
+}
 
 /** Which muscles some workouts work: main ones, and the ones they only ever support. */
 export interface MusclesWorked {

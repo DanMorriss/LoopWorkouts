@@ -45,13 +45,10 @@
 
 .workout-card__face {
     position: relative;
-    @include showcase-card;
+    // Solid, as a card held and dragged passes over the others
+    @include showcase-card-solid;
     // Its link and its row of actions have the padding
     padding: 0;
-    // Solid under the faint light, as a card held and dragged passes over the others
-    background:
-        radial-gradient(120% 80% at 100% 0%, var(--accent-soft), transparent 60%),
-        linear-gradient(var(--control), var(--control)), var(--card);
     box-shadow: 0 10px 30px var(--shadow);
     // Up and down scroll the page; left and right are the card's to swipe
     touch-action: pan-y;

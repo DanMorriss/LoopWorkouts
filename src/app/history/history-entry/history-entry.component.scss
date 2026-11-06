@@ -1,15 +1,13 @@
 @use 'interaction' as *;
+@use 'showcase-card' as *;
 
+// A card of the same family as Workouts' and Plan's, lit faintly from its top right
 :host {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    padding: 0.7rem 0;
+    gap: 0.75rem;
+    @include showcase-card-solid;
     outline: none;
-}
-
-:host + :host {
-    border-top: 1px solid var(--border-soft);
 }
 
 // Over the entries below it while its menu is open
@@ -18,12 +16,10 @@
     z-index: 5;
 }
 
-// The run just finished or ended, arriving from the workout summary: an accent bar and tint
+// The run just finished or ended, arriving from the workout summary: tinted, with a bar down
+// its left, as Workouts marks a workout just saved
 :host(.entry--highlighted) {
-    margin-inline: -0.75rem;
-    padding-inline: 0.75rem;
-    border-radius: 0.6rem;
-    background: var(--accent-soft);
+    background: linear-gradient(var(--accent-soft), var(--accent-soft)), var(--card);
     box-shadow: inset 3px 0 0 var(--accent);
 }
 
@@ -32,39 +28,48 @@
     outline-offset: 2px;
 }
 
-.entry__row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+// Its title and when at the left; the time it took, then ⋮, at the right
+.entry__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: start;
+    gap: 0.5rem;
 }
 
-.entry__text {
-    display: flex;
-    flex: 1;
+.entry__intro {
+    display: grid;
+    gap: 0.3rem;
     min-width: 0;
-    flex-direction: column;
-    gap: 0.2rem;
+    padding-top: 0.1rem;
 }
 
 .entry__title {
-    overflow: hidden;
-    color: var(--text);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @include showcase-title;
+    overflow-wrap: anywhere;
+}
+
+.entry__title--untitled {
+    color: var(--text-muted);
 }
 
 .entry__detail {
+    @include showcase-description;
     color: var(--text-muted);
-    font-size: 0.85rem;
     font-variant-numeric: tabular-nums;
 }
 
-// One line per rep step, e.g. "Squats: 3 × 10 @ 60 kg"
+// The time it took, as the big number, in a size that fits "1:05:30"
+.entry__time {
+    --showcase-count-size: 1.15rem;
+}
+
+// Its sets, under a faint rule, as a workout's card has its kit
 .entry__sets {
     --set-heading-size: 0.85rem;
     --set-heading-gap: 0.4rem;
     --set-superset-indent: 0.5rem;
-    margin: 0.1rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-soft);
     color: var(--text);
     font-size: 0.85rem;
     font-variant-numeric: tabular-nums;
@@ -95,16 +100,19 @@
 
 // The user's own words, set apart from the figures above with a quote line
 .entry__note {
-    margin: 0.2rem 0 0;
+    margin: 0;
     padding-left: 0.6rem;
     border-left: 2px solid var(--border-strong);
     color: var(--text);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    font-style: italic;
     overflow-wrap: anywhere;
 }
 
+// Level with the title, at the card's top right
 .entry__menu-wrap {
     position: relative;
+    margin: -0.25rem -0.5rem 0 0;
 }
 
 .entry__menu {

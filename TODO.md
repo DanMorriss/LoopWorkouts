@@ -39,7 +39,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 **Progress page**
 
-- [ ] **Rework the workout cards:** the other pages have had a revamp and this one's falling behind (`history/history-entry/`).
+- [x] **Rework the workout cards** (2026-11-06): each workout in the log is a card of the Workouts and Plan family, with the time it took as its big number, the main muscles its sets worked, and its sets under a rule.
 - [ ] **Add charts:** which ones is still to be decided, e.g. workouts or time per week. Only each exercise's page has a chart so far (`exercise-progress`).
 
 ### Sync

@@ -28,16 +28,28 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { exercisePath, isBuiltIn } from '../../models/exercise';
 import { SetLinesComponent } from '../set-lines/set-lines.component';
+import { musclesInSets, musclesOnACard } from '../../models/workout-muscles';
+import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
+import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
 
 /**
- * One workout in the history, with a ⋮ menu to add, edit or remove its note, or delete it.
- * The history decides which entry's menu is open and which note is being edited (one of
- * each at a time); the entry shows that, saves notes itself, and asks the history to
- * delete it, so the history can offer Undo.
+ * One workout in the history, as a card in the family of Workouts' and Plan's: its title, the
+ * time it took as the big number, the main muscles its sets worked, and its sets. Its ⋮ menu
+ * adds, edits or removes its note, or deletes it. The history decides which entry's menu is
+ * open and which note is being edited (one of each at a time); the entry shows that, saves
+ * notes itself, and asks the history to delete it, so the history can offer Undo.
  */
 @Component({
     selector: 'li[appHistoryEntry]',
-    imports: [DatePipe, FormField, MatIconModule, RouterLink, SetLinesComponent],
+    imports: [
+        DatePipe,
+        FormField,
+        MatIconModule,
+        RouterLink,
+        SetLinesComponent,
+        ShowcaseCountComponent,
+        ShowcaseMusclesComponent,
+    ],
     templateUrl: './history-entry.component.html',
     styleUrl: './history-entry.component.scss',
     host: {
@@ -94,6 +106,10 @@ export class HistoryEntryComponent {
      */
     protected readonly sections = computed(() =>
         sectionsOf(this.sets(), this.entry().headings, this.entry().supersets)
+    );
+    /** The main muscles its sets worked, as a workout's card names them. */
+    protected readonly muscles = computed(() =>
+        musclesOnACard(musclesInSets(this.entry().sets ?? [], (id) => this.exercises.byId(id)).main)
     );
     protected readonly id = computed(() => this.entry().id);
 

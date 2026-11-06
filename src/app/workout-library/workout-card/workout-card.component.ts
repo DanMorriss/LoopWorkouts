@@ -10,8 +10,8 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { workoutEquipment } from '../../models/built-in-workouts';
-import { capitalise, equipmentPhrases, MUSCLE_LABELS } from '../../models/exercise';
-import { MUSCLES_ON_A_CARD, musclesWorked } from '../../models/workout-muscles';
+import { capitalise, equipmentPhrases } from '../../models/exercise';
+import { musclesOnACard, musclesWorked } from '../../models/workout-muscles';
 import {
     allSteps,
     isReadyMade,
@@ -105,13 +105,7 @@ export class WorkoutCardComponent {
         musclesWorked([this.workout()], (id) => this.exercises.byId(id))
     );
     /** Its main muscles, the first few, then how many more; none with no exercise to go on. */
-    protected readonly muscles = computed(() => {
-        const { main } = this.worked();
-        return {
-            shown: main.slice(0, MUSCLES_ON_A_CARD).map((muscle) => MUSCLE_LABELS[muscle]),
-            more: Math.max(0, main.length - MUSCLES_ON_A_CARD),
-        };
-    });
+    protected readonly muscles = computed(() => musclesOnACard(this.worked().main));
     /** What it needs: "Dumbbells", "Bench", or "No equipment"; none with no exercise to go on. */
     protected readonly equipment = computed(() =>
         this.worked().hasExercises

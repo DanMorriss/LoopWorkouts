@@ -1,6 +1,9 @@
 import { Component, input } from '@angular/core';
 
-/** The big number by a card's title, over what it counts: "3 days a week", "5 exercises". */
+/**
+ * The big number by a card's title, over what it counts: "3 days a week", "5 exercises", or a
+ * workout done's time.
+ */
 @Component({
     selector: 'app-showcase-count',
     template: `
@@ -27,7 +30,9 @@ import { Component, input } from '@angular/core';
         .number {
             @include display;
             color: var(--glow-text);
-            font-size: 1.6rem;
+            // Smaller for a longer number, such as a time
+            font-size: var(--showcase-count-size, 1.6rem);
+            font-variant-numeric: tabular-nums;
             line-height: 1;
         }
 
@@ -41,6 +46,6 @@ import { Component, input } from '@angular/core';
     `,
 })
 export class ShowcaseCountComponent {
-    readonly number = input.required<number>();
+    readonly number = input.required<number | string>();
     readonly label = input.required<string>();
 }

@@ -1,28 +1,18 @@
 @let time = entry().startedAt | date: 'shortTime';
-<div class="entry__row">
-    <div class="entry__text">
-        <span class="entry__title" [id]="'entry-title-' + id()">{{ name() }}</span>
-        <span class="entry__detail">{{ time }} · {{ duration() }} · {{ rounds() }}</span>
-        <!-- Under the workout's headings as they were when it ran, if it had any -->
-        @if (sections().length) {
-            <app-set-lines class="entry__sets" [sections]="sections()">
-                <ng-template let-line>
-                    @if (line.path) {
-                        <a class="entry__exercise" [routerLink]="line.path">{{ line.name }}</a
-                        ><span aria-hidden="true">: {{ line.text }}</span>
-                        <span class="sr-only">, {{ line.spoken }}</span>
-                    } @else {
-                        <span aria-hidden="true">{{ line.name }}: {{ line.text }}</span>
-                        <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
-                    }
-                </ng-template>
-            </app-set-lines>
-        }
-        @if (entry().note && !editing()) {
-            <p class="entry__note"><span class="sr-only">Note: </span>{{ entry().note }}</p>
-        }
+<!-- Its title and when, then the time it took as the card's big number, then its options -->
+<div class="entry__head">
+    <div class="entry__intro">
+        <span
+            class="entry__title"
+            [class.entry__title--untitled]="!entry().title"
+            [id]="'entry-title-' + id()"
+            >{{ name() }}</span
+        >
+        <span class="entry__detail"
+            >{{ time }} · {{ rounds() }}<span class="sr-only"> · {{ duration() }} spent</span></span
+        >
     </div>
-
+    <app-showcase-count class="entry__time" aria-hidden="true" [number]="duration()" label="time" />
     <div
         class="entry__menu-wrap"
         (click)="$event.stopPropagation()"
@@ -78,6 +68,33 @@
         }
     </div>
 </div>
+
+@if (muscles().shown.length) {
+    <app-showcase-muscles
+        class="entry__works"
+        [muscles]="muscles().shown"
+        [more]="muscles().more"
+    />
+}
+
+<!-- Under the workout's headings as they were when it ran, if it had any -->
+@if (sections().length) {
+    <app-set-lines class="entry__sets" [sections]="sections()">
+        <ng-template let-line>
+            @if (line.path) {
+                <a class="entry__exercise" [routerLink]="line.path">{{ line.name }}</a
+                ><span aria-hidden="true">: {{ line.text }}</span>
+                <span class="sr-only">, {{ line.spoken }}</span>
+            } @else {
+                <span aria-hidden="true">{{ line.name }}: {{ line.text }}</span>
+                <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
+            }
+        </ng-template>
+    </app-set-lines>
+}
+@if (entry().note && !editing()) {
+    <p class="entry__note"><span class="sr-only">Note: </span>{{ entry().note }}</p>
+}
 
 @if (editing()) {
     <form

@@ -33,10 +33,11 @@
 - It's the **Progress** tab (at `/history`; the History tab until 2026-11-03), titled "Progress": at the top, "Last 7 days" (below), then the **muscles worked this week** (PRG-6, PRG-8; see [progress](progress.md)), then the **log**, under the heading "Log": every workout done, as below. The suggested next workout was here too, under the muscles, until 2026-11-03; it's on Today now. Each day's label is a heading under Log.
 - Newest first, grouped by the day they started: "**Today**", "**Yesterday**", then the date, e.g. "Saturday 17 October".
 - At the top: "**Last 7 days:** 4 workouts · 1:15:30": the count and total time spent of workouts started in the last 7 × 24 hours.
-- Each entry shows its title (or "Untitled workout") and a line: start time · time spent · rounds, e.g. "9:05 AM · 12:30 · 3 rounds".
+- Each entry is a **card** in the same family as the cards on Workouts and Plan (since 2026-11-06): its title (or "Untitled workout", greyed) in the display face, under it a line of start time · rounds, e.g. "9:05 AM · 3 rounds", and at its right the **time spent** as the card's big number, over "time", then its ⋮. Screen readers hear the time at the end of the line: "9:05 AM · 3 rounds · 12:30 spent".
+    - Under that, **Works** and the main muscles its sets worked, as a workout's card names them (up to four, in the app's order, then "+2 more"). Sets with no exercise, or of one since deleted, don't count; with none that do, there's no line.
     - Time spent is m:ss, or h:mm:ss over an hour.
     - Rounds: "3 rounds" when finished, "2 of 5 rounds · stopped" when stopped, "12 rounds · until stopped" for a workout that runs until stopped. With a time limit, "7 rounds + 3 in 20:00" (the steps done of the next round, if any), or "4 rounds · stopped before 20:00" when ended before time was up.
-- **Sets**, one line per step, under the entry, in the unit chosen in You → Profile, e.g.:
+- **Sets**, one line per step, under a faint rule, in the unit chosen in You → Profile, e.g.:
     - "Squats: 3 × 10 @ 60 kg": the same every set
     - "Squats: 10, 10, 8 @ 60 kg": the reps changed
     - "Squats: 10 @ 60, 8 @ 62.5 kg": the weight changed
@@ -48,7 +49,8 @@
     - Screen readers hear words, e.g. "Squats, 3 sets of 10 reps at 60 kg".
     - **Under the workout's headings** as they were when it ran (BLD-13), in order: e.g. "Warmup", then "Exercise bike: 5:00"; "Knee rehabilitation", then its lines. Lines before the first heading come first, with none over them, and a heading with no sets under it (e.g. a part stopped before) isn't shown. Screen readers hear them as headings within the entry. The workout summary's sets are grouped the same way.
     - **With its supersets** as they were when it ran (BLD-12): the lines of a superset's (or giant set's) steps go together under "Superset" (or "Giant set"), in a list of their own, set in a little with a line down their left. A superset with sets on only one of its steps (stopped before the second) shows that line on its own. The workout summary's sets are grouped the same way, and so is its Change reps or weight view.
-- The note, if any, sits under the entry.
+- The note, if any, sits under the sets, in italics with a line down its left.
+- The run arrived at from the workout summary is tinted, with a bar down its left, as Workouts marks a workout just saved.
 - With no workouts: "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to your workouts**.
 
 ### Notes

@@ -59,10 +59,10 @@ export const TOUR_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'exercise',
-                text: "Click on an exercise to see how it's done, a 3D demo and the muscles it works.",
+                text: "Tap an exercise to see how it's done, a 3D demo and the muscles it works.",
             },
         ],
-        text: "Click on an exercise to see how it's done and the muscles it works.",
+        text: "Tap an exercise to see how it's done and the muscles it works.",
     },
     {
         path: '/history',

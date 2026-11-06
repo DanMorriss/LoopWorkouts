@@ -154,6 +154,22 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         );
     });
 
+    it('makes a copy of it beside Edit, keeping both, opening the copy in Create', async () => {
+        const sprints = addSprints();
+        await open(sprints.id);
+        const slide = vi.spyOn(TestBed.inject(PageSlide), 'navigate').mockImplementation(() => {});
+
+        el().querySelector<HTMLButtonElement>('.details__copy')!.click();
+
+        const copy = store.workouts()[1];
+        expect(store.workouts().map((w) => w.title)).toEqual(['Sprints', 'Sprints (copy)']);
+        expect(el().querySelector('.details__edit')).not.toBeNull();
+        expect(slide).toHaveBeenCalledWith(
+            `/setup?editId=${copy.id}&from=%2Flibrary%2F${copy.id}`,
+            'in'
+        );
+    });
+
     describe('of a ready-made workout (LIB-6)', () => {
         beforeEach(async () => {
             await store.readyMadeLoaded;

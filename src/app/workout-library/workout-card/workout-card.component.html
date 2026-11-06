@@ -99,16 +99,8 @@
                 role="group"
                 [attr.aria-label]="'Options for ' + name()"
             >
-                @if (readyMade()) {
-                    <button
-                        type="button"
-                        class="menu__item workout-card__menu-item--copy"
-                        (click)="copyRequested.emit()"
-                    >
-                        <mat-icon aria-hidden="true">content_copy</mat-icon>
-                        Make a copy
-                    </button>
-                } @else {
+                <!-- A ready-made one can't be changed or deleted, only copied -->
+                @if (!readyMade()) {
                     <button
                         type="button"
                         class="menu__item workout-card__menu-item--edit"
@@ -117,6 +109,16 @@
                         <mat-icon aria-hidden="true">edit</mat-icon>
                         Edit
                     </button>
+                }
+                <button
+                    type="button"
+                    class="menu__item workout-card__menu-item--copy"
+                    (click)="copyRequested.emit()"
+                >
+                    <mat-icon aria-hidden="true">content_copy</mat-icon>
+                    Make a copy
+                </button>
+                @if (!readyMade()) {
                     <button
                         type="button"
                         class="menu__item menu__item--danger workout-card__menu-item--danger"

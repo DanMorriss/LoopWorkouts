@@ -459,13 +459,27 @@ describe('WorkoutStore', () => {
             const store = createStore();
             await store.readyMadeLoaded;
 
-            const copy = store.copyReadyMade('builtin:gym-legs')!;
+            const copy = store.copyWorkout('builtin:gym-legs')!;
 
             expect(copy.title).toBe('Gym legs (copy)');
             expect(copy.id).not.toBe('builtin:gym-legs');
             expect(store.workouts()).toEqual([copy]);
             expect(allSteps(copy)).toEqual(allSteps(store.findAnyWorkout('builtin:gym-legs')!));
-            expect(store.copyReadyMade('builtin:nothing')).toBeNull();
+            expect(store.copyWorkout('builtin:nothing')).toBeNull();
+        });
+
+        it('makes a copy of one of yours too, keeping both, the copy no favourite', () => {
+            const store = createStore();
+            const legs = store.addWorkout(makeWorkout({ title: 'Legs', steps: [reps(10)] }));
+            store.setFavourite(legs.id, true);
+
+            const copy = store.copyWorkout(legs.id)!;
+
+            expect(store.workouts().map((w) => w.title)).toEqual(['Legs', 'Legs (copy)']);
+            expect(copy.id).not.toBe(legs.id);
+            expect(allSteps(copy)).toEqual(allSteps(store.findWorkoutById(legs.id)!));
+            expect(copy.blocks).not.toBe(store.findWorkoutById(legs.id)!.blocks);
+            expect(copy.favourite).toBeUndefined();
         });
 
         it('carries on a run of one after a reload, once they have loaded', async () => {

@@ -172,7 +172,7 @@ export class WorkoutLibraryComponent {
         this.slide.navigate(editUrl(workout), 'in');
     }
 
-    /** Make a copy of a ready-made workout, and open it in Create. */
+    /** Make a copy of a workout, yours or ready-made, and open the copy in Create. */
     copyWorkout(workout: Workout) {
         const copy = this.makeCopy.of(workout.id);
         if (copy) {

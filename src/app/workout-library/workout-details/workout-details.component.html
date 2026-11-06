@@ -59,17 +59,17 @@
             </section>
 
             <div class="details__actions">
-                @if (readyMade()) {
-                    <button type="button" class="btn-pill details__copy" (click)="copy(workout)">
-                        <mat-icon aria-hidden="true">content_copy</mat-icon>
-                        Make a copy
-                    </button>
-                } @else {
+                <!-- A ready-made one can't be changed, only copied -->
+                @if (!readyMade()) {
                     <button type="button" class="btn-pill details__edit" (click)="edit(workout)">
                         <mat-icon aria-hidden="true">edit</mat-icon>
                         Edit
                     </button>
                 }
+                <button type="button" class="btn-pill details__copy" (click)="copy(workout)">
+                    <mat-icon aria-hidden="true">content_copy</mat-icon>
+                    Make a copy
+                </button>
             </div>
             <div class="sr-only" aria-live="polite">{{ announcement() }}</div>
         } @else if (!loading()) {

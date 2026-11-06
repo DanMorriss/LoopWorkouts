@@ -13,6 +13,8 @@ export interface WorkoutChoice {
     readyMade?: boolean;
     /** Its icon, if not a workout's, e.g. `event` for a day. */
     icon?: string;
+    /** A line under its name, e.g. what's planned on a day already. */
+    note?: string;
 }
 
 let nextId = 0;
@@ -64,7 +66,12 @@ let nextId = 0;
                                 <mat-icon aria-hidden="true">{{
                                     choice.icon ?? 'view_list'
                                 }}</mat-icon>
-                                <span class="choice__name">{{ choice.name }}</span>
+                                <span class="choice__name">
+                                    {{ choice.name }}
+                                    @if (choice.note) {
+                                        <span class="choice__note">{{ choice.note }}</span>
+                                    }
+                                </span>
                                 @if (choice.readyMade) {
                                     <app-ready-made-badge />
                                 }

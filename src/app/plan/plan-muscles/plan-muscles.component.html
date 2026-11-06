@@ -60,6 +60,7 @@
                     <app-workout-choice-dialog
                         animate.leave="dialog-leave"
                         [heading]="'Plan ' + suggestion.workout.title + ' on…'"
+                        hint="Each day says what's on it already, and the muscles those work."
                         [choices]="days()"
                         (closed)="closeDays()"
                         (picked)="planOn($event)"

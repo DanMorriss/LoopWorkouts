@@ -37,6 +37,15 @@
     overflow-wrap: anywhere;
 }
 
+// Under the name, smaller: e.g. what a day has on it already
+.choice__note {
+    display: block;
+    margin-top: 0.1rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+
 .choice__detail {
     flex-shrink: 0;
     color: var(--text-muted);

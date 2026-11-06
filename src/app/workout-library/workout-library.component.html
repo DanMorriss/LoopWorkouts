@@ -39,19 +39,37 @@
         </div>
     }
 
+    <!-- Searched and filtered, the list can't be reordered: where a card would land among the
+         hidden ones is a guess -->
+    @let cutDown = filters.cutDown();
+    @if (existingWorkouts) {
+        <app-library-filters class="library__filters" (click)="$event.stopPropagation()" />
+        @if (cutDown) {
+            <div class="library__count">
+                <p role="status">{{ shownCount() }}</p>
+                @if (filters.active()) {
+                    <button
+                        type="button"
+                        class="library__clear"
+                        (click)="$event.stopPropagation(); filters.clear()"
+                    >
+                        Clear search and filters
+                    </button>
+                }
+            </div>
+        }
+    }
+
     <!-- Held still for HOLD_MS a card lifts, and can be dragged to another place. Moving
          before then is a swipe or a scroll, which the drag lets go of -->
     <ul
         class="library-list"
         cdkDropList
         cdkDropListOrientation="mixed"
+        [cdkDropListDisabled]="cutDown"
         (cdkDropListDropped)="dropWorkout($event)"
     >
-        @for (
-            workout of workoutStore.workouts();
-            track workout.id;
-            let first = $first, last = $last
-        ) {
+        @for (workout of filters.shown(); track workout.id; let first = $first, last = $last) {
             <li
                 appWorkoutCard
                 cdkDrag
@@ -61,8 +79,8 @@
                 [workout]="workout"
                 [menuOpen]="openWorkoutMenuId() === workout.id"
                 [highlighted]="highlightedId() === workout.id"
-                [first]="first"
-                [last]="last"
+                [canMoveUp]="!first && !cutDown"
+                [canMoveDown]="!last && !cutDown"
                 (cdkDragStarted)="closeWorkoutMenus()"
                 (cdkDragMoved)="drop.moved($event)"
                 (cdkDragReleased)="drop.released($event)"

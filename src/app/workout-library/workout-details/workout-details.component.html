@@ -3,7 +3,10 @@
         <app-back-link [url]="back" label="Workouts" />
 
         @if (workout(); as workout) {
-            <h2 class="details__title">{{ name() }}</h2>
+            <div class="details__top">
+                <h2 class="details__title">{{ name() }}</h2>
+                <app-favourite-button [workout]="workout" />
+            </div>
 
             <section class="details__section" aria-labelledby="workout-details-muscles">
                 <h3 id="workout-details-muscles" class="details__heading">Muscles it works</h3>

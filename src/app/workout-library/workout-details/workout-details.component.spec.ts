@@ -154,6 +154,23 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         );
     });
 
+    it('makes it a favourite from the heart by its title, and not again', async () => {
+        const sprints = addSprints();
+        await open(sprints.id);
+        const heart = () => el().querySelector<HTMLElement>('.details__top .favourite-button')!;
+        expect(heart().getAttribute('aria-label')).toBe('Favourite Sprints');
+        expect(heart().getAttribute('aria-pressed')).toBe('false');
+
+        heart().click();
+        harness.detectChanges();
+        expect(store.findWorkoutById(sprints.id)?.favourite).toBe(true);
+        expect(heart().getAttribute('aria-pressed')).toBe('true');
+
+        heart().click();
+        harness.detectChanges();
+        expect(store.findWorkoutById(sprints.id)?.favourite).toBeUndefined();
+    });
+
     it('goes back with ‹ Workouts, saying which card to put focus on', async () => {
         const sprints = addSprints();
         await open(sprints.id);

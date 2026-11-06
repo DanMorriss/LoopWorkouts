@@ -6,7 +6,7 @@ import {
     ExerciseCardComponent,
 } from '../../exercises/exercise-card/exercise-card.component';
 import { filterExercises } from '../../exercises/exercise-filter';
-import { MuscleChipsComponent } from '../../exercises/muscle-chips/muscle-chips.component';
+import { MuscleChipsComponent } from '../../shared/components/muscle-chips/muscle-chips.component';
 import { EquipmentFilterComponent } from '../../shared/components/equipment-filter/equipment-filter.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';

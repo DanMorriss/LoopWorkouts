@@ -1,5 +1,5 @@
 import { Component, model } from '@angular/core';
-import { MUSCLE_LABELS, MuscleGroup } from '../../models/exercise';
+import { MUSCLE_LABELS, MuscleGroup } from '../../../models/exercise';
 
 const MUSCLES = Object.keys(MUSCLE_LABELS) as MuscleGroup[];
 

@@ -158,6 +158,14 @@
     z-index: 8;
 }
 
+// Its heart, level with the play button too, at its left
+.workout-card__favourite {
+    position: absolute;
+    left: 0.75rem;
+    bottom: calc(1rem + 8px);
+    z-index: 8;
+}
+
 // A shared .menu (styles/_menu.scss), placed under the options button
 .workout-card__menu {
     position: absolute;

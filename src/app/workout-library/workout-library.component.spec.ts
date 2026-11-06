@@ -46,7 +46,7 @@ describe('WorkoutLibraryComponent', () => {
         return Array.from(fixture.nativeElement.querySelectorAll(selector));
     }
 
-    function el(selector: string): HTMLElement | null {
+    function el<T extends HTMLElement = HTMLElement>(selector: string): T | null {
         return fixture.nativeElement.querySelector(selector);
     }
 
@@ -188,6 +188,116 @@ describe('WorkoutLibraryComponent', () => {
                 await settle();
 
                 expect(document.activeElement).toBe(card(0).querySelector('.workout-card__open'));
+            });
+        });
+
+        describe('searching and filtering', () => {
+            function search(query: string) {
+                const input = el<HTMLInputElement>('#library-search')!;
+                input.value = query;
+                input.dispatchEvent(new Event('input'));
+                fixture.detectChanges();
+            }
+            const favouritesChip = () =>
+                all('.library-filters__chip').find((chip) =>
+                    chip.textContent?.includes('Favourites')
+                )!;
+            const titles = () => all('.workout-card__title').map((t) => t.textContent?.trim());
+
+            it('shows every workout, with no count, until something is chosen', () => {
+                expect(el('#library-search')).not.toBeNull();
+                expect(all('.workout-card')).toHaveLength(2);
+                expect(el('.library__count')).toBeNull();
+            });
+
+            it('finds workouts by name, saying how many of them show', () => {
+                search('sprint');
+
+                expect(titles()).toEqual(['Sprints']);
+                expect(el('.library__count [role="status"]')?.textContent?.trim()).toBe(
+                    '1 of 2 workouts'
+                );
+            });
+
+            it('says when none match, and clears the search to show them all again', () => {
+                search('rowing');
+                expect(all('.workout-card')).toHaveLength(0);
+                expect(el('.library__count')?.textContent).toContain('No workouts match');
+
+                click(el('.library__clear'));
+
+                expect(all('.workout-card')).toHaveLength(2);
+                expect(el<HTMLInputElement>('#library-search')!.value).toBe('');
+            });
+
+            it('marks a favourite with its heart, and shows only favourites', () => {
+                const heart = card(1).querySelector<HTMLElement>('.favourite-button')!;
+                expect(heart.getAttribute('aria-label')).toBe('Favourite workout');
+                click(heart);
+                expect(store.workouts()[1].favourite).toBe(true);
+                expect(
+                    card(1).querySelector('.favourite-button')?.getAttribute('aria-pressed')
+                ).toBe('true');
+
+                click(favouritesChip());
+
+                expect(favouritesChip().getAttribute('aria-pressed')).toBe('true');
+                expect(all('.workout-card')).toHaveLength(1);
+                expect(card(0).textContent).toContain('Untitled workout');
+            });
+
+            it("doesn't open its details or start it from its heart", () => {
+                const slide = vi.spyOn(TestBed.inject(PageSlide), 'navigate');
+                click(card(0).querySelector('.favourite-button'));
+
+                expect(slide).not.toHaveBeenCalled();
+                expect(navigate).not.toHaveBeenCalled();
+            });
+
+            it("can't be reordered while some are hidden", () => {
+                search('sprint');
+                click(card(0).querySelector('.workout-card__action--menu'));
+
+                expect(card(0).querySelector('.workout-card__menu-item--down')).toBeNull();
+                const list = fixture.debugElement.query(By.directive(CdkDropList));
+                expect(list.injector.get(CdkDropList).disabled).toBe(true);
+            });
+
+            it('opens the muscles and Only what I have under More filters', () => {
+                const more = all('.library-filters__chip').find((chip) =>
+                    chip.textContent?.includes('More filters')
+                )!;
+                expect(more.getAttribute('aria-expanded')).toBe('false');
+                expect(el('app-muscle-chips')).toBeNull();
+
+                click(more);
+
+                expect(more.getAttribute('aria-expanded')).toBe('true');
+                expect(el('#library-more-filters app-muscle-chips')).not.toBeNull();
+                expect(el('#library-more-filters app-equipment-filter')).not.toBeNull();
+            });
+
+            it('shows a workout just saved, whatever the list was cut down to', async () => {
+                search('sprint');
+                fixture.destroy();
+                Object.defineProperty(TestBed.inject(ActivatedRoute).snapshot, 'queryParamMap', {
+                    value: convertToParamMap({ saved: second.id }),
+                    configurable: true,
+                });
+                create();
+                await settle();
+
+                expect(all('.workout-card')).toHaveLength(2);
+                expect(card(1).classList).toContain('workout-card--highlighted');
+            });
+
+            it('keeps the search coming back to the page, e.g. from details', () => {
+                search('sprint');
+                fixture.destroy();
+                create();
+
+                expect(titles()).toEqual(['Sprints']);
+                expect(el<HTMLInputElement>('#library-search')!.value).toBe('sprint');
             });
         });
 

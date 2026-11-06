@@ -142,10 +142,15 @@ export interface Workout extends Synced {
     repeats: number;
     /** The time limit, in whole seconds, rep steps and rests included. Missing for none. */
     timeLimitSeconds?: number;
+    /** Marked as a favourite on Workouts, to filter by. Missing for not. */
+    favourite?: true;
 }
 
-/** What's set up to make a workout: everything but what the store keeps (its id and dates). */
-export type WorkoutFields = Omit<Workout, 'id' | 'updatedAt'>;
+/**
+ * What's set up to make a workout: everything but what the store keeps (its id and dates) and
+ * what's set on Workouts rather than in Create (whether it's a favourite).
+ */
+export type WorkoutFields = Omit<Workout, 'id' | 'updatedAt' | 'favourite'>;
 
 /** The `repeats` value for a workout that keeps going until it's stopped. */
 export const UNTIL_STOPPED = 0;

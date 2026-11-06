@@ -16,6 +16,7 @@ import { WorkoutOutlineComponent } from '../../shared/components/workout-outline
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
 
 /** How many of its latest runs it lists. */
 const RECENT_RUNS = 5;
@@ -23,7 +24,7 @@ const RECENT_RUNS = 5;
 /**
  * A workout's details (LIB-4), at /library/<its id>, from its card in the library: the
  * muscles its exercises work, on the body map; its history, with its latest runs linking to them
- * on the Progress page; and what's in it, each step and its sets, so it can be read without
+ * on the Progress page; a heart to make it a favourite; and what's in it, each step and its sets, so it can be read without
  * opening Edit, each exercise sliding in its page. It slides in over Workouts, and back off with
  * ‹ Workouts or a swipe right, with focus back on the card (`?details=<its id>`).
  */
@@ -33,6 +34,7 @@ const RECENT_RUNS = 5;
         BackLinkComponent,
         BodyMapComponent,
         DatePipe,
+        FavouriteButtonComponent,
         MatIconModule,
         RouterLink,
         SwipeBackDirective,

@@ -25,6 +25,9 @@ import { listMuscles, workoutToFillGaps } from '../models/fill-gaps';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { HOLD_MS } from './workout-card/card-gestures';
 import { WorkoutCardComponent } from './workout-card/workout-card.component';
+import { LibraryFilters } from './library-filters.service';
+import { LibraryFiltersComponent } from './library-filters/library-filters.component';
+import { counted } from '../shared/format-count';
 import { changeSmoothly } from '../shared/layout-change';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
@@ -41,7 +44,14 @@ import { UndoService } from '../shared/undo/undo.service';
     selector: 'app-workout-library',
     templateUrl: './workout-library.component.html',
     styleUrl: './workout-library.component.scss',
-    imports: [CdkDrag, CdkDropList, MatIconModule, RouterLink, WorkoutCardComponent],
+    imports: [
+        CdkDrag,
+        CdkDropList,
+        LibraryFiltersComponent,
+        MatIconModule,
+        RouterLink,
+        WorkoutCardComponent,
+    ],
 })
 export class WorkoutLibraryComponent {
     workoutStore = inject(WorkoutStore);
@@ -53,6 +63,7 @@ export class WorkoutLibraryComponent {
     private injector = inject(Injector);
     private readonly undo = inject(UndoService);
     protected readonly slide = inject(PageSlide);
+    protected readonly filters = inject(LibraryFilters);
     protected openWorkoutMenuId = signal<string | null>(null);
     /** What screen readers hear once a workout has moved. */
     protected readonly announcement = signal('');
@@ -69,6 +80,10 @@ export class WorkoutLibraryComponent {
         const id = params.get('saved') ?? added;
         const workout = id ? this.workoutStore.findWorkoutById(id) : null;
         if (workout) {
+            // Just saved or added, it's shown, whatever the list was cut down to
+            if (!this.filters.shown().includes(workout)) {
+                this.filters.clear();
+            }
             const name = workout.title.trim() || 'Untitled workout';
             this.highlightedId.set(workout.id);
             this.bringIntoView(workout.id, added ? `Added ${name}` : `Saved ${name}`);
@@ -80,6 +95,13 @@ export class WorkoutLibraryComponent {
     }
 
     protected isExistingWorkouts = computed(() => this.workoutStore.workouts().length > 0);
+
+    /** How many are shown while some are hidden: "2 of 5 workouts", or "No workouts match". */
+    protected readonly shownCount = computed(() => {
+        const shown = this.filters.shown().length;
+        const all = this.workoutStore.workouts().length;
+        return shown ? `${shown} of ${counted(all, 'workout')}` : 'No workouts match';
+    });
 
     /**
      * The muscle groups the library's workouts don't work at all (missed), and those they only

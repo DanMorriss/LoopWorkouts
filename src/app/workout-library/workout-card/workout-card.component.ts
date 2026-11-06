@@ -27,6 +27,7 @@ import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { counted } from '../../shared/format-count';
 import { CardGestures } from './card-gestures';
+import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
 import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
 import { ShowcaseKitComponent } from '../../shared/components/showcase/showcase-kit.component';
 import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
@@ -34,7 +35,7 @@ import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showc
 /**
  * One workout in the library list, in the ready-made cards' look: its title and what's in it,
  * how many exercises, the muscles it mainly works and what it needs. Pressing it slides in its
- * details, and its play button starts it. It can also be swiped to the left to delete it, or held to pick it up: it lifts, and can then be dragged to another
+ * details, its play button starts it, and its heart makes it a favourite. It can also be swiped to the left to delete it, or held to pick it up: it lifts, and can then be dragged to another
  * place (the library's drop list does that), or let go of where it is for its options, as on
  * an iPhone. A right-click opens them too, and so does the ⋮ button, for keyboards, screen
  * readers and anyone who doesn't know the gestures; its menu has Move up and Move down as
@@ -44,6 +45,7 @@ import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showc
 @Component({
     selector: 'li[appWorkoutCard]',
     imports: [
+        FavouriteButtonComponent,
         MatIconModule,
         ShowcaseCountComponent,
         ShowcaseKitComponent,
@@ -64,9 +66,12 @@ export class WorkoutCardComponent {
     readonly menuOpen = input(false);
     /** Whether it's the workout just saved in Create, which the library points out. */
     readonly highlighted = input(false);
-    /** Whether it's first or last in the library, so it can't move up or down. */
-    readonly first = input(false);
-    readonly last = input(false);
+    /**
+     * Whether its options offer Move up and Move down: not at the top or bottom of the
+     * library, nor while it's searched or filtered (see `LibraryFilters.cutDown`).
+     */
+    readonly canMoveUp = input(false);
+    readonly canMoveDown = input(false);
 
     readonly started = output<void>();
     readonly menuToggled = output<void>();

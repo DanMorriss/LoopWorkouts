@@ -401,6 +401,61 @@ describe('WorkoutStore', () => {
             ]);
             expect('timeLimitSeconds' in workouts[1]).toBe(false);
         });
+
+        it('keeps a favourite, and drops anything else saved there', () => {
+            const saved = (id: string, favourite: unknown) => ({
+                ...makeWorkout(),
+                id,
+                updatedAt: 1,
+                favourite,
+            });
+            localStorage.setItem(
+                'workouts',
+                JSON.stringify([saved('yes', true), saved('odd', 'yes'), saved('no', false)])
+            );
+
+            const workouts = createStore().workouts();
+            expect(workouts.map((w) => w.favourite)).toEqual([true, undefined, undefined]);
+            expect('favourite' in workouts[1]).toBe(false);
+        });
+    });
+
+    describe('setFavourite', () => {
+        it('marks a workout as a favourite, and not, dated as a change that syncs', () => {
+            const store = createStore();
+            const added = store.addWorkout(makeWorkout());
+
+            store.setFavourite(added.id, true);
+            const favourite = store.findWorkoutById(added.id)!;
+            expect(favourite.favourite).toBe(true);
+            expect(favourite.updatedAt).toBeGreaterThan(added.updatedAt);
+            expect(savedWorkouts()[0].favourite).toBe(true);
+
+            store.setFavourite(added.id, false);
+            const not = store.findWorkoutById(added.id)!;
+            expect('favourite' in not).toBe(false);
+            expect(not.updatedAt).toBeGreaterThan(favourite.updatedAt);
+        });
+
+        it("changes nothing when it's already so", () => {
+            const store = createStore();
+            const added = store.addWorkout(makeWorkout());
+
+            store.setFavourite(added.id, false);
+
+            expect(store.findWorkoutById(added.id)).toBe(added);
+        });
+
+        it('stays a favourite when edited in Create', () => {
+            const store = createStore();
+            const added = store.addWorkout(makeWorkout());
+            store.setFavourite(added.id, true);
+
+            const edited = store.updateWorkout(added.id, makeWorkout({ title: 'Renamed' }))!;
+
+            expect(edited.title).toBe('Renamed');
+            expect(edited.favourite).toBe(true);
+        });
     });
 
     describe('active workout across page loads', () => {

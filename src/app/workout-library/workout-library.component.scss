@@ -34,6 +34,30 @@
     color: var(--text-strong);
 }
 
+.library__filters {
+    margin-top: 1rem;
+}
+
+// How many are shown while some are hidden, and the way to show them all again
+.library__count {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 0.75rem;
+    margin-top: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+
+    p {
+        margin: 0;
+    }
+}
+
+.library__clear {
+    @include link-button;
+}
+
 .library-list {
     display: grid;
     grid-template-columns: subgrid;

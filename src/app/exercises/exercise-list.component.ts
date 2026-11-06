@@ -24,7 +24,7 @@ import {
     ExerciseCardComponent,
 } from './exercise-card/exercise-card.component';
 import { filterExercises } from './exercise-filter';
-import { MuscleChipsComponent } from './muscle-chips/muscle-chips.component';
+import { MuscleChipsComponent } from '../shared/components/muscle-chips/muscle-chips.component';
 import { SearchFieldComponent } from '../shared/components/search-field/search-field.component';
 
 /**

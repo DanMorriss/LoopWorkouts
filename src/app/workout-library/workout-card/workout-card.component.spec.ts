@@ -24,8 +24,8 @@ const sprints = makeWorkout({
                 appWorkoutCard
                 [workout]="workout()"
                 [menuOpen]="menuOpen()"
-                [first]="first()"
-                [last]="last()"
+                [canMoveUp]="!first()"
+                [canMoveDown]="!last()"
                 (started)="events.push('started')"
                 (menuToggled)="events.push('menuToggled')"
                 (menuClosed)="events.push('menuClosed')"

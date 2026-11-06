@@ -263,6 +263,24 @@ export class WorkoutStore {
         this.saveWorkouts();
     }
 
+    /** Marks a workout as a favourite, or not, as a change to it that syncs. */
+    setFavourite(workoutId: string, favourite: boolean) {
+        const existing = this.findWorkoutById(workoutId);
+        if (!existing || (existing.favourite === true) === favourite) {
+            return;
+        }
+        const { favourite: _, ...rest } = existing;
+        const changed: Workout = {
+            ...rest,
+            ...(favourite ? { favourite: true as const } : {}),
+            updatedAt: this.clock.now(existing.updatedAt),
+        };
+        this._workouts.update((workouts) =>
+            workouts.map((workout) => (workout.id === workoutId ? changed : workout))
+        );
+        this.saveWorkouts();
+    }
+
     /** Moves a workout to another place in the library, e.g. dragged there. */
     moveWorkout(from: number, to: number) {
         const workouts = [...this._workouts()];
@@ -306,11 +324,14 @@ export class WorkoutStore {
             return null;
         }
 
+        // A favourite stays one, as that's set on Workouts rather than in Create
+        const { favourite } = existingWorkout;
         const updatedWorkout: Workout = {
             ...workoutUpdate,
             blocks: this.linked(workoutUpdate.blocks),
             id: workoutId,
             updatedAt: this.clock.now(existingWorkout.updatedAt),
+            ...(favourite ? { favourite } : {}),
         };
 
         this._workouts.update((workouts) =>
@@ -789,6 +810,7 @@ export function readWorkout(value: unknown): Workout | null {
         blocks,
         repeats: saved['repeats'] as number,
         ...timeLimit,
+        ...(saved['favourite'] === true ? { favourite: true as const } : {}),
         // Missing only if saved oddly: older than any real change, so any other copy wins
         updatedAt: isWholeNumber(saved['updatedAt'], 0) ? (saved['updatedAt'] as number) : 0,
     };

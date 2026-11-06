@@ -56,7 +56,10 @@
         {{ summary().spoken }}, {{ spokenRounds() }}{{ spokenWorks() }}
     </span>
 
-    <!-- Over the link, which covers the whole card: the middle starts it, the ⋮ at the right -->
+    <!-- Over the link, which covers the whole card: the heart at the left, the middle starts
+         it, the ⋮ at the right -->
+    <app-favourite-button class="workout-card__favourite" [workout]="workout()" />
+
     <button
         type="button"
         class="btn-main btn-main--round workout-card__start"
@@ -101,7 +104,7 @@
                     Edit
                 </button>
                 <!-- Dragging, for keyboards and screen readers (and anyone else) -->
-                @if (!first()) {
+                @if (canMoveUp()) {
                     <button
                         type="button"
                         class="menu__item workout-card__menu-item--up"
@@ -111,7 +114,7 @@
                         Move up
                     </button>
                 }
-                @if (!last()) {
+                @if (canMoveDown()) {
                     <button
                         type="button"
                         class="menu__item workout-card__menu-item--down"

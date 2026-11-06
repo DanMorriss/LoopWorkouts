@@ -20,5 +20,8 @@
         } @else if (hasHistory() && !hasPlan()) {
             <app-suggested-workout class="home__card" />
         }
+        <!-- The muscles worked in the last 7 days, on the body map; with nothing done in them
+             it shows nothing, as a blank map would only look like a telling off -->
+        <app-muscles-this-week class="home__card" [compact]="true" />
     </div>
 </div>

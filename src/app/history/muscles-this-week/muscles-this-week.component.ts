@@ -1,4 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { muscleBalance, setsByMuscle } from '../../models/muscle-balance';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
@@ -11,13 +13,14 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 let nextId = 0;
 
 /**
- * A card with the muscles used in the last seven days, on the history page and Home: a body
+ * A card with the muscles used in the last seven days, on the Progress page and Today: a body
  * map shaded by sets (PRG-6), then a bar per muscle group against the sets a week aimed for
- * (PRG-8). Nothing shows with no sets in the week.
+ * (PRG-8). Nothing shows with no sets in the week, so a blank map is never shown. `compact`
+ * (Today) leaves the bars out, with a link to them on Progress.
  */
 @Component({
     selector: 'app-muscles-this-week',
-    imports: [BodyMapComponent, MuscleBarsComponent],
+    imports: [BodyMapComponent, IconComponent, MuscleBarsComponent, RouterLink],
     template: `
         @if (musclesWorked().hasData) {
             <section class="muscles-week" [attr.aria-labelledby]="id">
@@ -26,17 +29,27 @@ let nextId = 0;
                     [main]="musclesWorked().main"
                     [supporting]="musclesWorked().supporting"
                 />
-                <app-muscle-bars
-                    class="muscles-week__bars"
-                    [balance]="musclesWorked().balance"
-                    [goal]="settings.trainingGoal()"
-                />
+                @if (compact()) {
+                    <a class="muscles-week__more" routerLink="/history">
+                        How each muscle's doing against its aim, on Progress
+                        <app-icon>chevron_right</app-icon>
+                    </a>
+                } @else {
+                    <app-muscle-bars
+                        class="muscles-week__bars"
+                        [balance]="musclesWorked().balance"
+                        [goal]="settings.trainingGoal()"
+                    />
+                }
             </section>
         }
     `,
     styleUrl: './muscles-this-week.component.scss',
 })
 export class MusclesThisWeekComponent {
+    /** Just the body map, with a link to the bars on Progress (Today). */
+    readonly compact = input(false);
+
     private readonly history = inject(HistoryStore);
     private readonly exercises = inject(ExerciseStore);
     protected readonly settings = inject(SettingsStore);

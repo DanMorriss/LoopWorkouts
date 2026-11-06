@@ -16,6 +16,7 @@ import { HistoryStore } from '../shared/state/history-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 import { HistoryEntryComponent } from './history-entry/history-entry.component';
 import { MusclesThisWeekComponent } from './muscles-this-week/muscles-this-week.component';
+import { TimePerWeekComponent } from './time-per-week/time-per-week.component';
 import { entryName, formatDuration } from './history-format';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
 
@@ -38,14 +39,20 @@ function dayKey(time: number): string {
 }
 
 /**
- * The Progress tab: the last seven days, the muscles worked this week (PRG-6, PRG-8), then the
+ * The Progress tab: the last seven days, the time per week (PRG-12), the muscles worked this week (PRG-6, PRG-8), then the
  * log, every workout done by day. The workout to do next is on Today and the workout summary,
  * not here. Its address stays /history, as links to a run in it use it. Arriving from the workout summary, `?run=<id>` highlights that run and
  * brings it into view, and `?note=<id>` does the same with its note box open.
  */
 @Component({
     selector: 'app-history',
-    imports: [DatePipe, HistoryEntryComponent, MusclesThisWeekComponent, RouterLink],
+    imports: [
+        DatePipe,
+        HistoryEntryComponent,
+        MusclesThisWeekComponent,
+        RouterLink,
+        TimePerWeekComponent,
+    ],
     templateUrl: './history.component.html',
     styleUrl: './history.component.scss',
     host: {

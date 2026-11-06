@@ -40,7 +40,8 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 **Progress page**
 
 - [x] **Rework the workout cards** (2026-11-06): each workout in the log is a card of the Workouts and Plan family, with the time it took as its big number, the main muscles its sets worked, and its sets under a rule.
-- [ ] **Add charts:** which ones is still to be decided, e.g. workouts or time per week. Only each exercise's page has a chart so far (`exercise-progress`).
+- [x] **Time per week** (PRG-12, 2026-11-06): a bar chart of the last 12 weeks, Monday to Sunday, under "Last 7 days", with the chosen week's time and workouts over it, arrow keys and a table.
+- [ ] **More charts, if wanted:** e.g. workouts per week (the same chart could switch between time and workouts), or a range to look further back than 12 weeks.
 
 ### Sync
 

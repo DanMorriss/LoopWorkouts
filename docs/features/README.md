@@ -104,6 +104,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | PRG-9  | A suggested next workout, for the muscles furthest short of their aims   | ✅  | —   | [progress](progress.md)                       |
 | PRG-10 | Be told what to step up next time, more weight or reps, on the summary   | ✅  | —   | [progress](progress.md)                       |
 | PRG-11 | See the muscles a workout worked, on its summary                         | ✅  | —   | [progress](progress.md)                       |
+| PRG-12 | See the time I spend working out each week, on a chart                   | ✅  | —   | [progress](progress.md)                       |
 | SYN-1  | Export all my data to a file                                             | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
 | SYN-2  | Import a backup without losing what's there                              | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
 | SYN-3  | Sign in and have the same data on every device                           | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |

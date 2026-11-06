@@ -19,6 +19,11 @@
     font-size: 0.9rem;
 }
 
+// The time per week, over the muscles
+.history__weeks {
+    margin: 0 0 1rem;
+}
+
 // Where the cards for the muscles worked and the workout to do next sit, when there are any
 .history__muscles:not(:empty) {
     display: block;

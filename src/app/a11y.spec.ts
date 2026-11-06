@@ -780,6 +780,11 @@ for (const theme of ['dark', 'light'] as const) {
                 await open('/history');
                 await expectNoViolations();
 
+                // The time per week, as a table
+                click('.weeks__toggle');
+                await settle();
+                await expectNoViolations();
+
                 click('.entry__menu-button');
                 await settle();
                 await expectNoViolations();

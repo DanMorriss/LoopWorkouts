@@ -1,0 +1,84 @@
+@use 'type' as *;
+@use 'chart' as *;
+
+:host {
+    display: block;
+}
+
+// A card on the panel, as the muscles worked this week are
+.weeks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 1px solid var(--panel-border);
+    border-radius: 0.9rem;
+    background: var(--card);
+}
+
+.weeks__title {
+    margin: 0;
+    color: var(--text-strong);
+    font-size: 1rem;
+}
+
+.weeks__empty {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+// The chosen week: its time big, in the display face, then which week and how many workouts
+.weeks__readout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin: 0;
+}
+
+.weeks__time {
+    @include display;
+    color: var(--glow-text);
+    font-size: 1.6rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.weeks__when {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.weeks__chart {
+    @include chart-frame;
+    margin-top: 0.25rem;
+}
+
+.weeks__svg {
+    @include chart-svg;
+}
+
+.weeks__grid {
+    @include chart-grid;
+}
+
+.weeks__axis {
+    @include chart-axis;
+}
+
+// Quieter than the chosen week, which is in its time's colour; still 3:1 on the card
+.weeks__bar {
+    fill: color-mix(in srgb, var(--accent) 75%, transparent);
+}
+
+.weeks__bar--shown {
+    fill: var(--glow-text);
+}
+
+.weeks__toggle {
+    @include chart-toggle;
+}
+
+.weeks__table {
+    @include chart-table;
+}

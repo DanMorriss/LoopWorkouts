@@ -1,0 +1,93 @@
+@use 'type' as *;
+@use 'interaction' as *;
+
+// What the app's charts share, an exercise's progress and the time per week alike: a chart
+// that takes focus to step through with the arrow keys, a hairline grid with muted labels,
+// and a way to show it as a table. Mixins, so only the pages with a chart carry them.
+//
+//   @use 'chart' as *;
+//   .thing__chart { @include chart-frame; }
+//   .thing__svg { @include chart-svg; }
+//   .thing__grid { @include chart-grid; }
+//   .thing__axis { @include chart-axis; }
+//   .thing__toggle { @include chart-toggle; }
+//   .thing__table { @include chart-table; }
+
+@mixin chart-frame {
+    position: relative;
+    border-radius: 0.5rem;
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 4px;
+    }
+}
+
+@mixin chart-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    // Up and down scroll the page; a finger moving across picks what's under it
+    touch-action: pan-y;
+}
+
+// Recessive: hairline grid, muted labels
+@mixin chart-grid {
+    stroke: var(--border-soft);
+    stroke-width: 1;
+}
+
+@mixin chart-axis {
+    fill: var(--text-muted);
+    @include small-type(0.625rem);
+    font-variant-numeric: tabular-nums;
+}
+
+// "Show as a table", under the chart
+@mixin chart-toggle {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--glow-text);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+
+    @include hover {
+        text-decoration: underline;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}
+
+// The chart's values, its last column, the figures, at the right
+@mixin chart-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text);
+    font-size: 0.8rem;
+
+    th,
+    td {
+        padding: 0.35rem 0.5rem 0.35rem 0;
+        border-bottom: 1px solid var(--border-soft);
+        text-align: left;
+    }
+
+    th {
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    td:last-child,
+    th:last-child {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+}

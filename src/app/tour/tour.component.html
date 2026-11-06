@@ -1,15 +1,39 @@
-<!-- Over the whole page, so nothing on it can be pressed while the tour's on; dimmed by the
-     light's shadow, or by itself while nothing's lit up -->
-<div class="tour__cover" [class.tour__cover--dim]="!light()"></div>
+<!-- Over the whole page, so nothing on it can be pressed while the tour's on, dimmed but for
+     a hole round each thing lit up: the stop's part, and its tab -->
+<svg class="tour__dim" aria-hidden="true">
+    <defs>
+        <mask id="tour-holes">
+            <rect width="100%" height="100%" fill="white" />
+            @for (light of lights(); track light.id) {
+                <rect
+                    class="tour__hole"
+                    fill="black"
+                    [attr.x]="light.left"
+                    [attr.y]="light.top"
+                    [attr.width]="light.width"
+                    [attr.height]="light.height"
+                    [attr.rx]="light.radius"
+                    [style.x.px]="light.left"
+                    [style.y.px]="light.top"
+                    [style.width.px]="light.width"
+                    [style.height.px]="light.height"
+                    [style.rx.px]="light.radius"
+                />
+            }
+        </mask>
+    </defs>
+    <rect class="tour__shade" width="100%" height="100%" mask="url(#tour-holes)" />
+</svg>
 
-@if (light(); as box) {
+@for (light of lights(); track light.id) {
     <div
         class="tour__light"
         aria-hidden="true"
-        [style.top.px]="box.top"
-        [style.left.px]="box.left"
-        [style.width.px]="box.width"
-        [style.height.px]="box.height"
+        [style.top.px]="light.top"
+        [style.left.px]="light.left"
+        [style.width.px]="light.width"
+        [style.height.px]="light.height"
+        [style.border-radius.px]="light.radius"
     ></div>
 }
 

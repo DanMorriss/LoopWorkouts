@@ -45,12 +45,18 @@ class YouPage {}
 @Component({
     imports: [RouterOutlet, TourComponent],
     template: `<main><router-outlet /></main>
+        <nav data-tour-tabs>
+            @for (path of tabs; track path) {
+                <a [attr.data-tour-tab]="path" [href]="path">{{ path }}</a>
+            }
+        </nav>
         @if (tour.stop() !== null) {
             <app-tour />
         }`,
 })
 class Host {
     protected readonly tour = TestBed.inject(TourService);
+    protected readonly tabs = ['/home', '/library', '/exercises', '/history', '/account'];
 }
 
 describe('TourComponent (NAV-8)', () => {
@@ -87,6 +93,16 @@ describe('TourComponent (NAV-8)', () => {
             (b) => b.textContent!.trim() === name
         );
 
+    /** Where each ring lit up starts, from the top of the screen. */
+    const lit = () =>
+        [...el().querySelectorAll<HTMLElement>('.tour__light')].map((ring) =>
+            Math.round(parseFloat(ring.style.top))
+        );
+    const tabTop = (path: string) =>
+        Math.round(
+            el().querySelector(`[data-tour-tab="${path}"]`)!.getBoundingClientRect().top - 1
+        );
+
     /** Lets the page open, the part be found, and the light follow it. */
     async function settle() {
         for (let i = 0; i < 4; i++) {
@@ -110,7 +126,13 @@ describe('TourComponent (NAV-8)', () => {
         expect(text('.tour__count')).toBe('1 of 6');
         expect(text('.tour__title')).toBe('Today');
         expect(text('.tour__text')).toContain('Start here: add a few workouts');
-        expect(el().querySelector('.tour__light')).not.toBeNull();
+        // Getting started, and Today's tab, the way back to it
+        expect(lit()).toEqual([
+            Math.round(
+                el().querySelector('[data-tour="get-started"]')!.getBoundingClientRect().top - 6
+            ),
+            tabTop('/home'),
+        ]);
         expect(document.activeElement?.id).toBe('tour-title');
         // No Back on the first stop
         expect(button('Back')).toBeUndefined();
@@ -132,6 +154,7 @@ describe('TourComponent (NAV-8)', () => {
         button('Next')!.click();
         await settle();
         expect(router.url).toBe('/library');
+        expect(lit().at(-1)).toBe(tabTop('/library'));
         expect(text('.tour__count')).toBe('2 of 6');
         expect(text('.tour__title')).toBe('Workouts');
         expect(document.activeElement?.id).toBe('tour-title');
@@ -142,7 +165,7 @@ describe('TourComponent (NAV-8)', () => {
         expect(text('.tour__title')).toBe('Today');
     });
 
-    it('ends back on Today, lighting up nothing, and Done puts focus on the greeting', async () => {
+    it('ends back on Today, lighting up the whole tab bar, and Done puts focus on the greeting', async () => {
         await start();
         for (let i = 0; i < 5; i++) {
             button('Next')!.click();
@@ -151,7 +174,10 @@ describe('TourComponent (NAV-8)', () => {
 
         expect(router.url).toBe('/home');
         expect(text('.tour__title')).toBe("That's it");
-        expect(el().querySelector('.tour__light')).toBeNull();
+        expect(lit()).toEqual([
+            Math.round(el().querySelector('nav')!.getBoundingClientRect().top - 3),
+        ]);
+        expect(text('.tour__text')).toContain('The tabs take you to each part');
         expect(button('Skip tour')).toBeUndefined();
 
         button('Done')!.click();

@@ -14,6 +14,8 @@ export interface TourStop {
     parts: readonly TourPart[];
     /** What it says when it lights up nothing, or can't find a part. */
     text: string;
+    /** 'all' lights up the whole tab bar, rather than the tab for its page. */
+    tab?: 'all';
 }
 
 export const TOUR_STOPS: readonly TourStop[] = [
@@ -84,6 +86,7 @@ export const TOUR_STOPS: readonly TourStop[] = [
         path: '/home',
         title: "That's it",
         parts: [],
-        text: 'Start with a workout, or plan your week.',
+        text: 'The tabs take you to each part, wherever you are. Start with a workout, or plan your week.',
+        tab: 'all',
     },
 ];

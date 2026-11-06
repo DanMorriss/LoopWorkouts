@@ -26,18 +26,20 @@ const FOLLOW_MS = 900;
 const PADDING = 6;
 const MARGIN = 12;
 
-/** Where the light is, on the screen. */
+/** Where a light is, on the screen: on the stop's part, or its tab. */
 interface Light {
+    id: 'part' | 'tab';
     top: number;
     left: number;
     width: number;
     height: number;
+    radius: number;
 }
 
 /**
  * The tour of the app (NAV-8), over every page while it's on: it opens each stop's page,
- * lights up its part (a ring whose shadow dims the rest) and says what it is in a card at the
- * bottom, with Back, Skip tour and Next. The page can't be pressed meanwhile. Not `app-dialog`,
+ * lights up its part and the tab it's under (the rest dimmed), and says what it is in a card
+ * just above the tab bar, with Back, Skip tour and Next. The page can't be pressed meanwhile. Not `app-dialog`,
  * which is a card in the middle of the page that a click outside closes; focus is trapped in
  * the card the same way.
  */
@@ -69,7 +71,7 @@ export class TourComponent {
     /** The part lit up, once found, and what's said about it. */
     private readonly part = signal<{ element: Element; text: string } | null>(null);
     protected readonly text = computed(() => this.part()?.text ?? this.stop().text);
-    protected readonly light = signal<Light | null>(null);
+    protected readonly lights = signal<Light[]>([]);
 
     /** Each stop's search for its part, so an earlier one still looking gives up. */
     private search = 0;
@@ -109,28 +111,45 @@ export class TourComponent {
         this.finish(heading);
     }
 
-    /** Keeps the light on its part as the page scrolls or the screen changes size. */
+    /** Keeps the lights on the part and its tab as the page scrolls or the screen changes size. */
     protected measure() {
-        const part = this.part();
-        if (!part) {
-            this.light.set(null);
-            return;
+        const lights: Light[] = [];
+        const part = this.part()?.element.getBoundingClientRect();
+        if (part) {
+            // Above the card, and on the screen
+            const floor = this.card().nativeElement.getBoundingClientRect().top - MARGIN;
+            const top = Math.max(MARGIN, part.top - PADDING);
+            const bottom = Math.min(floor, part.bottom + PADDING);
+            if (bottom - top >= 24) {
+                lights.push({
+                    id: 'part',
+                    top,
+                    left: part.left - PADDING,
+                    width: part.width + PADDING * 2,
+                    height: bottom - top,
+                    radius: 14,
+                });
+            }
         }
-        const box = part.element.getBoundingClientRect();
-        // Above the card, and on the screen
-        const floor = this.card().nativeElement.getBoundingClientRect().top - MARGIN;
-        const top = Math.max(MARGIN, box.top - PADDING);
-        const bottom = Math.min(floor, box.bottom + PADDING);
-        this.light.set(
-            bottom - top < 24
-                ? null
-                : {
-                      top,
-                      left: box.left - PADDING,
-                      width: box.width + PADDING * 2,
-                      height: bottom - top,
-                  }
-        );
+        // The tab that takes you there, or the whole tab bar at the end, as pills
+        const stop = this.stop();
+        const tab = this.document
+            .querySelector(
+                stop.tab === 'all' ? '[data-tour-tabs]' : `[data-tour-tab="${stop.path}"]`
+            )
+            ?.getBoundingClientRect();
+        if (tab) {
+            const gap = stop.tab === 'all' ? 3 : 1;
+            lights.push({
+                id: 'tab',
+                top: tab.top - gap,
+                left: tab.left - gap,
+                width: tab.width + gap * 2,
+                height: tab.height + gap * 2,
+                radius: (tab.height + gap * 2) / 2,
+            });
+        }
+        this.lights.set(lights);
     }
 
     private finish(focus: string | HTMLElement | null) {
@@ -144,9 +163,10 @@ export class TourComponent {
         const search = ++this.search;
         const stop = TOUR_STOPS[index];
         this.part.set(null);
-        this.light.set(null);
         this.focusTitle();
         await this.router.navigateByUrl(stop.path);
+        // Its tab lights up straight away, its part once it's found
+        this.measure();
         const started = performance.now();
         while (search === this.search && stop.parts.length) {
             const found = stop.parts

@@ -2,6 +2,7 @@
     <nav
         class="tab-bar"
         aria-label="Main"
+        data-tour-tabs
         [style.--count]="tabs.length"
         [style.--chosen]="chosen()"
     >
@@ -14,6 +15,7 @@
                 class="tab-bar__tab"
                 [class.tab-bar__tab--chosen]="i === chosen()"
                 [routerLink]="tab.path"
+                [attr.data-tour-tab]="tab.path"
                 [attr.aria-current]="currentFor(i)"
             >
                 <app-icon class="tab-bar__icon">{{ tab.icon }}</app-icon>

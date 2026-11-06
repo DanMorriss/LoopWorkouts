@@ -42,38 +42,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    // Slightly convex, like a real bubble: lit round its top edge and shaded round its bottom,
-    // inside, and it sits a little proud of the ring
-    box-shadow:
-        inset 0 6px 14px color-mix(in srgb, var(--bubble-light) 70%, transparent),
-        inset 0 -10px 22px color-mix(in srgb, var(--bubble-shade) 14%, transparent),
-        0 2px 6px color-mix(in srgb, var(--bubble-shade) 35%, transparent);
 }
 
-// A soft sheen at its top left, as light catches a curved surface, over the face but too faint
-// to get in the way of what's on it; it never moves
-.workout-inner::after {
-    content: '';
-    position: absolute;
-    inset: 5px;
-    border-radius: 50%;
-    pointer-events: none;
-    background:
-        radial-gradient(
-            circle at 32% 24%,
-            color-mix(in srgb, var(--bubble-light) 55%, transparent),
-            transparent 34%
-        ),
-        radial-gradient(
-            circle at 50% 50%,
-            transparent 62%,
-            color-mix(in srgb, var(--bubble-shade) 9%, transparent) 100%
-        );
-}
-
+// The whole of the circle, with no white rim round it
 .workout-face {
-    width: calc(100% - 10px);
-    height: calc(100% - 10px);
+    width: 100%;
+    height: 100%;
     // The old step's text and the new one's share the middle while one slides past the other
     display: grid;
     place-items: center;

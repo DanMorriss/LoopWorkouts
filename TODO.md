@@ -28,7 +28,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 **During a workout**
 
-- [x] **Make the bubble look 3D** (2026-11-06): the ring shaded as a tube with rounded ends (a cap where the fill starts and one going round on its leading edge), and the face slightly convex with a sheen, all still layers. Measured with the CPU slowed 4×, no frames are dropped, as before.
+- [x] **Make the bubble look 3D** (2026-11-06): the ring shaded as a tube with rounded ends (a cap where the fill starts and one going round on its leading edge, in place of timed work's white dot), and the face a glossy ball filling the circle, all still layers. Measured with the CPU slowed 4×, no frames are dropped, as before.
 
 **Today and Plan**
 

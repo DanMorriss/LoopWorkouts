@@ -184,6 +184,36 @@ $band: 15px;
     );
 }
 
+// The face as a glossy ball sitting in the ring, over it and inside the band, but clear of the
+// middle where the step's name and time are; it never moves. A crisp edge and a shadow cast
+// onto the ring; then, from the top down, a hard white highlight at the top left, a faint
+// sheen across the top, light bounced up along the bottom rim, and the curve darkening towards
+// the edge, most at the bottom right, away from the light.
+@function light($share) {
+    @return color-mix(in srgb, var(--bubble-light) $share, transparent);
+}
+
+@function shade($share) {
+    @return color-mix(in srgb, var(--bubble-shade) $share, transparent);
+}
+
+.workout-ring__gloss {
+    position: absolute;
+    inset: $band;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow:
+        inset 0 0 0 1px shade(22%),
+        0 10px 22px shade(60%),
+        0 3px 6px shade(40%);
+    background:
+        radial-gradient(ellipse 11% 7% at 35% 17%, var(--bubble-light), light(0%) 100%),
+        radial-gradient(ellipse 27% 16% at 36% 18%, light(92%), light(35%) 55%, transparent 100%),
+        radial-gradient(ellipse 62% 30% at 50% 8%, light(30%), transparent 100%),
+        radial-gradient(ellipse 58% 18% at 56% 97%, light(45%), transparent 100%),
+        radial-gradient(circle at 40% 34%, transparent 38%, shade(32%) 76%, shade(68%) 100%);
+}
+
 // Hidden but for finish(), which shows it and fades it out
 .workout-ring__flash {
     position: absolute;

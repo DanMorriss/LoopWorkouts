@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { DueTodayComponent } from './due-today/due-today.component';
 import { GetStartedComponent } from './get-started/get-started.component';
 import { WeekStripComponent } from './week-strip/week-strip.component';
+import { MusclesThisWeekComponent } from '../history/muscles-this-week/muscles-this-week.component';
 import { SuggestedWorkoutComponent } from '../history/suggested-workout/suggested-workout.component';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
@@ -22,6 +23,7 @@ import { weekdayOf } from '../models/plan';
     imports: [
         DueTodayComponent,
         GetStartedComponent,
+        MusclesThisWeekComponent,
         SuggestedWorkoutComponent,
         WeekStripComponent,
     ],

@@ -167,7 +167,32 @@ describe('HomeComponent', () => {
         });
     });
 
-    it('suggests the saved workout for the least worked muscles, and starts it, leaving the muscles to Progress', () => {
+    describe('muscles worked this week', () => {
+        it('shows the body map of the last 7 days, with a link to the bars on Progress', () => {
+            TestBed.inject(HistoryStore).record(entry);
+            create();
+
+            const card = element().querySelector('app-muscles-this-week .muscles-week')!;
+            expect(card.querySelector('app-body-map')).not.toBeNull();
+            expect(card.querySelector('app-muscle-bars')).toBeNull();
+            expect(card.querySelector('.muscles-week__more')!.getAttribute('href')).toBe(
+                '/history'
+            );
+        });
+
+        it("isn't there with no workout done in the last 7 days, as its map would be blank", () => {
+            TestBed.inject(HistoryStore).record({
+                ...entry,
+                startedAt: NOW - 8 * 24 * HOUR,
+                endedAt: NOW - 8 * 24 * HOUR + 600_000,
+            });
+            create();
+
+            expect(element().querySelector('.muscles-week')).toBeNull();
+        });
+    });
+
+    it('suggests the saved workout for the least worked muscles, and starts it', () => {
         const workouts = TestBed.inject(WorkoutStore);
         const push = workouts.addWorkout({
             title: 'Push',
@@ -183,7 +208,6 @@ describe('HomeComponent', () => {
         expect(text('.suggestion__reason')).toEqual([
             'For Chest (0 of 10 sets), the least worked this week.',
         ]);
-        expect(element().querySelector('app-muscles-this-week')).toBeNull();
         expect(element().querySelector('app-get-started')).toBeNull();
 
         const router = TestBed.inject(Router);

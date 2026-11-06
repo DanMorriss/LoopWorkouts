@@ -1,3 +1,5 @@
+@use 'interaction' as *;
+
 :host {
     display: block;
 }
@@ -19,4 +21,12 @@
 
 .muscles-week__bars {
     margin-top: 1.25rem;
+}
+
+// On Today, the way to the bars on Progress, under the map
+.muscles-week__more {
+    @include link-button;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    text-decoration: none;
 }

@@ -28,14 +28,14 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 **During a workout**
 
-- [ ] **Make the bubble look 3D:** slightly convex, like a real bubble, and the timer bar that goes round it 3D too, with curved ends rather than flat ones. The ring is two rotating half-circles (`workout/workout-ring/`), which is why its ends are flat, so curved ends mean adding end caps or redrawing it. It's on screen for the whole workout, so check it stays smooth on a phone, in both themes and with reduced motion.
+- [x] **Make the bubble look 3D** (2026-11-06): the ring shaded as a tube with rounded ends (a cap where the fill starts and one going round on its leading edge), and the face slightly convex with a sheen, all still layers. Measured with the CPU slowed 4×, no frames are dropped, as before.
 
 **Today and Plan**
 
 - [x] **Suggest a workout on a day with none planned** (2026-11-06): "Fancy a workout today?", saying resting is fine too, with the usual suggestion steered off the next planned workout and most of its main muscles, and saying which it leaves fresh.
 - [x] **The body map on the Plan page** (2026-11-06): What your plan works, at the bottom of the Plan page over Missing muscle groups, shaded for the planned workouts' main and supporting muscles.
 - [x] **Move Missing muscle groups to the Plan page** (LIB-5, LIB-7, 2026-11-06): at its bottom, for the workouts in the plan; its ready-made suggestion adds to your workouts, to plan from there.
-- [ ] **Decide: Muscles this week on Today?** Today is where most people land, so it needs to be exciting. The body map is only on Progress for now (`app-muscles-this-week`), and would need thought for someone who's done nothing yet this week, when it's blank.
+- [ ] **Muscles this week on Today** (decided by Dan, 2026-11-06): show it (`app-muscles-this-week`) on Today only when a workout has been done in the last 7 days; with none, the body map would be blank, so leave it out.
 
 **Progress page**
 
@@ -119,5 +119,6 @@ From the review of 2026-11-05; how to keep it from coming back is in `CLAUDE.md`
 - [ ] **A favourite marked on one device and an edit on another can lose one:** a workout syncs as one record, the latest change winning (see `mergeRecords()`), so a heart pressed on a phone and an edit saved on a laptop before they sync keeps only the later of the two. Rare enough to leave; keeping favourites as records of their own would fix it.
 - [ ] **A ready-made workout's mid-run changes go on a reload:** a run keeps only the workout's id in the tab, and a ready-made one is reloaded as it comes with the app, so a weight changed mid-run is lost if the page reloads part-way through (your own keep it, as it's saved on the workout). The sets already done are kept.
 - [ ] **Copies made before the one list show twice:** a ready-made workout added with Add to my workouts before 2026-11-06 is a workout of your own, so Gym legs can be listed twice, once with the badge. Left as Dan chose; deleting the copy tidies it, and its history stays under its own id.
+- [ ] **Check the 3D bubble on an iPhone:** its shading and rounded ends (2026-11-06) were measured smooth in Chromium with the CPU slowed 4×, which draws in software; check on a phone that the ring still fills smoothly and the sheen looks right in both themes.
 - [ ] **Card swipe tests still use real clock time:** they measure real time, so a busy machine could still fail them, even with `maxWorkers` at 2. The wheel flick test did just that on CI on 2026-11-05 and now has fake timestamps (the `mouse()` helper in `wheel-picker.component.spec.ts`), so do the same if a swipe test fails. They passed in all six full local runs on 2 workers.
 - [ ] **Watch how long CI takes with 2 test workers:** the job took 8m37s on #241's PR, 5m54s on `main` after it merged and 6m52s on a run that failed its tests, against 4m31s to 6m27s on recent PRs, with a limit of 15 minutes. If it stays slow, CI could use a higher cap than local runs, but that needs checking for random failures again.

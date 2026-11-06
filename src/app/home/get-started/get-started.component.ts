@@ -8,8 +8,8 @@ import { injectUsePlanOnToday } from '../use-plan-on-today';
 
 /**
  * Today with no workouts yet (NAV-6): a week to start with, planned for you (PLN-7). A
- * ready-made plan for your goal and equipment, used in one tap (its workouts added, your week
- * planned), the rest of the ready-made plans, or picking workouts yourself.
+ * ready-made plan for your goal and equipment, used in one tap (your week planned with its
+ * ready-made workouts), the rest of the ready-made plans, or picking workouts yourself.
  */
 @Component({
     selector: 'app-get-started',

@@ -32,7 +32,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 **Today and Plan**
 
-- [ ] **Suggest a workout on a day with none planned:** Today only suggests one with history and no week planned (`home.component.html`), so a rest day in a planned week shows nothing. Use the existing suggestion (`suggestNextWorkout` in `models/muscle-balance.ts`), but also look at the next workout planned this week and avoid overlapping its muscles too much. It needs to say why it's picking that, and not to feel like a rest day is being told off.
+- [x] **Suggest a workout on a day with none planned** (2026-11-06): "Fancy a workout today?", saying resting is fine too, with the usual suggestion steered off the next planned workout and most of its main muscles, and saying which it leaves fresh.
 - [ ] **The body map on the Plan page:** at the bottom of `plan/`, shaded for what the plan works across the week (`app-body-map`).
 - [x] **Move Missing muscle groups to the Plan page** (LIB-5, LIB-7, 2026-11-06): at its bottom, for the workouts in the plan; its ready-made suggestion adds to your workouts, to plan from there.
 - [ ] **Decide: Muscles this week on Today?** Today is where most people land, so it needs to be exciting. The body map is only on Progress for now (`app-muscles-this-week`), and would need thought for someone who's done nothing yet this week, when it's blank.

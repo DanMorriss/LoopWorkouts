@@ -194,6 +194,24 @@ export const EQUIPMENT_CHOICES: readonly Exclude<Equipment, 'none'>[] = [
     'ab wheel',
 ];
 
+/**
+ * The equipment you have, as saved: the pieces picked, in the order they're offered, or `['none']`
+ * for **No equipment**, said outright (since 2026-11-06), or empty for none picked yet. Pieces
+ * and No equipment don't go together: picked with any piece, it's left out.
+ */
+export function readMyEquipment(saved: unknown): Equipment[] | null {
+    if (!Array.isArray(saved)) {
+        return null;
+    }
+    const pieces: Equipment[] = EQUIPMENT_CHOICES.filter((choice) => saved.includes(choice));
+    return pieces.length === 0 && saved.includes('none') ? ['none'] : pieces;
+}
+
+/** Whether you've said you have no equipment, rather than picked none yet. */
+export function hasNoEquipment(myEquipment: readonly Equipment[]): boolean {
+    return myEquipment.length === 1 && myEquipment[0] === 'none';
+}
+
 /** How each piece of equipment is written in the app, e.g. "Pull-up bar". */
 export function equipmentLabel(equipment: Equipment): string {
     return equipment.charAt(0).toUpperCase() + equipment.slice(1);

@@ -1,4 +1,4 @@
-import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, EQUIPMENT_CHOICES } from './exercise';
+import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, readMyEquipment } from './exercise';
 import { TRAINING_GOALS, TrainingGoal } from './muscle-balance';
 import { WEIGHT_UNITS, WeightUnit } from './weight';
 
@@ -62,7 +62,7 @@ export function readProfile(value: unknown): Profile | null {
         bodyFigure: bodyFigure as BodyFigure,
         trainingGoal: trainingGoal as TrainingGoal,
         weightUnit: weightUnit as WeightUnit,
-        myEquipment: EQUIPMENT_CHOICES.filter((choice) => myEquipment.includes(choice)),
+        myEquipment: readMyEquipment(myEquipment) ?? [],
         updatedAt: updatedAt as number,
     };
 }

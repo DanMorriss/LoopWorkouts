@@ -102,6 +102,12 @@ describe('SettingsStore', () => {
         expect(store.onlyMyEquipment()).toBe(true);
     });
 
+    it('keeps No equipment, said outright, apart from none picked', () => {
+        localStorage.setItem('settings', '{"myEquipment": ["none"]}');
+
+        expect(createStore().myEquipment()).toEqual(['none']);
+    });
+
     for (const [label, saved] of [
         ['corrupted', '{not json'],
         ['not an object', '"loud"'],

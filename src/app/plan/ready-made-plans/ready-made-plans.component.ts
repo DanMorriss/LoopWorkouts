@@ -12,8 +12,8 @@ import { hiddenByEquipmentText } from '../../models/exercise';
 
 /**
  * The ready-made plans (PLN-6): a week of ready-made workouts each, those for your goal
- * first, and with Only what I have on, only those your equipment allows. Using one adds the
- * workouts you haven't got, replaces your plan, and goes to Today, with Undo. It slides in
+ * first, and with Only what I have on, only those your equipment allows. Using one plans its
+ * ready-made workouts as they are, in place of your plan, and goes to Today, with Undo. It slides in
  * over the page it was opened from, Today or the Plan page (`?from=plan`), and back to it.
  */
 @Component({
@@ -25,8 +25,8 @@ import { hiddenByEquipmentText } from '../../models/exercise';
                 <app-back-link [url]="back.url" [label]="back.label" />
                 <h2 class="plans__title">Ready-made plans</h2>
                 <p class="plans__hint">
-                    A week of ready-made workouts, the same every week. Using one adds the workouts
-                    you haven't got, and replaces your plan, with Undo.
+                    A week of ready-made workouts, the same every week. Using one replaces your plan
+                    with it, with Undo; its workouts are ready to start as they are.
                 </p>
 
                 <app-equipment-filter class="plans__kit" idPrefix="plans" things="Plans" />

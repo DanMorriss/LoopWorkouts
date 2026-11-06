@@ -5,7 +5,7 @@ import { WEEKDAYS } from './plan';
 
 /**
  * A ready-made week (PLN-6): which ready-made workouts go on which days, the same every week.
- * Using one copies in the workouts you haven't got and replaces your plan with it, with Undo.
+ * Using one replaces your plan with it, its ready-made workouts planned as they are, with Undo.
  * Days with nothing on them are rest days, left empty for now (mobility days can come later).
  */
 export interface BuiltInPlan {

@@ -1,10 +1,5 @@
 import { computed, inject, Service, signal } from '@angular/core';
-import {
-    BODY_FIGURE_CHOICES,
-    BodyFigure,
-    Equipment,
-    EQUIPMENT_CHOICES,
-} from '../../models/exercise';
+import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, readMyEquipment } from '../../models/exercise';
 import { TRAINING_GOALS, TrainingGoal } from '../../models/muscle-balance';
 import { cleanName, Profile, PROFILE_FIELDS } from '../../models/profile';
 import { WEIGHT_UNITS, WeightUnit } from '../../models/weight';
@@ -196,11 +191,7 @@ function loadSettings(): Settings {
             TRAINING_GOALS.find((g) => g === saved['trainingGoal']) ??
             DEFAULT_SETTINGS.trainingGoal,
         // Kept in the order it's offered, so it reads the same however it was picked
-        myEquipment: Array.isArray(saved['myEquipment'])
-            ? EQUIPMENT_CHOICES.filter((choice) =>
-                  (saved['myEquipment'] as unknown[]).includes(choice)
-              )
-            : DEFAULT_SETTINGS.myEquipment,
+        myEquipment: readMyEquipment(saved['myEquipment']) ?? DEFAULT_SETTINGS.myEquipment,
         onlyMyEquipment: flag('onlyMyEquipment'),
         eachSideFirst:
             saved['eachSideFirst'] === 'left' || saved['eachSideFirst'] === 'right'

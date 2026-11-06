@@ -145,6 +145,48 @@ describe('suggestNextWorkout', () => {
         steps: [linked(reps(15), 'builtin:calf-raise')],
     });
 
+    describe('on a rest day, avoiding the next planned workout', () => {
+        const goblet = makeWorkout({
+            id: 'goblet',
+            title: 'Goblet squats',
+            steps: [linked(reps(10), 'builtin:goblet-squat')],
+        });
+
+        it("doesn't suggest the next planned workout, nor one mostly working its muscles", () => {
+            // Nothing done: legs or goblet squats would be picked first, being first
+            const avoid = {
+                workoutIds: new Set(['legs']),
+                muscles: new Set(['quads', 'glutes'] as const),
+            };
+
+            const suggested = suggestNextWorkout(
+                [legs, goblet, push],
+                new Map(),
+                byId,
+                new Map(),
+                'muscle',
+                avoid
+            );
+
+            expect(suggested?.workout).toBe(push);
+        });
+
+        it('suggests one working those muscles anyway when there is nothing else', () => {
+            const avoid = {
+                workoutIds: new Set(['legs']),
+                muscles: new Set(['quads', 'glutes'] as const),
+            };
+
+            expect(
+                suggestNextWorkout([legs, goblet], new Map(), byId, new Map(), 'muscle', avoid)
+                    ?.workout
+            ).toBe(goblet);
+            expect(
+                suggestNextWorkout([legs], new Map(), byId, new Map(), 'muscle', avoid)
+            ).toBeNull();
+        });
+    });
+
     it('picks the workout for the least worked muscles, with them least first', () => {
         const counts = new Map([
             ['quads', 12],

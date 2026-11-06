@@ -112,11 +112,30 @@ export function shareOfAim(sets: number, muscle: MuscleGroup, goal: TrainingGoal
 }
 
 /**
+ * What a suggestion should steer clear of: on a rest day in a planned week, the workout planned
+ * next, which isn't suggested, and its main muscles, rested for it.
+ */
+export interface SuggestionAvoid {
+    workoutIds: ReadonlySet<string>;
+    muscles: ReadonlySet<MuscleGroup>;
+}
+
+/**
+ * The most of a workout's main muscles that can be among those to avoid, for it to be offered
+ * ahead of those with more: a third, so a full-body workout with the legs in it is fine before
+ * a legs day, and a legs workout isn't.
+ */
+const MOST_OVERLAP = 1 / 3;
+
+/**
  * The saved workout that works the muscles furthest short of their aims: the lowest average
  * of each muscle's share of its aim this week (`shareOfAim`) over the muscles it works, its
  * main muscles counting twice what its supporting ones do. On a tie, the one done longest ago
  * (never done first), then the library's order. Null when no workout has a step linked to an
  * exercise.
+ *
+ * With `avoid`, its workouts are left out, and one whose main muscles are mostly those to avoid
+ * (more than MOST_OVERLAP of them) is only suggested when every other one is too.
  */
 export function suggestNextWorkout(
     workouts: readonly Workout[],
@@ -124,8 +143,21 @@ export function suggestNextWorkout(
     byId: (id: string) => Exercise | undefined,
     /** When each workout was last started, by its id; missing for never. */
     lastDone: ReadonlyMap<string, number>,
-    goal: TrainingGoal
+    goal: TrainingGoal,
+    avoid?: SuggestionAvoid
 ): SuggestedWorkout | null {
+    if (avoid) {
+        const allowed = workouts.filter((workout) => !avoid.workoutIds.has(workout.id));
+        const apart = allowed.filter((workout) => {
+            const main = [...muscleWeights(workout, byId)].filter(([, weight]) => weight === 1);
+            const shared = main.filter(([muscle]) => avoid.muscles.has(muscle)).length;
+            return main.length > 0 && shared / main.length <= MOST_OVERLAP;
+        });
+        return (
+            suggestNextWorkout(apart, counts, byId, lastDone, goal) ??
+            suggestNextWorkout(allowed, counts, byId, lastDone, goal)
+        );
+    }
     let best: { suggestion: SuggestedWorkout; load: number; lastDone: number } | null = null;
     const share = (muscle: MuscleGroup) => shareOfAim(counts.get(muscle) ?? 0, muscle, goal);
 

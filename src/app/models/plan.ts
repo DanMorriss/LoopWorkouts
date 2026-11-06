@@ -153,6 +153,14 @@ export function thisWeek(
     );
 }
 
+/** The next day after `today` (0 for Monday) with anything planned this week, or -1 for none. */
+export function nextPlannedDay(
+    week: readonly (readonly PlannedWorkout[])[],
+    today: number
+): number {
+    return week.findIndex((planned, day) => day > today && planned.length > 0);
+}
+
 /** The start of the day after `monday`'s `day` (from 0), on the device's calendar. */
 function dayAfter(monday: number, day: number): number {
     const date = new Date(monday);

@@ -12,8 +12,12 @@
         }
         <!-- The weekly plan's workouts for today (PLN-2) -->
         <app-due-today class="home__card" />
-        <!-- With a week planned, the plan says what's next; the suggestion is for an unplanned one -->
-        @if (hasHistory() && !hasPlan()) {
+        <!-- With a week planned, the plan says what's next, but a day with nothing planned
+             offers a workout that leaves the next one's muscles fresh; with no plan, the
+             suggestion is for what's least worked -->
+        @if (restDay()) {
+            <app-suggested-workout class="home__card" [restDay]="true" />
+        } @else if (hasHistory() && !hasPlan()) {
             <app-suggested-workout class="home__card" />
         }
     </div>

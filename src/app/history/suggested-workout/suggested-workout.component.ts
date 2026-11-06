@@ -1,11 +1,19 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
 import { MUSCLE_LABELS } from '../../models/exercise';
-import { setsByMuscle, suggestNextWorkout, weeklyAim } from '../../models/muscle-balance';
+import {
+    setsByMuscle,
+    SuggestionAvoid,
+    suggestNextWorkout,
+    weeklyAim,
+} from '../../models/muscle-balance';
+import { nextPlannedDay, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
+import { musclesWorked } from '../../models/workout-muscles';
 import { Workout } from '../../models/workout';
 import { ActiveRunService } from '../../shared/run/active-run.service';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
+import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 
@@ -17,15 +25,27 @@ const LIST = new Intl.ListFormat('en-GB');
 let nextId = 0;
 
 /**
- * A card with the saved workout for the muscles furthest short of their aims in the last seven
- * days (PRG-9), on the history page and the workout summary. Nothing shows with no workout to suggest.
+ * A card with the workout for the muscles furthest short of their aims in the last seven days
+ * (PRG-9), on the history page, the workout summary and Today. Nothing shows with no workout to
+ * suggest.
+ *
+ * On a rest day in a planned week (`restDay`), it's offered, not pressed: resting is fine too.
+ * It steers clear of the workout planned next this week and of most of its main muscles, and
+ * says so, e.g. "and it leaves your Quads and Glutes fresh for Legs day on Thursday".
  */
 @Component({
     selector: 'app-suggested-workout',
     template: `
         @if (suggestion(); as suggested) {
             <section class="suggestion" [attr.aria-labelledby]="id">
-                <h3 class="suggestion__label" [id]="id">Suggested next workout</h3>
+                <h3 class="suggestion__label" [id]="id">
+                    {{ restDay() ? 'Fancy a workout today?' : 'Suggested next workout' }}
+                </h3>
+                @if (restDay()) {
+                    <p class="suggestion__reason">
+                        Nothing's planned today, so resting is fine too. If you'd like to train:
+                    </p>
+                }
                 <p class="suggestion__title">{{ suggested.workout.title }}</p>
                 <p class="suggestion__reason">{{ suggested.reason }}</p>
                 @if (startable()) {
@@ -46,11 +66,14 @@ let nextId = 0;
 export class SuggestedWorkoutComponent {
     /** With a Start button, as the library's Start. */
     readonly startable = input(true);
+    /** On Today, on a day of a planned week with nothing planned (PLN-2). */
+    readonly restDay = input(false);
 
     private readonly history = inject(HistoryStore);
     private readonly exercises = inject(ExerciseStore);
     private readonly workouts = inject(WorkoutStore);
     private readonly settings = inject(SettingsStore);
+    private readonly plan = inject(PlanStore);
     private readonly run = inject(ActiveRunService);
     private readonly router = inject(Router);
     private readonly now = Date.now();
@@ -63,6 +86,31 @@ export class SuggestedWorkoutComponent {
             (id) => this.exercises.byId(id)
         )
     );
+
+    /**
+     * On a rest day, the workouts planned on the next day this week with any, to leave alone,
+     * with their main muscles; null with none to come.
+     */
+    private readonly nextPlanned = computed(() => {
+        if (!this.restDay()) {
+            return null;
+        }
+        const week = thisWeek(
+            this.plan.plan(),
+            this.history.entries(),
+            this.now,
+            (id) => this.workouts.findAnyWorkout(id) !== null
+        );
+        const day = nextPlannedDay(week, weekdayOf(this.now));
+        if (day < 0) {
+            return null;
+        }
+        const workouts = week[day].map(
+            (planned) => this.workouts.findAnyWorkout(planned.workoutId)!
+        );
+        const { main } = musclesWorked(workouts, (id) => this.exercises.byId(id));
+        return { day, workouts, muscles: new Set(main) };
+    });
 
     protected readonly suggestion = computed(() => {
         const lastDone = new Map<string, number>();
@@ -77,7 +125,8 @@ export class SuggestedWorkoutComponent {
             this.weekSets(),
             (id) => this.exercises.byId(id),
             lastDone,
-            this.settings.trainingGoal()
+            this.settings.trainingGoal(),
+            this.avoid()
         );
         if (!suggested) {
             return null;
@@ -90,9 +139,35 @@ export class SuggestedWorkoutComponent {
         });
         return {
             workout: suggested.workout,
-            reason: `For ${LIST.format(muscles)}, the least worked this week.`,
+            reason: `For ${LIST.format(muscles)}, the least worked this week${this.leavesFresh(suggested.workout)}.`,
         };
     });
+
+    private readonly avoid = computed((): SuggestionAvoid | undefined => {
+        const next = this.nextPlanned();
+        return next
+            ? { workoutIds: new Set(next.workouts.map((w) => w.id)), muscles: next.muscles }
+            : undefined;
+    });
+
+    /**
+     * ", and it leaves your Quads and Glutes fresh for Legs day on Thursday": the main muscles
+     * of the next planned workout that `workout` doesn't work as main ones, up to two. Nothing
+     * when there's none to come, or it works them all.
+     */
+    private leavesFresh(workout: Workout): string {
+        const next = this.nextPlanned();
+        if (!next) {
+            return '';
+        }
+        const { main } = musclesWorked([workout], (id) => this.exercises.byId(id));
+        const fresh = [...next.muscles].filter((muscle) => !main.includes(muscle)).slice(0, 2);
+        if (fresh.length === 0) {
+            return '';
+        }
+        const name = next.workouts[0].title.trim() || 'your next workout';
+        return `, and it leaves your ${LIST.format(fresh.map((m) => MUSCLE_LABELS[m]))} fresh for ${name} on ${WEEKDAYS[next.day]}`;
+    }
 
     protected start(workout: Workout) {
         this.run.start(workout);

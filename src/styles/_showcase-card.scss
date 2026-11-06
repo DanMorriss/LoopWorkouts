@@ -19,6 +19,15 @@
         radial-gradient(120% 80% at 100% 0%, var(--accent-soft), transparent 60%), var(--control);
 }
 
+// The same, solid under the light, for a card that passes over others: held and dragged, or
+// with a menu open over the card below
+@mixin showcase-card-solid {
+    @include showcase-card;
+    background:
+        radial-gradient(120% 80% at 100% 0%, var(--accent-soft), transparent 60%),
+        linear-gradient(var(--control), var(--control)), var(--card);
+}
+
 // The title and what it's for at the left, the count at the right
 @mixin showcase-head {
     display: grid;

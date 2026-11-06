@@ -120,7 +120,33 @@ describe('HistoryComponent', () => {
             })
         );
 
-        expect(text('.entry__detail')).toEqual(['11:00 AM · 12:34 · 2 of 5 rounds · stopped']);
+        expect(text('.entry__detail')).toEqual([
+            '11:00 AM · 2 of 5 rounds · stopped · 12:34 spent',
+        ]);
+        // The time is the card's big number, said in the line above for screen readers
+        expect(text('.entry__time')).toEqual(['12:34 time']);
+    });
+
+    it('names the main muscles its sets worked, as a workout card does', () => {
+        create(
+            makeEntry({
+                sets: [
+                    {
+                        round: 0,
+                        step: 0,
+                        name: 'Squats',
+                        reps: 10,
+                        exerciseId: 'builtin:back-squat',
+                    },
+                    { round: 0, step: 1, name: 'Reps', reps: 10 },
+                ],
+            }),
+            makeEntry({ startedAt: NOW - 2 * HOUR })
+        );
+
+        expect(text('.entry__works .showcase-muscle')).toEqual(['Glutes', 'Quads']);
+        // The workout with no sets of an exercise names none
+        expect(fixture.nativeElement.querySelectorAll('.entry__works')).toHaveLength(1);
     });
 
     it('lists the sets of its rep steps under it, read out in words, in the unit chosen', () => {

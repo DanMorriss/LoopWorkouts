@@ -38,8 +38,8 @@ import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showc
  * details, its play button starts it, and its heart makes it a favourite. One of yours can be
  * swiped to the left to delete it. Held still, it lifts, and let go of, its options open, as
  * on an iPhone; a right-click opens them too, and so does the ⋮ button, for keyboards, screen
- * readers and anyone who doesn't know the gestures: Edit and Delete, or Make a copy for a
- * ready-made one. The library decides which card's options are open (one at a time); the card
+ * readers and anyone who doesn't know the gestures: Edit, Make a copy and Delete, or only
+ * Make a copy for a ready-made one. The library decides which card's options are open (one at a time); the card
  * shows that and reports what the user does.
  */
 @Component({
@@ -72,7 +72,7 @@ export class WorkoutCardComponent {
     readonly menuToggled = output<void>();
     readonly menuClosed = output<void>();
     readonly editRequested = output<void>();
-    /** Make a copy, of a ready-made one. */
+    /** Make a copy, to change while keeping this one. */
     readonly copyRequested = output<void>();
     readonly deleteRequested = output<void>();
 

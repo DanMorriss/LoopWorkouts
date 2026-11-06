@@ -22,6 +22,11 @@
     font-size: 1.6rem;
     color: var(--text-strong);
     overflow-wrap: anywhere;
+
+    // Given focus only arriving from Save, as a place to start; it's not a control
+    &:focus {
+        outline: none;
+    }
 }
 
 .details__description {

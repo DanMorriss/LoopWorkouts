@@ -3,6 +3,7 @@ import {
     allSteps,
     asOneGroup,
     Block,
+    copyOf,
     hasWork,
     isReadyMadeId,
     MAX_HEADING_LENGTH,
@@ -66,14 +67,11 @@ export class WorkoutStore {
      * after the app starts, so they're not in its first download.
      */
     readonly readyMadeLoaded: Promise<void> = import('../../models/built-in-workouts').then(
-        ({ BUILT_IN_WORKOUTS, copyOfBuiltIn }) => {
-            this.copyOfBuiltIn = copyOfBuiltIn;
+        ({ BUILT_IN_WORKOUTS }) => {
             this._builtIns.set(BUILT_IN_WORKOUTS);
             this.restoreReadyMadeRun();
         }
     );
-    /** Makes a ready-made workout's fields into one of your own, once they've loaded. */
-    private copyOfBuiltIn: ((workout: BuiltInWorkout) => WorkoutFields) | null = null;
 
     /** The ready-made workouts, used as they are, each a favourite if it's been made one. */
     readonly readyMade = computed<ReadyMadeWorkout[]>(() => {
@@ -367,16 +365,17 @@ export class WorkoutStore {
     }
 
     /**
-     * Make a copy of a ready-made workout (LIB-6): a workout of your own, "Gym legs (copy)",
-     * to change. Null if there's no such ready-made workout.
+     * Make a copy of a workout, yours or ready-made (LIB-2, LIB-6): a workout of your own, "Legs
+     * day (copy)", to change, leaving the one it's a copy of as it is. Null if there's no such
+     * workout.
      */
-    copyReadyMade(workoutId: string): Workout | null {
-        const builtIn = this._builtIns().find((workout) => workout.id === workoutId);
-        if (!builtIn || !this.copyOfBuiltIn) {
+    copyWorkout(workoutId: string): Workout | null {
+        const workout = this.findAnyWorkout(workoutId);
+        if (!workout) {
             return null;
         }
-        const copy = this.copyOfBuiltIn(builtIn);
-        return this.addWorkout({ ...copy, title: `${copy.title} (copy)` });
+        const title = workout.title.trim() || 'Untitled workout';
+        return this.addWorkout({ ...copyOf(workout), title: `${title} (copy)` });
     }
 
     updateWorkout(workoutId: string, workoutUpdate: WorkoutFields): Workout | null {

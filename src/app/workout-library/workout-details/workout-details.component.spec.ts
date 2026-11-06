@@ -154,6 +154,22 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         );
     });
 
+    it('makes a copy of it beside Edit, keeping both, opening the copy in Create', async () => {
+        const sprints = addSprints();
+        await open(sprints.id);
+        const slide = vi.spyOn(TestBed.inject(PageSlide), 'navigate').mockImplementation(() => {});
+
+        el().querySelector<HTMLButtonElement>('.details__copy')!.click();
+
+        const copy = store.workouts()[1];
+        expect(store.workouts().map((w) => w.title)).toEqual(['Sprints', 'Sprints (copy)']);
+        expect(el().querySelector('.details__edit')).not.toBeNull();
+        expect(slide).toHaveBeenCalledWith(
+            `/setup?editId=${copy.id}&from=%2Flibrary%2F${copy.id}`,
+            'in'
+        );
+    });
+
     describe('of a ready-made workout (LIB-6)', () => {
         beforeEach(async () => {
             await store.readyMadeLoaded;
@@ -206,6 +222,34 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         heart().click();
         harness.detectChanges();
         expect(store.findWorkoutById(sprints.id)?.favourite).toBeUndefined();
+    });
+
+    describe('arriving from Save in Create', () => {
+        async function arrive() {
+            const sprints = addSprints();
+            await harness.navigateByUrl(`/library/${sprints.id}?saved=1`);
+            harness.fixture.detectChanges();
+            await harness.fixture.whenStable();
+            await new Promise((resolve) => requestAnimationFrame(resolve));
+            harness.fixture.detectChanges();
+        }
+
+        it('says it was saved, with focus on Edit when it is in view', async () => {
+            await arrive();
+
+            expect(text(el().querySelector('[aria-live]')!)).toBe('Saved Sprints');
+            expect(document.activeElement).toBe(el().querySelector('.details__edit'));
+        });
+
+        it('puts focus on its title when Edit is out of view, as for a new copy', async () => {
+            const tall = document.createElement('div');
+            tall.style.height = '5000px';
+            document.body.prepend(tall);
+            await arrive();
+            tall.remove();
+
+            expect(document.activeElement).toBe(el().querySelector('.details__title'));
+        });
     });
 
     it('goes back with ‹ Workouts, saying which card to put focus on', async () => {

@@ -401,14 +401,3 @@ export function workoutEquipment(
     );
     return left.length ? left : ['none'];
 }
-
-/** A built-in workout as a new one for the library: its own copy, to change as you like. */
-export function copyOfBuiltIn(workout: BuiltInWorkout): WorkoutFields {
-    const { title, blocks, repeats, timeLimitSeconds } = workout;
-    return {
-        title,
-        blocks: structuredClone(blocks),
-        repeats,
-        ...(timeLimitSeconds === undefined ? {} : { timeLimitSeconds }),
-    };
-}

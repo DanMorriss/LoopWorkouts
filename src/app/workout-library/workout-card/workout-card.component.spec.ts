@@ -230,6 +230,17 @@ describe('WorkoutCardComponent', () => {
         expect(host.events).toEqual(['menuToggled', 'editRequested', 'deleteRequested']);
     });
 
+    it('offers Edit, Make a copy and Delete in its options, in that order', () => {
+        set({ menuOpen: true });
+
+        const items = Array.from(card().querySelectorAll('.menu__item'), (item) =>
+            item.textContent!.replace(/\s+/g, ' ').trim()
+        );
+        expect(items).toEqual(['edit Edit', 'content_copy Make a copy', 'delete Delete']);
+        el('.workout-card__menu-item--copy').click();
+        expect(host.events).toEqual(['copyRequested']);
+    });
+
     describe('a ready-made workout (LIB-6)', () => {
         const readyMade: Workout = { ...sprints, id: 'builtin:sprints' };
 

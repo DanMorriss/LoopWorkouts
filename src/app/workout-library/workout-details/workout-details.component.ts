@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -54,6 +54,7 @@ export class WorkoutDetailsComponent {
     private readonly route = inject(ActivatedRoute);
     private readonly slide = inject(PageSlide);
     private readonly makeCopy = inject(MakeCopy);
+    private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     private readonly id = toSignal(
         this.route.paramMap.pipe(map((params) => params.get('id') ?? '')),
@@ -61,6 +62,28 @@ export class WorkoutDetailsComponent {
     );
 
     protected readonly back = `/library?details=${this.route.snapshot.paramMap.get('id') ?? ''}`;
+    /** What screen readers hear arriving from Save in Create: "Saved Legs day". */
+    protected readonly announcement = signal('');
+
+    constructor() {
+        // Just saved in Create (BLD-15), and say so. Focus goes to Edit, where it was left, if
+        // the page came back scrolled there; otherwise, new to it, to its title at the top
+        if (this.route.snapshot.queryParamMap.has('saved')) {
+            // A frame on, as the page slide scrolls it back to where it was just after rendering
+            afterNextRender(() =>
+                requestAnimationFrame(() => {
+                    const page = this.host.nativeElement;
+                    const edit = page.querySelector<HTMLElement>('.details__edit');
+                    const inView =
+                        edit && edit.getBoundingClientRect().bottom <= window.innerHeight;
+                    (inView ? edit : page.querySelector<HTMLElement>('.details__title'))?.focus({
+                        preventScroll: true,
+                    });
+                    this.announcement.set(`Saved ${this.name()}`);
+                })
+            );
+        }
+    }
 
     /** It, yours or ready-made, or null for a link to one there isn't, such as one deleted since. */
     protected readonly workout = computed(() => this.workouts.findAnyWorkout(this.id()));

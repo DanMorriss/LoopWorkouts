@@ -182,6 +182,23 @@ export function aToZ<T extends Workout>(workouts: readonly T[]): T[] {
     );
 }
 
+/**
+ * A workout's fields as a new one of your own: its own copy, to change as you like, e.g. Make a
+ * copy (of yours or a ready-made one), leaving out what isn't set in Create (its id, dates and
+ * whether it's a favourite).
+ */
+export function copyOf(
+    workout: Pick<Workout, 'title' | 'blocks' | 'repeats' | 'timeLimitSeconds'>
+): WorkoutFields {
+    const { title, blocks, repeats, timeLimitSeconds } = workout;
+    return {
+        title,
+        blocks: structuredClone(blocks),
+        repeats,
+        ...(timeLimitSeconds === undefined ? {} : { timeLimitSeconds }),
+    };
+}
+
 /** The `repeats` value for a workout that keeps going until it's stopped. */
 export const UNTIL_STOPPED = 0;
 

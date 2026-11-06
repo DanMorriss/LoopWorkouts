@@ -1,7 +1,7 @@
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
-import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment, copyOfBuiltIn } from './built-in-workouts';
+import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment } from './built-in-workouts';
 import { canDoWith } from './exercise';
-import { allSteps, groupKind, MAX_HEADINGS, MAX_STEPS } from './workout';
+import { allSteps, copyOf, groupKind, MAX_HEADINGS, MAX_STEPS } from './workout';
 import { readWorkout } from '../shared/state/workout-store.service';
 
 const byTitle = (title: string) => BUILT_IN_WORKOUTS.find((w) => w.title === title)!;
@@ -19,7 +19,7 @@ describe('BUILT_IN_WORKOUTS', () => {
         '%s is a workout the app can save, of built-in exercises',
         (_title, workout) => {
             // Read back as a saved workout is, nothing in it dropped or changed
-            const saved = { ...copyOfBuiltIn(workout), id: 'copy', updatedAt: 1 };
+            const saved = { ...copyOf(workout), id: 'copy', updatedAt: 1 };
             expect(readWorkout(JSON.parse(JSON.stringify(saved)))).toEqual(saved);
 
             const steps = allSteps(workout);
@@ -116,16 +116,16 @@ describe('builtInWorkoutEquipment', () => {
     });
 });
 
-describe('copyOfBuiltIn', () => {
+describe('copyOf, a ready-made workout', () => {
     it('copies its steps, so changing the copy leaves the built-in one alone', () => {
         const workout = byTitle('Gym legs');
-        const copy = copyOfBuiltIn(workout);
+        const copy = copyOf(workout);
         expect(copy).toEqual({ title: 'Gym legs', blocks: workout.blocks, repeats: 1 });
         expect(copy.blocks).not.toBe(workout.blocks);
         expect(copy).not.toHaveProperty('id');
     });
 
     it('keeps a time limit', () => {
-        expect(copyOfBuiltIn(byTitle('20-minute AMRAP')).timeLimitSeconds).toBe(1200);
+        expect(copyOf(byTitle('20-minute AMRAP')).timeLimitSeconds).toBe(1200);
     });
 });

@@ -275,6 +275,14 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 ],
             },
             {
+                id: 'copy-workout',
+                question: 'How do I try a change but keep my workout as it is?',
+                answer: [
+                    'Make a copy, in a workout\'s options (⋮) or at the bottom of its details: "Legs day (copy)" is added beside it, and opens in Create to change. The one it\'s a copy of stays as it was.',
+                    "It works on ready-made workouts too, which can't be changed themselves.",
+                ],
+            },
+            {
                 id: 'workout-steps',
                 question: "How do I see what's in a workout without editing it?",
                 answer: [

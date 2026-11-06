@@ -9,7 +9,8 @@ import { makeWorkout as baseWorkout, SimpleWorkout } from '../shared/testing/mak
 import { PageSlide } from '../nav/page-slide';
 import { WorkoutLibraryComponent } from './workout-library.component';
 import { ActiveRunService } from '../shared/run/active-run.service';
-import { BUILT_IN_WORKOUTS, copyOfBuiltIn } from '../models/built-in-workouts';
+import { BUILT_IN_WORKOUTS } from '../models/built-in-workouts';
+import { copyOf } from '../models/workout';
 import { SettingsStore } from '../shared/state/settings-store.service';
 
 // A new workout to add: the shared test workout without its id
@@ -379,6 +380,22 @@ describe('WorkoutLibraryComponent', () => {
             });
         });
 
+        it('makes a copy of one from its options, keeping both, and opens it in Create', () => {
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+            click(card(0).querySelector('.workout-card__action--menu'));
+            click(card(0).querySelector('.workout-card__menu-item--copy'));
+
+            expect(store.workouts().map((w) => w.title)).toEqual([
+                'Sprints',
+                '   ',
+                'Sprints (copy)',
+            ]);
+            expect(slide).toHaveBeenCalledWith(`/setup?editId=${store.workouts()[2].id}`, 'in');
+            expect(TestBed.inject(UndoService).offer()?.message).toBe('Made a copy of "Sprints"');
+        });
+
         describe('deleting', () => {
             const undo = () => TestBed.inject(UndoService);
 
@@ -497,7 +514,7 @@ describe('WorkoutLibraryComponent', () => {
         });
 
         it('lists a copy added before beside the ready-made one, without the badge', () => {
-            store.addWorkout(copyOfBuiltIn(BUILT_IN_WORKOUTS.find((w) => w.title === 'Gym legs')!));
+            store.addWorkout(copyOf(BUILT_IN_WORKOUTS.find((w) => w.title === 'Gym legs')!));
             create();
 
             expect(titles().filter((title) => title === 'Gym legs')).toHaveLength(2);

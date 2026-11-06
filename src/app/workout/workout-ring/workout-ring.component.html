@@ -31,11 +31,18 @@
             <div class="workout-ring__half workout-ring__half--left">
                 <div class="workout-ring__fill"></div>
             </div>
-            <!-- Timed work's leading edge, going round with the fill -->
+            <!-- Where the fill starts, rounded, as a drawn line's end is -->
+            <div class="workout-ring__start"></div>
+            <!-- The leading edge, going round with the fill: a rounded end -->
             <div class="workout-ring__tip"></div>
         </div>
     }
     <!-- A rep step's full ring, held a moment after Done as it swells and fades: finish() -->
     <div #flash class="workout-ring__flash" aria-hidden="true"></div>
+    <!-- Light and shade over the band, so it reads as a rounded tube; it never moves -->
+    <div class="workout-ring__shine" aria-hidden="true"></div>
     <ng-content />
+    <!-- Over the face it holds, inside the band: the light and shade that make it a glossy
+         ball. It never moves, and lets presses through to the face -->
+    <div class="workout-ring__gloss" aria-hidden="true"></div>
 </div>

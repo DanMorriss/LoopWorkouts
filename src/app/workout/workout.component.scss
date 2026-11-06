@@ -44,9 +44,10 @@
     justify-content: center;
 }
 
+// The whole of the circle, with no white rim round it
 .workout-face {
-    width: calc(100% - 10px);
-    height: calc(100% - 10px);
+    width: 100%;
+    height: 100%;
     // The old step's text and the new one's share the middle while one slides past the other
     display: grid;
     place-items: center;

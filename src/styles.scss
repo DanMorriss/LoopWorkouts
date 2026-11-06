@@ -236,6 +236,14 @@
     }
 }
 
+// The workout's bubble, its face and the ring round it, the same in both themes as the ring's
+// colours are: the light that catches its top left and the shade under its bottom right,
+// used see-through (color-mix) so it reads as round
+:root {
+    --bubble-light: #ffffff;
+    --bubble-shade: #020617;
+}
+
 // Motion and the bars along the bottom, the same in both themes
 :root {
     // Apple's critically damped spring (no bounce) with a 0.3s response, as a CSS easing: it

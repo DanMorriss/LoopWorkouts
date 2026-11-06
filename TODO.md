@@ -12,6 +12,41 @@ Promoting the app to new users. The words to use, what's true to say, and the pl
 - [ ] **Soft launch, then communities, then Show HN or Product Hunt**, with the posts in docs/marketing.md. Short screen-recorded videos for Reels, TikTok and Shorts along the way.
 - [ ] **App stores, later:** Google Play through a Trusted Web Activity, and the App Store with the Apple Developer account (which Sign in with Apple needs too).
 
+### Tidying up (Dan, 2026-11-06)
+
+What Dan found using the app, by page. The tour (see Help) waits on this.
+
+**Everywhere**
+
+- [ ] **A page keeps the last page's scroll:** scrolled to the bottom of Today, changing to Workouts opens it scrolled down; scrolled to the top of Workouts, going back to Today opens that at the top. All the tabs share the window's scroll, and the router isn't told to do anything with it (no `withInMemoryScrolling`). Changing tab should open the page at the top, while going back by the ‹ link at the top of a page should return to where you were on the page before. `PageSlide` already puts the scroll back when a page slides back (`nav/page-slide.ts`), so keep that and check that every ‹ link does it.
+- [ ] **Onboarding's buttons should stay put:** keep them in the same place at the bottom of the screen on every step, so people can bash through it quickly. They follow each step's content for now (`welcome/setup/`; one step has its own Next inside a form). Check the welcome screen too, and that the keyboard doesn't cover them.
+
+**Workouts page**
+
+- [ ] **Saving an edit should get back smoothly:** from Workouts, into a workout, then editing and saving, jumps to Workouts with the edited workout in the middle (`/library?saved=<id>`). Make that a smooth transition; going back to the workout's details instead may be the better answer.
+- [ ] **Search and filters:** make the page searchable and filterable, with filters including "My own workouts" and favourites. There are no favourites yet, so they're new: a flag on a workout that syncs (`docs/features/data.md`). Reuse `search-field`, and see how `equipment-filter` works. Work out how dragging behaves while a filter is on.
+- [ ] **List the ready-made workouts on the page:** with them all listed, everything below the workouts can go: the Ready-made workouts link and Missing muscle groups (which moves to the Plan page, below). Still to work out: what a card does for a ready-made workout that hasn't been added (LIB-6), and whether its details keep their own page. Depends on the search and filters, as the list gets long without them.
+
+**Workout page**
+
+- [ ] **A › on an exercise's link:** in a workout, tapping an exercise opens its details, but nothing on a phone shows it can be tapped. Put a › at the right of the row, in `workout-outline` so that every page using it gets it.
+
+**During a workout**
+
+- [ ] **Make the bubble look 3D:** slightly convex, like a real bubble, and the timer bar that goes round it 3D too, with curved ends rather than flat ones. The ring is two rotating half-circles (`workout/workout-ring/`), which is why its ends are flat, so curved ends mean adding end caps or redrawing it. It's on screen for the whole workout, so check it stays smooth on a phone, in both themes and with reduced motion.
+
+**Today and Plan**
+
+- [ ] **Suggest a workout on a day with none planned:** Today only suggests one with history and no week planned (`home.component.html`), so a rest day in a planned week shows nothing. Use the existing suggestion (`suggestNextWorkout` in `models/muscle-balance.ts`), but also look at the next workout planned this week and avoid overlapping its muscles too much. It needs to say why it's picking that, and not to feel like a rest day is being told off.
+- [ ] **The body map on the Plan page:** at the bottom of `plan/`, shaded for what the plan works across the week (`app-body-map`).
+- [ ] **Move Missing muscle groups to the Plan page** (LIB-5, LIB-7), from Workouts. It could say what the plan leaves out, rather than what the whole library does. Update `docs/features/library.md` and `planning.md`.
+- [ ] **Decide: Muscles this week on Today?** Today is where most people land, so it needs to be exciting. The body map is only on Progress for now (`app-muscles-this-week`), and would need thought for someone who's done nothing yet this week, when it's blank.
+
+**Progress page**
+
+- [ ] **Rework the workout cards:** the other pages have had a revamp and this one's falling behind (`history/history-entry/`).
+- [ ] **Add charts:** which ones is still to be decided, e.g. workouts or time per week. Only each exercise's page has a chart so far (`exercise-progress`).
+
 ### Sync
 
 Accounts and sync are built and working (SYN-3, SYN-4, SYN-7 with Google, SYN-8, SYN-9); how they work is in `docs/features/backup-and-sync.md`. Worth knowing when planning: Supabase's free tier has 50,000 monthly users, a 500 MB database and 5 GB of egress, and pauses after a week unused (Pro is $25 a month, checked 2026-10-28). loopworkouts.com's DNS is at GoDaddy, with Microsoft 365 for Dan's email on the bare domain and Resend's records on the `mail` subdomain.

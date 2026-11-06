@@ -94,8 +94,15 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
             );
         });
 
-        it('lists the ones only worked as a supporting muscle apart', () => {
-            expect(muscles(1)).toBe('Shoulders Triceps Lower back Adductors Hamstrings');
+        it("links the map's muscles to exercises for each, and doesn't list the supporting ones again", () => {
+            const links = Array.from(
+                (fixture.nativeElement as HTMLElement).querySelectorAll('.body-map__link'),
+                (a) => [a.textContent!.trim(), a.getAttribute('href')]
+            );
+            expect(links).toContainEqual(['Chest', '/exercises?muscles=chest']);
+            expect(links).toContainEqual(['Triceps', '/exercises?muscles=triceps']);
+            expect(fixture.nativeElement.querySelectorAll('.plan-muscles__list')).toHaveLength(1);
+            expect(fixture.nativeElement.textContent).not.toContain('Only lightly');
         });
 
         describe('a ready-made workout for them', () => {

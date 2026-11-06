@@ -3,7 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { RouterLink } from '@angular/router';
 import { builtInWorkoutEquipment } from '../../models/built-in-workouts';
-import { canDoWith, MUSCLE_LABELS, MuscleGroup } from '../../models/exercise';
+import { canDoWith, MUSCLE_LABELS } from '../../models/exercise';
 import { listMuscles, workoutToFillGaps } from '../../models/fill-gaps';
 import { Workout } from '../../models/workout';
 import { musclesMissed, musclesWorked } from '../../models/workout-muscles';
@@ -20,9 +20,9 @@ import { injectFocusAfterRender } from '../../shared/focus-after-render';
 
 /**
  * At the foot of the Plan page: what the week's planned workouts work, on the body map; then
- * (LIB-5) the muscle groups they don't work at all, and those they only work as a supporting
- * muscle, each linking to the Exercises list cut down to it; then a ready-made workout that
- * does most for them (LIB-7), to plan on a day as it is. Nothing while no planned step is an
+ * (LIB-5) the muscle groups they don't work at all. Every muscle listed links to the Exercises
+ * list cut down to it, those on the map's key included; then a ready-made workout that does
+ * most for the gaps (LIB-7), to plan on a day as it is. Nothing while no planned step is an
  * exercise.
  */
 @Component({
@@ -53,14 +53,11 @@ export class PlanMusclesComponent {
 
     protected readonly planMuscles = computed(() => {
         const worked = this.worked();
-        const named = (muscles: MuscleGroup[]) =>
-            muscles.map((id) => ({ id, label: MUSCLE_LABELS[id] }));
         return {
             hasExercises: worked.hasExercises,
             main: worked.main,
             supporting: worked.supporting,
-            missed: named(musclesMissed(worked)),
-            light: named(worked.supporting),
+            missed: musclesMissed(worked).map((id) => ({ id, label: MUSCLE_LABELS[id] })),
         };
     });
 

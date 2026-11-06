@@ -1,4 +1,5 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MUSCLE_LABELS, MuscleGroup } from '../../../models/exercise';
 import { SettingsStore } from '../../state/settings-store.service';
 import { BODY_FIGURES } from './body-shapes';
@@ -19,10 +20,12 @@ let nextId = 0;
  * well, each muscle is a toggle button for keyboards and screen readers too, pressed when
  * it's main: for a filter, where tapping turns a muscle on or off (the Exercises list).
  * `removableLabels` gives each listed muscle a remove button. `figureOnly` leaves the list
- * out, for showing the figure itself (the setup's choice of body).
+ * out, for showing the figure itself (the setup's choice of body). `linkLabels` makes each
+ * listed muscle a link to exercises for it (the Plan page).
  */
 @Component({
     selector: 'app-body-map',
+    imports: [RouterLink],
     templateUrl: './body-map.component.html',
     styleUrl: './body-map.component.scss',
 })
@@ -35,6 +38,8 @@ export class BodyMapComponent {
     readonly toggles = input(false);
     readonly removableLabels = input(false);
     readonly figureOnly = input(false);
+    /** Each listed muscle a link to the Exercises list cut down to it (the Plan page). */
+    readonly linkLabels = input(false);
     readonly muscleTapped = output<MuscleGroup>();
     readonly muscleCleared = output<MuscleGroup>();
 

@@ -126,6 +126,25 @@
     }
 }
 
+// A listed muscle as a link to exercises for it: the whole chip, 44px to a finger
+.body-map__link {
+    color: inherit;
+    text-decoration: none;
+
+    // The chip is about 33px, so reach its edges and a little past, as other chips do
+    @include hit-area(12px, 0.85rem);
+
+    @include hover {
+        text-decoration: underline;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 0.45rem;
+        border-radius: 999px;
+    }
+}
+
 .body-map__remove {
     display: inline-flex;
     align-items: center;

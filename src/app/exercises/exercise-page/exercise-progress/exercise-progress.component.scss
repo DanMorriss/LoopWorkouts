@@ -1,6 +1,7 @@
 @use 'chip' as *;
 @use 'type' as *;
 @use 'interaction' as *;
+@use 'chart' as *;
 
 :host {
     display: block;
@@ -64,33 +65,19 @@
 }
 
 .progress__chart {
-    position: relative;
-    border-radius: 0.5rem;
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 4px;
-    }
+    @include chart-frame;
 }
 
 .progress__svg {
-    display: block;
-    width: 100%;
-    height: auto;
-    overflow: visible;
-    touch-action: pan-y;
+    @include chart-svg;
 }
 
-// Recessive: hairline grid, muted labels
 .progress__grid {
-    stroke: var(--border-soft);
-    stroke-width: 1;
+    @include chart-grid;
 }
 
 .progress__axis {
-    fill: var(--text-muted);
-    @include small-type(0.625rem);
-    font-variant-numeric: tabular-nums;
+    @include chart-axis;
 }
 
 .progress__crosshair {
@@ -159,47 +146,9 @@
 }
 
 .progress__toggle {
-    align-self: flex-start;
-    min-height: 44px;
-    padding: 0;
-    border: none;
-    background: none;
-    color: var(--glow-text);
-    font: inherit;
-    font-size: 0.8rem;
-    cursor: pointer;
-
-    @include hover {
-        text-decoration: underline;
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-    }
+    @include chart-toggle;
 }
 
 .progress__table {
-    width: 100%;
-    border-collapse: collapse;
-    color: var(--text);
-    font-size: 0.8rem;
-
-    th,
-    td {
-        padding: 0.35rem 0.5rem 0.35rem 0;
-        border-bottom: 1px solid var(--border-soft);
-        text-align: left;
-    }
-
-    th {
-        color: var(--text-muted);
-        font-weight: 500;
-    }
-
-    td:last-child,
-    th:last-child {
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-    }
+    @include chart-table;
 }

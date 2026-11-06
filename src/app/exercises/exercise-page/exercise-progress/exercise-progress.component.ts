@@ -11,6 +11,7 @@ import {
 } from '../../../models/progress';
 import { HistoryStore } from '../../../shared/state/history-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
+import { chartKeyMove } from '../../../shared/chart-keys';
 import {
     axisValue,
     bestLines,
@@ -32,8 +33,6 @@ const RANGES: { value: ChartRange; label: string; spoken: string; days: number }
     { value: '1y', label: 'Year', spoken: 'the last year', days: 365 },
     { value: 'all', label: 'All', spoken: 'all time', days: Infinity },
 ];
-
-/** Recent sessions shown before "Show all". */
 
 // The chart's drawing area, in SVG units: room on the left for the values, below for dates
 const WIDTH = 340;
@@ -204,7 +203,6 @@ export class ExerciseProgressComponent {
         this.range.set(range);
     }
 
-    /** Hovering snaps to the workout nearest the pointer, across the chart's whole height. */
     /** The point nearest the pointer, from the moment it's pressed (a tap, too) as it moves. */
     protected onPointerMove(event: PointerEvent) {
         const svg = event.currentTarget as SVGSVGElement;
@@ -217,17 +215,10 @@ export class ExerciseProgressComponent {
     }
 
     protected onKeydown(event: KeyboardEvent) {
-        const count = this.points().length;
-        const active = this.active();
-        const moves: Record<string, number> = {
-            ArrowLeft: Math.max(0, (active ?? count) - 1),
-            ArrowRight: Math.min(count - 1, (active ?? -1) + 1),
-            Home: 0,
-            End: count - 1,
-        };
-        if (count > 0 && event.key in moves) {
+        const moved = chartKeyMove(event.key, this.active(), this.points().length);
+        if (moved !== null) {
             event.preventDefault();
-            this.active.set(moves[event.key]);
+            this.active.set(moved);
         }
     }
 

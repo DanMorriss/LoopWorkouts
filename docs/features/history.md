@@ -30,7 +30,7 @@
 
 ### The page
 
-- It's the **Progress** tab (at `/history`; the History tab until 2026-11-03), titled "Progress": at the top, "Last 7 days" (below), then the **muscles worked this week** (PRG-6, PRG-8; see [progress](progress.md)), then the **log**, under the heading "Log": every workout done, as below. The suggested next workout was here too, under the muscles, until 2026-11-03; it's on Today now. Each day's label is a heading under Log.
+- It's the **Progress** tab (at `/history`; the History tab until 2026-11-03), titled "Progress": at the top, "Last 7 days" (below), then the **time per week** (PRG-12), then the **muscles worked this week** (PRG-6, PRG-8; both in [progress](progress.md)), then the **log**, under the heading "Log": every workout done, as below. The suggested next workout was here too, under the muscles, until 2026-11-03; it's on Today now. Each day's label is a heading under Log.
 - Newest first, grouped by the day they started: "**Today**", "**Yesterday**", then the date, e.g. "Saturday 17 October".
 - At the top: "**Last 7 days:** 4 workouts · 1:15:30": the count and total time spent of workouts started in the last 7 × 24 hours.
 - Each entry is a **card** in the same family as the cards on Workouts and Plan (since 2026-11-06): its title (or "Untitled workout", greyed) in the display face, under it a line of start time · rounds, e.g. "9:05 AM · 3 rounds", and at its right the **time spent** as the card's big number, over "time", then its ⋮. Screen readers hear the time at the end of the line: "9:05 AM · 3 rounds · 12:30 spent".

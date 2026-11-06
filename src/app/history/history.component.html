@@ -16,6 +16,8 @@
                 {{ lastWeek().workouts === 1 ? 'workout' : 'workouts' }} · {{ lastWeek().time }}
             </p>
 
+            <app-time-per-week class="history__weeks" />
+
             <app-muscles-this-week class="history__muscles" />
 
             <!-- Every workout done, newest first, under the muscles they worked -->

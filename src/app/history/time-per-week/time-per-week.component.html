@@ -1,0 +1,116 @@
+<section class="weeks" [attr.aria-labelledby]="id + '-title'">
+    <h3 class="weeks__title" [id]="id + '-title'">Time per week</h3>
+
+    @if (!anyTime()) {
+        <p class="weeks__empty">No workouts in the last {{ weekCount }} weeks.</p>
+    } @else {
+        <!-- The chosen week, this one to start with, over the bars -->
+        @let week = shown();
+        <p class="weeks__readout" aria-hidden="true">
+            <span class="weeks__time">{{ week.time }}</span>
+            <span class="weeks__when">{{ week.label }} · {{ week.count }}</span>
+        </p>
+
+        <!-- Arrow keys step through the weeks; the readout says each one -->
+        <div
+            class="weeks__chart"
+            tabindex="0"
+            role="group"
+            [attr.aria-labelledby]="id + '-title'"
+            [attr.aria-describedby]="id + '-help ' + id + '-spoken'"
+            (keydown)="onKeydown($event)"
+            (blur)="active.set(null)"
+        >
+            <span class="sr-only" [id]="id + '-help'"
+                >The last {{ weekCount }} weeks, Monday to Sunday. Use the left and right arrow keys
+                to hear each one.</span
+            >
+            <svg
+                class="weeks__svg"
+                [attr.viewBox]="'0 0 ' + width + ' ' + height"
+                aria-hidden="true"
+                (pointerdown)="onPointer($event)"
+                (pointermove)="onPointer($event)"
+                (pointerleave)="active.set(null)"
+            >
+                @for (tick of ticks(); track tick.label) {
+                    <line
+                        class="weeks__grid"
+                        [attr.x1]="left"
+                        [attr.x2]="right"
+                        [attr.y1]="tick.y"
+                        [attr.y2]="tick.y"
+                    />
+                    <text
+                        class="weeks__axis"
+                        [attr.x]="left - 6"
+                        [attr.y]="tick.y"
+                        dy="0.32em"
+                        text-anchor="end"
+                    >
+                        {{ tick.label }}
+                    </text>
+                }
+                @for (bar of bars(); track bar.start) {
+                    @if (bar.seconds > 0) {
+                        <rect
+                            class="weeks__bar"
+                            [class.weeks__bar--shown]="bar === week"
+                            [attr.x]="bar.x"
+                            [attr.y]="bar.y"
+                            [attr.width]="barWidth"
+                            [attr.height]="bar.height"
+                            rx="3"
+                        />
+                    }
+                }
+                <text class="weeks__axis" [attr.x]="left" [attr.y]="height - 4">
+                    {{ bars()[0].start | date: 'd MMM' }}
+                </text>
+                <text class="weeks__axis" [attr.x]="right" [attr.y]="height - 4" text-anchor="end">
+                    This week
+                </text>
+            </svg>
+            <span class="sr-only" [id]="id + '-spoken'" aria-live="polite"
+                >{{ week.spokenLabel }}: {{ week.spoken }}</span
+            >
+        </div>
+
+        <button
+            type="button"
+            class="weeks__toggle"
+            [attr.aria-controls]="id + '-table'"
+            [attr.aria-expanded]="tableOpen()"
+            (click)="tableOpen.set(!tableOpen())"
+        >
+            {{ tableOpen() ? 'Hide the table' : 'Show as a table' }}
+        </button>
+        @if (tableOpen()) {
+            <table class="weeks__table" [id]="id + '-table'">
+                <caption class="sr-only">
+                    Time per week, the last
+                    {{
+                        weekCount
+                    }}
+                    weeks
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Week of</th>
+                        <th scope="col">Workouts</th>
+                        <th scope="col">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (bar of bars(); track bar.start) {
+                        <tr>
+                            <td>{{ bar.start | date: 'd MMM' }}</td>
+                            <td>{{ bar.workouts }}</td>
+                            <td>{{ bar.time }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+</section>

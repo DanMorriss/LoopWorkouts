@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BUILT_IN_EXERCISES } from '../../../models/built-in-exercises';
 import { Exercise } from '../../../models/exercise';
 import { ExerciseStore } from '../../state/exercise-store.service';
+import { SettingsStore } from '../../state/settings-store.service';
 import { fakeReducedMotion } from '../../testing/fake-reduced-motion';
 import { DEMO_IN_3D, ExerciseDemoComponent } from './exercise-demo.component';
 
@@ -153,6 +154,23 @@ describe('ExerciseDemoComponent', () => {
                 await frames(40);
                 expect(pixels()).not.toBe(before);
                 expect(toggle()?.textContent?.trim()).toBe('Pause');
+            }
+        );
+
+        it.runIf(hasWebGL)(
+            'repaints the figure in the new colours when the theme changes',
+            async () => {
+                fakeReducedMotion(true);
+                await create(builtIn('builtin:push-up'), true);
+                await drawn();
+                const dark = pixels();
+
+                TestBed.inject(SettingsStore).update({ theme: 'light' });
+                fixture.detectChanges();
+                await frames(2);
+                fixture.detectChanges();
+
+                expect(pixels()).not.toBe(dark);
             }
         );
 

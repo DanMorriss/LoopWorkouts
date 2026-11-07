@@ -93,6 +93,54 @@ function sharedRenderer(): WebGLRenderer | null {
 /** Whether the 3D figure can be drawn here. */
 export const canDraw3d = () => sharedRenderer() !== null;
 
+/** Lets the page have the main thread for a moment, between steps of getting a figure ready. */
+function nextTask(): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve));
+}
+
+/** How a figure is shaded: the theme's colours, and the exercise's muscles. */
+export interface FigureLook {
+    readonly colors: FigureColors;
+    readonly main: readonly MuscleGroup[];
+    readonly supporting: readonly MuscleGroup[];
+}
+
+/**
+ * Makes the figure of `motion`, shaded as `look`, and gets it ready to draw: built, painted,
+ * its painting sent to the GPU and its shaders compiled (in the background, where the browser
+ * can), each step a task of its own, so the page stays free to scroll and be pressed while it
+ * happens. Done all at once, the first frame of an exercise's page held it up for seconds on a
+ * slow phone. Null if `cancelled()` by then, or the figure can't be drawn.
+ */
+export async function prepareScene(
+    motion: ExerciseMotion,
+    figure: BodyFigure,
+    look: () => FigureLook,
+    cancelled: () => boolean
+): Promise<FigureScene | null> {
+    await nextTask();
+    const gl = sharedRenderer();
+    if (!gl || cancelled()) {
+        return null;
+    }
+    const scene = new FigureScene(motion, figure);
+    const steps = [
+        () => scene.setLook(look()),
+        () => scene.paintIfStale(),
+        () => gl.initTexture(scene.texture),
+        () => gl.compileAsync(scene.scene, scene.camera),
+    ];
+    for (const step of steps) {
+        await nextTask();
+        if (cancelled()) {
+            scene.dispose();
+            return null;
+        }
+        await step();
+    }
+    return scene;
+}
+
 const v = (point: Vec3) => new Vector3(point[0], point[1], point[2]);
 
 /** Orthogonal to `along`, the part of `way` that is, made unit length; `fallback` if none. */
@@ -181,8 +229,9 @@ export class FigureScene {
     /** The width of the drawing over its height, at its best. */
     readonly aspect: number;
 
-    private readonly scene = new Scene();
-    private readonly camera: PerspectiveCamera;
+    /** The scene, camera and painting, for prepareScene() to get ready. */
+    readonly scene = new Scene();
+    readonly camera: PerspectiveCamera;
     private readonly target: Vector3;
     /** How far the figure and its kit reach round the upright line through `target`. */
     private readonly radius: number;
@@ -191,7 +240,7 @@ export class FigureScene {
     private readonly body: Body;
     private readonly model: BodyModel;
     private readonly painting = document.createElement('canvas');
-    private readonly texture = new CanvasTexture(this.painting);
+    readonly texture = new CanvasTexture(this.painting);
     private readonly bodyMaterial = new MeshBasicMaterial({ map: this.texture });
     private readonly kitMaterial = new MeshBasicMaterial();
     private readonly metalMaterial = new MeshBasicMaterial();
@@ -222,6 +271,8 @@ export class FigureScene {
     private main: readonly MuscleGroup[] = [];
     private supporting: readonly MuscleGroup[] = [];
     private colors: FigureColors | null = null;
+    /** The look's changed since the figure was painted, so it's painted before it's next drawn. */
+    private stale = false;
 
     constructor(
         private readonly motion: ExerciseMotion,
@@ -282,21 +333,35 @@ export class FigureScene {
         this.light(radius);
     }
 
-    /** Which muscles the exercise works, main and supporting, to shade. */
-    setMuscles(main: readonly MuscleGroup[], supporting: readonly MuscleGroup[]) {
+    /**
+     * The theme's colours, and which muscles the exercise works, main and supporting, to shade.
+     * Painted before the figure's next drawn, and only if they've changed: painting is slow.
+     */
+    setLook({ colors, main, supporting }: FigureLook) {
+        const same =
+            this.colors !== null &&
+            JSON.stringify([this.colors, this.main, this.supporting]) ===
+                JSON.stringify([colors, main, supporting]);
+        if (same) {
+            return;
+        }
+        this.colors = colors;
         this.main = main;
         this.supporting = supporting;
-        this.paint();
-    }
-
-    setColors(colors: FigureColors) {
-        this.colors = colors;
         const outline = over(colors.outline, colors.page);
         (this.outline.uniforms['color'].value as Color).copy(outline);
         this.kitMaterial.color = over(colors.other, colors.page);
         this.metalMaterial.color = over(colors.metal, colors.page);
         this.floorMaterial.color = outline;
-        this.paint();
+        this.stale = true;
+    }
+
+    /** Paints the figure if its look has changed since it last was. */
+    paintIfStale() {
+        if (this.stale) {
+            this.stale = false;
+            this.paint();
+        }
     }
 
     /**
@@ -309,6 +374,7 @@ export class FigureScene {
         if (!gl || !context || canvas.width === 0 || canvas.height === 0) {
             return false;
         }
+        this.paintIfStale();
         this.place(skeletonOf(pose, this.motion));
         const distance = this.aim(yaw, canvas.width / canvas.height);
         // The outline as thick as the body map's lines, however big the canvas is

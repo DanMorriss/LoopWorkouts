@@ -12,6 +12,21 @@ Promoting the app to new users. The words to use, what's true to say, and the pl
 - [ ] **Soft launch, then communities, then Show HN or Product Hunt**, with the posts in docs/marketing.md. Short screen-recorded videos for Reels, TikTok and Shorts along the way.
 - [ ] **App stores, later:** Google Play through a Trusted Web Activity, and the App Store with the Apple Developer account (which Sign in with Apple needs too).
 
+### Speed (Lighthouse, 2026-11-07)
+
+Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on its test phone (slow 4G, CPU slowed 4×). Mobile performance: Welcome 89 (desktop 98), Today 81, Workouts 88, Exercises 97, Progress 88, an exercise's page (push-up) 59. Accessibility and best practices 100, SEO 92. To measure again, Lighthouse a production build or the live site, as a guest already welcomed (`welcomed` set to `guest`), and compare total blocking time, as it's what most of these change; the lab can't stand in for real phones, so for those, see Vercel Speed Insights below.
+
+- [x] **The 3D demo held up an exercise's page** (2026-11-07): building the figure, painting it, sending it to the GPU and its first frame were one task of about 2.1s on the test phone. They're steps of their own now, after the page has shown (`prepareScene()` in `figure-scene.ts`), and it's painted once rather than twice. Measured in the browser with the CPU slowed 4×, the worst freeze went from about 640ms to 400ms and the blocking from about 1s to 0.8s; Lighthouse's score hardly moves, as each step is still over 50ms. To get it under that:
+    - **Draw it in a worker,** with an `OffscreenCanvas`, which three.js can: nothing of the 3D figure on the main thread at all. The most work, and the biggest gain.
+    - **Keep the built body between exercises,** as it's the same for every exercise (only the torso's reshaped per pose, so it needs a copy of its own): the second exercise opened would skip the build (about 270ms of the 4× slowed CPU).
+    - **A smaller painting,** 1024 rather than 2048 square, would paint and upload in about a quarter of the time. It changes how sharp the muscles are, so for Dan to look at first.
+- [x] **A `robots.txt`** (2026-11-07): there wasn't one, so the app's page came back in its place, failing Lighthouse's SEO check (92). `public/robots.txt` allows everything.
+- [ ] **Only the icons the app uses:** the Material Icons font is the biggest file on every page (126 KiB), for about 50 icons. Google Fonts sends just the ones asked for from Material Symbols (`icon_names=`): 30 came to 4 KB. They look a little different from Material Icons, and the icons picked in code (e.g. `{{ … }}` in a `mat-icon`) must be listed too.
+- [ ] **The body map only where it shows:** its drawings (`body-shapes.ts`, 58 KiB) load with Today, Progress and Exercises, even for a new guest with nothing to show on it. `@defer` it until it's shown and on screen.
+- [ ] **Supabase only when signing in:** the welcome page loads the whole Supabase client (59 KiB) as it opens, as `AccountService` starts it at once; most of Lighthouse's "unused JavaScript" there. Start it on a sign-in button, or when the browser's idle, unless the address has a sign-in link in it.
+- [ ] **Today's chain of files:** its slowest path is five requests, each found only once the one before has loaded (the page, `main`, Today's chunk, then two it imports), a round trip each on a slow phone, so its largest paint is 3.4s on the test phone against 1s on desktop. A `modulepreload` of Today's chunk in `index.html` would cut one.
+- [ ] **Real phones' numbers:** Vercel Speed Insights (not just the Web Analytics already on) would give real visitors' Core Web Vitals, which Lighthouse only estimates.
+
 ### Tidying up (Dan, 2026-11-06)
 
 What Dan found using the app, by page. The tour (see Help) waits on this.

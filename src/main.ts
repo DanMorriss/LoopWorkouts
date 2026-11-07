@@ -37,5 +37,6 @@ bootstrapApplication(AppComponent, {
     ],
 }).catch((err) => console.error(err));
 
-// Count page views (anonymously, with no cookies), once the app is on its way
-startAnalytics();
+// Count page views and measure how fast pages are (anonymously, with no cookies), once the
+// app is on its way
+startAnalytics(routes.flatMap((route) => route.path ?? []));

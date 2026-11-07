@@ -44,7 +44,7 @@ import {
     sub3,
     Vec3,
 } from '../../../models/exercise-skeleton';
-import { Body, buildBody, frame, paintDrawings, restHand, restJoint } from './figure-body';
+import { Body, frame, paintDrawings, restHand, restJoint, sharedBody } from './figure-body';
 
 /**
  * The 3D figure of an exercise's demo (EXR-13), drawn with three.js to look as the body map
@@ -278,7 +278,7 @@ export class FigureScene {
         readonly shins: readonly Mesh[];
         readonly feet: readonly Mesh[];
     };
-    /** The torso as made, to turn it a little more up the back for a twist. */
+    /** The torso as made (the shared body's, never changed), to shape this figure's copy from. */
     private readonly torsoRest: { position: Float32Array; normal: Float32Array };
     /** What the torso was last shaped for, so it's only shaped again when that changes. */
     private torsoShapedFor = '';
@@ -297,16 +297,19 @@ export class FigureScene {
     ) {
         this.texture.colorSpace = SRGBColorSpace;
         this.texture.anisotropy = 4;
-        this.body = buildBody(figure);
+        this.body = sharedBody(figure);
         this.model = this.body.model;
-        const part = (geometry: BufferGeometry) => {
-            const mesh = this.mesh(geometry, this.bodyMaterial);
+        const body = this.body;
+        // The body's parts are shared with every other figure, so not this one's to dispose of,
+        // apart from the torso, which is reshaped for each pose and so copied for this figure
+        const placed = (geometry: BufferGeometry, owned: boolean) => {
+            const mesh = this.mesh(geometry, this.bodyMaterial, this.scene, true, owned);
             mesh.matrixAutoUpdate = false;
             return mesh;
         };
-        const body = this.body;
+        const part = (geometry: BufferGeometry) => placed(geometry, false);
         this.parts = {
-            torso: part(body.torso),
+            torso: placed(body.torso.clone(), true),
             neck: part(body.neck),
             head: part(body.head),
             upperArms: body.upperArms.map(part),
@@ -317,8 +320,8 @@ export class FigureScene {
             feet: body.feet.map(part),
         };
         this.torsoRest = {
-            position: (body.torso.getAttribute('position').array as Float32Array).slice(),
-            normal: (body.torso.getAttribute('normal').array as Float32Array).slice(),
+            position: body.torso.getAttribute('position').array as Float32Array,
+            normal: body.torso.getAttribute('normal').array as Float32Array,
         };
 
         const joints = motionJoints(motion);
@@ -510,16 +513,19 @@ export class FigureScene {
     }
 
     /**
-     * A mesh of `geometry`, kept to be disposed of, in the scene or in `into`, outlined as the
-     * body map's shapes are unless it's a thin rod or cable.
+     * A mesh of `geometry`, in the scene or in `into`, outlined as the body map's shapes are
+     * unless it's a thin rod or cable. The geometry's disposed of with the scene if it's `owned`.
      */
     private mesh(
         geometry: BufferGeometry,
         material: Material,
         into: Object3D = this.scene,
-        outlined = material !== this.metalMaterial
+        outlined = material !== this.metalMaterial,
+        owned = true
     ) {
-        this.owned.push(geometry);
+        if (owned) {
+            this.owned.push(geometry);
+        }
         const mesh = new Mesh(geometry, material);
         mesh.castShadow = true;
         if (outlined) {

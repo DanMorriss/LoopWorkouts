@@ -16,11 +16,21 @@
         </label>
         <p class="sr-only" role="status">{{ resultText() }}</p>
 
-        <!-- The tour of the app (NAV-8), for any time -->
-        <button type="button" class="btn-pill help__tour" (click)="tour.start()">
-            <app-icon>explore</app-icon>
-            Take the tour
-        </button>
+        <!-- The tours, to take again any time: of the app (NAV-8), and of Create (BLD-17).
+             Always here, whatever's searched for, as they aren't answers -->
+        <section class="help__section" aria-labelledby="help-section-tours">
+            <h3 class="help__heading" id="help-section-tours">Tours</h3>
+            <div class="help__tours">
+                <button type="button" class="btn-pill" (click)="tour.start()">
+                    <app-icon>explore</app-icon>
+                    Tour of the app
+                </button>
+                <button type="button" class="btn-pill" (click)="tourOfCreate()">
+                    <app-icon>add_circle_outline</app-icon>
+                    Making a workout
+                </button>
+            </div>
+        </section>
 
         @for (section of sections(); track section.id) {
             <section class="help__section" [attr.aria-labelledby]="'help-section-' + section.id">

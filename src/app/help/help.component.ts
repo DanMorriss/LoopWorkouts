@@ -10,7 +10,7 @@ import {
     untracked,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
@@ -34,6 +34,7 @@ export class HelpComponent {
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly injector = inject(Injector);
     protected readonly tour = inject(TourService);
+    private readonly router = inject(Router);
 
     /** The question opened by a ? link, if any, as the address says. */
     protected readonly opened = toSignal(
@@ -84,6 +85,13 @@ export class HelpComponent {
                 )
             );
         });
+    }
+
+    /** Opens Create on a new workout, then its tour (BLD-17), which goes round it as it is. */
+    protected async tourOfCreate() {
+        if (await this.router.navigateByUrl('/setup')) {
+            this.tour.start('create');
+        }
     }
 
     protected search(event: Event) {

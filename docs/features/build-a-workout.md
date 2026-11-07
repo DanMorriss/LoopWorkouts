@@ -141,7 +141,7 @@
 
 ### The tour of Create (BLD-17)
 
-- **Shown once, the first time Create opens for a new workout** on this device: from + New on Workouts, or Add to workout → New workout on an exercise's page. Not for a workout being changed or a copy, and not while the tour of the app (NAV-8) is on. It's kept on the device only (`tour-create`, see [data](data.md)), so a device set up again shows it again.
+- **Shown once, the first time Create opens for a new workout** on this device: from + New on Workouts, or Add to workout → New workout on an exercise's page. Not for a workout being changed or a copy, and not while the tour of the app (NAV-8) is on. It's kept on the device only (`tour-create`, see [data](data.md)), so a device set up again shows it again. **Making a workout**, in Help's Tours, takes it again any time: it opens Create on a new workout, then the tour.
 - It's the tour of the app's overlay and card (see [home and navigation](home-and-navigation.md#the-tour-nav-8)), staying on Create and lighting up no tab: **eight stops**, top to bottom of the form, each lighting up one part (the page scrolls it above the card, with room added under the page while the tour's on if it's too short for that):
     1. **Make a workout**: the title. "A quick look at what's here, top to bottom. First, a name for it, e.g. Leg day."
     2. **Steps**: the first step's top row. "A workout is steps, done in order. Tap Reps to make one timed or a rest, and drag its handle, or use the arrows, to move it."
@@ -191,6 +191,7 @@
 - Given a device that's never made a workout, when I press + New on Workouts, then Create opens with its tour, "1 of 8", lighting up the title; when I press Next five times, then + Step is lit up, "Supersets", saying to tap Join with next under the first; when I press Next twice more, then Save and Start workout are lit up, "Save or start", with Done; when I press Done, then the tour goes and focus is on the title. When I press + New again, then there's no tour.
 - Given the tour of Create, when I press Skip tour (or Escape), then it ends, focus is on the title, and it isn't shown again.
 - Given a workout opened to edit, or a copy, then there's no tour.
+- Given the tour of Create already seen, when I press Making a workout in Help, then Create opens on a new workout with the tour at "1 of 8".
 
 ## Platform notes
 

@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HELP_SECTIONS } from './help-topics';
 import { HelpComponent } from './help.component';
-import { TourService } from '../tour/tour.service';
+import { CREATE_TOUR_KEY, TourService } from '../tour/tour.service';
 
 describe('HelpComponent (NAV-7)', () => {
     let harness: RouterTestingHarness;
@@ -13,6 +13,7 @@ describe('HelpComponent (NAV-7)', () => {
             providers: [
                 provideRouter([
                     { path: 'account', children: [] },
+                    { path: 'setup', children: [] },
                     { path: 'help', component: HelpComponent },
                 ]),
             ],
@@ -47,19 +48,47 @@ describe('HelpComponent (NAV-7)', () => {
 
         expect(el().querySelector('h2')!.textContent!.trim()).toBe('Help');
         expect(el().querySelector('.back-link')!.getAttribute('href')).toBe('/account');
-        expect(headings()).toEqual(HELP_SECTIONS.map((section) => section.title));
+        expect(headings()).toEqual(['Tours', ...HELP_SECTIONS.map((section) => section.title)]);
         expect(questions()).toHaveLength(
             HELP_SECTIONS.reduce((sum, section) => sum + section.topics.length, 0)
         );
         expect(opened()).toEqual([]);
     });
 
-    it('takes the tour of the app from under the search box (NAV-8)', async () => {
+    const tourButton = (name: string) =>
+        [...el().querySelectorAll<HTMLButtonElement>('.help__tours button')].find((button) =>
+            button.textContent!.trim().endsWith(name)
+        )!;
+
+    it('takes the tour of the app from Tours, under the search box (NAV-8)', async () => {
         await open();
 
-        el().querySelector<HTMLButtonElement>('.help__tour')!.click();
+        tourButton('Tour of the app').click();
 
-        expect(TestBed.inject(TourService).stop()).toBe(0);
+        const tour = TestBed.inject(TourService);
+        expect(tour.tour()).toBe('app');
+        expect(tour.stop()).toBe(0);
+    });
+
+    it('opens Create on a new workout for its tour, again or for the first time (BLD-17)', async () => {
+        localStorage.setItem(CREATE_TOUR_KEY, 'seen');
+        await open();
+
+        tourButton('Making a workout').click();
+        await harness.fixture.whenStable();
+
+        const tour = TestBed.inject(TourService);
+        expect(TestBed.inject(Router).url).toBe('/setup');
+        expect(tour.tour()).toBe('create');
+        expect(tour.stop()).toBe(0);
+        localStorage.clear();
+    });
+
+    it('keeps Tours while searching', async () => {
+        await open();
+        await search('iphone');
+
+        expect(el().querySelector('#help-section-tours')).not.toBeNull();
     });
 
     it('opens a question to its answer, with a link to do it', async () => {

@@ -88,7 +88,7 @@
 Since 2026-11-06, from an interview with Dan.
 
 - **Offered once on Today**: a card at its top, under the greeting, "**New here? Take a 1-minute tour**", with **Take the tour** (the main button) and **Not now**. It shows on every device until one of them is pressed, or the tour is started from Help: so straight after the setup on a new device, and once on a device already in use when the tour came in. It's kept on the device only, not synced, and Clear this device (or signing out) empties it, so a device set up again is offered it again. Not now takes the card away, and focus goes to the greeting.
-- **Take the tour** is also in **Help**, under the search box, for any time.
+- **Tour of the app** is also in **Help**, in **Tours** under the search box, for any time, beside **Making a workout**, which opens Create on a new workout and takes its tour (BLD-17, see [build-a-workout](build-a-workout.md)). Tours shows whatever's searched for, as it isn't an answer.
 - The tour goes through **seven stops**, opening each page in turn (as its tab would) and **lighting up** one part of it, and **the page's tab** in the tab bar, so it shows the way there; the rest of the screen is dimmed. A card just above the tab bar, which stays in view, says what it is:
     1. **Today**: the Getting started card, "Start here: add a few workouts, then plan your week. Once you have, Today shows what's due and how your week's going." With workouts or a plan there's no Getting started card, so it lights up the week instead: "Your week: what's planned and what's done. Edit plan changes it."
     2. **Workouts**: the first workout card, all of it, "Tap a card for its details, or ▶ to start it."
@@ -150,7 +150,7 @@ Since 2026-11-06, from an interview with Dan.
 - Given the tour is on Exercises, when I press Escape, then the tour ends, Exercises stays open with focus on its title, and Today no longer offers the tour.
 - Given the tour's last stop, then the whole tab bar is lit up; when I press Done, then Today is open with focus on the greeting.
 - Given workouts done, when the tour reaches Progress, then it lights up Time per week. Given none, then Progress shows example workouts, saying so, and lights up their Time per week; when the tour moves on, Progress is empty again and nothing was added to the history.
-- Given Help, when I press Take the tour, then the tour starts on Today.
+- Given Help, when I press Tour of the app, then the tour starts on Today; when I press Making a workout, then Create opens on a new workout with its tour, even if it's been seen.
 
 ## Platform notes
 

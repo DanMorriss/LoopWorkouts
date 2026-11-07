@@ -17,6 +17,7 @@ import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { HELP_SECTIONS, searchTopics } from './help-topics';
 import { counted } from '../shared/format-count';
 import { IconComponent } from '../shared/components/icon/icon.component';
+import { SearchFieldComponent } from '../shared/components/search-field/search-field.component';
 import { TourService } from '../tour/tour.service';
 
 /**
@@ -26,7 +27,13 @@ import { TourService } from '../tour/tour.service';
  */
 @Component({
     selector: 'app-help',
-    imports: [BackLinkComponent, IconComponent, RouterLink, SwipeBackDirective],
+    imports: [
+        BackLinkComponent,
+        IconComponent,
+        RouterLink,
+        SearchFieldComponent,
+        SwipeBackDirective,
+    ],
     templateUrl: './help.component.html',
     styleUrl: './help.component.scss',
 })
@@ -92,9 +99,5 @@ export class HelpComponent {
         if (await this.router.navigateByUrl('/setup')) {
             this.tour.start('create');
         }
-    }
-
-    protected search(event: Event) {
-        this.query.set((event.target as HTMLInputElement).value);
     }
 }

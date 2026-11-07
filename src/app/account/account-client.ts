@@ -28,8 +28,8 @@ export const AUTH_STORAGE_KEY = 'sb-cpgacyzlfyskifzhkotu-auth-token';
 export type AccountClient = Pick<SupabaseClient, 'auth' | 'rpc'>;
 
 /**
- * Gives the Supabase client, loading its code only when it's first needed (the You tab,
- * or sync once signed in), so it stays out of the app's first load. There's one client, which
+ * Gives the Supabase client, loading its code only when it's first needed (signing in, or a
+ * device signed in already: see AccountService and SyncStarter), so it stays out of the app's first load. There's one client, which
  * accounts and sync share. Tests provide a fake.
  */
 export const ACCOUNT_CLIENT = new InjectionToken<() => Promise<AccountClient>>('ACCOUNT_CLIENT', {

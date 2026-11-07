@@ -17,6 +17,30 @@
     text-align: center;
 }
 
+// Where the body map's figures will be while its code loads, the same size, so nothing moves
+// as they come: as .body-map__figures and .body-map__figure lay them out, a drawing twice as
+// tall as it's wide, with its caption under it. Gone as the map's put in, in the same layout
+.muscles-week__map-space {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+
+    .muscles-week__map:has(app-body-map) & {
+        display: none;
+    }
+}
+
+.muscles-week__figure-space {
+    flex: 0 1 9rem;
+    padding-bottom: calc(0.25rem + 1.45 * 0.75rem);
+
+    &::before {
+        content: '';
+        display: block;
+        aspect-ratio: 1 / 2;
+    }
+}
+
 .muscles-week__bars {
     margin-top: 1.25rem;
 }

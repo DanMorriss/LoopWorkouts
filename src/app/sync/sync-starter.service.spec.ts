@@ -7,15 +7,15 @@ describe('SyncStarter', () => {
     beforeEach(() => localStorage.clear());
     afterEach(() => localStorage.clear());
 
-    function create() {
-        const client = fakeAccountClient('me@example.com');
+    function create(signedInAs: string | null = 'me@example.com') {
+        const client = fakeAccountClient(signedInAs);
         TestBed.configureTestingModule({ providers: [provideFakeAccountClient(client)] });
         return { starter: TestBed.inject(SyncStarter), client };
     }
 
     // Loading sync's code is what loads Supabase's, so it's left alone until it's needed
     it("doesn't start sync on a device that isn't signed in", async () => {
-        const { starter, client } = create();
+        const { starter, client } = create(null);
 
         starter.startIfSignedIn();
         await new Promise((resolve) => setTimeout(resolve, 50));

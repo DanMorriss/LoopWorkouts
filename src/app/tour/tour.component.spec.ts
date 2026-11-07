@@ -49,7 +49,7 @@ class YouPage {}
         <div data-tour="step-header">Reps</div>
         <div data-tour="step-exercise">Exercise</div>
         <div data-tour="step-sets">Sets</div>
-        <div data-tour="add-steps">+ Step</div>
+        <div data-tour="add-steps"><button data-tour="add-step">+ Step</button></div>
         <div data-tour="repeat">Rounds</div>
         <div data-tour="save">Save</div>`,
 })
@@ -257,7 +257,7 @@ describe('TourComponent (NAV-8)', () => {
 
         it('stays on Create, lighting up each part and no tab', async () => {
             expect(router.url).toBe('/setup');
-            expect(text('.tour__count')).toBe('1 of 7');
+            expect(text('.tour__count')).toBe('1 of 8');
             expect(text('.tour__title')).toBe('Make a workout');
             const title = el().querySelector('[data-tour="workout-title"]')!;
             expect(lit()).toEqual([Math.round(title.getBoundingClientRect().top - 6)]);
@@ -269,8 +269,19 @@ describe('TourComponent (NAV-8)', () => {
             expect(lit()).toHaveLength(1);
         });
 
+        it('explains supersets on + Step, as Join with next needs a second step', async () => {
+            for (let i = 0; i < 5; i++) {
+                button('Next')!.click();
+                await settle();
+            }
+            expect(text('.tour__title')).toBe('Supersets');
+            expect(text('.tour__text')).toContain('tap Join with next under the first');
+            const add = el().querySelector('[data-tour="add-step"]')!;
+            expect(lit()).toEqual([Math.round(add.getBoundingClientRect().top - 6)]);
+        });
+
         it('Done leaves focus on the workout title', async () => {
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 7; i++) {
                 button('Next')!.click();
                 await settle();
             }

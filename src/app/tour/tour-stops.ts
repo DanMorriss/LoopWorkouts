@@ -166,10 +166,22 @@ const CREATE_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'add-steps',
-                text: '+ Step adds an exercise or a rest, and + Heading a title, e.g. Warmup. Join with next, on a step with one after it, makes them a superset.',
+                text: '+ Step adds an exercise or a rest, and + Heading a title, e.g. Warmup, to split a long workout into parts.',
             },
         ],
         text: '+ Step adds another step, and + Heading a title, e.g. Warmup.',
+    },
+    {
+        // Join with next only shows once a step has one after it, which a new workout's
+        // doesn't, so this lights up + Step, the first of the two taps
+        title: 'Supersets',
+        parts: [
+            {
+                part: 'add-step',
+                text: 'To do exercises back to back, e.g. bench press then rows, then one rest: add the second with + Step, then tap Join with next under the first. Join a third for a giant set.',
+            },
+        ],
+        text: 'To do exercises back to back, add the second with + Step, then tap Join with next under the first.',
     },
     {
         title: 'Rounds',

@@ -69,6 +69,16 @@ export interface FigureColors {
 /** How thick the outline round the figure and its kit is, in CSS pixels, as the body map's. */
 const OUTLINE_PX = 1.5;
 
+/** A canvas to draw on: on the page, or an offscreen one in a worker (figure.worker.ts). */
+export type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
+
+const inWorker = typeof document === 'undefined';
+
+/** A canvas that's never shown, on the page or in a worker. */
+function blankCanvas(): AnyCanvas {
+    return inWorker ? new OffscreenCanvas(1, 1) : document.createElement('canvas');
+}
+
 let renderer: WebGLRenderer | null | undefined;
 
 /**
@@ -78,7 +88,11 @@ let renderer: WebGLRenderer | null | undefined;
 function sharedRenderer(): WebGLRenderer | null {
     if (renderer === undefined) {
         try {
-            renderer = new WebGLRenderer({ antialias: true, alpha: true });
+            renderer = new WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                ...(inWorker ? { canvas: new OffscreenCanvas(1, 1) } : {}),
+            });
             renderer.outputColorSpace = SRGBColorSpace;
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = PCFShadowMap;
@@ -212,7 +226,10 @@ function outlineMaterial() {
 
 /** A CSS colour as it shows over `under`, so a see-through one can be drawn solid. */
 function over(color: string, under: string): Color {
-    const context = document.createElement('canvas').getContext('2d');
+    const context = blankCanvas().getContext('2d') as
+        | CanvasRenderingContext2D
+        | OffscreenCanvasRenderingContext2D
+        | null;
     if (!context) {
         return new Color(0x808080);
     }
@@ -239,7 +256,7 @@ export class FigureScene {
 
     private readonly body: Body;
     private readonly model: BodyModel;
-    private readonly painting = document.createElement('canvas');
+    private readonly painting = blankCanvas();
     readonly texture = new CanvasTexture(this.painting);
     private readonly bodyMaterial = new MeshBasicMaterial({ map: this.texture });
     private readonly kitMaterial = new MeshBasicMaterial();
@@ -369,24 +386,43 @@ export class FigureScene {
      * onto `canvas` (a 2D one), filling it. False if it couldn't be drawn.
      */
     draw(pose: Pose, yaw: number, canvas: HTMLCanvasElement): boolean {
-        const gl = sharedRenderer();
         const context = canvas.getContext('2d');
-        if (!gl || !context || canvas.width === 0 || canvas.height === 0) {
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        const drawn = this.render(pose, yaw, canvas.width, canvas.height, ratio);
+        if (!context || !drawn) {
             return false;
+        }
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(drawn, 0, 0);
+        return true;
+    }
+
+    /**
+     * Draws the figure as draw() does, `width` by `height` device pixels on a screen of `ratio`
+     * of them to a CSS pixel, and gives the picture to send to the page: in a worker, as it
+     * can't draw on the page's canvas itself. Null if it couldn't be drawn.
+     */
+    picture(pose: Pose, yaw: number, width: number, height: number, ratio: number) {
+        const drawn = this.render(pose, yaw, width, height, ratio);
+        return drawn instanceof OffscreenCanvas ? drawn.transferToImageBitmap() : null;
+    }
+
+    /** Renders the figure onto the shared renderer's canvas, and gives it; null if it can't. */
+    private render(pose: Pose, yaw: number, width: number, height: number, ratio: number) {
+        const gl = sharedRenderer();
+        if (!gl || width === 0 || height === 0) {
+            return null;
         }
         this.paintIfStale();
         this.place(skeletonOf(pose, this.motion));
-        const distance = this.aim(yaw, canvas.width / canvas.height);
+        const distance = this.aim(yaw, width / height);
         // The outline as thick as the body map's lines, however big the canvas is
         const visible = 2 * distance * Math.tan(((this.camera.fov / 2) * Math.PI) / 180);
-        const pixelsPerCm = canvas.height / visible;
-        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        const pixelsPerCm = height / visible;
         this.outline.uniforms['thickness'].value = (OUTLINE_PX * ratio) / pixelsPerCm;
-        gl.setSize(canvas.width, canvas.height, false);
+        gl.setSize(width, height, false);
         gl.render(this.scene, this.camera);
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.drawImage(gl.domElement, 0, 0);
-        return true;
+        return gl.domElement as AnyCanvas;
     }
 
     dispose() {

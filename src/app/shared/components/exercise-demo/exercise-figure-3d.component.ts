@@ -11,13 +11,13 @@ import {
     viewChild,
 } from '@angular/core';
 import { Pose } from '../../../models/exercise-motion';
-import type { FigureScene } from './figure-scene';
+import type { FigureDrawer } from './figure-drawer';
 
 /** How far it turns for each pixel dragged, in degrees. */
 const DEGREES_PER_PIXEL = 0.6;
 
 /**
- * The 3D figure of an exercise's demo in one pose (EXR-13), drawn by its `FigureScene` onto a
+ * The 3D figure of an exercise's demo in one pose (EXR-13), drawn by its `FigureDrawer` onto a
  * canvas. Dragging it sideways turns it round (`yaw`); the demo's Turn button does the same
  * without dragging. Hidden from screen readers: the how-to steps say the same in words.
  */
@@ -53,7 +53,7 @@ const DEGREES_PER_PIXEL = 0.6;
     host: { 'aria-hidden': 'true' },
 })
 export class ExerciseFigure3dComponent {
-    readonly scene = input.required<FigureScene>();
+    readonly scene = input.required<FigureDrawer>();
     readonly pose = input.required<Pose>();
     /** How far it's turned from the way it's first seen, in degrees. */
     readonly yaw = model(0);

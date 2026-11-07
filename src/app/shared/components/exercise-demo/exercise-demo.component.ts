@@ -19,15 +19,16 @@ import { ExerciseStore } from '../../state/exercise-store.service';
 import { ThemeService } from '../../theme/theme.service';
 import { ExerciseFigure3dComponent } from './exercise-figure-3d.component';
 import { ExerciseFigureComponent } from './exercise-figure.component';
-import type {
-    FigureColors,
-    FigureLook,
-    FigureScene,
-    prepareScene as PrepareScene,
-} from './figure-scene';
+import type { FigureDrawer, MakeFigure } from './figure-drawer';
+import type { FigureColors, FigureLook } from './figure-scene';
 
 /** Whether to draw the figure in 3D where the browser can; the flat figure if not. */
 export const DEMO_IN_3D = new InjectionToken<boolean>('DEMO_IN_3D', { factory: () => true });
+
+/** Whether to draw the 3D figure in a worker where the browser can; on the page if not. */
+export const DEMO_IN_WORKER = new InjectionToken<boolean>('DEMO_IN_WORKER', {
+    factory: () => true,
+});
 
 /** How far the Turn button turns the figure, in degrees, and how long it takes. */
 const TURN = 45;
@@ -40,7 +41,8 @@ const TURN_MS = 450;
  * Nothing for an exercise without a motion (your own, and built-in ones not done yet).
  *
  * The figure is drawn in 3D (three.js, loaded with the first demo), and can be turned round by
- * dragging it or with Turn. Without WebGL it's drawn flat, as it was drawn before.
+ * dragging it or with Turn: in a worker where the browser can, so it never holds the page up,
+ * and on the page otherwise. Without WebGL it's drawn flat, as it was drawn before.
  */
 @Component({
     selector: 'app-exercise-demo',
@@ -71,10 +73,11 @@ export class ExerciseDemoComponent {
     protected readonly drawing = signal<'loading' | '3d' | 'flat'>(
         inject(DEMO_IN_3D) ? 'loading' : 'flat'
     );
-    /** What gets a figure ready to draw, once three.js has loaded. */
-    private readonly prepareScene = signal<typeof PrepareScene | null>(null);
+    private readonly inWorker = inject(DEMO_IN_WORKER);
+    /** What makes a 3D figure, once it's known how they can be drawn here. */
+    private readonly makeFigure = signal<MakeFigure | null>(null);
     /** The 3D figure of this exercise's motion, its muscles shaded in the theme's colours. */
-    protected readonly scene = signal<FigureScene | null>(null);
+    protected readonly scene = signal<FigureDrawer | null>(null);
     /** Counts each time the scene is repainted, so its figures are drawn again. */
     protected readonly paint = signal(0);
     /** How far the 3D figure is turned from the way it's first seen, in degrees. */
@@ -107,17 +110,16 @@ export class ExerciseDemoComponent {
         });
 
         effect((onCleanup) => {
-            const prepareScene = this.prepareScene();
+            const makeFigure = this.makeFigure();
             const motion = this.motion();
-            if (!prepareScene || !motion) {
+            if (!makeFigure || !motion) {
                 return;
             }
-            // Got ready a step at a time, after the page has shown, keeping its space till then.
-            // The male figure, whichever is picked in Profile: the female one isn't right in 3D
+            // Made after the page has shown, keeping its space till then. The male figure, whichever is picked in Profile: the female one isn't right in 3D
             // yet (see TODO.md). The body map still draws the one picked
             let cancelled = false;
-            let made: FigureScene | null = null;
-            void prepareScene(
+            let made: FigureDrawer | null = null;
+            void makeFigure(
                 motion,
                 'male',
                 () => untracked(() => this.look()),
@@ -157,17 +159,15 @@ export class ExerciseDemoComponent {
             });
 
             if (this.drawing() === 'loading') {
-                import('./figure-scene').then(
-                    (module) => {
-                        if (module.canDraw3d()) {
-                            this.prepareScene.set(module.prepareScene);
-                            this.drawing.set('3d');
-                        } else {
-                            this.drawing.set('flat');
-                        }
-                    },
-                    () => this.drawing.set('flat')
-                );
+                import('./figure-drawer')
+                    .then((module) => module.figureMaker(this.inWorker))
+                    .then(
+                        (makeFigure) => {
+                            this.makeFigure.set(makeFigure);
+                            this.drawing.set(makeFigure ? '3d' : 'flat');
+                        },
+                        () => this.drawing.set('flat')
+                    );
             }
         });
     }

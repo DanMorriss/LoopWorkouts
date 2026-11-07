@@ -4,7 +4,7 @@ import { Exercise } from '../../../models/exercise';
 import { ExerciseStore } from '../../state/exercise-store.service';
 import { SettingsStore } from '../../state/settings-store.service';
 import { fakeReducedMotion } from '../../testing/fake-reduced-motion';
-import { DEMO_IN_3D, ExerciseDemoComponent } from './exercise-demo.component';
+import { DEMO_IN_3D, DEMO_IN_WORKER, ExerciseDemoComponent } from './exercise-demo.component';
 
 describe('ExerciseDemoComponent', () => {
     let fixture: ComponentFixture<ExerciseDemoComponent>;
@@ -24,8 +24,13 @@ describe('ExerciseDemoComponent', () => {
             next(count);
         });
 
-    async function create(exercise: Exercise, in3d = false) {
-        TestBed.configureTestingModule({ providers: [{ provide: DEMO_IN_3D, useValue: in3d }] });
+    async function create(exercise: Exercise, in3d = false, inWorker = true) {
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: DEMO_IN_3D, useValue: in3d },
+                { provide: DEMO_IN_WORKER, useValue: inWorker },
+            ],
+        });
         await TestBed.inject(ExerciseStore).loadMotion();
         fixture = TestBed.createComponent(ExerciseDemoComponent);
         fixture.componentRef.setInput('exercise', exercise);
@@ -120,12 +125,18 @@ describe('ExerciseDemoComponent', () => {
         const canvas = () => el().querySelector<HTMLCanvasElement>('app-exercise-figure-3d canvas');
         const turnButton = () =>
             el().querySelector<HTMLButtonElement>('button[aria-label="Turn the figure"]');
-        /** Waits for three.js to load and the figure to be drawn. */
+        /**
+         * Waits for three.js to load and the figure to be drawn: drawn in a worker, the picture
+         * comes a moment after the page asks for it.
+         */
         async function drawn() {
             await vi.waitFor(() => expect(canvas()).not.toBeNull(), { timeout: 10000 });
-            await frames(3);
+            await vi.waitFor(() => expect(pixels()).not.toBe(0), { timeout: 10000 });
             fixture.detectChanges();
         }
+        /** Waits for what's drawn to change from `before` (the canvas's pixels()). */
+        const changes = (before: number) =>
+            vi.waitFor(() => expect(pixels()).not.toBe(before), { timeout: 5000 });
         /** The canvas's pixels, to tell whether what's drawn changed. */
         const pixels = () => {
             const image = canvas()!
@@ -152,8 +163,22 @@ describe('ExerciseDemoComponent', () => {
                 expect(canvas()!.width).toBeGreaterThan(0);
                 const before = pixels();
                 await frames(40);
-                expect(pixels()).not.toBe(before);
+                await changes(before);
                 expect(toggle()?.textContent?.trim()).toBe('Pause');
+            }
+        );
+
+        it.runIf(hasWebGL)(
+            "draws it on the page where it can't be drawn in a worker, and plays it",
+            async () => {
+                fakeReducedMotion(false);
+                await create(builtIn('builtin:back-squat'), true, false);
+                await drawn();
+
+                expect(canvas()!.width).toBeGreaterThan(0);
+                const before = pixels();
+                await frames(40);
+                await changes(before);
             }
         );
 
@@ -170,7 +195,7 @@ describe('ExerciseDemoComponent', () => {
                 await frames(2);
                 fixture.detectChanges();
 
-                expect(pixels()).not.toBe(dark);
+                await changes(dark);
             }
         );
 
@@ -186,7 +211,7 @@ describe('ExerciseDemoComponent', () => {
             turnButton()!.click();
             fixture.detectChanges();
             await frames(2);
-            expect(pixels()).not.toBe(before);
+            await changes(before);
         });
     });
 });

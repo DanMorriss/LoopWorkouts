@@ -531,5 +531,22 @@ export function buildBody(figure: BodyFigure) {
 
 export type Body = ReturnType<typeof buildBody>;
 
+const built = new Map<BodyFigure, Body>();
+
+/**
+ * The body for `figure`, built the first time it's asked for and kept, as it's the same for
+ * every exercise: the next exercise's figure skips building it (about 270ms of a slow phone)
+ * and, as the same renderer draws it, sending its parts to the GPU again. Its parts are shared,
+ * so they're never changed or disposed of: a part to reshape is copied first, as the torso is.
+ */
+export function sharedBody(figure: BodyFigure): Body {
+    let body = built.get(figure);
+    if (!body) {
+        body = buildBody(figure);
+        built.set(figure, body);
+    }
+    return body;
+}
+
 /** A part's way of facing: its x (front) and y (along it) axes; z follows. */
 export const frame = (y: Vec3, x: Vec3): [Vec3, Vec3, Vec3] => [x, y, cross3(x, y)];

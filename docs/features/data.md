@@ -226,6 +226,10 @@ In ms since the epoch, by the device's clock, for the You tab. Signing out remov
 
 `due` once a device new to the app is sent to the welcome screen, and `asking` once the setup's questions (NAV-4) start: while it's there, Today opens the setup. Finishing or skipping it removes it. Missing on a device in use before the setup came in, which isn't asked. Signing out and Clear this device remove it.
 
+### `tour`: the tour's been taken or turned down
+
+`seen` once the tour of the app (NAV-8) has been started, from Today or Help, or Today's offer of it turned down with Not now. While it's missing, Today offers the tour. Not synced or backed up, as it's about this device. Signing out and Clear this device remove it, so a device set up again is offered it again.
+
 ### `clock-offset`: how far this device's clock is from the server's
 
 In ms, added to the device's clock to date changes (see [backup and sync](backup-and-sync.md), Sync). Kept after signing out, as the clock's no less off; so are the settings, which are this device's, less the name, and with `profileUpdatedAt` 0. Signing out removes everything else.

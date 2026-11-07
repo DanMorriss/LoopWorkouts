@@ -1,0 +1,65 @@
+<!-- Over the whole page, so nothing on it can be pressed while the tour's on, dimmed but for
+     a hole round each thing lit up: the stop's part, and its tab -->
+<svg class="tour__dim" aria-hidden="true">
+    <defs>
+        <mask id="tour-holes">
+            <rect width="100%" height="100%" fill="white" />
+            @for (light of lights(); track light.id) {
+                <rect
+                    class="tour__hole"
+                    fill="black"
+                    [attr.x]="light.left"
+                    [attr.y]="light.top"
+                    [attr.width]="light.width"
+                    [attr.height]="light.height"
+                    [attr.rx]="light.radius"
+                    [style.x.px]="light.left"
+                    [style.y.px]="light.top"
+                    [style.width.px]="light.width"
+                    [style.height.px]="light.height"
+                    [style.rx.px]="light.radius"
+                />
+            }
+        </mask>
+    </defs>
+    <rect class="tour__shade" width="100%" height="100%" mask="url(#tour-holes)" />
+</svg>
+
+@for (light of lights(); track light.id) {
+    <div
+        class="tour__light"
+        aria-hidden="true"
+        [style.top.px]="light.top"
+        [style.left.px]="light.left"
+        [style.width.px]="light.width"
+        [style.height.px]="light.height"
+        [style.border-radius.px]="light.radius"
+    ></div>
+}
+
+<div
+    #card
+    class="tour__card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tour-title"
+    aria-describedby="tour-text tour-count"
+    cdkTrapFocus
+>
+    <p class="tour__count" id="tour-count">{{ index() + 1 }} of {{ count }}</p>
+    <h2 #title class="tour__title" id="tour-title" tabindex="-1">{{ stop().title }}</h2>
+    <p class="tour__text" id="tour-text">{{ text() }}</p>
+    <div class="tour__actions">
+        @if (!last()) {
+            <button type="button" class="btn-pill tour__skip" (click)="skip()">Skip tour</button>
+        }
+        <span class="tour__steps">
+            @if (index() > 0) {
+                <button type="button" class="btn-pill tour__back" (click)="back()">Back</button>
+            }
+            <button type="button" class="btn-main btn-main--small tour__next" (click)="next()">
+                {{ last() ? 'Done' : 'Next' }}
+            </button>
+        </span>
+    </div>
+</div>

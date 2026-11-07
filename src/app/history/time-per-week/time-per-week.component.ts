@@ -3,7 +3,7 @@ import { Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { timePerWeek, WeekTotal } from '../../models/time-per-week';
 import { chartKeyMove } from '../../shared/chart-keys';
 import { counted } from '../../shared/format-count';
-import { HistoryStore } from '../../shared/state/history-store.service';
+import { ShownHistory } from '../shown-history';
 import { formatDuration } from '../history-format';
 
 /** How many weeks the chart shows, ending with this one. */
@@ -46,7 +46,7 @@ interface WeekBar extends WeekTotal {
     styleUrl: './time-per-week.component.scss',
 })
 export class TimePerWeekComponent {
-    private readonly history = inject(HistoryStore);
+    private readonly history = inject(ShownHistory);
     private readonly locale = inject(LOCALE_ID);
     private readonly now = Date.now();
 

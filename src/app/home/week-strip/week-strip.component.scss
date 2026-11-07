@@ -1,13 +1,12 @@
+@use 'panel-card' as *;
+
 :host {
     display: block;
 }
 
 // A card, as Due today and the suggested workout are
 .week {
-    padding: 1rem;
-    border: 1px solid var(--panel-border);
-    border-radius: 0.9rem;
-    background: var(--card);
+    @include panel-card;
 }
 
 .week__head {

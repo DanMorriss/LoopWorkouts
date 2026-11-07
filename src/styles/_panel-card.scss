@@ -1,0 +1,13 @@
+// A card on the page's panel, as Today's and Progress's are: Get started, the week, Due today,
+// the suggested workout, the time per week and the muscles worked. A mixin, so only the pages
+// with one carry it.
+//
+//   @use 'panel-card' as *;
+//   .thing { @include panel-card; }
+
+@mixin panel-card {
+    padding: 1rem;
+    border: 1px solid var(--panel-border);
+    border-radius: 0.9rem;
+    background: var(--card);
+}

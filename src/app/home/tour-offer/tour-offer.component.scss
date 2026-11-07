@@ -1,0 +1,35 @@
+@use 'panel-card' as *;
+
+:host {
+    display: block;
+}
+
+// A card, as the others on Today are, lit faintly with the accent as something new
+.offer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    @include panel-card;
+    border-color: var(--accent-line);
+    background:
+        radial-gradient(120% 90% at 100% 0%, var(--accent-soft), transparent 65%), var(--card);
+}
+
+.offer__title {
+    margin: 0;
+    color: var(--text-strong);
+    font-size: 1rem;
+}
+
+.offer__text {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.offer__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+}

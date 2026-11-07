@@ -359,6 +359,16 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
+            it('with the tour on (NAV-8)', async () => {
+                localStorage.setItem('welcomed', 'guest');
+                await open('/home');
+                click('.offer__start');
+                // The tour loads, opens Today and lights up Getting started
+                await settle(400);
+                expect(fixture.nativeElement.querySelector('.tour__light')).not.toBeNull();
+                await expectNoViolations();
+            });
+
             it('with the week planned', async () => {
                 const push = store.addWorkout({
                     title: 'Push',

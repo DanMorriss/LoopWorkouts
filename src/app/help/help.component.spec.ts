@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HELP_SECTIONS } from './help-topics';
 import { HelpComponent } from './help.component';
+import { TourService } from '../tour/tour.service';
 
 describe('HelpComponent (NAV-7)', () => {
     let harness: RouterTestingHarness;
@@ -51,6 +52,14 @@ describe('HelpComponent (NAV-7)', () => {
             HELP_SECTIONS.reduce((sum, section) => sum + section.topics.length, 0)
         );
         expect(opened()).toEqual([]);
+    });
+
+    it('takes the tour of the app from under the search box (NAV-8)', async () => {
+        await open();
+
+        el().querySelector<HTMLButtonElement>('.help__tour')!.click();
+
+        expect(TestBed.inject(TourService).stop()).toBe(0);
     });
 
     it('opens a question to its answer, with a link to do it', async () => {

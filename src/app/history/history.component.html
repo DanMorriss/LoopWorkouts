@@ -3,7 +3,7 @@
         <h2 class="history__title">Progress</h2>
 
         @if (groups().length === 0) {
-            <div class="history__empty">
+            <div class="history__empty" data-tour="progress-empty">
                 <p>
                     Nothing here yet. Do a workout, and how your week is going and what you've done
                     show up here.
@@ -11,12 +11,21 @@
                 <a routerLink="/library" class="btn-pill history__button">Go to your workouts</a>
             </div>
         } @else {
+            @if (shown.sample()) {
+                <!-- While the tour shows the page with nothing done yet (NAV-8) -->
+                <p class="history__sample">
+                    Examples, to show what's here. Yours will replace them.
+                </p>
+            }
             <p class="history__summary">
                 Last 7 days: {{ lastWeek().workouts }}
                 {{ lastWeek().workouts === 1 ? 'workout' : 'workouts' }} · {{ lastWeek().time }}
             </p>
 
-            <app-time-per-week class="history__weeks" />
+            <app-time-per-week
+                class="history__weeks"
+                [attr.data-tour]="shown.sample() ? 'progress-sample' : 'time-per-week'"
+            />
 
             <app-muscles-this-week class="history__muscles" />
 

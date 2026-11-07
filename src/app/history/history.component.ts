@@ -13,6 +13,8 @@ import { HistoryEntry } from '../models/history';
 import { changeSmoothly } from '../shared/layout-change';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { HistoryStore } from '../shared/state/history-store.service';
+import { ShownHistory } from './shown-history';
+import { provideShownHistoryWithSample } from './shown-history-with-sample';
 import { UndoService } from '../shared/undo/undo.service';
 import { HistoryEntryComponent } from './history-entry/history-entry.component';
 import { MusclesThisWeekComponent } from './muscles-this-week/muscles-this-week.component';
@@ -55,6 +57,7 @@ function dayKey(time: number): string {
     ],
     templateUrl: './history.component.html',
     styleUrl: './history.component.scss',
+    providers: [provideShownHistoryWithSample()],
     host: {
         // A click anywhere else closes an open menu
         '(document:click)': 'openMenuId.set(null)',
@@ -62,6 +65,8 @@ function dayKey(time: number): string {
 })
 export class HistoryComponent {
     private readonly history = inject(HistoryStore);
+    /** What's listed: the history, or examples while the tour shows the page. */
+    protected readonly shown = inject(ShownHistory);
     private readonly injector = inject(Injector);
     private readonly focusAfterRender = injectFocusAfterRender();
     private readonly reducedMotion = injectPrefersReducedMotion();
@@ -72,7 +77,7 @@ export class HistoryComponent {
         const today = dayKey(this.now);
         const yesterday = dayKey(this.now - DAY_MS);
         const groups: DayGroup[] = [];
-        for (const entry of this.history.entries()) {
+        for (const entry of this.shown.entries()) {
             const key = dayKey(entry.startedAt);
             let group = groups.at(-1);
             if (group?.key !== key) {
@@ -87,7 +92,7 @@ export class HistoryComponent {
 
     /** Workouts and time spent over the last seven days. */
     protected readonly lastWeek = computed(() => {
-        const recent = this.history
+        const recent = this.shown
             .entries()
             .filter((entry) => entry.startedAt >= this.now - 7 * DAY_MS);
         return {

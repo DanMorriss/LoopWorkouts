@@ -1,14 +1,17 @@
 <div class="flex justify-center">
     <div class="home w-full max-w-md p-4">
-        <h2 class="home__greeting">{{ greeting() }}</h2>
+        <h2 class="home__greeting" id="home-title" tabindex="-1">{{ greeting() }}</h2>
+
+        <!-- Until it's taken or turned down on this device, the tour of the app (NAV-8) -->
+        <app-tour-offer class="home__card" />
 
         @if (hasWorkouts() || hasPlan()) {
             <!-- The week's plan (PLN-4), the way in to changing it; with nothing planned, a
                  nudge to plan it (NAV-6) -->
-            <app-week-strip class="home__card" />
+            <app-week-strip class="home__card" data-tour="week" />
         } @else {
             <!-- New, with none of your own and nothing planned: a week to start with (NAV-6) -->
-            <app-get-started class="home__card" />
+            <app-get-started class="home__card" data-tour="get-started" />
         }
         <!-- The weekly plan's workouts for today (PLN-2) -->
         <app-due-today class="home__card" />

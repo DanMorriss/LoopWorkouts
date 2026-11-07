@@ -56,7 +56,7 @@
 
         <ul class="exercises__list">
             @for (item of shown(); track item.exercise.id) {
-                <li><app-exercise-card [card]="item" /></li>
+                <li><app-exercise-card [card]="item" data-tour="exercise" /></li>
             }
         </ul>
 
@@ -76,7 +76,7 @@
             @if (hiddenOpen()) {
                 <ul id="exercise-list-hidden" class="exercises__list">
                     @for (item of hidden(); track item.exercise.id) {
-                        <li><app-exercise-card [card]="item" /></li>
+                        <li><app-exercise-card [card]="item" data-tour="exercise" /></li>
                     }
                 </ul>
             }

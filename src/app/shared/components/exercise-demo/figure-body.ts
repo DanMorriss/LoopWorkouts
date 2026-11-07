@@ -55,13 +55,16 @@ export interface PaintColors {
  * figure's outline round them.
  */
 export function paintDrawings(
-    canvas: HTMLCanvasElement,
+    canvas: HTMLCanvasElement | OffscreenCanvas,
     figure: BodyFigure,
     colors: PaintColors,
     toneOf: (muscle: MuscleGroup | null) => 'main' | 'supporting' | 'idle' | 'other'
 ) {
     canvas.width = canvas.height = PAINT_SIZE;
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d') as
+        | CanvasRenderingContext2D
+        | OffscreenCanvasRenderingContext2D
+        | null;
     if (!context) {
         return;
     }

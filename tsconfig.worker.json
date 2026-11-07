@@ -1,0 +1,11 @@
+/* For web workers (*.worker.ts). They share the page's code and its DOM types, so `lib` keeps
+   "dom": a worker types its own `self` (see figure.worker.ts). */
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./out-tsc/worker",
+        "lib": ["es2022", "dom"],
+        "types": []
+    },
+    "include": ["src/**/*.worker.ts"]
+}

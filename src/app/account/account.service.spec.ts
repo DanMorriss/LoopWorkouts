@@ -13,11 +13,16 @@ import {
     fakeSyncStarter,
     provideFakeSyncStarter,
 } from '../shared/testing/fake-sync';
+import { AUTH_STORAGE_KEY } from './account-client';
 import { AccountService } from './account.service';
 
 describe('AccountService', () => {
     let client: FakeAccountClient;
     let sync: FakeSyncStarter;
+
+    // A signed-in fake keeps its session in localStorage, as Supabase does
+    beforeEach(() => localStorage.clear());
+    afterEach(() => localStorage.clear());
 
     function start(signedInAs: string | null = null) {
         client = fakeAccountClient(signedInAs);
@@ -31,17 +36,39 @@ describe('AccountService', () => {
     // Lets the client's promises settle
     const settled = () => new Promise((resolve) => setTimeout(resolve));
 
-    it('is loading at first, then signed out with no session', async () => {
+    it("is signed out at once with no account on this device, without loading Supabase's code", async () => {
         const account = start();
-        expect(account.state()).toEqual({ status: 'loading' });
+        expect(account.state()).toEqual({ status: 'signed-out' });
 
         await settled();
 
+        expect(client.auth.onAuthStateChange).not.toHaveBeenCalled();
+    });
+
+    it('loads it once the sign-in form is used, still signed out', async () => {
+        const account = start();
+        account.prepare();
+        await settled();
+
+        expect(client.auth.onAuthStateChange).toHaveBeenCalled();
         expect(account.state()).toEqual({ status: 'signed-out' });
     });
 
+    it('loads it at once for a sign-in coming back in the address', async () => {
+        const before = location.href;
+        history.replaceState(null, '', '/account#access_token=abc&refresh_token=def');
+        try {
+            start();
+            await settled();
+            expect(client.auth.onAuthStateChange).toHaveBeenCalled();
+        } finally {
+            history.replaceState(null, '', before);
+        }
+    });
+
     it('starts sync once signed in, and not before', async () => {
-        start();
+        const account = start();
+        account.prepare();
         await settled();
         expect(sync.start).not.toHaveBeenCalled();
 
@@ -51,6 +78,8 @@ describe('AccountService', () => {
 
     it('is signed in with a session, and follows the client when it changes', async () => {
         const account = start('me@example.com');
+        // Its session saved here, so it's looked for
+        expect(account.state()).toEqual({ status: 'loading' });
         await settled();
         expect(account.state()).toEqual({ status: 'signed-in', email: 'me@example.com' });
 
@@ -61,6 +90,8 @@ describe('AccountService', () => {
     });
 
     it("is signed out if the client can't load, e.g. offline", async () => {
+        // With an account saved here, so it's loaded at once
+        localStorage.setItem(AUTH_STORAGE_KEY, '{}');
         TestBed.configureTestingModule({
             providers: [
                 {

@@ -3,7 +3,14 @@ import type { Session } from '@supabase/supabase-js';
 import { Router } from '@angular/router';
 import { SyncStarter } from '../sync/sync-starter.service';
 import { UndoService } from '../shared/undo/undo.service';
-import { AccountClient, ACCOUNT_CLIENT, SIGN_IN_PATH, SignInProvider } from './account-client';
+import {
+    AccountClient,
+    ACCOUNT_CLIENT,
+    AUTH_STORAGE_KEY,
+    SIGN_IN_PATH,
+    SignInProvider,
+} from './account-client';
+import { hasSignInTokens } from './sign-in-landing';
 
 export type AccountState =
     | { status: 'loading' }
@@ -17,7 +24,8 @@ export { SIGN_IN_PATH };
 /**
  * Signing in to an account (SYN-3), by an email link or the code in the same email, or with
  * Google or Apple (SYN-7); signing out and deleting the account (SYN-8). Signing out and deleting leave this device's data as
- * it is. Made when the You tab first opens, which loads Supabase's code.
+ * it is. Supabase's code loads only once it's needed: at once if there's an account on this
+ * device, or a sign-in coming back in the address, and otherwise when signing in.
  */
 @Service()
 export class AccountService {
@@ -38,27 +46,70 @@ export class AccountService {
 
     constructor() {
         this.linkProblem.set(this.takeLinkProblem());
-        void this.start();
-    }
-
-    private async start() {
-        try {
-            const client = await this.connect();
-            client.auth.onAuthStateChange((_event, session) => this.show(session));
-            const { data } = await client.auth.getSession();
-            // Unless a sign-in or out has been heard since, which is newer
-            if (this._state().status === 'loading') {
-                this.show(data.session);
-            }
-        } catch {
-            // Offline with the code not loaded yet, say: as if signed out, until it's back
+        if (this.mightBeSignedIn()) {
+            void this.connect().catch(() => undefined);
+        } else {
+            // No account on this device, and none coming back in the address: signed out,
+            // without loading Supabase's code (59 KiB) until something needs it, so a first
+            // visit's welcome screen doesn't wait on it
             this._state.set({ status: 'signed-out' });
         }
     }
 
+    /**
+     * Loads Supabase's code ahead of signing in, e.g. once the sign-in form's being filled in,
+     * so sending the link doesn't wait on it.
+     */
+    prepare() {
+        void this.connect().catch(() => undefined);
+    }
+
+    /** Whether there's a session to look for: Supabase's, saved here, or a sign-in's tokens. */
+    private mightBeSignedIn(): boolean {
+        try {
+            if (localStorage.getItem(AUTH_STORAGE_KEY) !== null) {
+                return true;
+            }
+        } catch {
+            // Storage blocked: nothing can have been saved there
+        }
+        return hasSignInTokens(this.document.location);
+    }
+
+    /** Supabase's client, loaded the first time, then listened to for signing in and out. */
     private connect(): Promise<AccountClient> {
-        this.client ??= this.makeClient();
+        this.client ??= this.makeClient().then(
+            (client) => {
+                this.listen(client);
+                return client;
+            },
+            (error: unknown) => {
+                // Offline with the code not loaded yet, say: as if signed out, until it's back
+                this.client = null;
+                if (this._state().status === 'loading') {
+                    this._state.set({ status: 'signed-out' });
+                }
+                throw error;
+            }
+        );
         return this.client;
+    }
+
+    private listen(client: AccountClient) {
+        client.auth.onAuthStateChange((_event, session) => this.show(session));
+        client.auth.getSession().then(
+            ({ data }) => {
+                // Unless a sign-in or out has been heard since, which is newer
+                if (this._state().status === 'loading') {
+                    this.show(data.session);
+                }
+            },
+            () => {
+                if (this._state().status === 'loading') {
+                    this._state.set({ status: 'signed-out' });
+                }
+            }
+        );
     }
 
     private show(session: Session | null) {

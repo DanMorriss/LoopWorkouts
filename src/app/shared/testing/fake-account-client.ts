@@ -1,6 +1,6 @@
 import { Provider } from '@angular/core';
 import type { Session } from '@supabase/supabase-js';
-import { AccountClient, ACCOUNT_CLIENT } from '../../account/account-client';
+import { AccountClient, ACCOUNT_CLIENT, AUTH_STORAGE_KEY } from '../../account/account-client';
 
 /** A session for `email`, as much of one as the app reads. */
 export function sessionFor(email: string): Session {
@@ -10,13 +10,24 @@ export function sessionFor(email: string): Session {
 /**
  * A stand-in for Supabase's client, signed in as `email` (or signed out). Signing in with a
  * code and signing out tell its listener, as the real one does. Each call is a spy, so tests
- * can change what it answers.
+ * can change what it answers. As the real one does, it keeps a session in localStorage while
+ * signed in, which is how the app knows there may be one before loading Supabase's code: so
+ * make it after a test empties localStorage.
  */
 export function fakeAccountClient(email: string | null = null) {
     let session = email === null ? null : sessionFor(email);
     let listener: ((event: string, session: Session | null) => void) | null = null;
+    const save = () => {
+        if (session) {
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ user: session.user }));
+        } else {
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+        }
+    };
+    save();
     const change = (next: Session | null) => {
         session = next;
+        save();
         listener?.(next ? 'SIGNED_IN' : 'SIGNED_OUT', next);
     };
     const auth = {

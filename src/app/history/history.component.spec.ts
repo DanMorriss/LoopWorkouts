@@ -319,7 +319,7 @@ describe('HistoryComponent', () => {
         expect(text('.history__summary')).toEqual(['Last 7 days: 2 workouts · 1:03:20']);
     });
 
-    it('shows which muscles were worked in the last seven days', () => {
+    it('shows which muscles were worked in the last seven days', async () => {
         create(
             makeEntry({
                 startedAt: NOW - HOUR,
@@ -354,7 +354,11 @@ describe('HistoryComponent', () => {
         );
 
         expect(text('.muscles-week__title')).toEqual(['Muscles worked this week']);
-        expect(fixture.nativeElement.querySelector('app-body-map')).not.toBeNull();
+        // The map's drawings come once the page has settled
+        await vi.waitFor(() => {
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelector('app-body-map')).not.toBeNull();
+        });
         // A bar per muscle group, most worked first; the plank is too long ago to count
         const labels = text('.bars__label');
         const rows = text('.bars__row .sr-only');

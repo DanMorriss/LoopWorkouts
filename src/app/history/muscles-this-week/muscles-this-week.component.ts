@@ -1,8 +1,19 @@
-import { Component, computed, inject, input } from '@angular/core';
+import {
+    Component,
+    ComponentRef,
+    computed,
+    effect,
+    inject,
+    input,
+    signal,
+    untracked,
+    viewChild,
+    ViewContainerRef,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { muscleBalance, setsByMuscle } from '../../models/muscle-balance';
-import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
+import type { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { ShownHistory } from '../shown-history';
 import { SettingsStore } from '../../shared/state/settings-store.service';
@@ -20,15 +31,20 @@ let nextId = 0;
  */
 @Component({
     selector: 'app-muscles-this-week',
-    imports: [BodyMapComponent, IconComponent, MuscleBarsComponent, RouterLink],
+    imports: [IconComponent, MuscleBarsComponent, RouterLink],
     template: `
         @if (musclesWorked().hasData) {
             <section class="muscles-week" [attr.aria-labelledby]="id">
                 <h3 class="muscles-week__title" [id]="id">Muscles worked this week</h3>
-                <app-body-map
-                    [main]="musclesWorked().main"
-                    [supporting]="musclesWorked().supporting"
-                />
+                <!-- Its drawings (58 KiB) load only once there's something to show on it, so a
+                     new guest's Today and Progress never wait on them; its space is kept till then -->
+                <div class="muscles-week__map">
+                    <ng-container #map />
+                    <div class="muscles-week__map-space" aria-hidden="true">
+                        <span class="muscles-week__figure-space"></span>
+                        <span class="muscles-week__figure-space"></span>
+                    </div>
+                </div>
                 @if (compact()) {
                     <a class="muscles-week__more" routerLink="/history">
                         How each muscle's doing against its aim, on Progress
@@ -79,4 +95,39 @@ export class MusclesThisWeekComponent {
             balance,
         };
     });
+
+    /**
+     * The body map, once its code's loaded, made in `#map`. By hand rather than with @defer or
+     * NgComponentOutlet, which would each bring more of Angular into the first load, for every
+     * page (8 kB and 2 kB).
+     */
+    private readonly bodyMap = signal<typeof BodyMapComponent | null>(null);
+    private readonly mapSlot = viewChild('map', { read: ViewContainerRef });
+    private shownMap: ComponentRef<BodyMapComponent> | null = null;
+
+    constructor() {
+        effect(() => {
+            if (this.musclesWorked().hasData && !untracked(this.bodyMap)) {
+                import('../../shared/components/body-map/body-map.component').then(
+                    ({ BodyMapComponent }) => this.bodyMap.set(BodyMapComponent),
+                    // Offline with it not loaded, say: its space stays, the bars still show
+                    () => undefined
+                );
+            }
+        });
+        effect(() => {
+            const slot = this.mapSlot();
+            const bodyMap = this.bodyMap();
+            const { main, supporting } = this.musclesWorked();
+            if (!slot || !bodyMap) {
+                return;
+            }
+            // Made again if the card's gone and come back, which empties its slot
+            if (!this.shownMap || slot.length === 0) {
+                this.shownMap = slot.createComponent(bodyMap);
+            }
+            this.shownMap.setInput('main', main);
+            this.shownMap.setInput('supporting', supporting);
+        });
+    }
 }

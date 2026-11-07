@@ -26,6 +26,8 @@ const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple
     imports: [FormField],
     templateUrl: './sign-in.component.html',
     styleUrl: './sign-in.component.scss',
+    // Supabase's code loads as soon as the form's used, so it's there by the time it's sent
+    host: { '(focusin)': 'account.prepare()', '(pointerdown)': 'account.prepare()' },
 })
 export class SignInComponent {
     /** Why sign in, over the buttons, and what the email field is described by. */

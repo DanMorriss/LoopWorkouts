@@ -168,12 +168,20 @@ describe('HomeComponent', () => {
     });
 
     describe('muscles worked this week', () => {
-        it('shows the body map of the last 7 days, with a link to the bars on Progress', () => {
+        it('shows the body map of the last 7 days, with a link to the bars on Progress', async () => {
             TestBed.inject(HistoryStore).record(entry);
             create();
 
+            // Its space kept while its drawings load, after the page
             const card = element().querySelector('app-muscles-this-week .muscles-week')!;
-            expect(card.querySelector('app-body-map')).not.toBeNull();
+            expect(card.querySelector('.muscles-week__map-space')).not.toBeNull();
+            await vi.waitFor(() => {
+                fixture.detectChanges();
+                expect(card.querySelector('app-body-map')).not.toBeNull();
+            });
+            // Its space gives way to it
+            const space = card.querySelector('.muscles-week__map-space')!;
+            expect(getComputedStyle(space).display).toBe('none');
             expect(card.querySelector('app-muscle-bars')).toBeNull();
             expect(card.querySelector('.muscles-week__more')!.getAttribute('href')).toBe(
                 '/history'

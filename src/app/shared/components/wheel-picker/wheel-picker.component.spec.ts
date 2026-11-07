@@ -211,6 +211,23 @@ describe('WheelPickerComponent', () => {
             viewport().dispatchEvent(event);
         }
 
+        /**
+         * Waits for a mouse drag to come to rest: the glide onto its row picks the row as it
+         * ends, and stops marking the wheel as dragged. Not scrolled(), which takes a wheel
+         * that hasn't moved for a moment as stopped: on a busy machine frames can come far
+         * apart, and the glide isn't over until its last one.
+         */
+        async function dragEnded() {
+            const giveUp = performance.now() + 5000;
+            while (
+                viewport().classList.contains('wheel-picker__viewport--dragging') &&
+                performance.now() < giveUp
+            ) {
+                await wait(50);
+            }
+            await settle();
+        }
+
         const middleOf = (value: number) => {
             const rect = item(value).getBoundingClientRect();
             return rect.top + rect.height / 2;
@@ -221,15 +238,14 @@ describe('WheelPickerComponent', () => {
             await openByPress();
 
             // Drag the bottom visible number (4) up to the top row (2): two rows, held still
-            // before letting go, so nothing carries it further
+            // for 150ms before letting go, so nothing carries it further
             const from = middleOf(4);
             const to = middleOf(2);
-            mouse('pointerdown', from);
-            mouse('pointermove', (from + to) / 2);
-            mouse('pointermove', to);
-            await wait(150);
-            mouse('pointerup', to);
-            await scrolled();
+            mouse('pointerdown', from, 0);
+            mouse('pointermove', (from + to) / 2, 10);
+            mouse('pointermove', to, 20);
+            mouse('pointerup', to, 170);
+            await dragEnded();
 
             expect(host.value()).toBe(5);
             expect(viewport().scrollTop % rowHeight()).toBe(0);
@@ -246,7 +262,7 @@ describe('WheelPickerComponent', () => {
                 mouse('pointermove', from - (rowHeight() + 10) * (i / 4), i * 10);
             }
             mouse('pointerup', from - rowHeight() - 10, 40);
-            await scrolled();
+            await dragEnded();
 
             expect(host.value()).toBeGreaterThan(4);
             expect(viewport().scrollTop % rowHeight()).toBe(0);

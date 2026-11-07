@@ -19,7 +19,7 @@ import { WorkoutStore } from '../../shared/state/workout-store.service';
             [attr.aria-label]="'Favourite ' + name()"
             (click)="$event.stopPropagation(); toggle()"
         >
-            <app-icon>{{ on() ? 'favorite' : 'favorite_border' }}</app-icon>
+            <app-icon [class.icon-outline]="!on()">favorite</app-icon>
         </button>
     `,
     styles: `

@@ -52,9 +52,12 @@ import { LIBRARY_SOURCES, LibraryFilters } from '../library-filters.service';
                 [attr.aria-pressed]="filters.favourites()"
                 (click)="filters.favourites.set(!filters.favourites())"
             >
-                <app-icon class="library-filters__chip-icon">{{
-                    filters.favourites() ? 'favorite' : 'favorite_border'
-                }}</app-icon>
+                <app-icon
+                    class="library-filters__chip-icon"
+                    [class.icon-outline]="!filters.favourites()"
+                >
+                    favorite
+                </app-icon>
                 Favourites
             </button>
             <button

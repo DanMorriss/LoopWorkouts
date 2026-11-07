@@ -9,7 +9,7 @@
     "test": "ng test",
     "format": "prettier --write \"src/**/*.{ts,html,scss,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\"",
-    "lint": "eslint src/app",
+    "lint": "eslint src/app && node tools/check-icons.mjs",
     "unused": "knip --production"
   },
   "private": true,

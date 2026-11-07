@@ -419,3 +419,29 @@ body.mat-typography {
     line-height: 1;
     vertical-align: -0.05em;
 }
+
+// The icon font is Material Symbols, filled to look as Material Icons did, and drawn as an
+// outline with the icon-outline class (e.g. a favourite's heart when it's off). index.html
+// asks for both. Google's stylesheet styles app-icon's class; mat-icon's default class,
+// material-icons, is styled here the same, as giving mat-icon another default
+// (MAT_ICON_DEFAULT_OPTIONS) brings Material's icon module into the first load.
+.material-icons {
+    font-family: 'Material Symbols Outlined';
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-outlined,
+.material-icons {
+    font-variation-settings: 'FILL' 1;
+
+    &.icon-outline {
+        font-variation-settings: 'FILL' 0;
+    }
+}

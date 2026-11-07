@@ -10,6 +10,7 @@ import {
     input,
     linkedSignal,
     signal,
+    untracked,
 } from '@angular/core';
 import { Exercise } from '../../../models/exercise';
 import { poseAt } from '../../../models/exercise-motion';
@@ -18,7 +19,12 @@ import { ExerciseStore } from '../../state/exercise-store.service';
 import { ThemeService } from '../../theme/theme.service';
 import { ExerciseFigure3dComponent } from './exercise-figure-3d.component';
 import { ExerciseFigureComponent } from './exercise-figure.component';
-import type { FigureColors, FigureScene } from './figure-scene';
+import type {
+    FigureColors,
+    FigureLook,
+    FigureScene,
+    prepareScene as PrepareScene,
+} from './figure-scene';
 
 /** Whether to draw the figure in 3D where the browser can; the flat figure if not. */
 export const DEMO_IN_3D = new InjectionToken<boolean>('DEMO_IN_3D', { factory: () => true });
@@ -65,7 +71,8 @@ export class ExerciseDemoComponent {
     protected readonly drawing = signal<'loading' | '3d' | 'flat'>(
         inject(DEMO_IN_3D) ? 'loading' : 'flat'
     );
-    private readonly sceneModule = signal<typeof import('./figure-scene') | null>(null);
+    /** What gets a figure ready to draw, once three.js has loaded. */
+    private readonly prepareScene = signal<typeof PrepareScene | null>(null);
     /** The 3D figure of this exercise's motion, its muscles shaded in the theme's colours. */
     protected readonly scene = signal<FigureScene | null>(null);
     /** Counts each time the scene is repainted, so its figures are drawn again. */
@@ -100,32 +107,40 @@ export class ExerciseDemoComponent {
         });
 
         effect((onCleanup) => {
-            const module = this.sceneModule();
+            const prepareScene = this.prepareScene();
             const motion = this.motion();
-            if (!module || !motion) {
+            if (!prepareScene || !motion) {
                 return;
             }
+            // Got ready a step at a time, after the page has shown, keeping its space till then.
             // The male figure, whichever is picked in Profile: the female one isn't right in 3D
             // yet (see TODO.md). The body map still draws the one picked
-            const scene = new module.FigureScene(motion, 'male');
-            this.scene.set(scene);
+            let cancelled = false;
+            let made: FigureScene | null = null;
+            void prepareScene(
+                motion,
+                'male',
+                () => untracked(() => this.look()),
+                () => cancelled
+            ).then((scene) => {
+                made = scene;
+                this.scene.set(scene);
+            });
             onCleanup(() => {
+                cancelled = true;
                 this.scene.set(null);
-                scene.dispose();
+                made?.dispose();
             });
         });
 
         // Its muscles, in the theme's colours, read from the page once the theme has changed
         effect(() => {
             const scene = this.scene();
-            const exercise = this.exercise();
-            this.theme.applied();
-            if (!scene) {
-                return;
+            const look = this.look();
+            if (scene) {
+                scene.setLook(look);
+                this.paint.update((count) => count + 1);
             }
-            scene.setColors(this.colors());
-            scene.setMuscles(exercise.mainMuscles, exercise.supportingMuscles);
-            this.paint.update((count) => count + 1);
         });
 
         const destroyRef = inject(DestroyRef);
@@ -145,7 +160,7 @@ export class ExerciseDemoComponent {
                 import('./figure-scene').then(
                     (module) => {
                         if (module.canDraw3d()) {
-                            this.sceneModule.set(module);
+                            this.prepareScene.set(module.prepareScene);
                             this.drawing.set('3d');
                         } else {
                             this.drawing.set('flat');
@@ -183,6 +198,17 @@ export class ExerciseDemoComponent {
         };
         this.turning = { to, frame: requestAnimationFrame(step) };
     }
+
+    /** How the figure's shaded: the theme's colours, read from the page, and its muscles. */
+    private readonly look = computed((): FigureLook => {
+        const exercise = this.exercise();
+        this.theme.applied();
+        return {
+            colors: this.colors(),
+            main: exercise.mainMuscles,
+            supporting: exercise.supportingMuscles,
+        };
+    });
 
     /** The theme's colours for the figure, as the body map shades its muscles. */
     private colors(): FigureColors {

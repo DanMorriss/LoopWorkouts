@@ -99,6 +99,18 @@ describe('HelpComponent (NAV-7)', () => {
         );
     });
 
+    it('clears the search with the × in the box, showing every question again', async () => {
+        await open();
+        const all = questions();
+        await search('iphone');
+
+        el().querySelector<HTMLButtonElement>('button[aria-label="Clear search"]')!.click();
+        await harness.fixture.whenStable();
+
+        expect(questions()).toEqual(all);
+        expect(document.activeElement).toBe(el().querySelector('#help-search'));
+    });
+
     it('opens on the question a ? link asked for, with focus on it', async () => {
         document.body.appendChild(harness.fixture.nativeElement);
         await open('/help?q=no-sound');

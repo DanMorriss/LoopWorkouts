@@ -28,4 +28,19 @@ describe('SearchFieldComponent', () => {
         await fixture.whenStable();
         expect(field.value).toBe('');
     });
+
+    it('shows an × only with something typed, which clears it and keeps focus in the box', async () => {
+        const fixture = TestBed.createComponent(HostComponent);
+        await fixture.whenStable();
+        const el = fixture.nativeElement as HTMLElement;
+        const clear = () =>
+            el.querySelector<HTMLButtonElement>('button[aria-label="Clear search"]');
+
+        clear()!.click();
+        await fixture.whenStable();
+
+        expect(fixture.componentInstance.query()).toBe('');
+        expect(document.activeElement).toBe(el.querySelector('#find'));
+        expect(clear()).toBeNull();
+    });
 });

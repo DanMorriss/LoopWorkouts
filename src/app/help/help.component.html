@@ -3,17 +3,13 @@
         <app-back-link url="/account" label="You" />
         <h2 class="help__title">Help</h2>
 
-        <label class="picker-field help__search">
-            <span class="picker-field__label">Search help</span>
-            <input
-                class="picker-field__input"
-                type="search"
-                autocomplete="off"
-                placeholder="e.g. sound, plan, backup"
-                [value]="query()"
-                (input)="search($event)"
-            />
-        </label>
+        <app-search-field
+            class="help__search"
+            inputId="help-search"
+            label="Search help"
+            placeholder="e.g. sound, plan, backup"
+            [(value)]="query"
+        />
         <p class="sr-only" role="status">{{ resultText() }}</p>
 
         <!-- The tour of the app (NAV-8), for any time -->

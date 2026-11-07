@@ -1,3 +1,5 @@
+import { TourName } from './tour.service';
+
 /** A part of a page the tour can light up, found by its `data-tour` attribute. */
 export interface TourPart {
     /** The `data-tour` value on it, e.g. "get-started": the first on the page is lit up. */
@@ -5,10 +7,10 @@ export interface TourPart {
     text: string;
 }
 
-/** One stop on the tour (NAV-8): a page, and what's said about it. */
+/** One stop on a tour: a page, and what's said about it. */
 export interface TourStop {
-    /** The page it opens, as its tab does. */
-    path: string;
+    /** The page it opens, as its tab does, lighting the tab up; none stays on the page it's on. */
+    path?: string;
     title: string;
     /** What it may light up, the first found winning; none for a stop that lights up nothing. */
     parts: readonly TourPart[];
@@ -20,7 +22,17 @@ export interface TourStop {
     sampleHistory?: boolean;
 }
 
-export const TOUR_STOPS: readonly TourStop[] = [
+/** A tour: its stops, in order, and where focus goes when it ends. */
+export interface Tour {
+    stops: readonly TourStop[];
+    /** The id of what takes focus after Done, on the last stop's page. */
+    doneFocus: string;
+    /** The id of what takes focus after Skip tour; none for the page's title. */
+    skipFocus?: string;
+}
+
+/** The tour of the app (NAV-8): each tab's page, and its main part. */
+const APP_STOPS: readonly TourStop[] = [
     {
         path: '/home',
         title: 'Today',
@@ -103,3 +115,98 @@ export const TOUR_STOPS: readonly TourStop[] = [
         tab: 'all',
     },
 ];
+
+/**
+ * The tour of Create (BLD-17), the first time it opens for a new workout: the parts of a new
+ * workout's form, top to bottom, on the page as it is.
+ */
+const CREATE_STOPS: readonly TourStop[] = [
+    {
+        title: 'Make a workout',
+        parts: [
+            {
+                part: 'workout-title',
+                text: "A quick look at what's here, top to bottom. First, a name for it, e.g. Leg day.",
+            },
+        ],
+        text: "A quick look at what's here, top to bottom.",
+    },
+    {
+        title: 'Steps',
+        parts: [
+            {
+                part: 'step-header',
+                text: 'A workout is steps, done in order. Tap Reps to make one timed or a rest, and drag its handle, or use the arrows, to move it.',
+            },
+        ],
+        text: 'A workout is steps, done in order: reps, a time or a rest.',
+    },
+    {
+        title: 'Exercises',
+        parts: [
+            {
+                part: 'step-exercise',
+                text: 'Type to find an exercise, or make your own. The button beside it lists them all, by muscle and the kit you have.',
+            },
+        ],
+        text: 'Type to find an exercise, or make your own.',
+    },
+    {
+        title: 'Sets',
+        parts: [
+            {
+                part: 'step-sets',
+                text: 'With more than one set, you choose the rest after each, and Vary each set gives each its own reps and weight, e.g. for a pyramid. Each side does the left, then the right.',
+            },
+        ],
+        text: 'Each step can have sets, with a rest after each.',
+    },
+    {
+        title: 'More steps',
+        parts: [
+            {
+                part: 'add-steps',
+                text: '+ Step adds an exercise or a rest, and + Heading a title, e.g. Warmup, to split a long workout into parts.',
+            },
+        ],
+        text: '+ Step adds another step, and + Heading a title, e.g. Warmup.',
+    },
+    {
+        // Join with next only shows once a step has one after it, which a new workout's
+        // doesn't, so this lights up + Step, the first of the two taps
+        title: 'Supersets',
+        parts: [
+            {
+                part: 'add-step',
+                text: 'To do exercises back to back, e.g. bench press then rows, then one rest: add the second with + Step, then tap Join with next under the first. Join a third for a giant set.',
+            },
+        ],
+        text: 'To do exercises back to back, add the second with + Step, then tap Join with next under the first.',
+    },
+    {
+        title: 'Rounds',
+        parts: [
+            {
+                part: 'repeat',
+                text: 'Repeat the whole workout a number of rounds, until you stop, or as many rounds as fit in a time limit.',
+            },
+        ],
+        text: 'Repeat the whole workout a number of rounds, or for a time.',
+    },
+    {
+        title: 'Save or start',
+        parts: [
+            {
+                part: 'save',
+                text: 'Save keeps it in Workouts for another day, and Start workout saves it and starts it now.',
+            },
+        ],
+        text: 'Save keeps it in Workouts; Start workout starts it now.',
+    },
+];
+
+export const TOURS: Record<TourName, Tour> = {
+    // Done goes back to Today, its last stop
+    app: { stops: APP_STOPS, doneFocus: 'home-title' },
+    create: { stops: CREATE_STOPS, doneFocus: 'title', skipFocus: 'title' },
+};

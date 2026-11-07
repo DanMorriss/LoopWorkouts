@@ -230,6 +230,10 @@ In ms since the epoch, by the device's clock, for the You tab. Signing out remov
 
 `seen` once the tour of the app (NAV-8) has been started, from Today or Help, or Today's offer of it turned down with Not now. While it's missing, Today offers the tour. Not synced or backed up, as it's about this device. Signing out and Clear this device remove it, so a device set up again is offered it again.
 
+### `tour-create`: the tour of Create's been shown
+
+`seen` once the tour of Create (BLD-17) has started, the first time Create opened for a new workout on this device. While it's missing, the next new workout shows it. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.
+
 ### `clock-offset`: how far this device's clock is from the server's
 
 In ms, added to the device's clock to date changes (see [backup and sync](backup-and-sync.md), Sync). Kept after signing out, as the clock's no less off; so are the settings, which are this device's, less the name, and with `profileUpdatedAt` 0. Signing out removes everything else.

@@ -80,7 +80,7 @@
                                          runPlan()). A rest step is just a time. A superset has
                                          rounds, which are its steps' sets. -->
 @if (kind !== 'rest' && kind !== 'heading') {
-    <div class="picker-row">
+    <div class="picker-row" data-tour="step-sets">
         @if (!inSuperset) {
             <div class="picker-field">
                 <span class="picker-field__label" [id]="'step-' + key + '-sets-label'">

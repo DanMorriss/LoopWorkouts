@@ -15,7 +15,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
-import { TOUR_STOPS } from './tour-stops';
+import { TOURS, TourStop } from './tour-stops';
 import { TourService } from './tour.service';
 
 /** How long a stop waits for its part to show, e.g. on a page still loading. */
@@ -37,7 +37,7 @@ interface Light {
 }
 
 /**
- * The tour of the app (NAV-8), over every page while it's on: it opens each stop's page,
+ * A tour, of the app (NAV-8) or of Create (BLD-17), over every page while it's on: it opens each stop's page,
  * lights up its part and the tab it's under (the rest dimmed), and says what it is in a card
  * just above the tab bar, with Back, Skip tour and Next. The page can't be pressed meanwhile. Not `app-dialog`,
  * which is a card in the middle of the page that a click outside closes; focus is trapped in
@@ -63,10 +63,11 @@ export class TourComponent {
     private readonly card = viewChild.required<ElementRef<HTMLElement>>('card');
     private readonly title = viewChild.required<ElementRef<HTMLElement>>('title');
 
-    protected readonly count = TOUR_STOPS.length;
+    private readonly stops = computed(() => TOURS[this.tour.tour()].stops);
+    protected readonly count = computed(() => this.stops().length);
     protected readonly index = computed(() => this.tour.stop() ?? 0);
-    protected readonly stop = computed(() => TOUR_STOPS[this.index()]);
-    protected readonly last = computed(() => this.index() === TOUR_STOPS.length - 1);
+    protected readonly stop = computed(() => this.stops()[this.index()]);
+    protected readonly last = computed(() => this.index() === this.count() - 1);
 
     /** The part lit up, once found, and what's said about it. */
     private readonly part = signal<{ element: Element; text: string } | null>(null);
@@ -76,23 +77,26 @@ export class TourComponent {
     /** Each stop's search for its part, so an earlier one still looking gives up. */
     private search = 0;
     private frame = 0;
+    /** Room added under the page, so a part near its end can be scrolled up above the card. */
+    private room = 0;
 
     constructor() {
         effect(() => {
             const index = this.tour.stop();
             if (index !== null) {
-                untracked(() => void this.show(index));
+                untracked(() => void this.show(this.stops()[index]));
             }
         });
         inject(DestroyRef).onDestroy(() => {
             this.search++;
             cancelAnimationFrame(this.frame);
+            this.makeRoom(0);
         });
     }
 
     protected next() {
         if (this.last()) {
-            this.finish('home-title');
+            this.finish(TOURS[this.tour.tour()].doneFocus);
         } else {
             this.tour.next();
         }
@@ -102,8 +106,13 @@ export class TourComponent {
         this.tour.back();
     }
 
-    /** Ends the tour where it is, with focus on the page's title. */
+    /** Ends the tour where it is, with focus on the page's title, or what the tour says. */
     protected skip() {
+        const focus = TOURS[this.tour.tour()].skipFocus;
+        if (focus) {
+            this.finish(focus);
+            return;
+        }
         const heading = this.document.querySelector<HTMLElement>('main h2');
         if (heading && !heading.hasAttribute('tabindex')) {
             heading.setAttribute('tabindex', '-1');
@@ -131,13 +140,14 @@ export class TourComponent {
                 });
             }
         }
-        // The tab that takes you there, or the whole tab bar at the end, as pills
+        // The tab that takes you there, or the whole tab bar at the end, as pills; none for a
+        // stop that stays on its page
         const stop = this.stop();
-        const tab = this.document
-            .querySelector(
-                stop.tab === 'all' ? '[data-tour-tabs]' : `[data-tour-tab="${stop.path}"]`
-            )
-            ?.getBoundingClientRect();
+        const tabSelector =
+            stop.tab === 'all' ? '[data-tour-tabs]' : stop.path && `[data-tour-tab="${stop.path}"]`;
+        const tab = tabSelector
+            ? this.document.querySelector(tabSelector)?.getBoundingClientRect()
+            : undefined;
         if (tab) {
             const gap = stop.tab === 'all' ? 3 : 1;
             lights.push({
@@ -158,15 +168,16 @@ export class TourComponent {
         this.tour.end();
     }
 
-    /** Opens the stop's page, then looks for its part there and lights it up. */
-    private async show(index: number) {
+    /** Opens the stop's page, if it has one, then looks for its part there and lights it up. */
+    private async show(stop: TourStop) {
         const search = ++this.search;
-        const stop = TOUR_STOPS[index];
         this.part.set(null);
         this.focusTitle();
         // Before the page opens, so it opens with its examples
         this.tour.sampleHistory.set(stop.sampleHistory ?? false);
-        await this.router.navigateByUrl(stop.path);
+        if (stop.path) {
+            await this.router.navigateByUrl(stop.path);
+        }
         // Its tab lights up straight away, its part once it's found
         this.measure();
         const started = performance.now();
@@ -197,8 +208,10 @@ export class TourComponent {
         const box = element.getBoundingClientRect();
         const room = this.card().nativeElement.getBoundingClientRect().top;
         const at = Math.max(MARGIN * 2, (room - box.height) / 2);
+        const top = Math.max(0, box.top + window.scrollY - at);
+        this.makeRoom(top);
         window.scrollTo({
-            top: Math.max(0, box.top + window.scrollY - at),
+            top,
             behavior: this.reducedMotion() ? 'auto' : 'smooth',
         });
         const until = performance.now() + FOLLOW_MS;
@@ -210,6 +223,21 @@ export class TourComponent {
         };
         cancelAnimationFrame(this.frame);
         follow();
+    }
+
+    /**
+     * Makes the page long enough to scroll to `top`, e.g. for Create's Save, which on a short
+     * page can't otherwise come up above the card; 0 takes the room away.
+     */
+    private makeRoom(top: number) {
+        const main = this.document.querySelector('main');
+        if (!main) {
+            return;
+        }
+        const root = this.document.documentElement;
+        const furthest = root.scrollHeight - this.room - window.innerHeight;
+        this.room = top ? Math.max(0, Math.ceil(top - furthest)) : 0;
+        main.style.paddingBottom = this.room ? `calc(var(--bars-height) + ${this.room}px)` : '';
     }
 
     /** The new stop's title takes focus, so a screen reader reads it and its line. */

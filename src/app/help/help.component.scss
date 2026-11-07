@@ -16,8 +16,11 @@
     margin-bottom: 0.5rem;
 }
 
-.help__tour {
-    margin-top: 0.25rem;
+.help__tours {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
 }
 
 .help__section {

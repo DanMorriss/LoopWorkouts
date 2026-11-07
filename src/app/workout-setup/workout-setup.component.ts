@@ -13,6 +13,7 @@ import { InfinitySwitchComponent } from '../shared/components/infinity-switch/in
 import { SwapExerciseDialogComponent } from '../shared/components/swap-exercise-dialog/swap-exercise-dialog.component';
 import { LabelledWheelComponent } from '../shared/components/wheel-picker/labelled-wheel.component';
 import { WorkoutStore } from '../shared/state/workout-store.service';
+import { TourService } from '../tour/tour.service';
 import { BrowseExercisesDialogComponent } from './browse-exercises-dialog/browse-exercises-dialog.component';
 import { SetupDrag } from './setup-drag';
 import { SetupExercises } from './setup-exercises';
@@ -95,6 +96,7 @@ export class WorkoutSetupComponent {
 
     constructor() {
         const leaveCheck = inject(LeaveCheck);
+        const tour = inject(TourService);
         leaveCheck.set(this.askToLeave);
         inject(DestroyRef).onDestroy(() => leaveCheck.clear(this.askToLeave));
 
@@ -108,6 +110,10 @@ export class WorkoutSetupComponent {
                 return;
             }
             this.setup.load(this.setup.findWorkoutToEdit(params));
+            // The first time it opens for a new workout on this device, a tour of it (BLD-17)
+            if (this.setup.editingWorkoutId() === null) {
+                tour.startOnce('create');
+            }
             const add = params.get('add');
             if (add !== null) {
                 this.setup.addExercise(add);

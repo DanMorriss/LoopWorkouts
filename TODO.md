@@ -77,6 +77,12 @@ Eighteen ready-made workouts are listed on Workouts, under your own (see `docs/f
     - **Runs once, the first time:** straight after the setup (NAV-4), as the welcome screen and setup do, finishing on Today. It can be skipped, and isn't shown again once finished or skipped (a flag in localStorage, as `welcomed` and `setup` are; see `docs/features/data.md`).
     - **Can be run again from You,** e.g. a "Take the tour" row beside Help.
     - **When it's in, remove the ? links** (`HelpLinkComponent`, `src/app/shared/components/help-link/`) from the workout page, the Plan page, Today's week and the welcome screen. The tour does their job, and Help stays on You. Update NAV-7 in `docs/features/home-and-navigation.md` to match.
+- [x] **A tour of Create** (BLD-17, 2026-11-07): the first time Create opens for a new workout on a device (+ New, or a new workout from an exercise's page), seven stops down the form: the title, a step's kind and handle, its exercise, sets, + Step and + Heading (and Join with next), rounds, and Save or Start. The tour of the app's overlay, which now takes any number of tours (`TOURS` in `src/app/tour/tour-stops.ts`).
+    - **Run it again from Help,** e.g. a "Show me round Create" link in its Make a workout topic. It needs Create open on a new workout first, then `TourService.start('create')`.
+- [ ] **More tours, if wanted** (each a `TOURS` entry, shown once by `startOnce`), most useful first:
+    - **The first workout** (RUN, CTL): what's on the workout page is the least obvious part of the app, and it's used mid-exercise. Before the clock starts on the first workout run on a device, held paused while it's on: the bubble and the round, what's next, Done on a rep step and changing its reps or weight (RUN-6), how it's done (RUN-9), swap (RUN-11), skip (RUN-12), pause and stop, and that it carries on while you look at other pages (CTL-4). It would replace the ? link there.
+    - **The Plan page** (PLN), on its first visit: picking workouts for each day, the ready-made plans, and What your plan works with Missing muscle groups at the bottom, which are easily missed below the week. It would replace the ? link there too.
+    - **An exercise's page** (EXR), on the first one opened: turning the 3D demo with a finger, the muscles it works, your own note (EXR-10) and Add to workout (EXR-12).
 
 ### Setup and profile (NAV-4, SET-7)
 

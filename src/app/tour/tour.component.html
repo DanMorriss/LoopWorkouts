@@ -46,7 +46,7 @@
     aria-describedby="tour-text tour-count"
     cdkTrapFocus
 >
-    <p class="tour__count" id="tour-count">{{ index() + 1 }} of {{ count }}</p>
+    <p class="tour__count" id="tour-count">{{ index() + 1 }} of {{ count() }}</p>
     <h2 #title class="tour__title" id="tour-title" tabindex="-1">{{ stop().title }}</h2>
     <p class="tour__text" id="tour-text">{{ text() }}</p>
     <div class="tour__actions">

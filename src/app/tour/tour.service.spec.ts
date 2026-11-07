@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TOUR_KEY, TourService } from './tour.service';
+import { CREATE_TOUR_KEY, TOUR_KEY, TourService } from './tour.service';
 
 describe('TourService (NAV-8)', () => {
     beforeEach(() => localStorage.clear());
@@ -39,5 +39,30 @@ describe('TourService (NAV-8)', () => {
         expect(tour.stop()).toBeNull();
         tour.next();
         expect(tour.stop()).toBeNull();
+    });
+
+    it("starts Create's tour once, leaving the tour of the app offered", () => {
+        const tour = TestBed.inject(TourService);
+        tour.startOnce('create');
+
+        expect(tour.tour()).toBe('create');
+        expect(tour.stop()).toBe(0);
+        expect(localStorage.getItem(CREATE_TOUR_KEY)).toBe('seen');
+        expect(tour.offered()).toBe(true);
+
+        tour.end();
+        tour.startOnce('create');
+        expect(tour.stop()).toBeNull();
+    });
+
+    it('starts no tour over one already on', () => {
+        const tour = TestBed.inject(TourService);
+        tour.start();
+        tour.next();
+        tour.startOnce('create');
+
+        expect(tour.tour()).toBe('app');
+        expect(tour.stop()).toBe(1);
+        expect(localStorage.getItem(CREATE_TOUR_KEY)).toBeNull();
     });
 });

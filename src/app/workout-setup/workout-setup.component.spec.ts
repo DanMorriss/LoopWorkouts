@@ -39,6 +39,7 @@ import { WorkoutSetupComponent } from './workout-setup.component';
 import { WorkoutSetupForm } from './workout-setup-form';
 import { LeaveCheck } from '../nav/leave-check';
 import { PageSlide } from '../nav/page-slide';
+import { CREATE_TOUR_KEY, TourService } from '../tour/tour.service';
 
 /** The step a new workout starts with, as `shown()` reads it. */
 const blankStep = { kind: 'Reps', name: '', time: '0 reps' };
@@ -235,6 +236,42 @@ describe('WorkoutSetupComponent', () => {
     }
 
     afterEach(() => localStorage.clear());
+
+    describe('the tour of Create (BLD-17)', () => {
+        it('starts the first time it opens for a new workout, and not again', async () => {
+            await setup();
+            const tour = TestBed.inject(TourService);
+            await create({ empty: true });
+
+            expect(tour.tour()).toBe('create');
+            expect(tour.stop()).toBe(0);
+            expect(localStorage.getItem(CREATE_TOUR_KEY)).toBe('seen');
+
+            tour.end();
+            fixture.destroy();
+            await create({ empty: true });
+            expect(tour.stop()).toBeNull();
+        });
+
+        it('is not shown for a workout being changed', async () => {
+            await setup();
+            const legs = store.addWorkout({ ...savedWorkout, title: 'Legs' });
+            queryParamMap.next(convertToParamMap({ editId: legs.id }));
+            await create({ empty: true });
+
+            expect(TestBed.inject(TourService).stop()).toBeNull();
+        });
+
+        it('waits for a tour already on', async () => {
+            await setup();
+            const tour = TestBed.inject(TourService);
+            tour.start('app');
+            await create({ empty: true });
+
+            expect(tour.tour()).toBe('app');
+            expect(localStorage.getItem(CREATE_TOUR_KEY)).toBeNull();
+        });
+    });
 
     describe('leaving with unsaved changes', () => {
         const dialog = () =>

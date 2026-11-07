@@ -44,6 +44,18 @@ class ProgressPage {}
 class YouPage {}
 
 @Component({
+    template: `<h2>Steps</h2>
+        <label data-tour="workout-title">Title <input id="title" /></label>
+        <div data-tour="step-header">Reps</div>
+        <div data-tour="step-exercise">Exercise</div>
+        <div data-tour="step-sets">Sets</div>
+        <div data-tour="add-steps">+ Step</div>
+        <div data-tour="repeat">Rounds</div>
+        <div data-tour="save">Save</div>`,
+})
+class CreatePage {}
+
+@Component({
     imports: [RouterOutlet, TourComponent],
     template: `<main><router-outlet /></main>
         <nav data-tour-tabs>
@@ -76,6 +88,7 @@ describe('TourComponent (NAV-8)', () => {
                     { path: 'exercises', component: ExercisesPage },
                     { path: 'history', component: ProgressPage },
                     { path: 'account', component: YouPage },
+                    { path: 'setup', component: CreatePage },
                 ]),
             ],
         });
@@ -113,9 +126,9 @@ describe('TourComponent (NAV-8)', () => {
         }
     }
 
-    async function start() {
+    async function start(name: 'app' | 'create' = 'app') {
         fixture = TestBed.createComponent(Host);
-        tour.start();
+        tour.start(name);
         fixture.detectChanges();
         await settle();
     }
@@ -234,5 +247,51 @@ describe('TourComponent (NAV-8)', () => {
         expect(router.url).toBe('/exercises');
         expect(document.activeElement?.textContent).toBe('Exercises');
         expect(tour.offered()).toBe(false);
+    });
+
+    describe("Create's tour (BLD-17)", () => {
+        beforeEach(async () => {
+            await router.navigateByUrl('/setup');
+            await start('create');
+        });
+
+        it('stays on Create, lighting up each part and no tab', async () => {
+            expect(router.url).toBe('/setup');
+            expect(text('.tour__count')).toBe('1 of 7');
+            expect(text('.tour__title')).toBe('Make a workout');
+            const title = el().querySelector('[data-tour="workout-title"]')!;
+            expect(lit()).toEqual([Math.round(title.getBoundingClientRect().top - 6)]);
+
+            button('Next')!.click();
+            await settle();
+            expect(router.url).toBe('/setup');
+            expect(text('.tour__title')).toBe('Steps');
+            expect(lit()).toHaveLength(1);
+        });
+
+        it('Done leaves focus on the workout title', async () => {
+            for (let i = 0; i < 6; i++) {
+                button('Next')!.click();
+                await settle();
+            }
+            expect(text('.tour__title')).toBe('Save or start');
+            expect(button('Skip tour')).toBeUndefined();
+
+            button('Done')!.click();
+            await settle();
+            expect(tour.stop()).toBeNull();
+            expect(router.url).toBe('/setup');
+            expect(document.activeElement?.id).toBe('title');
+            // Any room made under the page to bring Save up above the card has gone
+            expect(el().querySelector('main')!.style.paddingBottom).toBe('');
+        });
+
+        it('Skip tour leaves focus on the workout title too', async () => {
+            button('Skip tour')!.click();
+            await settle();
+
+            expect(tour.stop()).toBeNull();
+            expect(document.activeElement?.id).toBe('title');
+        });
     });
 });

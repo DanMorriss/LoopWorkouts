@@ -4,7 +4,7 @@
 @let kind = step().value().kind;
 <!-- Finds an exercise as you type, or makes a new one -->
 @let exercise = exercises.exerciseFor(step().value());
-<div class="picker-field">
+<div class="picker-field" data-tour="step-exercise">
     <label class="picker-field__label" [for]="'step-' + key + '-name'"> Exercise (optional) </label>
     <div class="step__name-row">
         <app-exercise-picker

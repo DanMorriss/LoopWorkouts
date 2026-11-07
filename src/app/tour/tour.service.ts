@@ -1,16 +1,24 @@
 import { Service, signal } from '@angular/core';
 
-/** Set once the tour's been taken, or turned down, on this device. */
+/** The tours: of the app (NAV-8), and of making a workout on Create (BLD-17). */
+export type TourName = 'app' | 'create';
+
+/** Set once the tour of the app's been taken, or turned down, on this device. */
 export const TOUR_KEY = 'tour';
+/** Set once the tour of Create has been shown on this device. */
+export const CREATE_TOUR_KEY = 'tour-create';
+
+const KEYS: Record<TourName, string> = { app: TOUR_KEY, create: CREATE_TOUR_KEY };
 
 /**
- * The tour of the app (NAV-8): whether Today still offers it on this device, and which stop
- * is showing while it's on. The tour itself, `TourComponent` with its stops, loads only once it
- * starts (`AppComponent`), so none of it is in the first download.
+ * The tours: whether Today still offers the tour of the app on this device, and which tour
+ * and stop is showing while one's on. The tours themselves, `TourComponent` with their stops,
+ * load only once one starts (`AppComponent`), so none of them is in the first download.
  */
 @Service()
 export class TourService {
-    private readonly _offered = signal(readOffered());
+    private readonly _offered = signal(!seen(TOUR_KEY));
+    private readonly _tour = signal<TourName>('app');
     private readonly _stop = signal<number | null>(null);
 
     /**
@@ -18,14 +26,24 @@ export class TourService {
      * showing it.
      */
     readonly sampleHistory = signal(false);
-    /** Whether Today offers the tour: until it's taken or turned down here. */
+    /** Whether Today offers the tour of the app: until it's taken or turned down here. */
     readonly offered = this._offered.asReadonly();
-    /** The stop showing, from 0, or null with the tour off. */
+    /** The tour showing, or the last to have shown. */
+    readonly tour = this._tour.asReadonly();
+    /** The stop showing, from 0, or null with no tour on. */
     readonly stop = this._stop.asReadonly();
 
-    start() {
-        this.stopOffering();
+    start(tour: TourName = 'app') {
+        this.markSeen(tour);
+        this._tour.set(tour);
         this._stop.set(0);
+    }
+
+    /** Starts the tour if it hasn't been shown on this device, and no tour is on. */
+    startOnce(tour: TourName) {
+        if (this._stop() === null && !seen(KEYS[tour])) {
+            this.start(tour);
+        }
     }
 
     /** On to the next stop; the tour knows which is its last, and ends there instead. */
@@ -42,21 +60,28 @@ export class TourService {
         this.sampleHistory.set(false);
     }
 
-    /** Not now: Today stops offering it. */
+    /** Not now: Today stops offering the tour of the app. */
     stopOffering() {
-        this._offered.set(false);
+        this.markSeen('app');
+    }
+
+    private markSeen(tour: TourName) {
+        if (tour === 'app') {
+            this._offered.set(false);
+        }
         try {
-            localStorage.setItem(TOUR_KEY, 'seen');
+            localStorage.setItem(KEYS[tour], 'seen');
         } catch {
-            // Storage full or blocked: it's offered again next time, which is fine
+            // Storage full or blocked: it's shown again next time, which is fine
         }
     }
 }
 
-function readOffered(): boolean {
+/** Whether it's been seen; with storage blocked, it's counted as seen, so it isn't shown each time. */
+function seen(key: string): boolean {
     try {
-        return localStorage.getItem(TOUR_KEY) === null;
+        return localStorage.getItem(key) !== null;
     } catch {
-        return false;
+        return true;
     }
 }

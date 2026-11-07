@@ -2,7 +2,8 @@
     <div class="w-full max-w-md p-4">
         <app-back-link [url]="back().url" [label]="back().label" />
         <form [formRoot]="setup.workoutForm">
-            <label class="picker-field" for="title">
+            <!-- data-tour: what the tour of Create (BLD-17) lights up -->
+            <label class="picker-field" for="title" data-tour="workout-title">
                 <span class="picker-field__label">Workout Title</span>
                 <input
                     class="picker-field__input"
@@ -114,7 +115,7 @@
                         <!-- Where it will land -->
                         <div class="step-placeholder" *cdkDragPlaceholder></div>
 
-                        <app-setup-step-header [field]="step" [index]="i" />
+                        <app-setup-step-header [field]="step" [index]="i" data-tour="step-header" />
 
                         @if (expanded) {
                             <!-- Fades in as it opens, while what's below slides down to make room
@@ -133,7 +134,7 @@
 
             <!-- Adds a rep step, whose kind pill changes it to timed or rest; or a heading, e.g.
                  "Warmup", to break a long workout into parts -->
-            <div class="add-steps">
+            <div class="add-steps" data-tour="add-steps">
                 <button
                     type="button"
                     id="add-step"
@@ -171,7 +172,7 @@
             <h2 class="setup-heading" id="repeat-heading">Repeat the whole workout</h2>
 
             <!-- A number of rounds, or as many as fit in a time limit -->
-            <fieldset class="segmented mb-4" aria-labelledby="repeat-heading">
+            <fieldset class="segmented mb-4" aria-labelledby="repeat-heading" data-tour="repeat">
                 <div
                     class="segmented__options"
                     [style.--count]="setup.repeatModes.length"
@@ -246,7 +247,7 @@
                 <mat-error>{{ error.message }}</mat-error>
             }
             <!-- Start is the main one; Save keeps it in the library for later (BLD-15) -->
-            <div class="m-4 flex flex-wrap items-center justify-center gap-3">
+            <div class="m-4 flex flex-wrap items-center justify-center gap-3" data-tour="save">
                 <button
                     class="btn-pill setup-save"
                     type="button"

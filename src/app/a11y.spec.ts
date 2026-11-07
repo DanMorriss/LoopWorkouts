@@ -19,6 +19,7 @@ import { weekdayOf } from './models/plan';
 import { WorkoutStore } from './shared/state/workout-store.service';
 import { AddressMove } from './nav/moved-banner/address-move.service';
 import { UndoService } from './shared/undo/undo.service';
+import { CREATE_TOUR_KEY } from './tour/tour.service';
 import { asOneGroup } from './models/workout';
 
 /**
@@ -67,6 +68,8 @@ for (const theme of ['dark', 'light'] as const) {
             document.documentElement.dataset['theme'] = theme;
             localStorage.clear();
             sessionStorage.clear();
+            // So Create's own tour (BLD-17) doesn't cover it: the tour has its own check below
+            localStorage.setItem(CREATE_TOUR_KEY, 'seen');
             accountClient = fakeAccountClient();
             TestBed.configureTestingModule({
                 providers: [

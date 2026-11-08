@@ -41,6 +41,7 @@
         @if (menuOpen()) {
             <div
                 class="menu entry__menu"
+                appMenuPlacement
                 animate.leave="menu--leaving"
                 [id]="'options-' + id()"
                 role="group"

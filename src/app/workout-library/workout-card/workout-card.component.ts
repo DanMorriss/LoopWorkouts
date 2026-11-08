@@ -31,6 +31,7 @@ import { ReadyMadeBadgeComponent } from '../../shared/components/ready-made-badg
 import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
 import { ShowcaseKitComponent } from '../../shared/components/showcase/showcase-kit.component';
 import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
+import { MenuPlacementDirective } from '../../shared/menu-placement.directive';
 
 /**
  * One workout in the list, yours or ready-made (with its badge): its title and what's in it,
@@ -47,6 +48,7 @@ import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showc
     imports: [
         FavouriteButtonComponent,
         MatIconModule,
+        MenuPlacementDirective,
         ReadyMadeBadgeComponent,
         ShowcaseCountComponent,
         ShowcaseKitComponent,

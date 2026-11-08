@@ -58,6 +58,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 - [x] **Rework the workout cards** (2026-11-06): each workout in the log is a card of the Workouts and Plan family, with the time it took as its big number, the main muscles its sets worked, and its sets under a rule.
 - [x] **Time per week** (PRG-12, 2026-11-06): a bar chart of the last 12 weeks, Monday to Sunday, under "Last 7 days", with the chosen week's time and workouts over it, arrow keys and a table.
+- [x] **Open a workout from its card in the log** (2026-11-08): pressing a run's card slides in its workout's Details, to favourite it or make a copy to change, with ‹ Progress going back to that run.
 - [ ] **More charts, if wanted:** e.g. workouts per week (the same chart could switch between time and workouts), or a range to look further back than 12 weeks.
 
 ### Sync

@@ -37,6 +37,8 @@ describe('the Privacy notice and Terms of use', () => {
         expect(page.textContent).toContain('without one, none of it is sent anywhere');
         expect(page.textContent).toContain("Syncing, while you're signed in.");
         expect(page.textContent).toContain('Counting visits.');
+        expect(page.textContent).toContain('Loop Workouts is run by Dan Morriss');
+        expect(page.querySelector('a[href="https://ico.org.uk/make-a-complaint/"]')).not.toBeNull();
         expect(page.textContent).toContain('Last updated');
     });
 
@@ -46,6 +48,7 @@ describe('the Privacy notice and Terms of use', () => {
         const page: HTMLElement = harness.routeNativeElement!;
 
         expect(page.querySelector('h2')!.textContent!.trim()).toBe('Terms of use');
+        expect(page.textContent).toContain('the law of England and Wales');
         page.querySelector<HTMLAnchorElement>('a[href="/privacy"]')!.click();
         await harness.fixture.whenStable();
 

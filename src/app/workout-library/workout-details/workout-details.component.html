@@ -12,6 +12,17 @@
                 <p class="details__description">{{ ready.description }}</p>
             }
 
+            <!-- Started from here, as from its card, without going back to the list -->
+            <button
+                type="button"
+                class="btn-main details__start"
+                [attr.aria-label]="'Start ' + name()"
+                (click)="start(workout)"
+            >
+                <mat-icon aria-hidden="true">play_arrow</mat-icon>
+                Start workout
+            </button>
+
             <section class="details__section" aria-labelledby="workout-details-muscles">
                 <h3 id="workout-details-muscles" class="details__heading">Muscles it works</h3>
                 @if (muscles().hasExercises) {

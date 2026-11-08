@@ -16,6 +16,7 @@ import { BodyMapComponent } from '../../shared/components/body-map/body-map.comp
 import { WorkoutOutlineComponent } from '../../shared/components/workout-outline/workout-outline.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
+import { injectStartWorkout } from '../../shared/run/start-workout';
 import { MakeCopy } from '../../shared/state/make-copy.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
@@ -25,7 +26,7 @@ const RECENT_RUNS = 5;
 
 /**
  * A workout's details (LIB-4), at /library/<its id>, from its card in the library: the
- * muscles its exercises work, on the body map; its history, with its latest runs linking to them
+ * Start, to do it now, as its card's play button does; the muscles its exercises work, on the body map; its history, with its latest runs linking to them
  * on the Progress page; a heart to make it a favourite; and what's in it, each step and its sets, so it can be read without
  * opening Edit, each exercise sliding in its page. It slides in over Workouts, and back off with
  * ‹ Workouts or a swipe right, with focus back on the card (`?details=<its id>`).
@@ -126,6 +127,9 @@ export class WorkoutDetailsComponent {
         const exercise = this.exercises.byId(exerciseId);
         return exercise ? `/library/${this.id()}/${exerciseSlug(exercise)}` : null;
     };
+
+    /** Starts it, and opens the workout page on it. */
+    protected readonly start = injectStartWorkout();
 
     /** Make a copy of it, and open the copy in Create, coming back to the copy's details. */
     protected copy(workout: Workout) {

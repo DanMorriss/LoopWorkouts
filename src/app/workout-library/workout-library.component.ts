@@ -15,7 +15,7 @@ import { WorkoutCardComponent } from './workout-card/workout-card.component';
 import { LibraryFilters } from './library-filters.service';
 import { LibraryFiltersComponent } from './library-filters/library-filters.component';
 import { changeSmoothly } from '../shared/layout-change';
-import { ActiveRunService } from '../shared/run/active-run.service';
+import { injectStartWorkout } from '../shared/run/start-workout';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { editUrl, MakeCopy } from '../shared/state/make-copy.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
@@ -35,7 +35,6 @@ import { UndoService } from '../shared/undo/undo.service';
 export class WorkoutLibraryComponent {
     workoutStore = inject(WorkoutStore);
     router = inject(Router);
-    private readonly run = inject(ActiveRunService);
     private host = inject<ElementRef<HTMLElement>>(ElementRef);
     private injector = inject(Injector);
     private readonly undo = inject(UndoService);
@@ -158,10 +157,7 @@ export class WorkoutLibraryComponent {
         );
     }
 
-    startWorkout(workout: Workout) {
-        this.run.start(workout);
-        this.router.navigate(['/workout']);
-    }
+    readonly startWorkout = injectStartWorkout();
 
     navigateToCreateWorkout() {
         this.slide.navigate('/setup', 'in');

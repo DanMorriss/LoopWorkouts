@@ -106,7 +106,7 @@ src/styles/
   _interaction.scss  Hover and press feedback, and 44px hit areas for small controls
   _type.scss         The two faces, display tracking by size, and small-text tracking
   _dialog.scss, _menu.scss  How dialogs and menus arrive and leave
-supabase/schema.sql  The server side: the records table, and the sync and delete-account functions
+supabase/schema.sql  The server side: the records table, the sync and delete-account functions, and consent to keeping notes
 ```
 
 ## Roadmap

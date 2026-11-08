@@ -1,7 +1,9 @@
 import { ApplicationRef, inject, Service } from '@angular/core';
-import { Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router } from '@angular/router';
 import { spring, springCurve } from '../shared/spring';
 import { pathOf } from './current-url';
+import { findSpot, FocusSpot, focusSpot } from './focus-spot';
 import { LeaveCheck } from './leave-check';
 import { letInputThrough } from './let-input-through';
 import { prefersReducedMotion } from '../shared/reduced-motion';
@@ -29,6 +31,10 @@ export type SlideWay = 'in' | 'out';
  * view transition around those, as WorkoutMorph does for the workout. It names the two pages
  * itself for the slide (slide-over for the one further in, slide-under for the one it's over;
  * styles/_page-slide.scss moves them), so any page can slide in over any other.
+ *
+ * Coming back, focus goes back to what opened the page further in (a card, a link, a button),
+ * so a keyboard or screen reader carries on from there rather than from the top. The
+ * browser's own Back, which doesn't slide, does the same.
  */
 @Service()
 export class PageSlide {
@@ -37,10 +43,27 @@ export class PageSlide {
     private readonly leaveCheck = inject(LeaveCheck);
     /** How far down each page was scrolled when another slid in over it, to come back to. */
     private readonly scrolled = new Map<string, number>();
+    /** What had focus on each page (or was clicked) when another slid in over it, to go back to. */
+    private readonly focused = new Map<string, FocusSpot>();
+    /** The link follow() is following, for navigate() to note as what opened the page. */
+    private clicked?: EventTarget | null;
     /** See takeCaught(). */
     private caught = 0;
     /** The slide going on, or the last to have gone. */
     private latest?: ViewTransition;
+
+    constructor() {
+        // The browser's Back (or forward) to a page that was left for one further in
+        this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
+            if (
+                event instanceof NavigationEnd &&
+                this.router.currentNavigation()?.trigger === 'popstate'
+            ) {
+                const path = pathOf(event.urlAfterRedirects);
+                afterNextFrame(() => this.refocus(path));
+            }
+        });
+    }
 
     /**
      * For a link's (click): goes to `url`, sliding `way`. A click that opens a new tab or
@@ -58,7 +81,13 @@ export class PageSlide {
             return;
         }
         event.preventDefault();
-        this.navigate(url, way);
+        // The link clicked, as Safari doesn't focus a link that's tapped
+        this.clicked = event.currentTarget;
+        try {
+            this.navigate(url, way);
+        } finally {
+            this.clicked = undefined;
+        }
     }
 
     /**
@@ -69,23 +98,41 @@ export class PageSlide {
      * along (SwipeBackDirective).
      *
      * The page going in opens at its top, and the one coming back is scrolled where it was left,
-     * however many pages deep it was.
+     * however many pages deep it was, with focus on what had it when it was left.
      */
     navigate(url: string, way: SlideWay, velocity?: number) {
+        this.go(url, way, velocity, this.clicked ?? document.activeElement);
+    }
+
+    /** navigate(), with what opened the page going in (`opener`), to focus again coming back. */
+    private go(url: string, way: SlideWay, velocity: number | undefined, opener: unknown) {
         // Before the slide starts, as the screen is frozen during one
         const asking = this.leaveCheck.confirm();
         if (asking) {
             void asking.then((leave) => {
                 if (leave) {
-                    this.navigate(url, way, velocity);
+                    this.go(url, way, velocity, opener);
                 }
             });
             return;
         }
         if (way === 'in') {
-            this.scrolled.set(pathOf(this.router.url), window.scrollY);
+            const leaving = pathOf(this.router.url);
+            this.scrolled.set(leaving, window.scrollY);
+            const page = routedPage();
+            const spot = page && opener instanceof Element ? focusSpot(opener, page) : undefined;
+            if (spot) {
+                this.focused.set(leaving, spot);
+            } else {
+                this.focused.delete(leaving);
+            }
         }
         const top = way === 'in' ? 0 : (this.scrolled.get(pathOf(url)) ?? 0);
+        // Coming back, what had focus there has it again, once the page is drawn
+        let refocused = way === 'in';
+        const refocus = () => {
+            refocused ||= this.refocus(pathOf(url));
+        };
         // The page going further in slides over, and the one it's over slides under, whichever
         // pages they are: named on each as it's pictured, before going and once there
         const named: HTMLElement[] = [];
@@ -109,9 +156,10 @@ export class PageSlide {
                 name(way === 'in' ? 'slide-over' : 'slide-under');
             }
             window.scrollTo({ top, behavior: 'instant' });
+            refocus();
         };
         if (!document.startViewTransition) {
-            void go();
+            void go().then(() => afterNextFrame(refocus));
             return;
         }
         if (slides) {
@@ -140,6 +188,8 @@ export class PageSlide {
         // Interrupted (e.g. another view transition starting) rejects `ready`; nothing waits on it
         transition.ready.catch(() => undefined);
         transition.finished.finally(() => {
+            // A page that draws part of itself a moment later (a list loading) has it by now
+            refocus();
             for (const page of named) {
                 page.style.removeProperty('view-transition-name');
                 page.classList.remove(OVER_CLASS);
@@ -154,6 +204,24 @@ export class PageSlide {
             root.style.removeProperty('--slide-easing');
             root.style.removeProperty('--slide-duration');
         });
+    }
+
+    /**
+     * Focuses what had focus on the page at `path` when another slid in over it, if it's
+     * there, and if focus hasn't gone somewhere already (a page that put it on something
+     * itself). Whether it did.
+     */
+    private refocus(path: string): boolean {
+        const spot = this.focused.get(path);
+        const page = routedPage();
+        const target = spot && page ? findSpot(spot, page) : undefined;
+        const active = document.activeElement;
+        if (!target || (active && active !== document.body && active.isConnected)) {
+            return false;
+        }
+        // Where the scroll put it, rather than scrolling to it
+        target.focus({ preventScroll: true });
+        return true;
     }
 
     /**
@@ -189,6 +257,11 @@ export class PageSlide {
 
 /** The spring a page slides in on: --ease-spring, a 0.3s response with no bounce. */
 const SLIDE_SPRING = springCurve(0.3);
+
+/** Runs `then` once the next frame is drawn. */
+function afterNextFrame(then: () => void) {
+    requestAnimationFrame(() => setTimeout(then));
+}
 
 /** The page the router is showing: the element it puts after its outlet in <main>. */
 function routedPage(): HTMLElement | null {

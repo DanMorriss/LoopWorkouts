@@ -12,9 +12,13 @@ export function sessionFor(email: string): Session {
  * code and signing out tell its listener, as the real one does. Each call is a spy, so tests
  * can change what it answers. As the real one does, it keeps a session in localStorage while
  * signed in, which is how the app knows there may be one before loading Supabase's code: so
- * make it after a test empties localStorage.
+ * make it after a test empties localStorage. The account has consent to keeping notes that
+ * may mention health on record (SYN-10), unless `consent` is null.
  */
-export function fakeAccountClient(email: string | null = null) {
+export function fakeAccountClient(
+    email: string | null = null,
+    { consent = { at: Date.UTC(2026, 10, 8, 12), notice: '2026-11-08' } as unknown } = {}
+) {
     let session = email === null ? null : sessionFor(email);
     let listener: ((event: string, session: Session | null) => void) | null = null;
     const save = () => {
@@ -56,10 +60,14 @@ export function fakeAccountClient(email: string | null = null) {
             return { error: null as unknown };
         }),
     };
-    const rpc = vi.fn(async (_fn: string, _args?: unknown) => ({
-        data: null as unknown,
-        error: null as unknown,
-    }));
+    const rpc = vi.fn(async (fn: string, args?: unknown) => {
+        if (fn === 'give_health_consent') {
+            const { notice_date } = args as { notice_date: string };
+            consent = { at: Date.UTC(2026, 10, 9, 12), notice: notice_date };
+        }
+        const data = fn.endsWith('_health_consent') ? consent : null;
+        return { data: data as unknown, error: null as unknown };
+    });
     return { auth, rpc, change };
 }
 

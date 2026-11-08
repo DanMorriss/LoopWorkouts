@@ -921,8 +921,17 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
+            it('signing in without ticking to agree (and its error)', async () => {
+                await open('/account');
+                click('.sign-in__form button[type="submit"]');
+                await settle();
+                expect(fixture.nativeElement.querySelector('#health-consent-error')).not.toBeNull();
+                await expectNoViolations();
+            });
+
             it('signing in with no email (and its error)', async () => {
                 await open('/account');
+                click('#health-consent');
                 click('.sign-in__form button[type="submit"]');
                 await settle();
                 await expectNoViolations();
@@ -935,9 +944,18 @@ for (const theme of ['dark', 'light'] as const) {
                 ) as HTMLInputElement;
                 input.value = 'me@example.com';
                 input.dispatchEvent(new Event('input'));
+                click('#health-consent');
                 click('.sign-in__form button[type="submit"]');
                 await settle();
                 expect(fixture.nativeElement.querySelector('#account-code')).not.toBeNull();
+                await expectNoViolations();
+            });
+
+            it('signed in, asking for consent to keeping notes (SYN-10)', async () => {
+                accountClient.rpc.mockResolvedValue({ data: null, error: null });
+                accountClient.change(sessionFor('me@example.com'));
+                await open('/account');
+                expect(fixture.nativeElement.querySelector('#health-consent')).not.toBeNull();
                 await expectNoViolations();
             });
 

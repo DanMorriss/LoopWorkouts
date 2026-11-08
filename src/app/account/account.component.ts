@@ -9,19 +9,21 @@ import { AccountService } from './account.service';
 import { DeviceDataService } from '../shared/state/device-data.service';
 import { ProfileComponent } from './profile/profile.component';
 import { SignInComponent } from './sign-in/sign-in.component';
+import { ConsentStatusComponent } from './consent-status/consent-status.component';
 import { hasSignInTokens } from './sign-in-landing';
 import { YourDataComponent } from './your-data/your-data.component';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
 
 /**
- * The You tab (SYN-3, SYN-7, SYN-8, SYN-9): signing in (SignInComponent), who's
- * signed in and how sync is going, signing out and deleting the account; then your profile
+ * The You tab (SYN-3, SYN-7, SYN-8, SYN-9, SYN-10): signing in (SignInComponent), who's
+ * signed in and how sync is going, consent to keeping notes that may mention health, signing out and deleting the account; then your profile
  * (sex and weight units), Settings, which slides in over it, your data (backups and Clear
  * this device), and About.
  */
 @Component({
     selector: 'app-account',
     imports: [
+        ConsentStatusComponent,
         LoopLogoComponent,
         MatIconModule,
         ProfileComponent,

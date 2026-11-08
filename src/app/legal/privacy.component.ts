@@ -1,5 +1,7 @@
+import { formatDate } from '@angular/common';
 import { Component } from '@angular/core';
 import { LegalPageComponent } from './legal-page.component';
+import { PRIVACY_NOTICE_DATE } from './notice-date';
 
 /**
  * /privacy, linked from You. Kept true to what the app does: change it in the same PR as
@@ -11,4 +13,6 @@ import { LegalPageComponent } from './legal-page.component';
     templateUrl: './privacy.component.html',
     styleUrl: './legal-text.scss',
 })
-export class PrivacyComponent {}
+export class PrivacyComponent {
+    protected readonly updated = formatDate(PRIVACY_NOTICE_DATE, 'd MMMM y', 'en-US');
+}

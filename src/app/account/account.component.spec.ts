@@ -13,6 +13,7 @@ import {
     provideFakeSyncStarter,
 } from '../shared/testing/fake-sync';
 import { AccountComponent } from './account.component';
+import { PENDING_CONSENT_KEY } from './consent.service';
 
 describe('AccountComponent', () => {
     let fixture: ComponentFixture<AccountComponent>;
@@ -23,8 +24,12 @@ describe('AccountComponent', () => {
     let clear: ReturnType<typeof vi.fn>;
     let navigate: ReturnType<typeof vi.spyOn>;
 
-    async function create(signedInAs: string | null = null) {
-        client = fakeAccountClient(signedInAs);
+    async function create(
+        signedInAs: string | null = null,
+        options?: Parameters<typeof fakeAccountClient>[1]
+    ) {
+        localStorage.removeItem(PENDING_CONSENT_KEY);
+        client = fakeAccountClient(signedInAs, options);
         sync = fakeSyncStarter();
         clear = vi.fn(async () => undefined);
         TestBed.configureTestingModule({
@@ -43,6 +48,7 @@ describe('AccountComponent', () => {
     afterEach(() => {
         fixture.destroy();
         element.remove();
+        localStorage.removeItem(PENDING_CONSENT_KEY);
     });
 
     async function settle() {
@@ -61,6 +67,11 @@ describe('AccountComponent', () => {
         [...element.querySelectorAll('button')].find((b) => b.textContent!.trim() === label)!;
     async function press(label: string) {
         button(label).click();
+        await settle();
+    }
+    /** Ticks the box for keeping notes that may mention health (SYN-10). */
+    async function tick() {
+        element.querySelector<HTMLInputElement>('#health-consent')!.click();
         await settle();
     }
     async function type(id: string, value: string) {
@@ -91,8 +102,71 @@ describe('AccountComponent', () => {
         });
     });
 
-    describe('signed out', () => {
+    describe('signed out, before ticking to agree to keeping notes (SYN-10)', () => {
         beforeEach(() => create());
+
+        it('asks for consent above the ways of signing in, unticked, with a label', () => {
+            const box = element.querySelector<HTMLInputElement>('#health-consent')!;
+            expect(box.type).toBe('checkbox');
+            expect(box.checked).toBe(false);
+            expect(box.labels![0].textContent!.replace(/\s+/g, ' ').trim()).toBe(
+                'I agree that notes I write, which may mention my health, are kept with my account.'
+            );
+            expect(box.compareDocumentPosition(element.querySelector('.sign-in__provider')!)).toBe(
+                Node.DOCUMENT_POSITION_FOLLOWING
+            );
+            // Its label is the line, at least 44px to press
+            expect(box.labels![0].getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+            expect(element.querySelector('#health-consent-error')).toBeNull();
+        });
+
+        it("doesn't go to Google, saying why on the box and going to it", async () => {
+            await press('Continue with Google');
+
+            expect(client.auth.signInWithOAuth).not.toHaveBeenCalled();
+            const box = element.querySelector<HTMLInputElement>('#health-consent')!;
+            expect(element.querySelector('#health-consent-error')!.textContent).toBe(
+                'Tick the box to agree before signing in.'
+            );
+            expect(box.getAttribute('aria-invalid')).toBe('true');
+            expect(box.getAttribute('aria-describedby')).toBe('health-consent-error');
+            expect(document.activeElement).toBe(box);
+            expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBeNull();
+        });
+
+        it("doesn't send a sign-in link", async () => {
+            await type('account-email', 'me@example.com');
+            await press('Email me a sign-in link');
+
+            expect(client.auth.signInWithOtp).not.toHaveBeenCalled();
+            expect(document.activeElement!.id).toBe('health-consent');
+        });
+
+        it('signs in once ticked, the error gone, saving the consent with the account', async () => {
+            await press('Continue with Google');
+            await tick();
+            expect(element.querySelector('#health-consent-error')).toBeNull();
+
+            await type('account-email', 'me@example.com');
+            await press('Email me a sign-in link');
+            expect(client.auth.signInWithOtp).toHaveBeenCalled();
+            // Kept until signed in, as an email link may open in another tab
+            expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBe('2026-11-08');
+
+            await type('account-code', '123456');
+            await press('Sign in');
+            expect(client.rpc).toHaveBeenCalledWith('give_health_consent', {
+                notice_date: '2026-11-08',
+            });
+            expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBeNull();
+        });
+    });
+
+    describe('signed out', () => {
+        beforeEach(async () => {
+            await create();
+            await tick();
+        });
 
         it('asks for an email to send a sign-in link to, saying an account is optional', () => {
             expect(text()).toContain('An account is optional');
@@ -239,6 +313,14 @@ describe('AccountComponent', () => {
     describe('signed in', () => {
         beforeEach(() => create('me@example.com'));
 
+        it('says when the account agreed to keeping notes, and how to withdraw (SYN-10)', () => {
+            expect(client.rpc).toHaveBeenCalledWith('my_health_consent');
+            expect(text()).toContain(
+                'On 8 November 2026 you agreed that notes you write, which may mention your health, are kept with your account (under the privacy notice of 8 November 2026). To withdraw, delete those notes, or your account.'
+            );
+            expect(element.querySelector('#health-consent')).toBeNull();
+        });
+
         it('says who, what syncs, and that clearing the device signs it out', () => {
             expect(text()).toContain('Signed in as me@example.com.');
             expect(text()).toContain('Other settings stay a choice for each device.');
@@ -301,7 +383,7 @@ describe('AccountComponent', () => {
             const warning = element.querySelector('#account-delete-warning')!;
             expect(warning.textContent).toContain("It can't be undone.");
             expect(document.activeElement).toBe(warning);
-            expect(client.rpc).not.toHaveBeenCalled();
+            expect(client.rpc).not.toHaveBeenCalledWith('delete_my_account');
 
             await press('Cancel');
             expect(document.activeElement!.id).toBe('account-delete');
@@ -336,6 +418,42 @@ describe('AccountComponent', () => {
                 "Your account couldn't be deleted. Check your connection and try again."
             );
             expect(text()).toContain('Signed in as me@example.com.');
+        });
+    });
+
+    describe('signed in, with no consent to keeping notes on record (SYN-10)', () => {
+        beforeEach(() => create('me@example.com', { consent: null }));
+
+        it('asks for it, needing the box ticked', async () => {
+            expect(text()).toContain('which needs your consent to keep them with your account');
+            await press('Agree');
+
+            expect(client.rpc).not.toHaveBeenCalledWith('give_health_consent', expect.anything());
+            expect(element.querySelector('#health-consent-error')!.textContent).toBe(
+                'Tick the box to agree.'
+            );
+            expect(document.activeElement!.id).toBe('health-consent');
+        });
+
+        it('saves it once ticked, then says when, with focus there', async () => {
+            await tick();
+            await press('Agree');
+
+            expect(client.rpc).toHaveBeenCalledWith('give_health_consent', {
+                notice_date: '2026-11-08',
+            });
+            expect(element.querySelector('#health-consent')).toBeNull();
+            expect(document.activeElement!.id).toBe('consent-given');
+            expect(text()).toContain('On 9 November 2026 you agreed');
+        });
+
+        it("says when it couldn't be saved", async () => {
+            await tick();
+            client.rpc.mockResolvedValueOnce({ data: null, error: { message: 'down' } });
+            await press('Agree');
+
+            expect(status()).toContain("That couldn't be saved.");
+            expect(element.querySelector('#health-consent')).not.toBeNull();
         });
     });
 

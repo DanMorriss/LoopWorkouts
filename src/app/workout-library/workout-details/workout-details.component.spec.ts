@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../../models/history';
+import { allSteps, RepStep } from '../../models/workout';
+import { UndoService } from '../../shared/undo/undo.service';
 import { PageSlide } from '../../nav/page-slide';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
@@ -209,6 +211,43 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
                 `/setup?editId=${copy.id}&from=%2Flibrary%2F${copy.id}`,
                 'in'
             );
+        });
+
+        it('puts your own reps and weights back as it came, with Undo', async () => {
+            expect(el().querySelector('.details__reset')).toBeNull();
+            store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
+            const deadlift = allSteps(store.activeWorkout()!)[1] as RepStep;
+            store.updateActiveStep(1, { ...deadlift, reps: 8 });
+            store.stop();
+            harness.detectChanges();
+            await harness.fixture.whenStable();
+
+            expect(text(el().querySelector('.details__own')!)).toBe(
+                'With your own reps and weights.'
+            );
+            el().querySelector<HTMLButtonElement>('.details__reset')!.click();
+            harness.detectChanges();
+            await harness.fixture.whenStable();
+
+            expect(allSteps(store.findAnyWorkout('builtin:gym-legs')!)[1]).toEqual(deadlift);
+            expect(el().querySelector('.details__reset')).toBeNull();
+
+            const undo = TestBed.inject(UndoService);
+            expect(undo.offer()?.message).toBe('Reset the reps and weights of "Gym legs"');
+            undo.undo();
+            harness.detectChanges();
+            await harness.fixture.whenStable();
+            expect((allSteps(store.findAnyWorkout('builtin:gym-legs')!)[1] as RepStep).reps).toBe(
+                8
+            );
+            expect(document.activeElement?.id).toBe('workout-details-reset');
+
+            // Closing the bar instead leaves focus on Make a copy
+            el().querySelector<HTMLButtonElement>('.details__reset')!.click();
+            undo.dismiss();
+            harness.detectChanges();
+            await harness.fixture.whenStable();
+            expect(document.activeElement?.id).toBe('workout-details-copy');
         });
 
         it('makes it a favourite from its heart, as a ready-made one', () => {

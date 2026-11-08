@@ -9,7 +9,7 @@ create sequence if not exists public.records_seq;
 create table if not exists public.records (
     user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
     -- 'workout', 'history', 'exercise', 'exercise-note', 'hidden-exercise',
-    -- 'ready-made-favourite', 'library-order', 'plan' or 'profile'
+    -- 'ready-made-favourite', 'ready-made-change', 'library-order', 'plan' or 'profile'
     kind text not null,
     id text not null,
     -- When it last changed, and was deleted, in ms since the epoch, as on the device
@@ -101,7 +101,7 @@ begin
     from jsonb_to_recordset(changes) as c(
         kind text, id text, updated_at bigint, deleted_at bigint, data jsonb, version integer
     )
-    where c.kind in ('workout', 'history', 'exercise', 'exercise-note', 'hidden-exercise', 'ready-made-favourite', 'library-order', 'plan', 'profile')
+    where c.kind in ('workout', 'history', 'exercise', 'exercise-note', 'hidden-exercise', 'ready-made-favourite', 'ready-made-change', 'library-order', 'plan', 'profile')
         and c.id <> ''
         and c.updated_at > 0
         and (c.deleted_at is not null or c.data is not null)

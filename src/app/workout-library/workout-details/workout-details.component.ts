@@ -18,6 +18,9 @@ import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { injectStartWorkout } from '../../shared/run/start-workout';
 import { MakeCopy } from '../../shared/state/make-copy.service';
+import { ReadyMadeChanges } from '../../shared/state/ready-made-changes.service';
+import { UndoService } from '../../shared/undo/undo.service';
+import { injectFocusAfterRender } from '../../shared/focus-after-render';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
 
@@ -56,6 +59,9 @@ export class WorkoutDetailsComponent {
     private readonly route = inject(ActivatedRoute);
     private readonly slide = inject(PageSlide);
     private readonly makeCopy = inject(MakeCopy);
+    private readonly readyMadeChanges = inject(ReadyMadeChanges);
+    private readonly undo = inject(UndoService);
+    private readonly focusAfterRender = injectFocusAfterRender();
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     private readonly id = toSignal(
@@ -98,6 +104,8 @@ export class WorkoutDetailsComponent {
         const workout = this.workout();
         return workout && isReadyMade(workout) ? workout : null;
     });
+    /** A ready-made one with your own reps and weights on it, which can be put back. */
+    protected readonly changed = computed(() => this.readyMadeChanges.byId().has(this.id()));
     /** Not found yet only because the ready-made workouts are still loading. */
     protected readonly loading = computed(
         () => isReadyMadeId(this.id()) && this.workouts.readyMade().length === 0
@@ -148,6 +156,25 @@ export class WorkoutDetailsComponent {
         const copy = this.makeCopy.of(workout.id);
         if (copy) {
             this.edit(copy);
+        }
+    }
+
+    /**
+     * Puts a ready-made workout's reps and weights back as it came, with Undo, which takes focus
+     * as the button goes. Undo brings the button back with focus on it; closing the bar moves
+     * focus to Make a copy.
+     */
+    protected resetAmounts(workout: Workout) {
+        const was = this.readyMadeChanges.reset(workout.id);
+        if (was) {
+            this.undo.offerUndo({
+                message: `Reset the reps and weights of "${this.name()}"`,
+                undo: () => {
+                    this.readyMadeChanges.restore(was);
+                    this.focusAfterRender('workout-details-reset');
+                },
+                dismissed: () => this.focusAfterRender('workout-details-copy'),
+            });
         }
     }
 

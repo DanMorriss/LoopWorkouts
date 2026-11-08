@@ -138,14 +138,25 @@ describe('ExerciseProgressComponent', () => {
         expect(all('.progress__empty')).toEqual(['Not done in the last 4 weeks.']);
     });
 
-    it('shows the chart as a table', async () => {
+    it('swaps the chart for a table and back, keeping focus on its button', async () => {
         logged(10, [squat(5, 80)]);
         await create();
+        const toggle = button('Show as a table');
+        toggle.focus();
 
-        button('Show as a table').click();
+        toggle.click();
         await render();
 
+        expect(el().querySelector('.progress__chart')).toBeNull();
         expect(all('.progress__table tbody td').slice(1)).toEqual(['Legs', '93.5 kg']);
+        expect(toggle.textContent!.trim()).toBe('Show as a chart');
+        expect(document.activeElement).toBe(toggle);
+
+        toggle.click();
+        await render();
+
+        expect(el().querySelector('.progress__table')).toBeNull();
+        expect(el().querySelector('.progress__chart')).not.toBeNull();
     });
 
     it('charts most reps for a bodyweight exercise, and the longest for a timed one', async () => {

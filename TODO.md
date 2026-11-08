@@ -58,7 +58,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 - [x] **Rework the workout cards** (2026-11-06): each workout in the log is a card of the Workouts and Plan family, with the time it took as its big number, the main muscles its sets worked, and its sets under a rule.
 - [x] **Time per week** (PRG-12, 2026-11-06): a bar chart of the last 12 weeks, Monday to Sunday, under "Last 7 days", with the chosen week's time and workouts over it, arrow keys and a table.
-- [x] **Time per week from the first workout** (2026-11-08): a new user's chart and table start at the week of their first workout, not 12 mostly empty weeks; Show as a table, now by the card's title, swaps the bars for the table (and Show as a chart back) rather than adding it under them.
+- [x] **Time per week from the first workout** (2026-11-08): a new user's chart and table start at the week of their first workout, not 12 mostly empty weeks; Show as a table, now by the card's title, swaps the bars for the table (and Show as a chart back) rather than adding it under them; the exercise page's progress chart does the same.
 - [ ] **More charts, if wanted:** e.g. workouts per week (the same chart could switch between time and workouts), or a range to look further back than 12 weeks.
 
 ### Sync

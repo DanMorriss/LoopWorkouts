@@ -53,7 +53,7 @@ Under the body map, a **Progress** section:
     - **Range**: 4 weeks, 3 months, Year (365 days), or All (the default). A fixed range runs to today; All runs from the first session to the latest. With nothing in range: "Not done in the last 4 weeks." (and so on).
     - The value axis runs between round numbers (whole reps, halves of a kg or lb, round seconds) and never below 0. Dates at each end of the time axis.
     - **Reading it**: hovering snaps to the nearest workout and shows its value, date and workout. With the keyboard, the chart takes focus, starts on the latest workout, and the left and right arrows (and Home and End) step through them; screen readers hear each, e.g. "105 kg, 21 October 2026, Legs".
-    - **Show as a table** lists the same points: date, workout and value.
+    - **Show as a table**, at the right of the chart's title, over the range buttons, puts a table **in place of the chart** (since 2026-11-08; until then it was under the chart and added the table below it) of the same points in range: date, workout and value. The button, now **Show as a chart**, swaps the chart back. Being by the title, it doesn't move as they swap, so focus stays on it.
 - **Recent sessions**, newest first: the 5 latest, then "Show all N". Each has its date and workout, linking to it in the history (`/history?run=<id>`), and its sets as the history writes them.
 - Weights are in the unit chosen in You → Profile.
 

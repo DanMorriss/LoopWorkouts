@@ -99,7 +99,7 @@ At the bottom of the Plan page (since 2026-11-06; under the cards on Workouts un
 - With a week planned, the **suggested next workout** isn't shown on Today on a day with something planned: the plan says what's next. With nothing planned this week, it shows as before (see [progress](progress.md), PRG-9).
 - **On a day with nothing planned** in a planned week (since 2026-11-06; nothing showed there from 2026-11-03), it's offered, not pressed, so a rest day isn't told off: "**Fancy a workout today?** Nothing's planned today, so resting is fine too. If you'd like to train:", then the suggested workout, yours or ready-made, and Start.
     - It leaves out the workouts planned on the next day this week with any, and prefers those whose main muscles are mostly not theirs (no more than a third of its main muscles shared), falling back to the others only when there's nothing else.
-    - It says so: "For Chest (0 of 10 sets), the least worked this week, and it leaves your Glutes and Quads fresh for Legs day on Saturday.", naming up to two of the next workout's main muscles it doesn't work as main ones. With nothing more to come this week, or none left fresh, that part's left out.
+    - It says so: "It works your Chest, which you haven't trained in the last 7 days, and leaves your Glutes and Quads fresh for Legs day on Saturday.", naming up to two of the next workout's main muscles it doesn't work as main ones. With nothing more to come this week, or none left fresh, that part's left out.
     - It shows even with no history yet, and a day whose only workouts have since been deleted counts as nothing planned.
 - With nothing planned today, there's no card, and Today is as it was.
 

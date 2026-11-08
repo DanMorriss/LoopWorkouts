@@ -214,8 +214,11 @@ describe('HomeComponent', () => {
 
         expect(text('.suggestion__title')).toEqual(['Push']);
         expect(text('.suggestion__reason')).toEqual([
-            'For Chest (0 of 10 sets), the least worked this week.',
+            "It works your Chest, which you haven't trained in the last 7 days.",
         ]);
+        const more = element().querySelector<HTMLAnchorElement>('.suggestion__more')!;
+        expect(more.textContent).toContain('See your week');
+        expect(more.getAttribute('href')).toBe('/history');
         expect(element().querySelector('app-get-started')).toBeNull();
 
         const router = TestBed.inject(Router);
@@ -224,6 +227,23 @@ describe('HomeComponent', () => {
 
         expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(push.id);
         expect(router.navigate).toHaveBeenCalledWith(['/workout']);
+    });
+
+    it('says when the muscles it works have had some sets, but the least', () => {
+        TestBed.inject(WorkoutStore).addWorkout({
+            title: 'Squats',
+            repeats: 2,
+            blocks: asOneGroup([
+                { kind: 'reps', reps: 5, name: 'Back squat', exerciseId: 'builtin:back-squat' },
+            ]),
+        });
+        TestBed.inject(HistoryStore).record(entry);
+        create();
+
+        expect(text('.suggestion__title')).toEqual(['Squats']);
+        expect(text('.suggestion__reason')[0]).toMatch(
+            /^It works your .+, which you've trained least in the last 7 days\.$/
+        );
     });
 
     describe('this week (PLN-4)', () => {

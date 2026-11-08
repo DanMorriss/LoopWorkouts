@@ -131,11 +131,12 @@
     perspective: 20rem;
 }
 
-// The drum's axle, behind the face; the far side of the drum is never seen
+// The drum's axle, behind the face. A roll turns at most 75°, so the far side is never seen and
+// needs no hiding: backface-visibility would put the face's text, wheels and all, in a 3D layer,
+// where Safari on an iPhone won't scroll a wheel.
 .workout-face__content,
 .workout-status__round {
     transform-origin: 50% 50% -9rem;
-    backface-visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -48,6 +48,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 **Today and Plan**
 
+- [x] **Say why a workout's suggested in words** (2026-11-08): "It works your Calves, Hamstrings and Quads, which you haven't trained in the last 7 days", in place of "(0 of 10 sets)", with See your week going to the bars on Progress.
 - [x] **Suggest a workout on a day with none planned** (2026-11-06): "Fancy a workout today?", saying resting is fine too, with the usual suggestion steered off the next planned workout and most of its main muscles, and saying which it leaves fresh.
 - [x] **The body map on the Plan page** (2026-11-06): What your plan works, at the bottom of the Plan page over Missing muscle groups, shaded for the planned workouts' main and supporting muscles.
 - [x] **Move Missing muscle groups to the Plan page** (LIB-5, LIB-7, 2026-11-06): at its bottom, for the workouts in the plan; its ready-made suggestion adds to your workouts, to plan from there.
@@ -126,6 +127,7 @@ From the review of 2026-11-05; how to keep it from coming back is in `CLAUDE.md`
 
 ## 2. Known issues
 
+- [ ] **Check the workout's rep wheels on an iPhone:** on 2026-11-08 they wouldn't turn there during a workout (e.g. Squat jumps' reps), though setup's did. Not reproducible in Chromium, so fixed on the two likely causes: the face no longer changes its clip as a finger opens a wheel (it clips only while one step rolls past the next), and the step's text isn't in a 3D layer (`backface-visibility`) any more. In Safari, check a rep step's reps and weight wheels turn by dragging, and a step's text still rolls in and out inside the circle.
 - [ ] **Check the 3D demo on an iPhone:** since 2026-11-07 it's drawn in a worker where the browser can (Safari 17 and later should), and on the page otherwise; checked in Chromium only. On an iPhone, check an exercise's demo draws, plays, turns, and follows the theme, on iOS 17 or later and, if there's one to hand, on iOS 16 (the page's way).
 - [ ] **Devices already in use get the tour of Create:** once, on their next new workout (BLD-17, 2026-11-07), as the tour of the app was offered to them, so people who've made plenty of workouts see it too. It can be skipped. If that's not wanted, `WorkoutSetupComponent` could start it only for someone with no workouts of their own yet.
 - [ ] **Check the setup's buttons with an iPhone's keyboard:** they're fixed to the bottom of the screen (since 2026-11-06), and tested in Chromium only. In Safari they should sit clear of the home bar, and with the keyboard up on the name question they'll probably sit behind it, leaving its Go key as the way on, which is Next.

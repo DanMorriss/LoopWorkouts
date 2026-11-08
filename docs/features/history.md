@@ -51,7 +51,7 @@
     - **With its supersets** as they were when it ran (BLD-12): the lines of a superset's (or giant set's) steps go together under "Superset" (or "Giant set"), in a list of their own, set in a little with a line down their left. A superset with sets on only one of its steps (stopped before the second) shows that line on its own. The workout summary's sets are grouped the same way, and so is its Change reps or weight view.
 - The note, if any, sits under the sets, in italics with a line down its left.
 - The run arrived at from the workout summary is tinted, with a bar down its left, as Workouts marks a workout just saved.
-- With no workouts: "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to your workouts**.
+- With no workouts: "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to workouts** (until 2026-11-08 "Go to your workouts": Workouts has the ready-made ones too now).
 
 ### Notes
 

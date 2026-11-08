@@ -1,14 +1,11 @@
 import { Component, computed, inject, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MUSCLE_LABELS } from '../../models/exercise';
-import {
-    setsByMuscle,
-    SuggestionAvoid,
-    suggestNextWorkout,
-    weeklyAim,
-} from '../../models/muscle-balance';
+import { setsByMuscle, SuggestionAvoid, suggestNextWorkout } from '../../models/muscle-balance';
 import { nextPlannedDay, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { musclesWorked } from '../../models/workout-muscles';
 import { Workout } from '../../models/workout';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { injectStartWorkout } from '../../shared/run/start-workout';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
@@ -30,10 +27,14 @@ let nextId = 0;
  *
  * On a rest day in a planned week (`restDay`), it's offered, not pressed: resting is fine too.
  * It steers clear of the workout planned next this week and of most of its main muscles, and
- * says so, e.g. "and it leaves your Quads and Glutes fresh for Legs day on Thursday".
+ * says so, e.g. "and leaves your Quads and Glutes fresh for Legs day on Thursday".
+ *
+ * It says which muscles in words, not their sets and aims, with a link to the bars on Progress
+ * for those.
  */
 @Component({
     selector: 'app-suggested-workout',
+    imports: [IconComponent, RouterLink],
     template: `
         @if (suggestion(); as suggested) {
             <section class="suggestion" [attr.aria-labelledby]="id">
@@ -47,6 +48,10 @@ let nextId = 0;
                 }
                 <p class="suggestion__title">{{ suggested.workout.title }}</p>
                 <p class="suggestion__reason">{{ suggested.reason }}</p>
+                <a class="suggestion__more" routerLink="/history">
+                    See your week
+                    <app-icon>chevron_right</app-icon>
+                </a>
                 @if (startable()) {
                     <button
                         type="button"
@@ -129,15 +134,15 @@ export class SuggestedWorkoutComponent {
         if (!suggested) {
             return null;
         }
-        const muscles = suggested.muscles.slice(0, 3).map((muscle) => {
-            const sets = this.weekSets().get(muscle) ?? 0;
-            const count = Number.isInteger(sets) ? `${sets}` : sets.toFixed(1);
-            const { low } = weeklyAim(muscle, this.settings.trainingGoal());
-            return `${MUSCLE_LABELS[muscle]} (${count} of ${low} sets)`;
-        });
+        const muscles = suggested.muscles.slice(0, 3);
+        const untrained = muscles.every((muscle) => !this.weekSets().get(muscle));
+        const labels = muscles.map((muscle) => MUSCLE_LABELS[muscle]);
+        const which = untrained
+            ? `which you haven't trained in the last 7 days`
+            : `which you've trained least in the last 7 days`;
         return {
             workout: suggested.workout,
-            reason: `For ${LIST.format(muscles)}, the least worked this week${this.leavesFresh(suggested.workout)}.`,
+            reason: `It works your ${LIST.format(labels)}, ${which}${this.leavesFresh(suggested.workout)}.`,
         };
     });
 
@@ -149,7 +154,7 @@ export class SuggestedWorkoutComponent {
     });
 
     /**
-     * ", and it leaves your Quads and Glutes fresh for Legs day on Thursday": the main muscles
+     * ", and leaves your Quads and Glutes fresh for Legs day on Thursday": the main muscles
      * of the next planned workout that `workout` doesn't work as main ones, up to two. Nothing
      * when there's none to come, or it works them all.
      */
@@ -164,6 +169,6 @@ export class SuggestedWorkoutComponent {
             return '';
         }
         const name = next.workouts[0].title.trim() || 'your next workout';
-        return `, and it leaves your ${LIST.format(fresh.map((m) => MUSCLE_LABELS[m]))} fresh for ${name} on ${WEEKDAYS[next.day]}`;
+        return `, and leaves your ${LIST.format(fresh.map((m) => MUSCLE_LABELS[m]))} fresh for ${name} on ${WEEKDAYS[next.day]}`;
     }
 }

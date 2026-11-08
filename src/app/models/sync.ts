@@ -16,7 +16,8 @@ export type SyncedKind =
     | 'exercise'
     | 'exercise-note'
     | 'hidden-exercise'
-    | 'ready-made-favourite';
+    | 'ready-made-favourite'
+    | 'ready-made-change';
 const SYNCED_KINDS: readonly SyncedKind[] = [
     'workout',
     'history',
@@ -24,6 +25,7 @@ const SYNCED_KINDS: readonly SyncedKind[] = [
     'exercise-note',
     'hidden-exercise',
     'ready-made-favourite',
+    'ready-made-change',
 ];
 
 /**

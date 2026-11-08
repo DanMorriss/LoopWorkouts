@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { afterNextRender, Component, computed, ElementRef, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { describeRounds, formatDuration } from '../../history/history-format';
 import { exerciseSlug } from '../../models/exercise';
@@ -18,6 +18,9 @@ import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { injectStartWorkout } from '../../shared/run/start-workout';
 import { MakeCopy } from '../../shared/state/make-copy.service';
+import { ReadyMadeChanges } from '../../shared/state/ready-made-changes.service';
+import { UndoService } from '../../shared/undo/undo.service';
+import { injectFocusAfterRender } from '../../shared/focus-after-render';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
 
@@ -29,7 +32,8 @@ const RECENT_RUNS = 5;
  * Start, to do it now, as its card's play button does; the muscles its exercises work, on the body map; its history, with its latest runs linking to them
  * on the Progress page; a heart to make it a favourite; and what's in it, each step and its sets, so it can be read without
  * opening Edit, each exercise sliding in its page. It slides in over Workouts, and back off with
- * ‹ Workouts or a swipe right, with focus back on the card (`?details=<its id>`).
+ * ‹ Workouts or a swipe right, with focus back on the card (`?details=<its id>`). From a run of it on
+ * Progress (`?run=<the run's id>`), it's ‹ Progress, back to that run.
  */
 @Component({
     selector: 'app-workout-details',
@@ -55,6 +59,9 @@ export class WorkoutDetailsComponent {
     private readonly route = inject(ActivatedRoute);
     private readonly slide = inject(PageSlide);
     private readonly makeCopy = inject(MakeCopy);
+    private readonly readyMadeChanges = inject(ReadyMadeChanges);
+    private readonly undo = inject(UndoService);
+    private readonly focusAfterRender = injectFocusAfterRender();
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     private readonly id = toSignal(
@@ -62,7 +69,11 @@ export class WorkoutDetailsComponent {
         { initialValue: '' }
     );
 
-    protected readonly back = `/library?details=${this.route.snapshot.paramMap.get('id') ?? ''}`;
+    /**
+     * Back to Workouts, with focus on its card; or, from a workout done on Progress
+     * (`?run=<its id>`), back to that run there.
+     */
+    protected readonly back = this.backFrom(this.route.snapshot);
     /** What screen readers hear arriving from Save in Create: "Saved Legs day". */
     protected readonly announcement = signal('');
 
@@ -93,6 +104,8 @@ export class WorkoutDetailsComponent {
         const workout = this.workout();
         return workout && isReadyMade(workout) ? workout : null;
     });
+    /** A ready-made one with your own reps and weights on it, which can be put back. */
+    protected readonly changed = computed(() => this.readyMadeChanges.byId().has(this.id()));
     /** Not found yet only because the ready-made workouts are still loading. */
     protected readonly loading = computed(
         () => isReadyMadeId(this.id()) && this.workouts.readyMade().length === 0
@@ -131,11 +144,37 @@ export class WorkoutDetailsComponent {
     /** Starts it, and opens the workout page on it. */
     protected readonly start = injectStartWorkout();
 
+    private backFrom(route: ActivatedRouteSnapshot) {
+        const run = route.queryParamMap.get('run');
+        return run
+            ? { url: `/history?run=${encodeURIComponent(run)}`, label: 'Progress' }
+            : { url: `/library?details=${route.paramMap.get('id') ?? ''}`, label: 'Workouts' };
+    }
+
     /** Make a copy of it, and open the copy in Create, coming back to the copy's details. */
     protected copy(workout: Workout) {
         const copy = this.makeCopy.of(workout.id);
         if (copy) {
             this.edit(copy);
+        }
+    }
+
+    /**
+     * Puts a ready-made workout's reps and weights back as it came, with Undo, which takes focus
+     * as the button goes. Undo brings the button back with focus on it; closing the bar moves
+     * focus to Make a copy.
+     */
+    protected resetAmounts(workout: Workout) {
+        const was = this.readyMadeChanges.reset(workout.id);
+        if (was) {
+            this.undo.offerUndo({
+                message: `Reset the reps and weights of "${this.name()}"`,
+                undo: () => {
+                    this.readyMadeChanges.restore(was);
+                    this.focusAfterRender('workout-details-reset');
+                },
+                dismissed: () => this.focusAfterRender('workout-details-copy'),
+            });
         }
     }
 

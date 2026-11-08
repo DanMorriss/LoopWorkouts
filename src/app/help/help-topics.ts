@@ -134,7 +134,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'plan-added-workouts',
                 question: 'Can I change a workout in a ready-made plan?',
                 answer: [
-                    "A ready-made plan's workouts are ready-made ones, planned as they are, so they can't be changed. To change one, open it on Workouts and press Make a copy: the copy is yours, to change as you like.",
+                    "A ready-made plan's workouts are ready-made ones. Their reps and weights change as you go, from the summary after each one, but not their exercises. To change those, open it on Workouts and press Make a copy: the copy is yours, to change as you like.",
                     'Then put your copy on its days on the Plan page, in place of the ready-made one.',
                 ],
             },
@@ -279,7 +279,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 question: 'How do I try a change but keep my workout as it is?',
                 answer: [
                     'Make a copy, in a workout\'s options (⋮) or at the bottom of its details: "Legs day (copy)" is added beside it, and opens in Create to change. The one it\'s a copy of stays as it was.',
-                    "It works on ready-made workouts too, which can't be changed themselves.",
+                    "It works on ready-made workouts too, whose exercises can't be changed themselves (only their reps and weights).",
                 ],
             },
             {

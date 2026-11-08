@@ -31,10 +31,14 @@ import { SetLinesComponent } from '../set-lines/set-lines.component';
 import { musclesInSets, musclesOnACard } from '../../models/workout-muscles';
 import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
 import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
+import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { PageSlide } from '../../nav/page-slide';
 
 /**
  * One workout in the history, as a card in the family of Workouts' and Plan's: its title, the
- * time it took as the big number, the main muscles its sets worked, and its sets. Its ⋮ menu
+ * time it took as the big number, the main muscles its sets worked, and its sets. Pressing it
+ * slides in its workout's details, to favourite it or make a copy, while the workout's still
+ * there. Its ⋮ menu
  * adds, edits or removes its note, or deletes it. The history decides which entry's menu is
  * open and which note is being edited (one of each at a time); the entry shows that, saves
  * notes itself, and asks the history to delete it, so the history can offer Undo.
@@ -60,12 +64,15 @@ import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showc
         '[class.entry--stopped]': "entry().outcome === 'stopped'",
         '[class.entry--highlighted]': 'highlighted()',
         '[class.entry--menu-open]': 'menuOpen()',
+        '[class.entry--editing]': 'editing()',
     },
 })
 export class HistoryEntryComponent {
     private readonly history = inject(HistoryStore);
     private readonly settings = inject(SettingsStore);
     private readonly exercises = inject(ExerciseStore);
+    private readonly workouts = inject(WorkoutStore);
+    private readonly slide = inject(PageSlide);
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly injector = inject(Injector);
 
@@ -112,6 +119,16 @@ export class HistoryEntryComponent {
         musclesOnACard(musclesInSets(this.entry().sets ?? [], (id) => this.exercises.byId(id)).main)
     );
     protected readonly id = computed(() => this.entry().id);
+    /**
+     * Its workout's details, coming back to this entry (`?run=`); none for a workout deleted
+     * since, or an example while the tour shows the page.
+     */
+    protected readonly workoutUrl = computed(() => {
+        const { workoutId, id } = this.entry();
+        return this.workouts.findAnyWorkout(workoutId)
+            ? `/library/${workoutId}?run=${encodeURIComponent(id)}`
+            : null;
+    });
 
     // The box starts from the saved note each time it opens
     private readonly noteModel = linkedSignal(() => {
@@ -129,6 +146,13 @@ export class HistoryEntryComponent {
                 untracked(() => this.focusAfterRender(`#note-${CSS.escape(this.id())}`));
             }
         });
+    }
+
+    protected open(event: MouseEvent) {
+        const url = this.workoutUrl();
+        if (url) {
+            this.slide.follow(event, url, 'in');
+        }
     }
 
     /**

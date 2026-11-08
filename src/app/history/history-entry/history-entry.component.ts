@@ -31,6 +31,7 @@ import { SetLinesComponent } from '../set-lines/set-lines.component';
 import { musclesInSets, musclesOnACard } from '../../models/workout-muscles';
 import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
 import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
+import { MenuPlacementDirective } from '../../shared/menu-placement.directive';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { PageSlide } from '../../nav/page-slide';
 
@@ -49,6 +50,7 @@ import { PageSlide } from '../../nav/page-slide';
         DatePipe,
         FormField,
         MatIconModule,
+        MenuPlacementDirective,
         RouterLink,
         SetLinesComponent,
         ShowcaseCountComponent,

@@ -1,6 +1,7 @@
 import { Component, ElementRef, input, output, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { StepKind, stepKindName } from '../../models/workout';
+import { MenuPlacementDirective } from '../../shared/menu-placement.directive';
 
 /**
  * A step's kind as a pill, which opens a menu of the kinds under it. Which step's menu is
@@ -8,7 +9,7 @@ import { StepKind, stepKindName } from '../../models/workout';
  */
 @Component({
     selector: 'app-step-kind-menu',
-    imports: [MatIconModule],
+    imports: [MatIconModule, MenuPlacementDirective],
     templateUrl: './step-kind-menu.component.html',
     styleUrl: './step-kind-menu.component.scss',
     host: {

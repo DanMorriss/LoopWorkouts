@@ -56,7 +56,7 @@
 
 ### Notes
 
-- Each entry's **⋮ menu** offers **Add note** (or **Edit note** and **Remove note** once there is one) and **Delete**. One menu open at a time.
+- Each entry's **⋮ menu** offers **Add note** (or **Edit note** and **Remove note** once there is one) and **Delete**. One menu open at a time. It opens above the ⋮ where the tab bar would cover it below, as on the last card (since 2026-11-08).
 - A note is up to **120 characters**, trimmed. Saving an empty note removes it. Cancel keeps the note as it was.
 - The workout summary's **Done** opens Progress with that workout highlighted in the log and in view. (`?note=<id>` does the same with its note box open and focused; nothing links there since the note box moved onto the summary.)
 

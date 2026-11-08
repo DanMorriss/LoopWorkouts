@@ -51,12 +51,13 @@ Other commands:
 | `npm run lint`                            | Check that no component is over 300 lines of code                   |
 | `npm run unused`                          | Check for exports and dependencies the app doesn't use              |
 | `npm run e2e` / `npm run e2e:ui`          | End-to-end tests with Playwright on the production build            |
+| `npm run e2e:p1`                          | Just the P1 end-to-end tests (`--grep @p1`)                         |
 
 ## Tests
 
 Every pull request runs the format, component size and unused code checks, these tests, the end-to-end tests and the production build (which fails over its size budgets) in GitHub Actions (`.github/workflows/ci.yml`).
 
-The end-to-end tests (`e2e/`, see [its README](e2e/README.md)) drive the production build with Playwright at phone and desktop sizes, each from a clean device and with no request leaving the app's own server.
+The end-to-end tests (`e2e/`, see [its README](e2e/README.md)) drive the production build with Playwright at phone and desktop sizes, each from a clean device and with no request leaving the app's own server. They're the regression pack in [docs/regression-tests.md](docs/regression-tests.md), one spec per area, each test titled with its id and tagged with its priority.
 
 There are around 1,260 unit tests, run with [Vitest](https://vitest.dev) in browser mode: a real headless Chromium via Playwright, so layout and colour contrast are checked as a browser renders them. Workout tests use Vitest's fake clock (`vi.useFakeTimers()`). As well as the usual component and service tests, they include:
 

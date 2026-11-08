@@ -96,7 +96,10 @@ export class App {
 
     /** Waits for Angular to have started and the router to have drawn a page. */
     async ready() {
-        await expect(this.page.locator('app-root main > router-outlet + *').first()).toBeAttached();
+        // Longer than an expect's 5s: a page can take that long to load on a busy machine
+        await expect(this.page.locator('app-root main > router-outlet + *').first()).toBeAttached({
+            timeout: 15_000,
+        });
     }
 
     /** What the app has saved in localStorage under `key`, or null. */
@@ -153,7 +156,9 @@ export class App {
      * is emptied once IndexedDB has it), so a reload doesn't race it.
      */
     async historySaved() {
-        await expect.poll(() => this.storageItem('history-pending')).toMatch(/^(null|\[\])$/);
+        await expect
+            .poll(async () => String(await this.storageItem('history-pending')))
+            .toMatch(/^(null|\[\])$/);
     }
 }
 

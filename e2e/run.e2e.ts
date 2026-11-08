@@ -264,8 +264,13 @@ test.describe('skipping', () => {
         await run.startFromLibrary('A');
 
         await run.wait(5000);
-        const skippedAt = await page.evaluate(() => Date.now());
+        // The clock held still over the press, as the app skips an alarm it finds over a second
+        // late, and on a busy machine the clock could run on that far before it's scheduled
+        const skippedAt = (await page.evaluate(() => Date.now())) + 500;
+        await page.clock.pauseAt(skippedAt);
         await run.skip.click();
+        await page.clock.runFor(100);
+        await page.clock.resume();
         await expect(run.face.getByText('Rest', { exact: true })).toBeVisible();
         await expect(run.faceTime).toHaveText(/^00:(10|09)$/);
         // Its alarm sounds at once
@@ -363,7 +368,7 @@ test.describe('sets and sections', () => {
     });
     test.use({ storage: seed.workouts([legs]) });
 
-    test("REG-RUN-07 sets, sections and what's next", async ({ app, page }) => {
+    test("REG-RUN-07 sets, sections and what's next", { tag: '@p2' }, async ({ app, page }) => {
         const run = new WorkoutPage(page);
         await app.goto('/library');
         await run.startFromLibrary('Legs');
@@ -405,7 +410,7 @@ test.describe('changing reps mid-workout', () => {
     });
     test.use({ storage: seed.workouts([push]) });
 
-    test('REG-RUN-08 change reps or weight mid-workout', async ({ app, page }) => {
+    test('REG-RUN-08 change reps or weight mid-workout', { tag: '@p2' }, async ({ app, page }) => {
         const run = new WorkoutPage(page);
         await app.goto('/library');
         await run.startFromLibrary('Push');
@@ -437,40 +442,41 @@ test.describe('the summary', () => {
     test.use({ storage: seed.workouts([push]) });
 
     for (const answer of ['Yes, use next time', 'No, just this time'] as const) {
-        test(`REG-RUN-09 the summary: correct a set, note, next time (${answer})`, async ({
-            app,
-            page,
-        }) => {
-            const run = new WorkoutPage(page);
-            await app.goto('/library');
-            await run.startFromLibrary('Push');
-            await run.done.click();
-            await run.wait(5500);
-            await run.endWorkout();
-            await expect(run.summary).toContainText('Push-ups: 20 reps @ 40 kg');
+        test(
+            `REG-RUN-09 the summary: correct a set, note, next time (${answer})`,
+            { tag: '@p2' },
+            async ({ app, page }) => {
+                const run = new WorkoutPage(page);
+                await app.goto('/library');
+                await run.startFromLibrary('Push');
+                await run.done.click();
+                await run.wait(5500);
+                await run.endWorkout();
+                await expect(run.summary).toContainText('Push-ups: 20 reps @ 40 kg');
 
-            await run.summary.getByRole('button', { name: 'Change reps or weight' }).click();
-            await setWheel(run.summary.getByRole('spinbutton', { name: /Set 1 reps/ }), 18);
-            await expect(run.summary.getByText('Use these settings next time?')).toBeVisible();
+                await run.summary.getByRole('button', { name: 'Change reps or weight' }).click();
+                await setWheel(run.summary.getByRole('spinbutton', { name: /Set 1 reps/ }), 18);
+                await expect(run.summary.getByText('Use these settings next time?')).toBeVisible();
 
-            await run.summary.getByRole('button', { name: answer }).click();
-            if (answer === 'Yes, use next time') {
-                await expect(
-                    run.summary.getByText('Saved: next time starts from these.')
-                ).toBeVisible();
+                await run.summary.getByRole('button', { name: answer }).click();
+                if (answer === 'Yes, use next time') {
+                    await expect(
+                        run.summary.getByText('Saved: next time starts from these.')
+                    ).toBeVisible();
+                }
+                // The saved step starts from 18 next time, or stays at 20
+                await expect
+                    .poll(async () => (await savedSteps(app))[0])
+                    .toMatchObject({ reps: answer === 'Yes, use next time' ? 18 : 20, weight: 40 });
+
+                await run.summary.getByRole('textbox', { name: 'Note' }).fill('felt strong');
+                await run.summary.getByRole('textbox', { name: 'Note' }).press('Tab');
+                await run.summaryDone.click();
+                const entry = new HistoryPage(page).entry('Push');
+                await expect(entry).toContainText('felt strong');
+                await expect(entry).toContainText('Push-ups: 18 reps @ 40 kg');
             }
-            // The saved step starts from 18 next time, or stays at 20
-            await expect
-                .poll(async () => (await savedSteps(app))[0])
-                .toMatchObject({ reps: answer === 'Yes, use next time' ? 18 : 20, weight: 40 });
-
-            await run.summary.getByRole('textbox', { name: 'Note' }).fill('felt strong');
-            await run.summary.getByRole('textbox', { name: 'Note' }).press('Tab');
-            await run.summaryDone.click();
-            const entry = new HistoryPage(page).entry('Push');
-            await expect(entry).toContainText('felt strong');
-            await expect(entry).toContainText('Push-ups: 18 reps @ 40 kg');
-        });
+        );
     }
 });
 
@@ -482,7 +488,7 @@ test.describe('a time limit', () => {
     });
     test.use({ storage: seed.workouts([a, b]) });
 
-    test('REG-RUN-10 a time limit runs out', async ({ app, page, device }) => {
+    test('REG-RUN-10 a time limit runs out', { tag: '@p2' }, async ({ app, page, device }) => {
         const run = new WorkoutPage(page);
         await app.goto('/library');
         await run.startFromLibrary('A');
@@ -502,7 +508,7 @@ test.describe('a time limit', () => {
         expect(finish.map((alarm) => alarm.second)).toEqual([64]);
     });
 
-    test('REG-RUN-10 time runs out during a rep step', async ({ app, page }) => {
+    test('REG-RUN-10 time runs out during a rep step', { tag: '@p2' }, async ({ app, page }) => {
         const run = new WorkoutPage(page);
         await app.goto('/library');
         await run.startFromLibrary('B');
@@ -540,86 +546,102 @@ test.describe('swapping mid-workout', () => {
     });
     test.use({ storage: { ...seed.workouts([legs]), ...seed.history([goblets]) } });
 
-    test("REG-RUN-11 an exercise's details and Swap, mid-workout", async ({ app, page }) => {
-        const run = new WorkoutPage(page);
-        await app.goto('/library');
-        await run.startFromLibrary('Legs');
-        await expect(run.main.getByRole('button', { name: /^Details of/ })).toHaveCount(0);
-        await run.wait(3500);
+    test(
+        "REG-RUN-11 an exercise's details and Swap, mid-workout",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Legs');
+            await expect(run.main.getByRole('button', { name: /^Details of/ })).toHaveCount(0);
+            await run.wait(3500);
 
-        const info = run.main.getByRole('button', { name: 'Details of Back squat' });
-        await info.click();
-        const details = page.getByRole('dialog', { name: 'Back squat' });
-        await expect(details).toBeVisible();
-        // The workout still waits, and Space doesn't press Done
-        await page.keyboard.press('Space');
-        await expect(details).toBeVisible();
-        await details.getByRole('button', { name: 'Back' }).click();
-        await expect(details).toBeHidden();
-        await expect(info).toBeFocused();
-        await expect(run.done).toBeVisible();
+            const info = run.main.getByRole('button', { name: 'Details of Back squat' });
+            await info.click();
+            const details = page.getByRole('dialog', { name: 'Back squat' });
+            await expect(details).toBeVisible();
+            // The workout still waits, and Space doesn't press Done
+            await page.keyboard.press('Space');
+            await expect(details).toBeVisible();
+            await details.getByRole('button', { name: 'Back' }).click();
+            await expect(details).toBeHidden();
+            await expect(info).toBeFocused();
+            await expect(run.done).toBeVisible();
 
-        await info.click();
-        await details.getByRole('button', { name: 'Swap exercise' }).click();
-        const swap = page.getByRole('dialog', { name: 'Swap Back squat' });
-        await expect(swap).toContainText('For the rest of this workout. Sets done so far stay.');
-        await expect(swap.getByRole('searchbox', { name: 'Search exercises' })).toBeFocused();
-        await page.keyboard.type('goblet');
-        await swap.getByRole('button', { name: /^Goblet squat/ }).click();
-        await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
-        await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '24');
-        await expect(app.undoBar).toContainText('Swapped to Goblet squat');
+            await info.click();
+            await details.getByRole('button', { name: 'Swap exercise' }).click();
+            const swap = page.getByRole('dialog', { name: 'Swap Back squat' });
+            await expect(swap).toContainText(
+                'For the rest of this workout. Sets done so far stay.'
+            );
+            await expect(swap.getByRole('searchbox', { name: 'Search exercises' })).toBeFocused();
+            await page.keyboard.type('goblet');
+            await swap.getByRole('button', { name: /^Goblet squat/ }).click();
+            await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
+            await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '24');
+            await expect(app.undoBar).toContainText('Swapped to Goblet squat');
 
-        // Kept for the tab, through a reload
-        await app.reload();
-        await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
+            // Kept for the tab, through a reload
+            await app.reload();
+            await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
 
-        await run.done.click();
-        await run.wait(8500);
-        await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
-        await run.done.click();
-        await expect(run.summary).toContainText('Back squat for Goblet squat');
-        await run.summary.getByRole('button', { name: 'No, just this time' }).click();
-        await expect(run.summary).toContainText("Next time it's Back squat again.");
-        expect((await savedSteps(app))[1]).toMatchObject({
-            name: 'Back squat',
-            weight: 60,
-            exerciseId: 'builtin:back-squat',
-        });
-        await expect(run.summary).toContainText('Goblet squat: 2 × 10 @ 24 kg');
-    });
+            await run.done.click();
+            await run.wait(8500);
+            await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
+            await run.done.click();
+            await expect(run.summary).toContainText('Back squat for Goblet squat');
+            await run.summary.getByRole('button', { name: 'No, just this time' }).click();
+            await expect(run.summary).toContainText("Next time it's Back squat again.");
+            expect((await savedSteps(app))[1]).toMatchObject({
+                name: 'Back squat',
+                weight: 60,
+                exerciseId: 'builtin:back-squat',
+            });
+            await expect(run.summary).toContainText('Goblet squat: 2 × 10 @ 24 kg');
+        }
+    );
 
-    test('REG-RUN-11 focus goes back to the (i) after a swap', async ({ app, page }) => {
-        test.fixme(
-            true,
-            "App bug: after picking in Swap, focus ends on the Undo bar's Undo rather than the step's (i). WorkoutSwap.swapFor() puts it on the (i), then the undo bar takes it for its new offer."
-        );
-        const run = new WorkoutPage(page);
-        await app.goto('/library');
-        await run.startFromLibrary('Legs');
-        await run.wait(3500);
-        await run.main.getByRole('button', { name: 'Details of Back squat' }).click();
-        await page.getByRole('button', { name: 'Swap exercise' }).click();
-        await page.keyboard.type('goblet');
-        await page.getByRole('button', { name: /^Goblet squat/ }).click();
-        await expect(
-            run.main.getByRole('button', { name: 'Details of Goblet squat' })
-        ).toBeFocused();
-    });
+    test(
+        'REG-RUN-11 focus goes back to the (i) after a swap',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            test.fixme(
+                true,
+                "App bug: after picking in Swap, focus ends on the Undo bar's Undo rather than the step's (i). WorkoutSwap.swapFor() puts it on the (i), then the undo bar takes it for its new offer."
+            );
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Legs');
+            await run.wait(3500);
+            await run.main.getByRole('button', { name: 'Details of Back squat' }).click();
+            await page.getByRole('button', { name: 'Swap exercise' }).click();
+            await page.keyboard.type('goblet');
+            await page.getByRole('button', { name: /^Goblet squat/ }).click();
+            await expect(
+                run.main.getByRole('button', { name: 'Details of Goblet squat' })
+            ).toBeFocused();
+        }
+    );
 
-    test('REG-RUN-12 swap the next exercise while paused in a rest', async ({ app, page }) => {
-        test.fixme(
-            true,
-            "Known issue (TODO.md): no swapping the next exercise while paused in a rest. The paused ring shows only the rest's name, with no (i)."
-        );
-        const run = new WorkoutPage(page);
-        await app.goto('/library');
-        await run.startFromLibrary('Legs');
-        await run.wait(3500);
-        await run.done.click();
-        await run.pause.click();
-        await expect(run.main.getByRole('button', { name: 'Details of Back squat' })).toBeVisible();
-    });
+    test(
+        'REG-RUN-12 swap the next exercise while paused in a rest',
+        { tag: '@p3' },
+        async ({ app, page }) => {
+            test.fixme(
+                true,
+                "Known issue (TODO.md): no swapping the next exercise while paused in a rest. The paused ring shows only the rest's name, with no (i)."
+            );
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Legs');
+            await run.wait(3500);
+            await run.done.click();
+            await run.pause.click();
+            await expect(
+                run.main.getByRole('button', { name: 'Details of Back squat' })
+            ).toBeVisible();
+        }
+    );
 });
 
 test.describe('last time and step-ups', () => {
@@ -635,37 +657,45 @@ test.describe('last time and step-ups', () => {
     });
     test.use({ storage: { ...seed.workouts([squats]), ...seed.history([lastWeek]) } });
 
-    test('REG-RUN-13 last time, a suggested weight, personal bests', async ({ app, page }) => {
-        const run = new WorkoutPage(page);
-        await app.goto('/library');
-        await run.startFromLibrary('Squats');
-        await expect(run.main.getByText('Last time: 10, 10, 12 @ 60 kg')).toBeVisible();
+    test(
+        'REG-RUN-13 last time, a suggested weight, personal bests',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Squats');
+            await expect(run.main.getByText('Last time: 10, 10, 12 @ 60 kg')).toBeVisible();
 
-        await run.main.getByRole('button', { name: 'Try 62.5 kg' }).click();
-        await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '62.5');
-        await expect(run.main.getByRole('button', { name: 'Try 62.5 kg' })).toHaveCount(0);
-        await expect
-            .poll(async () => JSON.stringify(await app.stored('workouts')))
-            .toContain('"weight":62.5');
+            await run.main.getByRole('button', { name: 'Try 62.5 kg' }).click();
+            await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '62.5');
+            await expect(run.main.getByRole('button', { name: 'Try 62.5 kg' })).toHaveCount(0);
+            await expect
+                .poll(async () => JSON.stringify(await app.stored('workouts')))
+                .toContain('"weight":62.5');
 
-        for (let set = 0; set < 3; set++) {
-            await run.done.click();
-            if (set < 2) {
-                await run.wait(5500);
+            for (let set = 0; set < 3; set++) {
+                await run.done.click();
+                if (set < 2) {
+                    await run.wait(5500);
+                }
             }
-        }
-        await expect(run.summary).toHaveAccessibleName('Workout finished');
-        await expect(run.summary.getByRole('heading', { name: 'Personal bests' })).toBeVisible();
-        await expect(run.summary).toContainText('Heaviest: 62.5 kg × 10');
-        await expect(run.summary).toContainText('Back squat: try 65 kg, up from 62.5 kg');
-        await expect(run.summary.getByRole('heading', { name: 'Muscles worked' })).toBeVisible();
+            await expect(run.summary).toHaveAccessibleName('Workout finished');
+            await expect(
+                run.summary.getByRole('heading', { name: 'Personal bests' })
+            ).toBeVisible();
+            await expect(run.summary).toContainText('Heaviest: 62.5 kg × 10');
+            await expect(run.summary).toContainText('Back squat: try 65 kg, up from 62.5 kg');
+            await expect(
+                run.summary.getByRole('heading', { name: 'Muscles worked' })
+            ).toBeVisible();
 
-        await run.summary.getByRole('button', { name: /^Apply/ }).click();
-        await expect(run.summary.getByText(/Applied/)).toBeFocused();
-        await expect
-            .poll(async () => JSON.stringify(await app.stored('workouts')))
-            .toContain('"weight":65');
-    });
+            await run.summary.getByRole('button', { name: /^Apply/ }).click();
+            await expect(run.summary.getByText(/Applied/)).toBeFocused();
+            await expect
+                .poll(async () => JSON.stringify(await app.stored('workouts')))
+                .toContain('"weight":65');
+        }
+    );
 });
 
 test.describe('one side at a time', () => {
@@ -679,7 +709,7 @@ test.describe('one side at a time', () => {
         },
     });
 
-    test('REG-RUN-14 one side at a time', async ({ app, page }) => {
+    test('REG-RUN-14 one side at a time', { tag: '@p3' }, async ({ app, page }) => {
         const run = new WorkoutPage(page);
         await app.goto('/library');
         await run.startFromLibrary('Side plank');
@@ -698,42 +728,50 @@ test.describe('sound, beeps and the screen', () => {
     const intervals = workout('Intervals', { steps: [timed(30), rest(10)], repeats: 2 });
     test.use({ storage: seed.workouts([intervals]) });
 
-    test('REG-RUN-15 countdown beeps, turned off mid-workout', async ({ app, page, device }) => {
-        const run = new WorkoutPage(page);
-        await app.goto('/library');
-        await run.startFromLibrary('Intervals');
+    test(
+        'REG-RUN-15 countdown beeps, turned off mid-workout',
+        { tag: '@p2' },
+        async ({ app, page, device }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Intervals');
 
-        await run.wait(30_500);
-        const ticks = await device.alarms([ALARM.countdown]);
-        expect(ticks.map((tick) => tick.second)).toEqual([27, 28, 29]);
-        expect((await device.alarms([ALARM.rest])).map((a) => a.second)).toEqual([30]);
+            await run.wait(30_500);
+            const ticks = await device.alarms([ALARM.countdown]);
+            expect(ticks.map((tick) => tick.second)).toEqual([27, 28, 29]);
+            expect((await device.alarms([ALARM.rest])).map((a) => a.second)).toEqual([30]);
 
-        await run.close.click();
-        await app.tab('You').click();
-        await page.getByRole('link', { name: 'Settings' }).click();
-        await page.getByRole('switch', { name: 'Countdown beeps' }).click();
-        await app.runBar.getByRole('link').click();
-        await run.wait(50_000);
-        await expect(run.summary).toBeVisible();
-        const after = await device.alarms([ALARM.countdown]);
-        expect(after.map((tick) => tick.second)).toEqual([27, 28, 29]);
-        // The step alarms still play
-        expect((await device.alarms([ALARM.work])).map((a) => a.second)).toEqual([0, 40]);
-    });
+            await run.close.click();
+            await app.tab('You').click();
+            await page.getByRole('link', { name: 'Settings' }).click();
+            await page.getByRole('switch', { name: 'Countdown beeps' }).click();
+            await app.runBar.getByRole('link').click();
+            await run.wait(50_000);
+            await expect(run.summary).toBeVisible();
+            const after = await device.alarms([ALARM.countdown]);
+            expect(after.map((tick) => tick.second)).toEqual([27, 28, 29]);
+            // The step alarms still play
+            expect((await device.alarms([ALARM.work])).map((a) => a.second)).toEqual([0, 40]);
+        }
+    );
 
-    test('REG-RUN-15 the screen is kept on while running', async ({ app, page, device }) => {
-        const run = new WorkoutPage(page);
-        await app.goto('/library');
-        await run.startFromLibrary('Intervals');
-        await expect.poll(async () => (await device.wakeLock()).held).toBe(true);
-        await run.pause.click();
-        await expect.poll(async () => (await device.wakeLock()).held).toBe(false);
-        await run.resume.click();
-        await expect.poll(async () => (await device.wakeLock()).held).toBe(true);
-        await run.wait(71_000);
-        await expect(run.summary).toBeVisible();
-        await expect.poll(async () => (await device.wakeLock()).held).toBe(false);
-    });
+    test(
+        'REG-RUN-15 the screen is kept on while running',
+        { tag: '@p2' },
+        async ({ app, page, device }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Intervals');
+            await expect.poll(async () => (await device.wakeLock()).held).toBe(true);
+            await run.pause.click();
+            await expect.poll(async () => (await device.wakeLock()).held).toBe(false);
+            await run.resume.click();
+            await expect.poll(async () => (await device.wakeLock()).held).toBe(true);
+            await run.wait(71_000);
+            await expect(run.summary).toBeVisible();
+            await expect.poll(async () => (await device.wakeLock()).held).toBe(false);
+        }
+    );
 
     test.describe('with sound and Keep screen on off', () => {
         test.use({
@@ -743,21 +781,21 @@ test.describe('sound, beeps and the screen', () => {
             },
         });
 
-        test('REG-RUN-15 sound off plays nothing, and the screen may lock', async ({
-            app,
-            page,
-            device,
-        }) => {
-            const run = new WorkoutPage(page);
-            await app.goto('/library');
-            await run.startFromLibrary('Intervals');
-            await run.wait(31_000);
-            expect(await device.notes()).toEqual([]);
-            expect((await device.wakeLock()).requests).toBe(0);
-        });
+        test(
+            'REG-RUN-15 sound off plays nothing, and the screen may lock',
+            { tag: '@p2' },
+            async ({ app, page, device }) => {
+                const run = new WorkoutPage(page);
+                await app.goto('/library');
+                await run.startFromLibrary('Intervals');
+                await run.wait(31_000);
+                expect(await device.notes()).toEqual([]);
+                expect((await device.wakeLock()).requests).toBe(0);
+            }
+        );
     });
 
-    test('REG-RUN-15 real sound, vibration and the screen staying on', () => {
+    test('REG-RUN-15 real sound, vibration and the screen staying on', { tag: '@p2' }, () => {
         test.skip(
             true,
             'Manual on a phone: hear the beeps, feel the vibration (Android), and see the screen stay on through a workout. Alarms with the phone locked (ALM-2) are a known web limit on iPhone.'

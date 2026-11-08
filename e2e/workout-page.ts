@@ -21,10 +21,12 @@ export class WorkoutPage {
 
     /**
      * The ring's face: the step's name, its time or its reps and weight, and "then …" in a
-     * rest. (By its component, as nothing names it: the text in it is what's checked.)
+     * rest. (By its component, as nothing names it: the text in it is what's checked.) As one
+     * step rolls on to the next, the last one's face is there a moment longer, after the new
+     * one: the first is the step now.
      */
     get face(): Locator {
-        return this.main.locator('app-workout-face-slide');
+        return this.main.locator('app-workout-face-slide').first();
     }
 
     /** The time on the face, e.g. "00:10" (the countdown, as screen readers have it). */
@@ -118,14 +120,24 @@ export async function frames(page: Page, count: number) {
 /**
  * Sets a number wheel (a spin button) with its keys, as someone with a keyboard does: Page Down
  * or Up five rows at a time and the arrows for the rest, `step` apart (0.5 for weights, 1 for
- * reps, minutes and seconds), then checks where it landed and goes on from there. A wheel can be
- * redrawn as its value changes (the summary's, as the set it changes is logged), losing a key
- * pressed meanwhile, which the next go makes up; typing the digits isn't relied on for the same
- * reason, as a redraw between two of them starts the number again.
+ * reps, minutes and seconds), then checks where it landed and goes on from there. A wheel far
+ * from its value has the number typed first, as quick digits build one. A wheel can be redrawn
+ * as its value changes (the summary's, as the set it changes is logged), losing a key pressed
+ * meanwhile or starting a typed number again, which the keys after it make up.
  */
 export async function setWheel(wheel: Locator, value: number, step = 1) {
     const page = wheel.page();
     const now = async () => Number(await wheel.getAttribute('aria-valuenow'));
+    // Typed, a few times if need be, as a redraw between two digits starts the number again
+    for (let tries = 0; tries < 3 && Math.abs(value - (await now())) / step > 20; tries++) {
+        await wheel.focus();
+        await frames(page, 2);
+        await page.keyboard.type(String(value));
+        await expect
+            .poll(now, { timeout: 1500 })
+            .toBe(value)
+            .catch(() => undefined);
+    }
     for (let attempt = 0; attempt < 10; attempt++) {
         const current = await now();
         if (current === value) {

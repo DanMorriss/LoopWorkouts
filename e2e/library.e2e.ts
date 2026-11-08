@@ -198,15 +198,19 @@ test.describe('the order', () => {
         ),
     });
 
-    test('REG-LIB-05 the list is A to Z, with nothing to move', async ({ app, page }) => {
-        const library = new LibraryPage(page);
-        await app.goto('/library');
-        await page.getByRole('radio', { name: 'My own' }).check();
-        expect(await library.titles()).toEqual(['arms', 'Bench', 'Zone 2']);
-        const options = await library.options('Bench');
-        await expect(options.getByRole('button')).toHaveCount(3);
-        await expect(options.getByRole('button', { name: /^Move/ })).toHaveCount(0);
-    });
+    test(
+        'REG-LIB-05 the list is A to Z, with nothing to move',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const library = new LibraryPage(page);
+            await app.goto('/library');
+            await page.getByRole('radio', { name: 'My own' }).check();
+            expect(await library.titles()).toEqual(['arms', 'Bench', 'Zone 2']);
+            const options = await library.options('Bench');
+            await expect(options.getByRole('button')).toHaveCount(3);
+            await expect(options.getByRole('button', { name: /^Move/ })).toHaveCount(0);
+        }
+    );
 });
 
 test.describe('the plan page suggests a workout', () => {
@@ -223,38 +227,40 @@ test.describe('the plan page suggests a workout', () => {
         },
     });
 
-    test('REG-LIB-06 missing muscle groups and the workout to fill them', async ({ app, page }) => {
-        await app.goto('/plan');
-        const missing = page.getByRole('region', { name: 'Missing muscle groups' });
-        await expect(missing.getByRole('list').first().getByRole('link')).toHaveText([
-            'Biceps',
-            'Forearms',
-            'Abs',
-            'Obliques',
-            'Traps',
-            'Upper back',
-            'Abductors',
-            'Calves',
-            'Shins',
-            'Neck',
-        ]);
-        const works = page.getByRole('region', { name: 'What your plan works' });
-        await expect(works.getByRole('list', { name: 'Supporting' }).getByRole('link')).toHaveText([
-            'Shoulders',
-            'Triceps',
-            'Lower back',
-            'Adductors',
-            'Hamstrings',
-        ]);
-        await expect(missing).toContainText('Gym extras');
-        await expect(missing).toContainText('Adds Forearms, Abs, Obliques and 7 more.');
+    test(
+        'REG-LIB-06 missing muscle groups and the workout to fill them',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/plan');
+            const missing = page.getByRole('region', { name: 'Missing muscle groups' });
+            await expect(missing.getByRole('list').first().getByRole('link')).toHaveText([
+                'Biceps',
+                'Forearms',
+                'Abs',
+                'Obliques',
+                'Traps',
+                'Upper back',
+                'Abductors',
+                'Calves',
+                'Shins',
+                'Neck',
+            ]);
+            const works = page.getByRole('region', { name: 'What your plan works' });
+            await expect(
+                works.getByRole('list', { name: 'Supporting' }).getByRole('link')
+            ).toHaveText(['Shoulders', 'Triceps', 'Lower back', 'Adductors', 'Hamstrings']);
+            await expect(missing).toContainText('Gym extras');
+            await expect(missing).toContainText('Adds Forearms, Abs, Obliques and 7 more.');
 
-        await missing.getByRole('link', { name: 'Calves' }).click();
-        await expect(page).toHaveURL(/\/exercises\?muscles=calves(&|$)/);
-        await expect(
-            page.getByRole('group', { name: 'Main muscle' }).getByRole('button', { name: 'Calves' })
-        ).toHaveAttribute('aria-pressed', 'true');
-    });
+            await missing.getByRole('link', { name: 'Calves' }).click();
+            await expect(page).toHaveURL(/\/exercises\?muscles=calves(&|$)/);
+            await expect(
+                page
+                    .getByRole('group', { name: 'Main muscle' })
+                    .getByRole('button', { name: 'Calves' })
+            ).toHaveAttribute('aria-pressed', 'true');
+        }
+    );
 });
 
 test.describe('ready-made workouts', () => {

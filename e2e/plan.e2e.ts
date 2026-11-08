@@ -64,15 +64,19 @@ test.describe('a new guest', () => {
 });
 
 test.describe('a new guest, focus', () => {
-    test('REG-PLAN-01 focus moves to Edit plan once a plan is used', async ({ app, page }) => {
-        test.fixme(
-            true,
-            "App bug: focus ends on the Undo bar's Undo, not Edit plan. injectUsePlanOnToday() focuses Edit plan after the next render, but the undo bar focuses Undo after its own, later. docs/features/home-and-navigation.md says focus is on Edit plan."
-        );
-        await app.goto('/home');
-        await page.getByRole('button', { name: 'Use No equipment, 3 days' }).click();
-        await expect(page.getByRole('link', { name: 'Edit plan' })).toBeFocused();
-    });
+    test(
+        'REG-PLAN-01 focus moves to Edit plan once a plan is used',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            test.fixme(
+                true,
+                "App bug: focus ends on the Undo bar's Undo, not Edit plan. injectUsePlanOnToday() focuses Edit plan after the next render, but the undo bar focuses Undo after its own, later. docs/features/home-and-navigation.md says focus is on Edit plan."
+            );
+            await app.goto('/home');
+            await page.getByRole('button', { name: 'Use No equipment, 3 days' }).click();
+            await expect(page.getByRole('link', { name: 'Edit plan' })).toBeFocused();
+        }
+    );
 });
 
 test.describe('planning by hand', () => {
@@ -164,14 +168,18 @@ test.describe('due today', () => {
             },
         });
 
-        test('REG-PLAN-03 only what is still due is listed', async ({ app, page }) => {
-            await app.goto('/home');
-            const due = page.getByRole('region', { name: 'Due today' });
-            await expect(due.getByRole('button', { name: /^Start / })).toHaveAccessibleName(
-                'Start Push'
-            );
-            await expect(due).toContainText('Done today: Legs');
-        });
+        test(
+            'REG-PLAN-03 only what is still due is listed',
+            { tag: '@p1' },
+            async ({ app, page }) => {
+                await app.goto('/home');
+                const due = page.getByRole('region', { name: 'Due today' });
+                await expect(due.getByRole('button', { name: /^Start / })).toHaveAccessibleName(
+                    'Start Push'
+                );
+                await expect(due).toContainText('Done today: Legs');
+            }
+        );
     });
 
     test.describe('with both done today', () => {
@@ -183,13 +191,17 @@ test.describe('due today', () => {
             },
         });
 
-        test('REG-PLAN-03 all done, and still no suggestion (M4)', async ({ app, page }) => {
-            await app.goto('/home');
-            await expect(page.getByText(/All done: Push, Legs/)).toBeVisible();
-            await expect(page.getByRole('region', { name: 'Suggested next workout' })).toHaveCount(
-                0
-            );
-        });
+        test(
+            'REG-PLAN-03 all done, and still no suggestion (M4)',
+            { tag: '@p1' },
+            async ({ app, page }) => {
+                await app.goto('/home');
+                await expect(page.getByText(/All done: Push, Legs/)).toBeVisible();
+                await expect(
+                    page.getByRole('region', { name: 'Suggested next workout' })
+                ).toHaveCount(0);
+            }
+        );
     });
 });
 
@@ -202,38 +214,41 @@ test.describe('how the week is going', () => {
         },
     });
 
-    test('REG-PLAN-04 how this week is going, on Today and the Plan page', async ({
-        app,
-        page,
-    }) => {
-        await app.goto('/home');
-        const week = page.getByRole('region', { name: 'This week' });
-        await expect(week.getByRole('listitem')).toContainText([
-            'Monday: Legs, done',
-            'Tuesday: Push, missed',
-            'Wednesday, today: Legs, due today',
-            'Thursday: nothing planned',
-            'Friday: Pull',
-        ]);
-        await expect(week).toContainText('1 of 4 done this week · Next: Pull on Friday');
+    test(
+        'REG-PLAN-04 how this week is going, on Today and the Plan page',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/home');
+            const week = page.getByRole('region', { name: 'This week' });
+            await expect(week.getByRole('listitem')).toContainText([
+                'Monday: Legs, done',
+                'Tuesday: Push, missed',
+                'Wednesday, today: Legs, due today',
+                'Thursday: nothing planned',
+                'Friday: Pull',
+            ]);
+            await expect(week).toContainText('1 of 4 done this week · Next: Pull on Friday');
 
-        await week.getByRole('link', { name: 'Edit plan' }).click();
-        await expect(day(page, 'Monday')).toContainText('Done');
-        await expect(day(page, 'Tuesday')).toContainText('Missed');
-        await expect(day(page, 'Wednesday · today')).toContainText('Due');
-        await expect(page.getByText('1 of 3 done so far this week')).toBeVisible();
+            await week.getByRole('link', { name: 'Edit plan' }).click();
+            await expect(day(page, 'Monday')).toContainText('Done');
+            await expect(day(page, 'Tuesday')).toContainText('Missed');
+            await expect(day(page, 'Wednesday · today')).toContainText('Due');
+            await expect(page.getByText('1 of 3 done so far this week')).toBeVisible();
 
-        // Planned on a day already gone this week, it counts from next week
-        await day(page, 'Monday').getByRole('button', { name: 'Add a workout to Monday' }).click();
-        await page
-            .getByRole('dialog', { name: 'Plan on Monday' })
-            .getByRole('button', { name: /^Push/ })
-            .click();
-        await expect(
-            day(page, 'Monday').getByRole('listitem').filter({ hasText: 'Push' })
-        ).toContainText('From next week');
-        await expect(page.getByText('1 of 3 done so far this week')).toBeVisible();
-    });
+            // Planned on a day already gone this week, it counts from next week
+            await day(page, 'Monday')
+                .getByRole('button', { name: 'Add a workout to Monday' })
+                .click();
+            await page
+                .getByRole('dialog', { name: 'Plan on Monday' })
+                .getByRole('button', { name: /^Push/ })
+                .click();
+            await expect(
+                day(page, 'Monday').getByRole('listitem').filter({ hasText: 'Push' })
+            ).toContainText('From next week');
+            await expect(page.getByText('1 of 3 done so far this week')).toBeVisible();
+        }
+    );
 });
 
 test.describe('the ready-made plans', () => {
@@ -241,37 +256,41 @@ test.describe('the ready-made plans', () => {
         storage: { ...seed.workouts([legs]), ...seed.settings({ trainingGoal: 'fitness' }) },
     });
 
-    test("REG-PLAN-05 the ready-made plans page, and a plan's workouts", async ({ app, page }) => {
-        await app.goto('/home');
-        await page.getByRole('link', { name: 'More plans' }).click();
-        await expect(page).toHaveURL('/ready-made-plans');
-        await expect(app.backLink('Today')).toBeVisible();
-        await expect(app.tab('Today')).toHaveAttribute('aria-current', 'true');
-        const plans = page.getByRole('main').getByRole('article');
-        await expect(plans.first()).toHaveAccessibleName('Fitness, 4 days');
-        await expect(plans.nth(1)).toHaveAccessibleName('Kettlebell, 3 days');
-        await expect(plans.nth(2)).toHaveAccessibleName('No equipment, 3 days');
+    test(
+        "REG-PLAN-05 the ready-made plans page, and a plan's workouts",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/home');
+            await page.getByRole('link', { name: 'More plans' }).click();
+            await expect(page).toHaveURL('/ready-made-plans');
+            await expect(app.backLink('Today')).toBeVisible();
+            await expect(app.tab('Today')).toHaveAttribute('aria-current', 'true');
+            const plans = page.getByRole('main').getByRole('article');
+            await expect(plans.first()).toHaveAccessibleName('Fitness, 4 days');
+            await expect(plans.nth(1)).toHaveAccessibleName('Kettlebell, 3 days');
+            await expect(plans.nth(2)).toHaveAccessibleName('No equipment, 3 days');
 
-        await page.getByRole('switch', { name: 'Only what I have' }).click();
-        await expect(plans).toHaveCount(1);
-        await expect(plans).toHaveAccessibleName('No equipment, 3 days');
-        await expect(page.getByText("5 more need equipment you haven't picked.")).toBeVisible();
+            await page.getByRole('switch', { name: 'Only what I have' }).click();
+            await expect(plans).toHaveCount(1);
+            await expect(plans).toHaveAccessibleName('No equipment, 3 days');
+            await expect(page.getByText("5 more need equipment you haven't picked.")).toBeVisible();
 
-        const tabata = plans.getByRole('link', { name: /^Tabata/ });
-        await tabata.click();
-        await expect(page).toHaveURL(/\/ready-made-plans\/tabata/);
-        await expect(
-            page.getByRole('button', { name: /Add and start|Add to my workouts/ })
-        ).toHaveCount(0);
+            const tabata = plans.getByRole('link', { name: /^Tabata/ });
+            await tabata.click();
+            await expect(page).toHaveURL(/\/ready-made-plans\/tabata/);
+            await expect(
+                page.getByRole('button', { name: /Add and start|Add to my workouts/ })
+            ).toHaveCount(0);
 
-        // Back to the plans, with focus on the link it came from
-        await page
-            .getByRole('link', { name: /^Ready-made plans|^Plans/ })
-            .first()
-            .click();
-        await expect(page).toHaveURL('/ready-made-plans');
-        await expect(tabata).toBeFocused();
-    });
+            // Back to the plans, with focus on the link it came from
+            await page
+                .getByRole('link', { name: /^Ready-made plans|^Plans/ })
+                .first()
+                .click();
+            await expect(page).toHaveURL('/ready-made-plans');
+            await expect(tabata).toBeFocused();
+        }
+    );
 });
 
 test.describe('a ready-made plan over my own', () => {
@@ -279,26 +298,32 @@ test.describe('a ready-made plan over my own', () => {
         storage: { ...seed.workouts([legs]), ...seed.plan({ sat: ['legs'] }) },
     });
 
-    test('REG-PLAN-06 using a ready-made plan over an existing one', async ({ app, page }) => {
-        await app.goto('/ready-made-plans');
-        await page.getByRole('button', { name: 'Use Dumbbells at home, 4 days' }).click();
-        await expect(page).toHaveURL('/home');
-        await expect(app.undoBar).toContainText('Your week is planned: Dumbbells at home, 4 days');
-        const plan = await app.stored<{ days: string[][] }>('week-plan');
-        expect(plan?.days).toEqual([
-            ['builtin:dumbbell-upper'],
-            ['builtin:dumbbell-lower'],
-            [],
-            ['builtin:dumbbell-upper'],
-            ['builtin:dumbbell-lower'],
-            [],
-            [],
-        ]);
-        // Planned as they are: nothing added to my workouts
-        expect((await app.stored<unknown[]>('workouts'))?.length).toBe(1);
+    test(
+        'REG-PLAN-06 using a ready-made plan over an existing one',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/ready-made-plans');
+            await page.getByRole('button', { name: 'Use Dumbbells at home, 4 days' }).click();
+            await expect(page).toHaveURL('/home');
+            await expect(app.undoBar).toContainText(
+                'Your week is planned: Dumbbells at home, 4 days'
+            );
+            const plan = await app.stored<{ days: string[][] }>('week-plan');
+            expect(plan?.days).toEqual([
+                ['builtin:dumbbell-upper'],
+                ['builtin:dumbbell-lower'],
+                [],
+                ['builtin:dumbbell-upper'],
+                ['builtin:dumbbell-lower'],
+                [],
+                [],
+            ]);
+            // Planned as they are: nothing added to my workouts
+            expect((await app.stored<unknown[]>('workouts'))?.length).toBe(1);
 
-        await app.undo.click();
-        const undone = await app.stored<{ days: string[][] }>('week-plan');
-        expect(undone?.days[5]).toEqual(['legs']);
-    });
+            await app.undo.click();
+            const undone = await app.stored<{ days: string[][] }>('week-plan');
+            expect(undone?.days[5]).toEqual(['legs']);
+        }
+    );
 });

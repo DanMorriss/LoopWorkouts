@@ -17,6 +17,7 @@ npm run unused                                # exports and dependencies nothing
 npx ng test --watch=false --no-progress
 npm run build
 npm run e2e                                   # end-to-end, on the production build: e2e/README.md
+npm run e2e:p1                                # just the P1 regression tests
 ```
 
 `npm run e2e` builds the app first; `E2E_NO_BUILD=1 npm run e2e` reuses the last build when only the tests have changed, and `npm run e2e:ui` opens Playwright's UI. End-to-end specs are `e2e/*.e2e.ts` and import `test` from `e2e/fixtures.ts`, never from `@playwright/test`.
@@ -36,7 +37,7 @@ Duplication is the main way this codebase degrades, usually as one feature copyi
 - **Components:** `shared/components/`: `dialog` (every dialog over the page), `search-field`, `equipment-chips`, `equipment-filter`, `showcase` (a card's count, muscles and kit), `wheel-picker` and `labelled-wheel`, `help-link`, `icon`, `infinity-switch`, `toggle-switch`, `wheel-picker`, `workout-choice-dialog`, `workout-outline`, `body-map`, `muscle-chips` and more; `nav/back-link`; `exercises/exercise-card`; `history/set-lines`.
 - **Styles:** `src/styles/`: `_buttons` (`.btn-main`, `.btn-pill`, `.btn-icon`), `_forms` (`.picker-field`), `_menu`, `_segmented`, `_info`, `_dialog`; and these mixins: `_type` (`display`, `small-type`, `page-title`, `page-hint`, `dialog-title`), `_interaction` (`hover`, `pressed`, `hit-area`, `link-button`), `_chip`, `_showcase-card`. Don't write new button, chip or menu styles in a component.
 - **Helpers:** `shared/format-time.ts` (`formatSeconds`), `shared/format-count.ts` (`counted`), `shared/focus-after-render.ts`, `shared/reduced-motion.ts`, `shared/gesture.ts`, `shared/spring.ts`, `ExerciseStore.shownFor`, `models/` (e.g. `stepKindName`, `exerciseHint`).
-- **Tests:** `shared/testing/` (`makeWorkout`, `fakeReducedMotion`, fake sync, account and audio); end-to-end, `e2e/fixtures.ts` (`app`, `network`, the `onboarding` and `storage` options).
+- **Tests:** `shared/testing/` (`makeWorkout`, `fakeReducedMotion`, fake sync, account and audio); end-to-end, `e2e/fixtures.ts` (`app`, `network`, `device`, the `onboarding`, `storage`, `now` and `deviceApis` options), `e2e/seed.ts` (`seed.workouts`, `seed.history`, `seed.settings`, `seed.plan`, `workout`, `run`), the page helpers `e2e/workout-page.ts` (`WorkoutPage`, `setWheel`), `create-page.ts`, `library-page.ts` and `history-page.ts`, and `e2e/supabase.ts` (`FakeSupabase`), `axe.ts` and `touch.ts` (`Finger`). The regression list they follow is `docs/regression-tests.md`.
 
 Helpers that aren't about one component don't belong in a component's file, as importing it from elsewhere ties the two together.
 

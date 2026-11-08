@@ -63,6 +63,14 @@ export class CreatePage {
         return this.page.getByRole('button', { name: new RegExp(`^Step ${n}, `) });
     }
 
+    /** Opens step `n`, if it's closed (as a saved workout's are, opened to edit). */
+    async open(n: number) {
+        if ((await this.header(n).getAttribute('aria-expanded')) !== 'true') {
+            await this.header(n).click();
+        }
+        await expect(this.header(n)).toHaveAttribute('aria-expanded', 'true');
+    }
+
     /** Sets step `n`'s time with its Minutes and Seconds wheels. */
     async setTime(n: number, minutes: number, seconds: number) {
         await setWheel(this.field(n, 'Minutes'), minutes);
@@ -74,6 +82,7 @@ export class CreatePage {
      * it's linked by its name when saved, as a typed name is).
      */
     async name(n: number, name: string) {
+        await this.open(n);
         const box = this.exercise(n);
         await box.fill(name);
         await box.press('Escape');

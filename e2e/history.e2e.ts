@@ -97,7 +97,7 @@ test.describe('the log', () => {
 });
 
 test.describe('no history', () => {
-    test('REG-HIS-01 nothing done yet', async ({ app, page }) => {
+    test('REG-HIS-01 nothing done yet', { tag: '@p1' }, async ({ app, page }) => {
         await app.goto('/history');
         await expect(
             page.getByText(
@@ -235,21 +235,25 @@ test.describe('the last entry with a workout going', () => {
         },
     });
 
-    test("REG-HIS-03 the last entry's options open clear of the run bar", async ({ app, page }) => {
-        test.fixme(
-            true,
-            "App bug: with a workout going, the last entry's options (⋮) open downwards under the run bar and tab bar, and the page can't scroll them clear, so Delete can't be pressed (seen at desktop size, 1280 × 720, with a short log)."
-        );
-        const history = new HistoryPage(page);
-        await app.goto('/library');
-        await new WorkoutPage(page).startFromLibrary('Twice');
-        await new WorkoutPage(page).close.click();
-        await app.tab('Progress').click();
-        await history.options(history.entry('Legs')).click();
-        await page
-            .getByRole('group', { name: /^Options for Legs at / })
-            .getByRole('button', { name: 'Delete' })
-            .click({ timeout: 5000 });
-        await expect(history.entry('Legs')).toHaveCount(0);
-    });
+    test(
+        "REG-HIS-03 the last entry's options open clear of the run bar",
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            test.fixme(
+                true,
+                "App bug: with a workout going, the last entry's options (⋮) open downwards under the run bar and tab bar, and the page can't scroll them clear, so Delete can't be pressed (seen at desktop size, 1280 × 720, with a short log)."
+            );
+            const history = new HistoryPage(page);
+            await app.goto('/library');
+            await new WorkoutPage(page).startFromLibrary('Twice');
+            await new WorkoutPage(page).close.click();
+            await app.tab('Progress').click();
+            await history.options(history.entry('Legs')).click();
+            await page
+                .getByRole('group', { name: /^Options for Legs at / })
+                .getByRole('button', { name: 'Delete' })
+                .click({ timeout: 5000 });
+            await expect(history.entry('Legs')).toHaveCount(0);
+        }
+    );
 });

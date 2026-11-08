@@ -39,11 +39,15 @@ test.describe('a device new to the app', () => {
         }
     );
 
-    test('REG-NAV-01 a deep link opens its page, not the welcome screen', async ({ app, page }) => {
-        await app.goto('/exercises/back-squat');
-        await expect(page).toHaveURL('/exercises/back-squat');
-        await expect(app.heading('Back squat')).toBeVisible();
-    });
+    test(
+        'REG-NAV-01 a deep link opens its page, not the welcome screen',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            await app.goto('/exercises/back-squat');
+            await expect(page).toHaveURL('/exercises/back-squat');
+            await expect(app.heading('Back squat')).toBeVisible();
+        }
+    );
 
     test(
         'REG-NAV-02 the setup, answered all the way through',
@@ -114,7 +118,7 @@ test.describe('a device new to the app', () => {
         }
     );
 
-    test('REG-NAV-03 skipping the setup', async ({ app, page }) => {
+    test('REG-NAV-03 skipping the setup', { tag: '@p2' }, async ({ app, page }) => {
         await app.goto('/');
         await page.getByRole('button', { name: 'Continue as guest' }).click();
         await page.getByRole('button', { name: 'Skip for now' }).click();
@@ -141,7 +145,7 @@ test.describe('a device in use before the welcome screen', () => {
         storage: seed.workouts([workout('Legs', { steps: [timed(30)] })]),
     });
 
-    test('REG-NAV-01 opens Today straight away', async ({ app, page }) => {
+    test('REG-NAV-01 opens Today straight away', { tag: '@p1' }, async ({ app, page }) => {
         await app.goto('/home');
         await expect(page).toHaveURL('/home');
         await expect(app.tab('Today')).toHaveAttribute('aria-current', 'page');
@@ -200,14 +204,14 @@ test.describe('getting about', () => {
             await page.mouse.wheel(0, 2000);
             await app.tab('Workouts').click();
             await expect(page).toHaveURL('/library');
-            expect(await page.evaluate(() => window.scrollY)).toBe(0);
+            await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
         }
     );
 
     test.describe('at 320px wide', () => {
         test.use({ viewport: { width: 320, height: 640 } });
 
-        test('REG-NAV-04 each tab is at least 44px wide', async ({ app }) => {
+        test('REG-NAV-04 each tab is at least 44px wide', { tag: '@p1' }, async ({ app }) => {
             await app.goto('/home');
             for (const tab of ['Today', 'Workouts', 'Exercises', 'Progress', 'You'] as const) {
                 const box = await app.tab(tab).boundingBox();
@@ -259,15 +263,19 @@ test.describe('the run bar', () => {
         }
     );
 
-    test('REG-NAV-05 the workout page with nothing running', async ({ app, page }) => {
-        await app.goto('/workout');
-        await expect(page.getByText('No workout selected.')).toBeVisible();
-        await page.getByRole('link', { name: 'Choose a workout' }).click();
-        await expect(page).toHaveURL('/library');
+    test(
+        'REG-NAV-05 the workout page with nothing running',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            await app.goto('/workout');
+            await expect(page.getByText('No workout selected.')).toBeVisible();
+            await page.getByRole('link', { name: 'Choose a workout' }).click();
+            await expect(page).toHaveURL('/library');
 
-        await app.goto('/timer');
-        await expect(page).toHaveURL('/workout');
-    });
+            await app.goto('/timer');
+            await expect(page).toHaveURL('/workout');
+        }
+    );
 });
 
 test.describe('help', () => {
@@ -280,7 +288,7 @@ test.describe('help', () => {
         },
     });
 
-    test('REG-NAV-06 Help, its search, and a ? link', async ({ app, page }) => {
+    test('REG-NAV-06 Help, its search, and a ? link', { tag: '@p2' }, async ({ app, page }) => {
         await app.goto('/account');
         await page.getByRole('link', { name: /^Help/ }).click();
         await expect(page).toHaveURL('/help');

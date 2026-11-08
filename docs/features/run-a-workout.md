@@ -89,7 +89,7 @@
 ### Changing reps or weight mid-workout (RUN-6)
 
 - While a rep step is waiting, the **reps and weight on the face are wheels**: closed, each is just its number in the face's text, with a short faint line under it (no box) that says it can be changed, with its unit beside it ("reps", "kg"). Tapping one opens it there, over the ring, as wheels open anywhere else: **Reps** 1–100, and **Weight** none, then halves, in the unit chosen in You → Profile. No weight shows as "+", to add one. Screen readers hear them as spin buttons named "reps" and "Weight, kg".
-- A change applies at once, to **this set, the rest of this workout's rounds, and the saved workout**, so next time starts from there. If the workout has been deleted from the library meanwhile, only this workout changes.
+- A change applies at once, to **this set, the rest of this workout's rounds, and the saved workout**, so next time starts from there; on a ready-made workout too (since 2026-11-08), which keeps your reps and weights as a record of its own (see [library](library.md)). If the workout has been deleted from the library meanwhile, only this workout changes.
 - On a step whose sets vary (BLD-11), it applies to **this set only**, in this workout and the saved one: set 2 changed to 47.5 kg leaves sets 1 and 3 as they were. Each set's face shows its own reps and weight, and Next during a rest says the next set's, e.g. "then Leg press · set 2 of 3 · 10 reps @ 45 kg".
 - On a step done each side, a change is for both sides of the set.
 - A wheel closes by itself as it does anywhere else (on a pick, or two fifths of a second after it stops turning).

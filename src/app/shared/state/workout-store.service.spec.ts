@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { allSteps, asOneGroup, Block, Workout, WorkoutFields } from '../../models/workout';
+import { allSteps, asOneGroup, Block, RepStep, Workout, WorkoutFields } from '../../models/workout';
 import { LoggedSet } from '../../models/history';
 import {
     makeWorkout as baseWorkout,
@@ -495,7 +495,56 @@ describe('WorkoutStore', () => {
             expect(reloaded.activeWorkout()?.id).toBe('builtin:gym-legs');
         });
 
-        it("doesn't save a change made mid-run, as one never changes", async () => {
+        it("keeps a rep step's reps and weight for next time, as a record of its own", async () => {
+            const store = createStore();
+            await store.readyMadeLoaded;
+            store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
+            const deadlift = allSteps(store.activeWorkout()!)[1] as RepStep;
+
+            store.updateActiveStep(1, { ...deadlift, reps: 8, weight: 60 });
+
+            expect(allSteps(store.findAnyWorkout('builtin:gym-legs')!)[1]).toEqual({
+                ...deadlift,
+                reps: 8,
+                weight: 60,
+            });
+            expect(store.workouts()).toEqual([]);
+            expect(JSON.parse(localStorage.getItem('ready-made-changes')!)).toEqual([
+                {
+                    id: 'builtin:gym-legs',
+                    updatedAt: expect.any(Number),
+                    steps: [{ step: 1, exerciseId: deadlift.exerciseId, reps: 8, weight: 60 }],
+                },
+            ]);
+
+            // Back as it came, there's nothing to keep
+            store.updateActiveStep(1, deadlift);
+
+            expect(allSteps(store.findAnyWorkout('builtin:gym-legs')!)[1]).toEqual(deadlift);
+            expect(JSON.parse(localStorage.getItem('ready-made-changes')!)).toEqual([]);
+            expect(
+                TestBed.inject(DeletionStore).deletedAt('ready-made-change', 'builtin:gym-legs')
+            ).toBeGreaterThan(0);
+        });
+
+        it("doesn't keep another exercise in a step, which takes a copy", async () => {
+            const store = createStore();
+            await store.readyMadeLoaded;
+            store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
+            const deadlift = allSteps(store.activeWorkout()!)[1] as RepStep;
+
+            store.updateActiveStep(1, {
+                ...deadlift,
+                name: 'Good morning',
+                exerciseId: 'builtin:good-morning',
+            });
+
+            expect(allSteps(store.activeWorkout()!)[1].name).toBe('Good morning');
+            expect(allSteps(store.findAnyWorkout('builtin:gym-legs')!)[1]).toEqual(deadlift);
+            expect(localStorage.getItem('ready-made-changes')).toBeNull();
+        });
+
+        it("doesn't save a change of name made mid-run", async () => {
             const store = createStore();
             await store.readyMadeLoaded;
             store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);

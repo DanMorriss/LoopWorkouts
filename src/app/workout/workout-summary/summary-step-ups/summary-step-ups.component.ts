@@ -72,10 +72,13 @@ export class SummaryStepUpsComponent {
      */
     private readonly applied = signal<ReadonlyMap<number, ProgressionSuggestion>>(new Map());
 
-    /** Only a workout still in the library has a step to put it on. */
+    /**
+     * Only a workout still in the library has a step to put it on: yours, or a ready-made one,
+     * which keeps your reps and weights.
+     */
     protected readonly canApply = computed(() => {
         const id = this.run.workout()?.id;
-        return id !== undefined && this.store.workouts().some((workout) => workout.id === id);
+        return id !== undefined && this.store.findAnyWorkout(id) !== null;
     });
 
     /** Every step-up, a step at a time, with how it reads. */

@@ -11,6 +11,7 @@ import {
 import { readHistoryEntry } from '../shared/state/history-store.service';
 import { readWorkout } from '../shared/state/workout-store.service';
 import { readReadyMadeFavourite } from '../shared/state/ready-made-favourites.service';
+import { readReadyMadeChange } from '../models/ready-made-change';
 
 /**
  * The kinds of record on the server: those that leave a deletion, the library's order, the
@@ -67,6 +68,7 @@ export function recordsHere(copy: CopyHere): ServerRecord[] {
         ...copy.exerciseNotes.map((note) => record('exercise-note', note)),
         ...copy.hiddenExercises.map((hidden) => record('hidden-exercise', hidden)),
         ...copy.readyMadeFavourites.map((favourite) => record('ready-made-favourite', favourite)),
+        ...copy.readyMadeChanges.map((change) => record('ready-made-change', change)),
         // Never moved, so there's no order to give
         ...(copy.libraryOrder.updatedAt > 0
             ? [record('library-order', { id: LIBRARY_ORDER_ID, ...copy.libraryOrder })]
@@ -138,6 +140,7 @@ export function readPulled(fetched: readonly unknown[]): PulledPage {
         exerciseNotes: [],
         hiddenExercises: [],
         readyMadeFavourites: [],
+        readyMadeChanges: [],
         libraryOrder: null,
         plan: null,
         profile: null,
@@ -197,6 +200,7 @@ const RECORD_KINDS: readonly RecordKind[] = [
     'exercise-note',
     'hidden-exercise',
     'ready-made-favourite',
+    'ready-made-change',
     'library-order',
     'plan',
     'profile',
@@ -230,6 +234,8 @@ function addTo(copy: CopyToMerge, record: ServerRecord): boolean {
             return push(copy.hiddenExercises, dated(readHiddenExercise(record.data)));
         case 'ready-made-favourite':
             return push(copy.readyMadeFavourites, dated(readReadyMadeFavourite(record.data)));
+        case 'ready-made-change':
+            return push(copy.readyMadeChanges, dated(readReadyMadeChange(record.data)));
         case 'library-order':
             if (record.id !== LIBRARY_ORDER_ID || !isLibraryOrder(record.data)) {
                 return false;

@@ -140,7 +140,7 @@
 
 ### No workout
 
-- The workout page with no workout running says "No workout selected." with a link, "Choose one from your workouts".
+- The workout page with no workout running says "No workout selected." with a link, "Choose a workout" (until 2026-11-08 "Choose one from your workouts": Workouts has the ready-made ones too now).
 
 ## Acceptance criteria
 

@@ -5,18 +5,21 @@ import type { Locator, Page } from '@playwright/test';
 export class HistoryPage {
     constructor(readonly page: Page) {}
 
-    /** Every run in the log: each is a list item with a link to its workout's Details. */
+    /**
+     * Every run in the log: each is a list item with its options (⋮), named for the run, and
+     * a link to its workout's Details while the workout's still there.
+     */
     get entries(): Locator {
         return this.page
             .getByRole('main')
             .getByRole('listitem')
-            .filter({ has: this.page.getByRole('link', { name: /^Details of / }) });
+            .filter({ has: this.page.getByRole('button', { name: /^Options for / }) });
     }
 
     /** The runs of one workout, by its title as it ran. */
     entry(title: string): Locator {
         return this.entries.filter({
-            has: this.page.getByRole('link', { name: `Details of ${title}`, exact: true }),
+            has: this.page.getByRole('button', { name: `Options for ${title} at ` }),
         });
     }
 

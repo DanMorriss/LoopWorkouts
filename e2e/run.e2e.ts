@@ -569,8 +569,6 @@ test.describe('swapping mid-workout', () => {
         await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
         await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '24');
         await expect(app.undoBar).toContainText('Swapped to Goblet squat');
-        // Focus goes to the bar's Undo, as after any change it offers to undo
-        await expect(app.undo).toBeFocused();
 
         // Kept for the tab, through a reload
         await app.reload();
@@ -589,6 +587,24 @@ test.describe('swapping mid-workout', () => {
             exerciseId: 'builtin:back-squat',
         });
         await expect(run.summary).toContainText('Goblet squat: 2 × 10 @ 24 kg');
+    });
+
+    test('REG-RUN-11 focus goes back to the (i) after a swap', async ({ app, page }) => {
+        test.fixme(
+            true,
+            "App bug: after picking in Swap, focus ends on the Undo bar's Undo rather than the step's (i). WorkoutSwap.swapFor() puts it on the (i), then the undo bar takes it for its new offer."
+        );
+        const run = new WorkoutPage(page);
+        await app.goto('/library');
+        await run.startFromLibrary('Legs');
+        await run.wait(3500);
+        await run.main.getByRole('button', { name: 'Details of Back squat' }).click();
+        await page.getByRole('button', { name: 'Swap exercise' }).click();
+        await page.keyboard.type('goblet');
+        await page.getByRole('button', { name: /^Goblet squat/ }).click();
+        await expect(
+            run.main.getByRole('button', { name: 'Details of Goblet squat' })
+        ).toBeFocused();
     });
 
     test('REG-RUN-12 swap the next exercise while paused in a rest', async ({ app, page }) => {

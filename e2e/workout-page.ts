@@ -116,36 +116,37 @@ export async function frames(page: Page, count: number) {
 }
 
 /**
- * Sets a number wheel (a spin button) with its keys, as someone with a keyboard does: down or
- * up a row at a time (five at a time while far off), `step` apart (0.5 for weights, 1 for reps,
- * minutes and seconds), waiting for each to show before the next. A wheel can be redrawn as its
- * value changes (the summary's, as the set it changes is logged), so each key finds it again,
- * rather than typing the digits into one that may have gone.
+ * Sets a number wheel (a spin button) with its keys, as someone with a keyboard does: Page Down
+ * or Up five rows at a time and the arrows for the rest, `step` apart (0.5 for weights, 1 for
+ * reps, minutes and seconds), then checks where it landed and goes on from there. A wheel can be
+ * redrawn as its value changes (the summary's, as the set it changes is logged), losing a key
+ * pressed meanwhile, which the next go makes up; typing the digits isn't relied on for the same
+ * reason, as a redraw between two of them starts the number again.
  */
 export async function setWheel(wheel: Locator, value: number, step = 1) {
     const page = wheel.page();
     const now = async () => Number(await wheel.getAttribute('aria-valuenow'));
-    await wheel.focus();
-    // A wheel just shown scrolls to its value a frame later, which would undo a key pressed
-    // before it (CLAUDE.md, zoneless tests)
-    await frames(page, 2);
-    for (let current = await now(); current !== value; ) {
+    for (let attempt = 0; attempt < 10; attempt++) {
+        const current = await now();
+        if (current === value) {
+            break;
+        }
+        await wheel.focus();
+        // A wheel just shown scrolls to its value a frame later, which would undo a key
+        // pressed before it (CLAUDE.md, zoneless tests)
+        await frames(page, 2);
         const rows = Math.round((value - current) / step);
-        const key =
-            Math.abs(rows) >= 5
-                ? rows > 0
-                    ? 'PageDown'
-                    : 'PageUp'
-                : rows > 0
-                  ? 'ArrowDown'
-                  : 'ArrowUp';
-        await wheel.press(key);
-        // A key that reached a wheel being redrawn is lost: press it again
+        const [page5, one] = rows > 0 ? ['PageDown', 'ArrowDown'] : ['PageUp', 'ArrowUp'];
+        for (let i = 0; i < Math.floor(Math.abs(rows) / 5); i++) {
+            await page.keyboard.press(page5);
+        }
+        for (let i = 0; i < Math.abs(rows) % 5; i++) {
+            await page.keyboard.press(one);
+        }
         await expect
             .poll(now, { timeout: 1000 })
-            .not.toBe(current)
+            .toBe(value)
             .catch(() => undefined);
-        current = await now();
     }
     await expect(wheel).toHaveAttribute('aria-valuenow', String(value));
 }

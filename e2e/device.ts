@@ -76,8 +76,8 @@ function install(options: DeviceOptions) {
             }
 
             resume() {
-                // As a browser does: only from a tap or key press
-                if (this.state !== 'running' && (navigator.userActivation?.isActive ?? true)) {
+                // As a browser does: only once the page has been tapped or a key pressed on it
+                if (this.state !== 'running' && (navigator.userActivation?.hasBeenActive ?? true)) {
                     this.state = 'running';
                     this.dispatchEvent(new Event('statechange'));
                 }

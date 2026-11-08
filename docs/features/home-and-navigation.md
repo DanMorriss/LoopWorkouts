@@ -71,6 +71,7 @@
 - Once the workout has finished, the bar says "Finished: see how it went", with no Pause, and opens the summary.
 - The bar rises into place as it appears.
 - **The workout grows out of the bar** when it's pressed: the bar's frosted panel grows to fill the screen with the workout fading in on it, on a spring with no bounce, while the tab bar slides down out of the way. **⌄ folds it back** the same way: the panel shrinks into the bar and the tab bar comes back up. Every other change of page is instant, as switching tabs is. With reduced motion, the pages cross-fade quickly instead. A tap mid-way doesn't wait for it: it ends the move at once and lands on what it was over (as it does mid-slide on an exercise's page, Settings, or the theme's fade).
+- **Focus comes back to what opened a page** when it slides back out (by ‹, a swipe right, or saving in Create) or the browser's Back returns to it: the exercise's card on the Exercises list, Settings on You, a workout's card on Workouts, and so on, so a keyboard or screen reader carries on from there rather than from the top. It's found again by its link's address, else its id or label, and its place among the page's elements like it (`nav/focus-spot.ts`); something no longer there (a menu that's closed) leaves focus at the top, as before. The ring shows only after keyboard use, as the browser decides.
 - The **workout page** has no tab bar. A **⌄** button at its top left goes back to the page you came from (with its address, e.g. a muscle filter), named for its tab, e.g. "Back to Progress". The workout keeps running, in the bar. Opened straight from an address, it goes back to Workouts.
 - On the workout page on a phone, the workout's title takes the place of "Loop Workouts" in the header. An untitled workout keeps "Loop Workouts".
 
@@ -121,6 +122,7 @@ Since 2026-11-06, from an interview with Dan.
 - Given the setup is open, when I go from question to question, then Next and Skip for now stay in the same place on screen.
 - Given a page scrolled down, when I change tab, then the new page opens at its top.
 - Given the Exercises list scrolled down, when I open an exercise and press ‹ Exercises, then the list is back where it was scrolled.
+- Given the Exercises list, when I open an exercise from its card and go back (by ‹ Exercises, a swipe right or the browser's Back), then focus is on that card again, so the keyboard or screen reader carries on from it.
 - Given I set up on my phone, signed in, when I sign in on a new laptop, then it says "Getting your profile…", then Today opens, with my name, goal, equipment, body and units.
 - Given a device in use before the setup came in, when I open the app, then Today opens.
 - Given nothing saved on loop-workouts.vercel.app, when I open a page there, then the same page opens on loopworkouts.com.

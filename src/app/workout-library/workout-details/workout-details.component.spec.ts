@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../../models/history';
 import { allSteps, RepStep } from '../../models/workout';
@@ -156,6 +156,19 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         );
     });
 
+    it('starts it from Start workout under its title, opening the workout page', async () => {
+        const sprints = addSprints();
+        await open(sprints.id);
+        const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+        const start = el().querySelector<HTMLButtonElement>('.details__start')!;
+
+        expect(start.getAttribute('aria-label')).toBe('Start Sprints');
+        start.click();
+
+        expect(store.activeWorkout()?.title).toBe('Sprints');
+        expect(navigate).toHaveBeenCalledWith(['/workout']);
+    });
+
     it('makes a copy of it beside Edit, keeping both, opening the copy in Create', async () => {
         const sprints = addSprints();
         await open(sprints.id);
@@ -298,6 +311,16 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
 
         expect(text(back)).toBe('chevron_left Workouts');
         expect(back.getAttribute('href')).toBe(`/library?details=${sprints.id}`);
+    });
+
+    it('goes back with ‹ Progress to the run it was opened from there', async () => {
+        const sprints = addSprints();
+        await harness.navigateByUrl(`/library/${sprints.id}?run=123-${sprints.id}`);
+        harness.fixture.detectChanges();
+
+        const back = el().querySelector('.back-link')!;
+        expect(text(back)).toBe('chevron_left Progress');
+        expect(back.getAttribute('href')).toBe(`/history?run=123-${sprints.id}`);
     });
 
     it('edits the workout from its Edit button, coming back here', async () => {

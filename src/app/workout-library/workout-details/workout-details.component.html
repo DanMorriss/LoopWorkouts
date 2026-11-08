@@ -1,6 +1,6 @@
-<div class="flex justify-center" [appSwipeBack]="back">
+<div class="flex justify-center" [appSwipeBack]="back.url">
     <div class="w-full max-w-md p-4">
-        <app-back-link [url]="back" label="Workouts" />
+        <app-back-link [url]="back.url" [label]="back.label" />
 
         @if (workout(); as workout) {
             <div class="details__top">
@@ -14,6 +14,17 @@
                     <p class="details__own">With your own reps and weights.</p>
                 }
             }
+
+            <!-- Started from here, as from its card, without going back to the list -->
+            <button
+                type="button"
+                class="btn-main details__start"
+                [attr.aria-label]="'Start ' + name()"
+                (click)="start(workout)"
+            >
+                <mat-icon aria-hidden="true">play_arrow</mat-icon>
+                Start workout
+            </button>
 
             <section class="details__section" aria-labelledby="workout-details-muscles">
                 <h3 id="workout-details-muscles" class="details__heading">Muscles it works</h3>

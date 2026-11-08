@@ -41,6 +41,12 @@
     font-size: 0.9rem;
 }
 
+// The page's main action, under its title, so it's there without scrolling
+.details__start {
+    width: 100%;
+    margin-top: 1rem;
+}
+
 .details__section {
     margin-top: 1.25rem;
 }

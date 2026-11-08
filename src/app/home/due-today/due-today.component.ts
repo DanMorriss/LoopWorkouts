@@ -1,9 +1,8 @@
 import { Component, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Router } from '@angular/router';
 import { thisWeek, weekdayOf } from '../../models/plan';
 import { Workout } from '../../models/workout';
-import { ActiveRunService } from '../../shared/run/active-run.service';
+import { injectStartWorkout } from '../../shared/run/start-workout';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
@@ -55,8 +54,7 @@ export class DueTodayComponent {
     private readonly plan = inject(PlanStore);
     private readonly workouts = inject(WorkoutStore);
     private readonly history = inject(HistoryStore);
-    private readonly run = inject(ActiveRunService);
-    private readonly router = inject(Router);
+    protected readonly start = injectStartWorkout();
     private readonly now = Date.now();
 
     private readonly today = computed(
@@ -85,10 +83,5 @@ export class DueTodayComponent {
 
     protected name(workout: Workout): string {
         return workout.title.trim() || 'Untitled workout';
-    }
-
-    protected start(workout: Workout) {
-        this.run.start(workout);
-        void this.router.navigate(['/workout']);
     }
 }

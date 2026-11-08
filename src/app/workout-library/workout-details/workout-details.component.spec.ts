@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../../models/history';
 import { PageSlide } from '../../nav/page-slide';
@@ -152,6 +152,19 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         expect(runs[0].getAttribute('href')).toBe(
             `/history?run=${Date.UTC(2026, 9, 24, 12)}-${sprints.id}`
         );
+    });
+
+    it('starts it from Start workout under its title, opening the workout page', async () => {
+        const sprints = addSprints();
+        await open(sprints.id);
+        const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+        const start = el().querySelector<HTMLButtonElement>('.details__start')!;
+
+        expect(start.getAttribute('aria-label')).toBe('Start Sprints');
+        start.click();
+
+        expect(store.activeWorkout()?.title).toBe('Sprints');
+        expect(navigate).toHaveBeenCalledWith(['/workout']);
     });
 
     it('makes a copy of it beside Edit, keeping both, opening the copy in Create', async () => {

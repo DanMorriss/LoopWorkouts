@@ -1,5 +1,4 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { Router } from '@angular/router';
 import { MUSCLE_LABELS } from '../../models/exercise';
 import {
     setsByMuscle,
@@ -10,7 +9,7 @@ import {
 import { nextPlannedDay, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { musclesWorked } from '../../models/workout-muscles';
 import { Workout } from '../../models/workout';
-import { ActiveRunService } from '../../shared/run/active-run.service';
+import { injectStartWorkout } from '../../shared/run/start-workout';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { PlanStore } from '../../shared/state/plan-store.service';
@@ -74,8 +73,7 @@ export class SuggestedWorkoutComponent {
     private readonly workouts = inject(WorkoutStore);
     private readonly settings = inject(SettingsStore);
     private readonly plan = inject(PlanStore);
-    private readonly run = inject(ActiveRunService);
-    private readonly router = inject(Router);
+    protected readonly start = injectStartWorkout();
     private readonly now = Date.now();
     protected readonly id = `suggestion-title-${nextId++}`;
 
@@ -167,10 +165,5 @@ export class SuggestedWorkoutComponent {
         }
         const name = next.workouts[0].title.trim() || 'your next workout';
         return `, and it leaves your ${LIST.format(fresh.map((m) => MUSCLE_LABELS[m]))} fresh for ${name} on ${WEEKDAYS[next.day]}`;
-    }
-
-    protected start(workout: Workout) {
-        this.run.start(workout);
-        this.router.navigate(['/workout']);
     }
 }

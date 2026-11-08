@@ -11,9 +11,12 @@
     container-type: inline-size;
 }
 
-// Open, a wheel reaches past the circle, so the face stops cutting it off meanwhile
-.workout-face:has(.wheel-picker--open) {
-    overflow: visible;
+// The circle cuts off a step's text only while it rolls past the next one's. Not otherwise, and
+// above all not on opening a wheel, which reaches past the circle: changing the face's clip as a
+// finger presses the wheel rebuilds the layers under it, and on an iPhone the wheel then won't
+// scroll.
+.workout-face:has(> .workout-face__content + .workout-face__content) {
+    overflow: hidden;
 }
 
 // Room for the step strip under the round line, so the ring doesn't jump

@@ -81,7 +81,7 @@ Every built-in exercise has an animated figure, at the top of How to do it (see 
 Eighteen ready-made workouts are listed on Workouts, under your own (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
 
 - [x] **Keep your reps and weights on a ready-made workout** (2026-11-08): changed mid-workout, with Apply on the summary's Next time, or with Yes, use next time, without a copy; kept as a synced `ready-made-change` record, and put back with Reset reps and weights on its Details. Its exercises still take a copy, and the summary says so in plainer words.
-- [ ] **Dan to run `supabase/schema.sql` again:** `push_records()` takes the new kind `ready-made-change` (2026-11-08). Until it's run, the server leaves those records out, so your reps and weights on ready-made workouts stay on the device they were set on.
+- [x] **Run `supabase/schema.sql` again** (done by Dan, 2026-11-08): `push_records()` takes the new kind `ready-made-change`.
 - [ ] **Change a ready-made workout's reps and weights before running it:** they change only from a run or its summary for now; Create opens only your own. A Create for a ready-made one with its exercises, steps and rounds locked, or wheels on its Details, would do it.
 
 - [ ] **Dan to review the first batch:** the exercises, sets, reps and rests of each, and their descriptions. Ids are fixed once released, so rename before merging if a title changes.

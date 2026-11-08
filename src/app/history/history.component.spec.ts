@@ -84,14 +84,16 @@ describe('HistoryComponent', () => {
             }
         )!;
 
-    it('is titled Progress, and says there is nothing yet, linking to your workouts', () => {
+    it('is titled Progress, and says there is nothing yet, linking to Workouts', () => {
         create();
 
         expect(fixture.nativeElement.querySelector('h2').textContent.trim()).toBe('Progress');
         expect(fixture.nativeElement.textContent).toContain(
             "Nothing here yet. Do a workout, and how your week is going and what you've done show up here."
         );
-        expect(fixture.nativeElement.querySelector('a').getAttribute('href')).toBe('/library');
+        const link = fixture.nativeElement.querySelector('a');
+        expect(link.textContent.trim()).toBe('Go to workouts');
+        expect(link.getAttribute('href')).toBe('/library');
     });
 
     it('groups workouts by day, newest first: Today, Yesterday, then the date', () => {

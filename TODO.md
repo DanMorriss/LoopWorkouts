@@ -8,7 +8,7 @@ Open work, highest priority first. Tick items off (or delete them) as they're do
 
 Promoting the app to new users. The words to use, what's true to say, and the plan are in [docs/marketing.md](docs/marketing.md). Shared links already show a description and `public/share.png`.
 
-- [ ] **Have the legal review done first** (the Privacy notice and Terms of use, in Known issues), so new users' first visit goes well. The iPhone checks are done: Dan went through the app on an iPhone on 2026-11-08 (the 3D demo in its worker, the setup's buttons with the keyboard up, the Content-Security-Policy with both sign-ins, a tap and a swipe mid-slide, the summary's drag and the 3D bubble), and `push_records()` is done, as `supabase/schema.sql` was run on 2026-11-06.
+- [ ] **Have the legal review done first** (the Privacy notice and Terms of use, in Known issues), so new users' first visit goes well. The iPhone checks are done: Dan went through the app on an iPhone on 2026-11-08 (the 3D demo in its worker, running smoothly, stopping when paused or scrolled away and turning without swiping the page back, the setup's buttons with the keyboard up, the Content-Security-Policy with both sign-ins, a tap and a swipe mid-slide, the summary's drag and the 3D bubble), and `push_records()` is done, as `supabase/schema.sql` was run on 2026-11-06.
 - [ ] **Soft launch, then communities, then Show HN or Product Hunt**, with the posts in docs/marketing.md. Short screen-recorded videos for Reels, TikTok and Shorts along the way.
 - [ ] **App stores, later:** Google Play through a Trusted Web Activity, and the App Store with the Apple Developer account (which Sign in with Apple needs too).
 
@@ -78,7 +78,6 @@ Every built-in exercise has an animated figure, at the top of How to do it (see 
 - [ ] **A female 3D figure:** the 3D demo always draws the male figure for now, as the female one built the same way didn't look right (Dan, 2026-11-01). `body-model.ts` has her measurements already, and `FigureScene` takes the figure, so it's her shape (depths, torso profile, hair over the head) to work on; then pass `SettingsStore.bodyFigure()` in `ExerciseDemoComponent` again. The body map draws her as before.
 - [ ] **3D figure, still to do:** the drawings only show each part's width, so its depth front to back is a guess (`DEPTH`, and for the torso `TORSO_FRONT` and `TORSO_BACK`, in `figure-body.ts`), and seen from the side a part shows the drawings' edges wrapped round it; the flat figure, kept for browsers without WebGL, ignores the 3D-only fields (twists, hands placed across or forwards, which hand holds a kettlebell), so the Russian twist stands still there and the plank pull-through's hand reaches forwards rather than under the body.
 - [ ] **A posing tool:** a page only in development builds, with sliders for each joint and the figure drawn live, that prints the pose to paste into `built-in-exercise-motion.ts`. Each pose is written by hand as numbers for now, which is slow (the push-up's were worked out with a calculator).
-- [ ] **Check it on an iPhone:** that the 3D figure runs smoothly (three.js, with a shadow, drawn each frame), stops when paused or scrolled away, and that dragging it turns it without swiping the page back.
 
 ### Ready-made workouts (LIB-6)
 

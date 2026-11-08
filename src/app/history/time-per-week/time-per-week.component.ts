@@ -6,7 +6,7 @@ import { counted } from '../../shared/format-count';
 import { ShownHistory } from '../shown-history';
 import { formatDuration } from '../history-format';
 
-/** How many weeks the chart shows, ending with this one. */
+/** How many weeks the chart shows at most, ending with this one. */
 const WEEKS = 12;
 
 // The chart's drawing area, in SVG units: room on the left for the times, below for dates
@@ -16,6 +16,8 @@ const LEFT = 34;
 const RIGHT = 4;
 const TOP = 8;
 const BOTTOM = 22;
+/** The widest a bar gets, with only a few weeks to share the width. */
+const MAX_BAR = 32;
 
 /** Steps for the time axis, in minutes: the first at least a third of the longest week. */
 const STEPS = [5, 10, 15, 20, 30, 60, 90, 120, 180, 240, 300, 360, 480, 600];
@@ -35,9 +37,10 @@ interface WeekBar extends WeekTotal {
 }
 
 /**
- * The time spent working out each week, for the last 12 weeks, as bars (PRG-12). The chosen
- * week's time and workouts sit over the bars, starting on this week; a tap, hover or the
- * arrow keys choose another. It can also be read as a table.
+ * The time spent working out each week, for the last 12 weeks, as bars (PRG-12), from the
+ * week of the first workout for someone newer. The chosen week's time and workouts sit over
+ * the bars, starting on this week; a tap, hover or the arrow keys choose another. A table can
+ * stand in for the bars.
  */
 @Component({
     selector: 'app-time-per-week',
@@ -57,10 +60,16 @@ export class TimePerWeekComponent {
     protected readonly left = LEFT;
     protected readonly right = WIDTH - RIGHT;
     protected readonly bottom = HEIGHT - BOTTOM;
-    private readonly slot = (WIDTH - RIGHT - LEFT) / WEEKS;
-    protected readonly barWidth = this.slot * 0.62;
 
     private readonly totals = computed(() => timePerWeek(this.history.entries(), this.now, WEEKS));
+    /** The weeks shown: 12, or fewer from the first workout's. */
+    private readonly count = computed(() => this.totals().length);
+    private readonly slot = computed(() => (WIDTH - RIGHT - LEFT) / this.count());
+    protected readonly barWidth = computed(() => Math.min(MAX_BAR, this.slot() * 0.62));
+    /** For a screen reader: "The last 12 weeks", "The last 3 weeks" or "This week". */
+    protected readonly span = computed(() =>
+        this.count() === 1 ? 'This week' : `The last ${this.count()} weeks`
+    );
 
     /** The time axis, in minutes: from 0 to a round number at or over the longest week. */
     private readonly scale = computed(() => {
@@ -92,7 +101,7 @@ export class TimePerWeekComponent {
                 time,
                 count,
                 spoken: `${spokenTime(week.seconds)}, ${count}`,
-                x: LEFT + i * this.slot + (this.slot - this.barWidth) / 2,
+                x: LEFT + i * this.slot() + (this.slot() - this.barWidth()) / 2,
                 y,
                 height: this.bottom - y,
             };
@@ -103,9 +112,10 @@ export class TimePerWeekComponent {
 
     /** The week chosen by a tap, hover or the arrow keys; this week with none. */
     protected readonly active = signal<number | null>(null);
-    protected readonly shown = computed(() => this.bars()[this.active() ?? WEEKS - 1]);
+    protected readonly shown = computed(() => this.bars()[this.active() ?? this.count() - 1]);
 
-    protected readonly tableOpen = signal(false);
+    /** Whether the table is showing in place of the bars. */
+    protected readonly asTable = signal(false);
 
     protected onPointer(event: PointerEvent) {
         const box = (event.currentTarget as SVGSVGElement).getBoundingClientRect();
@@ -113,12 +123,13 @@ export class TimePerWeekComponent {
             return;
         }
         const x = ((event.clientX - box.left) / box.width) * WIDTH;
-        this.active.set(Math.min(WEEKS - 1, Math.max(0, Math.floor((x - LEFT) / this.slot))));
+        const week = Math.floor((x - LEFT) / this.slot());
+        this.active.set(Math.min(this.count() - 1, Math.max(0, week)));
     }
 
     protected onKeydown(event: KeyboardEvent) {
         // From this week, which is showing with none chosen
-        const moved = chartKeyMove(event.key, this.active() ?? WEEKS - 1, WEEKS);
+        const moved = chartKeyMove(event.key, this.active() ?? this.count() - 1, this.count());
         if (moved !== null) {
             event.preventDefault();
             this.active.set(moved);

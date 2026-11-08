@@ -49,6 +49,15 @@
     }
 }
 
+// The chart's title, with the table's toggle at the right, where swapping can't move it
+.progress__chart-title {
+    display: flex;
+    flex: 1 1 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
 .progress__ranges {
     display: flex;
     gap: 0.3rem;

@@ -58,8 +58,8 @@ interface ChartPoint {
 /**
  * An exercise's progress (PRG-4): its personal bests, a chart of one value per workout over
  * time, and its recent sessions, each linking to its workout in the history. The chart's
- * values can be read by hovering, by stepping through them with the arrow keys, or as a
- * table.
+ * values can be read by hovering, by stepping through them with the arrow keys, or in a
+ * table shown in its place.
  */
 @Component({
     selector: 'app-exercise-progress',
@@ -189,7 +189,8 @@ export class ExerciseProgressComponent {
         return active === null ? null : (this.points()[active] ?? null);
     });
 
-    protected readonly tableOpen = signal(false);
+    /** Whether the table is showing in place of the chart. */
+    protected readonly asTable = signal(false);
     protected readonly measureTitle = computed(() => {
         const measure = this.measure();
         return measure ? MEASURE_TITLES[measure] : '';

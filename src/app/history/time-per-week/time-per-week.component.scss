@@ -14,6 +14,14 @@
     @include panel-card;
 }
 
+// The title, with the table's toggle at the right, where swapping can't move it
+.weeks__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
 .weeks__title {
     margin: 0;
     color: var(--text-strong);
@@ -79,4 +87,5 @@
 
 .weeks__table {
     @include chart-table;
+    margin-top: 0.25rem;
 }

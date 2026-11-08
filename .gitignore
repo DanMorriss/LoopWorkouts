@@ -38,6 +38,11 @@ yarn-error.log
 testem.log
 /typings
 
+# Playwright's end-to-end reports (npm run e2e)
+/test-results
+/playwright-report
+/blob-report
+
 # System files
 .DS_Store
 Thumbs.db

@@ -1,6 +1,6 @@
 # Checks every pull request (and every push to main): formatting, component size, unused code,
 # unit tests (including the axe accessibility checks) and the production build, whose budgets
-# and compiler options fail it too.
+# and compiler options fail it too; and, alongside, the end-to-end tests (e2e/).
 name: CI
 
 on:
@@ -51,3 +51,38 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Builds the app for production and serves it (playwright.config.ts), then runs e2e/
+      - name: End-to-end tests
+        run: npm run e2e
+
+      # The HTML report, with each failed test's trace, screenshot and video: download it from
+      # the run's summary and open it with `npx playwright show-report <folder>`
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14

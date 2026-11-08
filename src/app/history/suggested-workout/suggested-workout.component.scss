@@ -1,4 +1,5 @@
 @use 'type' as *;
+@use 'interaction' as *;
 @use 'panel-card' as *;
 
 :host {
@@ -41,4 +42,11 @@
 .suggestion__reason {
     color: var(--text-muted);
     font-size: 0.85rem;
+}
+
+// The way to the bars on Progress, for each muscle's sets against its aim
+.suggestion__more {
+    @include link-button;
+    font-size: 0.85rem;
+    text-decoration: none;
 }

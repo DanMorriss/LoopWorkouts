@@ -2,11 +2,19 @@
 <!-- Its title and when, then the time it took as the card's big number, then its options -->
 <div class="entry__head">
     <div class="entry__intro">
-        <span
-            class="entry__title"
-            [class.entry__title--untitled]="!entry().title"
-            [id]="'entry-title-' + id()"
-            >{{ name() }}</span
+        <!-- Its workout's details, to favourite it or make a copy: covering the card (::after).
+             Not a link, without an href, for a workout deleted since -->
+        <a
+            class="entry__open"
+            [attr.href]="workoutUrl()"
+            [attr.aria-label]="workoutUrl() ? 'Details of ' + name() : null"
+            (click)="open($event)"
+            ><span
+                class="entry__title"
+                [class.entry__title--untitled]="!entry().title"
+                [id]="'entry-title-' + id()"
+                >{{ name() }}</span
+            ></a
         >
         <span class="entry__detail"
             >{{ time }} · {{ rounds() }}<span class="sr-only"> · {{ duration() }} spent</span></span

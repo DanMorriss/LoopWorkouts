@@ -274,6 +274,16 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         expect(back.getAttribute('href')).toBe(`/library?details=${sprints.id}`);
     });
 
+    it('goes back with ‹ Progress to the run it was opened from there', async () => {
+        const sprints = addSprints();
+        await harness.navigateByUrl(`/library/${sprints.id}?run=123-${sprints.id}`);
+        harness.fixture.detectChanges();
+
+        const back = el().querySelector('.back-link')!;
+        expect(text(back)).toBe('chevron_left Progress');
+        expect(back.getAttribute('href')).toBe(`/history?run=123-${sprints.id}`);
+    });
+
     it('edits the workout from its Edit button, coming back here', async () => {
         const sprints = addSprints();
         await open(sprints.id);

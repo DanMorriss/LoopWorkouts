@@ -1,6 +1,6 @@
-<div class="flex justify-center" [appSwipeBack]="back">
+<div class="flex justify-center" [appSwipeBack]="back.url">
     <div class="w-full max-w-md p-4">
-        <app-back-link [url]="back" label="Workouts" />
+        <app-back-link [url]="back.url" [label]="back.label" />
 
         @if (workout(); as workout) {
             <div class="details__top">

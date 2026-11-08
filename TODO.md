@@ -47,6 +47,7 @@ What Dan found using the app, by page. The tour (see Help) waits on this.
 
 **Today and Plan**
 
+- [x] **Say why a workout's suggested in words** (2026-11-08): "It works your Calves, Hamstrings and Quads, which you haven't trained in the last 7 days", in place of "(0 of 10 sets)", with See your week going to the bars on Progress.
 - [x] **Suggest a workout on a day with none planned** (2026-11-06): "Fancy a workout today?", saying resting is fine too, with the usual suggestion steered off the next planned workout and most of its main muscles, and saying which it leaves fresh.
 - [x] **The body map on the Plan page** (2026-11-06): What your plan works, at the bottom of the Plan page over Missing muscle groups, shaded for the planned workouts' main and supporting muscles.
 - [x] **Move Missing muscle groups to the Plan page** (LIB-5, LIB-7, 2026-11-06): at its bottom, for the workouts in the plan; its ready-made suggestion adds to your workouts, to plan from there.

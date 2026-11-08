@@ -164,3 +164,59 @@ $$;
 
 revoke execute on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- Consent to keeping notes, which may mention health (special category data under UK GDPR),
+-- with the account (SYN-10): ticked before signing in, or on the You tab. When it was given,
+-- by the server's clock, and the date of the privacy notice it was given under. Read and
+-- written only through the functions below; deleted with the account.
+create table if not exists public.consents (
+    user_id uuid primary key references auth.users (id) on delete cascade,
+    health_notes_at timestamptz not null,
+    notice date not null
+);
+
+alter table public.consents enable row level security;
+
+drop policy if exists "Read own consent" on public.consents;
+create policy "Read own consent" on public.consents
+    for select to authenticated
+    using ((select auth.uid()) = user_id);
+
+-- Gives consent under the notice of `notice_date`, replacing any given before, and gives
+-- {at, notice}, at in ms since the epoch.
+create or replace function public.give_health_consent(notice_date date) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+    me uuid := auth.uid();
+    given timestamptz := now();
+begin
+    if me is null then
+        raise exception 'Not signed in';
+    end if;
+    insert into public.consents (user_id, health_notes_at, notice)
+    values (me, given, notice_date)
+    on conflict (user_id) do update
+        set health_notes_at = excluded.health_notes_at, notice = excluded.notice;
+    return jsonb_build_object(
+        'at', (extract(epoch from given) * 1000)::bigint,
+        'notice', notice_date
+    );
+end;
+$$;
+
+revoke execute on function public.give_health_consent(date) from public, anon;
+grant execute on function public.give_health_consent(date) to authenticated;
+
+-- The signed-in account's consent, as {at, notice}, or null if it has none on record.
+create or replace function public.my_health_consent() returns jsonb
+language sql stable set search_path = '' as $$
+    select jsonb_build_object(
+        'at', (extract(epoch from health_notes_at) * 1000)::bigint,
+        'notice', notice
+    )
+    from public.consents
+    where user_id = (select auth.uid());
+$$;
+
+revoke execute on function public.my_health_consent() from public, anon;
+grant execute on function public.my_health_consent() to authenticated;

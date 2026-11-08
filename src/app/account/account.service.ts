@@ -11,6 +11,7 @@ import {
     SignInProvider,
 } from './account-client';
 import { hasSignInTokens } from './sign-in-landing';
+import { ConsentService } from './consent.service';
 
 export type AccountState =
     | { status: 'loading' }
@@ -33,6 +34,9 @@ export class AccountService {
     private readonly document = inject(DOCUMENT);
     private readonly sync = inject(SyncStarter);
     private readonly undo = inject(UndoService);
+    private readonly consent = inject(ConsentService);
+    /** The account whose consent (SYN-10) has been saved or looked up, once signed in. */
+    private consentChecked: string | null = null;
     private client: Promise<AccountClient> | null = null;
 
     private readonly _state = signal<AccountState>({ status: 'loading' });
@@ -96,12 +100,12 @@ export class AccountService {
     }
 
     private listen(client: AccountClient) {
-        client.auth.onAuthStateChange((_event, session) => this.show(session));
+        client.auth.onAuthStateChange((_event, session) => this.show(client, session));
         client.auth.getSession().then(
             ({ data }) => {
                 // Unless a sign-in or out has been heard since, which is newer
                 if (this._state().status === 'loading') {
-                    this.show(data.session);
+                    this.show(client, data.session);
                 }
             },
             () => {
@@ -112,15 +116,46 @@ export class AccountService {
         );
     }
 
-    private show(session: Session | null) {
+    private show(client: AccountClient, session: Session | null) {
         if (session) {
             this.sync.start();
         }
+        this.checkConsent(client, session);
         this._state.set(
             session
                 ? { status: 'signed-in', email: session.user.email ?? '' }
                 : { status: 'signed-out' }
         );
+    }
+
+    /**
+     * Once each account's signed in, saves the consent ticked before signing in (SYN-10), or
+     * looks up the account's. Not waited on: Supabase's listener waiting on its own client
+     * would never finish.
+     */
+    private checkConsent(client: AccountClient, session: Session | null) {
+        const user = session?.user.id ?? null;
+        if (user === this.consentChecked) {
+            return;
+        }
+        this.consentChecked = user;
+        if (user === null) {
+            this.consent.signedOut();
+        } else {
+            void this.consent.signedIn(client);
+        }
+    }
+
+    /**
+     * Agreed on the You tab, signed in already, to keeping notes that may mention health
+     * (SYN-10). Gives whether it was saved.
+     */
+    async agreeToConsent(): Promise<boolean> {
+        try {
+            return await this.consent.agreeSignedIn(await this.connect());
+        } catch {
+            return false;
+        }
     }
 
     /** Emails a link (and a code) to sign in with, making the account if it's new. */

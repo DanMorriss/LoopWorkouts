@@ -12,18 +12,21 @@ import { email, form, FormField, pattern, required } from '@angular/forms/signal
 import { AccountService } from '../account.service';
 import { SIGN_IN_PROVIDERS, SignInProvider } from '../account-client';
 import { injectFocusAfterRender } from '../../shared/focus-after-render';
+import { ConsentService } from '../consent.service';
+import { HealthConsentComponent } from '../health-consent/health-consent.component';
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple: 'Apple' };
 
 /**
  * Signing in (SYN-3, SYN-7): with Google (and Apple, once it's set up), which go there and
  * come back signed in, or by an email link, then the code from the same email typed here.
+ * Either way, only once the tick for keeping notes that may mention health is ticked (SYN-10).
  * Shown signed out on the You tab and on the welcome screen, each with its own `intro`.
  * Says what it's doing under itself, read out as it changes.
  */
 @Component({
     selector: 'app-sign-in',
-    imports: [FormField],
+    imports: [FormField, HealthConsentComponent],
     templateUrl: './sign-in.component.html',
     styleUrl: './sign-in.component.scss',
     // Supabase's code loads as soon as the form's used, so it's there by the time it's sent
@@ -45,6 +48,12 @@ export class SignInComponent {
     protected readonly busy = signal(false);
     /** What the last thing done did, read out as it changes. */
     protected readonly message = signal('');
+
+    private readonly consent = inject(ConsentService);
+    /** The tick for keeping notes that may mention health (SYN-10), needed to sign in. */
+    protected readonly consentForm = form(signal({ agreed: false }), (fields) => {
+        required(fields.agreed, { message: 'Tick the box to agree before signing in.' });
+    });
 
     private readonly emailModel = signal({ email: '' });
     protected readonly emailForm = form(this.emailModel, (fields) => {
@@ -93,6 +102,9 @@ export class SignInComponent {
 
     /** Off to Google or Apple to sign in, coming back to the You tab signed in (SYN-7). */
     protected async signInWith(provider: SignInProvider) {
+        if (!this.agreed()) {
+            return;
+        }
         const name = PROVIDER_NAMES[provider];
         this.busy.set(true);
         this.leavingFor = name;
@@ -110,6 +122,9 @@ export class SignInComponent {
      */
     protected async sendLink(event: Event) {
         event.preventDefault();
+        if (!this.agreed()) {
+            return;
+        }
         this.emailForm.email().markAsTouched();
         if (this.emailForm().invalid()) {
             this.focus('account-email');
@@ -161,5 +176,17 @@ export class SignInComponent {
         this.focus('account-email');
     }
 
-    /** Moves focus to an element once it's on the page. */
+    /**
+     * Whether the tick's ticked, saving that to go with the account once it's signed in;
+     * if not, says why it's needed and goes to it.
+     */
+    private agreed(): boolean {
+        this.consentForm.agreed().markAsTouched();
+        if (this.consentForm().invalid()) {
+            this.focus('health-consent');
+            return false;
+        }
+        this.consent.agree();
+        return true;
+    }
 }

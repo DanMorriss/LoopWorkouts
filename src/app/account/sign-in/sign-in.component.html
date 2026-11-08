@@ -34,6 +34,8 @@
     @if (account.linkProblem(); as problem) {
         <p class="sign-in__error" role="alert">{{ problem }}</p>
     }
+    <!-- Needed before either way of signing in (SYN-10) -->
+    <app-health-consent class="sign-in__consent" [field]="consentForm.agreed" />
     <!-- Google and Apple (SYN-7), in their own colours and with their marks,
          as their guidelines ask -->
     <div class="sign-in__providers">

@@ -9,7 +9,20 @@
         <app-progress-bests [bests]="bests()" />
 
         <div class="progress__chart-head">
-            <h4 [id]="id + '-chart'" class="progress__subheading">{{ measureTitle() }}</h4>
+            <div class="progress__chart-title">
+                <h4 [id]="id + '-chart'" class="progress__subheading">{{ measureTitle() }}</h4>
+                @if (points().length > 0) {
+                    <!-- Up here, so it stays put as the table and the chart swap under it -->
+                    <button
+                        type="button"
+                        class="progress__toggle"
+                        [attr.aria-controls]="id + '-view'"
+                        (click)="asTable.set(!asTable())"
+                    >
+                        {{ asTable() ? 'Show as a chart' : 'Show as a table' }}
+                    </button>
+                }
+            </div>
             <div class="progress__ranges" role="group" aria-label="Chart range">
                 @for (option of ranges; track option.value) {
                     <button
@@ -26,10 +39,38 @@
 
         @if (points().length === 0) {
             <p class="progress__empty">Not done in {{ rangeSpoken() }}.</p>
+        } @else if (asTable()) {
+            <table class="progress__table" [id]="id + '-view'">
+                <caption class="sr-only">
+                    {{
+                        measureTitle()
+                    }},
+                    {{
+                        rangeSpoken()
+                    }}
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Workout</th>
+                        <th scope="col">{{ measureTitle() }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (point of points(); track point.entryId) {
+                        <tr>
+                            <td>{{ point.at | date: dateFormat(point.at) }}</td>
+                            <td>{{ point.title }}</td>
+                            <td>{{ point.text }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         } @else {
             <!-- Arrow keys step through the workouts; the readout says each one -->
             <div
                 class="progress__chart"
+                [id]="id + '-view'"
                 tabindex="0"
                 role="group"
                 [attr.aria-labelledby]="id + '-chart'"
@@ -122,44 +163,6 @@
                     }
                 </span>
             </div>
-
-            <button
-                type="button"
-                class="progress__toggle"
-                [attr.aria-controls]="id + '-table'"
-                [attr.aria-expanded]="tableOpen()"
-                (click)="tableOpen.set(!tableOpen())"
-            >
-                {{ tableOpen() ? 'Hide the table' : 'Show as a table' }}
-            </button>
-            @if (tableOpen()) {
-                <table class="progress__table" [id]="id + '-table'">
-                    <caption class="sr-only">
-                        {{
-                            measureTitle()
-                        }},
-                        {{
-                            rangeSpoken()
-                        }}
-                    </caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Date</th>
-                            <th scope="col">Workout</th>
-                            <th scope="col">{{ measureTitle() }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (point of points(); track point.entryId) {
-                            <tr>
-                                <td>{{ point.at | date: dateFormat(point.at) }}</td>
-                                <td>{{ point.title }}</td>
-                                <td>{{ point.text }}</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
         }
 
         <app-recent-sessions [sessions]="sessions()" [id]="id" />

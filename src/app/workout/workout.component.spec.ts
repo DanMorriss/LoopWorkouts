@@ -3287,6 +3287,30 @@ describe('WorkoutComponent', () => {
                 fixture.destroy();
             });
 
+            it('puts it on a ready-made workout too, which keeps your reps and weights', async () => {
+                await store.readyMadeLoaded;
+                start(store.findAnyWorkout('builtin:gym-legs')!);
+                // Back squat's three sets, 12, 10 and 8 reps, resting 2:30 between
+                for (let i = 0; i < 3; i++) {
+                    (
+                        fixture.nativeElement.querySelector('.workout-next--done') as HTMLElement
+                    ).click();
+                    fixture.detectChanges();
+                    advance(i < 2 ? 150_000 : 0);
+                }
+                TestBed.inject(ActiveRunService).end();
+                fixture.detectChanges();
+
+                apply('Back squat: try 1 more rep on each set')!.click();
+                fixture.detectChanges();
+
+                const squat = allSteps(store.findAnyWorkout('builtin:gym-legs')!)[0] as RepStep;
+                expect(squat.sets).toEqual([{ reps: 13 }, { reps: 11 }, { reps: 9 }]);
+                expect(store.workouts()).toEqual([]);
+                localStorage.removeItem('ready-made-changes');
+                fixture.destroy();
+            });
+
             it('steps up each set alike where the sets vary (BLD-11)', () => {
                 const saved = TestBed.inject(WorkoutStore).addWorkout({
                     title: 'Pyramid',

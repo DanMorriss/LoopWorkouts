@@ -1,6 +1,6 @@
 # Data
 
-What the app saves, and in what shape. Everything is on the device. Signed in, the workouts, the library's order, the history, your own exercises, notes, hidden exercises, ready-made favourites, deletions and the profile are kept with the account too, as rows of one table on the server, in the same shapes as here (see [backup-and-sync](backup-and-sync.md), Sync); the other settings and the run in progress aren't.
+What the app saves, and in what shape. Everything is on the device. Signed in, the workouts, the library's order, the history, your own exercises, notes, hidden exercises, ready-made favourites and your reps and weights on ready-made workouts, deletions and the profile are kept with the account too, as rows of one table on the server, in the same shapes as here (see [backup-and-sync](backup-and-sync.md), Sync); the other settings and the run in progress aren't.
 
 **Ready for sync:** every workout and history entry has an id that can't clash with another device's (random, not 1, 2, 3) and an `updatedAt`, the time it last changed in ms since 1970. Deleting one leaves a marker in `deleted`. Merging two copies (a backup now, another device later) goes by id: the most recent change to each record wins, and a deletion wins over changes made before it. See [backup-and-sync](backup-and-sync.md).
 
@@ -144,6 +144,10 @@ A JSON list of `{ "id": "<exercise id>", "updatedAt": … }`, one per exercise h
 
 A JSON list of `{ "id": "builtin:<its name>", "updatedAt": … }`, one per ready-made workout (LIB-6) with its heart pressed (LIB-8, since 2026-11-06), as a ready-made workout isn't your data to mark. Taking the heart off removes it and leaves a deletion, of the kind `ready-made-favourite`, as hidden exercises do. One whose id isn't a ready-made one's is dropped when loading. Your own workouts' hearts are `favourite` on the workout.
 
+### `ready-made-changes`: your reps and weights on ready-made workouts
+
+A JSON list of `{ "id": "builtin:<its name>", "updatedAt": …, "steps": [{ "step": 1, "exerciseId": "builtin:romanian-deadlift", "reps": 8, "weight": 60 }, …] }`, one per ready-made workout (LIB-6) whose reps or weights you've changed (since 2026-11-08). Each step is a rep step's place in the workout (counted as a logged set's `step` is), the exercise it was, and its reps, weight in kg (missing for none) and `sets` where they vary, as on a step (BLD-11). Only its reps and weights: its exercises and everything else stay as the app has them. A step that isn't that exercise in the app any more is left as it comes, as are `sets` that don't fit its sets now. A step put back as it came is dropped, and once none are left, the record is removed, leaving a deletion of the kind `ready-made-change`, as is Reset reps and weights. One whose id isn't a ready-made one's, or with no `steps`, is dropped when loading, as is any step that isn't usable.
+
 ### `deleted`
 
 The last 5,000 workouts, history entries, exercises of your own, notes and hidden exercises deleted (shown again), oldest first, so a deletion reaches other copies and a run still going can't log itself back in (see [history](history.md)):
@@ -262,7 +266,7 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 ```json
 {
     "app": "Loop Workouts",
-    "version": 14,
+    "version": 15,
     "exportedAt": 1761055200000,
     "workouts": [],
     "history": [],
@@ -270,6 +274,7 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
     "exerciseNotes": [],
     "hiddenExercises": [],
     "readyMadeFavourites": [],
+    "readyMadeChanges": [],
     "libraryOrder": { "ids": [], "updatedAt": 0 },
     "plan": { "days": [[], [], [], [], [], [], []], "updatedAt": 0 },
     "deleted": [],
@@ -289,10 +294,11 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 }
 ```
 
-- `workouts`, `history`, `exercises`, `exerciseNotes` (as `exercise-notes`), `hiddenExercises` (as `hidden-exercises`), `readyMadeFavourites` (as `ready-made-favourites`), `deleted` and `settings` are in the same shapes as above, `libraryOrder` is the library's order (see `library-moved-at`) and `plan` the weekly plan (see `week-plan`); `exportedAt` is ms since 1970.
+- `workouts`, `history`, `exercises`, `exerciseNotes` (as `exercise-notes`), `hiddenExercises` (as `hidden-exercises`), `readyMadeFavourites` (as `ready-made-favourites`), `readyMadeChanges` (as `ready-made-changes`), `deleted` and `settings` are in the same shapes as above, `libraryOrder` is the library's order (see `library-moved-at`) and `plan` the weekly plan (see `week-plan`); `exportedAt` is ms since 1970.
 - `version` goes up whenever the file's shape changes. A file from an older version is converted when imported; one from a newer version is turned down.
 - **Version 1** files (from before random ids) have number workout ids, no `updatedAt` and no `deleted`. They're converted as saved data is: their workouts get new random ids, so they're matched on what they are (title, steps and rounds) rather than by id.
 - **Version 3 and older** files call workouts timers: a `timers` list in place of `workouts`, `timerId` in the history and the kind `timer` in `deleted`. They're renamed as they're read.
+- **Version 14 and older** files have no `readyMadeChanges`: nothing to convert. An older app turns a version 15 file down rather than leaving them out.
 - **Version 13 and older** files have no `readyMadeFavourites`, and no ready-made workouts (`builtin:` ids) in their plan: nothing to convert. An older app turns a version 14 file down rather than planning workouts it can't find.
 - **Version 12 and older** files have no `plan`, so the plan here stays as it is.
 - **Version 11 and older** files have no `supersets` on history entries: nothing to convert.

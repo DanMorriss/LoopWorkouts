@@ -16,6 +16,7 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { HistoryComponent } from './history.component';
 import { TourService } from '../tour/tour.service';
+import { PageSlide } from '../nav/page-slide';
 import { asOneGroup } from '../models/workout';
 
 // Midday on Sunday 18 October 2026, so "today" and "yesterday" can't flip mid-test
@@ -303,6 +304,28 @@ describe('HistoryComponent', () => {
         expect(links).toHaveLength(1);
         expect(links[0].getAttribute('href')).toBe('/exercises/back-squat');
         expect(text('.entry__sets li .sr-only')).toEqual([', 8 reps', 'Reps, 5 reps']);
+    });
+
+    it("opens its workout's details from the card, to favourite or copy it, coming back here", () => {
+        const sprints = TestBed.inject(WorkoutStore).addWorkout({
+            title: 'Sprints',
+            repeats: 1,
+            blocks: [],
+        });
+        const slide = TestBed.inject(PageSlide);
+        const navigate = vi.spyOn(slide, 'navigate').mockImplementation(() => undefined);
+        const entry = makeEntry({ workoutId: sprints.id });
+        create(entry, makeEntry({ startedAt: NOW - 2 * HOUR, workoutId: 'deleted-since' }));
+
+        // One link, covering its card; a workout deleted since has none
+        const links = fixture.nativeElement.querySelectorAll('.entry__open[href]');
+        expect(links).toHaveLength(1);
+        const url = `/library/${sprints.id}?run=${encodeURIComponent(entry.id)}`;
+        expect(links[0].getAttribute('href')).toBe(url);
+        expect(links[0].getAttribute('aria-label')).toBe('Details of Sprints');
+
+        links[0].click();
+        expect(navigate).toHaveBeenCalledWith(url, 'in');
     });
 
     it('names an untitled workout', () => {

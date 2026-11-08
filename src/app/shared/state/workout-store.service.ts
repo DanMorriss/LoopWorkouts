@@ -34,6 +34,8 @@ import { StepSkip } from '../../workout/workout-state';
 import { Deletion, inOrder, LibraryOrder, mergeRecords, newId } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { ReadyMadeFavourites } from './ready-made-favourites.service';
+import { ReadyMadeChanges } from './ready-made-changes.service';
+import { withAmounts } from '../../models/ready-made-change';
 import { SyncClock } from './sync-clock.service';
 import { ExerciseStore } from './exercise-store.service';
 import { linkSteps } from '../../models/exercise-links';
@@ -45,6 +47,7 @@ export class WorkoutStore {
     private readonly clock = inject(SyncClock);
     private readonly exercises = inject(ExerciseStore);
     private readonly favourites = inject(ReadyMadeFavourites);
+    private readonly readyMadeChanges = inject(ReadyMadeChanges);
     private _workouts = signal<Workout[]>([]);
     private readonly _builtIns = signal<readonly BuiltInWorkout[]>([]);
     private _movedAt = signal(readMovedAt());
@@ -73,11 +76,15 @@ export class WorkoutStore {
         }
     );
 
-    /** The ready-made workouts, used as they are, each a favourite if it's been made one. */
+    /**
+     * The ready-made workouts, used as they are but with your own reps and weights on them,
+     * each a favourite if it's been made one.
+     */
     readonly readyMade = computed<ReadyMadeWorkout[]>(() => {
         const favourites = this.favourites.ids();
+        const changes = this.readyMadeChanges.byId();
         return this._builtIns().map((workout) => ({
-            ...workout,
+            ...withAmounts(workout, changes.get(workout.id)?.steps ?? []),
             updatedAt: 0,
             ...(favourites.has(workout.id) ? { favourite: true as const } : {}),
         }));
@@ -554,7 +561,8 @@ export class WorkoutStore {
     /**
      * Replaces one step of the running workout, e.g. its reps or weight changed mid-workout,
      * and of the saved workout too, so it starts from there next time. `stepIndex` is its
-     * place in `allSteps()`.
+     * place in `allSteps()`. Of a ready-made workout, only a rep step's reps and weight are
+     * kept (ReadyMadeChanges); anything more, such as another exercise, takes a copy.
      */
     updateActiveStep(stepIndex: number, step: Step) {
         const workout = this._activeWorkout();
@@ -576,6 +584,12 @@ export class WorkoutStore {
                 workouts.map((t) => (t.id === workout.id ? updated : t))
             );
             this.saveWorkouts();
+            return;
+        }
+        const original = this._builtIns().find((builtIn) => builtIn.id === workout.id);
+        const originalStep = original && allSteps(original)[stepIndex];
+        if (originalStep) {
+            this.readyMadeChanges.setStep(workout.id, stepIndex, originalStep, step);
         }
     }
 

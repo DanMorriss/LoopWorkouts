@@ -44,9 +44,9 @@
     font-variant-numeric: tabular-nums;
 }
 
-// "Show as a table", under the chart
+// "Show as a table" (or "Show as a chart"), at the right of the chart's title
 @mixin chart-toggle {
-    align-self: flex-start;
+    align-self: center;
     min-height: 44px;
     padding: 0;
     border: none;

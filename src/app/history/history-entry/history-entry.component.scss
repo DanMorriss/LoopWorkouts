@@ -3,6 +3,7 @@
 
 // A card of the same family as Workouts' and Plan's, lit faintly from its top right
 :host {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -10,9 +11,16 @@
     outline: none;
 }
 
+// Pressed anywhere but its buttons and links, it dips, as a workout's card does
+@media (prefers-reduced-motion: no-preference) {
+    :host(:has(.entry__open:active)) {
+        scale: 0.98;
+        transition-duration: 0.08s;
+    }
+}
+
 // Over the entries below it while its menu is open
 :host(.entry--menu-open) {
-    position: relative;
     z-index: 5;
 }
 
@@ -48,6 +56,35 @@
     overflow-wrap: anywhere;
 }
 
+// A link to its workout's details, covering the card, with its links and buttons over that.
+// Not while its note's being written, where a slip would lose it
+.entry__open {
+    color: inherit;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+
+    &[href]::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        // The card's corners
+        border-radius: 0.9rem;
+    }
+
+    &:focus-visible {
+        outline: none;
+
+        &::after {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+    }
+}
+
+:host(.entry--editing) .entry__open::after {
+    content: none;
+}
+
 .entry__title--untitled {
     color: var(--text-muted);
 }
@@ -78,6 +115,7 @@
 
 // The exercise's name goes to its page, with its progress (PRG-4)
 .entry__exercise {
+    position: relative;
     color: var(--glow-text);
     text-decoration: underline;
     text-decoration-color: var(--border);
@@ -124,6 +162,7 @@
 }
 
 .entry__note-form {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.6rem;

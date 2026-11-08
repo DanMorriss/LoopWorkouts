@@ -7,6 +7,7 @@ import { ExerciseStore } from '../state/exercise-store.service';
 import { HistoryStore } from '../state/history-store.service';
 import { SettingsStore } from '../state/settings-store.service';
 import { ReadyMadeFavourites } from '../state/ready-made-favourites.service';
+import { ReadyMadeChanges } from '../state/ready-made-changes.service';
 import { PlanStore } from '../state/plan-store.service';
 import { Profile } from '../../models/profile';
 import { WorkoutStore } from '../state/workout-store.service';
@@ -51,6 +52,7 @@ export type CopyToMerge = Pick<
     | 'exerciseNotes'
     | 'hiddenExercises'
     | 'readyMadeFavourites'
+    | 'readyMadeChanges'
     | 'libraryOrder'
     | 'plan'
     | 'deleted'
@@ -74,6 +76,7 @@ export class BackupService {
     private readonly settings = inject(SettingsStore);
     private readonly plan = inject(PlanStore);
     private readonly favourites = inject(ReadyMadeFavourites);
+    private readonly readyMadeChanges = inject(ReadyMadeChanges);
     private readonly document = inject(DOCUMENT);
 
     /** Downloads a backup of everything, once the history has loaded, and gives the file's name. */
@@ -88,6 +91,7 @@ export class BackupService {
                 exerciseNotes: this.exercises.notes(),
                 hiddenExercises: this.exercises.hidden(),
                 readyMadeFavourites: this.favourites.list(),
+                readyMadeChanges: this.readyMadeChanges.list(),
                 libraryOrder: this.workouts.libraryOrder(),
                 plan: this.plan.plan(),
                 deleted: [...this.deletions.all()],
@@ -176,6 +180,7 @@ export class BackupService {
             backup.deleted
         );
         this.favourites.merge(backup.readyMadeFavourites, backup.deleted);
+        this.readyMadeChanges.merge(backup.readyMadeChanges, backup.deleted);
         const linkedWorkouts = backup.workouts.map((workout) => this.linked(workout, idHere));
         const linkedHistory = backup.history.map((entry) => this.linkedSets(entry, idHere));
         const workouts = backup.fromVersion1

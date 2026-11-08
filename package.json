@@ -12,6 +12,7 @@
     "lint": "eslint src/app && node tools/check-icons.mjs",
     "unused": "knip --production",
     "e2e": "tsc -p e2e && playwright test",
+    "e2e:p1": "tsc -p e2e && playwright test --grep @p1",
     "e2e:ui": "playwright test --ui"
   },
   "private": true,

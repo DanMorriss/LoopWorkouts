@@ -1,4 +1,6 @@
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
+import { Device, type DeviceOptions } from './device';
+import { NOW } from './seed';
 
 // The `test` every e2e spec imports instead of Playwright's: each test starts on a device new to
 // the app (Playwright gives each its own browser context, so its localStorage and IndexedDB
@@ -13,6 +15,8 @@ const ONBOARDED: Record<string, string> = {
     // The tours of the app (NAV-8) and of Create (BLD-17), counted as seen
     tour: 'seen',
     'tour-create': 'seen',
+    // The data's shape now, so nothing seeded is converted as if from an older version
+    'data-version': '5',
 };
 
 /** Where the app's sign-in and sync go: Loop Workouts' Supabase project. */
@@ -33,6 +37,15 @@ export interface AppOptions {
     storage: Record<string, string>;
     /** Whether an uncaught error on the page fails the test (it does by default). */
     failOnPageError: boolean;
+    /**
+     * The time on the page's clock as the test starts (`page.clock`, installed before the
+     * first page loads), Wednesday 11 November 2026 at 09:00 by default (`NOW` in seed.ts).
+     * It runs on as usual from there; `page.clock.runFor()` moves it on, firing the app's
+     * timers, as for a workout's countdown. `null` leaves the real clock.
+     */
+    now: string | null;
+    /** The phone's sound, vibration and wake lock: stand-ins that record what's asked of them. */
+    deviceApis: DeviceOptions;
 }
 
 export interface AppFixtures {
@@ -40,6 +53,8 @@ export interface AppFixtures {
     network: Network;
     /** Helpers for getting about the app. */
     app: App;
+    /** What the app has asked of the device: sounds played, vibrations, the wake lock. */
+    device: Device;
 }
 
 /** The requests stopped from leaving the app's server, as the test goes. */
@@ -88,12 +103,121 @@ export class App {
     storageItem(key: string): Promise<string | null> {
         return this.page.evaluate((k) => localStorage.getItem(k), key);
     }
+
+    /** What the app has saved under `key`, as JSON, or null. */
+    async stored<T = unknown>(key: string): Promise<T | null> {
+        const item = await this.storageItem(key);
+        return item === null ? null : (JSON.parse(item) as T);
+    }
+
+    /** The page's heading, the title under the header (level 2). */
+    heading(name: string | RegExp): Locator {
+        return this.page.getByRole('heading', { level: 2, name });
+    }
+
+    /** The bar at the bottom saying what just happened, with Undo where it can be undone. */
+    get undoBar(): Locator {
+        return this.page.locator('app-undo-bar .undo-bar');
+    }
+
+    /** The undo bar's Undo. */
+    get undo(): Locator {
+        return this.undoBar.getByRole('button', { name: 'Undo', exact: true });
+    }
+
+    /** The bar over the tabs while a workout's going. */
+    get runBar(): Locator {
+        return this.page.getByRole('complementary', { name: 'Workout in progress' });
+    }
+
+    /** The link at the top of a page that slid in, back to where it came from: ‹ Workouts. */
+    backLink(name: string | RegExp): Locator {
+        return this.page.locator('app-back-link').getByRole('link', { name });
+    }
+
+    /** What's focused, to check focus with `toBeFocused` on a locator, or read its name. */
+    focusedName(): Promise<string> {
+        return this.page.evaluate(() => {
+            const el = document.activeElement as HTMLElement | null;
+            return (el?.getAttribute('aria-label') ?? el?.textContent ?? '').trim();
+        });
+    }
+
+    /** Everything the app's live regions have said since the page loaded, in order. */
+    announcements(): Promise<string[]> {
+        return this.page.evaluate(() => window.__announced ?? []);
+    }
+
+    /**
+     * Waits for the app's history to have loaded and saved what was seeded (`history-pending`
+     * is emptied once IndexedDB has it), so a reload doesn't race it.
+     */
+    async historySaved() {
+        await expect.poll(() => this.storageItem('history-pending')).toMatch(/^(null|\[\])$/);
+    }
+}
+
+declare global {
+    interface Window {
+        __announced?: string[];
+    }
+}
+
+/**
+ * Runs in the page before the app: records the text of each live region (`aria-live`, or a
+ * role of status or alert) as it changes, as a screen reader would hear it.
+ */
+function recordAnnouncements() {
+    const heard: string[] = [];
+    window.__announced = heard;
+    const live = (node: Node | null): Element | null => {
+        for (
+            let el = node instanceof Element ? node : node?.parentElement;
+            el;
+            el = el.parentElement
+        ) {
+            const role = el.getAttribute('role');
+            const polite = el.getAttribute('aria-live');
+            if ((polite && polite !== 'off') || role === 'status' || role === 'alert') {
+                return el;
+            }
+        }
+        return null;
+    };
+    const observer = new MutationObserver((mutations) => {
+        const regions = new Set<Element>();
+        for (const mutation of mutations) {
+            const region = live(mutation.target);
+            if (region) {
+                regions.add(region);
+            }
+        }
+        for (const region of regions) {
+            const text = (region.textContent ?? '').replace(/\s+/g, ' ').trim();
+            if (text && heard.at(-1) !== text) {
+                heard.push(text);
+            }
+        }
+    });
+    const start = () =>
+        observer.observe(document.documentElement, {
+            subtree: true,
+            childList: true,
+            characterData: true,
+        });
+    if (document.documentElement) {
+        start();
+    } else {
+        document.addEventListener('DOMContentLoaded', start);
+    }
 }
 
 export const test = base.extend<AppOptions & AppFixtures>({
     onboarding: ['skip', { option: true }],
     storage: [{}, { option: true }],
     failOnPageError: [true, { option: true }],
+    now: [NOW, { option: true }],
+    deviceApis: [{ audio: 'allowed', vibrate: true, wakeLock: true }, { option: true }],
 
     // The app's localStorage as the test starts, given to the browser before any page loads
     storageState: async ({ onboarding, storage, baseURL }, use) => {
@@ -139,9 +263,14 @@ export const test = base.extend<AppOptions & AppFixtures>({
         await use(context);
     },
 
-    page: async ({ page, failOnPageError }, use) => {
+    page: async ({ page, failOnPageError, now, deviceApis }, use) => {
         const errors: string[] = [];
         page.on('pageerror', (error) => errors.push(error.stack ?? error.message));
+        if (now) {
+            await page.clock.install({ time: new Date(now) });
+        }
+        await Device.install(page, deviceApis);
+        await page.addInitScript(recordAnnouncements);
         await use(page);
         if (failOnPageError) {
             expect(errors, 'uncaught errors on the page').toEqual([]);
@@ -151,6 +280,12 @@ export const test = base.extend<AppOptions & AppFixtures>({
     app: async ({ page }, use) => {
         await use(new App(page));
     },
+
+    device: async ({ page }, use) => {
+        await use(new Device(page));
+    },
 });
 
 export { expect };
+export * from './seed';
+export { ALARM } from './device';

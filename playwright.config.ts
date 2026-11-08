@@ -11,6 +11,9 @@ export default defineConfig({
     // *.e2e.ts, not *.spec.ts, which are the unit tests' (`ng test` looks for those everywhere)
     testMatch: '**/*.e2e.ts',
     fullyParallel: true,
+    // A whole journey (building a workout, running it, then its summary and the history) is
+    // longer than Playwright's 30s allows on a busy machine
+    timeout: 60_000,
     forbidOnly: ci,
     retries: ci ? 2 : 0,
     // CI's runners have two cores, as does Vitest's maxWorkers (see vitest-base.config.mts)

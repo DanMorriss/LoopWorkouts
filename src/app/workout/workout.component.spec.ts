@@ -111,6 +111,7 @@ describe('WorkoutComponent', () => {
         expect(text()).toContain('No workout selected');
         expect(fixture.nativeElement.querySelector('.workout-ring')).toBeNull();
         const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
+        expect(link.textContent?.trim()).toBe('Choose a workout');
         expect(link.getAttribute('href')).toBe('/library');
         fixture.destroy();
     });

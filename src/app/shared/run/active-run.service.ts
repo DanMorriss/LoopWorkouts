@@ -85,6 +85,14 @@ export class ActiveRunService {
     });
     readonly isPaused = this.store.isPaused;
 
+    private readonly _held = signal(false);
+    /**
+     * The clock is stopped, as when paused, but the workout page shows the run as going, e.g.
+     * while the tour of it (RUN-13) points at Pause and Skip. Kept in memory only, so a
+     * reload while held carries on paused.
+     */
+    readonly held = this._held.asReadonly();
+
     // Everything below is worked out from the clock rather than counted tick by tick,
     // so the workout stays correct even when ticks arrive late or not at all
     private readonly now = signal(Date.now());
@@ -306,13 +314,32 @@ export class ActiveRunService {
             switchSeconds: this.settings.switchSidesSeconds(),
         });
         this.resumedAt.set(0);
+        this._held.set(false);
         this.ending.set(false);
         this._steppedUp.set(new Set());
         this._keptSwaps.set(new Set());
         this.sync();
     }
 
+    /** Stops the clock without showing the run paused: see `held`. Undone by release(). */
+    hold() {
+        if (!this.workout() || this.isPaused() || this.isComplete()) {
+            return;
+        }
+        this.store.pause();
+        this._held.set(true);
+        this.sync();
+    }
+
+    /** Starts the clock again after hold(). */
+    release() {
+        if (this._held()) {
+            this.togglePause();
+        }
+    }
+
     togglePause() {
+        this._held.set(false);
         if (this.isPaused()) {
             this.store.resume();
             this.resumedAt.set(Date.now());
@@ -619,6 +646,7 @@ export class ActiveRunService {
         this.recordRun(this.isComplete() ? 'finished' : 'stopped');
         this.store.stop();
         this.alarms.cancel();
+        this._held.set(false);
         this.ending.set(false);
     }
 

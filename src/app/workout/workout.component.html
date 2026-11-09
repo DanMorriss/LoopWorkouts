@@ -47,7 +47,8 @@
         </div>
 
         <!-- The ring, with Resume and End workout over it while paused -->
-        <div class="workout-stage">
+        <!-- data-tour: what the tour of the page (RUN-13) lights up -->
+        <div class="workout-stage" data-tour="stage">
             <app-workout-ring
                 [phase]="view.ringPhase()"
                 [paused]="view.isPaused()"
@@ -142,6 +143,7 @@
                     #doneButton
                     type="button"
                     class="workout-next workout-next--done"
+                    data-tour="next"
                     [attr.data-next]="view.nextKind()"
                     [attr.aria-label]="'Done. Next: ' + view.upNext()"
                     aria-keyshortcuts="Space"
@@ -156,6 +158,7 @@
                 <!-- Pulses in the next step's colour as this one nears its end, to get ready -->
                 <p
                     class="workout-next"
+                    data-tour="next"
                     [class.workout-next--soon]="view.nextSoon()"
                     [attr.data-next]="view.nextKind()"
                 >
@@ -171,10 +174,11 @@
                  and Skip moves on without logging the set). Resume and End workout are over the ring while paused. The
                  captions repeat the buttons' names for sighted users, so screen readers skip
                  them. -->
-                <div class="workout-controls">
+                <div class="workout-controls" data-tour="controls">
                     <div class="workout-control workout-control--main">
                         <button
                             #mainButton
+                            id="workout-pause"
                             type="button"
                             class="btn-main btn-main--round"
                             aria-label="Pause"

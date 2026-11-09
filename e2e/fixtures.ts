@@ -12,9 +12,11 @@ const ONBOARDED: Record<string, string> = {
     // The welcome screen's answer (NAV-3): going on as a guest. With no `setup` key, Home
     // doesn't open the setup (NAV-4) either.
     welcomed: 'guest',
-    // The tours of the app (NAV-8) and of Create (BLD-17), counted as seen
+    // The tours of the app (NAV-8), of Create (BLD-17) and of the workout page (RUN-13),
+    // counted as seen
     tour: 'seen',
     'tour-create': 'seen',
+    'tour-workout': 'seen',
     // The data's shape now, so nothing seeded is converted as if from an older version
     'data-version': '5',
 };

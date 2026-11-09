@@ -14,6 +14,7 @@
 - **RUN-10** As a user I want the workout to show which set, side or round I'm on, and the section I'm in, so I know where I am in a long gym workout.
 - **RUN-11** As a user I want to swap an exercise for something equivalent mid-workout, e.g. when someone's on the machine, so I can still work those muscles.
 - **RUN-12** As a user I want to skip any step, e.g. a warm-up I've done already, a rest I'm ready to cut short or a set I'm leaving out, and carry on from the next step without it logged as done.
+- **RUN-13** As a new user I want a short tour of the workout page before my first workout's clock starts, so I know what's on it without working it out mid-exercise.
 
 ## Rules
 
@@ -138,6 +139,21 @@
 - A workout ended before its first step was done has nothing logged: the summary says "Nothing to log", with no note box. Done still goes to the history.
 - The workout is logged in the history once, when it finishes, wherever the user is in the app (see [history](history.md)). It's dated when it actually finished, even if the app only noticed later.
 
+### The tour of the workout page (RUN-13)
+
+- **Shown once, on the first workout run on a device**: one with nothing in its history, so a device already in use, or one signed in with its history synced, doesn't get it. Only as a workout starts (from any Start button), not for a run picked up after a reload or opened from the run bar, and not while another tour is on. It's kept on the device only (`tour-workout`, see [data](data.md)).
+- **The clock waits for it.** The page shows the first step as it looks running, with Pause and Skip, not Resume and End workout, but its time stands still and no alarm sounds till the tour ends, however it ends (Done, Skip tour or Escape). A reload while it's on carries on paused.
+- It's the tour of the app's overlay and card (see [home and navigation](home-and-navigation.md#the-tour-nav-8)), staying on the workout and lighting up no tab: **six stops**:
+    1. **Your first workout**: the bubble, saying the clock waits till you're done, and that its ring fills as a timed step's time goes.
+    2. **What's next**: the line under the bubble, and that it pulses as the step nears its end.
+    3. **Rep steps**: the reps and weight, to change to what you did, then the line under the bubble to press when done (RUN-3, RUN-6).
+    4. **How it's done**: the (i), with Swap exercise there (RUN-9, RUN-11).
+    5. **Pause and skip**: Pause, with End workout behind it, and Skip (RUN-12).
+    6. **Off you go**: the workout carries on on other pages, with the run bar to come back (CTL-4); Done starts the clock.
+- A stop whose part isn't on the first step, e.g. the reps on a timed step or the (i) on an unnamed one, says it in words and lights up nothing.
+- **Done and Skip tour both leave focus on Pause**, ready for the clock that's just started.
+- The ? beside Tap to turn on sound stays: it's about sound after a reload, which the tour doesn't cover.
+
 ### No workout
 
 - The workout page with no workout running says "No workout selected." with a link, "Choose a workout" (until 2026-11-08 "Choose one from your workouts": Workouts has the ready-made ones too now).
@@ -204,9 +220,14 @@
 - Given work 0:03, rest 0:02 and a time limit of 0:20, when I skip the work 1s in and then the rest, then "00:19 left" shows, and time's up at "4 rounds + 1".
 - Given work 0:12 with countdown beeps, when I press Skip 2s in, then the rest's alarm sounds at once and none of the work's countdown ticks do.
 - Given work 0:03, push-ups, then rest, when I press Skip 8s into the push-ups, then the rest starts from its full time, no push-ups are logged, and the time spent counts the 8s.
+- Given a device with nothing in its history, when I start Gym push, then the workout page opens with its tour, "1 of 6", lighting up the bubble, with Pause and Skip showing and the clock standing still; Next three times lights up the (i); when I press Done on "Off you go", the clock starts and focus is on Pause.
+- Given the tour of the workout page on a timed first step, when it's on "Rep steps", then it says what a rep step does and lights up nothing.
+- Given the tour of the workout page, when I press Skip tour (or Escape), then the clock starts, and when I start another workout there's no tour.
+- Given a device with workouts in its history, or a run picked up after a reload, then there's no tour.
 
 ## Platform notes
 
 - **Web:** the maths is pure and has no Angular in it, so it can be ported line for line: `workoutStateAt()` in `src/app/workout/workout-state.ts` (where a workout is after so many ms, given the rep steps done and, for a time limit, the time off the clock: the time rep steps took, less any time skipped; `stepsIntoRound()` gives the score's steps) and the helpers in `src/app/models/workout.ts`. The run itself is `ActiveRunService` (`src/app/shared/run/`), and the page is `WorkoutComponent` (`src/app/workout/`), with what it shows worked out in `WorkoutView` (`workout-view.ts`), a step's text on the face in `workout-face-slide/`, the round line in `workout-round-line/`, details and swapping in `WorkoutSwap` (`workout-swap.ts`), each kind of step's look and motion in `workout-steps.scss` and `workout-motion.scss`, the step strip in `step-strip/`, an exercise's details in the shared `ExerciseDetailsDialogComponent` (RUN-9), and long names fitted to the face by `fitName()` (`fit-name.ts`), which measures the text rather than counting letters.
 - **Web:** the summary is `WorkoutSummaryComponent` (`src/app/workout/workout-summary/`), with its sets in `SummarySetsComponent` and Next time in `SummaryStepUpsComponent`. Swapped is `SummarySwapsComponent`. Its host is a grid whose one cell is the screen (`grid-template: minmax(0, 1fr) / minmax(0, 1fr)`): an auto row grows to the content, and the sheet then runs off the screen once the summary is long.
-- **iOS:** keep the same "work it out from the clock" design: store when the run started (moved on by pauses and rep steps, back by skips) and derive everything else. That's also what makes a relaunch carry on correctly (see [pause-and-stop](pause-and-stop.md)). A `TimelineView` or a display-link tick only needs to redraw. The face's drum is a `rotation3DEffect` about the x axis (the y axis for a new round) with an anchor behind the face; a long name can use `ViewThatFits`, or `lineLimit(3)` with `minimumScaleFactor(0.7)`. The (i) by an exercise's name (RUN-9) can open its details as a `.sheet` with medium and large detents, so the ring stays in sight above it.
+- **Web:** the tour of the workout page (RUN-13) is `TOURS.workout` in `src/app/tour/tour-stops.ts`, started by `tourFirstWorkout()` (`src/app/workout/workout-tour.ts`), which the page calls as it opens. It holds the clock with `ActiveRunService.hold()`, which pauses the run in the store but sets `held`, so `WorkoutView.isPaused` stays false and the page looks as it does running; `release()` resumes it as the tour ends, or as the page closes. The parts it lights up have `data-tour` attributes (`stage`, `next`, `reps` round both wheels, `info`, `controls`), and Pause has the id `workout-pause` for focus at the end.
+- **iOS:** keep the same "work it out from the clock" design: store when the run started (moved on by pauses and rep steps, back by skips) and derive everything else. That's also what makes a relaunch carry on correctly (see [pause-and-stop](pause-and-stop.md)). A `TimelineView` or a display-link tick only needs to redraw. The face's drum is a `rotation3DEffect` about the x axis (the y axis for a new round) with an anchor behind the face; a long name can use `ViewThatFits`, or `lineLimit(3)` with `minimumScaleFactor(0.7)`. The (i) by an exercise's name (RUN-9) can open its details as a `.sheet` with medium and large detents, so the ring stays in sight above it. The tour of the page (RUN-13) would be the same overlay as the other tours, or a `TipGroup` of TipKit `.popoverTip`s, with the run's clock paused but not shown paused.

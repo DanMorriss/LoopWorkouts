@@ -23,6 +23,7 @@ import { WorkoutComponent } from './workout.component';
 import { WorkoutFaceSlideComponent } from './workout-face-slide/workout-face-slide.component';
 import { WorkoutView } from './workout-view';
 import { By } from '@angular/platform-browser';
+import { WORKOUT_TOUR_KEY } from '../tour/tour.service';
 
 // 3s work, 2s rest, 2 rounds unless a test says otherwise
 const makeWorkout = (overrides: Partial<SimpleWorkout> = {}) =>
@@ -47,6 +48,8 @@ describe('WorkoutComponent', () => {
 
     beforeEach(async () => {
         sessionStorage.clear();
+        // The tour of the page (RUN-13) holds the clock: it has its own tests at the end
+        localStorage.setItem(WORKOUT_TOUR_KEY, 'seen');
         audio = new FakeAudioContext();
         await TestBed.configureTestingModule({
             imports: [WorkoutComponent],
@@ -58,7 +61,9 @@ describe('WorkoutComponent', () => {
 
     afterEach(() => sessionStorage.clear());
 
+    /** Opens the page on `workout`, just started, with the tour of the page (RUN-13) seen. */
     function start(workout: Workout) {
+        localStorage.setItem(WORKOUT_TOUR_KEY, 'seen');
         store.setActiveWorkout(workout);
         fixture = TestBed.createComponent(WorkoutComponent);
         component = fixture.componentInstance;

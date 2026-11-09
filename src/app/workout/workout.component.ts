@@ -31,6 +31,7 @@ import { WorkoutRingComponent } from './workout-ring/workout-ring.component';
 import { WorkoutRoundLineComponent } from './workout-round-line/workout-round-line.component';
 import { WorkoutSummaryComponent } from './workout-summary/workout-summary.component';
 import { WorkoutSwap } from './workout-swap';
+import { tourFirstWorkout } from './workout-tour';
 import { WorkoutView } from './workout-view';
 
 // Space on one of these already does something, e.g. presses the focused button
@@ -126,6 +127,8 @@ export class WorkoutComponent {
     private readonly glide = criticallyDampedSpring(0.4);
 
     constructor() {
+        tourFirstWorkout();
+
         // A rep step has come round: Done swells once, as it's the user's move now
         effect(() => {
             if (this.view.currentSet() === null || untracked(this.reducedMotion)) {

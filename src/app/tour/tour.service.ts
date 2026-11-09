@@ -1,14 +1,23 @@
 import { Service, signal } from '@angular/core';
 
-/** The tours: of the app (NAV-8), and of making a workout on Create (BLD-17). */
-export type TourName = 'app' | 'create';
+/**
+ * The tours: of the app (NAV-8), of making a workout on Create (BLD-17), and of the workout
+ * page on the first workout (RUN-13).
+ */
+export type TourName = 'app' | 'create' | 'workout';
 
 /** Set once the tour of the app's been taken, or turned down, on this device. */
 export const TOUR_KEY = 'tour';
 /** Set once the tour of Create has been shown on this device. */
 export const CREATE_TOUR_KEY = 'tour-create';
+/** Set once the tour of the workout page has been shown on this device. */
+export const WORKOUT_TOUR_KEY = 'tour-workout';
 
-const KEYS: Record<TourName, string> = { app: TOUR_KEY, create: CREATE_TOUR_KEY };
+const KEYS: Record<TourName, string> = {
+    app: TOUR_KEY,
+    create: CREATE_TOUR_KEY,
+    workout: WORKOUT_TOUR_KEY,
+};
 
 /**
  * The tours: whether Today still offers the tour of the app on this device, and which tour
@@ -39,9 +48,14 @@ export class TourService {
         this._stop.set(0);
     }
 
+    /** Whether startOnce() would start it: it hasn't been shown on this device, and no tour is on. */
+    due(tour: TourName): boolean {
+        return this._stop() === null && !seen(KEYS[tour]);
+    }
+
     /** Starts the tour if it hasn't been shown on this device, and no tour is on. */
     startOnce(tour: TourName) {
-        if (this._stop() === null && !seen(KEYS[tour])) {
+        if (this.due(tour)) {
             this.start(tour);
         }
     }

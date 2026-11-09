@@ -189,8 +189,17 @@ export class TourComponent {
                 }))
                 .find((part) => part.element);
             if (found?.element) {
-                this.part.set({ element: found.element, text: found.text });
-                this.bringIntoView(found.element);
+                const element = found.element;
+                this.part.set({ element, text: found.text });
+                // Once the card has its words, as their length moves its top
+                afterNextRender(
+                    () => {
+                        if (search === this.search) {
+                            this.bringIntoView(element);
+                        }
+                    },
+                    { injector: this.injector }
+                );
                 return;
             }
             if (performance.now() - started > WAIT_MS) {
@@ -235,9 +244,18 @@ export class TourComponent {
             return;
         }
         const root = this.document.documentElement;
-        const furthest = root.scrollHeight - this.room - window.innerHeight;
-        this.room = top ? Math.max(0, Math.ceil(top - furthest)) : 0;
-        main.style.paddingBottom = this.room ? `calc(var(--bars-height) + ${this.room}px)` : '';
+        const furthest = () => root.scrollHeight - window.innerHeight;
+        const set = (room: number) => {
+            this.room = room;
+            main.style.paddingBottom = room ? `calc(var(--bars-height) + ${room}px)` : '';
+        };
+        set(top ? Math.max(0, Math.ceil(top - (furthest() - this.room))) : 0);
+        // A page shorter than the screen, e.g. the workout's, takes some of the room before
+        // it scrolls at all, so what's still short is added again
+        const short = Math.ceil(top - furthest());
+        if (this.room && short > 0) {
+            set(this.room + short);
+        }
     }
 
     /** The new stop's title takes focus, so a screen reader reads it and its line. */

@@ -58,7 +58,8 @@ export class WorkoutView {
     readonly workout = this.run.workout;
     /** The workout as it runs, with how it does exercises each side: what its plan is made of. */
     readonly running = this.run.running;
-    readonly isPaused = this.run.isPaused;
+    /** Paused, as shown: not while the run's only held, for the tour of the page (RUN-13). */
+    readonly isPaused = computed(() => this.run.isPaused() && !this.run.held());
     /** The summary is open over the page, so its keys are left to it. */
     readonly summaryOpen = this.run.summaryOpen;
     readonly state = this.run.state;

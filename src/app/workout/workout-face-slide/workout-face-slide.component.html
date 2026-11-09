@@ -12,6 +12,7 @@
                 <button
                     type="button"
                     class="workout-face__info"
+                    data-tour="info"
                     [attr.aria-label]="'Details of ' + exercise.name"
                     (click)="details.emit({ exercise, next: false })"
                 >
@@ -29,28 +30,31 @@
                                              thing. It and the weight are wheels: tap one to
                                              change it, for this set, the rest of the workout
                                              and next time. -->
-        <div class="workout-face__amount">
-            <app-wheel-picker
-                class="workout-face__count"
-                [value]="face.reps"
-                (valueChange)="setReps($event)"
-                [options]="repOptions"
-                [labelledBy]="'reps-label-' + face.key"
-            />
-            <span class="workout-face__reps" [id]="'reps-label-' + face.key">reps</span>
-        </div>
-        <div class="workout-face__amount">
-            <app-wheel-picker
-                class="workout-face__weight"
-                [class.workout-face__weight--none]="!face.weight"
-                [value]="face.weightValue"
-                (valueChange)="setWeight($event)"
-                [options]="faceWeightOptions()"
-                [labelledBy]="'weight-label-' + face.key"
-            />
-            <span class="workout-face__weight-unit" [id]="'weight-label-' + face.key"
-                ><span class="sr-only">Weight, </span>{{ weightUnit() }}</span
-            >
+        <!-- Round both, for the tour of the page (RUN-13) to light up -->
+        <div data-tour="reps">
+            <div class="workout-face__amount">
+                <app-wheel-picker
+                    class="workout-face__count"
+                    [value]="face.reps"
+                    (valueChange)="setReps($event)"
+                    [options]="repOptions"
+                    [labelledBy]="'reps-label-' + face.key"
+                />
+                <span class="workout-face__reps" [id]="'reps-label-' + face.key">reps</span>
+            </div>
+            <div class="workout-face__amount">
+                <app-wheel-picker
+                    class="workout-face__weight"
+                    [class.workout-face__weight--none]="!face.weight"
+                    [value]="face.weightValue"
+                    (valueChange)="setWeight($event)"
+                    [options]="faceWeightOptions()"
+                    [labelledBy]="'weight-label-' + face.key"
+                />
+                <span class="workout-face__weight-unit" [id]="'weight-label-' + face.key"
+                    ><span class="sr-only">Weight, </span>{{ weightUnit() }}</span
+                >
+            </div>
         </div>
         @if (lastTime()) {
             <p class="workout-face__last-time">{{ lastTime() }}</p>

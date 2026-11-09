@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router, RouterOutlet } from '@angular/router';
 import { TourComponent } from './tour.component';
-import { TourService } from './tour.service';
+import { TourName, TourService } from './tour.service';
+import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
 
 // Stand-ins for the pages, each with the part the tour lights up
 @Component({
@@ -55,6 +56,14 @@ class YouPage {}
 })
 class CreatePage {}
 
+// A page shorter than the screen, with its big part low on it, as the workout page is
+@Component({
+    template: `<div style="height: 30vh"></div>
+        <div data-tour="stage" style="height: 45vh">Bubble</div>
+        <button id="workout-pause" data-tour="controls">Pause</button>`,
+})
+class WorkoutPage {}
+
 @Component({
     imports: [RouterOutlet, TourComponent],
     template: `<main><router-outlet /></main>
@@ -89,6 +98,7 @@ describe('TourComponent (NAV-8)', () => {
                     { path: 'history', component: ProgressPage },
                     { path: 'account', component: YouPage },
                     { path: 'setup', component: CreatePage },
+                    { path: 'workout', component: WorkoutPage },
                 ]),
             ],
         });
@@ -126,7 +136,7 @@ describe('TourComponent (NAV-8)', () => {
         }
     }
 
-    async function start(name: 'app' | 'create' = 'app') {
+    async function start(name: TourName = 'app') {
         fixture = TestBed.createComponent(Host);
         tour.start(name);
         fixture.detectChanges();
@@ -303,6 +313,38 @@ describe('TourComponent (NAV-8)', () => {
 
             expect(tour.stop()).toBeNull();
             expect(document.activeElement?.id).toBe('title');
+        });
+    });
+
+    describe("the workout page's tour (RUN-13)", () => {
+        beforeEach(async () => {
+            fakeReducedMotion(true);
+            await router.navigateByUrl('/workout');
+            await start('workout');
+        });
+
+        it('scrolls a part low on a page shorter than the screen up above the card', () => {
+            const stage = el().querySelector('[data-tour="stage"]')!.getBoundingClientRect();
+            const card = el().querySelector('.tour__card')!.getBoundingClientRect();
+
+            expect(text('.tour__title')).toBe('Your first workout');
+            expect(stage.top).toBeGreaterThanOrEqual(0);
+            expect(stage.bottom).toBeLessThanOrEqual(card.top);
+            expect(lit()).toEqual([Math.round(stage.top - 6)]);
+        });
+
+        it('Done leaves focus on Pause, with the room under the page gone', async () => {
+            for (let i = 0; i < 5; i++) {
+                button('Next')!.click();
+                await settle();
+            }
+            expect(text('.tour__title')).toBe('Off you go');
+
+            button('Done')!.click();
+            await settle();
+            expect(tour.stop()).toBeNull();
+            expect(document.activeElement?.id).toBe('workout-pause');
+            expect(el().querySelector('main')!.style.paddingBottom).toBe('');
         });
     });
 });

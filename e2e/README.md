@@ -62,7 +62,7 @@ test('Progress opens from the tab bar', async ({ app, page }) => {
 - **A device new to the app.** Each test has its own browser context, so its localStorage and
   IndexedDB (where the history is) start empty, and nothing carries over from another test.
 - **Past the first steps.** The `onboarding` option, `'skip'` by default, sets what the app
-  saves once the welcome screen's answered as a guest and both tours are seen, so Home opens
+  saves once the welcome screen's answered as a guest and the tours are seen, so Home opens
   Today. `test.use({ onboarding: 'show' })` starts on the welcome screen instead (see
   `welcome.e2e.ts`).
 - **Seeded storage, if asked.** `test.use({ storage: { settings: JSON.stringify({ theme:

@@ -205,8 +205,74 @@ const CREATE_STOPS: readonly TourStop[] = [
     },
 ];
 
+/**
+ * The tour of the workout page (RUN-13), on the first workout run on a device, with its clock
+ * held till the tour ends: the bubble, what's next, rep steps, how it's done and swapping,
+ * Pause and Skip, and that it carries on on other pages. A part that isn't there for the first
+ * step, e.g. the reps on a timed step, is said in words instead.
+ */
+const WORKOUT_STOPS: readonly TourStop[] = [
+    {
+        title: 'Your first workout',
+        parts: [
+            {
+                part: 'stage',
+                text: "A quick look before you start: the clock waits till you're done. The bubble is the step you're on, its ring filling as a timed step's time goes.",
+            },
+        ],
+        text: "A quick look before you start: the clock waits till you're done.",
+    },
+    {
+        title: "What's next",
+        parts: [
+            {
+                part: 'next',
+                text: 'What comes after this step. It pulses in its colour as this one nears its end, to get ready.',
+            },
+        ],
+        text: 'Under the bubble is what comes next, to get ready for.',
+    },
+    {
+        title: 'Rep steps',
+        parts: [
+            {
+                part: 'reps',
+                text: "On a rep step the clock waits for you. Tap the reps or weight to change them to what you did, then, when you're done, press what's next, under the bubble.",
+            },
+        ],
+        text: "On a rep step the clock waits for you. Tap the reps or weight on the bubble to change them to what you did, then, when you're done, press what's next, under it.",
+    },
+    {
+        title: "How it's done",
+        parts: [
+            {
+                part: 'info',
+                text: "Tap ⓘ to see how the exercise is done. Swap exercise there finds another for the same muscles, e.g. if the machine's taken.",
+            },
+        ],
+        text: "On an exercise, ⓘ beside its name shows how it's done, with Swap exercise if, say, the machine's taken.",
+    },
+    {
+        title: 'Pause and skip',
+        parts: [
+            {
+                part: 'controls',
+                text: 'Pause stops the clock, with End workout there when you want to finish early. Skip moves on without logging this step.',
+            },
+        ],
+        text: 'Pause stops the clock, and Skip moves on without logging the step.',
+    },
+    {
+        title: 'Off you go',
+        parts: [],
+        text: 'The workout carries on if you look at another page, with a bar at the bottom to come back. Press Done to start the clock.',
+    },
+];
+
 export const TOURS: Record<TourName, Tour> = {
     // Done goes back to Today, its last stop
     app: { stops: APP_STOPS, doneFocus: 'home-title' },
     create: { stops: CREATE_STOPS, doneFocus: 'title', skipFocus: 'title' },
+    // Pause, ready for the clock that starts as it ends
+    workout: { stops: WORKOUT_STOPS, doneFocus: 'workout-pause', skipFocus: 'workout-pause' },
 };

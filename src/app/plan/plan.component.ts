@@ -2,7 +2,6 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
-import { HelpLinkComponent } from '../shared/components/help-link/help-link.component';
 import { PageSlide } from '../nav/page-slide';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { MAX_WORKOUTS_A_DAY, PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../models/plan';
@@ -15,6 +14,7 @@ import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
 import { aToZ, isReadyMade } from '../models/workout';
+import { TourService } from '../tour/tour.service';
 import { PlanMusclesComponent } from './plan-muscles/plan-muscles.component';
 
 /** How a planned workout's place this week reads, e.g. "Done". "To come" says nothing. */
@@ -37,7 +37,6 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
     selector: 'app-plan',
     imports: [
         BackLinkComponent,
-        HelpLinkComponent,
         MatIconModule,
         PlanMusclesComponent,
         SwipeBackDirective,
@@ -54,6 +53,11 @@ export class PlanComponent {
     private readonly router = inject(Router);
     protected readonly slide = inject(PageSlide);
     private readonly now = Date.now();
+
+    constructor() {
+        // The first time it opens on this device, a tour of it (PLN-8)
+        inject(TourService).startOnce('plan');
+    }
 
     protected readonly today = weekdayOf(this.now);
     protected readonly statusText = STATUS_TEXT;

@@ -139,17 +139,17 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 ### REG-NAV-06 · Help, its search, and a ? link
 
 - **Stories:** NAV-7 · **Priority:** P2
-- **Preconditions:** `guest()`, clock Wednesday, one workout planned on Monday only, with its `plannedAt` set to today (`"0:<id>": <now>`), so the Plan page shows it **From next week** with its ? link.
+- **Preconditions:** `guest()`, clock Wednesday, one workout planned on Monday only, with its `plannedAt` set to today (`"0:<id>": <now>`), so Today says **Your plan starts next week** with its ? link.
 - **Steps:**
     1. You → **Help**.
     2. Type "iphone" in **Search help**.
     3. Type "zzzz".
-    4. Open Today → Edit plan; press the ? beside **From next week**.
+    4. Open Today; press the ? beside **Your plan starts next week**.
 - **Expected:**
     1. Help slides in at `/help` with every section closed and ‹ You; You stays current in the tab bar.
     2. Only the three questions mentioning iPhones show, opened, and a status says "3 answers".
     3. 'Nothing matches "zzzz". Try other words, or email us below.'
-    4. Help opens on the question about Done, Missed, Due and From next week, opened, scrolled to and focused. The link's accessible name starts "Help:".
+    4. Help opens on "Why does Today say my plan starts next week?", opened, scrolled to and focused. The link's accessible name starts "Help:".
 - **In the pack:** the topics are `<details>` (role group); the opened one is checked by its `open` attribute and its question's focus.
 
 ---

@@ -1,10 +1,10 @@
 import { Service, signal } from '@angular/core';
 
 /**
- * The tours: of the app (NAV-8), of making a workout on Create (BLD-17), and of the workout
- * page on the first workout (RUN-13).
+ * The tours: of the app (NAV-8), of making a workout on Create (BLD-17), of the workout page
+ * on the first workout (RUN-13), and of the Plan page on its first visit (PLN-8).
  */
-export type TourName = 'app' | 'create' | 'workout';
+export type TourName = 'app' | 'create' | 'workout' | 'plan';
 
 /** Set once the tour of the app's been taken, or turned down, on this device. */
 export const TOUR_KEY = 'tour';
@@ -12,11 +12,14 @@ export const TOUR_KEY = 'tour';
 export const CREATE_TOUR_KEY = 'tour-create';
 /** Set once the tour of the workout page has been shown on this device. */
 export const WORKOUT_TOUR_KEY = 'tour-workout';
+/** Set once the tour of the Plan page has been shown on this device. */
+export const PLAN_TOUR_KEY = 'tour-plan';
 
 const KEYS: Record<TourName, string> = {
     app: TOUR_KEY,
     create: CREATE_TOUR_KEY,
     workout: WORKOUT_TOUR_KEY,
+    plan: PLAN_TOUR_KEY,
 };
 
 /**

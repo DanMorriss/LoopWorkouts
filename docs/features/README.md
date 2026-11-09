@@ -125,6 +125,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | PLN-5  | Add new workouts from the plan, when the ones I have aren't enough       | ✅  | —   | [planning](planning.md)                       |
 | PLN-6  | Start from a ready-made week: workouts and plan in one go                | ✅  | —   | [planning](planning.md)                       |
 | PLN-7  | Be offered a ready-made week on Today, for my goal and equipment         | ✅  | —   | [planning](planning.md)                       |
+| PLN-8  | A tour of the Plan page, the first time I open it                        | ✅  | —   | [planning](planning.md)                       |
 
 What's saved on the device, and in what shape, is in [data](data.md). Where the app is heading, and why the planned stories are in the order they are, is in [direction](../direction.md).
 

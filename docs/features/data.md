@@ -242,6 +242,10 @@ In ms since the epoch, by the device's clock, for the You tab. Signing out remov
 
 `seen` once the tour of the workout page (RUN-13) has started, as the first workout on this device began. While it's missing, the next workout started shows it, if the history is still empty. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.
 
+### `tour-plan`: the tour of the Plan page's been shown
+
+`seen` once the tour of the Plan page (PLN-8) has started, the first time the page opened on this device. While it's missing, the next visit shows it. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.
+
 ### `clock-offset`: how far this device's clock is from the server's
 
 In ms, added to the device's clock to date changes (see [backup and sync](backup-and-sync.md), Sync). Kept after signing out, as the clock's no less off; so are the settings, which are this device's, less the name, and with `profileUpdatedAt` 0. Signing out removes everything else.

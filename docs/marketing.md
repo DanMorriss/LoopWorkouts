@@ -1,6 +1,6 @@
 # Telling people about Loop Workouts
 
-The words to describe the app, at each length, and the plan for promoting it. Started on 2026-11-01. The launch steps still to do are in [TODO.md](../TODO.md) under Launch.
+The words to describe the app, at each length, and the plan for promoting it. Started on 2026-11-01. The competitors and how to frame the app are in [market research](market-research.md) (2026-11-09). The launch steps still to do are in [TODO.md](../TODO.md) under Launch.
 
 ## What's true to say
 

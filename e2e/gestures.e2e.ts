@@ -35,6 +35,7 @@ test.describe('swiping', () => {
             await Finger.within(main, 0.3, 0.3),
             {
                 ms: 800,
+                settle: 200,
             }
         );
         await expect(page).toHaveURL('/exercises/back-squat');
@@ -68,6 +69,7 @@ test.describe('swiping', () => {
                 await Finger.within(app.runBar, 0.4),
                 {
                     ms: 800,
+                    settle: 200,
                 }
             );
             await expect(app.runBar).toBeVisible();
@@ -112,6 +114,7 @@ test.describe('swiping', () => {
                 await Finger.within(arms, 0.45, 0.3),
                 {
                     ms: 800,
+                    settle: 200,
                 }
             );
             await expect(arms).toHaveCount(1);

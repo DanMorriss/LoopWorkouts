@@ -2,6 +2,8 @@
 
 Researched on 2026-11-09 from app store listings, vendors' sites and comparison articles. Prices are US App Store prices unless noted. They vary by region and change often, and many of the comparison sites are run by rival apps, so check a figure before quoting it. No Reddit threads came up in search, so what users actually say still needs gathering by hand (see Next steps). This is the groundwork for reworking [marketing](marketing.md).
 
+**Decided (2026-11-09):** Dan chose to start as a workout timer for home kettlebell and circuit trainers, with remembering and suggesting improvements as the selling point beyond the timer, and to branch out once there's a user base. The app will be paid in the stores (about £2.99 a month or £24.99 a year), with a free web beta first. See [marketing](marketing.md) for the strategy. Where this file recommends "Free, with no catch" as a proof point, that no longer applies.
+
 ## Summary
 
 The apps people use today fall into four groups, and none of them both **runs** a mixed workout and **remembers** it:

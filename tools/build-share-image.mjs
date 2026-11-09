@@ -7,7 +7,7 @@ import { chromium } from 'playwright';
 
 const browser = await chromium.launch();
 
-// A phone, 14 seconds into Cardio intervals: a timed step, its ring part filled
+// A phone at the start of Kettlebell full body: a rep step, waiting for Done
 const phone = await browser.newPage({
     viewport: { width: 400, height: 760 },
     deviceScaleFactor: 2,
@@ -18,9 +18,9 @@ await phone.evaluate(() => {
     localStorage.setItem('settings', JSON.stringify({ theme: 'dark' }));
 });
 await phone.goto('http://localhost:4300/library');
-await phone.getByRole('link', { name: /Cardio intervals/ }).click();
-await phone.getByRole('button', { name: /Add and start/ }).click();
-await phone.waitForTimeout(14000);
+await phone.getByRole('link', { name: /Kettlebell full body/ }).click();
+await phone.getByRole('button', { name: 'Start Kettlebell full body' }).click();
+await phone.waitForTimeout(3000);
 const screen = (await phone.screenshot()).toString('base64');
 
 const icon = readFileSync(new URL('../public/favicon.svg', import.meta.url), 'base64');
@@ -55,11 +55,11 @@ await card.setContent(`<!doctype html>
 </style>
 <div class="words">
     <div class="name"><img src="data:image/svg+xml;base64,${icon}" alt="" />Loop Workouts</div>
-    <div class="tagline">Build it. Run it.<br />Beat it next time.</div>
+    <div class="tagline">The workout timer that<br />remembers what you lifted.</div>
     <ul>
-        <li>Interval timer and gym log in one</li>
-        <li>Works offline, no app store needed</li>
-        <li>See what to beat every workout</li>
+        <li>Runs your reps, rests and rounds</li>
+        <li>Shows what to beat next time</li>
+        <li>Free in beta, works offline</li>
     </ul>
 </div>
 <div class="phone"><img src="data:image/png;base64,${screen}" alt="" /></div>`);

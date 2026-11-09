@@ -12,6 +12,7 @@ Decided by Dan on 2026-11-09.
 - **The business: a paid app in the App Store and Google Play,** at about £2.99 a month or £24.99 a year. It gets there in two stages:
     1. **A free web beta, now.** Free users while the iPhone app is built, to get feedback, iron out the kinks, and collect testimonials.
     2. **The store launch, paid,** with the beta's testimonials and fixes.
+- **Founding members get their first year free.** Anyone who signs in during the beta becomes a founding member, and gets their first year free in the store app. Signing in is what makes them one: a guest's data stays on their device, so there's no way to know who they are. The welcome screen and the You tab say so, as do the shared link's description and the beta invitation. Supabase's list of accounts, with when each was made, is the record of who's a founding member.
 
 ### Pricing next to the rivals
 
@@ -19,10 +20,11 @@ Decided by Dan on 2026-11-09.
 
 ### To decide before charging
 
-- **What beta users get for helping.** Recommended: they become **founding members**, with something concrete, such as a free first year in the store app or a lower price for good. Say what it is in the beta invitation. "Free while in beta, and you'll get X" is honest, and it explains why it's free.
 - **Whether the web version stays free.** If the store app is paid and the web app isn't, most people will use the web app. The options are to make the web app paid too, give it a free tier with limits, or close it once the store apps are out.
 - **A free tier or a trial in the store.** A trial is simpler. A free tier (say, the timer without the memory) brings more people in, but it gives away what makes the app worth having.
-- **The terms of use.** They say the app is free, so they'll need to change before charging, along with the privacy notice if payments bring in a new provider.
+- **When the beta ends,** so founding members know the cut-off. Until it's set, say "during the beta".
+- **How a founding member claims their year** in the store app, by signing in with the same account. Apple and Google each have ways to give a year free (offer codes, or a promotional offer for existing accounts), and Apple's rules on unlocking paid features for accounts made outside the store need checking first.
+- **The terms of use.** They say the app is free, so they'll need to change before charging, along with the privacy notice if payments bring in a new provider. They should also state the founding members' offer, as it's a promise.
 
 ## The free beta
 
@@ -42,7 +44,7 @@ Home kettlebell and circuit trainers, in this order:
 
 ### Telling beta users
 
-Say plainly that it's a beta, that it's free for now, that a paid store app is coming, and what they'll get for helping. Ask for feedback at the moments it's freshest: after their first workout and after their first week.
+Say plainly that it's a beta, that it's free for now, that a paid store app is coming, and that signing in during the beta makes them a founding member, with their first year free in the app. Ask for feedback at the moments it's freshest: after their first workout and after their first week.
 
 ### Collecting testimonials
 
@@ -91,6 +93,7 @@ The marketing skills (`/draft-content`, `/brand-review`, `/email-sequence`, `/ca
 Check a claim here before using it anywhere new.
 
 - **Free, for now:** the terms of use say so. Don't promise it'll always be free: a paid store app is planned. "Free while in beta" is safe.
+- **Founding members get their first year free** in the store app: anyone who signs in during the beta. Don't promise a cut-off date, a price or a launch date until they're set.
 - **Runs the whole workout:** timed steps, rep steps that wait for you to tap Done, rests, sets, supersets, rounds or "until I stop", and a time limit for as many rounds as possible, with your score at the end.
 - **Remembers and suggests:** every set is logged; a rep step shows what you did last time; the summary celebrates personal bests and suggests what to step up next time (more weight, or another rep); each exercise has a chart and its bests; and it suggests a next workout for the muscles you've worked least.
 - **For kettlebells:** 21 built-in exercises use a kettlebell, and there are 3 ready-made kettlebell workouts (full body, a swing ladder and an AMRAP) and a 3-day kettlebell plan.
@@ -104,17 +107,17 @@ Check a claim here before using it anywhere new.
 
 ## Taglines
 
-- **The workout timer that remembers what you lifted.** (Recommended: it says "timer" first, and the memory is the reason to choose it.)
-- **Build it. Run it. Beat it next time.** (In use now in `share.png` and `og:title`. It still fits, as a second line.)
+- **The workout timer that remembers what you lifted.** (In use: Welcome, `share.png`, `og:title` and the manifest. It says "timer" first, and the memory is the reason to choose it.)
+- **Build it. Run it. Beat it next time.** (The old one. It still fits, as a second line.)
 - Your workout, on a loop.
 
 ## Short versions
 
-These are drafts for the new positioning. The app's own copy (`src/index.html`, `manifest.webmanifest`, `share.png`) still uses the old "interval timer and gym log" words until it's updated.
+The first two are in the app's own copy: `src/index.html` and `manifest.webmanifest`.
 
 **Search results and shared links** (about 155 characters):
 
-> A workout timer for kettlebells and circuits that remembers what you lifted. Reps, rests and rounds, run for you, and what to beat next time. Free in beta.
+> A workout timer for kettlebells and circuits that remembers what you lifted: reps, rests and rounds, run for you, and what to beat next time. Free in beta.
 
 **One line** (80 characters at most):
 
@@ -146,7 +149,7 @@ For a landing page, and later a store listing (drop "in the browser" and "beta" 
 >
 > **Built for everyone.** Works fully by keyboard and screen reader, respects reduced motion, and has light and dark themes.
 >
-> Free while in beta. Open loopworkouts.com and press start.
+> Free while in beta, and founding members get their first year free in the app. Open loopworkouts.com and press start.
 
 ## Posts
 
@@ -154,7 +157,7 @@ For a landing page, and later a store listing (drop "in the browser" and "beta" 
 
 > **I built a workout timer for kettlebell circuits that remembers what you lifted. Looking for beta testers.**
 >
-> Every timer I tried was pure countdowns, useless for "15 swings, 8 presses each side, rest 60s", and I kept forgetting which bell I'd used last week. So I made one that does both: timed steps, rep steps that wait for you to tap Done, and a log that shows what you did last time and suggests when to go up a bell. There are 21 kettlebell exercises with 3D demos, a swing ladder, an AMRAP and a 3-day plan built in. It runs in the browser and works offline: loopworkouts.com. It's free while in beta, as I'm building the iPhone app. I'd love to know what's missing for how you train.
+> Every timer I tried was pure countdowns, useless for "15 swings, 8 presses each side, rest 60s", and I kept forgetting which bell I'd used last week. So I made one that does both: timed steps, rep steps that wait for you to tap Done, and a log that shows what you did last time and suggests when to go up a bell. There are 21 kettlebell exercises with 3D demos, a swing ladder, an AMRAP and a 3-day plan built in. It runs in the browser and works offline: loopworkouts.com. It's free while in beta, as I'm building the iPhone app, and anyone who signs in now gets their first year free in it too. I'd love to know what's missing for how you train.
 
 Change the middle for each community: no equipment and the ready-made bodyweight workouts for r/bodyweightfitness, and home circuits and the weekly plan for r/homegym.
 
@@ -164,7 +167,7 @@ Change the middle for each community: no equipment and the ready-made bodyweight
 
 ## Pictures and video
 
-- **Shared links:** `public/share.png`, made by `tools/build-share-image.mjs` (see Web, shared links in [home and navigation](features/home-and-navigation.md)). Update it with the new tagline.
+- **Shared links:** `public/share.png`, made by `tools/build-share-image.mjs` (see Web, shared links in [home and navigation](features/home-and-navigation.md)): the new tagline beside Kettlebell full body running.
 - **Short videos** (Reels, TikTok, Shorts), 15 seconds with no voiceover needed: a kettlebell workout running (the ring filling, Done on a set of swings), "last time" on a step and the personal best at the end, and a 3D demo turning round.
 - **The store listing** will need screenshots and a preview video. Plan them from the same shots.
 
@@ -172,12 +175,12 @@ Change the middle for each community: no equipment and the ready-made bodyweight
 
 In order. Each step's to-do is in TODO.md under Launch.
 
-1. **Shared links show a picture and a description.** Done; the words change with step 4.
+1. **Shared links show a picture and a description.** Done.
 2. **Know whether it's working:** Vercel Web Analytics (tag links with `?ref=`), Speed Insights, and an email link under You → About. Done.
 3. **Clear the iPhone checks and the legal review.** The iPhone checks are done (2026-11-08); the legal review is left.
-4. **Ready the beta:** decide what founding members get, then update the app's own words (`index.html`, the manifest, `share.png`, Welcome) for the new positioning and say "beta" in it.
+4. **Ready the beta:** the app's own words (`index.html`, the manifest, `share.png`, Welcome and the You tab) say what it is now, that it's a beta, and that founding members get their first year free. Done (2026-11-09).
 5. **Soft launch:** friends and the gym. Watch a few people use it without helping.
 6. **Communities,** with the beta invitation above, and short videos along the way.
 7. **Collect testimonials** from the people who keep coming back.
-8. **The store apps, paid:** the iPhone app with the Apple Developer account ($99 a year), which also unlocks Sign in with Apple, and Google Play. First change the terms of use, and decide on the web version, the trial and the founding members' offer.
+8. **The store apps, paid:** the iPhone app with the Apple Developer account ($99 a year), which also unlocks Sign in with Apple, and Google Play. First change the terms of use, and decide on the web version, the trial, when the beta ends, and how founding members claim their year.
 9. **Branch out** to gym-goers and HIIT once there's a decent user base. Show HN or Product Hunt fit around here.

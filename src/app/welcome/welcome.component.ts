@@ -26,7 +26,7 @@ import { WELCOMED_KEY } from './welcome-first';
                 </p>
 
                 <app-sign-in
-                    intro="Loop Workouts is free while in beta. Sign in now to be a founding member, with your first year free when the app comes to the App Store and Google Play. Your workouts and history are then on every device you use."
+                    intro="Loop Workouts is free while in beta. Sign in to keep your workouts and history on every device you use."
                     (signedIn)="goHome('signed-in')"
                 />
 

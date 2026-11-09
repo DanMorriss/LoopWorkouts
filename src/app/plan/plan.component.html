@@ -1,7 +1,8 @@
 <div class="flex justify-center" [appSwipeBack]="'/home'" [swipeBackDisabled]="addingTo() !== null">
     <div class="w-full max-w-md p-4">
         <app-back-link url="/home" label="Today" />
-        <h2 class="plan__title">Plan</h2>
+        <!-- data-tour: what the tour of the page (PLN-8) lights up -->
+        <h2 class="plan__title" id="plan-title" tabindex="-1">Plan</h2>
         <p class="plan__hint">
             Which workouts you do on which days, the same every week. Your week and what's due show
             on Today.
@@ -9,6 +10,7 @@
         <a
             href="/ready-made-plans?from=plan"
             class="plan__ready-made"
+            data-tour="plan-ready-made"
             (click)="slide.follow($event, '/ready-made-plans?from=plan', 'in')"
             >Start from a ready-made plan</a
         >
@@ -20,6 +22,7 @@
             <section
                 class="plan__day"
                 [class.plan__day--today]="day.day === today"
+                [attr.data-tour]="day.day === today ? 'plan-today' : null"
                 [attr.aria-labelledby]="'plan-day-' + day.day"
             >
                 <div class="plan__day-head">
@@ -48,6 +51,7 @@
                         @for (planned of day.workouts; track planned.workoutId) {
                             <li
                                 class="plan__workout"
+                                data-tour="plan-workout"
                                 [class.plan__workout--done]="planned.status === 'done'"
                                 [class.plan__workout--missed]="planned.status === 'missed'"
                                 [class.plan__workout--today]="planned.status === 'today'"
@@ -61,9 +65,6 @@
                                         }
                                         {{ status }}
                                     </span>
-                                    @if (planned.status === 'next week') {
-                                        <app-help-link topic="plan-statuses" />
-                                    }
                                 }
                                 <button
                                     type="button"

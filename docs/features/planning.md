@@ -1,6 +1,6 @@
 # Planning
 
-Built (PLN-1–7): a weekly plan of which workouts you do on which days, the same every week, on a Plan page opened from Today; this week's progress on it there; what's due today on Today; and the week at a glance at the top of Today, the way in to the plan. Kept simple on purpose: no multi-week programmes.
+Built (PLN-1–8): a weekly plan of which workouts you do on which days, the same every week, on a Plan page opened from Today; this week's progress on it there; what's due today on Today; and the week at a glance at the top of Today, the way in to the plan; and a tour of the Plan page on its first visit. Kept simple on purpose: no multi-week programmes.
 
 ## Stories
 
@@ -11,6 +11,7 @@ Built (PLN-1–7): a weekly plan of which workouts you do on which days, the sam
 - **PLN-5** As a user planning my week, I want a way to add new workouts when the ones I have aren't enough.
 - **PLN-6** As a user I want to start from a ready-made week, so my workouts and my plan are set up in one go.
 - **PLN-7** As a new user I want Today to offer me a ready-made week for my goal and equipment, to use in one tap.
+- **PLN-8** As a new user I want a short tour of the Plan page the first time I open it, so I know what the statuses mean and find the ready-made plans and the muscles at the bottom.
 
 ## Rules
 
@@ -92,6 +93,17 @@ At the bottom of the Plan page (since 2026-11-06; under the cards on Workouts un
     - **Add to a day** opens the same dialog as a day's Add, with the days to pick: "Plan Gym extras on…", "Each day says what's on it already, and the muscles those work.", then a button per day, Monday first, today marked "(today)". Under each day's name (since 2026-11-06), what's planned on it, each workout with up to three of its main muscles, "Legs day: Glutes, Quads · Push: Chest", or "Nothing planned", so a day can be picked to suit. A day it's on already says "Planned", and a full one "Full"; neither can be picked. Picking one plans it there, as it is, with focus back on that day's Add; the lists then shrink, and the next best is suggested for what's left.
     - With no gaps, or none that a ready-made workout helps, there's no card.
 
+### The tour of the Plan page (PLN-8)
+
+- **Shown once, the first time the Plan page opens** on this device, from Edit plan or Plan your week on Today, and not while another tour is on. Devices already in use get it once too, on their next visit. It's kept on the device only (`tour-plan`, see [data](data.md)).
+- It's the tour of the app's overlay and card (see [home and navigation](home-and-navigation.md#the-tour-nav-8)), staying on the Plan page and lighting up no tab: **four stops**:
+    1. **Your week**: today's day, saying the plan's the same every week, and Add and ✕.
+    2. **This week**: the first planned workout, saying what Done, Missed, Due and From next week mean (PLN-3). It replaced the ? beside From next week, whose question stays in Help.
+    3. **Ready-made plans**: Start from a ready-made plan (PLN-6).
+    4. **What your plan works**: the body map, saying Missing muscle groups is under it, with a ready-made workout for them (LIB-5, LIB-7).
+- With nothing planned, stops 2 and 4 say what will be there, and light up nothing.
+- **Done and Skip tour both leave focus on the page's title**, Plan.
+
 ### Due today (PLN-2)
 
 - On **Today**, under the week: a **Due today** card listing today's planned workouts not yet run today, in the plan's order, each with **Start**. The first's Start is the page's main button; the others' are smaller.
@@ -110,6 +122,8 @@ At the bottom of the Plan page (since 2026-11-06; under the cards on Workouts un
 - Given the Plan page, when I press Add on Thursday, then Add new workouts is first; when I press it, then Workouts opens and nothing's planned.
 - Given no workouts, when I open Plan, then it says to make one first, with Go to your workouts, and no Add.
 - Given Legs planned on Saturday, when I press its ✕, then Saturday says "Nothing planned".
+- Given a device that's never opened the Plan page, with Gym full body planned today, when I press Edit plan, then the Plan page opens with its tour, "1 of 4", lighting up today; Next lights up Gym full body, saying what Done, Missed, Due and From next week mean; when I press Done on the fourth, then focus is on the title, Plan, and opening the page again shows no tour.
+- Given nothing planned, when the Plan page's tour reaches This week or What your plan works, then it says what will be there and lights up nothing.
 - Given today is Wednesday and Legs on Monday (run Monday evening), Push on Tuesday (run on Wednesday instead), and Legs and Push today, when I open Plan, then Monday's Legs is Done, Tuesday's Push is Missed, today's Legs is Due, and it says "1 of 4 done so far this week".
 - Given Legs planned on Friday and then deleted, then Friday says "Nothing planned".
 - Given Push and Legs planned today, when I open Today, then Due today lists Push then Legs, each with Start (Push's the main button), and there's no suggested workout; when I've run Legs, then only Push is listed, with "Done today: Legs"; when I've run both, then it says "All done: Push, Legs" and the suggested workout is back.
@@ -133,5 +147,5 @@ At the bottom of the Plan page (since 2026-11-06; under the cards on Workouts un
 
 ## Platform notes
 
-- **Web:** the plan is `WeekPlan` in `src/app/models/plan.ts`, with `thisWeek()` working out where each planned workout is from the history, by the device's calendar (`weekdayOf()`, `startOfWeek()`). It's kept by `PlanStore` (`src/app/shared/state/plan-store.service.ts`) in localStorage as `week-plan`, each change dated by the sync clock. It syncs as the record of kind `plan`, id `week` (`src/app/sync/sync-records.ts`), and is `plan` in backups from version 13. The page is `PlanComponent` (`src/app/plan/`), and Today's cards `WeekStripComponent` (`src/app/home/week-strip/`, a day's mark from `markFor()`) and `DueTodayComponent` (`src/app/home/due-today/`). The ready-made plans are `BUILT_IN_PLANS` in `src/app/models/built-in-plans.ts` (with `plansFor()`, `firstPlan()` and `builtInPlanEquipment()`), checked by `built-in-plans.spec.ts`; using one is `ReadyMadePlans.use()` (`src/app/shared/state/ready-made-plans.service.ts`), which returns its undo, with the whole week set by `PlanStore.replace()` and put back by `PlanStore.restore()`; the page is `ReadyMadePlansComponent` (`src/app/plan/ready-made-plans/`), each plan shown by `PlanCardComponent` (`src/app/plan/plan-card/`), shared with Today's Get started. Picking a workout uses `WorkoutChoiceDialogComponent` (`src/app/shared/components/workout-choice-dialog/`), shared with an exercise's Add to workout. What your plan works and Missing muscle groups are `PlanMusclesComponent`, the body map `BodyMapComponent` (`shared/components/body-map/`), (`src/app/plan/plan-muscles/`), from `musclesWorked()` and `musclesMissed()` in `src/app/models/workout-muscles.ts`; the ready-made workout for the gaps is picked by `workoutToFillGaps()`, with its line by `listMuscles()`, in `src/app/models/fill-gaps.ts`.
+- **Web:** the plan is `WeekPlan` in `src/app/models/plan.ts`, with `thisWeek()` working out where each planned workout is from the history, by the device's calendar (`weekdayOf()`, `startOfWeek()`). It's kept by `PlanStore` (`src/app/shared/state/plan-store.service.ts`) in localStorage as `week-plan`, each change dated by the sync clock. It syncs as the record of kind `plan`, id `week` (`src/app/sync/sync-records.ts`), and is `plan` in backups from version 13. The page is `PlanComponent` (`src/app/plan/`), and Today's cards `WeekStripComponent` (`src/app/home/week-strip/`, a day's mark from `markFor()`) and `DueTodayComponent` (`src/app/home/due-today/`). The ready-made plans are `BUILT_IN_PLANS` in `src/app/models/built-in-plans.ts` (with `plansFor()`, `firstPlan()` and `builtInPlanEquipment()`), checked by `built-in-plans.spec.ts`; using one is `ReadyMadePlans.use()` (`src/app/shared/state/ready-made-plans.service.ts`), which returns its undo, with the whole week set by `PlanStore.replace()` and put back by `PlanStore.restore()`; the page is `ReadyMadePlansComponent` (`src/app/plan/ready-made-plans/`), each plan shown by `PlanCardComponent` (`src/app/plan/plan-card/`), shared with Today's Get started. Picking a workout uses `WorkoutChoiceDialogComponent` (`src/app/shared/components/workout-choice-dialog/`), shared with an exercise's Add to workout. What your plan works and Missing muscle groups are `PlanMusclesComponent`, the body map `BodyMapComponent` (`shared/components/body-map/`), (`src/app/plan/plan-muscles/`), from `musclesWorked()` and `musclesMissed()` in `src/app/models/workout-muscles.ts`; the ready-made workout for the gaps is picked by `workoutToFillGaps()`, with its line by `listMuscles()`, in `src/app/models/fill-gaps.ts`. The tour of the page (PLN-8) is `TOURS.plan` in `src/app/tour/tour-stops.ts`, started by `PlanComponent` with `TourService.startOnce('plan')`; the parts it lights up have `data-tour` attributes (`plan-today` on today's day only, `plan-workout` on each planned workout, the first winning, `plan-ready-made`, and `plan-works` in `PlanMusclesComponent`), and the title has the id `plan-title`, for focus at the end.
 - **iOS:** the page maps onto a `List` with a `Section` per day and `.swipeActions` (or an ✕ button) to take a workout off; Add onto a `.sheet` or `Menu` of your workouts. The week starts on Monday whatever the device's `Calendar` says, as on the web. The week is a row of seven views at the top of the Today tab, with Edit plan pushing the plan; Due today is a section under it.

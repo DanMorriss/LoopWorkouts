@@ -6,6 +6,7 @@ import { asOneGroup, Workout } from '../models/workout';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
+import { PLAN_TOUR_KEY, TourService } from '../tour/tour.service';
 import { PlanComponent } from './plan.component';
 
 /** Wednesday 28 October 2026, mid-morning. */
@@ -120,11 +121,48 @@ describe('PlanComponent', () => {
         await open();
 
         expect(days()[0]).toBe('Monday: Legs From next week');
-        // With a ? beside it, to Help on what it means
-        expect(
-            el().querySelector('.plan__workout--later app-help-link a')!.getAttribute('href')
-        ).toBe('/help?q=plan-statuses');
         expect(el().querySelector('.plan__so-far')).toBeNull();
+    });
+
+    describe('the tour of the page (PLN-8)', () => {
+        it('starts the first time the page opens', async () => {
+            const tour = TestBed.inject(TourService);
+            await open();
+
+            expect(tour.tour()).toBe('plan');
+            expect(tour.stop()).toBe(0);
+            expect(localStorage.getItem(PLAN_TOUR_KEY)).toBe('seen');
+        });
+
+        it("doesn't start once it's been seen on this device", async () => {
+            localStorage.setItem(PLAN_TOUR_KEY, 'seen');
+            await open();
+
+            expect(TestBed.inject(TourService).stop()).toBeNull();
+        });
+
+        it('has the parts it lights up, on today and the first planned workout', async () => {
+            // NOW is a Wednesday
+            TestBed.inject(PlanStore).add(2, legs.id);
+            await open();
+
+            expect(text(el().querySelector('[data-tour="plan-today"] h3')!)).toBe(
+                'Wednesday · today'
+            );
+            expect(text(el().querySelector('[data-tour="plan-workout"]')!)).toContain('Legs');
+            expect(el().querySelector('[data-tour="plan-ready-made"]')).not.toBeNull();
+            // Where focus goes as it ends
+            expect(el().querySelector('#plan-title')!.getAttribute('tabindex')).toBe('-1');
+        });
+
+        it('waits for a tour already on', async () => {
+            const tour = TestBed.inject(TourService);
+            tour.start('app');
+            await open();
+
+            expect(tour.tour()).toBe('app');
+            expect(localStorage.getItem(PLAN_TOUR_KEY)).toBeNull();
+        });
     });
 
     it('plans a workout from the library on a day, then focuses that day again', async () => {

@@ -269,10 +269,58 @@ const WORKOUT_STOPS: readonly TourStop[] = [
     },
 ];
 
+/**
+ * The tour of the Plan page (PLN-8), on its first visit: the week, where each planned workout
+ * is this week, the ready-made plans, and what the plan works and misses, at the bottom.
+ */
+const PLAN_STOPS: readonly TourStop[] = [
+    {
+        title: 'Your week',
+        parts: [
+            {
+                part: 'plan-today',
+                text: 'Which workouts you do on which days, the same every week. Tap Add on a day to plan one, of yours or a ready-made one, and × to take it off.',
+            },
+        ],
+        text: 'Which workouts you do on which days, the same every week. Tap Add on a day to plan one.',
+    },
+    {
+        title: 'This week',
+        parts: [
+            {
+                part: 'plan-workout',
+                text: "Each planned workout says how it's going this week: Done, Missed if its day went by, or Due today. From next week means it was planned after its day had gone.",
+            },
+        ],
+        text: "Once a workout's planned, it says how it's going this week: Done, Missed if its day went by, or Due today. From next week means it was planned after its day had gone.",
+    },
+    {
+        title: 'Ready-made plans',
+        parts: [
+            {
+                part: 'plan-ready-made',
+                text: 'Or start from a ready-made week for your goal and kit, which sets up its workouts and plan in one go.',
+            },
+        ],
+        text: 'Or start from a ready-made week for your goal and kit.',
+    },
+    {
+        title: 'What your plan works',
+        parts: [
+            {
+                part: 'plan-works',
+                text: 'The muscles your plan works. Under it, any it misses, with a ready-made workout to plan for them. Pick a muscle to find exercises for it.',
+            },
+        ],
+        text: 'Once workouts are planned, the bottom of the page shows the muscles they work, and any they miss, with a ready-made workout to plan for them.',
+    },
+];
+
 export const TOURS: Record<TourName, Tour> = {
     // Done goes back to Today, its last stop
     app: { stops: APP_STOPS, doneFocus: 'home-title' },
     create: { stops: CREATE_STOPS, doneFocus: 'title', skipFocus: 'title' },
     // Pause, ready for the clock that starts as it ends
     workout: { stops: WORKOUT_STOPS, doneFocus: 'workout-pause', skipFocus: 'workout-pause' },
+    plan: { stops: PLAN_STOPS, doneFocus: 'plan-title', skipFocus: 'plan-title' },
 };

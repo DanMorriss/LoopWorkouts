@@ -311,18 +311,12 @@ test.describe('help', () => {
             page.getByText('Nothing matches "zzzz". Try other words, or email us below.')
         ).toBeVisible();
 
-        await app.goto('/plan');
-        await page
-            .getByRole('region', { name: 'Monday' })
-            .getByRole('link', { name: /^Help: / })
-            .click();
+        await app.goto('/home');
+        await page.getByRole('link', { name: /^Help: Why does Today say my plan/ }).click();
         await expect(page).toHaveURL(/\/help/);
-        const topic = page.getByRole('group').filter({
-            hasText: 'What do Done, Missed, Due and From next week mean?',
-        });
+        const question = 'Why does Today say my plan starts next week?';
+        const topic = page.getByRole('group').filter({ hasText: question });
         await expect(topic).toHaveAttribute('open', '');
-        await expect(
-            topic.getByText('What do Done, Missed, Due and From next week mean?')
-        ).toBeFocused();
+        await expect(topic.getByText(question)).toBeFocused();
     });
 });

@@ -95,7 +95,7 @@ At the bottom of the Plan page (since 2026-11-06; under the cards on Workouts un
 
 ### The tour of the Plan page (PLN-8)
 
-- **Shown once, the first time the Plan page opens** on this device, from Edit plan or Plan your week on Today, and not while another tour is on. Devices already in use get it once too, on their next visit. It's kept on the device only (`tour-plan`, see [data](data.md)).
+- **Shown once, the first time the Plan page opens** on this device, from Edit plan or Plan your week on Today, and not while another tour is on. Devices already in use get it once too, on their next visit. It's kept on the device only (`tour-plan`, see [data](data.md)). **Planning your week**, in Help's Tours, takes it again any time: it opens the Plan page, then the tour.
 - It's the tour of the app's overlay and card (see [home and navigation](home-and-navigation.md#the-tour-nav-8)), staying on the Plan page and lighting up no tab: **four stops**:
     1. **Your week**: today's day, saying the plan's the same every week, and Add and ✕.
     2. **This week**: the first planned workout, saying what Done, Missed, Due and From next week mean (PLN-3). It replaced the ? beside From next week, whose question stays in Help.

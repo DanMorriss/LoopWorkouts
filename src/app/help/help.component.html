@@ -12,7 +12,8 @@
         />
         <p class="sr-only" role="status">{{ resultText() }}</p>
 
-        <!-- The tours, to take again any time: of the app (NAV-8), and of Create (BLD-17).
+        <!-- The tours, to take again any time: of the app (NAV-8), Create (BLD-17), the workout
+             page (RUN-13) and the Plan page (PLN-8).
              Always here, whatever's searched for, as they aren't answers -->
         <section class="help__section" aria-labelledby="help-section-tours">
             <h3 class="help__heading" id="help-section-tours">Tours</h3>
@@ -24,6 +25,19 @@
                 <button type="button" class="btn-pill" (click)="tourOfCreate()">
                     <app-icon class="icon-outline">add_circle</app-icon>
                     Making a workout
+                </button>
+                <button
+                    type="button"
+                    id="help-tour-workout"
+                    class="btn-pill"
+                    (click)="tourOfWorkout()"
+                >
+                    <app-icon>timer</app-icon>
+                    Running a workout
+                </button>
+                <button type="button" class="btn-pill" (click)="tourOfPlan()">
+                    <app-icon>event</app-icon>
+                    Planning your week
                 </button>
             </div>
         </section>

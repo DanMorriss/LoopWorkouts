@@ -14,6 +14,34 @@ Check a claim here before using it anywhere new.
 - **Don't say it works in your pocket or on a locked phone.** On an iPhone the beeps stop when the phone is locked by hand (ALM-2). Say "keeps your screen on" instead.
 - **No vibration on iPhones** (Safari doesn't support it), so don't promise it there.
 
+## Brand voice
+
+The marketing skills (`/draft-content`, `/brand-review`, `/email-sequence`, `/campaign-plan`) apply this and "What's true to say" above automatically. Change it here, not in a prompt.
+
+**Who it's for**, in order:
+
+1. **Home and kettlebell trainers** who want a timer that copes with "10 swings, then rest 30s".
+2. **Gym-goers following a plan** (from a coach, a book or a friend) who want to log sets and know what to beat.
+3. **HIIT, EMOM and AMRAP fans** who need intervals, rounds and time limits.
+4. **People the other apps leave out:** keyboard and screen reader users, and anyone who wants reduced motion.
+
+**The alternatives** they use now: a plain interval timer, a gym log with no timer, or a notes app and memory. Say what Loop Workouts does; don't name or knock other apps.
+
+**How it sounds:**
+
+- **Plain.** Short sentences and everyday words, as a friend who trains would say it. "Beeps tell you when to switch", not "audio cues optimise transitions".
+- **Concrete.** Show a real workout ("10 swings, then rest 30s", "7 rounds + 3") rather than an adjective.
+- **Honest.** Only what's in "What's true to say". No "best", "#1" or "revolutionary", and no health, weight-loss or body-image promises.
+- **Encouraging, never pushy.** Progress is about beating your last time, not anyone else. No "crush it", "beast mode", "no excuses" or guilt.
+- **From the maker** in community posts: "I built…", asking for feedback.
+
+**Style:**
+
+- British English (colour, programme, kg first), sentence case for headings, and no exclamation marks except "Last one!", which is the app's own.
+- The name is **Loop Workouts** (two words, both capitals), never LoopTimer or "Loop". The site is **loopworkouts.com**, lower case.
+- The app's words: workout, exercise, step (timed, rep or rest), round, set, rep, ready-made workout, plan, the log, personal best. Not "routine", "session" or "WOD", except in a community that uses them.
+- Calls to action are an action: "Open loopworkouts.com and press start." Tag links with `?ref=` (see the plan below).
+
 ## Taglines
 
 - **Build it. Run it. Beat it next time.** (the one in use: `share.png`, `og:title`)

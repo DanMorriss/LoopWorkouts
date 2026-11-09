@@ -327,7 +327,7 @@ describe('TourComponent (NAV-8)', () => {
             const stage = el().querySelector('[data-tour="stage"]')!.getBoundingClientRect();
             const card = el().querySelector('.tour__card')!.getBoundingClientRect();
 
-            expect(text('.tour__title')).toBe('Your first workout');
+            expect(text('.tour__title')).toBe('The workout');
             expect(stage.top).toBeGreaterThanOrEqual(0);
             expect(stage.bottom).toBeLessThanOrEqual(card.top);
             expect(lit()).toEqual([Math.round(stage.top - 6)]);

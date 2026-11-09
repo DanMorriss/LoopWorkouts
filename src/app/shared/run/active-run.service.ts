@@ -321,19 +321,30 @@ export class ActiveRunService {
         this.sync();
     }
 
-    /** Stops the clock without showing the run paused: see `held`. Undone by release(). */
+    /** Whether hold() paused the run, so release() resumes it; one already paused stays so. */
+    private heldFromRunning = false;
+
+    /**
+     * Stops the clock without showing the run paused: see `held`. A run already paused is
+     * shown running too, and stays paused after. Undone by release().
+     */
     hold() {
-        if (!this.workout() || this.isPaused() || this.isComplete()) {
+        if (!this.workout() || this.isComplete() || this._held()) {
             return;
         }
+        this.heldFromRunning = !this.isPaused();
         this.store.pause();
         this._held.set(true);
         this.sync();
     }
 
-    /** Starts the clock again after hold(). */
+    /** Undoes hold(): the clock starts again, unless the run was paused before. */
     release() {
-        if (this._held()) {
+        if (!this._held()) {
+            return;
+        }
+        this._held.set(false);
+        if (this.heldFromRunning) {
             this.togglePause();
         }
     }

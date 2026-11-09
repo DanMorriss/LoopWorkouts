@@ -206,21 +206,21 @@ const CREATE_STOPS: readonly TourStop[] = [
 ];
 
 /**
- * The tour of the workout page (RUN-13), on the first workout run on a device, with its clock
- * held till the tour ends: the bubble, what's next, rep steps, how it's done and swapping,
- * Pause and Skip, and that it carries on on other pages. A part that isn't there for the first
- * step, e.g. the reps on a timed step, is said in words instead.
+ * The tour of the workout page (RUN-13), on the first workout run on a device, or from Help on
+ * a run going, with its clock held till the tour ends: the bubble, what's next, rep steps, how
+ * it's done and swapping, Pause and Skip, and that it carries on on other pages. A part that
+ * isn't there for the step it's on, e.g. the reps on a timed step, is said in words instead.
  */
 const WORKOUT_STOPS: readonly TourStop[] = [
     {
-        title: 'Your first workout',
+        title: 'The workout',
         parts: [
             {
                 part: 'stage',
-                text: "A quick look before you start: the clock waits till you're done. The bubble is the step you're on, its ring filling as a timed step's time goes.",
+                text: "A quick look round: the clock waits till you're done. The bubble is the step you're on, its ring filling as a timed step's time goes.",
             },
         ],
-        text: "A quick look before you start: the clock waits till you're done.",
+        text: "A quick look round: the clock waits till you're done.",
     },
     {
         title: "What's next",
@@ -265,7 +265,30 @@ const WORKOUT_STOPS: readonly TourStop[] = [
     {
         title: 'Off you go',
         parts: [],
-        text: 'The workout carries on if you look at another page, with a bar at the bottom to come back. Press Done to start the clock.',
+        text: 'The workout carries on if you look at another page, with a bar at the bottom to come back. Press Done to carry on.',
+    },
+];
+
+/**
+ * The same tour on a practice run of Bodyweight basics, started from Help with no workout
+ * going: its first and last stops say so, and Done goes back to Help.
+ */
+const WORKOUT_PRACTICE_STOPS: readonly TourStop[] = [
+    {
+        title: 'A practice run',
+        parts: [
+            {
+                part: 'stage',
+                text: "Bodyweight basics, just for the tour: the clock waits, and nothing's logged. The bubble is the step you're on, its ring filling as a timed step's time goes.",
+            },
+        ],
+        text: "Bodyweight basics, just for the tour: the clock waits, and nothing's logged.",
+    },
+    ...WORKOUT_STOPS.slice(1, -1),
+    {
+        title: "That's it",
+        parts: [],
+        text: 'A workout carries on if you look at another page, with a bar at the bottom to come back. Done ends this practice run and goes back to Help.',
     },
 ];
 
@@ -322,5 +345,11 @@ export const TOURS: Record<TourName, Tour> = {
     create: { stops: CREATE_STOPS, doneFocus: 'title', skipFocus: 'title' },
     // Pause, ready for the clock that starts as it ends
     workout: { stops: WORKOUT_STOPS, doneFocus: 'workout-pause', skipFocus: 'workout-pause' },
+    // Back on Help, which the page puts focus on once it's there (`tourWorkoutPage()`)
+    'workout-practice': {
+        stops: WORKOUT_PRACTICE_STOPS,
+        doneFocus: 'help-tour-workout',
+        skipFocus: 'help-tour-workout',
+    },
     plan: { stops: PLAN_STOPS, doneFocus: 'plan-title', skipFocus: 'plan-title' },
 };

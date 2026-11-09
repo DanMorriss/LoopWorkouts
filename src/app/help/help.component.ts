@@ -19,6 +19,12 @@ import { counted } from '../shared/format-count';
 import { IconComponent } from '../shared/components/icon/icon.component';
 import { SearchFieldComponent } from '../shared/components/search-field/search-field.component';
 import { TourService } from '../tour/tour.service';
+import { ActiveRunService } from '../shared/run/active-run.service';
+import { WorkoutStore } from '../shared/state/workout-store.service';
+import type { WorkoutTourParam } from '../workout/workout-tour';
+
+/** The ready-made workout Running a workout practises on: no kit, and a rep step to show. */
+const PRACTICE_WORKOUT_ID = 'builtin:bodyweight-basics';
 
 /**
  * Help (NAV-7): the questions people ask, in sections, each opening to its answer, with a
@@ -42,6 +48,8 @@ export class HelpComponent {
     private readonly injector = inject(Injector);
     protected readonly tour = inject(TourService);
     private readonly router = inject(Router);
+    private readonly run = inject(ActiveRunService);
+    private readonly workouts = inject(WorkoutStore);
 
     /** The question opened by a ? link, if any, as the address says. */
     protected readonly opened = toSignal(
@@ -98,6 +106,32 @@ export class HelpComponent {
     protected async tourOfCreate() {
         if (await this.router.navigateByUrl('/setup')) {
             this.tour.start('create');
+        }
+    }
+
+    /**
+     * Opens the workout page with its tour (RUN-13): on the run going, if there is one, or on
+     * a practice run of Bodyweight basics, which the page stops as the tour ends.
+     */
+    protected async tourOfWorkout() {
+        let tour: WorkoutTourParam = 'run';
+        if (!this.run.workout()) {
+            // They load a moment after the app does
+            await this.workouts.readyMadeLoaded;
+            const practice = this.workouts.findAnyWorkout(PRACTICE_WORKOUT_ID);
+            if (!practice) {
+                return;
+            }
+            this.run.start(practice);
+            tour = 'practice';
+        }
+        void this.router.navigate(['/workout'], { queryParams: { tour } });
+    }
+
+    /** Opens the Plan page, then its tour (PLN-8). */
+    protected async tourOfPlan() {
+        if (await this.router.navigateByUrl('/plan')) {
+            this.tour.start('plan');
         }
     }
 }

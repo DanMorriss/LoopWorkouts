@@ -3,7 +3,9 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HELP_SECTIONS } from './help-topics';
 import { HelpComponent } from './help.component';
-import { CREATE_TOUR_KEY, TourService } from '../tour/tour.service';
+import { CREATE_TOUR_KEY, PLAN_TOUR_KEY, TourService } from '../tour/tour.service';
+import { ActiveRunService } from '../shared/run/active-run.service';
+import { makeWorkout } from '../shared/testing/make-workout';
 
 describe('HelpComponent (NAV-7)', () => {
     let harness: RouterTestingHarness;
@@ -14,6 +16,8 @@ describe('HelpComponent (NAV-7)', () => {
                 provideRouter([
                     { path: 'account', children: [] },
                     { path: 'setup', children: [] },
+                    { path: 'plan', children: [] },
+                    { path: 'workout', children: [] },
                     { path: 'help', component: HelpComponent },
                 ]),
             ],
@@ -82,6 +86,51 @@ describe('HelpComponent (NAV-7)', () => {
         expect(tour.tour()).toBe('create');
         expect(tour.stop()).toBe(0);
         localStorage.clear();
+    });
+
+    it('opens the Plan page for its tour, again or for the first time (PLN-8)', async () => {
+        localStorage.setItem(PLAN_TOUR_KEY, 'seen');
+        await open();
+
+        tourButton('Planning your week').click();
+        await harness.fixture.whenStable();
+
+        const tour = TestBed.inject(TourService);
+        expect(TestBed.inject(Router).url).toBe('/plan');
+        expect(tour.tour()).toBe('plan');
+        expect(tour.stop()).toBe(0);
+        localStorage.clear();
+    });
+
+    describe('Running a workout (RUN-13)', () => {
+        afterEach(() => {
+            TestBed.inject(ActiveRunService).stop();
+            sessionStorage.clear();
+        });
+
+        it('starts a practice run of Bodyweight basics with nothing going', async () => {
+            await open();
+
+            tourButton('Running a workout').click();
+            await vi.waitFor(() => expect(TestBed.inject(Router).url).not.toBe('/help'));
+
+            expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(
+                'builtin:bodyweight-basics'
+            );
+            expect(TestBed.inject(Router).url).toBe('/workout?tour=practice');
+        });
+
+        it('tours the run going, leaving it as it is', async () => {
+            const run = TestBed.inject(ActiveRunService);
+            run.start(makeWorkout());
+            await open();
+
+            tourButton('Running a workout').click();
+            await harness.fixture.whenStable();
+
+            expect(run.workout()?.id).toBe('workout-1');
+            expect(TestBed.inject(Router).url).toBe('/workout?tour=run');
+        });
     });
 
     it('keeps Tours while searching', async () => {

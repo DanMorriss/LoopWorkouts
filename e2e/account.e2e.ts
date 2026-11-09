@@ -9,6 +9,8 @@ const legs = workout('Legs', { steps: [timed(30, 'Squats')] });
 
 /** The You tab's sign-in. */
 const signIn = (page: import('@playwright/test').Page) => ({
+    /** The tick for keeping notes that may mention health (SYN-10), needed to sign in. */
+    agree: page.getByRole('checkbox', { name: /I agree that notes I write/ }),
     email: page.getByRole('textbox', { name: 'Email' }),
     send: page.getByRole('button', { name: 'Email me a sign-in link' }),
     code: page.getByRole('textbox', { name: 'Code' }),
@@ -29,6 +31,15 @@ test.describe('signing in by email', () => {
             await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
             await expect(page.getByRole('button', { name: 'Continue with Apple' })).toHaveCount(0);
 
+            // Nothing's sent without the tick, which says why and takes focus
+            await form.email.fill('me@example.com');
+            await form.send.click();
+            await expect(page.getByText('Tick the box to agree before signing in.')).toBeVisible();
+            await expect(form.agree).toBeFocused();
+            await form.agree.check();
+            await expect(page.getByText('Tick the box to agree before signing in.')).toHaveCount(0);
+
+            await form.email.fill('');
             await form.send.click();
             await expect(page.getByText('Enter your email address.')).toBeVisible();
             await expect(form.email).toBeFocused();
@@ -60,6 +71,7 @@ test.describe('signing in by email', () => {
         const form = signIn(page);
         await app.goto('/account');
 
+        await form.agree.check();
         await form.email.fill(' me@example.com ');
         await form.send.click();
         await expect(page.getByText(/We've sent a sign-in link to/)).toContainText(
@@ -100,6 +112,15 @@ test.describe('signing in by email', () => {
         await expect(sync.getByText(/Synced at /)).toBeVisible();
         await expect(sync.getByRole('button', { name: 'Sign out' })).toBeVisible();
         await expect(sync.getByRole('button', { name: 'Delete account' })).toBeVisible();
+        // The tick was saved with the account, dated by the server, under the notice's date
+        expect(supabase.callsTo('rpc/give_health_consent')[0].body).toEqual({
+            notice_date: '2026-11-08',
+        });
+        await expect(
+            page.getByText(
+                'On 11 November 2026 you agreed that notes you write, which may mention your health, are kept with your account (under the privacy notice of 8 November 2026).'
+            )
+        ).toBeVisible();
     });
 });
 
@@ -111,7 +132,12 @@ test.describe('Google, and links that come back with an error', () => {
             const supabase = new FakeSupabase(page);
             await supabase.install();
             await app.goto('/account');
-            await page.getByRole('button', { name: 'Continue with Google' }).click();
+            const google = page.getByRole('button', { name: 'Continue with Google' });
+            await google.click();
+            await expect(signIn(page).agree).toBeFocused();
+            expect(supabase.callsTo('auth/v1/authorize')).toEqual([]);
+            await signIn(page).agree.check();
+            await google.click();
             await expect.poll(() => supabase.callsTo('auth/v1/authorize').length).toBe(1);
         }
     );
@@ -186,6 +212,7 @@ test.describe('signing in from the welcome screen', () => {
                 await supabase.install();
                 const form = signIn(page);
                 await app.goto('/');
+                await form.agree.check();
                 await form.email.fill('me@example.com');
                 await form.send.click();
                 await form.code.fill('123456');
@@ -366,4 +393,65 @@ test.describe('a session the server has ended', () => {
         await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
         expect(await app.storageItem('workouts')).toBeNull();
     });
+});
+
+test.describe('consent to keeping notes, signed in', () => {
+    test.use({ storage: signedIn('me@example.com', Date.parse(NOW)) });
+
+    test(
+        'REG-ACC-07 an account with no consent on record is asked',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            const supabase = new FakeSupabase(page);
+            await supabase.install();
+            await app.goto('/account');
+            await expect(
+                page.getByText(
+                    'Notes you write may mention your health, which needs your consent to keep them with your account.'
+                )
+            ).toBeVisible();
+            const agree = page.getByRole('button', { name: 'Agree' });
+            const tick = signIn(page).agree;
+
+            await agree.click();
+            await expect(page.getByText('Tick the box to agree.')).toBeVisible();
+            await expect(tick).toBeFocused();
+
+            supabase.consentAnswer = 'abort';
+            await tick.check();
+            await agree.click();
+            await expect(
+                page.getByText("That couldn't be saved. Check your connection and try again.")
+            ).toBeVisible();
+
+            supabase.consentAnswer = 200;
+            await agree.click();
+            const given = page.getByText(/On 11 November 2026 you agreed that notes you write/);
+            await expect(given).toBeVisible();
+            await expect(given).toBeFocused();
+            await expect(agree).toHaveCount(0);
+        }
+    );
+
+    test(
+        "REG-ACC-07 consent on record is shown; none when it can't be looked up",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const supabase = new FakeSupabase(page);
+            supabase.consent = { at: Date.parse('2026-11-09T12:00:00Z'), notice: '2026-11-08' };
+            await supabase.install();
+            await app.goto('/account');
+            await expect(
+                page.getByText(
+                    'On 9 November 2026 you agreed that notes you write, which may mention your health, are kept with your account (under the privacy notice of 8 November 2026). To withdraw, delete those notes, or your account.'
+                )
+            ).toBeVisible();
+
+            supabase.consentAnswer = 'abort';
+            await app.reload();
+            await expect(page.getByText('Signed in as me@example.com.')).toBeVisible();
+            await expect(page.getByText(/you agreed that notes/)).toHaveCount(0);
+            await expect(page.getByRole('button', { name: 'Agree' })).toHaveCount(0);
+        }
+    );
 });

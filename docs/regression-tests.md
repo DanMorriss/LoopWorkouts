@@ -1041,14 +1041,16 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 ### REG-ACC-01 · Signing in by email: validation and errors
 
-- **Stories:** SYN-3 · **Priority:** P1
+- **Stories:** SYN-3, SYN-10 · **Priority:** P1
 - **Preconditions:** `guest()`, stub as above.
 - **Steps:**
-    1. Open You. Press **Email me a sign-in link** with the field empty.
+    0. Open You. Type "me@example.com" and press **Email me a sign-in link** without ticking the consent box; then tick it.
+    1. Empty the field and press **Email me a sign-in link**.
     2. Type "nope"; press it.
     3. With `otp` answering 429, type "me@example.com"; press it.
     4. With `otp` aborted (offline), press it.
 - **Expected:**
+    0. "Tick the box to agree before signing in." under the box, focus on it, no request; ticked, the message goes. (Every sign-in below ticks it first; Continue with Google unticked does the same and goes nowhere.)
     1. The signed-out text, **Continue with Google** (no Apple button), "or", Email. "Enter your email address." on the field, focus on it; no request sent.
     2. "That isn't an email address. Check it and try again."; no request.
     3. "Too many sign-in emails for now. Wait a while, then try again."
@@ -1127,6 +1129,21 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     3. `delete_my_account` is called; the app reloads saying "Your account has been deleted, and its data removed from this device."; settings kept.
     4. "You're offline: it'll sync when you're back online."; back online, a `push_records` call carries the edited workout.
     5. "It couldn't sync just now, and will try again in a minute."
+
+### REG-ACC-07 · Consent to keeping notes that may mention health
+
+- **Stories:** SYN-10 · **Priority:** P1 (asked and agreeing), P2 (shown, and not looked up)
+- **Preconditions:** `signedIn(...)`; `give_health_consent` and `my_health_consent` stubbed, keeping the consent as the server does. Signing in with the tick (REG-ACC-02) saves it with `notice_date` 2026-11-08, and You then says when.
+- **Steps:**
+    1. With none on record, open You. Press **Agree** unticked.
+    2. Offline, tick and press Agree.
+    3. Online, press Agree.
+    4. Separately, with consent on record from 9 Nov, open You; then reload with the lookup failing.
+- **Expected:**
+    1. "Notes you write may mention your health, which needs your consent to keep them with your account.", the tick and Agree; "Tick the box to agree.", focus on the box.
+    2. "That couldn't be saved. Check your connection and try again."
+    3. "On 11 November 2026 you agreed that notes you write, …", with focus on it; the tick and Agree go.
+    4. "On 9 November 2026 you agreed … (under the privacy notice of 8 November 2026). To withdraw, delete those notes, or your account."; with the lookup failing, nothing about consent, and no Agree.
 
 ---
 
@@ -1272,11 +1289,11 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Exercises                 | REG-EXR-01 – 05  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                            |
 | Your data and offline     | REG-DATA-01 – 05 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9                                                                                      |
-| Account (stubbed)         | REG-ACC-01 – 06  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, NAV-3, NAV-4, SET-7                                                                 |
+| Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                               |
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                    |
 | Gestures and dragging     | REG-GES-01 – 03  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12                                                                                     |
 
-**Count:** 80 tests: 39 P1, 32 P2, 9 P3.
+**Count:** 81 tests: 40 P1, 32 P2, 9 P3.
 
 | Area      | P1     | P2     | P3    | Total  |
 | --------- | ------ | ------ | ----- | ------ |
@@ -1290,10 +1307,10 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | EXR       | 2      | 3      | 0     | 5      |
 | SET       | 2      | 1      | 1     | 4      |
 | DATA      | 4      | 0      | 1     | 5      |
-| ACC       | 4      | 2      | 0     | 6      |
+| ACC       | 5      | 2      | 0     | 7      |
 | A11Y      | 3      | 3      | 0     | 6      |
 | GES       | 0      | 0      | 3     | 3      |
-| **Total** | **39** | **32** | **9** | **80** |
+| **Total** | **40** | **32** | **9** | **81** |
 
 ### In the pack
 
@@ -1311,7 +1328,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | EXR  | `e2e/exercises.e2e.ts` | 8     | 0                               | 1 (3D figure, manual)                                 |
 | SET  | `e2e/settings.e2e.ts`  | 6     | 0                               | 0                                                     |
 | DATA | `e2e/data.e2e.ts`      | 5     | 0                               | 0                                                     |
-| ACC  | `e2e/account.e2e.ts`   | 15    | 0                               | 1 (real Google, manual)                               |
+| ACC  | `e2e/account.e2e.ts`   | 17    | 0                               | 1 (real Google, manual)                               |
 | A11Y | `e2e/a11y.e2e.ts`      | 21    | 1 (B4)                          | 0 (the 4 phone-width tests skip on `desktop`)         |
 | GES  | `e2e/gestures.e2e.ts`  | 7     | 1 (Known issue: superset folds) | 1 (iPhone, manual); the touch tests skip on `desktop` |
 

@@ -69,6 +69,10 @@ export class FakeSupabase {
     /** GET /user, and refreshing the token: 401 for a session the server's ended. */
     user: Answer = 200;
     authorize: Answer = 'abort';
+    /** give_health_consent and my_health_consent (SYN-10): a status, or 'abort' when offline. */
+    consentAnswer: Answer = 200;
+    /** The account's consent to keeping notes, as the server keeps it: null for none on record. */
+    consent: { at: number; notice: string } | null = null;
 
     constructor(private readonly page: Page) {}
 
@@ -153,6 +157,14 @@ export class FakeSupabase {
                     : json(this.pull, null);
             case '/rest/v1/rpc/push_records':
                 return json(this.push, now);
+            case '/rest/v1/rpc/give_health_consent':
+                if (this.consentAnswer === 200) {
+                    const { notice_date } = body as { notice_date: string };
+                    this.consent = { at: now, notice: notice_date };
+                }
+                return json(this.consentAnswer, this.consent);
+            case '/rest/v1/rpc/my_health_consent':
+                return json(this.consentAnswer, this.consent);
             case '/rest/v1/rpc/delete_my_account':
                 return this.deleteAccount === 'abort'
                     ? route.abort('internetdisconnected')

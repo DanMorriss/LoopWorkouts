@@ -21,7 +21,9 @@ npx playwright show-report                    # the last run's report, with fail
 builds the app (`npm run build`) and serves `dist/` on <http://127.0.0.1:4300> with
 `e2e/serve.mts`, which answers any page with `index.html` and adds `vercel.json`'s headers, as
 Vercel does. Locally, a server already on that port is reused, so stop it after rebuilding. On
-CI, the `e2e` job runs them with two retries, and keeps the report when they fail.
+CI, the `e2e` job runs them in 3 shards side by side (`--shard=1/3` and so on: the whole pack
+on one runner's 2 workers would take about 18 minutes), with two retries, and keeps each shard's
+report when it fails. A whole local run takes about 6 minutes on 6 workers.
 
 The production build, rather than `ng serve`, as it's what ships (its Content-Security-Policy,
 inlined fonts, analytics and preloads), takes about 15 seconds, and is then served instantly and

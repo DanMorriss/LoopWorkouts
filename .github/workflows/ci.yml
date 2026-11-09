@@ -52,10 +52,16 @@ jobs:
       - name: Production build
         run: npm run build
 
+  # The pack takes about 18 minutes on one 2-core runner, so it's split into 3 shards that run
+  # side by side, each a third of the tests on 2 workers (playwright.config.ts)
   e2e:
-    name: End-to-end tests
+    name: End-to-end tests (${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
 
     steps:
       - uses: actions/checkout@v7
@@ -73,7 +79,7 @@ jobs:
 
       # Builds the app for production and serves it (playwright.config.ts), then runs e2e/
       - name: End-to-end tests
-        run: npm run e2e
+        run: npm run e2e -- --shard=${{ matrix.shard }}/3
 
       # The HTML report, with each failed test's trace, screenshot and video: download it from
       # the run's summary and open it with `npx playwright show-report <folder>`
@@ -81,7 +87,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: |
             playwright-report/
             test-results/

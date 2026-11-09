@@ -7,10 +7,13 @@
     "build": "ng build && node tools/preload-today.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "format": "prettier --write \"src/**/*.{ts,html,scss,css}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\"",
+    "format": "prettier --write \"src/**/*.{ts,html,scss,css}\" \"e2e/**/*.{ts,mts}\" playwright.config.ts",
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\" \"e2e/**/*.{ts,mts}\" playwright.config.ts",
     "lint": "eslint src/app && node tools/check-icons.mjs",
-    "unused": "knip --production"
+    "unused": "knip --production",
+    "e2e": "tsc -p e2e && playwright test",
+    "e2e:p1": "tsc -p e2e && playwright test --grep @p1",
+    "e2e:ui": "playwright test --ui"
   },
   "private": true,
   "engines": {
@@ -37,6 +40,8 @@
     "@angular/build": "^22.2.3",
     "@angular/cli": "^22.2.3",
     "@angular/compiler-cli": "^22.2.3",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.19.2",
     "@types/three": "^0.187.0",
     "@vitest/browser-playwright": "^5.0.3",
     "angular-eslint": "^22.6.0",

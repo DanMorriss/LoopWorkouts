@@ -1,0 +1,16 @@
+/* The end-to-end tests and their config, which run in Node (Playwright), not in the app:
+   type-checked by `npm run e2e` (tsc -p e2e) with the app's strict options. */
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "rootDir": "..",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "lib": ["es2023", "dom"],
+        "types": ["node"],
+        "importHelpers": false,
+        "experimentalDecorators": false
+    },
+    "include": ["**/*.ts", "**/*.mts", "../playwright.config.ts"]
+}

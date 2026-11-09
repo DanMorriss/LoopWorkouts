@@ -21,12 +21,12 @@ import { WELCOMED_KEY } from './welcome-first';
                 <app-loop-logo class="welcome__logo" />
                 <h2 class="welcome__title">Welcome to Loop Workouts</h2>
                 <p class="welcome__pitch">
-                    Build your workouts, run them with a timer that counts your sets and rests, and
-                    see how you're getting on.
+                    The workout timer that remembers what you lifted. It runs your whole workout,
+                    reps and rests included, and next time shows you what to beat.
                 </p>
 
                 <app-sign-in
-                    intro="Sign in to keep your workouts and history on every device you use."
+                    intro="Loop Workouts is free while in beta. Sign in to keep your workouts and history on every device you use."
                     (signedIn)="goHome('signed-in')"
                 />
 

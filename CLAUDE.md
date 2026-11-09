@@ -28,6 +28,7 @@ The compiler fails on unused locals and parameters, and the build on its budgets
 
 - **What to work on:** `TODO.md`, highest priority first; `docs/direction.md` explains the order.
 - **What the app does:** `docs/features/`, with stories by stable id (e.g. `ALM-2`), rules, acceptance criteria and web and iOS notes.
+- **Marketing:** `docs/marketing.md`, the brand voice, audience and what's true to say, for the marketing skills and any copy in the app.
 - **Code:** `src/app/models/` is pure logic and data with no Angular in it; `src/app/shared/` is what several features use, and must not import from a feature; each other folder is a feature.
 
 ## Reuse before you write

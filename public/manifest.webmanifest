@@ -1,7 +1,7 @@
 {
     "name": "Loop Workouts",
     "short_name": "Loop Workouts",
-    "description": "Interval timer and workout log that shows you how you're improving",
+    "description": "The workout timer that remembers what you lifted, and what to beat next time",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",

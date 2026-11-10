@@ -1,10 +1,8 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { Exercise, MuscleGroup } from '../../models/exercise';
-import {
-    exerciseCard,
-    ExerciseCardComponent,
-} from '../../exercises/exercise-card/exercise-card.component';
+import { exerciseCard } from '../../exercises/exercise-card/exercise-card.component';
+import { ExerciseCardsComponent } from '../../exercises/exercise-cards/exercise-cards.component';
 import { filterExercises } from '../../exercises/exercise-filter';
 import { MuscleChipsComponent } from '../../shared/components/muscle-chips/muscle-chips.component';
 import { EquipmentFilterComponent } from '../../shared/components/equipment-filter/equipment-filter.component';
@@ -26,7 +24,7 @@ import { SearchFieldComponent } from '../../shared/components/search-field/searc
         DialogComponent,
         SearchFieldComponent,
         EquipmentFilterComponent,
-        ExerciseCardComponent,
+        ExerciseCardsComponent,
         MuscleChipsComponent,
     ],
     template: `
@@ -45,30 +43,13 @@ import { SearchFieldComponent } from '../../shared/components/search-field/searc
 
             <app-muscle-chips class="browse__chips" [(selected)]="muscles" />
 
-            <p class="browse__count" role="status">
-                {{ cards().length }} {{ cards().length === 1 ? 'exercise' : 'exercises' }}
-            </p>
-
-            @if (cards().length === 0) {
-                <div class="browse__empty">
-                    <p>No exercises match.</p>
-                    <button type="button" class="btn-pill" (click)="clearFilters()">
-                        Clear search and filters
-                    </button>
-                </div>
-            }
-
-            <ul class="browse__list" aria-label="Exercises">
-                @for (item of cards(); track item.exercise.id) {
-                    <li>
-                        <app-exercise-card
-                            [card]="item"
-                            [picks]="true"
-                            (picked)="picked.emit($event)"
-                        />
-                    </li>
-                }
-            </ul>
+            <app-exercise-cards
+                label="Exercises"
+                [cards]="cards()"
+                [picks]="true"
+                (picked)="picked.emit($event)"
+                (cleared)="clearFilters()"
+            />
         </app-dialog>
     `,
     styleUrl: './browse-exercises-dialog.component.scss',

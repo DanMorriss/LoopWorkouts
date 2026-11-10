@@ -31,7 +31,7 @@ describe('ExerciseListComponent', () => {
     }
 
     const el = (): HTMLElement => fixture.nativeElement;
-    const names = (selector = '.exercises__list') =>
+    const names = (selector = '.exercise-cards__list') =>
         Array.from(el().querySelectorAll(`${selector} .exercise-card__name`)).map((name) =>
             name.firstChild!.textContent!.trim()
         );

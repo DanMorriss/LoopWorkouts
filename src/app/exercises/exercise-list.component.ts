@@ -21,11 +21,8 @@ import { parseMusclesParam, serialiseMusclesParam } from './muscle-filter-query'
 import { listBackLink } from './list-from';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
-import {
-    CardProgress,
-    exerciseCard,
-    ExerciseCardComponent,
-} from './exercise-card/exercise-card.component';
+import { CardProgress, exerciseCard } from './exercise-card/exercise-card.component';
+import { ExerciseCardsComponent } from './exercise-cards/exercise-cards.component';
 import { filterExercises } from './exercise-filter';
 import { MuscleChipsComponent } from '../shared/components/muscle-chips/muscle-chips.component';
 import { SearchFieldComponent } from '../shared/components/search-field/search-field.component';
@@ -43,7 +40,7 @@ import { SearchFieldComponent } from '../shared/components/search-field/search-f
         EquipmentFilterComponent,
         BodyMapComponent,
         ExerciseEditorComponent,
-        ExerciseCardComponent,
+        ExerciseCardsComponent,
         MuscleChipsComponent,
         BackLinkComponent,
         SwipeBackDirective,

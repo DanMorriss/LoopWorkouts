@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../models/history';
+import { PageSlide } from '../nav/page-slide';
 import { asOneGroup, Workout } from '../models/workout';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
@@ -170,7 +171,7 @@ describe('PlanComponent', () => {
 
         await click('#plan-add-3');
         expect(text(el().querySelector('.choice__title')!)).toBe('Plan on Thursday');
-        // After Add new workouts, first: Legs, then Push
+        // After Make a new workout, first: Legs, then Push
         el().querySelectorAll<HTMLButtonElement>('.choice__choice')[2].click();
         await render();
 
@@ -219,7 +220,12 @@ describe('PlanComponent', () => {
         await click('#plan-add-3');
         const choices = [...el().querySelectorAll<HTMLButtonElement>('.choice__choice')];
         const names = choices.map((choice) => text(choice.querySelector('.choice__name')!));
-        expect(names.slice(0, 4)).toEqual(['Add new workouts', 'Legs', 'Push', '20-minute AMRAP']);
+        expect(names.slice(0, 4)).toEqual([
+            'Make a new workout',
+            'Legs',
+            'Push',
+            '20-minute AMRAP',
+        ]);
         expect(names).toHaveLength(3 + workouts.readyMade().length);
         expect(choices[2].querySelector('app-ready-made-badge')).toBeNull();
         expect(choices[3].querySelector('app-ready-made-badge')).not.toBeNull();
@@ -248,20 +254,40 @@ describe('PlanComponent', () => {
         expect(link.getAttribute('href')).toBe('/ready-made-plans?from=plan');
     });
 
-    it('offers Add new workouts first when picking, which goes to the Workouts tab (PLN-5)', async () => {
+    it('offers Make a new workout first when picking, which opens Create for that day (PLN-5)', async () => {
         await open();
 
         await click('#plan-add-3');
         const choices = [...el().querySelectorAll<HTMLButtonElement>('.choice__choice')];
         expect(choices.map((choice) => text(choice.querySelector('.choice__name')!))).toEqual([
-            'Add new workouts',
+            'Make a new workout',
             'Legs',
             'Push',
         ]);
+        const slide = vi.spyOn(TestBed.inject(PageSlide), 'navigate').mockImplementation(() => {});
         choices[0].click();
         await render();
 
-        expect(TestBed.inject(Router).url).toBe('/library');
+        expect(slide).toHaveBeenCalledWith('/setup?planOn=3&from=/plan', 'in');
         expect(TestBed.inject(PlanStore).plan().days[3]).toEqual([]);
+    });
+
+    it('points out a workout just made for a day in Create, and says so', async () => {
+        TestBed.inject(PlanStore).add(3, push.id);
+        const harness = await RouterTestingHarness.create();
+        fixture = harness.fixture;
+        // On the page, so focus can move
+        document.body.appendChild(el());
+        await harness.navigateByUrl(`/plan?saved=${push.id}`);
+        await render();
+
+        const saved = [...el().querySelectorAll('.plan__workout--saved')].map(text);
+        expect(saved).toHaveLength(1);
+        expect(saved[0]).toContain('Push');
+        expect(document.activeElement?.id).toBe('plan-add-3');
+        expect(text(el().querySelector('[role="status"]')!)).toBe(
+            'Saved Push, planned on Thursday'
+        );
+        el().remove();
     });
 });

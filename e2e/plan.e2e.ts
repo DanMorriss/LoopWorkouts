@@ -1,4 +1,6 @@
 import { expect, reps, run, seed, test, workout } from './fixtures';
+import { CreatePage } from './create-page';
+import { LibraryPage } from './library-page';
 import { WorkoutPage } from './workout-page';
 
 // Today and the weekly plan (planning.md): REG-PLAN in docs/regression-tests.md. The clock is at
@@ -28,7 +30,7 @@ test.describe('a new guest', () => {
             ).toBeVisible();
             await expect(getStarted.getByRole('link', { name: 'More plans' })).toBeVisible();
             await expect(
-                getStarted.getByRole('link', { name: 'Pick your own workouts' })
+                getStarted.getByRole('link', { name: 'Make your own plan' })
             ).toBeVisible();
 
             await getStarted.getByRole('button', { name: 'Use No equipment, 3 days' }).click();
@@ -103,9 +105,9 @@ test.describe('planning by hand', () => {
         await add.click();
         const dialog = page.getByRole('dialog', { name: 'Plan on Thursday' });
         await expect(dialog).toBeVisible();
-        // After its ‹ Back, Add new workouts comes first
+        // After its ‹ Back, Make a new workout comes first
         await expect(dialog.getByRole('listitem').first().getByRole('button')).toHaveAccessibleName(
-            'Add new workouts'
+            'Make a new workout'
         );
         await page.keyboard.press('Escape');
         await expect(dialog).toBeHidden();
@@ -128,11 +130,72 @@ test.describe('planning by hand', () => {
         await expect.poll(() => app.announcements()).toContain('Push taken off Thursday');
 
         await add.click();
-        await dialog.getByRole('button', { name: /Add new workouts/ }).click();
-        await expect(page).toHaveURL('/library');
+        await dialog.getByRole('button', { name: /Make a new workout/ }).click();
+        await expect(page).toHaveURL('/setup?planOn=3&from=%2Fplan');
+        await expect(app.backLink('Plan')).toBeVisible();
         const plan = await app.stored<{ days: string[][] }>('week-plan');
         expect(plan?.days.flat() ?? []).toEqual([]);
     });
+
+    test(
+        'REG-PLAN-07 make a new workout for a day, and come back to the plan with it',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            await app.goto('/plan');
+            const thursday = day(page, 'Thursday');
+            await thursday.getByRole('button', { name: 'Add a workout to Thursday' }).click();
+            await page
+                .getByRole('dialog', { name: 'Plan on Thursday' })
+                .getByRole('button', { name: /Make a new workout/ })
+                .click();
+            const create = new CreatePage(page);
+            await create.build('Sprints', [{ kind: 'Timed', seconds: 30 }]);
+            await create.save.click();
+
+            await expect(page).toHaveURL(/\/plan\?saved=/);
+            await expect(thursday.getByRole('listitem')).toContainText(['Sprints']);
+            await expect(
+                thursday.getByRole('button', { name: 'Add a workout to Thursday' })
+            ).toBeFocused();
+            await expect
+                .poll(() => app.announcements())
+                .toContain('Saved Sprints, planned on Thursday');
+        }
+    );
+
+    test(
+        'REG-PLAN-08 Add to plan from a workout: several days at once, with Undo',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            await app.goto('/library');
+            const options = await new LibraryPage(page).options('Legs');
+            await options.getByRole('button', { name: 'Add to plan' }).click();
+            const dialog = page.getByRole('dialog', { name: 'Plan Legs on…' });
+            await expect(dialog).toBeVisible();
+            const monday = dialog.getByRole('button', { name: /^Monday/ });
+            await monday.click();
+            await expect(monday).toHaveAttribute('aria-pressed', 'true');
+            await dialog.getByRole('button', { name: /^Thursday/ }).click();
+            await dialog.getByRole('button', { name: 'Done' }).click();
+            await expect(dialog).toBeHidden();
+            await expect(app.undoBar).toContainText('Legs planned on Monday and Thursday');
+
+            // Its Details say where it's planned; Change days takes it off one
+            await page.getByRole('link', { name: 'Details of Legs', exact: true }).click();
+            await expect(page.getByText('On your plan: Mon, Thu')).toBeVisible();
+            await page.getByRole('button', { name: 'Change days' }).click();
+            await dialog.getByRole('button', { name: /^Monday/ }).click();
+            await dialog.getByRole('button', { name: 'Done' }).click();
+            await expect(page.getByText('On your plan: Thu')).toBeVisible();
+            await expect(app.undoBar).toContainText('Legs taken off Monday');
+
+            await app.undo.click();
+            await expect(page.getByText('On your plan: Mon, Thu')).toBeVisible();
+            await expect(page.getByRole('button', { name: 'Change days' })).toBeFocused();
+            const plan = await app.stored<{ days: string[][] }>('week-plan');
+            expect(plan?.days).toEqual([['legs'], [], [], ['legs'], [], [], []]);
+        }
+    );
 });
 
 test.describe('due today', () => {

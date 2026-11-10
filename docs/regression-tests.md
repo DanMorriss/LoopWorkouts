@@ -165,7 +165,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     2. Press **Use this plan**.
     3. Press **Undo**.
 - **Expected:**
-    1. No This week card and no logo; **Get started** shows "No equipment, 3 days" with its days ("Mon Bodyweight basics", …), **Use this plan** (the main button), **More plans** and **Pick your own workouts**.
+    1. No This week card and no logo; **Get started** shows "No equipment, 3 days" with its days ("Mon Bodyweight basics", …), **Use this plan** (the main button), **More plans** and **Make your own plan** (to `/plan`).
     2. Workouts now has Bodyweight basics, Cardio intervals, Core in 15 and Tabata; Get started is replaced by This week, with dots on Mon, Wed and Fri and Wednesday outlined as today; Due today lists Cardio intervals with Start; the Undo bar says "Your week is planned: No equipment, 3 days"; focus is on **Edit plan**.
     3. The four workouts are gone, `week-plan` is back to empty, and Get started is back.
 - **In the pack:** Use this plan plans the ready-made workouts **as they are** (nothing is copied into your workouts), and as it's planned on a Wednesday, Monday's says "from next week" (PLN-3) and Friday's "to come". Focus ends on the Undo bar's Undo, not Edit plan: an app bug (B1), a `test.fixme`.
@@ -180,15 +180,15 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. Press Add on Thursday again and pick **Push**.
     4. Press Add on Thursday again.
     5. Pick nothing: press ‹ Back. Then press the ✕ named "Take Push off Thursday".
-    6. Press Add on Thursday, then **Add new workouts**.
+    6. Press Add on Thursday, then **Make a new workout**.
 - **Expected:**
     1. Today's This week says "Nothing planned yet." with a ready-made plan's **Use this plan** as the main button and **More plans** and **Make your own plan** under it. The Plan page slides in at `/plan` with ‹ Today, the title Plan, and every day saying "Nothing planned"; Today stays current in the tab bar.
-    2. A dialog "Plan on Thursday" opens with **Add new workouts** first, then Legs and Push; Escape closes it and focus is back on Thursday's Add.
+    2. A dialog "Plan on Thursday" opens with **Make a new workout** first, then Legs and Push; Escape closes it and focus is back on Thursday's Add.
     3. Thursday lists Push; focus is on Thursday's Add; a live region says "Push planned on Thursday".
     4. Push says "Planned" and can't be picked.
     5. Thursday says "Nothing planned"; focus on its Add; "Push taken off Thursday" is announced.
-    6. Workouts opens, and nothing has been planned.
-- **In the pack:** the Add dialog starts with ‹ Back, then Add new workouts, your workouts, then the ready-made ones with their badge.
+    6. Create opens at `/setup?planOn=3&from=/plan` with ‹ Plan, and nothing has been planned.
+- **In the pack:** the Add dialog starts with ‹ Back, then Make a new workout, your workouts, then the ready-made ones with their badge.
 
 ### REG-PLAN-03 · Due today
 
@@ -244,6 +244,34 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     1. Today opens; the Undo bar says "Your week is planned: Dumbbells at home, 4 days"; Workouts gains only **Dumbbell lower** (your own Dumbbell upper is reused, not copied); the plan is upper on Mon and Thu, lower on Tue and Fri, and Saturday's Legs is off.
     2. Legs is back on Saturday, Dumbbell lower is gone, and your Dumbbell upper is still there.
 - **In the pack:** the plan is `builtin:dumbbell-upper` and `builtin:dumbbell-lower` as they are, and nothing is added to your workouts (no Dumbbell lower copy).
+
+### REG-PLAN-07 · Make a new workout for a day, and come back to the plan
+
+- **Stories:** PLN-5 · **Priority:** P1
+- **Preconditions:** `guest()`, workouts Legs and Push, nothing planned.
+- **Steps:**
+    1. Open `/plan`, press Add on Thursday, then **Make a new workout**.
+    2. Build Sprints (one timed step of 0:30) and press **Save**.
+- **Expected:**
+    1. Create slides in with ‹ Plan.
+    2. The Plan page slides back at `/plan?saved=<id>`; Thursday lists Sprints, pointed out; focus is on Thursday's Add; "Saved Sprints, planned on Thursday" is announced.
+
+### REG-PLAN-08 · Add to plan from a workout
+
+- **Stories:** PLN-1 · **Priority:** P1
+- **Preconditions:** `guest()`, workouts Legs and Push, nothing planned.
+- **Steps:**
+    1. Open Workouts, open Legs's options (⋮) and press **Add to plan**.
+    2. Choose Monday and Thursday, then press **Done**.
+    3. Open Legs's Details.
+    4. Press **Change days**, unchoose Monday, press Done.
+    5. Press **Undo**.
+- **Expected:**
+    1. A dialog "Plan Legs on…" lists the seven days, none chosen, with **Done**.
+    2. Each day pressed is ticked (`aria-pressed`); the dialog closes and the Undo bar says "Legs planned on Monday and Thursday".
+    3. It says "On your plan: Mon, Thu".
+    4. "On your plan: Thu"; the Undo bar says "Legs taken off Monday".
+    5. "On your plan: Mon, Thu" again; focus on Change days; `week-plan` has Legs on Monday and Thursday.
 
 ---
 
@@ -1043,14 +1071,12 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 - **Stories:** SYN-3, SYN-10 · **Priority:** P1
 - **Preconditions:** `guest()`, stub as above.
-- **Steps:**
-    0. Open You. Type "me@example.com" and press **Email me a sign-in link** without ticking the consent box; then tick it.
+- **Steps:** 0. Open You. Type "me@example.com" and press **Email me a sign-in link** without ticking the consent box; then tick it.
     1. Empty the field and press **Email me a sign-in link**.
     2. Type "nope"; press it.
     3. With `otp` answering 429, type "me@example.com"; press it.
     4. With `otp` aborted (offline), press it.
-- **Expected:**
-    0. "Tick the box to agree before signing in." under the box, focus on it, no request; ticked, the message goes. (Every sign-in below ticks it first; Continue with Google unticked does the same and goes nowhere.)
+- **Expected:** 0. "Tick the box to agree before signing in." under the box, focus on it, no request; ticked, the message goes. (Every sign-in below ticks it first; Continue with Google unticked does the same and goes nowhere.)
     1. The signed-out text, **Continue with Google** (no Apple button), "or", Email. "Enter your email address." on the field, focus on it; no request sent.
     2. "That isn't an email address. Check it and try again."; no request.
     3. "Too many sign-in emails for now. Wait a while, then try again."
@@ -1280,7 +1306,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Area                      | Tests            | Stories covered                                                                                                               |
 | ------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                              |
-| Today and planning        | REG-PLAN-01 – 06 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
+| Today and planning        | REG-PLAN-01 – 08 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
 | Building a workout        | REG-BLD-01 – 09  | BLD-1, BLD-3 – BLD-16, EXR-2, EXR-11, LIB-1                                                                                   |
 | Workouts and ready-made   | REG-LIB-01 – 08  | LIB-1 – LIB-7, CTL-4                                                                                                          |
 | Running a workout         | REG-RUN-01 – 15  | RUN-1 – RUN-12, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
@@ -1289,7 +1315,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Exercises                 | REG-EXR-01 – 05  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                            |
 | Your data and offline     | REG-DATA-01 – 05 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9                                                                                      |
-| Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                               |
+| Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                         |
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                    |
 | Gestures and dragging     | REG-GES-01 – 03  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12                                                                                     |
 

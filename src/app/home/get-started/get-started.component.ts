@@ -1,5 +1,4 @@
 import { Component, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { PageSlide } from '../../nav/page-slide';
 import { firstPlan } from '../../models/built-in-plans';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
@@ -9,11 +8,12 @@ import { injectUsePlanOnToday } from '../use-plan-on-today';
 /**
  * Today with no workouts yet (NAV-6): a week to start with, planned for you (PLN-7). A
  * ready-made plan for your goal and equipment, used in one tap (your week planned with its
- * ready-made workouts), the rest of the ready-made plans, or picking workouts yourself.
+ * ready-made workouts), the rest of the ready-made plans, or making your own on the Plan page,
+ * whose Add offers the ready-made workouts as well as your own.
  */
 @Component({
     selector: 'app-get-started',
-    imports: [PlanCardComponent, RouterLink],
+    imports: [PlanCardComponent],
     template: `
         <section class="start" aria-labelledby="get-started-title">
             <h3 class="start__label" id="get-started-title">Get started</h3>
@@ -30,7 +30,9 @@ import { injectUsePlanOnToday } from '../use-plan-on-today';
                     (click)="slide.follow($event, '/ready-made-plans', 'in')"
                     >More plans</a
                 >
-                <a routerLink="/library" class="btn-pill">Pick your own workouts</a>
+                <a href="/plan" class="btn-pill" (click)="slide.follow($event, '/plan', 'in')"
+                    >Make your own plan</a
+                >
             </div>
         </section>
     `,

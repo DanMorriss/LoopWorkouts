@@ -23,6 +23,7 @@ import {
 } from '../models/workout';
 import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
 import { HistoryStore } from '../shared/state/history-store.service';
+import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
@@ -434,6 +435,48 @@ describe('WorkoutSetupComponent', () => {
 
             expect(slide).toHaveBeenCalledWith('/library', 'out');
             expect(store.workouts()).toHaveLength(saved);
+        });
+    });
+
+    describe('made for a day of the plan (PLN-5)', () => {
+        beforeEach(async () => {
+            await setup({ planOn: '3', from: '/plan' });
+            await create();
+            typeTitle('Sprints');
+            chooseTime(0, 'seconds', '30');
+        });
+
+        it('goes back to the Plan page', () => {
+            const back = fixture.nativeElement.querySelector('.back-link') as HTMLElement;
+            expect(back.textContent).toContain('Plan');
+            expect(back.getAttribute('href')).toBe('/plan');
+        });
+
+        it('plans it on that day with Save, and slides back to the Plan page with it', async () => {
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+
+            await press('Save');
+
+            const id = store.workouts()[0].id;
+            expect(TestBed.inject(PlanStore).plan().days[3]).toEqual([id]);
+            expect(slide).toHaveBeenCalledWith(`/plan?saved=${id}`, 'out');
+        });
+
+        it('plans it on that day with Start too', async () => {
+            await submit();
+
+            expect(TestBed.inject(PlanStore).plan().days[3]).toEqual([store.workouts()[0].id]);
+            expect(navigate).toHaveBeenCalledWith(['/workout']);
+        });
+
+        it("ignores a day that isn't one", async () => {
+            for (const planOn of ['7', '-1', '', 'mon']) {
+                queryParamMap.next(convertToParamMap({ planOn }));
+                fixture.detectChanges();
+                expect(fixture.debugElement.injector.get(WorkoutSetupForm).planOn()).toBeNull();
+            }
         });
     });
 

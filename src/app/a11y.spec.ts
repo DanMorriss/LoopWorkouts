@@ -574,6 +574,19 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
+            it("choosing days in a card's Add to plan (PLN-1)", async () => {
+                store.addWorkout(sprints);
+                await open('/library');
+                click('.workout-card:not([data-workout^="builtin:"]) .workout-card__action--menu');
+                await settle();
+                click('.workout-card__menu-item--plan');
+                await settle();
+                click('.choice__choice');
+                await settle();
+                expect(document.querySelector('.choice__choice--on')).not.toBeNull();
+                await expectNoViolations();
+            });
+
             it('after deleting a workout, with Undo offered', async () => {
                 store.addWorkout(sprints);
                 await open('/library');

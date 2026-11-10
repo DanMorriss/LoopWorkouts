@@ -26,6 +26,32 @@
                 Start workout
             </button>
 
+            <!-- Planned on days of the week (PLN-1), here as from its card's options -->
+            <div class="details__plan">
+                <button
+                    type="button"
+                    [id]="planButtonId"
+                    class="btn-pill"
+                    aria-haspopup="dialog"
+                    [attr.aria-describedby]="plannedOn() ? 'workout-details-planned' : null"
+                    (click)="planning.set(true)"
+                >
+                    <mat-icon aria-hidden="true">event</mat-icon>
+                    {{ plannedOn() ? 'Change days' : 'Add to plan' }}
+                </button>
+                @if (plannedOn()) {
+                    <p id="workout-details-planned" class="details__planned">{{ plannedOn() }}</p>
+                }
+            </div>
+            @if (planning()) {
+                <app-add-to-plan-dialog
+                    animate.leave="dialog-leave"
+                    [workout]="workout"
+                    (closed)="closePlanning()"
+                    (done)="planOn(workout, $event)"
+                />
+            }
+
             <section class="details__section" aria-labelledby="workout-details-muscles">
                 <h3 id="workout-details-muscles" class="details__heading">Muscles it works</h3>
                 @if (muscles().hasExercises) {

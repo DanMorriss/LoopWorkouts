@@ -207,7 +207,7 @@ test.describe('the order', () => {
             await page.getByRole('radio', { name: 'My own' }).check();
             expect(await library.titles()).toEqual(['arms', 'Bench', 'Zone 2']);
             const options = await library.options('Bench');
-            await expect(options.getByRole('button')).toHaveCount(3);
+            await expect(options.getByRole('button')).toHaveCount(4);
             await expect(options.getByRole('button', { name: /^Move/ })).toHaveCount(0);
         }
     );

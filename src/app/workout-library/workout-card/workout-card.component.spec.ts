@@ -29,6 +29,7 @@ const sprints = makeWorkout({
                 (menuClosed)="events.push('menuClosed')"
                 (editRequested)="events.push('editRequested')"
                 (copyRequested)="events.push('copyRequested')"
+                (planRequested)="events.push('planRequested')"
                 (deleteRequested)="events.push('deleteRequested')"
             ></li>
         </ul>
@@ -230,15 +231,21 @@ describe('WorkoutCardComponent', () => {
         expect(host.events).toEqual(['menuToggled', 'editRequested', 'deleteRequested']);
     });
 
-    it('offers Edit, Make a copy and Delete in its options, in that order', () => {
+    it('offers Add to plan, Edit, Make a copy and Delete in its options, in that order', () => {
         set({ menuOpen: true });
 
         const items = Array.from(card().querySelectorAll('.menu__item'), (item) =>
             item.textContent!.replace(/\s+/g, ' ').trim()
         );
-        expect(items).toEqual(['edit Edit', 'content_copy Make a copy', 'delete Delete']);
+        expect(items).toEqual([
+            'event Add to plan',
+            'edit Edit',
+            'content_copy Make a copy',
+            'delete Delete',
+        ]);
         el('.workout-card__menu-item--copy').click();
-        expect(host.events).toEqual(['copyRequested']);
+        el('.workout-card__menu-item--plan').click();
+        expect(host.events).toEqual(['copyRequested', 'planRequested']);
     });
 
     describe('a ready-made workout (LIB-6)', () => {
@@ -252,9 +259,10 @@ describe('WorkoutCardComponent', () => {
             expect(spoken()).toMatch(/^Ready-made\. /);
         });
 
-        it('offers Make a copy in its options, and no Edit or Delete', () => {
+        it('offers Add to plan and Make a copy in its options, and no Edit or Delete', () => {
             set({ workout: readyMade, menuOpen: true });
 
+            expect(card().querySelector('.workout-card__menu-item--plan')).not.toBeNull();
             expect(card().querySelector('.workout-card__menu-item--edit')).toBeNull();
             expect(card().querySelector('.workout-card__menu-item--danger')).toBeNull();
             el('.workout-card__menu-item--copy').click();

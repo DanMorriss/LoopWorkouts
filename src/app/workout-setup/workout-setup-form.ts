@@ -36,6 +36,7 @@ import { counted } from '../shared/format-count';
 import { changeSmoothly } from '../shared/layout-change';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
+import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { UndoService } from '../shared/undo/undo.service';
@@ -78,6 +79,7 @@ export class WorkoutSetupForm {
     private readonly focusAfterRender = injectFocusAfterRender();
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly exercises = inject(ExerciseStore);
+    private readonly plan = inject(PlanStore);
 
     /** Weights are shown and picked in this, and saved in kg. */
     readonly weightUnit = inject(SettingsStore).weightUnit();
@@ -86,6 +88,11 @@ export class WorkoutSetupForm {
     readonly maxHeadings = MAX_HEADINGS;
     /** In the order the kind menu lists them. */
     readonly editingWorkoutId = signal<string | null>(null);
+    /**
+     * The day a new workout goes on in the plan once saved, from the Plan page's Make a new
+     * workout (`?planOn=<day>`), or null.
+     */
+    readonly planOn = signal<number | null>(null);
     readonly minuteOptions = pickerOptions(0, 99, padded);
     readonly secondOptions = pickerOptions(0, 59, padded);
     readonly repOptions = pickerOptions(0, MAX_REPS, String);
@@ -912,12 +919,14 @@ export class WorkoutSetupForm {
 
     /**
      * Save (BLD-15), checked as Start is: saves the workout without starting it, and slides back
-     * out, as ‹ does: an edited one to its details, where the change shows, and a new one to
-     * Workouts, with it highlighted. Both say it was saved.
+     * out, as ‹ does: an edited one to its details, where the change shows, a new one to
+     * Workouts, with it highlighted, or, made for a day of the plan, to the Plan page, with it
+     * highlighted on that day. All say it was saved.
      */
     async saveOnly(): Promise<void> {
         await submit(this.workoutForm, async () => {
             const editing = this.editingWorkoutId() !== null;
+            const planned = !editing && this.planOn() !== null;
             const savedWorkout = this.save();
             // Kept as it is, so the page slides out showing what was saved; only marked saved,
             // so leaving doesn't ask about changes
@@ -925,7 +934,9 @@ export class WorkoutSetupForm {
             this.slide.navigate(
                 editing
                     ? `/library/${savedWorkout.id}?saved=1`
-                    : `/library?saved=${savedWorkout.id}`,
+                    : planned
+                      ? `/plan?saved=${savedWorkout.id}`
+                      : `/library?saved=${savedWorkout.id}`,
                 'out'
             );
             return undefined;
@@ -952,9 +963,18 @@ export class WorkoutSetupForm {
                   };
 
         const editingId = this.editingWorkoutId();
-        return editingId
-            ? (this.workoutStore.updateWorkout(editingId, workout) ??
-                  this.workoutStore.addWorkout(workout))
-            : this.workoutStore.addWorkout(workout);
+        if (editingId) {
+            return (
+                this.workoutStore.updateWorkout(editingId, workout) ??
+                this.workoutStore.addWorkout(workout)
+            );
+        }
+        const added = this.workoutStore.addWorkout(workout);
+        // Made for a day of the plan: it goes on that day, by Save or Start
+        const day = this.planOn();
+        if (day !== null) {
+            this.plan.add(day, added.id);
+        }
+        return added;
     }
 }

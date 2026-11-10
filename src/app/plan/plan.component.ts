@@ -1,5 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { afterNextRender, Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { PageSlide } from '../nav/page-slide';
@@ -29,8 +29,8 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
 /**
  * The weekly plan (PLN-1): Monday to Sunday, the workouts planned on each, the same every week,
  * with where each is this week (PLN-3): done, missed, due today or to come. Each day adds a
- * workout from your workouts, or takes one off; the dialog's **Add new workouts** goes to the
- * Workouts tab to add more (PLN-5). It slides in over Today, from its week (PLN-4),
+ * workout, yours or ready-made, or takes one off; the dialog's **Make a new workout** opens
+ * Create, whose Save plans it on that day and comes back here (PLN-5). It slides in over Today, from its week (PLN-4),
  * and back off with ‹ Today or a swipe right.
  */
 @Component({
@@ -50,13 +50,30 @@ export class PlanComponent {
     private readonly workouts = inject(WorkoutStore);
     private readonly history = inject(HistoryStore);
     private readonly focusAfterRender = injectFocusAfterRender();
-    private readonly router = inject(Router);
     protected readonly slide = inject(PageSlide);
     private readonly now = Date.now();
 
     constructor() {
         // The first time it opens on this device, a tour of it (PLN-8)
         inject(TourService).startOnce('plan');
+        // Back from Save in Create, made for a day here: point it out, and say so
+        const saved = inject(ActivatedRoute).snapshot.queryParamMap.get('saved');
+        const day = saved ? this.planStore.plan().days.findIndex((ids) => ids.includes(saved)) : -1;
+        if (saved && day >= 0) {
+            this.saved.set({ id: saved, day });
+            this.focusAfterRender(this.canAdd(day) ? `plan-add-${day}` : 'plan-title');
+            // Once the live region's on the page, as one filled before it isn't heard
+            const said = `Saved ${this.names().get(saved)}, planned on ${WEEKDAYS[day]}`;
+            afterNextRender(() => this.announcement.set(said));
+        }
+    }
+
+    /** The workout just made in Create for a day here, which is pointed out on that day. */
+    protected readonly saved = signal<{ id: string; day: number } | null>(null);
+
+    protected isSaved(day: number, workoutId: string): boolean {
+        const saved = this.saved();
+        return saved?.day === day && saved.id === workoutId;
     }
 
     protected readonly today = weekdayOf(this.now);
@@ -121,11 +138,14 @@ export class PlanComponent {
         return this.days()[day].workouts.length < MAX_WORKOUTS_A_DAY;
     }
 
-    /** A workout picked for the day; or, picking Add new workouts (null), on to Workouts. */
+    /**
+     * A workout picked for the day; or, picking Make a new workout (null), Create, whose Save
+     * plans it on the day and comes back here (PLN-5).
+     */
     protected add(day: number, workoutId: string | null) {
         this.addingTo.set(null);
         if (workoutId === null) {
-            void this.router.navigateByUrl('/library');
+            this.slide.navigate(`/setup?planOn=${day}&from=/plan`, 'in');
             return;
         }
         this.planStore.add(day, workoutId);

@@ -99,6 +99,15 @@
     color: var(--text-muted);
 }
 
+// Just made in Create for this day: pointed out, as Workouts points out a new workout
+.plan__workout--saved {
+    margin-inline: -0.5rem;
+    padding-left: 0.5rem;
+    border-radius: 0.5rem;
+    background: var(--accent-soft);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
 .plan__remove {
     flex-shrink: 0;
 }

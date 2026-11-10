@@ -1,7 +1,9 @@
 import {
     copyPlan,
+    daysPlannedOn,
     EMPTY_PLAN,
     isWeekPlan,
+    planChangeText,
     plannedKey,
     startOfWeek,
     thisWeek,
@@ -56,6 +58,25 @@ describe('the weekly plan (PLN-1)', () => {
                 plannedAt: { '0:a': -1 },
             })
         ).toEqual({ days: [['a'], [], [], [], [], [], []], updatedAt: 1 });
+    });
+});
+
+describe('Add to plan (PLN-1)', () => {
+    it('finds the days a workout is planned on', () => {
+        expect(daysPlannedOn(plan([['a'], [], ['b', 'a'], [], [], [], []]), 'a')).toEqual([0, 2]);
+        expect(daysPlannedOn(EMPTY_PLAN, 'a')).toEqual([]);
+    });
+
+    it('says what changed, as the Undo bar does', () => {
+        expect(planChangeText('Legs', [0], [])).toBe('Legs planned on Monday');
+        expect(planChangeText('Legs', [0, 3], [])).toBe('Legs planned on Monday and Thursday');
+        expect(planChangeText('Legs', [0, 2, 4], [])).toBe(
+            'Legs planned on Monday, Wednesday and Friday'
+        );
+        expect(planChangeText('Legs', [], [4])).toBe('Legs taken off Friday');
+        expect(planChangeText('Legs', [1], [4, 6])).toBe(
+            'Legs planned on Tuesday, and taken off Friday and Sunday'
+        );
     });
 });
 

@@ -143,7 +143,8 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 question: 'How do I plan my own week?',
                 answer: [
                     'On Today, press Edit plan (or Make your own plan). Press Add on a day and pick a workout; take one off with its ✕.',
-                    'The list has your workouts, then the ready-made ones. Need another? Add new workouts, at the top of the list, takes you to Workouts to make one.',
+                    'The list has your workouts, then the ready-made ones. Need another? Make a new workout, at the top of the list, opens Create; once saved, it goes on that day and you come back to the plan.',
+                    'Or plan a workout from Workouts: Add to plan, in its options (⋮) or on its page, picks as many days as you like at once.',
                 ],
                 link: { label: 'Open the plan', url: '/plan' },
             },

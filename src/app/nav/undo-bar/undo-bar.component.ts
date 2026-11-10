@@ -15,7 +15,8 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
 
 /**
  * The Undo bar, floating above the tabs (and the workout's bar) after a delete: what
- * happened, Undo, and a close button. Focus goes to Undo as it appears, so it's one key away;
+ * happened, Undo, and a close button. Focus goes to Undo as it appears, so it's one key away
+ * (unless the offer's `keepFocus`, where the page moves it somewhere more useful);
  * screen readers hear what happened as it does. It goes when it's used, closed (or Escape),
  * replaced, or the page changes. A notice (UndoService.notify()) has no Undo, and leaves focus
  * where it is; it may have a link instead (View library), and a quiet one isn't read out, as
@@ -48,9 +49,10 @@ export class UndoBarComponent {
             }
         });
 
-        // Each new offer takes focus, so Undo is one key away
+        // Each new offer takes focus, so Undo is one key away, unless the page puts it elsewhere
         effect(() => {
-            if (this.undo.offer()?.undo) {
+            const offer = this.undo.offer();
+            if (offer?.undo && !offer.keepFocus) {
                 afterNextRender(() => this.undoButton()?.nativeElement.focus(), {
                     injector: this.injector,
                 });

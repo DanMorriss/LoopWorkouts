@@ -15,6 +15,12 @@ export interface UndoOffer {
     /** A page to see what happened on, e.g. View library after an import. */
     link?: { label: string; url: string };
     /**
+     * Leaves focus where the page puts it, rather than taking it to Undo: for a change that
+     * moves focus somewhere more useful, e.g. Edit plan once a plan's used, or the step's (i)
+     * after a swap. Undo is still in the bar, and the message is still read out.
+     */
+    keepFocus?: boolean;
+    /**
      * Already read out on the page it happened on, so the bar only shows it: e.g. an import's
      * result, which Your data says in a line of its own.
      */

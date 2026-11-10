@@ -239,10 +239,6 @@ test.describe('the last entry with a workout going', () => {
         "REG-HIS-03 the last entry's options open clear of the run bar",
         { tag: '@p1' },
         async ({ app, page }) => {
-            test.fixme(
-                true,
-                "App bug: with a workout going, the last entry's options (⋮) open downwards under the run bar and tab bar, and the page can't scroll them clear, so Delete can't be pressed (seen at desktop size, 1280 × 720, with a short log)."
-            );
             const history = new HistoryPage(page);
             await app.goto('/library');
             await new WorkoutPage(page).startFromLibrary('Twice');

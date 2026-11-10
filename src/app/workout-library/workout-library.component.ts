@@ -135,21 +135,28 @@ export class WorkoutLibraryComponent {
      * says so: once the live region is on the page, as one filled before it isn't heard.
      */
     private bringIntoView(id: string, announcement: string) {
+        const card = () =>
+            this.host.nativeElement.querySelector<HTMLElement>(`[data-workout="${id}"]`);
         afterNextRender(
             () => {
-                const card = this.host.nativeElement.querySelector<HTMLElement>(
-                    `[data-workout="${id}"]`
-                );
-                card?.scrollIntoView({
-                    block: 'center',
-                    behavior: this.reducedMotion() ? 'auto' : 'smooth',
-                });
-                card?.querySelector<HTMLElement>('.workout-card__start')?.focus({
-                    preventScroll: true,
-                });
+                card()
+                    ?.querySelector<HTMLElement>('.workout-card__start')
+                    ?.focus({ preventScroll: true });
                 this.announcement.set(announcement);
             },
             { injector: this.injector }
+        );
+        // Scrolled once the ready-made workouts are in the list too, as they can push it down,
+        // and two frames on, as the page slide scrolls the page to its top just after rendering
+        void this.workoutStore.readyMadeLoaded.then(() =>
+            requestAnimationFrame(() =>
+                requestAnimationFrame(() =>
+                    card()?.scrollIntoView({
+                        block: 'center',
+                        behavior: this.reducedMotion() ? 'auto' : 'smooth',
+                    })
+                )
+            )
         );
     }
 

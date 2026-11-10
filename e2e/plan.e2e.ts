@@ -70,10 +70,6 @@ test.describe('a new guest, focus', () => {
         'REG-PLAN-01 focus moves to Edit plan once a plan is used',
         { tag: '@p1' },
         async ({ app, page }) => {
-            test.fixme(
-                true,
-                "App bug: focus ends on the Undo bar's Undo, not Edit plan. injectUsePlanOnToday() focuses Edit plan after the next render, but the undo bar focuses Undo after its own, later. docs/features/home-and-navigation.md says focus is on Edit plan."
-            );
             await app.goto('/home');
             await page.getByRole('button', { name: 'Use No equipment, 3 days' }).click();
             await expect(page.getByRole('link', { name: 'Edit plan' })).toBeFocused();

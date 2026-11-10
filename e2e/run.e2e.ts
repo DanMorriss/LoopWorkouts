@@ -605,10 +605,6 @@ test.describe('swapping mid-workout', () => {
         'REG-RUN-11 focus goes back to the (i) after a swap',
         { tag: '@p2' },
         async ({ app, page }) => {
-            test.fixme(
-                true,
-                "App bug: after picking in Swap, focus ends on the Undo bar's Undo rather than the step's (i). WorkoutSwap.swapFor() puts it on the (i), then the undo bar takes it for its new offer."
-            );
             const run = new WorkoutPage(page);
             await app.goto('/library');
             await run.startFromLibrary('Legs');

@@ -305,10 +305,6 @@ test.describe('a held Space', () => {
     test.use({ storage: seed.workouts([intervals]) });
 
     test('REG-A11Y-03 a held Space toggles once', { tag: '@p1' }, async ({ app, page }) => {
-        test.fixme(
-            true,
-            "App bug: holding Space (nothing focused) pauses, then resumes as it's let go. The pause moves focus to Resume; the key's repeats then reach that button, which onSpace() leaves to it (SPACE_HANDLED_BY) without preventing them, so it's pressed on release. pause-and-stop.md: 'It's ignored when held down (no flicker)'."
-        );
         const run = new WorkoutPage(page);
         await app.goto('/library');
         await run.startFromLibrary('Intervals');

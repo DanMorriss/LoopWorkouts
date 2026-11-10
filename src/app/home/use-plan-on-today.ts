@@ -22,7 +22,7 @@ export function injectUsePlanOnToday(): (plan: BuiltInPlan) => void {
     return (plan) =>
         morphHome(appRef, () => {
             const undoUse = readyMade.use(plan);
-            undo.offerUndo({ message: weekPlannedText(plan), undo: undoUse });
+            undo.offerUndo({ message: weekPlannedText(plan), undo: undoUse, keepFocus: true });
             afterNextRender(() => document.getElementById(WEEK_EDIT_ID)?.focus(), { injector });
         });
 }

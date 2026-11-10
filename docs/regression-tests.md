@@ -168,7 +168,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     1. No This week card and no logo; **Get started** shows "No equipment, 3 days" with its days ("Mon Bodyweight basics", …), **Use this plan** (the main button), **More plans** and **Make your own plan** (to `/plan`).
     2. Workouts now has Bodyweight basics, Cardio intervals, Core in 15 and Tabata; Get started is replaced by This week, with dots on Mon, Wed and Fri and Wednesday outlined as today; Due today lists Cardio intervals with Start; the Undo bar says "Your week is planned: No equipment, 3 days"; focus is on **Edit plan**.
     3. The four workouts are gone, `week-plan` is back to empty, and Get started is back.
-- **In the pack:** Use this plan plans the ready-made workouts **as they are** (nothing is copied into your workouts), and as it's planned on a Wednesday, Monday's says "from next week" (PLN-3) and Friday's "to come". Focus ends on the Undo bar's Undo, not Edit plan: an app bug (B1), a `test.fixme`.
+- **In the pack:** Use this plan plans the ready-made workouts **as they are** (nothing is copied into your workouts), and as it's planned on a Wednesday, Monday's says "from next week" (PLN-3) and Friday's "to come". Focus ends on Edit plan, with Undo still in the bar (B1, fixed 2026-11-10).
 
 ### REG-PLAN-02 · Plan the week by hand
 
@@ -308,7 +308,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     1. `/library?saved=<id>`: Sprints is highlighted (tinted, with a bar down its left), scrolled into view, focused, and "Saved Sprints" is announced. No run bar: nothing is running.
     2. Create opens with every step collapsed; the main button says **Save & start workout**.
     3. Workouts has one Sprints 2 (no extra copy), with the same id; nothing running.
-- **In the pack:** focus lands on the saved card's play button ("Start Sprints"). The card isn't scrolled into view on a phone: an app bug (B2), a `test.fixme`.
+- **In the pack:** focus lands on the saved card's play button ("Start Sprints"). It's scrolled into view, on a phone too (B2, fixed 2026-11-10).
 
 ### REG-BLD-03 · What can't be saved or started
 
@@ -716,7 +716,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     4. Still Goblet squat (swaps are kept for the tab).
     5. Round 2 is goblet squats too.
     6. The summary lists "Back squat for Goblet squat"; No says "Next time it's Back squat again."; the saved workout still has Back squat at 60 kg, and there's no Next time step-up for it. The history logs the sets as Goblet squat.
-- **In the pack:** the summary lists "Goblet squat: 2 × 10 @ 24 kg". Focus after the swap ends on the Undo bar's Undo, not the (i): an app bug (B1), a `test.fixme` of its own.
+- **In the pack:** the summary lists "Goblet squat: 2 × 10 @ 24 kg". Focus after the swap is on the (i), with Undo still in the bar (B1, fixed 2026-11-10), a test of its own.
 
 ### REG-RUN-12 · Swap the next exercise while paused in a rest
 
@@ -811,7 +811,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     1. Gone at once; the Undo bar says "Deleted Sprints" with focus on Undo.
     2. Back in place, with its note.
     3. Still gone after the reload (its deletion is kept in `deleted`).
-- **In the pack:** with a workout going, the last entry's options open under the run bar and tab bar, so Delete can't be pressed there (desktop): an app bug (B3), a `test.fixme`; REG-HIS-04 seeds an older run so its entry isn't last.
+- **In the pack:** with a workout going, the last entry's options open above its ⋮, clear of the run bar and tab bar, so Delete can be pressed (B3, fixed by `a866f45` on 2026-11-08); REG-HIS-04 seeds an older run so its entry isn't last.
 
 ### REG-HIS-04 · A deleted entry doesn't come back when its run finishes
 
@@ -1225,7 +1225,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     2. Done, then Paused with focus on Resume, then resumed with focus on Pause.
     3. Shift+Space is ignored; a held Space toggles once.
     4. ArrowUp changes reps to 11; Space on the wheel doesn't press Done.
-- **In the pack:** Shift+Space is checked with nothing focused, as a focused button takes Space (and Shift+Space) itself. A held Space pauses, then resumes as it's let go: an app bug (B4), a `test.fixme`.
+- **In the pack:** Shift+Space is checked with nothing focused, as a focused button takes Space (and Shift+Space) itself. A held Space pauses once, and its repeats are swallowed till it's let go (B4, fixed 2026-11-10).
 
 ### REG-A11Y-04 · Reduced motion
 
@@ -1359,17 +1359,17 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | Area | Spec                   | Tests | fixme                           | skip                                                  |
 | ---- | ---------------------- | ----- | ------------------------------- | ----------------------------------------------------- |
 | NAV  | `e2e/nav.e2e.ts`       | 10    | 0                               | 0                                                     |
-| PLAN | `e2e/plan.e2e.ts`      | 9     | 1 (B1)                          | 0                                                     |
-| BLD  | `e2e/build.e2e.ts`     | 12    | 1 (B2)                          | 0                                                     |
-| LIB  | `e2e/library.e2e.ts`   | 8     | 0                               | 0                                                     |
-| RUN  | `e2e/run.e2e.ts`       | 22    | 2 (B1; REG-RUN-12, Known issue) | 1 (real sound, manual)                                |
-| HIS  | `e2e/history.e2e.ts`   | 6     | 1 (B3)                          | 0                                                     |
+| PLAN | `e2e/plan.e2e.ts`      | 11    | 0                               | 0                                                     |
+| BLD  | `e2e/build.e2e.ts`     | 12    | 0                               | 0                                                     |
+| LIB  | `e2e/library.e2e.ts`   | 9     | 0                               | 0                                                     |
+| RUN  | `e2e/run.e2e.ts`       | 22    | 1 (REG-RUN-12, Known issue)     | 1 (real sound, manual)                                |
+| HIS  | `e2e/history.e2e.ts`   | 6     | 0                               | 0                                                     |
 | PRG  | `e2e/progress.e2e.ts`  | 4     | 0                               | 0                                                     |
 | EXR  | `e2e/exercises.e2e.ts` | 8     | 0                               | 1 (3D figure, manual)                                 |
 | SET  | `e2e/settings.e2e.ts`  | 6     | 0                               | 0                                                     |
 | DATA | `e2e/data.e2e.ts`      | 5     | 0                               | 0                                                     |
 | ACC  | `e2e/account.e2e.ts`   | 17    | 0                               | 1 (real Google, manual)                               |
-| A11Y | `e2e/a11y.e2e.ts`      | 21    | 1 (B4)                          | 0 (the 4 phone-width tests skip on `desktop`)         |
+| A11Y | `e2e/a11y.e2e.ts`      | 21    | 0                               | 0 (the 4 phone-width tests skip on `desktop`)         |
 | GES  | `e2e/gestures.e2e.ts`  | 7     | 1 (Known issue: superset folds) | 1 (iPhone, manual); the touch tests skip on `desktop` |
 
 ### Left out on purpose
@@ -1408,9 +1408,9 @@ Found while checking the docs against the code. None is fixed here.
 
 ## App bugs found by the pack
 
-Each is a `test.fixme` with the reason, to pass once fixed. None is fixed here.
+Each was a `test.fixme` with the reason, to pass once fixed. All four are fixed, and their tests are on.
 
-- **B1. Focus ends on Undo, not where the page puts it.** After **Use this plan** on Today, focus should move to Edit plan (`injectUsePlanOnToday()`, home-and-navigation.md), and after a Swap mid-workout to the step's (i) (`WorkoutSwap.swapFor()`); in both, the Undo bar's effect focuses Undo after the next render, later. REG-PLAN-01, REG-RUN-11.
-- **B2. A saved workout isn't scrolled into view.** After Save in Create on a new workout, Workouts highlights its card and focuses its play button but stays scrolled to the top, so on a phone the card is out of view (library.md: "in view and focused"). REG-BLD-02.
-- **B3. The last log entry's options open under the run bar.** With a workout going, ⋮ on the last entry of the log opens its menu downwards, under the run bar and tab bar, and the page can't scroll it clear, so Delete can't be pressed (desktop, a short log). REG-HIS-03.
-- **B4. A held Space pauses, then resumes.** pause-and-stop.md says a held Space is ignored; holding it with nothing focused pauses, which moves focus to Resume, and the key's repeats then reach that button (`onSpace()` leaves Space on a button to it, without preventing it), so letting go presses Resume. REG-A11Y-03.
+- **B1. Focus ends on Undo, not where the page puts it.** After **Use this plan** on Today, focus should move to Edit plan (`injectUsePlanOnToday()`, home-and-navigation.md), and after a Swap mid-workout to the step's (i) (`WorkoutSwap.swapFor()`); in both, the Undo bar's effect focuses Undo after the next render, later. REG-PLAN-01, REG-RUN-11. _Fixed 2026-11-10: an offer can keep focus where the page puts it (`keepFocus`), and both do._
+- **B2. A saved workout isn't scrolled into view.** After Save in Create on a new workout, Workouts highlights its card and focuses its play button but stays scrolled to the top, so on a phone the card is out of view (library.md: "in view and focused"). REG-BLD-02. _Fixed 2026-11-10: the slide back scrolled the page to its top after the card was scrolled to; it's now scrolled two frames later, once the ready-made workouts are listed too._
+- **B3. The last log entry's options open under the run bar.** With a workout going, ⋮ on the last entry of the log opens its menu downwards, under the run bar and tab bar, and the page can't scroll it clear, so Delete can't be pressed (desktop, a short log). REG-HIS-03. _Fixed by `a866f45` (2026-11-08), which opens a menu above its button when the bars would cover it; the test passed from then, but its `fixme` was only taken off on 2026-11-10._
+- **B4. A held Space pauses, then resumes.** pause-and-stop.md says a held Space is ignored; holding it with nothing focused pauses, which moves focus to Resume, and the key's repeats then reach that button (`onSpace()` leaves Space on a button to it, without preventing it), so letting go presses Resume. REG-A11Y-03. _Fixed 2026-11-10: once Space has paused, resumed or pressed Done, its repeats are swallowed until it's let go._

@@ -117,6 +117,8 @@ export class WorkoutSwap {
         if (swap && was) {
             this.undo.offerUndo({
                 message: `Swapped to ${replacement.name}`,
+                // Focus goes to the step's (i), below
+                keepFocus: true,
                 undo: () => {
                     this.run.undoSwap();
                     this.focusInfo();

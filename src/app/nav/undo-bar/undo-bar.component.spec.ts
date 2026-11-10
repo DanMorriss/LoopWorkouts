@@ -64,6 +64,20 @@ describe('UndoBarComponent', () => {
         );
     });
 
+    it("leaves focus where the page put it for an offer that's to keep it, still saying it", () => {
+        const before = document.activeElement;
+
+        undo.offerUndo({ message: 'Swapped to Goblet squat', undo: () => {}, keepFocus: true });
+        fixture.detectChanges();
+        TestBed.tick();
+
+        expect(undoButton()).toBeDefined();
+        expect(document.activeElement).toBe(before);
+        expect(element.querySelector('[role="status"]')!.textContent).toContain(
+            'Swapped to Goblet squat.'
+        );
+    });
+
     it('takes it back on Undo, and goes', () => {
         const calls = offer();
 

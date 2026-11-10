@@ -109,7 +109,7 @@ Since 2026-11-06, from an interview with Dan.
 - It floats above the tabs (and the workout's bar), in the same frosted capsule: what happened, e.g. "Deleted "Legs day".", **Undo**, and a close button. It rises in, and sinks out as it goes.
 - **Undo** puts it back as it was, where it was, and focus goes to it (e.g. the workout's ⋮ button). An exercise deleted from its page opens that page again.
 - It **doesn't go on a timer**, so there's always time to read it and reach it. It goes when it's used, closed (or Escape), replaced by another delete, or the page changes.
-- Focus goes to Undo as it appears, so it's one key away, and screen readers hear what happened. Closing it puts focus where it would have gone after the delete.
+- Focus goes to Undo as it appears, so it's one key away, and screen readers hear what happened. Closing it puts focus where it would have gone after the delete. Where the change moves focus somewhere more useful, it stays there, with Undo still in the bar and the change read out (since 2026-11-10): Edit plan after Use this plan, and the step's (i) after a Swap.
 - **Notices** use the same bar, with no Undo: "Signed in as me@example.com." on Today after signing in, and what happened after signing out, deleting the account or being signed out (see [backup-and-sync](backup-and-sync.md)). They're read out as they show, don't take focus, and go as an offer does. A notice can have a link in place of Undo, e.g. **View workouts** after Import backup; and one already read out on its page (the import's result, said under its buttons) is shown but not read out again.
 
 ## Acceptance criteria

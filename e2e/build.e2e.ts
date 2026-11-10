@@ -92,15 +92,13 @@ test.describe('a new workout', () => {
         'REG-BLD-02 the saved workout is scrolled into view',
         { tag: '@p1' },
         async ({ app, page }) => {
-            test.fixme(
-                true,
-                "App bug: after Save in Create, Workouts highlights the new card and focuses its play button but stays scrolled to the top, so on a phone the card is out of view (library.md: 'in view and focused')."
-            );
             const create = new CreatePage(page);
             await app.goto('/setup');
             await create.build('Sprints', [{ kind: 'Timed', seconds: 30 }]);
             await create.save.click();
-            await expect(new LibraryPage(page).card('Sprints')).toBeInViewport();
+            const card = new LibraryPage(page).card('Sprints');
+            await expect(card).toBeInViewport();
+            await expect(card.getByRole('button', { name: 'Start Sprints' })).toBeFocused();
         }
     );
 

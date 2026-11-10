@@ -67,6 +67,7 @@ const SPACE_HANDLED_BY =
     ],
     host: {
         '(document:keydown.space)': 'onSpace($event)',
+        '(document:keyup.space)': 'spaceLetGo()',
         '(document:keydown.escape)': 'onEscape($event)',
         // A phone turned round gives the face a new width to fit the name to
         '(window:resize)': 'fitName(view.stepKey())',
@@ -269,8 +270,27 @@ export class WorkoutComponent {
         this.run.skipStep();
     }
 
+    /**
+     * Whether the Space being held down paused, resumed or pressed Done: its repeats are then
+     * swallowed till it's let go, even on the button focus moved to (Resume), which would
+     * otherwise be pressed as it's let go.
+     */
+    private spaceHeld = false;
+
+    /**
+     * Space let go. A method, not `spaceHeld = false` in the binding: a handler that comes to
+     * false stops the key's default, which is how a focused button is pressed by Space.
+     */
+    protected spaceLetGo() {
+        this.spaceHeld = false;
+    }
+
     /** Space pauses and resumes, like most media players, or presses Done on a rep step. */
     onSpace(event: Event) {
+        if ((event as KeyboardEvent).repeat && this.spaceHeld) {
+            event.preventDefault();
+            return;
+        }
         const target = event.target as Element | null;
         if (
             !this.view.workout() ||
@@ -285,6 +305,7 @@ export class WorkoutComponent {
         }
         // Otherwise Space would also scroll the page
         event.preventDefault();
+        this.spaceHeld = true;
         if (this.view.isRepsActive()) {
             this.finishReps();
         } else {

@@ -955,6 +955,30 @@ describe('WorkoutComponent', () => {
                 fixture.destroy();
             });
 
+            it("swallows a held Space's repeats on the button focus moved to, till it's let go", () => {
+                start(makeWorkout());
+                pressSpace();
+                expect(view().isPaused()).toBe(true);
+                const resume = button('Resume')!;
+
+                // Its repeats would make Resume active, to be pressed as the key's let go
+                expect(pressSpace(resume, { repeat: true })).toBe(true);
+                expect(view().isPaused()).toBe(true);
+
+                // Letting go leaves the key alone, as a focused button is pressed by it
+                const keyup = new KeyboardEvent('keyup', {
+                    key: ' ',
+                    code: 'Space',
+                    bubbles: true,
+                    cancelable: true,
+                });
+                resume.dispatchEvent(keyup);
+                expect(keyup.defaultPrevented).toBe(false);
+                // Let go, a held Space on Resume is Resume's again
+                expect(pressSpace(resume, { repeat: true })).toBe(false);
+                fixture.destroy();
+            });
+
             it('ignores Space with Shift, Ctrl, Alt or Cmd held', () => {
                 start(makeWorkout());
 

@@ -1173,7 +1173,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 ### REG-ACC-07 · Consent to keeping notes that may mention health
 
 - **Stories:** SYN-10 · **Priority:** P1 (asked and agreeing), P2 (shown, and not looked up)
-- **Preconditions:** `signedIn(...)`; `give_health_consent` and `my_health_consent` stubbed, keeping the consent as the server does. Signing in with the tick (REG-ACC-02) saves it with `notice_date` 2026-11-08, and You then says when.
+- **Preconditions:** `signedIn(...)`; `give_health_consent` and `my_health_consent` stubbed, keeping the consent as the server does. Signing in with the tick (REG-ACC-02) saves it with `notice_date` set to the privacy notice's date (2026-11-10), and You then says when.
 - **Steps:**
     1. With none on record, open You. Press **Agree** unticked.
     2. Offline, tick and press Agree.

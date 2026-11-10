@@ -114,11 +114,11 @@ test.describe('signing in by email', () => {
         await expect(sync.getByRole('button', { name: 'Delete account' })).toBeVisible();
         // The tick was saved with the account, dated by the server, under the notice's date
         expect(supabase.callsTo('rpc/give_health_consent')[0].body).toEqual({
-            notice_date: '2026-11-08',
+            notice_date: '2026-11-10',
         });
         await expect(
             page.getByText(
-                'On 11 November 2026 you agreed that notes you write, which may mention your health, are kept with your account (under the privacy notice of 8 November 2026).'
+                'On 11 November 2026 you agreed that notes you write, which may mention your health, are kept with your account (under the privacy notice of 10 November 2026).'
             )
         ).toBeVisible();
     });

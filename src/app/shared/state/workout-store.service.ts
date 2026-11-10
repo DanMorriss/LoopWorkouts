@@ -30,7 +30,7 @@ import type { BuiltInWorkout } from '../../models/built-in-workouts';
 import { MAX_WEIGHT_KG } from '../../models/weight';
 import { isLoggedSet, isTimedSet, RepSet } from '../../models/history';
 import { StepSwap } from '../../models/step-swap';
-import { StepSkip } from '../../workout/workout-state';
+import { StepSkip } from '../../models/workout-state';
 import { Deletion, inOrder, LibraryOrder, mergeRecords, newId } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { ReadyMadeFavourites } from './ready-made-favourites.service';

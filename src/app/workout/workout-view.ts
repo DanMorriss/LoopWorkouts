@@ -21,7 +21,7 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { RoundDot } from './round-dots/round-dots.component';
 import { StripStep } from './step-strip/step-strip.component';
-import { placeAt, WorkoutState } from './workout-state';
+import { placeAt, WorkoutState } from '../models/workout-state';
 
 /** Which set it is, e.g. "set 2 of 3", or a superset's round, "superset round 2 of 3". */
 export function setText(set: GroupSet): string {

@@ -27,7 +27,7 @@ import {
     Workout,
     workoutSeconds,
 } from '../../models/workout';
-import { alarmEvents } from '../../workout/alarm-schedule';
+import { alarmEvents } from '../../models/alarm-schedule';
 import {
     isSetAt,
     placeAt,
@@ -35,7 +35,7 @@ import {
     setsDone,
     stepsIntoRound,
     workoutStateAt,
-} from '../../workout/workout-state';
+} from '../../models/workout-state';
 import { AlarmService } from '../alarms/alarm.service';
 import { HistoryStore } from '../state/history-store.service';
 import { SettingsStore } from '../state/settings-store.service';

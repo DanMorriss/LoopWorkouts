@@ -1,5 +1,5 @@
 import { DestroyRef, inject, InjectionToken, Service, signal } from '@angular/core';
-import { AlarmEvent, AlarmKind } from '../../workout/alarm-schedule';
+import { AlarmEvent, AlarmKind } from '../../models/alarm-schedule';
 import { SettingsStore } from '../state/settings-store.service';
 
 /** Makes the audio context, or returns null where the browser has no Web Audio. */

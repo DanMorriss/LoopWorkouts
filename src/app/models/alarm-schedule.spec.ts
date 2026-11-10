@@ -1,4 +1,4 @@
-import { UNTIL_STOPPED } from '../models/workout';
+import { UNTIL_STOPPED } from './workout';
 import { makeWorkout, reps, rest, work } from '../shared/testing/make-workout';
 import { alarmEvents } from './alarm-schedule';
 import { workoutStateAt } from './workout-state';

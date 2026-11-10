@@ -1,6 +1,7 @@
 @use 'styles/buttons';
 @use 'styles/dialog';
 @use 'styles/drag';
+@use 'styles/fonts';
 @use 'styles/forms';
 @use 'styles/home-morph';
 @use 'styles/info';
@@ -421,8 +422,8 @@ body.mat-typography {
 }
 
 // The icon font is Material Symbols, filled to look as Material Icons did, and drawn as an
-// outline with the icon-outline class (e.g. a favourite's heart when it's off). index.html
-// asks for both. Google's stylesheet styles app-icon's class; mat-icon's default class,
+// outline with the icon-outline class (e.g. a favourite's heart when it's off). The font has
+// both (styles/_fonts.scss, which styles app-icon's class too); mat-icon's default class,
 // material-icons, is styled here the same, as giving mat-icon another default
 // (MAT_ICON_DEFAULT_OPTIONS) brings Material's icon module into the first load.
 .material-icons {

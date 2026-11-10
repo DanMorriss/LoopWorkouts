@@ -62,7 +62,7 @@ export interface AppFixtures {
 
 /** The requests stopped from leaving the app's server, as the test goes. */
 export class Network {
-    /** Every one, by URL: Supabase, Google Fonts, web sockets and anything else. */
+    /** Every one, by URL: Supabase, web sockets and anything else. */
     readonly blocked: string[] = [];
 
     /** Those to Supabase (sign-in and sync): none, for a guest. */
@@ -259,9 +259,7 @@ export const test = base.extend<AppOptions & AppFixtures>({
                     : route.fallback();
             }
             network.blocked.push(url.href);
-            // Google Fonts too: the build inlines their CSS, so it's the font files from
-            // fonts.gstatic.com that are stopped. The page falls back to the system's font, and
-            // icons show as their names (they're aria-hidden, so locators don't see them).
+            // The fonts are the app's own (public/fonts), so nothing else is needed for a page
             return route.abort('blockedbyclient');
         });
         await context.routeWebSocket(/.*/, (socket) => {

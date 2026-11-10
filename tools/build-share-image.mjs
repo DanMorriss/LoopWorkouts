@@ -24,10 +24,17 @@ await phone.waitForTimeout(3000);
 const screen = (await phone.screenshot()).toString('base64');
 
 const icon = readFileSync(new URL('../public/favicon.svg', import.meta.url), 'base64');
+const audiowide = readFileSync(
+    new URL('../public/fonts/audiowide-latin.woff2', import.meta.url),
+    'base64'
+);
 const card = await browser.newPage({ viewport: { width: 1200, height: 630 } });
 await card.setContent(`<!doctype html>
-<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet" />
 <style>
+    @font-face {
+        font-family: 'Audiowide';
+        src: url(data:font/woff2;base64,${audiowide}) format('woff2');
+    }
     body {
         margin: 0;
         width: 1200px;

@@ -36,6 +36,26 @@ test('the tab bar reaches each page, and back to Today', async ({ app, page, net
     expect(network.supabase).toEqual([]);
 });
 
+test("the fonts and icons are the app's own: a page asks nothing of any other server", async ({
+    app,
+    page,
+    network,
+}) => {
+    await app.goto('/home');
+    await page.evaluate(() => document.fonts.ready);
+
+    // Drawn in their fonts, not the system's or as an icon's name in letters
+    expect(
+        await page.evaluate(() => document.fonts.check('24px "Material Symbols Outlined"'))
+    ).toBe(true);
+    const loaded = await page.evaluate(() =>
+        [...document.fonts].filter((font) => font.status === 'loaded').map((font) => font.family)
+    );
+    expect(loaded).toContain('Material Symbols Outlined');
+    expect(loaded).toContain('Audiowide');
+    expect(network.blocked).toEqual([]);
+});
+
 test('a deep link opens its page', async ({ app, page }) => {
     await app.goto('/history');
 

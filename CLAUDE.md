@@ -59,7 +59,7 @@ Helpers that aren't about one component don't belong in a component's file, as i
 - **Every colour is a token** in `src/styles.scss`, set for both dark and light themes; `theme-contrast.spec.ts` checks them. For a see-through version use `color-mix(in srgb, var(--token) 30%, transparent)`. No raw hex or `rgba()` in a component's styles.
 - **Each class means one thing in a file.** A class name is on one kind of element, and defined in one place. Using the same name for two things lets the styles of one leak onto the other, and a parent's class beats a child's `:host` styles. The same goes for classes on a child component's element: only set spacing there.
 - **Mixins, not global classes,** for what only some pages need: the global styles are part of the first download.
-- **Budgets:** a component's styles fail the build over 4 kB, and the initial bundle over 500 kB. Fix that by moving a part into a child component rather than raising the limit. Anything on every page uses `app-icon`, not `mat-icon`. The icon font has only the icons the app uses: add a new one to `icon_names` in `index.html` (`npm run lint` says which), and use `icon-outline` rather than an `_outline` or `_border` name.
+- **Budgets:** a component's styles fail the build over 4 kB, and the initial bundle over 500 kB. Fix that by moving a part into a child component rather than raising the limit. Anything on every page uses `app-icon`, not `mat-icon`. The icon font (`public/fonts`, served from the app, not Google) has only the icons the app uses: after using a new icon, or the last of one, run `npm run icons` to rebuild it (`npm run lint` says when), and use `icon-outline` rather than an `_outline` or `_border` name.
 
 ## Accessibility
 

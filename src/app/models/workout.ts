@@ -331,6 +331,41 @@ export function withEachRepSet(
     return amounts.reduce<RepStep>((to, amount, set) => withRepSet(to, set, change(amount)), step);
 }
 
+/** A rep step's reps and weight for each of its `rounds` sets, from 1: its own, or the step's. */
+export function setAmountsOf(step: RepStep, rounds: number): RepSetAmount[] {
+    return Array.from({ length: rounds }, (_, set) => {
+        const { reps, weight } = stepForSet(step, set) as RepStep;
+        return { reps, ...(weight === undefined ? {} : { weight }) };
+    });
+}
+
+/**
+ * A rep step with each set's reps and weight, one for each set: the step's own, which every
+ * set has, where they're alike, or a list of them where they vary (BLD-11). Its other
+ * fields stay as they are.
+ */
+export function withSetAmounts(step: RepStep, amounts: readonly RepSetAmount[]): RepStep {
+    const { weight: _weight, sets: _sets, ...rest } = step;
+    const [first] = amounts;
+    const own: RepStep = {
+        ...rest,
+        reps: first.reps,
+        ...(first.weight === undefined ? {} : { weight: first.weight }),
+    };
+    const alike = amounts.every(
+        (amount) => amount.reps === first.reps && amount.weight === first.weight
+    );
+    return alike
+        ? own
+        : {
+              ...own,
+              sets: amounts.map(({ reps, weight }) => ({
+                  reps,
+                  ...(weight === undefined ? {} : { weight }),
+              })),
+          };
+}
+
 /** Steps as a workout's blocks: one group, run once a round, as workouts were before groups. */
 export function asOneGroup(steps: Step[]): Block[] {
     return [{ kind: 'group', rounds: 1, restSeconds: 0, steps }];

@@ -92,6 +92,11 @@
                 }
             </section>
 
+            @if (readyMade(); as ready) {
+                <!-- Its reps and weights, set before starting it: yours have Edit -->
+                <app-ready-made-amounts class="details__section" [workout]="ready" />
+            }
+
             <!-- Its steps, to see what's in it without opening Edit -->
             <section class="details__section" aria-labelledby="workout-details-steps">
                 <h3 id="workout-details-steps" class="details__heading">What's in it</h3>

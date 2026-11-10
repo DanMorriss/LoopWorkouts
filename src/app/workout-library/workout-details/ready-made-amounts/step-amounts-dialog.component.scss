@@ -1,0 +1,35 @@
+@use 'type' as *;
+
+.amounts__title {
+    @include dialog-title;
+    overflow-wrap: anywhere;
+}
+
+.amounts__hint {
+    margin: 0.5rem 0 1rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.amounts__sets {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.amounts__set-name {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--text-strong);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.amounts__save {
+    width: 100%;
+    margin-top: 1.25rem;
+}

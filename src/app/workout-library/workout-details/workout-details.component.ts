@@ -27,6 +27,7 @@ import { PlanStore } from '../../shared/state/plan-store.service';
 import { daysPlannedOn, WEEKDAYS } from '../../models/plan';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
+import { ReadyMadeAmountsComponent } from './ready-made-amounts/ready-made-amounts.component';
 
 /** How many of its latest runs it lists. */
 const RECENT_RUNS = 5;
@@ -51,6 +52,7 @@ const PLAN_BUTTON_ID = 'workout-details-plan';
         DatePipe,
         FavouriteButtonComponent,
         MatIconModule,
+        ReadyMadeAmountsComponent,
         ReadyMadeBadgeComponent,
         RouterLink,
         SwipeBackDirective,

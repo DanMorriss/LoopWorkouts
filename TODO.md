@@ -96,7 +96,7 @@ Eighteen ready-made workouts are listed on Workouts, under your own (see `docs/f
 
 - [x] **Keep your reps and weights on a ready-made workout** (2026-11-08): changed mid-workout, with Apply on the summary's Next time, or with Yes, use next time, without a copy; kept as a synced `ready-made-change` record, and put back with Reset reps and weights on its Details. Its exercises still take a copy, and the summary says so in plainer words.
 - [x] **Run `supabase/schema.sql` again** (done by Dan, 2026-11-08): `push_records()` takes the new kind `ready-made-change`.
-- [ ] **Change a ready-made workout's reps and weights before running it:** they change only from a run or its summary for now; Create opens only your own. A Create for a ready-made one with its exercises, steps and rounds locked, or wheels on its Details, would do it.
+- [x] **Change a ready-made workout's reps and weights before running it** (2026-11-10): its Details has **Your reps and weights**, each rep exercise opening a dialog of Reps and Weight wheels for each set, kept as the summary's Apply keeps them, with Undo (`ReadyMadeAmountsComponent`, `StepAmountsDialogComponent`, `WorkoutStore.setReadyMadeStep()`). Timed steps (a plank's time, say) still change only from a run.
 
 - [ ] **Dan to review the first batch:** the exercises, sets, reps and rests of each, and their descriptions. Ids are fixed once released, so rename before merging if a title changes.
 - [ ] **Dan to review the second batch** (2026-11-03): Tabata, Kettlebell AMRAP, Dumbbell upper and lower, Gym full body, Gym extras, Pull-up bar and dips, and Step circuit. As for the first, ids are fixed once released.

@@ -1,0 +1,75 @@
+@use 'interaction' as *;
+
+:host {
+    display: block;
+}
+
+.amounts__heading {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    color: var(--text-strong);
+}
+
+.amounts__text {
+    margin: 0 0 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.amounts__lines {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+    overflow: hidden;
+
+    li + li {
+        border-top: 1px solid var(--border-soft);
+    }
+}
+
+// An exercise and its sets, the whole row pressed to change them
+.amounts__line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0 0.6rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.55rem 0.75rem;
+    border: 0;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    @include hover {
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+    }
+    @include pressed {
+        background: color-mix(in srgb, var(--accent) 14%, transparent);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+    }
+}
+
+.amounts__name {
+    color: var(--text-strong);
+    overflow-wrap: anywhere;
+}
+
+.amounts__amount {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+.amounts__edit {
+    color: var(--text-muted);
+    font-size: 20px;
+}

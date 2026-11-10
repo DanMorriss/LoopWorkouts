@@ -1,7 +1,7 @@
 import { expect, group, heading, reps, rest, run, seed, test, timed, workout } from './fixtures';
 import { HistoryPage } from './history-page';
 import { LibraryPage } from './library-page';
-import { WorkoutPage } from './workout-page';
+import { setWheel, WorkoutPage } from './workout-page';
 
 // Workouts, your own and the ready-made ones on one list (library.md): REG-LIB in
 // docs/regression-tests.md.
@@ -367,6 +367,41 @@ test.describe('ready-made workouts', () => {
             await expect(page).toHaveURL('/library');
             await app.goto('/library/builtin:nope');
             await expect(page.getByText('Workout not found')).toBeVisible();
+        }
+    );
+});
+
+test.describe("a ready-made workout's reps and weights", () => {
+    test(
+        'REG-LIB-10 set them on its Details before running it',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            await app.goto('/library/builtin:gym-legs');
+            const amounts = page.getByRole('region', { name: 'Your reps and weights' });
+            const squat = amounts.getByRole('button', { name: /^Change Back squat/ });
+            await expect(squat).toHaveAccessibleName('Change Back squat, 12, 10, 8');
+
+            await squat.click();
+            const dialog = page.getByRole('dialog', { name: 'Back squat' });
+            for (const set of [1, 2, 3]) {
+                await setWheel(
+                    dialog.getByRole('spinbutton', { name: `Back squat Set ${set} Weight (kg)` }),
+                    60,
+                    0.5
+                );
+            }
+            await dialog.getByRole('button', { name: 'Save' }).click();
+            await expect(dialog).toBeHidden();
+            await expect(squat).toHaveAccessibleName('Change Back squat, 12, 10, 8 @ 60 kg');
+            await expect(app.undoBar).toContainText('Back squat: 12, 10, 8 @ 60 kg');
+            await expect(page.getByText('With your own reps and weights.')).toBeVisible();
+
+            // The workout starts with them, as it is: no copy made
+            await page.getByRole('button', { name: 'Start Gym legs' }).click();
+            const run = new WorkoutPage(page);
+            await expect(page).toHaveURL('/workout');
+            await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '60');
+            expect(await app.stored('workouts')).toBeNull();
         }
     );
 });

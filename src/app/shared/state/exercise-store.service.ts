@@ -1,6 +1,6 @@
 import { computed, inject, Service, signal } from '@angular/core';
-import { BUILT_IN_EXERCISES } from '../../models/built-in-exercises';
 import {
+    BuiltInExercise,
     EquipmentNeed,
     Exercise,
     ExerciseNote,
@@ -20,6 +20,7 @@ import {
 import { ExerciseFinder, findByName } from '../../models/exercise-links';
 import { ExerciseMotion } from '../../models/exercise-motion';
 import { Deletion, mergeRecords, newId, readMark } from '../../models/sync';
+import { loadBuiltInExercises, loadedBuiltInExercises } from './built-in-exercises-loader';
 import { DeletionStore } from './deletion-store.service';
 import { SyncClock } from './sync-clock.service';
 import { migrateSavedData } from './migrate';
@@ -30,7 +31,10 @@ export const HIDDEN_EXERCISES_KEY = 'hidden-exercises';
 
 /**
  * Every exercise: the built-in ones (EXR-6) and your own (EXR-9), saved in the browser, your
- * notes on any of them (EXR-10), and which are hidden from the picker.
+ * notes on any of them (EXR-10), and which are hidden from the picker. The built-in ones
+ * aren't in the first download: `load()` brings them, and the pages that show or save
+ * exercises wait for it (`exercisesLoaded` in app.routes.ts), as does anything that links
+ * steps to exercises by name, which would otherwise make one of your own for a built-in name.
  */
 @Service()
 export class ExerciseStore {
@@ -43,11 +47,21 @@ export class ExerciseStore {
 
     /** Your own exercises, oldest first. */
     readonly own = computed(() => this._own());
-    /** The built-in exercises, then your own. */
-    readonly exercises = computed<readonly Exercise[]>(() => [
-        ...BUILT_IN_EXERCISES,
-        ...this._own(),
-    ]);
+    /** The built-in exercises, once `load()` has them: at once if they've loaded before. */
+    private readonly builtIn = signal<readonly BuiltInExercise[]>(loadedBuiltInExercises());
+    /** Whether the built-in exercises are here. */
+    readonly loaded = computed(() => this.builtIn().length > 0);
+
+    /**
+     * Loads the built-in exercises, if they aren't here yet; `exercises()` has them once it
+     * settles. Failing (e.g. offline, on a page not yet downloaded), it can be tried again.
+     */
+    async load(): Promise<void> {
+        this.builtIn.set(await loadBuiltInExercises());
+    }
+
+    /** The built-in exercises, once loaded, then your own. */
+    readonly exercises = computed<readonly Exercise[]>(() => [...this.builtIn(), ...this._own()]);
     readonly notes = computed(() => this._notes());
     private readonly _hidden = signal<HiddenExercise[]>(
         loadList(HIDDEN_EXERCISES_KEY, readHiddenExercise)
@@ -59,7 +73,13 @@ export class ExerciseStore {
     readonly finder: ExerciseFinder = {
         find: (name) => findByName(name, this.exercises()),
         byId: (id) => this.byId(id),
-        create: (name, measuredBy) => this.addOwn(name, measuredBy),
+        create: (name, measuredBy) => {
+            // A name not found yet may be a built-in one's, still to come
+            if (!this.loaded()) {
+                throw new Error('Linking exercises by name before the built-in ones are loaded');
+            }
+            return this.addOwn(name, measuredBy);
+        },
     };
 
     /** The built-in exercises' words, once `loadText()` has them. */

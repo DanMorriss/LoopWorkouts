@@ -186,7 +186,7 @@ Which shape the rest is in: `5`. Missing means 1, from before it was saved. On l
 
 The run in progress in a tab moves too (`activeTimerId`, `activeTimerStartedAt` and `activeTimerPausedAt` become the `activeWorkout…` keys below). That's done whenever a tab loads rather than once, since each tab has its own.
 
-**2 → 3, exercises (EXR-4):** each named work step in a workout, and each named set in the history, gets the `exerciseId` its name means: a built-in exercise where the name, or one of its other names, matches (ignoring case, spaces and a plural "s"), and otherwise a new exercise of your own, one per name, measured by reps for a rep step and by time for a timed one. Rest and unnamed steps aren't linked.
+**2 → 3, exercises (EXR-4):** each named work step in a workout, and each named set in the history, gets the `exerciseId` its name means: a built-in exercise where the name, or one of its other names, matches (ignoring case, spaces and a plural "s"), and otherwise a new exercise of your own, one per name, measured by reps for a rep step and by time for a timed one. Rest and unnamed steps aren't linked. As the built-in exercises aren't in the first download (since 2026-11-10), a device with workouts or history to convert this way loads them before the app starts (`prepareSavedData()` in `migrate.ts`); the conversion never runs without them, as it would make an exercise of your own for every built-in name. Other devices don't wait.
 
 ### `settings`
 

@@ -197,7 +197,8 @@ export class SyncService {
         }
         this.status.update((status) => ({ ...status, syncing: true }));
         try {
-            await this.history.ready;
+            // What's pulled is linked to the built-in exercises by name, so they're needed too
+            await Promise.all([this.history.ready, this.exercises.load()]);
             const tooNew = await this.pull(client, state);
             await this.push(client, state);
             if (state !== this.state) {

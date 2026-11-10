@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { at, expect, run, seed, test, timed, workout, type Workout } from './fixtures';
+import { at, expect, reps, run, seed, test, timed, workout, type Workout } from './fixtures';
 import { CreatePage } from './create-page';
 import { HistoryPage } from './history-page';
 import { WorkoutPage } from './workout-page';
@@ -279,6 +279,35 @@ test.describe('offline', () => {
             const plan = await app.stored<{ days: string[][] }>('week-plan');
             expect(plan?.days[3]).toHaveLength(1);
             expect(network.supabase).toEqual([]);
+        }
+    );
+});
+
+test.describe('data saved by an older version of the app', () => {
+    // Version 2's: a workout's steps in one list, not linked to exercises yet, which version 3
+    // does by name, to the built-in exercises, which aren't in the first download
+    const { blocks: _blocks, ...squats } = workout('Squat day', {
+        steps: [reps(10, 'Back squat')],
+    });
+    const saved = { ...squats, steps: [reps(10, 'Back squat')] };
+    test.use({ storage: { 'data-version': '2', workouts: JSON.stringify([saved]) } });
+
+    test(
+        'REG-DATA-06 an old device is brought up to date, its steps linked to built-in exercises',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            await app.goto('/library/squat-day');
+
+            await expect(page.getByRole('heading', { name: 'Squat day' })).toBeVisible();
+            await expect(page.getByText('None of its steps is an exercise yet.')).toHaveCount(0);
+            const now = await app.stored<Workout[]>('workouts');
+            const steps = now?.[0].blocks.flatMap((block) =>
+                block.kind === 'group' ? block.steps : []
+            );
+            expect(steps?.map((step) => step.exerciseId)).toEqual(['builtin:back-squat']);
+            // Linked to the built-in one, not a copy of your own
+            expect(await app.stored('exercises')).toBeNull();
+            expect(await app.storageItem('data-version')).toBe('5');
         }
     );
 });

@@ -1,9 +1,9 @@
-import { BUILT_IN_EXERCISES } from '../../models/built-in-exercises';
-import { Exercise, MeasuredBy, OwnExercise } from '../../models/exercise';
+import { BuiltInExercise, Exercise, MeasuredBy, OwnExercise } from '../../models/exercise';
 import { ExerciseFinder, findByName, linkSets, linkSteps } from '../../models/exercise-links';
 import { isLoggedSet } from '../../models/history';
 import { Deletion, newId } from '../../models/sync';
 import { asOneGroup, Step } from '../../models/workout';
+import { loadBuiltInExercises, loadedBuiltInExercises } from './built-in-exercises-loader';
 
 /** Which shape the saved data is in. Missing means 1, from before this was saved. */
 const VERSION_KEY = 'data-version';
@@ -13,14 +13,48 @@ export const DATA_VERSION = 5;
 export const LEGACY_WORKOUT_IDS_KEY = 'legacy-workout-ids';
 
 /**
+ * Whether bringing the saved data up to date needs the built-in exercises (version 3 links
+ * saved steps and sets to them by name), which aren't in the first download: then
+ * `prepareSavedData()` loads them first. Only on a device with workouts or history saved in
+ * a shape older than version 3.
+ */
+export function needsBuiltInExercises(): boolean {
+    const version = Number(localStorage.getItem(VERSION_KEY) ?? 1);
+    return (
+        version < 3 &&
+        ['workouts', 'timers', 'history'].some((key) => localStorage.getItem(key) !== null)
+    );
+}
+
+/**
+ * Brings the saved data up to date before the app starts, loading the built-in exercises
+ * first if that needs them. Run once, as the app starts; the stores' own calls to
+ * `migrateSavedData()` then find nothing left to do.
+ */
+export async function prepareSavedData(): Promise<void> {
+    if (needsBuiltInExercises()) {
+        migrateSavedData(Date.now(), await loadBuiltInExercises());
+    }
+}
+
+/**
  * Brings data saved by an older version of the app up to date, once, before anything reads
  * it, a version at a time (see docs/features/data.md). Anything unreadable is left as it is:
- * the stores drop what they can't use.
+ * the stores drop what they can't use. Saved data from before version 3 needs `builtIn`, the
+ * built-in exercises, to link to (`prepareSavedData()` loads them, and once loaded they're
+ * used), and isn't touched without them, as linking it to your own exercises alone would
+ * make a copy of each.
  */
-export function migrateSavedData(now = Date.now()) {
+export function migrateSavedData(
+    now = Date.now(),
+    builtIn: readonly BuiltInExercise[] = loadedBuiltInExercises()
+) {
     const version = Number(localStorage.getItem(VERSION_KEY) ?? 1);
     if (version >= DATA_VERSION) {
         return;
+    }
+    if (builtIn.length === 0 && needsBuiltInExercises()) {
+        throw new Error('Saved data from before version 3 needs the built-in exercises');
     }
     // Only names change in version 4, so it goes first and the other steps use the new ones
     if (version < 4) {
@@ -30,7 +64,7 @@ export function migrateSavedData(now = Date.now()) {
         toVersion2(now);
     }
     if (version < 3) {
-        toVersion3(now);
+        toVersion3(now, builtIn);
     }
     if (version < 5) {
         toVersion5();
@@ -100,9 +134,9 @@ export function renameActiveRunKeys() {
  * history, is linked to the exercise its name means, built-in where one matches and
  * otherwise a new one of your own, one per name.
  */
-function toVersion3(now: number) {
+function toVersion3(now: number, builtIn: readonly BuiltInExercise[]) {
     const own = (readList('exercises') ?? []).filter(isOwnExercise);
-    const finder = listFinder(own, now);
+    const finder = listFinder(builtIn, own, now);
     const workouts = readList('workouts');
     if (workouts) {
         localStorage.setItem(
@@ -126,8 +160,12 @@ function toVersion3(now: number) {
  * Finds exercises among the built-in ones and `own`, and makes new ones of your own into
  * `own`, for linking saved data before the exercise store is there to do it.
  */
-export function listFinder(own: OwnExercise[], now: number): ExerciseFinder {
-    const all = () => [...BUILT_IN_EXERCISES, ...own] as Exercise[];
+export function listFinder(
+    builtIn: readonly BuiltInExercise[],
+    own: OwnExercise[],
+    now: number
+): ExerciseFinder {
+    const all = () => [...builtIn, ...own] as Exercise[];
     return {
         find: (name) => findByName(name, all()),
         byId: (id) => all().find((exercise) => exercise.id === id),

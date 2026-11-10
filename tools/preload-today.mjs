@@ -1,5 +1,6 @@
-// Preloads Today's chunk and the chunks it imports when the page opens on Today, so a phone
-// fetches them alongside main rather than one round trip after another (the page, main,
+// Preloads Today's chunk and the chunks it imports when the page opens on Today, and the
+// built-in exercises' (which Today waits for, though they aren't in the first download), so
+// a phone fetches them alongside main rather than one round trip after another (the page, main,
 // Today's chunk, then what that imports). Run by `npm run build`, after `ng build`, which
 // writes the chunk graph to browser-stats.json (`statsJson` in angular.json): chunk names
 // change with every build, so index.html can't name them itself.
@@ -13,6 +14,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const ENTRY = 'src/app/home/home.component.ts';
+// Loaded on demand (ExerciseStore.load()), but Today waits for it, so it comes too
+const EXERCISES = 'src/app/models/built-in-exercises.ts';
 
 const dist = new URL('../dist/loop-workouts/', import.meta.url).pathname;
 const { outputs } = JSON.parse(readFileSync(join(dist, 'browser-stats.json'), 'utf8'));
@@ -40,6 +43,12 @@ const visit = (file) => {
     }
 };
 visit(name(today));
+const exercises = Object.entries(outputs).find(([, out]) => EXERCISES in (out.inputs ?? {}))?.[0];
+if (!exercises) {
+    console.error(`preload-today: no chunk for ${EXERCISES} in browser-stats.json`);
+    process.exit(1);
+}
+visit(name(exercises));
 
 const script =
     `if (/^\\/(home)?$/.test(location.pathname)) for (const href of ${JSON.stringify(preload)}) ` +

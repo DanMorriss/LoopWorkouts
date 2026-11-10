@@ -261,6 +261,55 @@ test.describe('the plan page suggests a workout', () => {
             ).toHaveAttribute('aria-pressed', 'true');
         }
     );
+
+    test(
+        'REG-LIB-09 Add to a day: the suggestion on several days at once, with Undo',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/plan');
+            const missing = page.getByRole('region', { name: 'Missing muscle groups' });
+            const add = missing.getByRole('button', { name: 'Plan Gym extras on a day' });
+            await add.click();
+            const dialog = page.getByRole('dialog', { name: 'Plan Gym extras on…' });
+            await expect(dialog).toBeVisible();
+            // Each day says what's on it already, and the muscles those work
+            await expect(dialog.getByRole('button', { name: /^Monday/ })).toContainText(
+                'Squat day: Glutes, Quads'
+            );
+            const tuesday = dialog.getByRole('button', { name: /^Tuesday/ });
+            const saturday = dialog.getByRole('button', { name: /^Saturday/ });
+            await tuesday.click();
+            await saturday.click();
+            await expect(tuesday).toHaveAttribute('aria-pressed', 'true');
+            await expect(saturday).toHaveAttribute('aria-pressed', 'true');
+            await dialog.getByRole('button', { name: 'Done' }).click();
+            await expect(dialog).toBeHidden();
+
+            await expect(app.undoBar).toContainText('Gym extras planned on Tuesday and Saturday');
+            for (const name of ['Tuesday', 'Saturday']) {
+                await expect(
+                    page.getByRole('region', { name, exact: true }).getByRole('listitem')
+                ).toContainText(['Gym extras']);
+            }
+            // Planned now, so another is suggested for what's left
+            await expect(missing).not.toContainText('Gym extras');
+            const plan = await app.stored<{ days: string[][] }>('week-plan');
+            expect(plan?.days[1]).toEqual(['builtin:gym-extras']);
+            expect(plan?.days[5]).toEqual(['builtin:gym-extras']);
+
+            await app.undo.click();
+            await expect(missing).toContainText('Gym extras');
+            await expect(page.getByRole('region', { name: 'Tuesday', exact: true })).toContainText(
+                'Nothing planned'
+            );
+            // Back on the first of those days' Add
+            await expect(
+                page.getByRole('button', { name: 'Add a workout to Tuesday' })
+            ).toBeFocused();
+            const undone = await app.stored<{ days: string[][] }>('week-plan');
+            expect(undone?.days.flat()).toEqual(['squat-day', 'bench-day']);
+        }
+    );
 });
 
 test.describe('ready-made workouts', () => {

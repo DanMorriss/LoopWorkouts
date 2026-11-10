@@ -1,17 +1,14 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { formatWeight, weightIn } from '../models/weight';
 import {
-    GroupSet,
     hasSets,
     RepStep,
     repStepsPerRound,
     runPlan,
     runsUntilStopped,
-    Side,
     sideName,
     stepKindName,
     StepKind,
-    Workout,
     workoutSeconds,
 } from '../models/workout';
 import { formatSeconds } from '../shared/format-time';
@@ -19,15 +16,9 @@ import { ActiveRunService } from '../shared/run/active-run.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
-import { RoundDot } from './round-dots/round-dots.component';
 import { StripStep } from './step-strip/step-strip.component';
 import { placeAt, WorkoutState } from '../models/workout-state';
-
-/** Which set it is, e.g. "set 2 of 3", or a superset's round, "superset round 2 of 3". */
-export function setText(set: GroupSet): string {
-    const count = `${set.set + 1} of ${set.of}`;
-    return set.group === 'exercise' ? `set ${count}` : `${set.group} round ${count}`;
-}
+import { roundDots, secondSide, setDots, setOf, setText, startsSet } from './round-progress';
 
 /** Each kind of step's icon by its name, so the kinds aren't told apart by colour alone. */
 const KIND_ICONS: Record<StepKind, string> = {
@@ -38,9 +29,6 @@ const KIND_ICONS: Record<StepKind, string> = {
 
 // The countdown of a timed step pops on each of its last this many seconds
 const POP_SECONDS = 3;
-
-// Above this many rounds, the dots under "round 2 of 20" would wrap on a phone, so only the line shows
-const MAX_ROUND_DOTS = 15;
 
 /**
 
@@ -148,7 +136,7 @@ export class WorkoutView {
         const state = this.state();
         const workout = this.running();
         return state && workout && state.phase !== 'complete'
-            ? this.setOf(workout, state.stepIndex)
+            ? setOf(workout, state.stepIndex)
             : null;
     });
 
@@ -255,11 +243,11 @@ export class WorkoutView {
         const workout = this.running();
         // Which set, as one starts: a superset's other steps are in the round already said
         const set =
-            step.kind !== 'rest' && workout && this.startsSet(workout, next.stepIndex)
-                ? this.setOf(workout, next.stepIndex)
+            step.kind !== 'rest' && workout && startsSet(workout, next.stepIndex)
+                ? setOf(workout, next.stepIndex)
                 : null;
         // A step's second side is the same exercise again, so it's only the side
-        const side = workout && this.secondSide(workout, next.stepIndex);
+        const side = workout && secondSide(workout, next.stepIndex);
         const name = side
             ? sideName(side)
             : `${step.name || stepKindName(step.kind)}${set ? ` · ${setText(set)}` : ''}`;
@@ -340,7 +328,7 @@ export class WorkoutView {
                 last: set
                     ? set.set === set.of - 1 && !this.restingAfterSet()
                     : this.repeats() === 1,
-                dots: set ? this.setDots(set) : this.totalRounds() > 1 ? this.roundDots() : [],
+                dots: set ? setDots(set) : this.totalRounds() > 1 ? this.roundDots() : [],
                 strip: this.stepStrip(),
             },
         ];
@@ -371,49 +359,6 @@ export class WorkoutView {
         const { sets } = runPlan(workout);
         return sets.indexOf(sets[state.stepIndex]);
     });
-
-    /** One dot per set, as for rounds, when there are few enough to fit. */
-    private setDots(set: GroupSet): RoundDot[] {
-        if (set.of > MAX_ROUND_DOTS) {
-            return [];
-        }
-        return Array.from({ length: set.of }, (_, i) =>
-            i === set.set ? 'current' : i < set.set ? 'done' : 'left'
-        );
-    }
-
-    /**
-     * The side of step `stepIndex` of the round, when it's a step's second side in its set:
-     * the side before it, maybe with Switch sides between, is the same step and set.
-     */
-    private secondSide(workout: Workout, stepIndex: number): Side | null {
-        const { places } = runPlan(workout);
-        const place = places[stepIndex];
-        let i = stepIndex - 1;
-        while (i >= 0 && places[i] === null) {
-            i--;
-        }
-        const before = places[i];
-        return place?.side && before?.step === place.step && before.set === place.set
-            ? place.side
-            : null;
-    }
-
-    /** Whether step `stepIndex` of the round is the first of its set (or a superset's round). */
-    private startsSet(workout: Workout, stepIndex: number): boolean {
-        const { places, sets } = runPlan(workout);
-        return (
-            places.findIndex((place, i) => place !== null && sets[i] === sets[stepIndex]) ===
-            stepIndex
-        );
-    }
-
-    /** The set step `stepIndex` of the round is in, for an exercise of more than one. */
-
-    private setOf(workout: Workout, stepIndex: number): GroupSet | null {
-        const set = runPlan(workout).sets[stepIndex];
-        return set && set.of > 1 ? set : null;
-    }
 
     /**
      * The round's steps as a strip in their kinds' colours: done, the one in progress, and
@@ -448,19 +393,7 @@ export class WorkoutView {
     );
 
     /** One dot per round, for workouts short enough for a row of them to fit on a phone. */
-    readonly roundDots = computed((): RoundDot[] => {
-        const total = this.totalRounds();
-        if (total > MAX_ROUND_DOTS) {
-            return [];
-        }
-        const current = this.roundNumber() - 1;
-        return Array.from({ length: total }, (_, i) => {
-            if (i === current) {
-                return 'current';
-            }
-            return i < current ? 'done' : 'left';
-        });
-    });
+    readonly roundDots = computed(() => roundDots(this.totalRounds(), this.roundNumber() - 1));
 
     // The ring sweep is a CSS animation that runs for the whole step, so the browser can
     // animate it without repainting. This only changes when a new step starts, which

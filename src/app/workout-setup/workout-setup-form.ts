@@ -24,7 +24,6 @@ import {
     stepForSet,
     StepKind,
     stepKindName,
-    supersetName,
     UNTIL_STOPPED,
     Workout,
     WorkoutFields,
@@ -32,7 +31,6 @@ import {
 import { PageSlide } from '../nav/page-slide';
 import { WheelPickerOption } from '../shared/components/wheel-picker/wheel-picker.component';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
-import { counted } from '../shared/format-count';
 import { changeSmoothly } from '../shared/layout-change';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
@@ -43,19 +41,16 @@ import { UndoService } from '../shared/undo/undo.service';
 import {
     DEFAULT_TIME_LIMIT_MINUTES,
     hasAmount,
-    isExercise,
     isStep,
     lonelyStepsOut,
     moved,
     NAME_EXAMPLES,
-    ownExercise,
     padded,
     partEnd,
     pickerOptions,
     RepeatMode,
     rowHasAmount,
     rowOf,
-    rowTime,
     StepModel,
     timeLimitSeconds,
     toBlocks,
@@ -64,6 +59,16 @@ import {
     withSets,
     WorkoutSetupModel,
 } from './step-model';
+import {
+    amountText,
+    setRowText,
+    stepNumbers,
+    stepTitle,
+    summaryName,
+    supersetNameAt,
+    supersetSteps,
+    toggleLabel,
+} from './step-text';
 
 /**
  * Create's form: the workout being set up, as rows (see StepModel), its checks, and what can be
@@ -109,7 +114,7 @@ export class WorkoutSetupForm {
     private nextKey = 1;
     readonly model = signal<WorkoutSetupModel>(this.emptySetup());
     /** Keys of the steps showing their name box and wheels; the rest show a one-line summary. */
-    private readonly expandedKeys = signal<ReadonlySet<number>>(this.allKeys());
+    readonly expandedKeys = signal<ReadonlySet<number>>(this.allKeys());
 
     readonly workoutForm = form(
         this.model,
@@ -299,130 +304,32 @@ export class WorkoutSetupForm {
         return this.stepNumbers()[index];
     }
 
-    /**
-     * Each row's step number, a heading or a superset's own row having the number of the step
-     * before it.
-     */
-    private readonly stepNumbers = computed(() => {
-        let count = 0;
-        return this.model().steps.map((step) => (isStep(step) ? ++count : count));
-    });
+    /** Each row's step number (see `stepNumbers()`). */
+    private readonly stepNumbers = computed(() => stepNumbers(this.model().steps));
 
     /** The steps of the superset whose own row is at `index`, in order. */
-    private supersetSteps(index: number): StepModel[] {
-        const key = this.model().steps[index].key;
-        return this.model().steps.filter((step) => step.group === key);
+    supersetSteps(index: number): StepModel[] {
+        return supersetSteps(this.model().steps, index);
     }
 
-    /** "Superset" or "Giant set", by how many exercises the one at `index` has (BLD-12). */
+    // What a row says (step-text.ts)
     supersetName(index: number): string {
-        return supersetName(this.supersetSteps(index).filter(isStep));
+        return supersetNameAt(this.model().steps, index);
     }
-
-    /**
-     * How a step is named to screen readers, e.g. "Step 2, rest" or "Step 1, Squats"; a
-     * heading is "Heading, Warmup", and a superset "Superset, steps 2 to 3".
-     */
     stepTitle(index: number): string {
-        const step = this.model().steps[index];
-        if (step.kind === 'heading') {
-            return step.name.trim() ? `Heading, ${step.name.trim()}` : 'Heading';
-        }
-        if (step.kind === 'superset') {
-            const first = this.stepNumber(index) + 1;
-            const last = first + this.supersetSteps(index).length - 1;
-            return `${this.supersetName(index)}, steps ${first} to ${last}`;
-        }
-        return `Step ${this.stepNumber(index)}, ${step.name.trim() || stepKindName(step.kind).toLowerCase()}`;
+        return stepTitle(this.model().steps, index, this.stepNumbers());
     }
-
-    /** What a row's open button says: its title and amount, and the superset it's in. */
     toggleLabel(index: number): string {
-        const step = this.model().steps[index];
-        const time = this.amountText(step);
-        const head = this.model().steps.findIndex((row) => row.key === step.group);
-        const inSuperset = head === -1 ? '' : `, in the ${this.supersetName(head).toLowerCase()}`;
-        return `${this.stepTitle(index)}${inSuperset}${time ? `, ${time}` : ''}`;
+        return toggleLabel(this.model().steps, index, this.stepNumbers(), this.weightUnit);
     }
-
-    /** What a collapsed row shows as its name: a superset's is its steps', e.g. "Bench, Row". */
     summaryName(index: number): string {
-        const step = this.model().steps[index];
-        if (step.kind !== 'superset') {
-            return step.name.trim();
-        }
-        return this.supersetSteps(index)
-            .map((member) => member.name.trim() || stepKindName(member.kind as StepKind))
-            .join(', ');
+        return summaryName(this.model().steps, index);
     }
-
-    /**
-     * How much of a step there is, as its wheels show it: e.g. "02:15", "20 reps", or
-     * "10 reps @ 60 kg", and "each side" for one done each side. A superset's is its rounds and
-     * rest, e.g. "3 rounds · rest 01:00"; a step in one has its own amount, its rounds being
-     * the superset's.
-     */
     amountText(step: StepModel): string {
-        if (step.kind === 'heading') {
-            return '';
-        }
-        const rest = step.restMinutes * 60 + step.restSeconds;
-        const restText =
-            rest > 0 ? ` · rest ${padded(step.restMinutes)}:${padded(step.restSeconds)}` : '';
-        if (step.kind === 'superset') {
-            return step.sets === 1 ? '1 round' : `${step.sets} rounds${restText}`;
-        }
-        const sets = step.kind !== 'rest' && step.sets > 1 && !step.group;
-        const eachSide = step.kind !== 'rest' && step.eachSide ? ' each side' : '';
-        const weight = step.weight > 0 ? ` @ ${step.weight} ${this.weightUnit}` : '';
-        const time = `${padded(step.minutes)}:${padded(step.seconds)}`;
-        if (!sets && varies(step)) {
-            return `${this.variedText(step)}${eachSide}`;
-        }
-        if (!sets) {
-            if (step.kind === 'reps') {
-                return `${counted(step.reps, 'rep')}${weight}${eachSide}`;
-            }
-            return `${time}${eachSide}`;
-        }
-        // As the history says sets, e.g. "3 × 10 @ 60 kg", or each set's where they vary, e.g.
-        // "12, 10, 8 @ 40–50 kg", with the rest between them
-        const amount = varies(step)
-            ? this.variedText(step)
-            : `${step.sets} × ${step.kind === 'reps' ? `${step.reps}${weight}` : time}`;
-        return `${amount}${eachSide}${restText}`;
+        return amountText(step, this.weightUnit);
     }
-
-    /** Sets that vary, e.g. "12, 10, 8 @ 40–50 kg", or "00:30, 00:45, 01:00". */
-    private variedText(step: StepModel): string {
-        const rows = step.setRows;
-        if (step.kind !== 'reps') {
-            return rows.map(rowTime).join(', ');
-        }
-        const weights = rows.map((row) => row.weight).filter((weight) => weight > 0);
-        const low = Math.min(...weights);
-        const high = Math.max(...weights);
-        const weight =
-            weights.length === 0
-                ? ''
-                : ` @ ${low === high ? low : `${low}–${high}`} ${this.weightUnit}`;
-        return `${rows.map((row) => row.reps).join(', ')}${weight}`;
-    }
-
-    /**
-     * A set's row, e.g. "Set 2 · 10 × 45 kg", "Set 2 · 10 reps" or "Set 2 · 00:45"; in a
-     * superset, a round's, e.g. "Round 2 · 10 reps".
-     */
     setRowText(step: StepModel, set: number): string {
-        const row = step.setRows[set];
-        const name = `${step.group ? 'Round' : 'Set'} ${set + 1}`;
-        if (step.kind !== 'reps') {
-            return `${name} · ${rowTime(row)}`;
-        }
-        if (row.weight > 0) {
-            return `${name} · ${row.reps} × ${row.weight} ${this.weightUnit}`;
-        }
-        return `${name} · ${counted(row.reps, 'rep')}`;
+        return setRowText(step, set, this.weightUnit);
     }
 
     /**
@@ -448,116 +355,6 @@ export class WorkoutSetupForm {
         } else {
             change();
         }
-    }
-
-    /**
-     * Whether Join with next can join this exercise, or superset, with the exercise straight
-     * after it (BLD-12).
-     */
-    canJoin(index: number): boolean {
-        const rows = this.model().steps;
-        const row = rows[index];
-        const next = rows[partEnd(rows, index)];
-        return (
-            row.group === 0 &&
-            (row.kind === 'superset' || isExercise(row)) &&
-            next !== undefined &&
-            next.group === 0 &&
-            isExercise(next)
-        );
-    }
-
-    /**
-     * Join with next: an exercise and the next become a superset, with the first's sets as its
-     * rounds and its rest between sets as the rest between them; on a superset, the next
-     * exercise joins it, making it a giant set.
-     */
-    joinWithNext(index: number) {
-        if (!this.canJoin(index)) {
-            return;
-        }
-        const rows = this.model().steps;
-        const row = rows[index];
-        const end = partEnd(rows, index);
-        const next = rows[end];
-        const head: StepModel =
-            row.kind === 'superset'
-                ? row
-                : {
-                      ...this.newStep(),
-                      kind: 'superset',
-                      sets: row.sets,
-                      restMinutes: row.restMinutes,
-                      restSeconds: row.restSeconds,
-                  };
-        const joined = { ...withSets(next, head.sets), group: head.key };
-        const before = rows.slice(0, index);
-        const after = rows.slice(end + 1);
-        this.smoothChange(() => {
-            this.updateSteps(() =>
-                row.kind === 'superset'
-                    ? [...before, ...rows.slice(index, end), joined, ...after]
-                    : [...before, head, { ...row, group: head.key }, joined, ...after]
-            );
-            this.expandedKeys.update((keys) => new Set([...keys, head.key]));
-        });
-        const at = this.model().steps.indexOf(head);
-        this.stepAnnouncement.set(
-            `${this.stepTitle(at)}, ${this.amountText(head)}: ${this.summaryName(at)}`
-        );
-        this.focusAfterRender(`step-${head.key}-toggle`);
-    }
-
-    /**
-     * Take out: a superset's step becomes an exercise of its own just after it, with its rounds
-     * as its sets and its rest between them. A superset left with one step becomes that one's
-     * exercise the same way.
-     */
-    takeOut(index: number) {
-        const rows = this.model().steps;
-        const step = rows[index];
-        const head = rows.findIndex((row) => row.key === step.group);
-        if (head === -1) {
-            return;
-        }
-        const name = step.name.trim() || stepKindName(step.kind as StepKind).toLowerCase();
-        const supersetName = this.supersetName(head).toLowerCase();
-        const end = partEnd(rows, head);
-        const out = ownExercise(step, rows[head]);
-        this.smoothChange(() =>
-            this.updateSteps(() =>
-                lonelyStepsOut(
-                    [
-                        ...rows.slice(0, index),
-                        ...rows.slice(index + 1, end),
-                        out,
-                        ...rows.slice(end),
-                    ],
-                    step.group
-                )
-            )
-        );
-        this.stepAnnouncement.set(
-            `Took ${name} out of the ${supersetName}, now step ${this.stepNumber(this.model().steps.findIndex((row) => row.key === step.key))}`
-        );
-        this.focusAfterRender(`step-${step.key}-toggle`);
-    }
-
-    /** + Step in a superset: a rep step at its end, with its rounds. */
-    addToSuperset(index: number) {
-        if (this.stepCount() >= MAX_STEPS) {
-            return;
-        }
-        const rows = this.model().steps;
-        const head = rows[index];
-        const end = partEnd(rows, index);
-        const step: StepModel = { ...this.newStep(), group: head.key, sets: head.sets };
-        this.updateSteps(() => [...rows.slice(0, end), step, ...rows.slice(end)]);
-        this.expandedKeys.set(new Set([head.key, step.key]));
-        this.stepAnnouncement.set(
-            `Added a rep step to the ${this.supersetName(index).toLowerCase()}, step ${this.stepNumber(end)}`
-        );
-        this.focusAfterRender(`step-${step.key}-name`);
     }
 
     /**
@@ -625,7 +422,7 @@ export class WorkoutSetupForm {
      * places, rather than the page jumping (and rather than animating a step's height, which
      * would lay the page out again every frame).
      */
-    private smoothChange(change: () => void) {
+    smoothChange(change: () => void) {
         changeSmoothly(
             this.host.nativeElement,
             'form > *, .step, .wheel-row',
@@ -888,7 +685,8 @@ export class WorkoutSetupForm {
         };
     }
 
-    private newStep(): StepModel {
+    /** A new rep step's row, ready to fill in. */
+    newStep(): StepModel {
         return this.stepModel({ kind: 'reps', reps: 0, name: '' });
     }
 

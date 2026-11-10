@@ -506,7 +506,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Preconditions:** `guest()`, workouts "Squat day" (Back squat) and "Bench day" (Bench press), planned Monday and Thursday.
 - **Steps:** Open the Plan page; press the Calves link.
 - **Expected:** Missing muscle groups lists Biceps, Forearms, Abs, Obliques, Traps, Upper back, Abductors, Calves, Shins and Neck; What your plan works lists Shoulders, Triceps, Lower back, Adductors and Hamstrings as Supporting; Gym extras is suggested, "Adds Forearms, Abs, Obliques and 7 more."; Calves opens `/exercises?muscles=calves` (with `&from=plan`) with the Calves chip pressed.
-- **In the pack:** moved from Workouts to the Plan page on 2026-11-06, and it counts only planned workouts. Adding the suggestion to a day isn't checked.
+- **In the pack:** moved from Workouts to the Plan page on 2026-11-06, and it counts only planned workouts. Adding the suggestion to days is REG-LIB-09.
 
 ### REG-LIB-07 · Ready-made workouts: filter, look, copy, start as they are
 
@@ -529,6 +529,20 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Preconditions:** `guest()`, workout "Legs" running (start it, ⌄ back).
 - **Steps:** Delete Legs from its ⋮. Then reload.
 - **Expected (records today's behaviour, an open question in library.md):** the run carries on in the bar until the reload, after which it's gone. If that's decided otherwise, change this test.
+
+### REG-LIB-09 · Add to a day: the suggestion on several days at once, with Undo
+
+- **Stories:** LIB-7, PLN-1 · **Priority:** P2
+- **Preconditions:** as REG-LIB-06: "Squat day" on Monday and "Bench day" on Thursday.
+- **Steps:**
+    1. Open the Plan page. Under Missing muscle groups, press **Add to a day** on Gym extras.
+    2. Choose Tuesday and Saturday, then press **Done**.
+    3. Press **Undo**.
+- **Expected:**
+    1. A dialog "Plan Gym extras on…" lists the seven days, Monday saying "Squat day: Glutes, Quads", with **Done**.
+    2. Each day pressed is ticked (`aria-pressed`); the dialog closes; the Undo bar says "Gym extras planned on Tuesday and Saturday"; both days list Gym extras (`builtin:gym-extras`, as it is), and another workout is suggested.
+    3. Gym extras is off both days and suggested again; focus is on Tuesday's Add; `week-plan` is back to Squat day and Bench day.
+- **In the pack:** since 2026-11-10 it's the same dialog as a workout's Add to plan (REG-PLAN-08), and takes several days at once.
 
 ---
 
@@ -1308,7 +1322,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                              |
 | Today and planning        | REG-PLAN-01 – 08 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
 | Building a workout        | REG-BLD-01 – 09  | BLD-1, BLD-3 – BLD-16, EXR-2, EXR-11, LIB-1                                                                                   |
-| Workouts and ready-made   | REG-LIB-01 – 08  | LIB-1 – LIB-7, CTL-4                                                                                                          |
+| Workouts and ready-made   | REG-LIB-01 – 09  | LIB-1 – LIB-7, CTL-4                                                                                                          |
 | Running a workout         | REG-RUN-01 – 15  | RUN-1 – RUN-12, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 04  | HIS-1 – HIS-5, CTL-3                                                                                                          |
 | Progress                  | REG-PRG-01 – 03  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9                                                                                             |

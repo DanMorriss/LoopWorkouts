@@ -134,7 +134,8 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'plan-added-workouts',
                 question: 'Can I change a workout in a ready-made plan?',
                 answer: [
-                    "A ready-made plan's workouts are ready-made ones. Their reps and weights change as you go, from the summary after each one, or before you start, under Your reps and weights on the workout's page, but not their exercises. To change those, open it on Workouts and press Make a copy: the copy is yours, to change as you like.",
+                    "A ready-made plan's workouts are ready-made ones. Their reps and weights change as you go, or before you start, under Your reps and weights on the workout's page, but not their exercises.",
+                    'To change those, open it on Workouts and press Make a copy: the copy is yours, to change as you like.',
                     'Then put your copy on its days on the Plan page, in place of the ready-made one.',
                 ],
             },

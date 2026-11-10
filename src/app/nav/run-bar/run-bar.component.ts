@@ -2,16 +2,13 @@ import { Component, computed, ElementRef, inject, viewChild } from '@angular/cor
 import { Router } from '@angular/router';
 import { ActiveRunService } from '../../shared/run/active-run.service';
 import { formatSeconds } from '../../shared/format-time';
-import { project, rubberband, VelocityTracker } from '../../shared/gesture';
+import { SideSwipe } from '../../shared/side-swipe';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { criticallyDampedSpring } from '../../shared/spring';
 import { injectCurrentUrl, isOnPage } from '../current-url';
 import { WorkoutMorph } from '../workout-morph';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { stepKindName } from '../../models/workout';
-
-/** px a finger moves before it's taken as a swipe or a scroll. */
-const SLOP = 10;
 
 /**
  * The workout in progress, in a bar above the tabs on every page but its own, like a music
@@ -75,122 +72,57 @@ export class RunBarComponent {
     private readonly reducedMotion = injectPrefersReducedMotion();
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     private readonly bar = viewChild<ElementRef<HTMLElement>>('bar');
-    /** The finger being followed, from where it went down. */
-    private start?: { id: number; x: number; y: number };
-    /** Moved sideways past SLOP: the bar is following it. */
-    private swiping = false;
-    /** Where the bar was when the finger went down (px), caught mid-spring. */
-    private startOffset = 0;
-    /** Counts presses, so a swipe's spring knows if a new press caught the bar mid-way. */
-    private presses = 0;
     /** The bar's move with the finger (px). */
     private offset = 0;
-    private tracker = new VelocityTracker();
-    /** A swipe just ended, so the click it would make on what it started on is dropped. */
-    private swallowClick = false;
+    protected readonly swipe = new SideSwipe({
+        element: () => this.bar()?.nativeElement,
+        canStart: () => !this.finished(),
+        // Where it is on screen now, mid-spring included, and stop it there (End workout
+        // behind with it)
+        caughtAt: (bar) => {
+            const offset = new DOMMatrix(getComputedStyle(bar).transform).m41;
+            this.host.getAnimations({ subtree: true }).forEach((animation) => animation.cancel());
+            return offset;
+        },
+        moveTo: (offset) => {
+            const wasPast = this.isPast(this.offset);
+            this.moveTo(offset);
+            // A tick as it crosses the point where letting go would end the workout
+            if (wasPast !== this.isPast(offset)) {
+                navigator.vibrate?.(8);
+            }
+        },
+        released: (velocity, past) => void this.released(velocity, past),
+        settle: () => void this.springTo(0, 0),
+    });
 
     constructor() {
         // On the way down, so it's dropped before the link or button it would land on hears it
-        this.host.addEventListener('click', (event) => this.onClick(event), { capture: true });
+        this.host.addEventListener('click', (event) => this.swipe.swallowed(event), {
+            capture: true,
+        });
     }
 
-    protected onPointerDown(event: PointerEvent) {
+    /** Let go: past halfway (or flicked), the workout ends; otherwise the bar goes back. */
+    private async released(velocity: number, past: boolean) {
         const bar = this.bar()?.nativeElement;
-        if (!bar || event.pointerType === 'mouse' || !event.isPrimary || this.finished()) {
+        if (!bar) {
             return;
         }
-        this.presses++;
-        // Where it is on screen now, mid-spring included, and stop it there (End workout
-        // behind with it)
-        const offset = new DOMMatrix(getComputedStyle(bar).transform).m41;
-        this.host.getAnimations({ subtree: true }).forEach((animation) => animation.cancel());
-        this.moveTo(offset);
-        this.start = { id: event.pointerId, x: event.clientX, y: event.clientY };
-        this.swiping = false;
-        this.startOffset = offset;
-        this.tracker = new VelocityTracker();
-        this.tracker.add(event.clientX, event.timeStamp);
-    }
-
-    protected onPointerMove(event: PointerEvent) {
-        const start = this.start;
-        const bar = this.bar()?.nativeElement;
-        if (!start || !bar || event.pointerId !== start.id) {
-            return;
-        }
-        const dx = event.clientX - start.x;
-        const dy = event.clientY - start.y;
-        if (!this.swiping) {
-            if (Math.hypot(dx, dy) < SLOP) {
-                return;
-            }
-            // Mostly rightwards is a swipe; anything else is the page's, so let it go (and a
-            // bar caught on its way back into place carries on there)
-            if (dx <= Math.abs(dy)) {
-                this.start = undefined;
-                void this.springTo(0, 0);
-                return;
-            }
-            this.swiping = true;
-            bar.setPointerCapture(event.pointerId);
-        }
-        const wasPast = this.isPast(this.offset);
-        // Left of where it rests there's nothing, so it resists more the further it's pulled,
-        // rather than stopping dead
-        const pulled = this.startOffset + dx;
-        this.moveTo(pulled < 0 ? rubberband(pulled, bar.offsetWidth || 1) : pulled);
-        this.tracker.add(event.clientX, event.timeStamp);
-        // A tick as it crosses the point where letting go would end the workout
-        if (wasPast !== this.isPast(this.offset)) {
-            navigator.vibrate?.(8);
-        }
-    }
-
-    protected async onPointerUp(event: PointerEvent) {
-        const bar = this.bar()?.nativeElement;
-        if (!this.start || !bar || event.pointerId !== this.start.id) {
-            return;
-        }
-        this.start = undefined;
-        if (!this.swiping) {
-            // A tap on a bar caught mid-spring: it carries on into place
-            void this.springTo(0, 0);
-            return;
-        }
-        this.swiping = false;
-        this.swallowClick = true;
-        // Cleared after the click this pointerup makes, if any, has gone by
-        setTimeout(() => (this.swallowClick = false));
-        const velocity = this.tracker.velocity(event.timeStamp);
-        const press = this.presses;
-        // Where a flick would carry it: past halfway over, the workout ends
-        if (this.isPast(this.offset + project(velocity))) {
-            await this.springTo(bar.offsetWidth, velocity);
-            // Caught again on its way off: the new press has it now, so the workout goes on
-            if (press !== this.presses) {
-                return;
-            }
-            this.run.end();
-            // Off to its summary; the bar is put back once it's gone with the page
-            await this.router.navigateByUrl('/workout');
-            this.moveTo(0);
-        } else {
+        if (!past) {
             await this.springTo(0, velocity);
+            return;
         }
-    }
-
-    protected cancel() {
-        this.start = undefined;
-        this.swiping = false;
-        void this.springTo(0, 0);
-    }
-
-    private onClick(event: MouseEvent) {
-        if (this.swallowClick) {
-            this.swallowClick = false;
-            event.preventDefault();
-            event.stopPropagation();
+        const press = this.swipe.presses;
+        await this.springTo(bar.offsetWidth, velocity);
+        // Caught again on its way off: the new press has it now, so the workout goes on
+        if (press !== this.swipe.presses) {
+            return;
         }
+        this.run.end();
+        // Off to its summary; the bar is put back once it's gone with the page
+        await this.router.navigateByUrl('/workout');
+        this.moveTo(0);
     }
 
     /** Over far enough that letting go there would end the workout: past halfway. */

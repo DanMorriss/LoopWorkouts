@@ -1,11 +1,8 @@
 import { booleanAttribute, Directive, ElementRef, inject, input } from '@angular/core';
-import { project, rubberband, VelocityTracker } from '../shared/gesture';
+import { SideSwipe } from '../shared/side-swipe';
 import { criticallyDampedSpring } from '../shared/spring';
 import { PageSlide } from './page-slide';
 import { prefersReducedMotion } from '../shared/reduced-motion';
-
-/** px a finger moves before it's taken as a swipe back or a scroll. */
-const SLOP = 10;
 
 /**
  * Where a swipe can't start: things a finger moves sideways on for their own sake (the
@@ -27,10 +24,10 @@ const OWN_GESTURES =
     selector: '[appSwipeBack]',
     host: {
         style: 'touch-action: pan-y',
-        '(pointerdown)': 'onPointerDown($event)',
-        '(pointermove)': 'onPointerMove($event)',
-        '(pointerup)': 'onPointerUp($event)',
-        '(pointercancel)': 'cancel()',
+        '(pointerdown)': 'swipe.press($event)',
+        '(pointermove)': 'swipe.move($event)',
+        '(pointerup)': 'swipe.release($event)',
+        '(pointercancel)': 'swipe.cancel()',
     },
 })
 export class SwipeBackDirective {
@@ -42,108 +39,37 @@ export class SwipeBackDirective {
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     private readonly slide = inject(PageSlide);
 
+    /** The page's move with the finger (px). */
+    private offset = 0;
+    protected readonly swipe = new SideSwipe({
+        element: () => this.host,
+        canStart: (event) =>
+            !this.swipeBackDisabled() &&
+            !(event.target instanceof Element && event.target.closest(OWN_GESTURES)),
+        // Where it is on screen now, mid-spring or mid-slide in included, and stop it there
+        caughtAt: (host) => {
+            const offset =
+                new DOMMatrix(getComputedStyle(host).transform).m41 + this.slide.takeCaught();
+            host.getAnimations().forEach((animation) => animation.cancel());
+            return offset;
+        },
+        moveTo: (offset) => this.moveTo(offset),
+        released: (velocity, past) => {
+            if (past) {
+                // Left where it is, so the old picture is taken from under the finger
+                this.slide.navigate(this.appSwipeBack(), 'out', velocity);
+            } else {
+                this.settle(velocity);
+            }
+        },
+        settle: () => this.settle(0),
+    });
+
     constructor() {
         // On the way down, so it's dropped before what it would land on hears it
-        this.host.addEventListener('click', (event) => this.onClick(event), { capture: true });
-    }
-
-    /** The finger being followed, from where it went down. */
-    private start?: { id: number; x: number; y: number };
-    /** Moved sideways past SLOP: the page is following it. */
-    private swiping = false;
-    /** Where the page was when the finger went down (px), caught mid-spring or mid-slide. */
-    private startOffset = 0;
-    /** The page's move with the finger (px), and how fast it was going. */
-    private offset = 0;
-    private tracker = new VelocityTracker();
-    /** A swipe just ended, so the click it would make on what it started on is dropped. */
-    private swallowClick = false;
-
-    protected onPointerDown(event: PointerEvent) {
-        if (
-            event.pointerType === 'mouse' ||
-            !event.isPrimary ||
-            this.swipeBackDisabled() ||
-            (event.target instanceof Element && event.target.closest(OWN_GESTURES))
-        ) {
-            return;
-        }
-        // Where it is on screen now, mid-spring or mid-slide in included, and stop it there
-        const offset =
-            new DOMMatrix(getComputedStyle(this.host).transform).m41 + this.slide.takeCaught();
-        this.host.getAnimations().forEach((animation) => animation.cancel());
-        this.moveTo(offset);
-        this.start = { id: event.pointerId, x: event.clientX, y: event.clientY };
-        this.swiping = false;
-        this.startOffset = offset;
-        this.tracker = new VelocityTracker();
-        this.tracker.add(event.clientX, event.timeStamp);
-    }
-
-    protected onPointerMove(event: PointerEvent) {
-        const start = this.start;
-        if (!start || event.pointerId !== start.id) {
-            return;
-        }
-        const dx = event.clientX - start.x;
-        const dy = event.clientY - start.y;
-        if (!this.swiping) {
-            if (Math.hypot(dx, dy) < SLOP) {
-                return;
-            }
-            // Mostly rightwards is a swipe back; anything else is the page's, so let it go (and
-            // a page caught on its way back into place carries on there)
-            if (dx <= Math.abs(dy)) {
-                this.start = undefined;
-                this.settle(0);
-                return;
-            }
-            this.swiping = true;
-            this.host.setPointerCapture(event.pointerId);
-        }
-        // Left of where it rests, it resists more the further it's pulled, rather than
-        // stopping dead
-        const pulled = this.startOffset + dx;
-        this.moveTo(pulled < 0 ? rubberband(pulled, this.host.offsetWidth || 1) : pulled);
-        this.tracker.add(event.clientX, event.timeStamp);
-    }
-
-    protected onPointerUp(event: PointerEvent) {
-        if (!this.start || event.pointerId !== this.start.id) {
-            return;
-        }
-        this.start = undefined;
-        if (!this.swiping) {
-            // A tap on a page caught mid-spring: it carries on into place
-            this.settle(0);
-            return;
-        }
-        this.swiping = false;
-        this.swallowClick = true;
-        // Cleared after the click this pointerup makes, if any, has gone by
-        setTimeout(() => (this.swallowClick = false));
-        const velocity = this.tracker.velocity(event.timeStamp);
-        // Where a flick would carry it: past halfway over, it goes back
-        if (this.offset + project(velocity) > this.host.offsetWidth / 2) {
-            // Left where it is, so the old picture is taken from under the finger
-            this.slide.navigate(this.appSwipeBack(), 'out', velocity);
-        } else {
-            this.settle(velocity);
-        }
-    }
-
-    protected cancel() {
-        this.start = undefined;
-        this.swiping = false;
-        this.settle(0);
-    }
-
-    private onClick(event: MouseEvent) {
-        if (this.swallowClick) {
-            this.swallowClick = false;
-            event.preventDefault();
-            event.stopPropagation();
-        }
+        this.host.addEventListener('click', (event) => this.swipe.swallowed(event), {
+            capture: true,
+        });
     }
 
     /** Moves the page `offset` px right of where it rests. */

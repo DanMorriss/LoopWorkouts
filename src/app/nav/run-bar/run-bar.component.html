@@ -11,10 +11,10 @@
         class="run-bar"
         aria-label="Workout in progress"
         [attr.data-phase]="phase()"
-        (pointerdown)="onPointerDown($event)"
-        (pointermove)="onPointerMove($event)"
-        (pointerup)="onPointerUp($event)"
-        (pointercancel)="cancel()"
+        (pointerdown)="swipe.press($event)"
+        (pointermove)="swipe.move($event)"
+        (pointerup)="swipe.release($event)"
+        (pointercancel)="swipe.cancel()"
     >
         <!-- Grows into the workout page as it opens (WorkoutMorph) -->
         <a class="run-bar__open" href="/workout" (click)="morph.follow($event, '/workout')">

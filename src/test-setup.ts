@@ -1,4 +1,9 @@
+import { loadBuiltInExercises } from './app/shared/state/built-in-exercises-loader';
 import { clearDatabase } from './app/shared/testing/history-database';
+
+// The built-in exercises load on demand, and the app's pages wait for them; a spec has them
+// from the start, as once loaded every ExerciseStore has them at once
+beforeAll(() => loadBuiltInExercises());
 
 // The history is saved in IndexedDB, which (unlike localStorage) each spec doesn't clear itself
 beforeEach(() => clearDatabase());

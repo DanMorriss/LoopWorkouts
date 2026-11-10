@@ -1061,6 +1061,14 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Note:** there's no service worker, so the app can't be **opened** offline: a reload while offline fails. That's expected today, and why step 4 goes back online first. A page not yet opened before going offline can't load its code either; record that as expected, or note it if a service worker comes.
 - **In the pack:** each page's code is loaded by going to it in the app (a full page load would drop the rest), then the device goes offline.
 
+### REG-DATA-06 · An old device brought up to date, linked to the built-in exercises
+
+- **Stories:** EXR-4 · **Priority:** P1
+- **Preconditions:** `guest()`, `data-version` 2, and a workout "Squat day" saved as version 2 did: a list of `steps`, one rep step named "Back squat" with no `exerciseId`.
+- **Steps:** Open its Details (`/library/squat-day`).
+- **Expected:** Its muscles show (not "None of its steps is an exercise yet."); the saved step's `exerciseId` is `builtin:back-squat`; no exercise of your own was made (`exercises` isn't saved); `data-version` is 5.
+- **In the pack:** the built-in exercises aren't in the first download, so this device loads them before the app starts (`prepareSavedData()`); without them, the conversion would make an exercise of your own called Back squat.
+
 ### REG-DATA-05 · Years of history
 
 - **Stories:** SYN-5 · **Priority:** P3
@@ -1328,7 +1336,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Progress                  | REG-PRG-01 – 03  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9                                                                                             |
 | Exercises                 | REG-EXR-01 – 05  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                            |
-| Your data and offline     | REG-DATA-01 – 05 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9                                                                                      |
+| Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                               |
 | Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                         |
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                    |
 | Gestures and dragging     | REG-GES-01 – 03  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12                                                                                     |
@@ -1367,7 +1375,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | PRG  | `e2e/progress.e2e.ts`  | 4     | 0                               | 0                                                     |
 | EXR  | `e2e/exercises.e2e.ts` | 8     | 0                               | 1 (3D figure, manual)                                 |
 | SET  | `e2e/settings.e2e.ts`  | 6     | 0                               | 0                                                     |
-| DATA | `e2e/data.e2e.ts`      | 5     | 0                               | 0                                                     |
+| DATA | `e2e/data.e2e.ts`      | 6     | 0                               | 0                                                     |
 | ACC  | `e2e/account.e2e.ts`   | 17    | 0                               | 1 (real Google, manual)                               |
 | A11Y | `e2e/a11y.e2e.ts`      | 21    | 0                               | 0 (the 4 phone-width tests skip on `desktop`)         |
 | GES  | `e2e/gestures.e2e.ts`  | 7     | 1 (Known issue: superset folds) | 1 (iPhone, manual); the touch tests skip on `desktop` |

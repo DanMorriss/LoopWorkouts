@@ -141,7 +141,7 @@ export class BackupService {
         if (!backup.ok) {
             return backup;
         }
-        await this.history.ready;
+        await Promise.all([this.history.ready, this.exercises.load()]);
         return { ok: true, ...this.merge(backup), skipped: backup.skipped };
     }
 
@@ -157,7 +157,8 @@ export class BackupService {
      * The library's order is taken from the file if a workout was moved there more recently.
      * Settings aren't part of it, since they're a choice for each device, but the profile from
      * another device is, taken if it changed there more recently. Wait for the
-     * history's `ready` first.
+     * history's `ready` first, and for the built-in exercises (`ExerciseStore.load()`), as
+     * steps are linked to them by name.
      */
     merge(backup: CopyToMerge): MergeCounts {
         // An exercise typed on both devices is one exercise: the one here, under its id here

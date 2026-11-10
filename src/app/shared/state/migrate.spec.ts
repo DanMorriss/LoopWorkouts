@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { makeWorkout, reps, rest, savedBeforeGroups, work } from '../testing/make-workout';
 import { HistoryStore } from './history-store.service';
-import { DATA_VERSION, migrateSavedData } from './migrate';
+import { DATA_VERSION, migrateSavedData, needsBuiltInExercises } from './migrate';
 import { WorkoutStore } from './workout-store.service';
 
 // Data as version 1 of the app saved it: number ids, no dates, and called timers
@@ -45,6 +45,32 @@ describe('migrating saved data', () => {
         );
         localStorage.setItem('history-deleted', JSON.stringify(['500-1']));
     }
+
+    describe('the built-in exercises, which version 3 links to', () => {
+        it('are needed only for workouts or history saved before version 3', () => {
+            expect(needsBuiltInExercises()).toBe(false);
+            saveVersion1();
+            expect(needsBuiltInExercises()).toBe(true);
+            localStorage.setItem('data-version', '3');
+            expect(needsBuiltInExercises()).toBe(false);
+        });
+
+        it('leave the data alone without them, rather than make a copy of each', () => {
+            saveVersion1();
+            const before = localStorage.getItem('timers');
+
+            expect(() => migrateSavedData(7000, [])).toThrowError(/needs the built-in exercises/);
+
+            expect(localStorage.getItem('timers')).toBe(before);
+            expect(localStorage.getItem('data-version')).toBeNull();
+        });
+
+        it('are only needed for what there is to link: a new device is set up without them', () => {
+            migrateSavedData(7000, []);
+
+            expect(localStorage.getItem('data-version')).toBe(String(DATA_VERSION));
+        });
+    });
 
     it('gives workouts random ids and a date, and points the history to them', () => {
         saveVersion1();

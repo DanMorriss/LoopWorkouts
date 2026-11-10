@@ -39,26 +39,7 @@
             />
         </section>
 
-        <p class="exercises__count" role="status">
-            {{ shown().length }} {{ shown().length === 1 ? 'exercise' : 'exercises' }}
-        </p>
-
-        @if (shown().length === 0) {
-            <div class="exercises__empty">
-                <p>No exercises match.</p>
-                @if (filtered()) {
-                    <button type="button" class="btn-pill" (click)="clearFilters()">
-                        Clear search and filters
-                    </button>
-                }
-            </div>
-        }
-
-        <ul class="exercises__list">
-            @for (item of shown(); track item.exercise.id) {
-                <li><app-exercise-card [card]="item" data-tour="exercise" /></li>
-            }
-        </ul>
+        <app-exercise-cards [cards]="shown()" [clearable]="filtered()" (cleared)="clearFilters()" />
 
         @if (hidden().length > 0) {
             <button
@@ -74,11 +55,11 @@
                 }}</mat-icon>
             </button>
             @if (hiddenOpen()) {
-                <ul id="exercise-list-hidden" class="exercises__list">
-                    @for (item of hidden(); track item.exercise.id) {
-                        <li><app-exercise-card [card]="item" data-tour="exercise" /></li>
-                    }
-                </ul>
+                <app-exercise-cards
+                    listId="exercise-list-hidden"
+                    [cards]="hidden()"
+                    [counted]="false"
+                />
             }
         }
     </div>

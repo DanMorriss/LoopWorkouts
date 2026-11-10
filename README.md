@@ -61,7 +61,7 @@ The end-to-end tests (`e2e/`, see [its README](e2e/README.md)) drive the product
 
 There are around 1,260 unit tests, run with [Vitest](https://vitest.dev) in browser mode: a real headless Chromium via Playwright, so layout and colour contrast are checked as a browser renders them. Workout tests use Vitest's fake clock (`vi.useFakeTimers()`). As well as the usual component and service tests, they include:
 
-- **Workout logic** (`src/app/workout/workout-state.ts`): phase changes on exact seconds, no rest after the last round, zero rest skipped, and catching up after delayed ticks.
+- **Workout logic** (`src/app/models/workout-state.ts`): phase changes on exact seconds, no rest after the last round, zero rest skipped, and catching up after delayed ticks.
 - **Sync** (`src/app/sync/`): fetching, merging and sending against a fake server that keeps records as the database does, and clocks that are off.
 - **Accessibility** (`src/app/a11y.spec.ts`): renders the whole app and runs [axe-core](https://github.com/dequelabs/axe-core) over every page and state, including the delete dialog and the workout mid-workout. Any WCAG 2.1 A/AA or best-practice violation fails the test.
 
@@ -83,9 +83,10 @@ src/app/
     workout-card/      One workout: tap for its details, play to start, swipe to delete, hold to drag (or let go for options)
     workout-details/   A workout's muscles and history, its own page, from its options
   workout/             The running workout: ring, countdown, announcements
-    workout-state.ts   Works out phase, time left and round from elapsed time
     fit-name.ts        Fits a step's name to the face: wraps, then shrinks only as far as it must
     step-strip/        The round's steps as a strip in their kinds' colours
+  models/              Pure logic and data, with no Angular in it
+    workout-state.ts   Works out phase, time left and round from elapsed time
     alarm-schedule.ts  When each alarm is due
   shared/
     state/workout-store.service.ts  Saved workouts and the active workout

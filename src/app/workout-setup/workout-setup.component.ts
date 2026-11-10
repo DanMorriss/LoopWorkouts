@@ -18,6 +18,7 @@ import { TourService } from '../tour/tour.service';
 import { BrowseExercisesDialogComponent } from './browse-exercises-dialog/browse-exercises-dialog.component';
 import { SetupDrag } from './setup-drag';
 import { SetupExercises } from './setup-exercises';
+import { SetupSupersets } from './setup-supersets';
 import { StepDragPreviewComponent } from './step-drag-preview/step-drag-preview.component';
 import { BACK_PAGE } from './step-model';
 import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-changes-dialog.component';
@@ -33,7 +34,7 @@ import { WorkoutSetupForm } from './workout-setup-form';
     selector: 'app-workout-setup',
     templateUrl: './workout-setup.component.html',
     styleUrls: ['./workout-setup.component.scss', './workout-setup-supersets.scss'],
-    providers: [WorkoutSetupForm, SetupExercises, SetupDrag],
+    providers: [WorkoutSetupForm, SetupExercises, SetupDrag, SetupSupersets],
     host: {
         '(window:beforeunload)': 'warnBeforeUnload($event)',
         '(document:click)': 'setup.closePopups($event)',

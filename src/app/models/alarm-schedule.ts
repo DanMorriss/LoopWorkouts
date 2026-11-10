@@ -5,7 +5,7 @@ import {
     stepSeconds,
     Workout,
     workoutSeconds,
-} from '../models/workout';
+} from './workout';
 import { nextRepStep } from './workout-state';
 
 export type AlarmKind = 'work' | 'rest' | 'finish' | 'countdown';

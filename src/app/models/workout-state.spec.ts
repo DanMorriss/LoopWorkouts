@@ -1,4 +1,4 @@
-import { isTimedSet, RepSet, TimedSet } from '../models/history';
+import { isTimedSet, RepSet, TimedSet } from './history';
 import {
     Block,
     placedHeadings,
@@ -9,7 +9,7 @@ import {
     withEachRepSet,
     withRepSet,
     workoutSeconds,
-} from '../models/workout';
+} from './workout';
 import { makeWorkout, reps, rest, work } from '../shared/testing/make-workout';
 import { nextRepStep, placeAt, setsDone, stepsIntoRound, workoutStateAt } from './workout-state';
 

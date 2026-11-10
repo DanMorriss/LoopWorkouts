@@ -12,7 +12,7 @@ import { MAX_SWITCH_SECONDS, Side } from '../models/workout';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { KeepAwakeService } from '../shared/run/keep-awake.service';
 import { SettingsStore, Theme } from '../shared/state/settings-store.service';
-import { AlarmKind } from '../workout/alarm-schedule';
+import { AlarmKind } from '../models/alarm-schedule';
 
 interface AlarmPreview {
     kind: AlarmKind;

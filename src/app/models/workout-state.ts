@@ -1,5 +1,5 @@
-import { LoggedSet, RepSet, TimedSet } from '../models/history';
-import { runPosition, stepAsRunAt, StepSwap } from '../models/step-swap';
+import { LoggedSet, RepSet, TimedSet } from './history';
+import { runPosition, stepAsRunAt, StepSwap } from './step-swap';
 import {
     endlessRounds,
     repStepsPerRound,
@@ -11,7 +11,7 @@ import {
     stepSeconds,
     Workout,
     workoutSeconds,
-} from '../models/workout';
+} from './workout';
 
 export type WorkoutPhase = 'work' | 'rest' | 'reps' | 'complete';
 

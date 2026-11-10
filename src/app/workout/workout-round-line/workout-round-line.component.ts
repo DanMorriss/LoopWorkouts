@@ -1,7 +1,8 @@
 import { Component, input } from '@angular/core';
 import { RoundDotsComponent } from '../round-dots/round-dots.component';
 import { StepStripComponent } from '../step-strip/step-strip.component';
-import { RoundSlide, setText } from '../workout-view';
+import { setText } from '../round-progress';
+import { RoundSlide } from '../workout-view';
 
 /**
  * What the workout's line above the ring says: which set and round, the time left, the rounds

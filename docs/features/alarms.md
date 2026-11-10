@@ -62,7 +62,7 @@
 
 ## Platform notes
 
-- **Web:** `AlarmService` (`src/app/shared/alarms/alarm.service.ts`) books notes on the Web Audio clock, which keeps time in background tabs where JS timers don't. The list of alarm times is pure: `alarmEvents()` in `src/app/workout/alarm-schedule.ts`. Keep screen on is the Screen Wake Lock API (`KeepAwakeService`).
+- **Web:** `AlarmService` (`src/app/shared/alarms/alarm.service.ts`) books notes on the Web Audio clock, which keeps time in background tabs where JS timers don't. The list of alarm times is pure: `alarmEvents()` in `src/app/models/alarm-schedule.ts`. Keep screen on is the Screen Wake Lock API (`KeepAwakeService`).
 - **Web limits:**
     - **ALM-2:** iPhones suspend web audio when the phone locks, so alarms stop if it's locked by hand. Scheduled notifications aren't possible on iOS web (no Notification Triggers). Playing the alarms as an `<audio>` track was tried in PR #64 and was silent once locked in Safari, so it was taken out (#65).
     - **ALM-3:** iPhones don't support web vibration at all.

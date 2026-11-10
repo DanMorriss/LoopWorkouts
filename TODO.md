@@ -138,10 +138,13 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 
 From the review of 2026-11-05; how to keep it from coming back is in `CLAUDE.md`.
 
-- [ ] **Share the swipe gesture:** `RunBarComponent` and `SwipeBackDirective` are nearly the same code, and `CardGestures` a variant of it. Needs an iPhone check once shared, as it's all touch.
-- [ ] **Split `WorkoutSetupForm` (about 950 lines) and `WorkoutView` (about 585):** services aren't under the 300 line limit, but both are large. `WorkoutSetupForm` could lose what a row says (`stepTitle()`, `amountText()` and so on) to plain functions in `step-model.ts`.
-- [ ] **Share the rest of an exercise list:** the Exercises page and Browse in Create repeat their count, empty message and list styles, and how they filter.
-- [ ] **Move `shared/` off the `workout/` folder:** `AlarmService`, `ActiveRunService` and `WorkoutStore` import from `workout/alarm-schedule` and `workout/workout-state`, which belong in `models/` or `shared/run/`.
+- [x] **Share the swipe gesture** (2026-11-10): `RunBarComponent` and `SwipeBackDirective` follow a finger with one plain class, `SideSwipe` (`shared/side-swipe.ts`): the slop, the rightward lock, the rubber band, the speed and the dropped click. Each keeps what it does on letting go. `CardGestures` is left as it is, as it holds as well as swipes, to the left.
+    - **Needs an iPhone check:** swiping a page back and swiping the run bar away, as it's all touch. The touch tests pass in Chromium.
+- [x] **Split `WorkoutSetupForm` and `WorkoutView`** (2026-11-10): `WorkoutSetupForm` went from 980 lines to about 780, what a row says moving to plain functions in `step-text.ts`, and joining and taking out supersets to `SetupSupersets` (`setup-supersets.ts`), beside `SetupExercises` and `SetupDrag`. `WorkoutView` went from 585 to 518, where the run is in its round and sets moving to `round-progress.ts`.
+    - **Still large:** `WorkoutSetupForm` keeps the form, the steps' rows and opening them, and loading and saving. Turning a saved workout into rows and back (`stepModels()`, `stepModel()`) could go next, if it grows again. What's left of `WorkoutView` is signals built on one another, so it'd split only into services handing those back and forth.
+- [x] **Share the rest of an exercise list** (2026-11-10): the count, "No exercises match." with Clear search and filters, and the cards are `ExerciseCardsComponent` (`exercises/exercise-cards/`), on the Exercises page (its hidden ones too) and in Browse; how they filter was shared already (`filterExercises()`).
+- [x] **Move `shared/` off the `workout/` folder** (2026-11-10): `alarm-schedule.ts` and `workout-state.ts`, pure and with no Angular in them, are in `models/` now, so nothing in `shared/` imports from `workout/`.
+- [ ] **The rest of `shared/`'s imports from other folders** (found 2026-11-10): `body-map` and `workout-outline` use `nav/page-slide`, `help-link` uses `help/help-topics`, and `DeviceDataService` uses `account/account-client`. `PageSlide` is the app's frame rather than a feature, so it could move to `shared/` (or `nav/` count as shared); `help-link` goes once the tours replace the ? links; the account client's type could move to `shared/`. The test fakes in `shared/testing/` import what they fake, which is fine.
 
 ## 2. Known issues
 

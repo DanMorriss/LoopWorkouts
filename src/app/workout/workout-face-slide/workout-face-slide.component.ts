@@ -12,7 +12,7 @@ import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { ClockDigitsComponent } from '../clock-digits/clock-digits.component';
-import { placeAt } from '../workout-state';
+import { placeAt } from '../../models/workout-state';
 import { FaceSlide, WorkoutView } from '../workout-view';
 
 /**

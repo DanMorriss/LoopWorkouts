@@ -172,7 +172,7 @@
 <!-- Supersets (BLD-12): a step to add to one, and joining the
                                          next exercise to one, or making one with it; or taking a
                                          step out of one -->
-@if (kind === 'superset' || inSuperset || setup.canJoin(i)) {
+@if (kind === 'superset' || inSuperset || supersets.canJoin(i)) {
     <div class="step__group-actions">
         @if (kind === 'superset') {
             <button
@@ -181,19 +181,19 @@
                 [id]="'step-' + key + '-add'"
                 [disabled]="setup.stepCount() >= setup.maxSteps"
                 [attr.aria-label]="'Add a step to the ' + setup.supersetName(i).toLowerCase()"
-                (click)="setup.addToSuperset(i)"
+                (click)="supersets.addToSuperset(i)"
             >
                 <mat-icon aria-hidden="true">add</mat-icon>
                 Step
             </button>
         }
-        @if (setup.canJoin(i)) {
+        @if (supersets.canJoin(i)) {
             <button
                 type="button"
                 class="btn-pill"
                 [id]="'step-' + key + '-join'"
                 [attr.aria-label]="'Join ' + setup.stepTitle(i) + ' with the next step'"
-                (click)="setup.joinWithNext(i)"
+                (click)="supersets.joinWithNext(i)"
             >
                 <mat-icon aria-hidden="true">link</mat-icon>
                 Join with next
@@ -205,7 +205,7 @@
                 class="btn-pill"
                 [id]="'step-' + key + '-take-out'"
                 [attr.aria-label]="'Take ' + setup.stepTitle(i) + ' out'"
-                (click)="setup.takeOut(i)"
+                (click)="supersets.takeOut(i)"
             >
                 <mat-icon aria-hidden="true">link_off</mat-icon>
                 Take out

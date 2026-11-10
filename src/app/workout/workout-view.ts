@@ -230,6 +230,28 @@ export class WorkoutView {
         return id ? this.exercises.byId(id) : undefined;
     });
 
+    /**
+     * What's over the greyed ring while paused: the step's name, with its exercise's (i); or,
+     * in a rest before an exercise, "Rest, then Back squat" with that one's, so it can be
+     * looked at and swapped while paused too (RUN-11). Null for no name.
+     */
+    readonly pausedName = computed(() => {
+        const text = this.stepLabel();
+        if (!text) {
+            return null;
+        }
+        const own = this.stepExercise();
+        if (own) {
+            return { text, exercise: own, next: false };
+        }
+        const next = this.nextExercise();
+        // As the step's named, as "then …" on the face has it
+        const name = this.nextState()?.step?.name || next?.name;
+        return next
+            ? { text: `${text}, then ${name}`, exercise: next, next: true }
+            : { text, exercise: undefined, next: false };
+    });
+
     /** e.g. "Plank · 00:45", "Squats · 10 reps @ 60 kg", or "finish" when the workout ends after this step. */
     readonly upNext = computed(() => {
         const next = this.nextState();

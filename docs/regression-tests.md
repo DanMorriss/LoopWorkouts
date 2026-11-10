@@ -681,6 +681,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     1. The face shows 15 and 22.5 kg; `workouts` has the step at 15 reps, `weight: 22.5`.
     2. Round 2 starts from 15 at 22.5 kg.
     3. The saved step has no weight.
+- **In the pack, a ready-made workout too:** start Gym legs, set Back squat's weight to 40 kg, and reload: it's still 40, kept in `ready-made-changes` (a Known issue until 2026-11-10, found already fixed).
 
 ### REG-RUN-09 · The summary: correct a set, note, next time
 
@@ -733,10 +734,11 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 
 ### REG-RUN-12 · Swap the next exercise while paused in a rest
 
-- **Stories:** RUN-11 · **Priority:** P3 · **[Known issue]**
-- **Preconditions:** as REG-RUN-11, in the rest before round 2.
-- **Steps:** Pause during the rest; look for an (i) to swap the next exercise.
-- **Expected (wanted):** a way to open the next exercise's details and Swap it while paused. Today the paused ring shows only the rest's name, with no (i) (TODO Known issues: "No swapping the next exercise while paused in a rest"). `test.fixme`.
+- **Stories:** RUN-11 · **Priority:** P3
+- **Preconditions:** workout "Pair": Back squat (`builtin:back-squat`) 10 reps at 60 kg, Rest 0:30, Deadlift (`builtin:deadlift`) 10 reps at 80 kg.
+- **Steps:** Start; Done; Pause in the rest. Press the (i) beside "Rest, then Deadlift", then Swap exercise; type "romanian" and pick Romanian deadlift.
+- **Expected:** paused, the ring says "Rest, then Deadlift" with an (i) named "Details of Deadlift, next". After the swap it's still paused, says "Rest, then Romanian deadlift", and focus is on "Details of Romanian deadlift, next".
+- **In the pack:** a Known issue until 2026-11-10, when the paused ring got the next exercise's (i).
 
 ### REG-RUN-13 · Last time, a suggested weight, personal bests
 
@@ -1321,7 +1323,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | TODO.md Known issue                                                                | Where it lands here                                  | How                                                                                              |
 | ---------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | Focus isn't put back after a page slides back (`PageSlide`)                        | REG-PLAN-05, REG-LIB-02                              | Fixed (`aef2211`) and gone from TODO.md: asserted                                                |
-| No swapping the next exercise while paused in a rest                               | REG-RUN-12                                           | `test.fixme`                                                                                     |
+| No swapping the next exercise while paused in a rest                               | REG-RUN-12                                           | Fixed 2026-11-10 and gone from TODO.md: asserted                                                 |
 | Enter in a step's name box may save before its kind follows the exercise (Safari)  | —                                                    | Cleared from TODO.md (Safari settles the kind first); no WebKit project                          |
 | An open superset folds as its handle is pressed                                    | REG-GES-03                                           | `test.fixme`                                                                                     |
 | Card swipe tests still use real clock time                                         | REG-GES-02                                           | The e2e swipes give each touch its time (`e2e/touch.ts`)                                         |
@@ -1383,7 +1385,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | PLAN | `e2e/plan.e2e.ts`      | 11    | 0                               | 0                                                     |
 | BLD  | `e2e/build.e2e.ts`     | 12    | 0                               | 0                                                     |
 | LIB  | `e2e/library.e2e.ts`   | 10    | 0                               | 0                                                     |
-| RUN  | `e2e/run.e2e.ts`       | 22    | 1 (REG-RUN-12, Known issue)     | 1 (real sound, manual)                                |
+| RUN  | `e2e/run.e2e.ts`       | 23    | 0                               | 1 (real sound, manual)                                |
 | HIS  | `e2e/history.e2e.ts`   | 6     | 0                               | 0                                                     |
 | PRG  | `e2e/progress.e2e.ts`  | 4     | 0                               | 0                                                     |
 | EXR  | `e2e/exercises.e2e.ts` | 8     | 0                               | 1 (3D figure, manual)                                 |

@@ -95,16 +95,19 @@
             @if (view.isPaused() && view.isComplete() === false) {
                 <div class="workout-paused">
                     <!-- Which step it's paused on, with its (i) still there: pausing to read
-                         how it's done is what the details are for (RUN-9) -->
-                    @if (view.stepLabel(); as label) {
+                         how it's done is what the details are for (RUN-9). In a rest, the
+                         exercise after it, to swap while paused (RUN-11) -->
+                    @if (view.pausedName(); as name) {
                         <div class="workout-paused__name">
-                            <p class="workout-paused__step">{{ label }}</p>
-                            @if (view.stepExercise(); as exercise) {
+                            <p class="workout-paused__step">{{ name.text }}</p>
+                            @if (name.exercise; as exercise) {
                                 <button
                                     type="button"
                                     class="workout-face__info workout-paused__info"
-                                    [attr.aria-label]="'Details of ' + exercise.name"
-                                    (click)="swap.showExercise(exercise)"
+                                    [attr.aria-label]="
+                                        'Details of ' + exercise.name + (name.next ? ', next' : '')
+                                    "
+                                    (click)="swap.showExercise(exercise, name.next)"
                                 >
                                     <mat-icon aria-hidden="true">info</mat-icon>
                                 </button>

@@ -965,7 +965,15 @@ describe('WorkoutComponent', () => {
                 expect(pressSpace(resume, { repeat: true })).toBe(true);
                 expect(view().isPaused()).toBe(true);
 
-                document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space' }));
+                // Letting go leaves the key alone, as a focused button is pressed by it
+                const keyup = new KeyboardEvent('keyup', {
+                    key: ' ',
+                    code: 'Space',
+                    bubbles: true,
+                    cancelable: true,
+                });
+                resume.dispatchEvent(keyup);
+                expect(keyup.defaultPrevented).toBe(false);
                 // Let go, a held Space on Resume is Resume's again
                 expect(pressSpace(resume, { repeat: true })).toBe(false);
                 fixture.destroy();

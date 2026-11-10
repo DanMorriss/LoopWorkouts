@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.{ts,html,scss,css}\" \"e2e/**/*.{ts,mts}\" playwright.config.ts",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,css}\" \"e2e/**/*.{ts,mts}\" playwright.config.ts",
     "lint": "eslint src/app && node tools/check-icons.mjs",
+    "icons": "node tools/build-icon-font.mjs",
     "unused": "knip --production",
     "e2e": "tsc -p e2e && playwright test",
     "e2e:p1": "tsc -p e2e && playwright test --grep @p1",

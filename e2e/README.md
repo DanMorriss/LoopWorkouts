@@ -69,9 +69,8 @@ test('Progress opens from the tab bar', async ({ app, page }) => {
 'light' }) } })` adds localStorage before the first page loads (once, so a test that clears
   the device sees it cleared). Prefer making data through the app; seed it when that isn't what's
   being tested, using the same shapes the stores save.
-- **No network.** Only the app's own server is reached. Supabase (sign-in, sync), Google Fonts
-  and anything else are blocked, with the system font and icons' names showing instead (they're
-  `aria-hidden`); web sockets are closed; Vercel's analytics scripts get an empty one. The
+- **No network.** Only the app's own server is reached, which serves the fonts and icons too.
+  Supabase (sign-in, sync) and anything else are blocked; web sockets are closed; Vercel's analytics scripts get an empty one. The
   `network` fixture lists what was blocked: `expect(network.supabase).toEqual([])` checks a guest
   never talks to Supabase. To test signing in or sync, stub Supabase in the test with
   `page.route(SUPABASE, ...)` (exported from `fixtures.ts`), which Playwright tries before the

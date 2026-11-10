@@ -1,47 +1,27 @@
-// Checks that the icon font index.html asks Google Fonts for (`icon_names=`) has exactly the
-// icons the app uses: a missing one would show as its name in letters, and a spare one is
-// downloaded by every page for nothing. Run by `npm run lint`.
-//
-// An icon's name is found as the text of a `mat-icon` or `app-icon`, the quoted names in an
-// `{{ … }}` there, an `icon: '…'` field, or a value in a `…_ICONS` table. An icon named some
-// other way (built from parts, say) is missed: add it to one of those, or to EXTRA below.
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+// Checks that the icon font (public/fonts/material-symbols-outlined.woff2, made by
+// `npm run icons`) has exactly the icons the app uses: a missing one would show as its name in
+// letters, and a spare one is downloaded by every page for nothing. It goes by the list
+// tools/icon-font.json keeps of what's in the font, and that file's hash, so the font can't
+// change without the list. Run by `npm run lint`.
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
+import { ICON_FONT, ICON_LIST, usedIcons } from './used-icons.mjs';
 
-const EXTRA = [];
-
-const root = new URL('..', import.meta.url).pathname;
-const files = readdirSync(join(root, 'src/app'), { recursive: true })
-    .filter((f) => /\.(ts|html)$/.test(f) && !f.endsWith('.spec.ts'))
-    .map((f) => readFileSync(join(root, 'src/app', f), 'utf8'));
-
-const used = new Set(EXTRA);
-const quoted = (text) => [...text.matchAll(/'([a-z0-9_]+)'/g)].map((m) => m[1]);
-for (const text of files) {
-    for (const [, , inner] of text.matchAll(/<(mat-icon|app-icon)\b[^>]*>([^<]*)<\/\1\s*>/g)) {
-        const content = inner.trim();
-        if (content.includes('{{')) quoted(content).forEach((n) => used.add(n));
-        else if (content) used.add(content);
-    }
-    for (const [, name] of text.matchAll(/\bicon: '([a-z0-9_]+)'/g)) used.add(name);
-    for (const [, table] of text.matchAll(/_ICONS\b[^=]*=\s*\{([^}]*)\}/g)) {
-        quoted(table).forEach((n) => used.add(n));
-    }
-}
-
-const index = readFileSync(join(root, 'src/index.html'), 'utf8');
-const listed = index.match(/icon_names=([a-z0-9_,]+)/)?.[1].split(',') ?? [];
+const used = usedIcons();
+const { names, sha256 } = JSON.parse(readFileSync(ICON_LIST, 'utf8'));
 const problems = [];
-const missing = [...used].filter((n) => !listed.includes(n)).sort();
-const spare = listed.filter((n) => !used.has(n));
-const sorted = [...listed].sort();
-if (missing.length) problems.push(`not in index.html's icon_names: ${missing.join(', ')}`);
-if (spare.length) problems.push(`in index.html's icon_names but not used: ${spare.join(', ')}`);
-// In order, so a name is easy to find in it
-if (listed.join() !== sorted.join()) problems.push(`icon_names isn't in alphabetical order`);
+const missing = used.filter((n) => !names.includes(n));
+const spare = names.filter((n) => !used.includes(n));
+if (missing.length) problems.push(`not in the icon font: ${missing.join(', ')}`);
+if (spare.length) problems.push(`in the icon font but not used: ${spare.join(', ')}`);
+if (!existsSync(ICON_FONT)) {
+    problems.push('no public/fonts/material-symbols-outlined.woff2');
+} else if (createHash('sha256').update(readFileSync(ICON_FONT)).digest('hex') !== sha256) {
+    problems.push("the font file isn't the one tools/icon-font.json lists");
+}
 
 if (problems.length) {
-    console.error(`Icons: ${problems.join('\n       ')}`);
+    console.error(`Icons: ${problems.join('\n       ')}\n       Run npm run icons to rebuild it.`);
     process.exit(1);
 }
-console.log(`Icons: the ${listed.length} in index.html are the ones used.`);
+console.log(`Icons: the ${names.length} in the icon font are the ones used.`);

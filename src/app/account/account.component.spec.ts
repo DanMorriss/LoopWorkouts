@@ -151,12 +151,12 @@ describe('AccountComponent', () => {
             await press('Email me a sign-in link');
             expect(client.auth.signInWithOtp).toHaveBeenCalled();
             // Kept until signed in, as an email link may open in another tab
-            expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBe('2026-11-08');
+            expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBe('2026-11-10');
 
             await type('account-code', '123456');
             await press('Sign in');
             expect(client.rpc).toHaveBeenCalledWith('give_health_consent', {
-                notice_date: '2026-11-08',
+                notice_date: '2026-11-10',
             });
             expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBeNull();
         });
@@ -440,7 +440,7 @@ describe('AccountComponent', () => {
             await press('Agree');
 
             expect(client.rpc).toHaveBeenCalledWith('give_health_consent', {
-                notice_date: '2026-11-08',
+                notice_date: '2026-11-10',
             });
             expect(element.querySelector('#health-consent')).toBeNull();
             expect(document.activeElement!.id).toBe('consent-given');

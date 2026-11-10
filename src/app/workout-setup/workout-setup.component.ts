@@ -5,6 +5,7 @@ import { FormField, FormRoot } from '@angular/forms/signals';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
+import { WEEKDAYS } from '../models/plan';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { LeaveCheck, LeaveQuestion } from '../nav/leave-check';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
@@ -110,6 +111,7 @@ export class WorkoutSetupComponent {
                 return;
             }
             this.setup.load(this.setup.findWorkoutToEdit(params));
+            this.setup.planOn.set(planDay(params.get('planOn')));
             // The first time it opens for a new workout on this device, a tour of it (BLD-17)
             if (this.setup.editingWorkoutId() === null) {
                 tour.startOnce('create');
@@ -129,10 +131,13 @@ export class WorkoutSetupComponent {
         });
     }
     /**
-     * Where ‹ goes: the page it was opened from (`?from=`), if that's a workout's details or an
-     * exercise's page, otherwise Workouts. With unsaved changes, LeaveCheck asks first.
+     * Where ‹ goes: the page it was opened from (`?from=`), if that's a workout's details, an
+     * exercise's page or the Plan page, otherwise Workouts. With unsaved changes, LeaveCheck asks first.
      */
     private backFrom(from: string | null): { url: string; label: string } {
+        if (from === '/plan') {
+            return { url: from, label: 'Plan' };
+        }
         const page = from?.match(BACK_PAGE);
         if (!from || !page) {
             return { url: '/library', label: 'Workouts' };
@@ -161,4 +166,10 @@ export class WorkoutSetupComponent {
     }
     /** An exercise was just added from ?add=, which is being taken off the address. */
     private addedExercise = false;
+}
+
+/** A day of the week from the address's `?planOn=` (0 for Monday), or null if it isn't one. */
+function planDay(param: string | null): number | null {
+    const day = Number(param);
+    return param !== null && /^\d$/.test(param) && day < WEEKDAYS.length ? day : null;
 }

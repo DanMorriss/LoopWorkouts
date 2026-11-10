@@ -83,6 +83,7 @@
         <button
             type="button"
             class="btn-icon workout-card__action workout-card__action--menu"
+            [id]="'workout-menu-' + workout().id"
             [attr.data-menu-for]="workout().id"
             [attr.aria-label]="'Open options for ' + name()"
             [attr.aria-expanded]="menuOpen()"
@@ -101,6 +102,15 @@
                 role="group"
                 [attr.aria-label]="'Options for ' + name()"
             >
+                <button
+                    type="button"
+                    class="menu__item workout-card__menu-item--plan"
+                    aria-haspopup="dialog"
+                    (click)="planRequested.emit()"
+                >
+                    <mat-icon aria-hidden="true">event</mat-icon>
+                    Add to plan
+                </button>
                 <!-- A ready-made one can't be changed or deleted, only copied -->
                 @if (!readyMade()) {
                     <button

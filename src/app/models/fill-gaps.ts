@@ -1,4 +1,5 @@
 import { Exercise, MuscleGroup } from './exercise';
+import { joinAnd } from './text';
 import { Workout } from './workout';
 import { ALL_MUSCLES, musclesWorked } from './workout-muscles';
 
@@ -55,8 +56,5 @@ export function workoutToFillGaps<W extends Pick<Workout, 'blocks'>>(
 export function listMuscles(labels: readonly string[], most = 4): string {
     const named = labels.length > most ? labels.slice(0, most - 1) : [...labels];
     const more = labels.length - named.length;
-    const parts = more > 0 ? [...named, `${more} more`] : named;
-    return parts.length <= 1
-        ? (parts[0] ?? '')
-        : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+    return joinAnd(more > 0 ? [...named, `${more} more`] : named);
 }

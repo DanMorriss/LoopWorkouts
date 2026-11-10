@@ -66,6 +66,38 @@ describe('PlanStore', () => {
         expect(store.plan().updatedAt).toBeGreaterThan(before.updatedAt);
     });
 
+    it('plans a workout on just the days given, in one change: on the new ones, off the rest', () => {
+        const now = vi.spyOn(Date, 'now').mockReturnValue(1_000);
+        const store = createStore();
+        store.add(0, 'legs');
+        store.add(2, 'push');
+        store.add(4, 'legs');
+        const updatedAt = store.plan().updatedAt;
+
+        now.mockReturnValue(9_000);
+        store.setDays('legs', [0, 2]);
+
+        expect(store.plan().days).toEqual([['legs'], [], ['push', 'legs'], [], [], [], []]);
+        expect(store.plan().plannedAt).toEqual({
+            '0:legs': 1_000,
+            '2:push': 1_000,
+            '2:legs': 9_000,
+        });
+        expect(store.plan().updatedAt).toBeGreaterThan(updatedAt);
+    });
+
+    it("leaves a full day it isn't on alone", () => {
+        const store = createStore();
+        for (let i = 0; i < MAX_WORKOUTS_A_DAY; i++) {
+            store.add(1, `w${i}`);
+        }
+
+        store.setDays('legs', [1, 3]);
+
+        expect(store.plan().days[1]).not.toContain('legs');
+        expect(store.plan().days[3]).toEqual(['legs']);
+    });
+
     it('takes a workout off a day, leaving the others', () => {
         const store = createStore();
         store.add(4, 'push');

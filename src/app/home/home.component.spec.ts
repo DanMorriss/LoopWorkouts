@@ -132,7 +132,7 @@ describe('HomeComponent', () => {
                 ])
             ).toEqual([
                 ['More plans', '/ready-made-plans'],
-                ['Pick your own workouts', '/library'],
+                ['Make your own plan', '/plan'],
             ]);
             expect(element().querySelector('app-week-strip')).toBeNull();
         });

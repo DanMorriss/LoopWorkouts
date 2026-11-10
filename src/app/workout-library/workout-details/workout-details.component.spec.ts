@@ -6,6 +6,7 @@ import { allSteps, RepStep } from '../../models/workout';
 import { UndoService } from '../../shared/undo/undo.service';
 import { PageSlide } from '../../nav/page-slide';
 import { HistoryStore } from '../../shared/state/history-store.service';
+import { PlanStore } from '../../shared/state/plan-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { makeWorkout as baseWorkout } from '../../shared/testing/make-workout';
 import { WorkoutDetailsComponent } from './workout-details.component';
@@ -45,6 +46,94 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
 
     const el = (): HTMLElement => harness.routeNativeElement!;
     const text = (node: Element = el()) => node.textContent!.replace(/\s+/g, ' ').trim();
+
+    describe('Add to plan (PLN-1)', () => {
+        const render = async () => {
+            harness.fixture.detectChanges();
+            await harness.fixture.whenStable();
+        };
+        const planButton = () => el().querySelector<HTMLButtonElement>('#workout-details-plan')!;
+        const dayButtons = () =>
+            Array.from(document.querySelectorAll<HTMLButtonElement>('.choice__choice'));
+
+        it('plans it on several days at once, says where, with Undo, and focus back', async () => {
+            const sprints = addSprints();
+            const plan = TestBed.inject(PlanStore);
+            plan.add(0, 'other');
+            await open(sprints.id);
+            document.body.appendChild(el());
+            expect(text(planButton())).toBe('event Add to plan');
+            expect(el().querySelector('.details__planned')).toBeNull();
+
+            planButton().click();
+            await render();
+            expect(text(document.querySelector('.choice__title')!)).toBe('Plan Sprints on…');
+            expect(dayButtons()).toHaveLength(7);
+            dayButtons()[0].click();
+            dayButtons()[3].click();
+            await render();
+            document.querySelector<HTMLButtonElement>('.choice__done')!.click();
+            await render();
+
+            expect(plan.plan().days[0]).toEqual(['other', sprints.id]);
+            expect(plan.plan().days[3]).toEqual([sprints.id]);
+            expect(text(el().querySelector('.details__planned')!)).toBe('On your plan: Mon, Thu');
+            expect(text(planButton())).toBe('event Change days');
+            const undo = TestBed.inject(UndoService);
+            expect(undo.offer()?.message).toBe('Sprints planned on Monday and Thursday');
+
+            undo.undo();
+            await render();
+            expect(plan.plan().days.flat()).toEqual(['other']);
+            expect(document.activeElement).toBe(planButton());
+            el().remove();
+        });
+
+        it('starts with the days it is on chosen, so unchoosing one takes it off', async () => {
+            const sprints = addSprints();
+            const plan = TestBed.inject(PlanStore);
+            plan.add(2, sprints.id);
+            plan.add(4, sprints.id);
+            await open(sprints.id);
+            expect(text(el().querySelector('.details__planned')!)).toBe('On your plan: Wed, Fri');
+
+            planButton().click();
+            await render();
+            expect(dayButtons().map((day) => day.getAttribute('aria-pressed'))).toEqual([
+                'false',
+                'false',
+                'true',
+                'false',
+                'true',
+                'false',
+                'false',
+            ]);
+            dayButtons()[4].click();
+            await render();
+            document.querySelector<HTMLButtonElement>('.choice__done')!.click();
+            await render();
+
+            expect(plan.plan().days[2]).toEqual([sprints.id]);
+            expect(plan.plan().days[4]).toEqual([]);
+            expect(TestBed.inject(UndoService).offer()?.message).toBe('Sprints taken off Friday');
+        });
+
+        it('changes nothing when closed without Done', async () => {
+            const sprints = addSprints();
+            await open(sprints.id);
+            document.body.appendChild(el());
+            planButton().click();
+            await render();
+            dayButtons()[1].click();
+            document.querySelector<HTMLButtonElement>('app-dialog-back button')!.click();
+            await render();
+
+            expect(TestBed.inject(PlanStore).plan().days.flat()).toEqual([]);
+            expect(TestBed.inject(UndoService).offer()).toBeNull();
+            expect(document.activeElement).toBe(planButton());
+            el().remove();
+        });
+    });
 
     it("lists what's in it at the bottom, so it can be read without Edit", async () => {
         const legs = store.addWorkout({

@@ -56,6 +56,7 @@
                                 [class.plan__workout--missed]="planned.status === 'missed'"
                                 [class.plan__workout--today]="planned.status === 'today'"
                                 [class.plan__workout--later]="planned.status === 'next week'"
+                                [class.plan__workout--saved]="isSaved(day.day, planned.workoutId)"
                             >
                                 <span class="plan__workout-name">{{ planned.name }}</span>
                                 @if (statusText[planned.status]; as status) {
@@ -92,7 +93,7 @@
             <app-workout-choice-dialog
                 animate.leave="dialog-leave"
                 [heading]="'Plan on ' + days()[addingTo()!].name"
-                newLabel="Add new workouts"
+                newLabel="Make a new workout"
                 [choices]="choices()"
                 (closed)="closeAdding()"
                 (picked)="add(addingTo()!, $event)"

@@ -57,13 +57,11 @@
                     Add to a day
                 </button>
                 @if (choosingDay()) {
-                    <app-workout-choice-dialog
+                    <app-add-to-plan-dialog
                         animate.leave="dialog-leave"
-                        [heading]="'Plan ' + suggestion.workout.title + ' on…'"
-                        hint="Each day says what's on it already, and the muscles those work."
-                        [choices]="days()"
+                        [workout]="suggestion.workout"
                         (closed)="closeDays()"
-                        (picked)="planOn($event)"
+                        (done)="planOn($event)"
                     />
                 }
             </div>

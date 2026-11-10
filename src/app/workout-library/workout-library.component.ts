@@ -14,7 +14,9 @@ import { Workout } from '../models/workout';
 import { WorkoutCardComponent } from './workout-card/workout-card.component';
 import { LibraryFilters } from './library-filters.service';
 import { LibraryFiltersComponent } from './library-filters/library-filters.component';
+import { AddToPlanDialogComponent } from '../shared/components/add-to-plan-dialog/add-to-plan-dialog.component';
 import { changeSmoothly } from '../shared/layout-change';
+import { injectPlanOnDays } from '../shared/plan-on-days';
 import { injectStartWorkout } from '../shared/run/start-workout';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { editUrl, MakeCopy } from '../shared/state/make-copy.service';
@@ -30,7 +32,12 @@ import { UndoService } from '../shared/undo/undo.service';
     selector: 'app-workout-library',
     templateUrl: './workout-library.component.html',
     styleUrl: './workout-library.component.scss',
-    imports: [LibraryFiltersComponent, MatIconModule, WorkoutCardComponent],
+    imports: [
+        AddToPlanDialogComponent,
+        LibraryFiltersComponent,
+        MatIconModule,
+        WorkoutCardComponent,
+    ],
 })
 export class WorkoutLibraryComponent {
     workoutStore = inject(WorkoutStore);
@@ -166,6 +173,26 @@ export class WorkoutLibraryComponent {
     navigateToEditWorkout(workout: Workout) {
         this.openWorkoutMenuId.set(null);
         this.slide.navigate(editUrl(workout), 'in');
+    }
+
+    /** The workout whose Add to plan dialog is open, from its card's options. */
+    protected readonly planning = signal<Workout | null>(null);
+    private readonly planOnDays = injectPlanOnDays();
+
+    planWorkout(workout: Workout) {
+        this.openWorkoutMenuId.set(null);
+        this.planning.set(workout);
+    }
+
+    /** Plans it on the days chosen, with Undo, focus coming back to its card's ⋮. */
+    planOn(workout: Workout, days: number[]) {
+        this.planning.set(null);
+        this.planOnDays(workout, days, `workout-menu-${workout.id}`);
+    }
+
+    closePlanning(workout: Workout) {
+        this.planning.set(null);
+        this.focusAfterRender(`[data-menu-for="${CSS.escape(workout.id)}"]`);
     }
 
     /** Make a copy of a workout, yours or ready-made, and open the copy in Create. */

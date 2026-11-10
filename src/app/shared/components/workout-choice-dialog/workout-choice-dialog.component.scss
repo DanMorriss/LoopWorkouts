@@ -31,6 +31,20 @@
     cursor: not-allowed;
 }
 
+// Chosen, choosing several: ticked, in the accent colour
+.choice__choice--on {
+    background: var(--accent-soft);
+
+    .mat-icon {
+        color: var(--accent);
+    }
+}
+
+.choice__done {
+    width: 100%;
+    margin-top: 1rem;
+}
+
 .choice__name {
     flex: 1;
     min-width: 0;

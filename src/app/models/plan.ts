@@ -1,4 +1,5 @@
 import { HistoryEntry } from './history';
+import { joinAnd } from './text';
 
 /** The days of the week, Monday first: a plan's days, and the order This week shows them in. */
 export const WEEKDAYS = [
@@ -38,6 +39,29 @@ export function plannedKey(day: number, workoutId: string): string {
 }
 
 export const EMPTY_PLAN: WeekPlan = { days: WEEKDAYS.map(() => []), updatedAt: 0 };
+
+/** The days a workout's planned on, from 0 for Monday. */
+export function daysPlannedOn(plan: WeekPlan, workoutId: string): number[] {
+    return plan.days.flatMap((ids, day) => (ids.includes(workoutId) ? [day] : []));
+}
+
+/**
+ * What planning a workout on some days and taking it off others did, as the Undo bar says it:
+ * "Legs planned on Monday and Thursday", "Legs taken off Friday", or both, "Legs planned on
+ * Monday, and taken off Friday".
+ */
+export function planChangeText(
+    name: string,
+    added: readonly number[],
+    removed: readonly number[]
+): string {
+    const days = (list: readonly number[]) => joinAnd(list.map((day) => WEEKDAYS[day]));
+    const parts = [
+        ...(added.length ? [`planned on ${days(added)}`] : []),
+        ...(removed.length ? [`taken off ${days(removed)}`] : []),
+    ];
+    return `${name} ${parts.join(', and ')}`;
+}
 
 /** Whether a saved value is a usable plan: seven days of workout ids, and when it changed. */
 export function isWeekPlan(value: unknown): value is WeekPlan {

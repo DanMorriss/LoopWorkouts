@@ -45,6 +45,29 @@ export class PlanStore {
     }
 
     /**
+     * Plans `workoutId` on just `days` (from 0 for Monday): at the end of each it isn't on yet,
+     * unless that's full, and off the others. One change, dated now.
+     */
+    setDays(workoutId: string, days: readonly number[]) {
+        const plan = this._plan();
+        const now = Date.now();
+        const plannedAt = { ...plan.plannedAt };
+        const newDays = plan.days.map((ids, day) => {
+            if (!days.includes(day)) {
+                return ids.filter((id) => id !== workoutId);
+            }
+            if (ids.includes(workoutId) || ids.length >= MAX_WORKOUTS_A_DAY) {
+                return ids;
+            }
+            plannedAt[plannedKey(day, workoutId)] = now;
+            return [...ids, workoutId];
+        });
+        this.save(
+            copyPlan({ days: newDays, updatedAt: this.clock.now(plan.updatedAt), plannedAt })
+        );
+    }
+
+    /**
      * Sets every day at once, Monday first, e.g. from a ready-made plan (PLN-6). A workout
      * already on its day keeps when it was planned; the rest are planned now. Dated now, as any
      * change is, so it syncs as the latest.

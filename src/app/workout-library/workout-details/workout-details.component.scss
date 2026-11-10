@@ -51,6 +51,21 @@
     margin-top: 1.25rem;
 }
 
+// Add to plan, with the days it's on beside it
+.details__plan {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.details__planned {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
 .details__heading {
     margin: 0 0 0.6rem;
     font-size: 1rem;

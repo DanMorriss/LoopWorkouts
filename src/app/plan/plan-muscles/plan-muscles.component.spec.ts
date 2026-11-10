@@ -8,6 +8,7 @@ import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { makeWorkout as baseWorkout, reps, SimpleWorkout } from '../../shared/testing/make-workout';
+import { UndoService } from '../../shared/undo/undo.service';
 import { PlanMusclesComponent } from './plan-muscles.component';
 import { weekdayOf } from '../../models/plan';
 
@@ -124,7 +125,7 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                 );
             });
 
-            it('plans it as it is on the day picked, then suggests another', async () => {
+            it('plans it as it is on the days chosen, with Undo, then suggests another', async () => {
                 el('.plan-muscles__filler-add')!.click();
                 fixture.detectChanges();
                 const days = Array.from(
@@ -156,14 +157,29 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                     'Nothing planned',
                     'Nothing planned',
                 ]);
+                // Several at once: Thursday and Saturday
+                expect(days.map((day) => day.getAttribute('aria-pressed'))).toEqual(
+                    Array(7).fill('false')
+                );
                 days[3].click();
+                days[5].click();
+                fixture.detectChanges();
+                expect(days[3].getAttribute('aria-pressed')).toBe('true');
+                expect(plan.plan().days[3]).toEqual([]);
+                document.querySelector<HTMLButtonElement>('.choice__done')!.click();
                 fixture.detectChanges();
                 await fixture.whenStable();
 
                 expect(plan.plan().days[3]).toEqual(['builtin:gym-extras']);
+                expect(plan.plan().days[5]).toEqual(['builtin:gym-extras']);
+                const undo = TestBed.inject(UndoService);
+                expect(undo.offer()?.message).toBe('Gym extras planned on Thursday and Saturday');
                 // Not copied: it's planned as it is
                 expect(store.workouts().map((w) => w.title)).toEqual(['Legs', 'Push', 'Arms']);
                 expect(suggested()).not.toBe('Gym extras');
+
+                undo.undo();
+                expect(plan.plan().days.flat()).not.toContain('builtin:gym-extras');
             });
 
             it('with Only what I have on, suggests only what your equipment allows', () => {

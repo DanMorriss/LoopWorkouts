@@ -173,7 +173,7 @@ test.describe('dialogs', () => {
             page,
             page.getByRole('button', { name: 'Add a workout to Thursday' }),
             plan,
-            plan.getByRole('button', { name: 'Add new workouts' })
+            plan.getByRole('button', { name: 'Make a new workout' })
         );
     });
 

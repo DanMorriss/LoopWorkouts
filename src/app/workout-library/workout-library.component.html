@@ -49,9 +49,19 @@
                 (menuClosed)="closeWorkoutMenu(workout.id)"
                 (editRequested)="navigateToEditWorkout(workout)"
                 (copyRequested)="copyWorkout(workout)"
+                (planRequested)="planWorkout(workout)"
                 (deleteRequested)="deleteWorkout(workout)"
             ></li>
         }
     </ul>
     <div class="sr-only" aria-live="polite">{{ announcement() }}</div>
+
+    @if (planning(); as workout) {
+        <app-add-to-plan-dialog
+            animate.leave="dialog-leave"
+            [workout]="workout"
+            (closed)="closePlanning(workout)"
+            (done)="planOn(workout, $event)"
+        />
+    }
 </div>

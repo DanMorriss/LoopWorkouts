@@ -21,15 +21,22 @@ import { MakeCopy } from '../../shared/state/make-copy.service';
 import { ReadyMadeChanges } from '../../shared/state/ready-made-changes.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { injectFocusAfterRender } from '../../shared/focus-after-render';
+import { AddToPlanDialogComponent } from '../../shared/components/add-to-plan-dialog/add-to-plan-dialog.component';
+import { injectPlanOnDays } from '../../shared/plan-on-days';
+import { PlanStore } from '../../shared/state/plan-store.service';
+import { daysPlannedOn, WEEKDAYS } from '../../models/plan';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
 
 /** How many of its latest runs it lists. */
 const RECENT_RUNS = 5;
+/** Add to plan, which focus comes back to. */
+const PLAN_BUTTON_ID = 'workout-details-plan';
 
 /**
  * A workout's details (LIB-4), at /library/<its id>, from its card in the library: the
- * Start, to do it now, as its card's play button does; the muscles its exercises work, on the body map; its history, with its latest runs linking to them
+ * Start, to do it now, as its card's play button does; Add to plan, saying which days it's on
+ * (PLN-1); the muscles its exercises work, on the body map; its history, with its latest runs linking to them
  * on the Progress page; a heart to make it a favourite; and what's in it, each step and its sets, so it can be read without
  * opening Edit, each exercise sliding in its page. It slides in over Workouts, and back off with
  * ‹ Workouts or a swipe right, with focus back on the card (`?details=<its id>`). From a run of it on
@@ -38,6 +45,7 @@ const RECENT_RUNS = 5;
 @Component({
     selector: 'app-workout-details',
     imports: [
+        AddToPlanDialogComponent,
         BackLinkComponent,
         BodyMapComponent,
         DatePipe,
@@ -62,6 +70,8 @@ export class WorkoutDetailsComponent {
     private readonly readyMadeChanges = inject(ReadyMadeChanges);
     private readonly undo = inject(UndoService);
     private readonly focusAfterRender = injectFocusAfterRender();
+    private readonly plan = inject(PlanStore);
+    private readonly planOnDays = injectPlanOnDays();
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     private readonly id = toSignal(
@@ -140,6 +150,28 @@ export class WorkoutDetailsComponent {
         const exercise = this.exercises.byId(exerciseId);
         return exercise ? `/library/${this.id()}/${exerciseSlug(exercise)}` : null;
     };
+
+    /** Where it's planned, "On your plan: Mon, Thu", or nothing when it isn't (PLN-1). */
+    protected readonly plannedOn = computed(() => {
+        const days = daysPlannedOn(this.plan.plan(), this.id());
+        return days.length
+            ? `On your plan: ${days.map((day) => WEEKDAYS[day].slice(0, 3)).join(', ')}`
+            : '';
+    });
+    protected readonly planButtonId = PLAN_BUTTON_ID;
+    /** Add to plan's dialog is open. */
+    protected readonly planning = signal(false);
+
+    /** Plans it on the days chosen in Add to plan, with Undo, focus coming back here. */
+    protected planOn(workout: Workout, days: number[]) {
+        this.planning.set(false);
+        this.planOnDays(workout, days, PLAN_BUTTON_ID);
+    }
+
+    protected closePlanning() {
+        this.planning.set(false);
+        this.focusAfterRender(PLAN_BUTTON_ID);
+    }
 
     /** Starts it, and opens the workout page on it. */
     protected readonly start = injectStartWorkout();

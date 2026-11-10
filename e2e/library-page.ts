@@ -29,7 +29,7 @@ export class LibraryPage {
         return names.map((name) => name.replace(/^Details of /, ''));
     }
 
-    /** Opens a card's options (⋮), and gives them: Edit, Make a copy, Delete. */
+    /** Opens a card's options (⋮), and gives them: Add to plan, Edit, Make a copy, Delete. */
     async options(title: string): Promise<Locator> {
         await this.page
             .getByRole('button', { name: `Open options for ${title}`, exact: true })

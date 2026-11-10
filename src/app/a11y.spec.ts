@@ -611,6 +611,15 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
+            it("a ready-made workout's reps and weights for one exercise (LIB-6)", async () => {
+                await store.readyMadeLoaded;
+                await open('/library/builtin:gym-legs');
+                click('#ready-made-amounts-0');
+                await settle();
+                expect(fixture.nativeElement.querySelector('.amounts__save')).not.toBeNull();
+                await expectNoViolations();
+            });
+
             it('leaving Create with unsaved changes', async () => {
                 await open('/setup');
                 const title = fixture.nativeElement.querySelector('#title') as HTMLInputElement;

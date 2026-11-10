@@ -8,6 +8,7 @@ import { PageSlide } from '../../nav/page-slide';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { fakeReducedMotion } from '../../shared/testing/fake-reduced-motion';
 import { makeWorkout as baseWorkout } from '../../shared/testing/make-workout';
 import { WorkoutDetailsComponent } from './workout-details.component';
 
@@ -133,6 +134,12 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             expect(document.activeElement).toBe(planButton());
             el().remove();
         });
+    });
+
+    it('has no reps and weights to set for one of yours, which has Edit', async () => {
+        await open(addSprints().id);
+
+        expect(el().querySelector('app-ready-made-amounts .amounts')).toBeNull();
     });
 
     it("lists what's in it at the bottom, so it can be read without Edit", async () => {
@@ -337,6 +344,83 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             harness.detectChanges();
             await harness.fixture.whenStable();
             expect(document.activeElement?.id).toBe('workout-details-copy');
+        });
+
+        describe('your reps and weights, set before running it', () => {
+            const render = async () => {
+                harness.detectChanges();
+                await harness.fixture.whenStable();
+            };
+            const lines = () =>
+                Array.from(el().querySelectorAll('.amounts__line'), (line) =>
+                    line.getAttribute('aria-label')
+                );
+            const squat = () => el().querySelector<HTMLButtonElement>('#ready-made-amounts-0')!;
+            const wheels = () =>
+                Array.from(document.querySelectorAll<HTMLElement>('[role="spinbutton"]'));
+            /** Turns a wheel one place on, as the arrow keys do. */
+            const turn = async (wheel: HTMLElement) => {
+                // A freshly shown wheel jumps to its value a frame later
+                await new Promise(requestAnimationFrame);
+                await new Promise(requestAnimationFrame);
+                wheel.dispatchEvent(
+                    new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })
+                );
+                await render();
+            };
+
+            beforeEach(() => document.body.appendChild(el()));
+            afterEach(() => el().remove());
+
+            it('lists each rep exercise with its sets', () => {
+                expect(lines()).toEqual([
+                    'Change Back squat, 12, 10, 8',
+                    'Change Romanian deadlift, 3 × 10',
+                    'Change Leg press, 3 × 12',
+                    'Change Leg curl, 3 × 12',
+                    'Change Seated calf raise, 3 × 15',
+                ]);
+            });
+
+            it("keeps a set's reps as the summary's Apply would, with Undo, and focus back", async () => {
+                fakeReducedMotion(true);
+                squat().click();
+                await render();
+                expect(text(document.querySelector('.amounts__title')!)).toBe('Back squat');
+                // Set 1, 2 and 3, each with Reps and Weight
+                expect(wheels()).toHaveLength(6);
+
+                await turn(wheels()[0]);
+                document.querySelector<HTMLButtonElement>('.amounts__save')!.click();
+                await render();
+
+                const steps = allSteps(store.findAnyWorkout('builtin:gym-legs')!);
+                expect((steps[0] as RepStep).sets?.map((set) => set.reps)).toEqual([13, 10, 8]);
+                expect(lines()[0]).toBe('Change Back squat, 13, 10, 8');
+                expect(text(el().querySelector('.details__own')!)).toBe(
+                    'With your own reps and weights.'
+                );
+                const undo = TestBed.inject(UndoService);
+                expect(undo.offer()?.message).toBe('Back squat: 13, 10, 8');
+
+                undo.undo();
+                await render();
+                expect(lines()[0]).toBe('Change Back squat, 12, 10, 8');
+                expect(el().querySelector('.details__own')).toBeNull();
+                expect(document.activeElement).toBe(squat());
+            });
+
+            it('changes nothing when closed without Save, with focus back', async () => {
+                squat().click();
+                await render();
+                await turn(wheels()[0]);
+                document.querySelector<HTMLButtonElement>('app-dialog-back button')!.click();
+                await render();
+
+                expect(lines()[0]).toBe('Change Back squat, 12, 10, 8');
+                expect(TestBed.inject(UndoService).offer()).toBeNull();
+                expect(document.activeElement).toBe(squat());
+            });
         });
 
         it('makes it a favourite from its heart, as a ready-made one', () => {

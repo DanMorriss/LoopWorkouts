@@ -586,10 +586,19 @@ export class WorkoutStore {
             this.saveWorkouts();
             return;
         }
-        const original = this._builtIns().find((builtIn) => builtIn.id === workout.id);
+        this.setReadyMadeStep(workout.id, stepIndex, step);
+    }
+
+    /**
+     * Keeps a rep step's reps and weight on a ready-made workout (ReadyMadeChanges), e.g. set
+     * on its Details or mid-workout; `stepIndex` is its place in `allSteps()`. Anything more
+     * changed than those is left out, as it would take a copy.
+     */
+    setReadyMadeStep(workoutId: string, stepIndex: number, step: Step) {
+        const original = this._builtIns().find((builtIn) => builtIn.id === workoutId);
         const originalStep = original && allSteps(original)[stepIndex];
         if (originalStep) {
-            this.readyMadeChanges.setStep(workout.id, stepIndex, originalStep, step);
+            this.readyMadeChanges.setStep(workoutId, stepIndex, originalStep, step);
         }
     }
 

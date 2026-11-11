@@ -1,0 +1,84 @@
+<div class="pose-tool">
+    <header>
+        <h2 class="pose-tool__title">Posing tool</h2>
+        <p class="pose-tool__hint">
+            Only in development builds. Change a position with the sliders, then copy it and paste
+            it over the one in <code>built-in-exercise-motion.ts</code>. Nothing is saved here.
+        </p>
+    </header>
+
+    <label class="picker-field">
+        <span class="picker-field__label">Exercise</span>
+        <select #picked class="picker-field__input" (change)="pick(picked.value)">
+            @for (choice of choices(); track choice.id) {
+                <option [value]="choice.id" [selected]="choice.id === exercise()?.id">
+                    {{ choice.name }}
+                </option>
+            }
+        </select>
+    </label>
+
+    @if (motion(); as motion) {
+        <div class="pose-tool__positions" role="group" aria-label="Positions">
+            @for (each of motion.frames; track $index) {
+                <button
+                    type="button"
+                    class="pose-tool__position"
+                    [attr.aria-pressed]="!playing() && $index === frame()"
+                    (click)="show($index)"
+                >
+                    {{ each.label }}
+                </button>
+            }
+        </div>
+
+        <div class="pose-tool__layout">
+            <div class="pose-tool__stage">
+                <div class="pose-tool__figures">
+                    @let solid = scene();
+                    @if (solid) {
+                        <app-exercise-figure-3d
+                            class="pose-tool__figure"
+                            [scene]="solid"
+                            [pose]="shown()!"
+                            [paint]="paint()"
+                            [(yaw)]="yaw"
+                        />
+                    } @else if (drawing() === 'loading') {
+                        <div class="pose-tool__figure pose-tool__waiting"></div>
+                    }
+                    <app-exercise-figure
+                        class="pose-tool__figure"
+                        [motion]="motion"
+                        [pose]="shown()!"
+                        [main]="exercise()?.mainMuscles ?? []"
+                        [supporting]="exercise()?.supportingMuscles ?? []"
+                    />
+                </div>
+                <div class="pose-tool__actions">
+                    <button type="button" class="btn-pill" (click)="togglePlay()">
+                        {{ playing() ? 'Stop' : 'Play' }}
+                    </button>
+                    <button type="button" class="btn-pill" (click)="reframe()">Reframe</button>
+                    <button type="button" class="btn-pill" (click)="reset()">Reset</button>
+                    <button type="button" class="btn-pill" (click)="copyPose()">Copy pose</button>
+                    <button type="button" class="btn-pill" (click)="copyMotion()">
+                        Copy motion
+                    </button>
+                </div>
+                <p class="pose-tool__status" aria-live="polite">{{ status() }}</p>
+            </div>
+
+            <div class="pose-tool__controls">
+                @if (pose(); as pose) {
+                    <app-pose-sliders
+                        [pose]="pose"
+                        [view]="motion.view"
+                        (poseChange)="setPose($event)"
+                    />
+                }
+                <pre class="pose-tool__code">{{ code() }}</pre>
+            </div>
+        </div>
+    }
+</div>

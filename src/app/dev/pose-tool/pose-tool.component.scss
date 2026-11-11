@@ -1,0 +1,103 @@
+@use 'chip' as *;
+@use 'type' as *;
+
+.pose-tool {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.pose-tool__title {
+    @include page-title;
+}
+
+.pose-tool__hint {
+    @include page-hint;
+}
+
+.pose-tool__positions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.pose-tool__position {
+    @include chip;
+}
+
+// On a phone, the figures stay in view at the top as the sliders scroll under them; wider,
+// they stand on the left
+.pose-tool__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+
+    @media (min-width: 48rem) {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: start;
+    }
+}
+
+.pose-tool__stage {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-block: 0.5rem;
+    // Opaque on a phone, as the sliders scroll under it; wider, they're beside it
+    background: var(--page-bg);
+
+    @media (min-width: 48rem) {
+        background: none;
+    }
+}
+
+.pose-tool__figures {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.pose-tool__figure {
+    --figure-max-height: min(32vh, 22rem);
+}
+
+.pose-tool__waiting {
+    height: min(32vh, 22rem);
+}
+
+.pose-tool__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.pose-tool__status {
+    min-height: 1.2em;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.pose-tool__controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.pose-tool__code {
+    overflow-x: auto;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--control);
+    color: var(--text);
+    padding: 0.75rem;
+    font-size: 0.8rem;
+    user-select: all;
+}

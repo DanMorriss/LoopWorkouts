@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { asOneGroup, UNTIL_STOPPED, Workout } from '../../models/workout';
 import { makeWorkout, reps, rest, work } from '../../shared/testing/make-workout';
 import { WorkoutCardComponent } from './workout-card.component';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { fakeReducedMotion } from '../../shared/testing/fake-reduced-motion';
 
 const sprints = makeWorkout({

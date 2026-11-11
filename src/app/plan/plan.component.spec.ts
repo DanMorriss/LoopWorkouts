@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../models/history';
-import { PageSlide } from '../nav/page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { asOneGroup, Workout } from '../models/workout';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
@@ -214,7 +214,7 @@ describe('PlanComponent', () => {
 
     it('offers the ready-made workouts after yours, A to Z, each with its badge', async () => {
         const workouts = TestBed.inject(WorkoutStore);
-        await workouts.readyMadeLoaded;
+        await workouts.loadReadyMade();
         await open();
 
         await click('#plan-add-3');
@@ -240,7 +240,7 @@ describe('PlanComponent', () => {
         const workouts = TestBed.inject(WorkoutStore);
         workouts.deleteWorkout(legs.id);
         workouts.deleteWorkout(push.id);
-        await workouts.readyMadeLoaded;
+        await workouts.loadReadyMade();
         await open();
 
         expect(el().querySelector('#plan-add-0')).not.toBeNull();

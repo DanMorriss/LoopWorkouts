@@ -20,7 +20,7 @@ import {
     runsUntilStopped,
     Workout,
 } from '../../models/workout';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { formatSeconds } from '../../shared/format-time';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';

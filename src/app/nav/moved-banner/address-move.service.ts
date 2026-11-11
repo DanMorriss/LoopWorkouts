@@ -1,5 +1,5 @@
 import { DOCUMENT, effect, inject, Injector, Service, signal } from '@angular/core';
-import { AUTH_STORAGE_KEY } from '../../account/account-client';
+import { AUTH_STORAGE_KEY } from '../../shared/state/auth-storage-key';
 import { hasSignInTokens } from '../../account/sign-in-landing';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';

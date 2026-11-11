@@ -1,7 +1,7 @@
 import { userEvent } from 'vitest/browser';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { AUTH_STORAGE_KEY } from '../../account/account-client';
+import { AUTH_STORAGE_KEY } from '../../shared/state/auth-storage-key';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { UndoService } from '../../shared/undo/undo.service';

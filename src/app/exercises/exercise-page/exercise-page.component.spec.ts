@@ -11,7 +11,7 @@ import { UndoService } from '../../shared/undo/undo.service';
 import { makeWorkout } from '../../shared/testing/make-workout';
 import { EXERCISE_TOUR_KEY, TourService } from '../../tour/tour.service';
 import { ExercisePageComponent } from './exercise-page.component';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 
 describe('ExercisePageComponent', () => {
     let harness: RouterTestingHarness;

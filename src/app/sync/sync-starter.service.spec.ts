@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AUTH_STORAGE_KEY } from '../account/account-client';
+import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
 import { fakeAccountClient, provideFakeAccountClient } from '../shared/testing/fake-account-client';
 import { SyncStarter } from './sync-starter.service';
 

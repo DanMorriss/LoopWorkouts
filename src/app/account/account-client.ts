@@ -1,5 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
 
 /**
  * Loop Workouts' Supabase project, in Europe. The publishable key is meant to be in the app:
@@ -20,9 +21,6 @@ export type SignInProvider = 'google' | 'apple';
  * first. Apple waits on an Apple Developer account; add it here once it's set up.
  */
 export const SIGN_IN_PROVIDERS: readonly SignInProvider[] = ['google'];
-
-/** Where the client keeps the sign-in, in localStorage: there while this device is signed in. */
-export const AUTH_STORAGE_KEY = 'sb-cpgacyzlfyskifzhkotu-auth-token';
 
 /** The parts of the Supabase client accounts use. */
 export type AccountClient = Pick<SupabaseClient, 'auth' | 'rpc'>;

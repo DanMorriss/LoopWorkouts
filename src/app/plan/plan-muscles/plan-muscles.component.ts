@@ -3,7 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { builtInWorkoutEquipment } from '../../models/built-in-workouts';
 import { canDoWith, MUSCLE_LABELS, MuscleGroup } from '../../models/exercise';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { listMuscles, workoutToFillGaps } from '../../models/fill-gaps';
 import { Workout } from '../../models/workout';
 import { musclesMissed, musclesWorked } from '../../models/workout-muscles';

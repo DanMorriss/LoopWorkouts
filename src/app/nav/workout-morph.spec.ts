@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
 import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
-import { FADING_CLASS } from './page-slide';
+import { FADING_CLASS } from '../shared/navigation/page-slide';
 import { MORPHING_CLASS, WorkoutMorph } from './workout-morph';
 
 @Component({ template: '' })

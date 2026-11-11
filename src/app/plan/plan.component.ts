@@ -2,7 +2,7 @@ import { afterNextRender, Component, computed, inject, signal } from '@angular/c
 import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
-import { PageSlide } from '../nav/page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { MAX_WORKOUTS_A_DAY, PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../models/plan';
 import {

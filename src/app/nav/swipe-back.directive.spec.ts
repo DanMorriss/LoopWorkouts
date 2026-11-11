@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
-import { PageSlide } from './page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { SwipeBackDirective } from './swipe-back.directive';
 
 @Component({

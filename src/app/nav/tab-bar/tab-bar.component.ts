@@ -1,6 +1,6 @@
 import { Component, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { injectCurrentUrl, isOnPage, pathOf } from '../current-url';
+import { injectCurrentUrl, isOnPage, pathOf } from '../../shared/navigation/current-url';
 import { TABS } from './tabs';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 

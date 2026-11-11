@@ -38,8 +38,8 @@ import {
 } from '../shared/testing/make-workout';
 import { WorkoutSetupComponent } from './workout-setup.component';
 import { WorkoutSetupForm } from './workout-setup-form';
-import { LeaveCheck } from '../nav/leave-check';
-import { PageSlide } from '../nav/page-slide';
+import { LeaveCheck } from '../shared/navigation/leave-check';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { CREATE_TOUR_KEY, JOIN_TIP_KEY, TourService } from '../tour/tour.service';
 
 /** The step a new workout starts with, as `shown()` reads it. */

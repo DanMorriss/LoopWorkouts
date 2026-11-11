@@ -1,6 +1,6 @@
 import { ApplicationRef } from '@angular/core';
-import { letInputThrough } from '../nav/let-input-through';
-import { FADING_CLASS } from '../nav/page-slide';
+import { letInputThrough } from '../shared/navigation/let-input-through';
+import { FADING_CLASS } from '../shared/navigation/page-slide';
 import { criticallyDampedSpring } from '../shared/spring';
 import { prefersReducedMotion } from '../shared/reduced-motion';
 

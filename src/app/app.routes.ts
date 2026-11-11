@@ -1,21 +1,22 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Routes } from '@angular/router';
-import { confirmLeaving } from './nav/leave-check';
+import { confirmLeaving } from './shared/navigation/leave-check';
 import { ExerciseStore } from './shared/state/exercise-store.service';
 import { HistoryStore } from './shared/state/history-store.service';
+import { WorkoutStore } from './shared/state/workout-store.service';
 import { welcomeFirst } from './welcome/welcome-first';
 
 // Pages that read the history wait for it to load, so they don't show it empty at first
 const historyLoaded: CanActivateFn = () => inject(HistoryStore).ready.then(() => true);
+// Failing to load what it waits for (offline, say), a page opens without it
+const opens = () => true;
 // Pages that show or save exercises wait for the built-in ones, which aren't in the first
-// download; failing to load them (offline, say), the page opens without them
-const exercisesLoaded: CanActivateFn = () =>
-    inject(ExerciseStore)
-        .load()
-        .then(
-            () => true,
-            () => true
-        );
+// download
+const exercisesLoaded: CanActivateFn = () => inject(ExerciseStore).load().then(opens, opens);
+// Pages that show, plan or run workouts wait for the ready-made ones (LIB-6), which load
+// only then, as they bring the built-in exercises with them
+const readyMadeLoaded: CanActivateFn = () =>
+    inject(WorkoutStore).loadReadyMade().then(opens, opens);
 
 export const routes: Routes = [
     // The app opens on Home: the workouts due today, the workout to do next and the muscles worked this week
@@ -23,7 +24,7 @@ export const routes: Routes = [
     {
         path: 'home',
         // A device new to the app is welcomed first, to sign in or go on as a guest
-        canActivate: [historyLoaded, welcomeFirst, exercisesLoaded],
+        canActivate: [historyLoaded, welcomeFirst, exercisesLoaded, readyMadeLoaded],
         loadComponent: () => import('./home/home.component').then((m) => m.HomeComponent),
     },
     {
@@ -45,7 +46,7 @@ export const routes: Routes = [
     },
     {
         path: 'library',
-        canActivate: [exercisesLoaded],
+        canActivate: [exercisesLoaded, readyMadeLoaded],
         loadComponent: () =>
             import('./workout-library/workout-library.component').then(
                 (m) => m.WorkoutLibraryComponent
@@ -54,7 +55,7 @@ export const routes: Routes = [
     {
         // A workout's details, over the library
         path: 'library/:id',
-        canActivate: [exercisesLoaded, historyLoaded],
+        canActivate: [exercisesLoaded, historyLoaded, readyMadeLoaded],
         loadComponent: () =>
             import('./workout-library/workout-details/workout-details.component').then(
                 (m) => m.WorkoutDetailsComponent
@@ -73,13 +74,13 @@ export const routes: Routes = [
     },
     {
         path: 'plan',
-        canActivate: [exercisesLoaded, historyLoaded],
+        canActivate: [exercisesLoaded, historyLoaded, readyMadeLoaded],
         loadComponent: () => import('./plan/plan.component').then((m) => m.PlanComponent),
     },
     {
         // The ready-made plans (PLN-6), from Today or the Plan page
         path: 'ready-made-plans',
-        canActivate: [exercisesLoaded],
+        canActivate: [exercisesLoaded, readyMadeLoaded],
         loadComponent: () =>
             import('./plan/ready-made-plans/ready-made-plans.component').then(
                 (m) => m.ReadyMadePlansComponent
@@ -98,7 +99,7 @@ export const routes: Routes = [
     {
         // One of a ready-made plan's workouts, from its card: only to look at, and back there
         path: 'ready-made-plans/:id',
-        canActivate: [exercisesLoaded],
+        canActivate: [exercisesLoaded, readyMadeLoaded],
         loadComponent: () =>
             import(
                 './workout-library/ready-made/ready-made-workout/ready-made-workout.component'
@@ -107,7 +108,7 @@ export const routes: Routes = [
     {
         // One of its exercises, over a workout's details, and back to them
         path: 'library/:workoutId/:id',
-        canActivate: [exercisesLoaded, historyLoaded],
+        canActivate: [exercisesLoaded, historyLoaded, readyMadeLoaded],
         loadComponent: () =>
             import('./exercises/exercise-page/exercise-page.component').then(
                 (m) => m.ExercisePageComponent
@@ -129,7 +130,7 @@ export const routes: Routes = [
     },
     {
         path: 'history',
-        canActivate: [exercisesLoaded, historyLoaded],
+        canActivate: [exercisesLoaded, historyLoaded, readyMadeLoaded],
         loadComponent: () => import('./history/history.component').then((m) => m.HistoryComponent),
     },
     {
@@ -156,7 +157,7 @@ export const routes: Routes = [
     },
     {
         path: 'workout',
-        canActivate: [exercisesLoaded],
+        canActivate: [exercisesLoaded, readyMadeLoaded],
         loadComponent: () => import('./workout/workout.component').then((m) => m.WorkoutComponent),
     },
     // The workout page was /timer until October 2026, so links and bookmarks to it still work

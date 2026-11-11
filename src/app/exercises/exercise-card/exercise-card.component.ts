@@ -10,7 +10,7 @@ import {
     isBuiltIn,
     MUSCLE_LABELS,
 } from '../../models/exercise';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 
 /** One exercise in the list, as its card shows it. */
 export interface ExerciseCard {

@@ -10,7 +10,7 @@ import { isReadyMade, isReadyMadeId, Workout } from '../../models/workout';
 import { ReadyMadeBadgeComponent } from '../../shared/components/ready-made-badge/ready-made-badge.component';
 import { musclesWorked } from '../../models/workout-muscles';
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { WorkoutOutlineComponent } from '../../shared/components/workout-outline/workout-outline.component';

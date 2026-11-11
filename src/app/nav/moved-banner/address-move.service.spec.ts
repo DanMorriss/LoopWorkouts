@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { AUTH_STORAGE_KEY } from '../../account/account-client';
+import { AUTH_STORAGE_KEY } from '../../shared/state/auth-storage-key';
 import { makeWorkout } from '../../shared/testing/make-workout';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { SyncStarter, SyncStatus } from '../../sync/sync-starter.service';

@@ -16,7 +16,7 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { HistoryComponent } from './history.component';
 import { TourService } from '../tour/tour.service';
-import { PageSlide } from '../nav/page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { asOneGroup } from '../models/workout';
 
 // Midday on Sunday 18 October 2026, so "today" and "yesterday" can't flip mid-test

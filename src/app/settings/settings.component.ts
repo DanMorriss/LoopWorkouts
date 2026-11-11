@@ -1,6 +1,6 @@
 import { ApplicationRef, Component, computed, DOCUMENT, inject } from '@angular/core';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
-import { letInputThrough } from '../nav/let-input-through';
+import { letInputThrough } from '../shared/navigation/let-input-through';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { AlarmService } from '../shared/alarms/alarm.service';
 import { ToggleSwitchComponent } from '../shared/components/toggle-switch/toggle-switch.component';

@@ -90,7 +90,7 @@ describe('HomeComponent', () => {
      */
     async function useThePlan() {
         // Its workouts are ready-made ones, which load on demand
-        await TestBed.inject(WorkoutStore).readyMadeLoaded;
+        await TestBed.inject(WorkoutStore).loadReadyMade();
         const start = vi.spyOn(document, 'startViewTransition');
         (element().querySelector('.plan-card__use') as HTMLButtonElement).click();
         expect(document.documentElement.classList).toContain('home-morphing');
@@ -332,7 +332,7 @@ describe('HomeComponent', () => {
                     blocks: asOneGroup([{ kind: 'reps', reps: 5, name: 'Bench press' }]),
                 });
                 TestBed.inject(PlanStore).add(3, legs.id);
-                await TestBed.inject(WorkoutStore).readyMadeLoaded;
+                await TestBed.inject(WorkoutStore).loadReadyMade();
                 create();
             }
 

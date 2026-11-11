@@ -1,6 +1,6 @@
 import { EnvironmentInjector, inject, Service, signal } from '@angular/core';
 import type { SyncService } from './sync.service';
-import { AUTH_STORAGE_KEY } from '../account/account-client';
+import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
 
 /** When this device last synced, in localStorage. */
 export const LAST_SYNCED_KEY = 'synced-at';

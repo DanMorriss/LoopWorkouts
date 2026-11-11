@@ -1,6 +1,7 @@
 import { Provider } from '@angular/core';
 import type { Session } from '@supabase/supabase-js';
-import { AccountClient, ACCOUNT_CLIENT, AUTH_STORAGE_KEY } from '../../account/account-client';
+import { AccountClient, ACCOUNT_CLIENT } from '../../account/account-client';
+import { AUTH_STORAGE_KEY } from '../state/auth-storage-key';
 
 /** A session for `email`, as much of one as the app reads. */
 export function sessionFor(email: string): Session {

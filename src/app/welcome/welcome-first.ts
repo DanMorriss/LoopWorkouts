@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AUTH_STORAGE_KEY } from '../account/account-client';
+import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 

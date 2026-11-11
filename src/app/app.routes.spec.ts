@@ -3,7 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from './models/history';
 import { routes } from './app.routes';
-import { AUTH_STORAGE_KEY } from './account/account-client';
+import { AUTH_STORAGE_KEY } from './shared/state/auth-storage-key';
 
 const entry: HistoryEntry = {
     id: '1000000-1',

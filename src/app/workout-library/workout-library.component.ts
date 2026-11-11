@@ -1,4 +1,4 @@
-import { PageSlide } from '../nav/page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import {
     afterNextRender,
     Component,
@@ -78,7 +78,7 @@ export class WorkoutLibraryComponent {
             if (this.workoutStore.findAnyWorkout(details)) {
                 focusCard();
             } else {
-                void this.workoutStore.readyMadeLoaded.then(focusCard);
+                void this.workoutStore.loadReadyMade().then(focusCard);
             }
         }
     }
@@ -148,7 +148,7 @@ export class WorkoutLibraryComponent {
         );
         // Scrolled once the ready-made workouts are in the list too, as they can push it down,
         // and two frames on, as the page slide scrolls the page to its top just after rendering
-        void this.workoutStore.readyMadeLoaded.then(() =>
+        void this.workoutStore.loadReadyMade().then(() =>
             requestAnimationFrame(() =>
                 requestAnimationFrame(() =>
                     card()?.scrollIntoView({

@@ -3340,7 +3340,7 @@ describe('WorkoutComponent', () => {
             });
 
             it('puts it on a ready-made workout too, which keeps your reps and weights', async () => {
-                await store.readyMadeLoaded;
+                await store.loadReadyMade();
                 start(store.findAnyWorkout('builtin:gym-legs')!);
                 // Back squat's three sets, 12, 10 and 8 reps, resting 2:30 between
                 for (let i = 0; i < 3; i++) {

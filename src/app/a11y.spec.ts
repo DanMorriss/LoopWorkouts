@@ -3,7 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import axe from 'axe-core';
 import { AppComponent } from './app.component';
 import { routes } from './app.routes';
-import { LeaveCheck } from './nav/leave-check';
+import { LeaveCheck } from './shared/navigation/leave-check';
 import {
     FakeAccountClient,
     fakeAccountClient,
@@ -476,7 +476,7 @@ for (const theme of ['dark', 'light'] as const) {
 
         describe('ready-made workouts', () => {
             it('listed on Workouts with their badges, the filters and equipment open', async () => {
-                await TestBed.inject(WorkoutStore).readyMadeLoaded;
+                await TestBed.inject(WorkoutStore).loadReadyMade();
                 await open('/library');
                 expect(
                     fixture.nativeElement.querySelector('.workout-card app-ready-made-badge')
@@ -489,7 +489,7 @@ for (const theme of ['dark', 'light'] as const) {
             });
 
             it('a workout, on its Details, with Make a copy', async () => {
-                await TestBed.inject(WorkoutStore).readyMadeLoaded;
+                await TestBed.inject(WorkoutStore).loadReadyMade();
                 await open('/ready-made/gym-legs');
                 expect(fixture.nativeElement.querySelector('.details__copy')).not.toBeNull();
                 await expectNoViolations();
@@ -609,7 +609,7 @@ for (const theme of ['dark', 'light'] as const) {
 
             it("with a ready-made card's options open", async () => {
                 store.addWorkout(sprints);
-                await store.readyMadeLoaded;
+                await store.loadReadyMade();
                 await open('/library');
                 click('[data-workout="builtin:gym-legs"] .workout-card__action--menu');
                 await settle();
@@ -620,7 +620,7 @@ for (const theme of ['dark', 'light'] as const) {
             });
 
             it("a ready-made workout's reps and weights for one exercise (LIB-6)", async () => {
-                await store.readyMadeLoaded;
+                await store.loadReadyMade();
                 await open('/library/builtin:gym-legs');
                 click('#ready-made-amounts-0');
                 await settle();

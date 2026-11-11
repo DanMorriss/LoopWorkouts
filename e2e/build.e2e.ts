@@ -110,7 +110,10 @@ test.describe('a new workout', () => {
             await app.goto('/setup');
             await page.evaluate(() => localStorage.removeItem('tip-join'));
             await create.addStep.click();
-            // + Step opens the new step and closes the first, where Join with next is
+            // + Step opens the new step and closes the first, where Join with next is; once
+            // it's done (its name box has focus), step 1 can be opened again
+            await expect(create.header(2)).toHaveAttribute('aria-expanded', 'true');
+            await expect(create.exercise(2)).toBeFocused();
             await create.open(1);
 
             const tip = page.getByRole('dialog', { name: 'Supersets' });

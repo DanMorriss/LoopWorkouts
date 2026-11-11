@@ -192,6 +192,7 @@
                 type="button"
                 class="btn-pill"
                 [id]="'step-' + key + '-join'"
+                data-tour="join"
                 [attr.aria-label]="'Join ' + setup.stepTitle(i) + ' with the next step'"
                 (click)="supersets.joinWithNext(i)"
             >

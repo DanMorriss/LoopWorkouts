@@ -3,14 +3,16 @@ import { Service, signal } from '@angular/core';
 /**
  * The tours: of the app (NAV-8), of making a workout on Create (BLD-17), of the workout page
  * (RUN-13), on the first workout or a run going, or on a practice run from Help, and of the
- * Plan page on its first visit (PLN-8).
+ * Plan page on its first visit (PLN-8); and a tip of one stop, on Create's first Join with next.
  */
-export type TourName = 'app' | 'create' | 'workout' | 'workout-practice' | 'plan';
+export type TourName = 'app' | 'create' | 'join' | 'workout' | 'workout-practice' | 'plan';
 
 /** Set once the tour of the app's been taken, or turned down, on this device. */
 export const TOUR_KEY = 'tour';
 /** Set once the tour of Create has been shown on this device. */
 export const CREATE_TOUR_KEY = 'tour-create';
+/** Set once the tip on Create's first Join with next has been shown on this device. */
+export const JOIN_TIP_KEY = 'tip-join';
 /** Set once the tour of the workout page has been shown on this device. */
 export const WORKOUT_TOUR_KEY = 'tour-workout';
 /** Set once the tour of the Plan page has been shown on this device. */
@@ -19,6 +21,7 @@ export const PLAN_TOUR_KEY = 'tour-plan';
 const KEYS: Record<TourName, string> = {
     app: TOUR_KEY,
     create: CREATE_TOUR_KEY,
+    join: JOIN_TIP_KEY,
     workout: WORKOUT_TOUR_KEY,
     // Taken from Help, it counts as seen for the first workout too
     'workout-practice': WORKOUT_TOUR_KEY,

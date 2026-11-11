@@ -43,10 +43,13 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="tour-title"
-    aria-describedby="tour-text tour-count"
+    [attr.aria-describedby]="count() > 1 ? 'tour-text tour-count' : 'tour-text'"
     cdkTrapFocus
 >
-    <p class="tour__count" id="tour-count">{{ index() + 1 }} of {{ count() }}</p>
+    <!-- A tip of one stop has no count -->
+    @if (count() > 1) {
+        <p class="tour__count" id="tour-count">{{ index() + 1 }} of {{ count() }}</p>
+    }
     <h2 #title class="tour__title" id="tour-title" tabindex="-1">{{ stop().title }}</h2>
     <p class="tour__text" id="tour-text">{{ text() }}</p>
     <div class="tour__actions">

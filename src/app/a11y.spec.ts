@@ -19,7 +19,12 @@ import { weekdayOf } from './models/plan';
 import { WorkoutStore } from './shared/state/workout-store.service';
 import { AddressMove } from './nav/moved-banner/address-move.service';
 import { UndoService } from './shared/undo/undo.service';
-import { CREATE_TOUR_KEY, PLAN_TOUR_KEY, WORKOUT_TOUR_KEY } from './tour/tour.service';
+import {
+    CREATE_TOUR_KEY,
+    JOIN_TIP_KEY,
+    PLAN_TOUR_KEY,
+    WORKOUT_TOUR_KEY,
+} from './tour/tour.service';
 import { asOneGroup } from './models/workout';
 
 /**
@@ -71,6 +76,7 @@ for (const theme of ['dark', 'light'] as const) {
             // So the tours of Create (BLD-17), the workout page (RUN-13) and the Plan page
             // (PLN-8) don't cover them: the tour has its own check below
             localStorage.setItem(CREATE_TOUR_KEY, 'seen');
+            localStorage.setItem(JOIN_TIP_KEY, 'seen');
             localStorage.setItem(WORKOUT_TOUR_KEY, 'seen');
             localStorage.setItem(PLAN_TOUR_KEY, 'seen');
             accountClient = fakeAccountClient();

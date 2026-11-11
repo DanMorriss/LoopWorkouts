@@ -54,8 +54,8 @@ Eighteen ready-made workouts are listed on Workouts, under your own (see `docs/f
 
 - [ ] **Watch which questions people email about,** and add them to Help (`src/app/help/help-topics.ts`), most asked first.
 - [ ] **The ? links left:** the tours replaced the Plan page's, and the workout page's by Tap to turn on sound stays (it's about sound after a reload, which the tour doesn't cover). Still there: Today's week (beside From next week, which REG-NAV-06 uses) and the welcome screen (Why might I lose my workouts?). Decide whether they go; if so, update NAV-7 in `docs/features/home-and-navigation.md`.
-- [ ] **Tour of Create, point at Join with next where it is:** the Supersets stop can only light up + Step, as Join with next shows only on a step with one after it, and a new workout has one step. A one-off tip on the first Join with next to appear (once a second step is added) would show it in place.
-- [ ] **Tour of Create, light up all of Rounds:** the Rounds stop lights up the Rounds or Time limit switch only, not the wheels and Until stopped under it, as nothing holds them all. An element round them, with the `data-tour="repeat"` on it, would.
+- [x] **Tour of Create, point at Join with next where it is** (2026-11-11): a tip of one card, the first time a Join with next shows on an open step (`TOURS.join`, `tip-join`), with focus back where it was after (`returnFocus`).
+- [x] **Tour of Create, light up all of Rounds** (2026-11-11): `data-tour="repeat"` is on an element round the switch and what's under it.
 - [ ] **More tours, if wanted** (each a `TOURS` entry, shown once by `startOnce`):
     - **An exercise's page** (EXR), on the first one opened: turning the 3D demo with a finger, the muscles it works, your own note (EXR-10) and Add to workout (EXR-12).
 

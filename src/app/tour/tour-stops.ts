@@ -29,6 +29,11 @@ export interface Tour {
     doneFocus: string;
     /** The id of what takes focus after Skip tour; none for the page's title. */
     skipFocus?: string;
+    /**
+     * Done and Skip tour put focus back where it was as the tour opened, e.g. for a tip that
+     * shows up as something's being done, which carries on after it.
+     */
+    returnFocus?: true;
 }
 
 /** The tour of the app (NAV-8): each tab's page, and its main part. */
@@ -173,7 +178,8 @@ const CREATE_STOPS: readonly TourStop[] = [
     },
     {
         // Join with next only shows once a step has one after it, which a new workout's
-        // doesn't, so this lights up + Step, the first of the two taps
+        // doesn't, so this lights up + Step, the first of the two taps; a tip shows Join with
+        // next itself, the first time one appears (JOIN_STOPS)
         title: 'Supersets',
         parts: [
             {
@@ -339,10 +345,29 @@ const PLAN_STOPS: readonly TourStop[] = [
     },
 ];
 
+/**
+ * A tip, the first time a Join with next shows in Create (BLD-12), as a second step's added:
+ * the tour of Create can only point at + Step for it, as a new workout has one step.
+ */
+const JOIN_STOPS: readonly TourStop[] = [
+    {
+        title: 'Supersets',
+        parts: [
+            {
+                part: 'join',
+                text: 'Join with next makes this step and the next a superset: done back to back, then one rest. Join a third for a giant set.',
+            },
+        ],
+        text: 'Join with next, under a step, makes it and the next a superset: done back to back, then one rest.',
+    },
+];
+
 export const TOURS: Record<TourName, Tour> = {
     // Done goes back to Today, its last stop
     app: { stops: APP_STOPS, doneFocus: 'home-title' },
     create: { stops: CREATE_STOPS, doneFocus: 'title', skipFocus: 'title' },
+    // Back to what was being done as it showed, e.g. the new step's name
+    join: { stops: JOIN_STOPS, doneFocus: 'title', skipFocus: 'title', returnFocus: true },
     // Pause, ready for the clock that starts as it ends
     workout: { stops: WORKOUT_STOPS, doneFocus: 'workout-pause', skipFocus: 'workout-pause' },
     // Back on Help, which the page puts focus on once it's there (`tourWorkoutPage()`)

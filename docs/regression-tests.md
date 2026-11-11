@@ -435,6 +435,19 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 
 ## 4. Workouts library and ready-made workouts (`library.md`)
 
+### REG-BLD-10 · A tip the first time Join with next shows
+
+- **Stories:** BLD-12, BLD-17 · **Priority:** P2
+- **Preconditions:** `guest()` with `tip-join` removed (the fixtures mark it seen), Create on a new workout (the tour of Create seen).
+- **Steps:**
+    1. Press **+ Step**, then open step 1 again by its row (+ Step closes it).
+    2. Press **Done**.
+    3. Close and open step 1 again.
+- **Expected:**
+    1. A card "Supersets" over the page, lighting up step 1's Join with next: "Join with next makes this step and the next a superset…", with Done and no count.
+    2. It goes, focus is back on step 1's row, and `tip-join` is `seen`.
+    3. No tip.
+
 ### REG-LIB-01 · No workouts of my own
 
 - **Stories:** LIB-1, LIB-6 · **Priority:** P1
@@ -1344,7 +1357,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | ------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                              |
 | Today and planning        | REG-PLAN-01 – 08 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
-| Building a workout        | REG-BLD-01 – 09  | BLD-1, BLD-3 – BLD-16, EXR-2, EXR-11, LIB-1                                                                                   |
+| Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                   |
 | Workouts and ready-made   | REG-LIB-01 – 10  | LIB-1 – LIB-7, CTL-4                                                                                                          |
 | Running a workout         | REG-RUN-01 – 15  | RUN-1 – RUN-12, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 04  | HIS-1 – HIS-5, CTL-3                                                                                                          |
@@ -1383,7 +1396,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | ---- | ---------------------- | ----- | ------------------------------- | ----------------------------------------------------- |
 | NAV  | `e2e/nav.e2e.ts`       | 10    | 0                               | 0                                                     |
 | PLAN | `e2e/plan.e2e.ts`      | 11    | 0                               | 0                                                     |
-| BLD  | `e2e/build.e2e.ts`     | 12    | 0                               | 0                                                     |
+| BLD  | `e2e/build.e2e.ts`     | 13    | 0                               | 0                                                     |
 | LIB  | `e2e/library.e2e.ts`   | 10    | 0                               | 0                                                     |
 | RUN  | `e2e/run.e2e.ts`       | 23    | 0                               | 1 (real sound, manual)                                |
 | HIS  | `e2e/history.e2e.ts`   | 6     | 0                               | 0                                                     |

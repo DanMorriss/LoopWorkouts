@@ -1,5 +1,5 @@
 import { CdkDrag, CdkDragPlaceholder, CdkDragPreview, CdkDropList } from '@angular/cdk/drag-drop';
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormField, FormRoot } from '@angular/forms/signals';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -99,8 +99,22 @@ export class WorkoutSetupComponent {
     constructor() {
         const leaveCheck = inject(LeaveCheck);
         const tour = inject(TourService);
+        const supersets = inject(SetupSupersets);
         leaveCheck.set(this.askToLeave);
         inject(DestroyRef).onDestroy(() => leaveCheck.clear(this.askToLeave));
+
+        // The first time a Join with next shows, on an open step with one after it, a tip on it
+        // (BLD-12)
+        let joinable: boolean | null = null;
+        effect(() => {
+            const now = this.setup
+                .model()
+                .steps.some((step, i) => this.setup.isExpanded(step.key) && supersets.canJoin(i));
+            if (joinable === false && now) {
+                untracked(() => tour.startOnce('join'));
+            }
+            joinable = now;
+        });
 
         // Not just the snapshot: the page stays open when only the query changes, e.g. Create
         // from the menu while editing, which goes from ?editId=1 to a new workout

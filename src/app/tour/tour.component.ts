@@ -74,6 +74,9 @@ export class TourComponent {
     protected readonly text = computed(() => this.part()?.text ?? this.stop().text);
     protected readonly lights = signal<Light[]>([]);
 
+    /** What had focus as the tour opened, for a tour that puts it back (`returnFocus`). */
+    private openedFrom: HTMLElement | null = null;
+
     /** Each stop's search for its part, so an earlier one still looking gives up. */
     private search = 0;
     private frame = 0;
@@ -163,8 +166,14 @@ export class TourComponent {
     }
 
     private finish(focus: string | HTMLElement | null) {
-        const element = typeof focus === 'string' ? this.document.getElementById(focus) : focus;
+        const back = TOURS[this.tour.tour()].returnFocus ? this.openedFrom : null;
+        const element = back?.isConnected
+            ? back
+            : typeof focus === 'string'
+              ? this.document.getElementById(focus)
+              : focus;
         element?.focus();
+        this.openedFrom = null;
         this.tour.end();
     }
 
@@ -172,6 +181,16 @@ export class TourComponent {
     private async show(stop: TourStop) {
         const search = ++this.search;
         this.part.set(null);
+        // Before the card takes focus: where it goes back to, for a tour that puts it back
+        const active = this.document.activeElement;
+        if (
+            this.index() === 0 &&
+            active instanceof HTMLElement &&
+            active !== this.document.body &&
+            !active.closest('app-tour')
+        ) {
+            this.openedFrom = active;
+        }
         this.focusTitle();
         // Before the page opens, so it opens with its examples
         this.tour.sampleHistory.set(stop.sampleHistory ?? false);

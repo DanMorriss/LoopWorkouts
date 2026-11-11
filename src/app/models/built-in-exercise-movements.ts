@@ -41,7 +41,12 @@ export type Movement =
     /** Up and down on the spot, for the heart and lungs. */
     | 'cardio'
     /** Several movements in one: from the floor to overhead, or a squat into a press. */
-    | 'whole body';
+    | 'whole body'
+    /**
+     * Easing a muscle into a stretch, held or flowing: child's pose, cat-cow. Swap only offers
+     * a stretch for a stretch.
+     */
+    | 'stretch';
 
 /**
  * Each built-in exercise's movement, by id. Kept apart, as their words are, so they aren't in
@@ -145,4 +150,14 @@ export const BUILT_IN_MOVEMENTS: Readonly<Record<string, Movement>> = {
     'builtin:kettlebell-lunge': 'lunge',
     'builtin:kettlebell-curl': 'curl',
     'builtin:kettlebell-press': 'vertical push',
+    'builtin:downward-dog': 'stretch',
+    'builtin:childs-pose': 'stretch',
+    'builtin:cat-cow': 'stretch',
+    'builtin:cobra-stretch': 'stretch',
+    'builtin:kneeling-hip-flexor-stretch': 'stretch',
+    'builtin:standing-quad-stretch': 'stretch',
+    'builtin:seated-hamstring-stretch': 'stretch',
+    'builtin:pigeon-stretch': 'stretch',
+    'builtin:worlds-greatest-stretch': 'stretch',
+    'builtin:thread-the-needle': 'stretch',
 };

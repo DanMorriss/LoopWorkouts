@@ -16,7 +16,9 @@ const SAME_MOVEMENT = 4;
  * muscles match `current`'s, each extra or missing one counting against it (so a whole-body
  * move doesn't come top for a chest one), with a little for supporting muscles in common; and
  * a little more for needing none of `current`'s equipment, as that's likely what's taken.
- * Then by name. An exercise of your own has no movement, so it's by muscles alone.
+ * Then by name. An exercise of your own has no movement, so it's by muscles alone. A stretch
+ * is only offered for a stretch, and only a stretch for one: a cobra stretch shares the abs
+ * with a plank, but isn't something to do instead of one.
  */
 export function swapSuggestions(
     current: Exercise,
@@ -29,6 +31,8 @@ export function swapSuggestions(
     const movement = BUILT_IN_MOVEMENTS[current.id];
     const sameMovement = (exercise: Exercise) =>
         movement !== undefined && BUILT_IN_MOVEMENTS[exercise.id] === movement;
+    const isStretch = (exercise: Exercise) => BUILT_IN_MOVEMENTS[exercise.id] === 'stretch';
+    const stretching = isStretch(current);
     const kit = new Set<Equipment>(current.equipment.flat().filter((piece) => piece !== 'none'));
     const count = (muscles: readonly MuscleGroup[], of: Set<MuscleGroup>) =>
         muscles.filter((muscle) => of.has(muscle)).length;
@@ -50,6 +54,7 @@ export function swapSuggestions(
             (exercise) =>
                 exercise.id !== current.id &&
                 exercise.measuredBy === measuredBy &&
+                isStretch(exercise) === stretching &&
                 (count(exercise.mainMuscles, main) > 0 || sameMovement(exercise)) &&
                 (myEquipment.length === 0 || canDoWith(exercise, myEquipment))
         )

@@ -1222,4 +1222,145 @@ export const BUILT_IN_EXERCISE_TEXT: Readonly<Record<BuiltInExercise['id'], Exer
             'Squeeze the handle hard; it makes the press feel steadier.',
         ],
     },
+    // Tenth batch: stretches and mobility
+    'builtin:downward-dog': {
+        description:
+            'From your hands and feet, you push your hips up and back into an upside-down V. Loosens your hamstrings, calves and shoulders.',
+        steps: [
+            'Start on your hands and knees, hands just in front of your shoulders, fingers spread.',
+            'Tuck your toes under and push your hips up and back, straightening your legs as far as is comfortable.',
+            'Press the floor away so your arms and back make one long line, and let your head hang between your arms.',
+            'Ease your heels towards the floor and hold, breathing slowly. Lower your knees to come out of it.',
+        ],
+        tips: [
+            'Tight hamstrings? Keep your knees bent: a long, flat back matters more than straight legs.',
+            'Ease into it and hold still. Never bounce, and back off if it hurts rather than stretches.',
+        ],
+    },
+    'builtin:childs-pose': {
+        description:
+            'Kneeling, you sit back towards your heels and fold forward, arms out in front. A gentle stretch for your back, and a rest.',
+        steps: [
+            'Kneel with your big toes touching and your knees about hip-width apart, or wider.',
+            'Sit back towards your heels, then walk your hands forward and lower your chest towards the floor.',
+            'Rest your forehead on the floor, arms long in front of you, and let your back relax.',
+            'Breathe slowly and hold, then walk your hands back in to sit up.',
+        ],
+        tips: [
+            "Can't sit back that far? Put a folded towel between your heels and your bottom, or under your forehead.",
+            'Walk your hands over to one side, then the other, to stretch down each side of your back.',
+        ],
+    },
+    'builtin:cat-cow': {
+        description:
+            'On your hands and knees, you round your back up, then let it dip, in time with your breath. A gentle way to loosen your back.',
+        steps: [
+            'Start on your hands and knees, hands under your shoulders and knees under your hips.',
+            'Breathe out and round your back up towards the ceiling, tucking your chin and tailbone under.',
+            'Breathe in and let your stomach sink towards the floor, lifting your chest and looking ahead.',
+            'Keep flowing slowly between the two, with your breath, until the time is up.',
+        ],
+        tips: [
+            'Move your whole back, a little at a time, from your neck to your tailbone, not just your lower back.',
+            'Only go as far as is comfortable each way; it should never pinch.',
+        ],
+    },
+    'builtin:cobra-stretch': {
+        description:
+            'Lying face down, you press your chest up off the floor, keeping your hips down. Stretches your abs and the front of your body.',
+        steps: [
+            'Lie face down, legs straight and the tops of your feet on the floor, hands flat under your shoulders.',
+            'Press into your hands to lift your chest, keeping your hips and legs on the floor.',
+            'Straighten your arms only as far as your lower back is comfortable, shoulders down away from your ears.',
+            'Hold, breathing steadily, then lower yourself slowly back to the floor.',
+        ],
+        tips: [
+            'Feel a pinch in your lower back? Come down lower, or rest on your forearms instead of your hands.',
+            'Keep your neck long and look at the floor a little ahead, not up at the ceiling.',
+        ],
+    },
+    'builtin:kneeling-hip-flexor-stretch': {
+        description:
+            'Kneeling on one knee, you ease your hips forward. Loosens the front of the hip and thigh of the leg behind you.',
+        steps: [
+            'Kneel on your left knee with your right foot flat in front of you, both knees bent at about a right angle.',
+            'Stand tall through your body, squeeze your left glute and tuck your hips under a little.',
+            'Ease your hips forward until you feel a stretch at the front of your left hip, keeping your body upright.',
+            'Hold, breathing steadily, then swap legs.',
+        ],
+        tips: [
+            'Put a folded towel or mat under your back knee if the floor is hard.',
+            "Don't arch your lower back to go further: tucking your hips under is what makes the stretch.",
+        ],
+    },
+    'builtin:standing-quad-stretch': {
+        description:
+            'Standing on one leg, you pull your other heel up behind you. A simple stretch for the front of your thigh.',
+        steps: [
+            'Stand tall on your left leg, a hand on a wall or chair for balance if you need it.',
+            'Bend your right knee and hold your right foot or ankle behind you with your right hand.',
+            'Draw your heel gently towards your bottom, knees side by side, until you feel a stretch down the front of your thigh.',
+            'Hold, standing tall, then let go and swap legs.',
+        ],
+        tips: [
+            "Keep your knee pointing at the floor; don't let it drift forward or out to the side.",
+            'Tuck your hips under a little to feel it more, rather than pulling harder on your foot.',
+        ],
+    },
+    'builtin:seated-hamstring-stretch': {
+        description:
+            'Sitting with your legs straight out, you fold forward from your hips towards your toes. Loosens your hamstrings and calves.',
+        steps: [
+            'Sit on the floor with your legs straight out in front of you, feet together and toes pointing up.',
+            'Sit up tall, then fold forward from your hips, sliding your hands along your legs.',
+            'Stop where you feel a stretch down the backs of your legs, and rest your hands on your shins, ankles or feet.',
+            'Hold, breathing slowly and easing a little further as your legs relax, then sit back up.',
+        ],
+        tips: [
+            'Lead with your chest, not your head: reaching forward with a long back stretches more than rounding over.',
+            'Ease into it and hold still; never bounce to reach further.',
+        ],
+    },
+    'builtin:pigeon-stretch': {
+        description:
+            'With one shin across the floor in front of you and the other leg straight behind, you sink your hips. A deep stretch for your glutes.',
+        steps: [
+            'Start on your hands and knees. Bring your right knee forward behind your right hand, your shin angled across towards your left hip.',
+            'Slide your left leg straight back behind you, the top of your foot on the floor.',
+            'Keep your hips square and lower them towards the floor, staying up on your hands or folding forward onto your forearms.',
+            'Hold, breathing slowly, then come back to your hands and knees and swap legs.',
+        ],
+        tips: [
+            'Feel it in your knee? Bring your front heel in closer to your hips, or put a cushion under that hip.',
+            'Let your hips sink as they relax, rather than forcing them down.',
+        ],
+    },
+    'builtin:worlds-greatest-stretch': {
+        description:
+            'A lunge with a twist: you drop an elbow towards your front foot, then reach that arm to the ceiling. Loosens your hips and upper back.',
+        steps: [
+            'From standing, take a long step forward with your right foot into a lunge, your back leg straight.',
+            'Put your left hand on the floor inside your right foot, and lower your right elbow towards your right instep.',
+            'Turn your chest to the right and reach your right arm up to the ceiling, following your hand with your eyes.',
+            'Bring your hand back down and step back to standing. Swap legs each time, or do all your reps on one side first.',
+        ],
+        tips: [
+            'Take your time: pause for a breath at each part rather than rushing through.',
+            'Count each side as a rep, or each pair, but always count the same way.',
+        ],
+    },
+    'builtin:thread-the-needle': {
+        description:
+            'On your hands and knees, you reach one arm under your body, then up to the ceiling. Loosens your upper back and shoulders.',
+        steps: [
+            'Start on your hands and knees, hands under your shoulders and knees under your hips.',
+            'Slide your right hand under your left arm, palm up, lowering your right shoulder and the side of your head towards the floor.',
+            'Pause, then sweep your right arm back out and up to the ceiling, turning your chest and following your hand with your eyes.',
+            "That's one rep. Do all your reps, then swap sides.",
+        ],
+        tips: [
+            'Keep your hips over your knees as you turn; the twist comes from your upper back.',
+            'Rather hold it? Rest in the threaded position for a few slow breaths each side.',
+        ],
+    },
 };

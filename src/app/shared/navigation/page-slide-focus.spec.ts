@@ -4,7 +4,7 @@ import { Component, inject } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router, RouterOutlet } from '@angular/router';
 
-import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
+import { fakeReducedMotion } from '../testing/fake-reduced-motion';
 import { PageSlide } from './page-slide';
 
 /** A list of exercises, each sliding in its page. */

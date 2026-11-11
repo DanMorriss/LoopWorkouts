@@ -2,7 +2,7 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { BuiltInPlan, builtInPlanEquipment, planWorkouts } from '../../models/built-in-plans';
 import { capitalise, equipmentPhrases } from '../../models/exercise';
 import { WEEKDAYS } from '../../models/plan';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { readyMadeSlug } from '../../workout-library/ready-made/ready-made-card';
 import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';

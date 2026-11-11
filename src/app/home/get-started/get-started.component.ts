@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { firstPlan } from '../../models/built-in-plans';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';

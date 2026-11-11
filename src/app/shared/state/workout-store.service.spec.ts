@@ -425,7 +425,7 @@ describe('WorkoutStore', () => {
         it('loads them on demand, to start and plan by id alongside yours', async () => {
             const store = createStore();
             const mine = store.addWorkout(makeWorkout({ title: 'Mine' }));
-            await store.readyMadeLoaded;
+            await store.loadReadyMade();
 
             expect(store.readyMade().length).toBeGreaterThan(10);
             expect(store.allWorkouts()[0]).toBe(mine);
@@ -437,7 +437,7 @@ describe('WorkoutStore', () => {
 
         it('makes one a favourite as a record of its own, not a workout of yours', async () => {
             const store = createStore();
-            await store.readyMadeLoaded;
+            await store.loadReadyMade();
 
             store.setFavourite('builtin:gym-legs', true);
 
@@ -457,7 +457,7 @@ describe('WorkoutStore', () => {
 
         it('makes a copy of one, "(copy)", as a workout of your own', async () => {
             const store = createStore();
-            await store.readyMadeLoaded;
+            await store.loadReadyMade();
 
             const copy = store.copyWorkout('builtin:gym-legs')!;
 
@@ -482,22 +482,31 @@ describe('WorkoutStore', () => {
             expect(copy.favourite).toBeUndefined();
         });
 
-        it('carries on a run of one after a reload, once they have loaded', async () => {
+        it("doesn't load them until asked, as they bring the built-in exercises", async () => {
             const store = createStore();
-            await store.readyMadeLoaded;
+            await new Promise((resolve) => setTimeout(resolve, 50));
+
+            expect(store.readyMade()).toEqual([]);
+            await store.loadReadyMade();
+            expect(store.readyMade().length).toBeGreaterThan(10);
+        });
+
+        it('carries on a run of one after a reload, loading them itself', async () => {
+            const store = createStore();
+            await store.loadReadyMade();
             store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
 
             TestBed.resetTestingModule();
             const reloaded = createStore();
             expect(reloaded.activeWorkout()).toBeNull();
-            await reloaded.readyMadeLoaded;
 
-            expect(reloaded.activeWorkout()?.id).toBe('builtin:gym-legs');
+            // Wherever the reload was, as the run bar shows on every page
+            await vi.waitFor(() => expect(reloaded.activeWorkout()?.id).toBe('builtin:gym-legs'));
         });
 
         it("keeps a rep step's reps and weight for next time, as a record of its own", async () => {
             const store = createStore();
-            await store.readyMadeLoaded;
+            await store.loadReadyMade();
             store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
             const deadlift = allSteps(store.activeWorkout()!)[1] as RepStep;
 
@@ -529,7 +538,7 @@ describe('WorkoutStore', () => {
 
         it("doesn't keep another exercise in a step, which takes a copy", async () => {
             const store = createStore();
-            await store.readyMadeLoaded;
+            await store.loadReadyMade();
             store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
             const deadlift = allSteps(store.activeWorkout()!)[1] as RepStep;
 
@@ -546,7 +555,7 @@ describe('WorkoutStore', () => {
 
         it("doesn't save a change of name made mid-run", async () => {
             const store = createStore();
-            await store.readyMadeLoaded;
+            await store.loadReadyMade();
             store.setActiveWorkout(store.findAnyWorkout('builtin:gym-legs')!);
             const first = allSteps(store.activeWorkout()!)[0];
 

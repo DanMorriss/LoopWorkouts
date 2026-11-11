@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
-import { pathOf } from './current-url';
+import { pathOf } from '../shared/navigation/current-url';
 
 /**
  * Opens each new page at its top, as the window's scroll would otherwise carry over from the

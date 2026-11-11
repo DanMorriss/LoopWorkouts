@@ -13,7 +13,7 @@ describe('SummaryCopyComponent (LIB-6)', () => {
         localStorage.clear();
         sessionStorage.clear();
         store = TestBed.inject(WorkoutStore);
-        await store.readyMadeLoaded;
+        await store.loadReadyMade();
     });
 
     afterEach(() => {

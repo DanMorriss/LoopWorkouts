@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WEEKDAYS } from '../models/plan';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
-import { LeaveCheck, LeaveQuestion } from '../nav/leave-check';
+import { LeaveCheck, LeaveQuestion } from '../shared/navigation/leave-check';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
 import { ExerciseEditorComponent } from '../shared/components/exercise-editor/exercise-editor.component';
 import { InfinitySwitchComponent } from '../shared/components/infinity-switch/infinity-switch.component';

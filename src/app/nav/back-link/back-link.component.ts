@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import { PageSlide } from '../page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 
 /**

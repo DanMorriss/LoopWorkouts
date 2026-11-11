@@ -1,12 +1,12 @@
 import { ApplicationRef, inject, Service } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
-import { spring, springCurve } from '../shared/spring';
+import { spring, springCurve } from '../spring';
 import { pathOf } from './current-url';
 import { findSpot, FocusSpot, focusSpot } from './focus-spot';
 import { LeaveCheck } from './leave-check';
 import { letInputThrough } from './let-input-through';
-import { prefersReducedMotion } from '../shared/reduced-motion';
+import { prefersReducedMotion } from '../reduced-motion';
 
 /** On <html> while a page slides, naming the parts that move. */
 export const SLIDING_CLASS = 'page-sliding';

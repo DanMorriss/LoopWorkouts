@@ -4,7 +4,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../../models/history';
 import { allSteps, RepStep } from '../../models/workout';
 import { UndoService } from '../../shared/undo/undo.service';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
@@ -283,7 +283,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
 
     describe('of a ready-made workout (LIB-6)', () => {
         beforeEach(async () => {
-            await store.readyMadeLoaded;
+            await store.loadReadyMade();
             await open('builtin:gym-legs');
         });
 

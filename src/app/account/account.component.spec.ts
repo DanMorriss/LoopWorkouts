@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { DeviceDataService } from '../shared/state/device-data.service';
-import { PageSlide } from '../nav/page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import {
     FakeAccountClient,
     fakeAccountClient,

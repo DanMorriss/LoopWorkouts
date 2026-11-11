@@ -13,7 +13,7 @@ import {
     fakeSyncStarter,
     provideFakeSyncStarter,
 } from '../shared/testing/fake-sync';
-import { AUTH_STORAGE_KEY } from './account-client';
+import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
 import { AccountService } from './account.service';
 
 describe('AccountService', () => {

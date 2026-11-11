@@ -116,8 +116,8 @@ export class HelpComponent {
     protected async tourOfWorkout() {
         let tour: WorkoutTourParam = 'run';
         if (!this.run.workout()) {
-            // They load a moment after the app does
-            await this.workouts.readyMadeLoaded;
+            // The ready-made workouts load when first needed; offline, there's no practice run
+            await this.workouts.loadReadyMade().catch(() => undefined);
             const practice = this.workouts.findAnyWorkout(PRACTICE_WORKOUT_ID);
             if (!practice) {
                 return;

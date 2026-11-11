@@ -28,7 +28,7 @@ import {
     Workout,
     WorkoutFields,
 } from '../models/workout';
-import { PageSlide } from '../nav/page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { WheelPickerOption } from '../shared/components/wheel-picker/wheel-picker.component';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
 import { changeSmoothly } from '../shared/layout-change';

@@ -13,7 +13,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { AUTH_STORAGE_KEY } from '../../account/account-client';
+import { AUTH_STORAGE_KEY } from '../../shared/state/auth-storage-key';
 import { BodyFigure } from '../../models/exercise';
 import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
 import { likelyWeightUnit, MAX_NAME_LENGTH } from '../../models/profile';

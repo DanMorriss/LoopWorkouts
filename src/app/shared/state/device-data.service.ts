@@ -1,7 +1,7 @@
 import { DestroyRef, DOCUMENT, inject, Service } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, take } from 'rxjs';
-import { AUTH_STORAGE_KEY } from '../../account/account-client';
+import { AUTH_STORAGE_KEY } from './auth-storage-key';
 import { UndoService } from '../undo/undo.service';
 import { deleteDatabase } from './history-database';
 import { SettingsStore } from './settings-store.service';

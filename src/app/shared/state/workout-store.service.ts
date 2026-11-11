@@ -65,16 +65,27 @@ export class WorkoutStore {
     /** Your own workouts, which are your data: saved, backed up and synced. */
     readonly workouts = computed(() => this._workouts());
 
+    private readyMadeLoading: Promise<void> | null = null;
+
     /**
-     * Resolves once the ready-made workouts (LIB-6) are here. They load on demand, a moment
-     * after the app starts, so they're not in its first download.
+     * Loads the ready-made workouts (LIB-6), if they aren't here yet. They're not in the first
+     * download, and as they bring the built-in exercises with them, only the pages that show
+     * or plan workouts ask for them (`readyMadeLoaded` in app.routes.ts), or a run of one this
+     * tab had going. Failing (e.g. offline), it can be tried again.
      */
-    readonly readyMadeLoaded: Promise<void> = import('../../models/built-in-workouts').then(
-        ({ BUILT_IN_WORKOUTS }) => {
-            this._builtIns.set(BUILT_IN_WORKOUTS);
-            this.restoreReadyMadeRun();
-        }
-    );
+    loadReadyMade(): Promise<void> {
+        this.readyMadeLoading ??= import('../../models/built-in-workouts').then(
+            ({ BUILT_IN_WORKOUTS }) => {
+                this._builtIns.set(BUILT_IN_WORKOUTS);
+                this.restoreReadyMadeRun();
+            },
+            (error: unknown) => {
+                this.readyMadeLoading = null;
+                throw error;
+            }
+        );
+        return this.readyMadeLoading;
+    }
 
     /**
      * The ready-made workouts, used as they are but with your own reps and weights on them,
@@ -150,6 +161,9 @@ export class WorkoutStore {
         const active = this.loadActiveWorkout();
         if (active) {
             this.restoreRun(active);
+        } else if (isReadyMadeId(sessionStorage.getItem('activeWorkoutId') ?? '')) {
+            // The run bar shows on every page, so a ready-made run carries on wherever it reloads
+            this.loadReadyMade().catch(() => undefined);
         }
     }
 

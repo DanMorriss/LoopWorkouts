@@ -33,7 +33,7 @@ import { ShowcaseCountComponent } from '../../shared/components/showcase/showcas
 import { ShowcaseMusclesComponent } from '../../shared/components/showcase/showcase-muscles.component';
 import { MenuPlacementDirective } from '../../shared/menu-placement.directive';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 
 /**
  * One workout in the history, as a card in the family of Workouts' and Plan's: its title, the

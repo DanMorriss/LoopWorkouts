@@ -1,9 +1,9 @@
 import { ApplicationRef, inject, Service } from '@angular/core';
 import { Router } from '@angular/router';
-import { isOnPage } from './current-url';
-import { LeaveCheck } from './leave-check';
-import { letInputThrough } from './let-input-through';
-import { FADING_CLASS } from './page-slide';
+import { isOnPage } from '../shared/navigation/current-url';
+import { LeaveCheck } from '../shared/navigation/leave-check';
+import { letInputThrough } from '../shared/navigation/let-input-through';
+import { FADING_CLASS } from '../shared/navigation/page-slide';
 import { prefersReducedMotion } from '../shared/reduced-motion';
 
 /** On <html> while the workout morphs, naming the parts that move. */

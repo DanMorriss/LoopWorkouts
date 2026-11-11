@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { Workout } from '../../../models/workout';
 import { outline, repeatsText } from '../../../models/workout-outline';
-import { PageSlide } from '../../../nav/page-slide';
+import { PageSlide } from '../../navigation/page-slide';
 import { IconComponent } from '../icon/icon.component';
 
 /**

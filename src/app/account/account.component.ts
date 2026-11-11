@@ -1,7 +1,7 @@
 import { Component, computed, DOCUMENT, effect, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { PageSlide } from '../nav/page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { LoopLogoComponent } from '../shared/components/loop-logo/loop-logo.component';
 import { SyncStarter } from '../sync/sync-starter.service';
 import { syncText } from '../sync/sync-text';

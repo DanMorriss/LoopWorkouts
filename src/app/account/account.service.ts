@@ -3,13 +3,8 @@ import type { Session } from '@supabase/supabase-js';
 import { Router } from '@angular/router';
 import { SyncStarter } from '../sync/sync-starter.service';
 import { UndoService } from '../shared/undo/undo.service';
-import {
-    AccountClient,
-    ACCOUNT_CLIENT,
-    AUTH_STORAGE_KEY,
-    SIGN_IN_PATH,
-    SignInProvider,
-} from './account-client';
+import { AccountClient, ACCOUNT_CLIENT, SIGN_IN_PATH, SignInProvider } from './account-client';
+import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
 import { hasSignInTokens } from './sign-in-landing';
 import { ConsentService } from './consent.service';
 

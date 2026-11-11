@@ -3,7 +3,7 @@ import { HistoryEntry } from '../../models/history';
 import { makeWorkout } from '../testing/make-workout';
 import { savedHistory } from '../testing/history-database';
 import { Router } from '@angular/router';
-import { AUTH_STORAGE_KEY } from '../../account/account-client';
+import { AUTH_STORAGE_KEY } from './auth-storage-key';
 import { UndoService } from '../undo/undo.service';
 import {
     DEVICE_CHANNEL,

@@ -21,7 +21,7 @@ describe('ReadyMadePlans (PLN-6)', () => {
         planStore.plan().days[day].map((id) => workouts.findAnyWorkout(id)?.title);
 
     it('replaces the plan with its week of ready-made workouts, as they are', async () => {
-        await workouts.readyMadeLoaded;
+        await workouts.loadReadyMade();
         const legs = workouts.addWorkout({
             title: 'Legs',
             repeats: 1,

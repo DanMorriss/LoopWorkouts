@@ -6,7 +6,7 @@ import { WorkoutStore } from '../shared/state/workout-store.service';
 import { DeletionStore } from '../shared/state/deletion-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 import { makeWorkout as baseWorkout, SimpleWorkout } from '../shared/testing/make-workout';
-import { PageSlide } from '../nav/page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { WorkoutLibraryComponent } from './workout-library.component';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { BUILT_IN_WORKOUTS } from '../models/built-in-workouts';
@@ -33,7 +33,7 @@ describe('WorkoutLibraryComponent', () => {
 
         store = TestBed.inject(WorkoutStore);
         // Listed with yours once they've loaded, so every test has them
-        await store.readyMadeLoaded;
+        await store.loadReadyMade();
         navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     });
 

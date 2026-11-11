@@ -1,7 +1,7 @@
 import { booleanAttribute, Directive, ElementRef, inject, input } from '@angular/core';
 import { SideSwipe } from '../shared/side-swipe';
 import { criticallyDampedSpring } from '../shared/spring';
-import { PageSlide } from './page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 import { prefersReducedMotion } from '../shared/reduced-motion';
 
 /**

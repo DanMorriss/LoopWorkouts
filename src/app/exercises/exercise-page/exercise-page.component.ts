@@ -12,7 +12,7 @@ import {
 } from '../../shared/components/workout-choice-dialog/workout-choice-dialog.component';
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
 import { listBackLink } from '../list-from';
-import { PageSlide } from '../../nav/page-slide';
+import { PageSlide } from '../../shared/navigation/page-slide';
 import { TourService } from '../../tour/tour.service';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { BUILT_IN_WORKOUTS } from '../../models/built-in-workouts';

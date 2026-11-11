@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { PageSlide } from '../../../nav/page-slide';
+import { PageSlide } from '../../navigation/page-slide';
 import { MUSCLE_LABELS, MuscleGroup } from '../../../models/exercise';
 import { SettingsStore } from '../../state/settings-store.service';
 import { BODY_FIGURES } from './body-shapes';

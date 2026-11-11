@@ -111,7 +111,7 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
             const suggested = () => el('.plan-muscles__filler-name')?.textContent!.trim();
 
             beforeEach(async () => {
-                await store.readyMadeLoaded;
+                await store.loadReadyMade();
                 fixture.detectChanges();
             });
 

@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 
-import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
+import { fakeReducedMotion } from '../testing/fake-reduced-motion';
 import { LeaveCheck } from './leave-check';
 import { FADING_CLASS, PageSlide, SLIDING_CLASS } from './page-slide';
 

@@ -6,7 +6,7 @@ import { provideRouter, Router } from '@angular/router';
 
 import { fakeReducedMotion } from '../shared/testing/fake-reduced-motion';
 import { openNewPagesAtTop } from './open-at-top';
-import { PageSlide } from './page-slide';
+import { PageSlide } from '../shared/navigation/page-slide';
 
 @Component({ template: '' })
 class BlankPage {}

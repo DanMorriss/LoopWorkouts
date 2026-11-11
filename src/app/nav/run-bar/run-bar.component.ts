@@ -5,7 +5,7 @@ import { formatSeconds } from '../../shared/format-time';
 import { SideSwipe } from '../../shared/side-swipe';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { criticallyDampedSpring } from '../../shared/spring';
-import { injectCurrentUrl, isOnPage } from '../current-url';
+import { injectCurrentUrl, isOnPage } from '../../shared/navigation/current-url';
 import { WorkoutMorph } from '../workout-morph';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { stepKindName } from '../../models/workout';

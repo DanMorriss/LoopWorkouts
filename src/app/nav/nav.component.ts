@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { WorkoutStore } from '../shared/state/workout-store.service';
-import { injectCurrentUrl, isOnPage } from './current-url';
+import { injectCurrentUrl, isOnPage } from '../shared/navigation/current-url';
 import { TABS } from './tab-bar/tabs';
 import { WorkoutMorph } from './workout-morph';
 import { IconComponent } from '../shared/components/icon/icon.component';

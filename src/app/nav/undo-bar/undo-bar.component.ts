@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UndoService } from '../../shared/undo/undo.service';
-import { injectCurrentUrl } from '../current-url';
+import { injectCurrentUrl } from '../../shared/navigation/current-url';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 
 /**

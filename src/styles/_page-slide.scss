@@ -1,7 +1,7 @@
 // Going into a page further in (an exercise from the Exercises list, Settings from You, the
 // ready-made plans from Today, …) slides it in from the right, over the page it came from, which
 // moves a little way left and fades; going back, the page leaves to the right and the one under
-// it comes back (PageSlide, src/app/nav/page-slide.ts). The two have different names, so each
+// it comes back (PageSlide, src/app/shared/navigation/page-slide.ts). The two have different names, so each
 // keeps its own place on screen rather than the browser moving one into the other's (they
 // needn't be scrolled the same). Names only apply while it runs.
 
@@ -30,7 +30,7 @@
 }
 
 // A press mid-transition ends it and goes on to the page (letInputThrough,
-// src/app/nav/let-input-through.ts). The browser decides what a finger's move is for from where
+// src/app/shared/navigation/let-input-through.ts). The browser decides what a finger's move is for from where
 // it went down, which mid-transition is <html>: up and down stay the page's scroll, and
 // sideways the page's own (a swipe back taking the page from under the finger).
 :root:is(.page-sliding, .page-fading, .workout-morphing, .theme-switching) {

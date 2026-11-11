@@ -144,9 +144,9 @@ A JSON list of `{ "id": "<exercise id>", "updatedAt": … }`, one per exercise h
 
 A JSON list of `{ "id": "builtin:<its name>", "updatedAt": … }`, one per ready-made workout (LIB-6) with its heart pressed (LIB-8, since 2026-11-06), as a ready-made workout isn't your data to mark. Taking the heart off removes it and leaves a deletion, of the kind `ready-made-favourite`, as hidden exercises do. One whose id isn't a ready-made one's is dropped when loading. Your own workouts' hearts are `favourite` on the workout.
 
-### `ready-made-changes`: your reps and weights on ready-made workouts
+### `ready-made-changes`: your reps, weights and times on ready-made workouts
 
-A JSON list of `{ "id": "builtin:<its name>", "updatedAt": …, "steps": [{ "step": 1, "exerciseId": "builtin:romanian-deadlift", "reps": 8, "weight": 60 }, …] }`, one per ready-made workout (LIB-6) whose reps or weights you've changed (since 2026-11-08). Each step is a rep step's place in the workout (counted as a logged set's `step` is), the exercise it was, and its reps, weight in kg (missing for none) and `sets` where they vary, as on a step (BLD-11). Only its reps and weights: its exercises and everything else stay as the app has them. A step that isn't that exercise in the app any more is left as it comes, as are `sets` that don't fit its sets now. A step put back as it came is dropped, and once none are left, the record is removed, leaving a deletion of the kind `ready-made-change`, as is Reset reps and weights. One whose id isn't a ready-made one's, or with no `steps`, is dropped when loading, as is any step that isn't usable.
+A JSON list of `{ "id": "builtin:<its name>", "updatedAt": …, "steps": [{ "step": 1, "exerciseId": "builtin:romanian-deadlift", "reps": 8, "weight": 60 }, …] }`, one per ready-made workout (LIB-6) whose reps or weights you've changed (since 2026-11-08). Each step is a rep step's place in the workout (counted as a logged set's `step` is), the exercise it was, and its reps, weight in kg (missing for none) and `sets` where they vary, as on a step (BLD-11). A timed exercise's step (since data version 16, 2026-11-11) has `seconds` and `sets` of `{ "seconds": … }` where they vary, in place of reps and weight, e.g. `{ "step": 4, "exerciseId": "builtin:plank", "seconds": 30 }`. Only its reps, weights and times: its exercises and everything else stay as the app has them. A step that isn't that exercise in the app any more is left as it comes, as are `sets` that don't fit its sets now. A step put back as it came is dropped, and once none are left, the record is removed, leaving a deletion of the kind `ready-made-change`, as is Reset reps and weights. One whose id isn't a ready-made one's, or with no `steps`, is dropped when loading, as is any step that isn't usable.
 
 ### `deleted`
 
@@ -278,7 +278,7 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 ```json
 {
     "app": "Loop Workouts",
-    "version": 15,
+    "version": 16,
     "exportedAt": 1761055200000,
     "workouts": [],
     "history": [],
@@ -311,6 +311,7 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 - **Version 1** files (from before random ids) have number workout ids, no `updatedAt` and no `deleted`. They're converted as saved data is: their workouts get new random ids, so they're matched on what they are (title, steps and rounds) rather than by id.
 - **Version 3 and older** files call workouts timers: a `timers` list in place of `workouts`, `timerId` in the history and the kind `timer` in `deleted`. They're renamed as they're read.
 - **Version 14 and older** files have no `readyMadeChanges`: nothing to convert. An older app turns a version 15 file down rather than leaving them out.
+- **Version 15 and older** files have no times in `readyMadeChanges`: nothing to convert. An older app turns a version 16 file down, and leaves synced records written by version 16 alone until it's updated, rather than dropping the times and writing the record back without them.
 - **Version 13 and older** files have no `readyMadeFavourites`, and no ready-made workouts (`builtin:` ids) in their plan: nothing to convert. An older app turns a version 14 file down rather than planning workouts it can't find.
 - **Version 12 and older** files have no `plan`, so the plan here stays as it is.
 - **Version 11 and older** files have no `supersets` on history entries: nothing to convert.

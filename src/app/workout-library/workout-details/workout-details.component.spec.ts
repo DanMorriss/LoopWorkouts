@@ -410,6 +410,60 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
                 expect(document.activeElement).toBe(squat());
             });
 
+            it("keeps a timed exercise's time, with Minutes and Seconds for each round", async () => {
+                fakeReducedMotion(true);
+                await open('builtin:core-in-15');
+                expect(text(el().querySelector('.amounts__heading')!)).toBe(
+                    'Your reps, weights and times'
+                );
+                expect(lines().slice(-2)).toEqual([
+                    'Change Side plank, 3 × 0:30 each side',
+                    'Change Plank, 3 × 0:45',
+                ]);
+
+                el().querySelector<HTMLButtonElement>('#ready-made-amounts-4')!.click();
+                await render();
+                expect(text(document.querySelector('.amounts__hint')!)).toContain(
+                    'Your time for each round.'
+                );
+                // Round 1, 2 and 3, each with Minutes and Seconds
+                expect(wheels()).toHaveLength(6);
+                await turn(wheels()[1]);
+                document.querySelector<HTMLButtonElement>('.amounts__save')!.click();
+                await render();
+
+                const plank = allSteps(store.findAnyWorkout('builtin:core-in-15')!)[4];
+                expect(plank).toMatchObject({
+                    kind: 'work',
+                    seconds: 46,
+                    sets: [{ seconds: 46 }, { seconds: 45 }, { seconds: 45 }],
+                });
+                expect(lines().at(-1)).toBe('Change Plank, 0:46, 0:45, 0:45');
+                expect(TestBed.inject(UndoService).offer()?.message).toBe(
+                    'Plank: 0:46, 0:45, 0:45'
+                );
+            });
+
+            it("can't save a time of 0:00", async () => {
+                await open('builtin:core-in-15');
+                el().querySelector<HTMLButtonElement>('#ready-made-amounts-4')!.click();
+                await render();
+                await new Promise(requestAnimationFrame);
+                await new Promise(requestAnimationFrame);
+                // Seconds to 0 with Home
+                wheels()[1].dispatchEvent(
+                    new KeyboardEvent('keydown', { key: 'Home', bubbles: true })
+                );
+                await render();
+
+                expect(document.querySelector('.amounts__error')?.textContent).toContain(
+                    'Each set needs some time.'
+                );
+                expect(document.querySelector<HTMLButtonElement>('.amounts__save')!.disabled).toBe(
+                    true
+                );
+            });
+
             it('changes nothing when closed without Save, with focus back', async () => {
                 squat().click();
                 await render();

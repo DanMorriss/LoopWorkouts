@@ -56,8 +56,7 @@ Eighteen ready-made workouts are listed on Workouts, under your own (see `docs/f
 - [ ] **The ? links left:** the tours replaced the Plan page's, and the workout page's by Tap to turn on sound stays (it's about sound after a reload, which the tour doesn't cover). Still there: Today's week (beside From next week, which REG-NAV-06 uses) and the welcome screen (Why might I lose my workouts?). Decide whether they go; if so, update NAV-7 in `docs/features/home-and-navigation.md`.
 - [x] **Tour of Create, point at Join with next where it is** (2026-11-11): a tip of one card, the first time a Join with next shows on an open step (`TOURS.join`, `tip-join`), with focus back where it was after (`returnFocus`).
 - [x] **Tour of Create, light up all of Rounds** (2026-11-11): `data-tour="repeat"` is on an element round the switch and what's under it.
-- [ ] **More tours, if wanted** (each a `TOURS` entry, shown once by `startOnce`):
-    - **An exercise's page** (EXR), on the first one opened: turning the 3D demo with a finger, the muscles it works, your own note (EXR-10) and Add to workout (EXR-12).
+- [x] **A tour of an exercise's page** (2026-11-11): on the first one opened, four stops (Add to workout, your note, the muscles it works and the demo, turned with a finger), and in Help's Tours (`TOURS.exercise`, `tour-exercise`).
 
 ### Setup and profile (NAV-4, SET-7)
 

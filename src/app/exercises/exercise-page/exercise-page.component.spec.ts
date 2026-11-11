@@ -9,6 +9,7 @@ import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { DeletionStore } from '../../shared/state/deletion-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { makeWorkout } from '../../shared/testing/make-workout';
+import { EXERCISE_TOUR_KEY, TourService } from '../../tour/tour.service';
 import { ExercisePageComponent } from './exercise-page.component';
 import { PageSlide } from '../../nav/page-slide';
 
@@ -114,6 +115,34 @@ describe('ExercisePageComponent', () => {
 
             expect(back.getAttribute('href')).toBe('/library/gone');
             expect(back.textContent).toContain('Workout');
+        });
+    });
+
+    describe("the tour of an exercise's page", () => {
+        it('starts on the first one opened, and not again', async () => {
+            const tour = TestBed.inject(TourService);
+            await open('/exercises/back-squat');
+
+            expect(tour.tour()).toBe('exercise');
+            expect(tour.stop()).toBe(0);
+            expect(localStorage.getItem(EXERCISE_TOUR_KEY)).toBe('seen');
+            // What it lights up, and where focus goes as it ends
+            for (const part of ['exercise-add', 'exercise-note', 'exercise-muscles']) {
+                expect(el().querySelector(`[data-tour="${part}"]`), part).not.toBeNull();
+            }
+            expect(el().querySelector('#exercise-page-title')!.getAttribute('tabindex')).toBe('-1');
+
+            tour.end();
+            await harness.navigateByUrl('/exercises/plank');
+            await render();
+            expect(tour.stop()).toBeNull();
+        });
+
+        it("isn't started by a link to an exercise there isn't", async () => {
+            await open('/exercises/no-such-thing');
+
+            expect(TestBed.inject(TourService).stop()).toBeNull();
+            expect(localStorage.getItem(EXERCISE_TOUR_KEY)).toBeNull();
         });
     });
 

@@ -378,3 +378,35 @@ test.describe('adding to a workout from its page', () => {
         }
     );
 });
+
+test.describe("the tour of an exercise's page", () => {
+    test(
+        "REG-EXR-06 the tour of an exercise's page, the first one opened",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/exercises');
+            await page.evaluate(() => localStorage.removeItem('tour-exercise'));
+            await page.getByRole('link', { name: /^Back squat/ }).click();
+
+            const tour = page.getByRole('dialog', { name: 'Add to workout' });
+            await expect(tour).toBeVisible();
+            await expect(tour).toContainText('1 of 4');
+            const titles = ['Add to workout', 'Your note', 'Muscles worked', 'How to do it'];
+            for (const [stop, title] of titles.entries()) {
+                const card = page.getByRole('dialog', { name: title });
+                await expect(card).toBeVisible();
+                await card
+                    .getByRole('button', { name: stop < titles.length - 1 ? 'Next' : 'Done' })
+                    .click();
+            }
+            await expect(page.getByRole('dialog')).toHaveCount(0);
+            await expect(page.getByRole('heading', { name: 'Back squat', level: 2 })).toBeFocused();
+            expect(await app.storageItem('tour-exercise')).toBe('seen');
+
+            // Not again on the next one
+            await app.goto('/exercises/plank');
+            await expect(page.getByRole('heading', { name: 'Plank', level: 2 })).toBeVisible();
+            await expect(page.getByRole('dialog')).toHaveCount(0);
+        }
+    );
+});

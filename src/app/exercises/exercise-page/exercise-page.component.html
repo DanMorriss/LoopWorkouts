@@ -7,7 +7,10 @@
         <app-back-link [url]="backUrl" [label]="backLabel" />
 
         @if (exercise(); as exercise) {
-            <h2 class="exercise__name">{{ exercise.name }}</h2>
+            <!-- data-tour: what the tour of the page lights up; focus goes here after it -->
+            <h2 class="exercise__name" id="exercise-page-title" tabindex="-1">
+                {{ exercise.name }}
+            </h2>
             <app-exercise-details
                 [exercise]="exercise"
                 [emptyHint]="builtIn() ? '' : 'No how-to steps or tips yet. Add them with Edit.'"
@@ -17,6 +20,7 @@
                         type="button"
                         id="exercise-page-add"
                         class="btn-pill"
+                        data-tour="exercise-add"
                         aria-haspopup="dialog"
                         (click)="adding.set(true)"
                     >
@@ -27,6 +31,7 @@
                         type="button"
                         id="exercise-page-edit"
                         class="btn-pill"
+                        data-tour="exercise-note"
                         (click)="openEditor()"
                     >
                         <mat-icon aria-hidden="true">{{

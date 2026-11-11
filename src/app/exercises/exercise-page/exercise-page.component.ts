@@ -13,6 +13,7 @@ import {
 import { BackLinkComponent } from '../../nav/back-link/back-link.component';
 import { listBackLink } from '../list-from';
 import { PageSlide } from '../../nav/page-slide';
+import { TourService } from '../../tour/tour.service';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { BUILT_IN_WORKOUTS } from '../../models/built-in-workouts';
 import { Exercise, exercisePath, isBuiltIn } from '../../models/exercise';
@@ -71,6 +72,14 @@ export class ExercisePageComponent {
     protected readonly backUrl = this.back.url;
     protected readonly backLabel = this.back.label;
     protected readonly slide = inject(PageSlide);
+
+    constructor() {
+        // The first time an exercise's page opens on this device, a tour of it, unless a link
+        // led nowhere
+        if (this.exercise()) {
+            inject(TourService).startOnce('exercise');
+        }
+    }
 
     /**
      * The workout it was opened from: your own's details (/library/<workout>/<exercise>), or a

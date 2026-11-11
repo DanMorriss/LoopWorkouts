@@ -134,4 +134,11 @@ export class HelpComponent {
             this.tour.start('plan');
         }
     }
+
+    /** Opens Back squat's page, which has every part the tour shows, then its tour. */
+    protected async tourOfExercise() {
+        if (await this.router.navigateByUrl('/exercises/back-squat')) {
+            this.tour.start('exercise');
+        }
+    }
 }

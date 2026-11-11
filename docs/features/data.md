@@ -246,6 +246,10 @@ In ms since the epoch, by the device's clock, for the You tab. Signing out remov
 
 `seen` once the tour of the workout page (RUN-13) has started, as the first workout on this device began. While it's missing, the next workout started shows it, if the history is still empty. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.
 
+### `tour-exercise`: the tour of an exercise's page's been shown
+
+`seen` once the tour of an exercise's page has started, the first time one opened on this device. While it's missing, the next exercise's page shows it. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.
+
 ### `tour-plan`: the tour of the Plan page's been shown
 
 `seen` once the tour of the Plan page (PLN-8) has started, the first time the page opened on this device. While it's missing, the next visit shows it. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.

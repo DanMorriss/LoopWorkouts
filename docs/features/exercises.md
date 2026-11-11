@@ -95,6 +95,16 @@ At `/exercises/<name>` for a built-in exercise (e.g. `/exercises/back-squat`, it
 
 A link to an exercise that isn't there (deleted, or mistyped) says "Exercise not found", with a link to all exercises.
 
+### The tour of an exercise's page
+
+- **Shown once, the first exercise's page opened** on this device (since 2026-11-11), from the list, a workout's details or a ready-made plan's workout, and not while another tour is on, nor for a link to an exercise that isn't there. Devices already in use get it once too. It's kept on the device only (`tour-exercise`, see [data](data.md)). **An exercise's page**, in Help's Tours, takes it again any time: it opens Back squat's page, which has every part it shows, then the tour.
+- It's the tour of the app's overlay and card (see [home and navigation](home-and-navigation.md#the-tour-nav-8)), staying on the page and lighting up no tab: **four stops**, top to bottom:
+    1. **Add to workout**: "Put it at the end of one of your workouts, or start a new one with it, with 3 sets to change before you save."
+    2. **Your note**: Add note (or Edit, on your own). "Keep a note of your own on it, e.g. a machine setting or a cue. It shows here, and under the ring as you do it."
+    3. **Muscles worked**: the body map. "What it works, darker for the main muscles. Once you've done it, your bests and a chart show under them."
+    4. **How to do it**: the demo. "The figure shows the move. Drag it sideways to turn it round, or press Turn, to see it from any side." Your own exercise has no demo, so this stop says it in words and lights up nothing.
+- **Done and Skip tour both leave focus on the exercise's name**, at the top.
+
 ### The animated demo (EXR-13)
 
 Every built-in exercise has one; your own exercises don't. Most are posed from the side; those whose move shows best from the front (a lateral raise, a shoulder press, a jumping jack, a side plank) from the front.

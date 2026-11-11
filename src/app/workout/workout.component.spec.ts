@@ -2274,6 +2274,29 @@ describe('WorkoutComponent', () => {
                     expect(pausedInfo()!.getAttribute('aria-label')).toBe('Details of Push-up');
                 });
 
+                it('in a rest, names the exercise after it, with its (i) to swap it (RUN-11)', () => {
+                    fixture.destroy();
+                    start(
+                        makeWorkout({
+                            steps: [
+                                rest(30),
+                                { ...reps(20, 'Push-ups'), exerciseId: 'builtin:push-up' },
+                            ],
+                            repeats: 1,
+                        })
+                    );
+                    pause();
+
+                    expect(el('.workout-paused__step')!.textContent!.trim()).toBe(
+                        'Rest, then Push-ups'
+                    );
+                    pausedInfo()!.click();
+                    fixture.detectChanges();
+                    expect(
+                        el('app-exercise-details-dialog .details__title')!.textContent!.trim()
+                    ).toBe('Push-up');
+                });
+
                 it('names a step that is no exercise, with no (i)', () => {
                     pause();
 

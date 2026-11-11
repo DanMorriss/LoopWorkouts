@@ -402,6 +402,28 @@ test.describe('sets and sections', () => {
     });
 });
 
+test.describe('a ready-made workout, reloaded', () => {
+    test(
+        'REG-RUN-08 a weight changed mid-run on a ready-made workout survives a reload',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library/builtin:gym-legs');
+            await page.getByRole('button', { name: 'Start Gym legs' }).click();
+            await expect(page).toHaveURL('/workout');
+
+            await setWheel(run.wheel('Weight, kg'), 40, 0.5);
+            await expect
+                .poll(() => app.stored<{ id: string }[]>('ready-made-changes'))
+                .toEqual([expect.objectContaining({ id: 'builtin:gym-legs' })]);
+
+            await app.reload();
+            await expect(run.face.getByText('Back squat', { exact: true })).toBeVisible();
+            await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '40');
+        }
+    );
+});
+
 test.describe('changing reps mid-workout', () => {
     const push = workout('Push', {
         id: 'push',
@@ -618,24 +640,38 @@ test.describe('swapping mid-workout', () => {
             ).toBeFocused();
         }
     );
+});
+
+test.describe('swapping while paused in a rest', () => {
+    const pair = workout('Pair', {
+        steps: [
+            reps(10, 'Back squat', { exercise: 'back-squat', weight: 60 }),
+            rest(30),
+            reps(10, 'Deadlift', { exercise: 'deadlift', weight: 80 }),
+        ],
+    });
+    test.use({ storage: seed.workouts([pair]) });
 
     test(
         'REG-RUN-12 swap the next exercise while paused in a rest',
         { tag: '@p3' },
         async ({ app, page }) => {
-            test.fixme(
-                true,
-                "Known issue (TODO.md): no swapping the next exercise while paused in a rest. The paused ring shows only the rest's name, with no (i)."
-            );
             const run = new WorkoutPage(page);
             await app.goto('/library');
-            await run.startFromLibrary('Legs');
-            await run.wait(3500);
+            await run.startFromLibrary('Pair');
             await run.done.click();
             await run.pause.click();
+            await expect(run.main.getByText('Rest, then Deadlift')).toBeVisible();
+            await run.main.getByRole('button', { name: 'Details of Deadlift, next' }).click();
+            await page.getByRole('button', { name: 'Swap exercise' }).click();
+            await page.keyboard.type('romanian');
+            await page.getByRole('button', { name: /^Romanian deadlift/ }).click();
+            // Still paused, the next exercise swapped, and focus back on its (i)
+            await expect(run.main.getByText('Rest, then Romanian deadlift')).toBeVisible();
+            await expect(run.resume).toBeVisible();
             await expect(
-                run.main.getByRole('button', { name: 'Details of Back squat' })
-            ).toBeVisible();
+                run.main.getByRole('button', { name: 'Details of Romanian deadlift, next' })
+            ).toBeFocused();
         }
     );
 });

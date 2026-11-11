@@ -238,6 +238,10 @@ In ms since the epoch, by the device's clock, for the You tab. Signing out remov
 
 `seen` once the tour of Create (BLD-17) has started, the first time Create opened for a new workout on this device. While it's missing, the next new workout shows it. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.
 
+### `tip-join`: the tip on Join with next's been shown
+
+`seen` once the tip on Create's first Join with next (BLD-12) has shown on this device. While it's missing, the next Join with next to show on an open step shows it. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.
+
 ### `tour-workout`: the tour of the workout page's been shown
 
 `seen` once the tour of the workout page (RUN-13) has started, as the first workout on this device began. While it's missing, the next workout started shows it, if the history is still empty. Not synced or backed up, and removed by signing out and Clear this device, as `tour` is.

@@ -102,6 +102,36 @@ test.describe('a new workout', () => {
         }
     );
 
+    test(
+        'REG-BLD-10 a tip the first time Join with next shows',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const create = new CreatePage(page);
+            await app.goto('/setup');
+            await page.evaluate(() => localStorage.removeItem('tip-join'));
+            await create.addStep.click();
+            // + Step opens the new step and closes the first, where Join with next is
+            await create.open(1);
+
+            const tip = page.getByRole('dialog', { name: 'Supersets' });
+            await expect(tip).toBeVisible();
+            await expect(tip).toContainText(
+                'Join with next makes this step and the next a superset'
+            );
+            await expect(tip.getByText(/of \d/)).toHaveCount(0);
+            await tip.getByRole('button', { name: 'Done' }).click();
+            await expect(tip).toBeHidden();
+            // Back where it was as the tip showed
+            await expect(create.header(1)).toBeFocused();
+            expect(await app.storageItem('tip-join')).toBe('seen');
+
+            // Once only
+            await create.header(1).click();
+            await create.open(1);
+            await expect(page.getByRole('dialog', { name: 'Supersets' })).toHaveCount(0);
+        }
+    );
+
     test('REG-BLD-02 save without starting, then edit', { tag: '@p1' }, async ({ app, page }) => {
         const create = new CreatePage(page);
         const library = new LibraryPage(page);

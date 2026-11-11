@@ -40,7 +40,7 @@ import { WorkoutSetupComponent } from './workout-setup.component';
 import { WorkoutSetupForm } from './workout-setup-form';
 import { LeaveCheck } from '../nav/leave-check';
 import { PageSlide } from '../nav/page-slide';
-import { CREATE_TOUR_KEY, TourService } from '../tour/tour.service';
+import { CREATE_TOUR_KEY, JOIN_TIP_KEY, TourService } from '../tour/tour.service';
 
 /** The step a new workout starts with, as `shown()` reads it. */
 const blankStep = { kind: 'Reps', name: '', time: '0 reps' };
@@ -271,6 +271,56 @@ describe('WorkoutSetupComponent', () => {
 
             expect(tour.tour()).toBe('app');
             expect(localStorage.getItem(CREATE_TOUR_KEY)).toBeNull();
+        });
+    });
+
+    describe('the tip on Join with next (BLD-12)', () => {
+        /** Opens or closes the first step, by its row's button. */
+        const toggleFirst = async () => {
+            el<HTMLButtonElement>('[id$="-toggle"]').click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+        };
+
+        it('starts the first time one shows, on an open step with one after it, and not again', async () => {
+            await setup();
+            const tour = TestBed.inject(TourService);
+            await create({ empty: true });
+            tour.end();
+            expect(el('[data-tour="join"]')).toBeNull();
+
+            // A second step closes the first, where Join with next is
+            await press('Add step');
+            expect(tour.stop()).toBeNull();
+            await toggleFirst();
+
+            expect(el('[data-tour="join"]')).not.toBeNull();
+            expect(tour.tour()).toBe('join');
+            expect(localStorage.getItem(JOIN_TIP_KEY)).toBe('seen');
+
+            tour.end();
+            await toggleFirst();
+            await toggleFirst();
+            expect(tour.stop()).toBeNull();
+        });
+
+        it("isn't shown as a saved workout opens, its steps closed", async () => {
+            await setup();
+            const legs = store.addWorkout({
+                title: 'Legs',
+                repeats: 1,
+                blocks: asOneGroup([
+                    { kind: 'reps', reps: 10, name: 'Squat' },
+                    { kind: 'reps', reps: 10, name: 'Lunge' },
+                ]),
+            });
+            queryParamMap.next(convertToParamMap({ editId: legs.id }));
+            await create({ empty: true });
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(TestBed.inject(TourService).stop()).toBeNull();
+            expect(localStorage.getItem(JOIN_TIP_KEY)).toBeNull();
         });
     });
 

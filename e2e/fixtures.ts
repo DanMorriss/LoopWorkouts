@@ -13,11 +13,12 @@ const ONBOARDED: Record<string, string> = {
     // doesn't open the setup (NAV-4) either.
     welcomed: 'guest',
     // The tours of the app (NAV-8), of Create (BLD-17), of the workout page (RUN-13) and of
-    // the Plan page (PLN-8), counted as seen
+    // the Plan page (PLN-8), and the tip on Join with next, counted as seen
     tour: 'seen',
     'tour-create': 'seen',
     'tour-workout': 'seen',
     'tour-plan': 'seen',
+    'tip-join': 'seen',
     // The data's shape now, so nothing seeded is converted as if from an older version
     'data-version': '5',
 };

@@ -569,6 +569,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     1. The row is "Change Back squat, 12, 10, 8"; a dialog "Back squat" opens with Set 1–3, each with Reps and Weight wheels.
     2. The dialog closes; the row is "Change Back squat, 12, 10, 8 @ 60 kg"; the Undo bar says "Back squat: 12, 10, 8 @ 60 kg"; "With your own reps and weights." shows.
     3. The workout page opens on Back squat with its Weight wheel at 60; nothing was copied into your workouts (`workouts` isn't saved).
+- **In the pack, a timed exercise too:** on Core in 15 the heading is "Your reps, weights and times"; Plank ("Change Plank, 3 × 0:45") set to 0:30 for each round is "3 × 0:30", still after a reload, kept as `{ "step": 4, "exerciseId": "builtin:plank", "seconds": 30 }`.
 
 ---
 
@@ -1397,7 +1398,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | NAV  | `e2e/nav.e2e.ts`       | 10    | 0                               | 0                                                     |
 | PLAN | `e2e/plan.e2e.ts`      | 11    | 0                               | 0                                                     |
 | BLD  | `e2e/build.e2e.ts`     | 13    | 0                               | 0                                                     |
-| LIB  | `e2e/library.e2e.ts`   | 10    | 0                               | 0                                                     |
+| LIB  | `e2e/library.e2e.ts`   | 11    | 0                               | 0                                                     |
 | RUN  | `e2e/run.e2e.ts`       | 23    | 0                               | 1 (real sound, manual)                                |
 | HIS  | `e2e/history.e2e.ts`   | 6     | 0                               | 0                                                     |
 | PRG  | `e2e/progress.e2e.ts`  | 4     | 0                               | 0                                                     |

@@ -404,6 +404,36 @@ test.describe("a ready-made workout's reps and weights", () => {
             expect(await app.stored('workouts')).toBeNull();
         }
     );
+
+    test(
+        "REG-LIB-10 a timed exercise's time, kept through a reload",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/library/builtin:core-in-15');
+            const amounts = page.getByRole('region', { name: 'Your reps, weights and times' });
+            const plank = amounts.getByRole('button', { name: /^Change Plank/ });
+            await expect(plank).toHaveAccessibleName('Change Plank, 3 × 0:45');
+
+            await plank.click();
+            const dialog = page.getByRole('dialog', { name: 'Plank' });
+            for (const round of [1, 2, 3]) {
+                await setWheel(
+                    dialog.getByRole('spinbutton', { name: `Plank Round ${round} Seconds` }),
+                    30
+                );
+            }
+            await dialog.getByRole('button', { name: 'Save' }).click();
+            await expect(plank).toHaveAccessibleName('Change Plank, 3 × 0:30');
+
+            await app.reload();
+            await expect(plank).toHaveAccessibleName('Change Plank, 3 × 0:30');
+            const saved =
+                await app.stored<{ steps: { seconds?: number }[] }[]>('ready-made-changes');
+            expect(saved?.[0].steps).toEqual([
+                { step: 4, exerciseId: 'builtin:plank', seconds: 30 },
+            ]);
+        }
+    );
 });
 
 test.describe('deleting the workout that is running', () => {

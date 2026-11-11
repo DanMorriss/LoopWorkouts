@@ -51,8 +51,11 @@ import { ReadyMadeChange, readReadyMadeChange } from '../../models/ready-made-ch
  *    rather than planning workouts it can't find.
  * 15: `readyMadeChanges`, your own reps and weights on ready-made workouts. Nothing to convert;
  *    an older app turns the file down rather than leaving them out.
+ * 16: a timed exercise's time in `readyMadeChanges` (`seconds`, and each set's where they vary).
+ *    Nothing to convert; an older app turns the file down, and leaves synced records this new
+ *    alone, rather than dropping the times and writing the record back without them.
  */
-export const BACKUP_VERSION = 15;
+export const BACKUP_VERSION = 16;
 
 /** Far more than years of workouts take (about 1 KB each), so a bigger file isn't a backup. */
 export const MAX_BACKUP_BYTES = 50 * 1024 * 1024;

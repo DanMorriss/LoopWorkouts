@@ -1,22 +1,33 @@
 import { Component, computed, inject, input, linkedSignal, output } from '@angular/core';
 import { weightIn, weightOptions, weightToKg } from '../../../models/weight';
-import { MAX_REPS, RepSetAmount } from '../../../models/workout';
+import { MAX_REPS, RepSetAmount, TimedSetAmount } from '../../../models/workout';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { WheelPickerComponent } from '../../../shared/components/wheel-picker/wheel-picker.component';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
 
-const REP_OPTIONS = Array.from({ length: MAX_REPS }, (_, i) => ({
-    value: i + 1,
-    label: String(i + 1),
-}));
+/** `from` to `to` as wheel options, each labelled by `label`. */
+const options = (from: number, to: number, label: (n: number) => string = String) =>
+    Array.from({ length: to - from + 1 }, (_, i) => ({ value: from + i, label: label(from + i) }));
+const twoDigits = (n: number) => String(n).padStart(2, '0');
+
+const REP_OPTIONS = options(1, MAX_REPS);
+const MINUTE_OPTIONS = options(0, 99, twoDigits);
+const SECOND_OPTIONS = options(0, 59, twoDigits);
+
+/** A set's two wheels, as they show: reps and weight (in your unit, 0 for none), or a time. */
+interface Row {
+    first: number;
+    second: number;
+}
 
 let nextId = 0;
 
 /**
- * A ready-made workout's exercise's reps and weight, set before running it: a Reps and a
- * Weight wheel for each of its sets (or rounds, in a superset), and Save. Weights show in
- * your unit and are kept in kg; one left as it was keeps its kg exactly. ‹ Back, Escape or a
- * click outside change nothing. Where it's used, it has animate.leave="dialog-leave".
+ * A ready-made workout's exercise's sets, set before running it: for each set (or round, in
+ * a superset), a Reps and a Weight wheel for a rep exercise, or Minutes and Seconds for a
+ * timed one, and Save. Weights show in your unit and are kept in kg; one left as it was keeps
+ * its kg exactly. A time of 0:00 can't be saved. ‹ Back, Escape or a click outside change
+ * nothing. Where it's used, it has animate.leave="dialog-leave".
  */
 @Component({
     selector: 'app-step-amounts-dialog',
@@ -29,12 +40,7 @@ let nextId = 0;
             (closed)="closed.emit()"
         >
             <h2 class="amounts__title" [id]="id + '-title'">{{ name() }}</h2>
-            <p class="amounts__hint" [id]="id + '-hint'">
-                Your reps and weight{{
-                    rows().length > 1 ? ' for each ' + setName().toLowerCase() : ''
-                }}{{ eachSide() ? ', each side' : '' }}. They're kept for next time, and change as
-                you go too.
-            </p>
+            <p class="amounts__hint" [id]="id + '-hint'">{{ hint() }}</p>
             <ol class="amounts__sets">
                 @for (row of rows(); track $index; let i = $index) {
                     @let rowId = id + '-set-' + i;
@@ -46,30 +52,42 @@ let nextId = 0;
                         }
                         <div class="picker-row">
                             <div class="picker-field">
-                                <span class="picker-field__label" [id]="rowId + '-reps'">Reps</span>
+                                <span class="picker-field__label" [id]="rowId + '-first'">{{
+                                    labels()[0]
+                                }}</span>
                                 <app-wheel-picker
-                                    [value]="row.reps"
-                                    (valueChange)="setRow(i, { reps: $event })"
-                                    [options]="repOptions"
-                                    [labelledBy]="labelled(i, 'reps')"
+                                    [value]="row.first"
+                                    (valueChange)="setRow(i, { first: $event })"
+                                    [options]="firstOptions()"
+                                    [labelledBy]="labelled(i, 'first')"
                                 />
                             </div>
                             <div class="picker-field">
-                                <span class="picker-field__label" [id]="rowId + '-weight'"
-                                    >Weight ({{ unit() }})</span
-                                >
+                                <span class="picker-field__label" [id]="rowId + '-second'">{{
+                                    labels()[1]
+                                }}</span>
                                 <app-wheel-picker
-                                    [value]="row.weight"
-                                    (valueChange)="setRow(i, { weight: $event })"
-                                    [options]="weightOptions()"
-                                    [labelledBy]="labelled(i, 'weight')"
+                                    [value]="row.second"
+                                    (valueChange)="setRow(i, { second: $event })"
+                                    [options]="secondOptions()"
+                                    [labelledBy]="labelled(i, 'second')"
                                 />
                             </div>
                         </div>
                     </li>
                 }
             </ol>
-            <button type="button" class="btn-main amounts__save" (click)="save()">Save</button>
+            @if (noTime()) {
+                <p class="amounts__error" role="alert">Each set needs some time.</p>
+            }
+            <button
+                type="button"
+                class="btn-main amounts__save"
+                [disabled]="noTime()"
+                (click)="save()"
+            >
+                Save
+            </button>
         </app-dialog>
     `,
     styleUrl: './step-amounts-dialog.component.scss',
@@ -77,42 +95,73 @@ let nextId = 0;
 export class StepAmountsDialogComponent {
     /** The exercise, e.g. "Back squat". */
     readonly name = input.required<string>();
-    /** Each set's reps and weight (in kg) as they are now. */
-    readonly amounts = input.required<readonly RepSetAmount[]>();
+    /** Each set's amount as it is now: reps and weight (in kg), or a time. */
+    readonly amounts = input.required<readonly RepSetAmount[] | readonly TimedSetAmount[]>();
     /** What a set is called: "Set", or "Round" in a superset. */
     readonly setName = input('Set');
     readonly eachSide = input(false);
     readonly closed = output<void>();
-    /** Each set's reps and weight (in kg, missing for none), as saved. */
-    readonly saved = output<RepSetAmount[]>();
+    /** Each set's amount, as saved: reps and weight (in kg, missing for none), or a time. */
+    readonly saved = output<RepSetAmount[] | TimedSetAmount[]>();
 
     protected readonly id = `step-amounts-${nextId++}`;
     protected readonly unit = inject(SettingsStore).weightUnit;
-    protected readonly repOptions = REP_OPTIONS;
-    protected readonly weightOptions = computed(() => weightOptions(this.unit()));
+    /** A timed exercise's, with Minutes and Seconds, rather than Reps and Weight. */
+    protected readonly timed = computed(() => {
+        const [first] = this.amounts();
+        return first !== undefined && 'seconds' in first;
+    });
+    protected readonly labels = computed(() =>
+        this.timed() ? ['Minutes', 'Seconds'] : ['Reps', `Weight (${this.unit()})`]
+    );
+    protected readonly firstOptions = computed(() => (this.timed() ? MINUTE_OPTIONS : REP_OPTIONS));
+    protected readonly secondOptions = computed(() =>
+        this.timed() ? SECOND_OPTIONS : weightOptions(this.unit())
+    );
+    protected readonly hint = computed(() => {
+        const what = this.timed() ? 'Your time' : 'Your reps and weight';
+        const each = this.rows().length > 1 ? ` for each ${this.setName().toLowerCase()}` : '';
+        const side = this.eachSide() ? ', each side' : '';
+        // Reps and weight change mid-workout too; a time doesn't
+        const kept = this.timed()
+            ? "It's kept for next time."
+            : "They're kept for next time, and change as you go too.";
+        return `${what}${each}${side}. ${kept}`;
+    });
 
-    /** As the wheels show them: the weight in your unit, 0 for none. */
-    protected readonly rows = linkedSignal(() =>
-        this.amounts().map(({ reps, weight }) => ({
-            reps,
-            weight: weight ? weightIn(weight, this.unit()) : 0,
-        }))
+    protected readonly rows = linkedSignal((): Row[] =>
+        this.amounts().map((amount) =>
+            'seconds' in amount
+                ? { first: Math.floor(amount.seconds / 60), second: amount.seconds % 60 }
+                : {
+                      first: amount.reps,
+                      second: amount.weight ? weightIn(amount.weight, this.unit()) : 0,
+                  }
+        )
+    );
+    /** A timed set set to 0:00, which can't be run. */
+    protected readonly noTime = computed(
+        () => this.timed() && this.rows().some((row) => row.first === 0 && row.second === 0)
     );
 
-    protected labelled(set: number, wheel: 'reps' | 'weight'): string {
+    protected labelled(set: number, wheel: 'first' | 'second'): string {
         const row = this.rows().length > 1 ? `${this.id}-set-${set} ` : '';
         return `${this.id}-title ${row}${this.id}-set-${set}-${wheel}`;
     }
 
-    protected setRow(set: number, change: Partial<{ reps: number; weight: number }>) {
+    protected setRow(set: number, change: Partial<Row>) {
         this.rows.update((rows) => rows.map((row, i) => (i === set ? { ...row, ...change } : row)));
     }
 
     protected save() {
+        if (this.timed()) {
+            this.saved.emit(this.rows().map((row) => ({ seconds: row.first * 60 + row.second })));
+            return;
+        }
         const unit = this.unit();
-        const before = this.amounts();
+        const before = this.amounts() as readonly RepSetAmount[];
         this.saved.emit(
-            this.rows().map(({ reps, weight }, i) => {
+            this.rows().map(({ first: reps, second: weight }, i) => {
                 const was = before[i]?.weight;
                 // Left as it showed, it keeps its kg, rather than drift by rounding
                 const kg =

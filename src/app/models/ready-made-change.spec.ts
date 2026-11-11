@@ -1,8 +1,9 @@
 import { readReadyMadeChange, stepAmounts, withAmounts } from './ready-made-change';
-import { allSteps, asOneGroup, RepStep, Step } from './workout';
+import { allSteps, asOneGroup, RepStep, Step, TimedStep } from './workout';
 
 const squat: RepStep = { kind: 'reps', reps: 10, name: 'Squats', exerciseId: 'builtin:squat' };
 const rest: Step = { kind: 'rest', seconds: 30, name: '' };
+const plank: TimedStep = { kind: 'work', seconds: 45, name: 'Plank', exerciseId: 'builtin:plank' };
 const workout = {
     blocks: [{ kind: 'group' as const, rounds: 3, restSeconds: 0, steps: [squat, rest] }],
 };
@@ -15,9 +16,38 @@ describe('ready-made changes (LIB-6)', () => {
             reps: 8,
             weight: 40,
         });
-        // Another exercise takes a copy, as does a timed step
+        // Another exercise takes a copy; a rest isn't an exercise to keep a time for
         expect(stepAmounts(0, squat, { ...squat, exerciseId: 'builtin:lunge' })).toBeNull();
         expect(stepAmounts(1, rest, { ...rest, seconds: 60 })).toBeNull();
+    });
+
+    it("keeps a timed exercise's time, and each set's where they vary (data version 16)", () => {
+        expect(stepAmounts(2, plank, { ...plank, seconds: 30 })).toEqual({
+            step: 2,
+            exerciseId: 'builtin:plank',
+            seconds: 30,
+        });
+        const sets = [{ seconds: 30 }, { seconds: 20 }];
+        expect(stepAmounts(2, plank, { ...plank, seconds: 30, sets })).toEqual({
+            step: 2,
+            exerciseId: 'builtin:plank',
+            seconds: 30,
+            sets,
+        });
+        // Changed to reps, it's more than its time
+        expect(stepAmounts(2, plank, { ...squat, exerciseId: 'builtin:plank' })).toBeNull();
+
+        const planks = { blocks: asOneGroup([squat, plank]) };
+        expect(
+            allSteps(withAmounts(planks, [{ step: 1, exerciseId: 'builtin:plank', seconds: 30 }]))
+        ).toEqual([squat, { ...plank, seconds: 30 }]);
+        // A time for a step that's reps now, or reps for one that's timed, is left out
+        expect(
+            withAmounts(planks, [
+                { step: 0, exerciseId: 'builtin:squat', seconds: 30 },
+                { step: 1, exerciseId: 'builtin:plank', reps: 5 },
+            ]).blocks
+        ).toEqual(planks.blocks);
     });
 
     it('puts them on the workout, its other fields as they came', () => {
@@ -52,12 +82,28 @@ describe('ready-made changes (LIB-6)', () => {
                     { step: 0, exerciseId: 'builtin:squat', reps: 8, weight: 40, extra: 1 },
                     { step: 1, exerciseId: 'builtin:squat', reps: 0 },
                     { step: 2, exerciseId: '', reps: 8 },
+                    {
+                        step: 3,
+                        exerciseId: 'builtin:plank',
+                        seconds: 30,
+                        sets: [{ seconds: 30 }, { seconds: 20 }],
+                    },
+                    { step: 4, exerciseId: 'builtin:plank', seconds: 0 },
+                    { step: 5, exerciseId: 'builtin:plank', seconds: 1.5 },
                 ],
             })
         ).toEqual({
             id: 'builtin:gym-legs',
             updatedAt: 5,
-            steps: [{ step: 0, exerciseId: 'builtin:squat', reps: 8, weight: 40 }],
+            steps: [
+                { step: 0, exerciseId: 'builtin:squat', reps: 8, weight: 40 },
+                {
+                    step: 3,
+                    exerciseId: 'builtin:plank',
+                    seconds: 30,
+                    sets: [{ seconds: 30 }, { seconds: 20 }],
+                },
+            ],
         });
         expect(readReadyMadeChange({ id: 'mine', updatedAt: 5, steps: [] })).toBeNull();
         expect(readReadyMadeChange({ id: 'builtin:gym-legs', updatedAt: 5 })).toBeNull();

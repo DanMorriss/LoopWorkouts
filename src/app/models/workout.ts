@@ -366,6 +366,29 @@ export function withSetAmounts(step: RepStep, amounts: readonly RepSetAmount[]):
           };
 }
 
+/** A timed step's time for each of its `rounds` sets, from 1: its own, or the step's. */
+export function timedSetAmountsOf(step: TimedStep, rounds: number): TimedSetAmount[] {
+    return Array.from({ length: rounds }, (_, set) => ({
+        seconds: (stepForSet(step, set) as TimedStep).seconds,
+    }));
+}
+
+/**
+ * A timed step with each set's time: the step's own where they're alike, or a list of them
+ * where they vary (BLD-11). Its other fields stay as they are.
+ */
+export function withTimedSetAmounts(
+    step: TimedStep,
+    amounts: readonly TimedSetAmount[]
+): TimedStep {
+    const { sets: _sets, ...rest } = step;
+    const [first] = amounts;
+    const alike = amounts.every((amount) => amount.seconds === first.seconds);
+    return alike
+        ? { ...rest, seconds: first.seconds }
+        : { ...rest, seconds: first.seconds, sets: amounts.map(({ seconds }) => ({ seconds })) };
+}
+
 /** Steps as a workout's blocks: one group, run once a round, as workouts were before groups. */
 export function asOneGroup(steps: Step[]): Block[] {
     return [{ kind: 'group', rounds: 1, restSeconds: 0, steps }];

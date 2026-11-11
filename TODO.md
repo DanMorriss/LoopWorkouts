@@ -46,7 +46,7 @@ Every built-in exercise has an animated figure, at the top of How to do it (see 
 
 Eighteen ready-made workouts are listed on Workouts, under your own (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
 
-- [ ] **Change a ready-made workout's timed steps before running it:** Your reps and weights on its Details covers rep steps only, so a plank's time, say, still changes only from a run.
+- [x] **Change a ready-made workout's timed steps before running it** (2026-11-11): its Details lists timed exercises too, with Minutes and Seconds wheels for each set, kept in the same `ready-made-change` record (`seconds`, data version 16).
 - [ ] **Mobility days in the ready-made plans,** once there are mobility workouts: rest days are left empty for now.
 - [ ] **More batches, once there are exercises for them:** a band workout (only Band pull-apart uses a band so far), rings, and mobility or stretching (there are no stretches yet), which need new built-in exercises first (see `docs/writing-exercises.md`). Each must pass `built-in-workouts.spec.ts`.
 

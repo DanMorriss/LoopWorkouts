@@ -982,6 +982,13 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Legs opens as saved, without Back squat added again (`add` is gone from the address).
     4. A new workout with only Back squat; Plank's is 3 × 0:30.
 
+### REG-EXR-06 · The tour of an exercise's page
+
+- **Stories:** EXR-6, EXR-10, EXR-12, EXR-13 · **Priority:** P2
+- **Preconditions:** `guest()` with `tour-exercise` removed (the fixtures mark it seen).
+- **Steps:** From the Exercises list, open Back squat. Press Next three times, then Done. Then open Plank.
+- **Expected:** "1 of 4", then Add to workout, Your note, Muscles worked and How to do it; after Done the card's gone, focus is on the name "Back squat", and `tour-exercise` is `seen`. Plank's page opens with no tour.
+
 ---
 
 ## 9. Settings and profile (`settings.md`)
@@ -1363,7 +1370,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Running a workout         | REG-RUN-01 – 15  | RUN-1 – RUN-12, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 04  | HIS-1 – HIS-5, CTL-3                                                                                                          |
 | Progress                  | REG-PRG-01 – 03  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9                                                                                             |
-| Exercises                 | REG-EXR-01 – 05  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
+| Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                            |
 | Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                               |
 | Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                         |
@@ -1402,7 +1409,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | RUN  | `e2e/run.e2e.ts`       | 23    | 0                               | 1 (real sound, manual)                                |
 | HIS  | `e2e/history.e2e.ts`   | 6     | 0                               | 0                                                     |
 | PRG  | `e2e/progress.e2e.ts`  | 4     | 0                               | 0                                                     |
-| EXR  | `e2e/exercises.e2e.ts` | 8     | 0                               | 1 (3D figure, manual)                                 |
+| EXR  | `e2e/exercises.e2e.ts` | 9     | 0                               | 1 (3D figure, manual)                                 |
 | SET  | `e2e/settings.e2e.ts`  | 6     | 0                               | 0                                                     |
 | DATA | `e2e/data.e2e.ts`      | 6     | 0                               | 0                                                     |
 | ACC  | `e2e/account.e2e.ts`   | 17    | 0                               | 1 (real Google, manual)                               |

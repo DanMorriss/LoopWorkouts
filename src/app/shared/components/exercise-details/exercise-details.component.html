@@ -34,7 +34,12 @@
 <!-- The buttons that go with it, e.g. Edit, under the description and note -->
 <ng-content />
 
-<section class="exercise__section" [attr.aria-labelledby]="id + '-muscles'">
+<!-- data-tour: what the tour of an exercise's page lights up -->
+<section
+    class="exercise__section"
+    [attr.aria-labelledby]="id + '-muscles'"
+    data-tour="exercise-muscles"
+>
     <h3 [id]="id + '-muscles'" class="exercise__heading">Muscles worked</h3>
     <app-body-map [main]="shown.mainMuscles" [supporting]="shown.supportingMuscles" />
 </section>
@@ -45,7 +50,7 @@
 @if (words?.steps?.length) {
     <section class="exercise__section" [attr.aria-labelledby]="id + '-how'">
         <h3 [id]="id + '-how'" class="exercise__heading">How to do it</h3>
-        <app-exercise-demo class="exercise__demo" [exercise]="shown" />
+        <app-exercise-demo class="exercise__demo" [exercise]="shown" data-tour="exercise-demo" />
         <ol class="exercise__steps">
             @for (step of words!.steps; track $index) {
                 <li>{{ step }}</li>

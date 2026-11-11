@@ -17,6 +17,7 @@ describe('HelpComponent (NAV-7)', () => {
                     { path: 'account', children: [] },
                     { path: 'setup', children: [] },
                     { path: 'plan', children: [] },
+                    { path: 'exercises/:id', children: [] },
                     { path: 'workout', children: [] },
                     { path: 'help', component: HelpComponent },
                 ]),
@@ -98,6 +99,19 @@ describe('HelpComponent (NAV-7)', () => {
         const tour = TestBed.inject(TourService);
         expect(TestBed.inject(Router).url).toBe('/plan');
         expect(tour.tour()).toBe('plan');
+        expect(tour.stop()).toBe(0);
+        localStorage.clear();
+    });
+
+    it("opens Back squat's page for the tour of an exercise's page", async () => {
+        await open();
+
+        tourButton("An exercise's page").click();
+        await harness.fixture.whenStable();
+
+        const tour = TestBed.inject(TourService);
+        expect(TestBed.inject(Router).url).toBe('/exercises/back-squat');
+        expect(tour.tour()).toBe('exercise');
         expect(tour.stop()).toBe(0);
         localStorage.clear();
     });

@@ -362,6 +362,53 @@ const JOIN_STOPS: readonly TourStop[] = [
     },
 ];
 
+/**
+ * The tour of an exercise's page, the first one opened: what can be done with it, top to
+ * bottom. An exercise of your own has no demo, so the last stop says it in words.
+ */
+const EXERCISE_STOPS: readonly TourStop[] = [
+    {
+        title: 'Add to workout',
+        parts: [
+            {
+                part: 'exercise-add',
+                text: 'Put it at the end of one of your workouts, or start a new one with it, with 3 sets to change before you save.',
+            },
+        ],
+        text: 'Add to workout puts it at the end of one of your workouts, or starts a new one with it.',
+    },
+    {
+        title: 'Your note',
+        parts: [
+            {
+                part: 'exercise-note',
+                text: 'Keep a note of your own on it, e.g. a machine setting or a cue. It shows here, and under the ring as you do it.',
+            },
+        ],
+        text: 'Keep a note of your own on an exercise, e.g. a machine setting. It shows here, and under the ring as you do it.',
+    },
+    {
+        title: 'Muscles worked',
+        parts: [
+            {
+                part: 'exercise-muscles',
+                text: 'What it works, darker for the main muscles. Once you’ve done it, your bests and a chart show under them.',
+            },
+        ],
+        text: 'What it works, and once you’ve done it, your bests and a chart.',
+    },
+    {
+        title: 'How to do it',
+        parts: [
+            {
+                part: 'exercise-demo',
+                text: 'The figure shows the move. Drag it sideways to turn it round, or press Turn, to see it from any side.',
+            },
+        ],
+        text: 'A built-in exercise shows how it’s done: a figure you can turn round with a finger, then the steps and tips.',
+    },
+];
+
 export const TOURS: Record<TourName, Tour> = {
     // Done goes back to Today, its last stop
     app: { stops: APP_STOPS, doneFocus: 'home-title' },
@@ -377,4 +424,10 @@ export const TOURS: Record<TourName, Tour> = {
         skipFocus: 'help-tour-workout',
     },
     plan: { stops: PLAN_STOPS, doneFocus: 'plan-title', skipFocus: 'plan-title' },
+    // Back to the top: the exercise's name
+    exercise: {
+        stops: EXERCISE_STOPS,
+        doneFocus: 'exercise-page-title',
+        skipFocus: 'exercise-page-title',
+    },
 };

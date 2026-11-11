@@ -69,14 +69,10 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 
 ### Code health
 
-From the review of 2026-11-05; how to keep it from coming back is in `CLAUDE.md`.
+How to keep the codebase from degrading is in `CLAUDE.md`.
 
-- [x] **Share the swipe gesture** (2026-11-10): `RunBarComponent` and `SwipeBackDirective` follow a finger with one plain class, `SideSwipe` (`shared/side-swipe.ts`): the slop, the rightward lock, the rubber band, the speed and the dropped click. Each keeps what it does on letting go. `CardGestures` is left as it is, as it holds as well as swipes, to the left.
-    - **Needs an iPhone check:** swiping a page back and swiping the run bar away, as it's all touch. The touch tests pass in Chromium.
-- [x] **Split `WorkoutSetupForm` and `WorkoutView`** (2026-11-10): `WorkoutSetupForm` went from 980 lines to about 780, what a row says moving to plain functions in `step-text.ts`, and joining and taking out supersets to `SetupSupersets` (`setup-supersets.ts`), beside `SetupExercises` and `SetupDrag`. `WorkoutView` went from 585 to 518, where the run is in its round and sets moving to `round-progress.ts`.
-    - **Still large:** `WorkoutSetupForm` keeps the form, the steps' rows and opening them, and loading and saving. Turning a saved workout into rows and back (`stepModels()`, `stepModel()`) could go next, if it grows again. What's left of `WorkoutView` is signals built on one another, so it'd split only into services handing those back and forth.
-- [x] **Share the rest of an exercise list** (2026-11-10): the count, "No exercises match." with Clear search and filters, and the cards are `ExerciseCardsComponent` (`exercises/exercise-cards/`), on the Exercises page (its hidden ones too) and in Browse; how they filter was shared already (`filterExercises()`).
-- [x] **Move `shared/` off the `workout/` folder** (2026-11-10): `alarm-schedule.ts` and `workout-state.ts`, pure and with no Angular in them, are in `models/` now, so nothing in `shared/` imports from `workout/`.
+- [ ] **Check the shared swipe on an iPhone:** `RunBarComponent` and `SwipeBackDirective` now follow a finger with one class, `SideSwipe` (`shared/side-swipe.ts`). Check swiping a page back and swiping the run bar away, as it's all touch; the touch tests pass in Chromium.
+- [ ] **`WorkoutSetupForm` is still large** (about 780 lines): it keeps the form, the steps' rows and opening them, and loading and saving. If it grows again, turning a saved workout into rows and back (`stepModels()`, `stepModel()`) could go next. `WorkoutView` (518) is signals built on one another, so it'd split only into services handing those back and forth.
 - [ ] **The rest of `shared/`'s imports from other folders** (found 2026-11-10): `body-map` and `workout-outline` use `nav/page-slide`, `help-link` uses `help/help-topics`, and `DeviceDataService` uses `account/account-client`. `PageSlide` is the app's frame rather than a feature, so it could move to `shared/` (or `nav/` count as shared); `help-link` goes once the tours replace the ? links; the account client's type could move to `shared/`. The test fakes in `shared/testing/` import what they fake, which is fine.
 
 ## 2. Known issues

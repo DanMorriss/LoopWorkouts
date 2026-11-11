@@ -744,7 +744,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     4. Still Goblet squat (swaps are kept for the tab).
     5. Round 2 is goblet squats too.
     6. The summary lists "Back squat for Goblet squat"; No says "Next time it's Back squat again."; the saved workout still has Back squat at 60 kg, and there's no Next time step-up for it. The history logs the sets as Goblet squat.
-- **In the pack:** the summary lists "Goblet squat: 2 × 10 @ 24 kg". Focus after the swap is on the (i), with Undo still in the bar (B1, fixed 2026-11-10), a test of its own.
+- **In the pack:** the summary lists "Goblet squat: 2 × 10 @ 24 kg". Focus after the swap is on the (i), with Undo still in the bar (B1, fixed 2026-11-10), a test of its own. Type into the search only once it has focus (`WorkoutPage.swapTo()`): the dialog takes focus a moment after it opens, and on the test's clock, keys pressed sooner went to Swap exercise, leaving only "t" in the box (it failed about 1 run in 25 until 2026-11-11).
 
 ### REG-RUN-12 · Swap the next exercise while paused in a rest
 

@@ -632,9 +632,7 @@ test.describe('swapping mid-workout', () => {
             await run.startFromLibrary('Legs');
             await run.wait(3500);
             await run.main.getByRole('button', { name: 'Details of Back squat' }).click();
-            await page.getByRole('button', { name: 'Swap exercise' }).click();
-            await page.keyboard.type('goblet');
-            await page.getByRole('button', { name: /^Goblet squat/ }).click();
+            await run.swapTo('goblet', 'Goblet squat');
             await expect(
                 run.main.getByRole('button', { name: 'Details of Goblet squat' })
             ).toBeFocused();
@@ -663,9 +661,7 @@ test.describe('swapping while paused in a rest', () => {
             await run.pause.click();
             await expect(run.main.getByText('Rest, then Deadlift')).toBeVisible();
             await run.main.getByRole('button', { name: 'Details of Deadlift, next' }).click();
-            await page.getByRole('button', { name: 'Swap exercise' }).click();
-            await page.keyboard.type('romanian');
-            await page.getByRole('button', { name: /^Romanian deadlift/ }).click();
+            await run.swapTo('romanian', 'Romanian deadlift');
             // Still paused, the next exercise swapped, and focus back on its (i)
             await expect(run.main.getByText('Rest, then Romanian deadlift')).toBeVisible();
             await expect(run.resume).toBeVisible();

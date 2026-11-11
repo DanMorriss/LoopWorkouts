@@ -1,5 +1,5 @@
-import { CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { DOCUMENT, inject, Injectable, signal } from '@angular/core';
+import { CdkDrag, CdkDragDrop, CdkDragStart } from '@angular/cdk/drag-drop';
+import { afterNextRender, inject, Injectable, Injector, signal } from '@angular/core';
 import { DropSpring } from '../shared/drop-spring';
 import { movedRow, partEnd, StepModel, wellFormed } from './step-model';
 import { WorkoutSetupForm } from './workout-setup-form';
@@ -8,7 +8,7 @@ import { WorkoutSetupForm } from './workout-setup-form';
 @Injectable()
 export class SetupDrag {
     private readonly form = inject(WorkoutSetupForm);
-    private readonly document = inject(DOCUMENT);
+    private readonly injector = inject(Injector);
 
     /**
      * Where a step's handle was grabbed, from the step's top left (px). The CDK puts a custom
@@ -21,13 +21,13 @@ export class SetupDrag {
     readonly drop = new DropSpring();
 
     /**
-     * The superset whose handle is held: its steps hide from then until it's dropped, so it
-     * drags as one row, its steps following it (`dropStep`). 0 for none.
+     * The superset being dragged: its steps hide from when the drag starts until it's dropped,
+     * so it drags as one row, its steps following it (`dropStep`). 0 for none. Only once it's
+     * dragging, so pressing its handle leaves the list where it is under the finger.
      */
     readonly heldSuperset = signal(0);
-    private supersetDragging = false;
 
-    grabStep(event: PointerEvent, key: number) {
+    grabStep(event: PointerEvent) {
         const step = (event.currentTarget as Element).closest('.step')?.getBoundingClientRect();
         if (step) {
             this.grabbedAt.set({
@@ -36,27 +36,25 @@ export class SetupDrag {
                 width: step.width,
             });
         }
-        const row = this.form.model().steps.find((other) => other.key === key);
+    }
+
+    dragStarted({ source }: CdkDragStart<number>) {
+        const row = this.form.model().steps.find((other) => other.key === source.data);
         if (row?.kind !== 'superset') {
             return;
         }
-        // Hidden before the drag starts, so the list measures itself without them
-        this.heldSuperset.set(key);
-        this.supersetDragging = false;
-        // Let go without dragging, its steps come back
-        this.document.defaultView?.addEventListener(
-            'pointerup',
+        this.heldSuperset.set(row.key);
+        // The CDK measured the rows as the drag started, with its steps still showing: once
+        // they've folded away, it measures them again, so the rows below sort where they are
+        const list = source.dropContainer;
+        afterNextRender(
             () => {
-                if (!this.supersetDragging) {
-                    this.heldSuperset.set(0);
+                if (this.heldSuperset() === row.key && list?._dropListRef.isDragging()) {
+                    list._dropListRef.withItems(list.getSortedItems().map((item) => item._dragRef));
                 }
             },
-            { once: true }
+            { injector: this.injector }
         );
-    }
-
-    dragStarted() {
-        this.supersetDragging = this.heldSuperset() !== 0;
     }
 
     /**
@@ -80,7 +78,6 @@ export class SetupDrag {
     /** A step dragged by its handle and dropped in a new place. */
     dropStep(event: CdkDragDrop<unknown>) {
         this.heldSuperset.set(0);
-        this.supersetDragging = false;
         if (event.previousIndex === event.currentIndex) {
             return;
         }

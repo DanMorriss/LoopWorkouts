@@ -1,3 +1,4 @@
+import { GestureClock } from '../../shared/testing/gesture-clock';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
@@ -128,25 +129,29 @@ describe('RunBarComponent', () => {
             }: { target?: Element; pointerType?: string } = {}
         ) =>
             target.dispatchEvent(
-                new PointerEvent(type, {
-                    bubbles: true,
-                    pointerId: 7,
-                    isPrimary: true,
-                    pointerType,
-                    clientX: x,
-                    clientY: y,
-                })
+                clock.stamp(
+                    new PointerEvent(type, {
+                        bubbles: true,
+                        pointerId: 7,
+                        isPrimary: true,
+                        pointerType,
+                        clientX: x,
+                        clientY: y,
+                    })
+                )
             );
 
+        let clock: GestureClock;
         /** Long enough that letting go after it reads as still, not as a flick. */
-        const pause = () => new Promise((resolve) => setTimeout(resolve, 150));
+        const pause = () => clock.pass(150);
 
         beforeEach(() => {
             // Pointers made up by a test aren't active, so the browser won't capture them
             vi.spyOn(Element.prototype, 'setPointerCapture').mockImplementation(() => undefined);
             element.style.width = '400px';
             start(makeWorkout({ steps: [work(30, 'Plank')] }));
-            // A swipe's speed comes from real time between its moves
+            clock = new GestureClock();
+            // Its spring plays out in real time
             vi.useRealTimers();
         });
 
@@ -166,7 +171,7 @@ describe('RunBarComponent', () => {
             pointer('pointermove', 120);
             pointer('pointermove', 280);
             expect(element.classList).toContain('run-bar--past-end');
-            await pause();
+            pause();
             pointer('pointerup', 280);
 
             await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe('/workout'), {
@@ -179,7 +184,7 @@ describe('RunBarComponent', () => {
             pointer('pointerdown', 20);
             pointer('pointermove', 120);
             pointer('pointermove', 280);
-            await pause();
+            pause();
             pointer('pointerup', 280);
             await new Promise((resolve) => setTimeout(resolve, 30));
 
@@ -191,7 +196,7 @@ describe('RunBarComponent', () => {
             // Let go short of halfway, it comes back, and the workout goes on
             pointer('pointermove', 330);
             pointer('pointermove', 100);
-            await pause();
+            pause();
             pointer('pointerup', 100);
             await new Promise((resolve) => setTimeout(resolve, 600));
 
@@ -203,7 +208,7 @@ describe('RunBarComponent', () => {
             pointer('pointerdown', 20);
             pointer('pointermove', 60);
             pointer('pointermove', 120);
-            await pause();
+            pause();
             pointer('pointerup', 120);
             await fixture.whenStable();
 
@@ -217,7 +222,7 @@ describe('RunBarComponent', () => {
             pointer('pointerdown', 20, 20, { target: link });
             pointer('pointermove', 60);
             pointer('pointermove', 120);
-            await pause();
+            pause();
             pointer('pointerup', 120);
             const click = new MouseEvent('click', { bubbles: true, cancelable: true });
             link.dispatchEvent(click);

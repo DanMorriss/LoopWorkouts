@@ -12,7 +12,7 @@
     cdkDragHandle
     aria-hidden="true"
     [title]="kind === 'superset' ? 'Drag to move it with its steps' : 'Drag to reorder'"
-    (pointerdown)="drag.grabStep($event, key)"
+    (pointerdown)="drag.grabStep($event)"
 >
     <mat-icon>drag_indicator</mat-icon>
 </span>

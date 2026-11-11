@@ -1,3 +1,4 @@
+import { GestureClock } from '../shared/testing/gesture-clock';
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
@@ -57,19 +58,25 @@ describe('SwipeBackDirective', () => {
         { target = page, pointerType = 'touch' }: { target?: Element; pointerType?: string } = {}
     ) =>
         target.dispatchEvent(
-            new PointerEvent(type, {
-                bubbles: true,
-                pointerId: 7,
-                isPrimary: true,
-                pointerType,
-                clientX: x,
-                clientY: y,
-            })
+            clock.stamp(
+                new PointerEvent(type, {
+                    bubbles: true,
+                    pointerId: 7,
+                    isPrimary: true,
+                    pointerType,
+                    clientX: x,
+                    clientY: y,
+                })
+            )
         );
 
+    let clock: GestureClock;
+    beforeEach(() => {
+        clock = new GestureClock();
+    });
     /** Long enough that letting go after it reads as still, not as a flick. */
-    const pause = () => new Promise((resolve) => setTimeout(resolve, 150));
-    /** A moment between moves, so they have a speed. */
+    const pause = () => clock.pass(150);
+    /** A moment of real time, for a spring to get under way. */
     const tick = () => new Promise((resolve) => setTimeout(resolve, 20));
 
     it('follows a finger moving right, and goes back once let go past halfway', async () => {
@@ -78,7 +85,7 @@ describe('SwipeBackDirective', () => {
         pointer('pointermove', 270);
 
         expect(page.style.transform).toBe('translateX(250px)');
-        await pause();
+        pause();
         pointer('pointerup', 270);
 
         expect(navigate).toHaveBeenCalledWith('/exercises?muscles=quads', 'out', 0);
@@ -88,7 +95,7 @@ describe('SwipeBackDirective', () => {
         pointer('pointerdown', 20);
         pointer('pointermove', 60);
         pointer('pointermove', 100);
-        await pause();
+        pause();
         pointer('pointerup', 100);
 
         expect(navigate).not.toHaveBeenCalled();
@@ -98,9 +105,9 @@ describe('SwipeBackDirective', () => {
 
     it('goes back on a quick flick, handing its speed on', async () => {
         pointer('pointerdown', 20);
-        await tick();
+        clock.pass(20);
         pointer('pointermove', 50);
-        await tick();
+        clock.pass(20);
         pointer('pointermove', 90);
         pointer('pointerup', 90);
 
@@ -122,7 +129,7 @@ describe('SwipeBackDirective', () => {
     it('takes the page from where it is when caught springing back into place', async () => {
         pointer('pointerdown', 20);
         pointer('pointermove', 120);
-        await pause();
+        pause();
         pointer('pointerup', 120);
         expect(page.getAnimations()).toHaveLength(1);
 
@@ -142,7 +149,7 @@ describe('SwipeBackDirective', () => {
     it('springs on into place from a tap that caught it on the way', async () => {
         pointer('pointerdown', 20);
         pointer('pointermove', 120);
-        await pause();
+        pause();
         pointer('pointerup', 120);
         await tick();
 

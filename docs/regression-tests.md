@@ -1319,8 +1319,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Expected:**
     1. Deleted with the Undo bar, and back on Undo; the short swipe springs back. Neither starts the workout or opens its details.
     2. It lifts, then its options open; it doesn't start or open.
-- **Note (Known issue):** "Card swipe tests still use real clock time": give these synthetic events fake timestamps.
-- **In the pack:** touch by Chromium's touch events with their own times, so the speed is the test's, not the machine's (the Known issue about real clock time doesn't apply here).
+- **In the pack:** touch by Chromium's touch events with their own times, so the speed is the test's, not the machine's. The unit tests' swipes give their events times too (`GestureClock` in `shared/testing/gesture-clock.ts`), fixed 2026-11-11.
 
 ### REG-GES-03 · Dragging to reorder: library cards and Create's steps
 
@@ -1334,8 +1333,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     1. A is last, and stays last after reload.
     2. The order is C, A, B; "Moved C to step 1" is announced.
     3. Plank first, then the superset with Bench and Row still in it, open as before; "Moved superset to the end" is announced.
-- **[Known issue]:** "An open superset folds as its handle is pressed": the list jumps up under the finger as the handle is pressed. Don't assert the list stays still on press; add a `test.fixme` check for it if wanted.
-- **In the pack:** the library's cards no longer drag (A to Z), so only Create's steps are dragged, with the mouse; "an open superset folds as its handle is pressed" is a `test.fixme`.
+- **In the pack:** the library's cards no longer drag (A to Z), so only Create's steps are dragged, with the mouse; an open superset stays put as its handle is pressed, then drags whole past Plank (fixed 2026-11-11).
 
 ---
 
@@ -1346,8 +1344,8 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Focus isn't put back after a page slides back (`PageSlide`)                        | REG-PLAN-05, REG-LIB-02                              | Fixed (`aef2211`) and gone from TODO.md: asserted                                                |
 | No swapping the next exercise while paused in a rest                               | REG-RUN-12                                           | Fixed 2026-11-10 and gone from TODO.md: asserted                                                 |
 | Enter in a step's name box may save before its kind follows the exercise (Safari)  | —                                                    | Cleared from TODO.md (Safari settles the kind first); no WebKit project                          |
-| An open superset folds as its handle is pressed                                    | REG-GES-03                                           | `test.fixme`                                                                                     |
-| Card swipe tests still use real clock time                                         | REG-GES-02                                           | The e2e swipes give each touch its time (`e2e/touch.ts`)                                         |
+| An open superset folds as its handle is pressed                                    | REG-GES-03                                           | Fixed 2026-11-11 and gone from TODO.md: asserted                                                 |
+| Card swipe tests still use real clock time                                         | REG-GES-02                                           | Fixed 2026-11-11 and gone from TODO.md (`GestureClock`); the e2e swipes time each touch          |
 | Check the setup's buttons with an iPhone's keyboard                                | REG-NAV-02 checks the fixed buttons in Chromium only | Manual on an iPhone                                                                              |
 | Try a tap and a swipe mid page-slide on an iPhone; the summary's drag on an iPhone | REG-GES-01                                           | Manual in Safari                                                                                 |
 | Check the Content-Security-Policy on an iPhone                                     | All P1 tests on the production build                 | Fail on CSP console errors; real Safari manual                                                   |

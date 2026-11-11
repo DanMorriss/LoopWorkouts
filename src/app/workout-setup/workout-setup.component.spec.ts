@@ -1,5 +1,5 @@
 import type { Mock } from 'vitest';
-import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import {
@@ -1938,21 +1938,22 @@ describe('WorkoutSetupComponent', () => {
                 list.sortPredicate(to, list.getSortedItems()[from], list);
             const hidden = () => steps().map((step) => step.classList.contains('step--hidden'));
             const handle = el('.step__handle', steps()[0]);
-            const grab = () => {
-                handle.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
-                fixture.detectChanges();
-            };
+            const superset = fixture.debugElement
+                .queryAll(By.directive(CdkDrag))[0]
+                .injector.get(CdkDrag<number>);
 
             expect(handle.getAttribute('aria-hidden')).toBe('true');
-            // Held, its steps hide, so it drags as one row; let go without dragging, they're back
-            grab();
-            expect(hidden()).toEqual([false, true, true, false]);
-            window.dispatchEvent(new PointerEvent('pointerup'));
+            // Pressed, nothing moves, so the list stays where it is under the finger
+            handle.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
             fixture.detectChanges();
             expect(hidden()).toEqual([false, false, false, false]);
 
+            // Dragged, its steps hide, so it drags as one row
+            superset.started.emit({ source: superset, event: new PointerEvent('pointermove') });
+            fixture.detectChanges();
+            expect(hidden()).toEqual([false, true, true, false]);
+
             // It can go past Plank, its steps following it
-            grab();
             expect(canDrop(0, 3)).toBe(true);
             list.dropped.emit({ previousIndex: 0, currentIndex: 3 } as CdkDragDrop<unknown>);
             fixture.detectChanges();

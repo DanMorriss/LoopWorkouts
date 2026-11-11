@@ -233,22 +233,38 @@ test.describe('dragging steps', () => {
     });
 
     test(
-        'REG-GES-03 an open superset stays put as its handle is pressed',
+        'REG-GES-03 an open superset stays put as its handle is pressed, then drags whole',
         { tag: '@p3' },
         async ({ app, page }) => {
-            test.fixme(
-                true,
-                'Known issue (TODO.md): an open superset folds as its handle is pressed, so the list below jumps up under the finger before the drag starts.'
-            );
+            const create = new CreatePage(page);
             await app.goto('/setup?editId=upper');
             await page.getByRole('button', { name: /^Superset, steps 1 to 2/ }).click();
-            const plank = new CreatePage(page).header(3);
-            const before = (await plank.boundingBox())!.y;
+            const plank = create.header(3);
+            const before = (await plank.boundingBox())!;
             const handle = (await page.getByTitle('Drag to move it with its steps').boundingBox())!;
-            await page.mouse.move(handle.x + 5, handle.y + 5);
+            const [x, y] = [handle.x + handle.width / 2, handle.y + handle.height / 2];
+
+            // Pressed, nothing moves under the finger
+            await page.mouse.move(x, y);
             await page.mouse.down();
-            expect((await plank.boundingBox())!.y).toBe(before);
+            expect((await plank.boundingBox())!.y).toBe(before.y);
+
+            // Dragged, its steps fold away and the rows below are measured again where they
+            // are, so it goes past Plank
+            await page.mouse.move(x, y + 10, { steps: 5 });
+            await expect.poll(async () => (await plank.boundingBox())!.y).toBeLessThan(before.y);
+            const moved = (await plank.boundingBox())!;
+            await page.mouse.move(x, moved.y + moved.height + 5, { steps: 20 });
             await page.mouse.up();
+
+            await expect(create.header(1)).toHaveAccessibleName(/^Step 1, Plank/);
+            // Open again as it was, with both its steps
+            await expect(
+                page.getByRole('button', { name: /^Superset, steps 2 to 3/ })
+            ).toHaveAttribute('aria-expanded', 'true');
+            await expect
+                .poll(() => app.announcements())
+                .toContainEqual(expect.stringContaining('Moved superset to the end'));
         }
     );
 });

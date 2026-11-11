@@ -1,3 +1,4 @@
+import { GestureClock } from '../../shared/testing/gesture-clock';
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { asOneGroup, UNTIL_STOPPED, Workout } from '../../models/workout';
@@ -285,22 +286,34 @@ describe('WorkoutCardComponent', () => {
         const face = () => el('.workout-card__face');
         const offset = () => new DOMMatrix(getComputedStyle(face()).transform).m41;
 
+        let clock: GestureClock;
+        beforeEach(() => {
+            clock = new GestureClock();
+        });
+
         function pointer(type: string, x: number, y = 100) {
             face().dispatchEvent(
-                new PointerEvent(type, {
-                    pointerId: 1,
-                    pointerType: 'touch',
-                    clientX: x,
-                    clientY: y,
-                    bubbles: true,
-                })
+                clock.stamp(
+                    new PointerEvent(type, {
+                        pointerId: 1,
+                        pointerType: 'touch',
+                        clientX: x,
+                        clientY: y,
+                        bubbles: true,
+                    })
+                )
             );
         }
 
-        /** Presses at x = 300, moves `dx` across (and `dy` down), and maybe lets go. */
+        /**
+         * Presses at x = 300, moves `dx` across (and `dy` down) in two moves a frame apart, and
+         * maybe lets go straight away, as a flick.
+         */
         function swipe(dx: number, { dy = 0, letGo = true } = {}) {
             pointer('pointerdown', 300);
+            clock.pass(16);
             pointer('pointermove', 300 + dx / 2, 100 + dy / 2);
+            clock.pass(16);
             pointer('pointermove', 300 + dx, 100 + dy);
             if (letGo) {
                 pointer('pointerup', 300 + dx, 100 + dy);
@@ -349,23 +362,24 @@ describe('WorkoutCardComponent', () => {
             await vi.waitFor(() => expect(host.events).toEqual(['deleteRequested']));
         });
 
-        it('opens nothing after a swipe', async () => {
+        it('opens nothing after a swipe', () => {
             fakeReducedMotion(true);
             const slide = vi
                 .spyOn(TestBed.inject(PageSlide), 'navigate')
                 .mockImplementation(() => {});
             swipe(-60, { letGo: false });
-            await new Promise((resolve) => setTimeout(resolve, 120));
+            // Let go after a pause, so it springs back rather than being flicked away
+            clock.pass(150);
             pointer('pointerup', 240);
             el('.workout-card__open').click();
 
             expect(slide).not.toHaveBeenCalled();
         });
 
-        it('springs back, without deleting or starting, when let go short of halfway', async () => {
+        it('springs back, without deleting or starting, when let go short of halfway', () => {
             swipe(-60, { letGo: false });
             // A pause before letting go, so it's let go slowly rather than flicked
-            await new Promise((resolve) => setTimeout(resolve, 120));
+            clock.pass(150);
             pointer('pointerup', 240);
             el('.workout-card__start').click();
 

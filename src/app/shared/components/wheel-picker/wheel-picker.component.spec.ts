@@ -1,3 +1,4 @@
+import { withTimeStamp } from '../../testing/gesture-clock';
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { fakeReducedMotion } from '../../testing/fake-reduced-motion';
@@ -205,10 +206,9 @@ describe('WheelPickerComponent', () => {
                 clientY: y,
                 bubbles: true,
             });
-            if (timeStamp !== undefined) {
-                Object.defineProperty(event, 'timeStamp', { value: timeStamp });
-            }
-            viewport().dispatchEvent(event);
+            viewport().dispatchEvent(
+                timeStamp === undefined ? event : withTimeStamp(event, timeStamp)
+            );
         }
 
         const middleOf = (value: number) => {

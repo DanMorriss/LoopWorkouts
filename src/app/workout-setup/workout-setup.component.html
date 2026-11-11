@@ -94,7 +94,7 @@
                         [class.step--collapsed]="!expanded"
                         cdkDrag
                         [cdkDragData]="key"
-                        (cdkDragStarted)="drag.dragStarted()"
+                        (cdkDragStarted)="drag.dragStarted($event)"
                         (cdkDragMoved)="drag.drop.moved($event)"
                         (cdkDragReleased)="drag.drop.released($event)"
                     >

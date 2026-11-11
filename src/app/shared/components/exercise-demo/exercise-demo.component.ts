@@ -6,29 +6,17 @@ import {
     effect,
     ElementRef,
     inject,
-    InjectionToken,
     input,
     linkedSignal,
     signal,
-    untracked,
 } from '@angular/core';
 import { Exercise } from '../../../models/exercise';
 import { poseAt } from '../../../models/exercise-motion';
 import { injectPrefersReducedMotion } from '../../reduced-motion';
 import { ExerciseStore } from '../../state/exercise-store.service';
-import { ThemeService } from '../../theme/theme.service';
+import { injectDemoScene } from './demo-scene';
 import { ExerciseFigure3dComponent } from './exercise-figure-3d.component';
 import { ExerciseFigureComponent } from './exercise-figure.component';
-import type { FigureDrawer, MakeFigure } from './figure-drawer';
-import type { FigureColors, FigureLook } from './figure-scene';
-
-/** Whether to draw the figure in 3D where the browser can; the flat figure if not. */
-export const DEMO_IN_3D = new InjectionToken<boolean>('DEMO_IN_3D', { factory: () => true });
-
-/** Whether to draw the 3D figure in a worker where the browser can; on the page if not. */
-export const DEMO_IN_WORKER = new InjectionToken<boolean>('DEMO_IN_WORKER', {
-    factory: () => true,
-});
 
 /** How far the Turn button turns the figure, in degrees, and how long it takes. */
 const TURN = 45;
@@ -54,7 +42,6 @@ export class ExerciseDemoComponent {
     readonly exercise = input.required<Exercise>();
 
     private readonly exercises = inject(ExerciseStore);
-    private readonly theme = inject(ThemeService);
     private readonly host: HTMLElement = inject(ElementRef).nativeElement;
     protected readonly motion = computed(() => this.exercises.motionOf(this.exercise()));
     protected readonly reduced = injectPrefersReducedMotion();
@@ -69,17 +56,14 @@ export class ExerciseDemoComponent {
         return motion && poseAt(motion, this.elapsed());
     });
 
-    /** How it's drawn: in 3D, flat (no WebGL), or not yet known (three.js loading). */
-    protected readonly drawing = signal<'loading' | '3d' | 'flat'>(
-        inject(DEMO_IN_3D) ? 'loading' : 'flat'
-    );
-    private readonly inWorker = inject(DEMO_IN_WORKER);
-    /** What makes a 3D figure, once it's known how they can be drawn here. */
-    private readonly makeFigure = signal<MakeFigure | null>(null);
-    /** The 3D figure of this exercise's motion, its muscles shaded in the theme's colours. */
-    protected readonly scene = signal<FigureDrawer | null>(null);
-    /** Counts each time the scene is repainted, so its figures are drawn again. */
-    protected readonly paint = signal(0);
+    /** The 3D figure, once three.js has loaded, or whether to draw it flat. */
+    private readonly figure = injectDemoScene(this.motion, () => ({
+        main: this.exercise().mainMuscles,
+        supporting: this.exercise().supportingMuscles,
+    }));
+    protected readonly drawing = this.figure.drawing;
+    protected readonly scene = this.figure.scene;
+    protected readonly paint = this.figure.paint;
     /** How far the 3D figure is turned from the way it's first seen, in degrees. */
     protected readonly yaw = linkedSignal({ source: this.motion, computation: () => 0 });
     /** A turn under way: where it's turning to, and its next frame. */
@@ -109,42 +93,6 @@ export class ExerciseDemoComponent {
             onCleanup(() => cancelAnimationFrame(frame));
         });
 
-        effect((onCleanup) => {
-            const makeFigure = this.makeFigure();
-            const motion = this.motion();
-            if (!makeFigure || !motion) {
-                return;
-            }
-            // Made after the page has shown, keeping its space till then. The male figure, whichever is picked in Profile: the female one isn't right in 3D
-            // yet (see TODO.md). The body map still draws the one picked
-            let cancelled = false;
-            let made: FigureDrawer | null = null;
-            void makeFigure(
-                motion,
-                'male',
-                () => untracked(() => this.look()),
-                () => cancelled
-            ).then((scene) => {
-                made = scene;
-                this.scene.set(scene);
-            });
-            onCleanup(() => {
-                cancelled = true;
-                this.scene.set(null);
-                made?.dispose();
-            });
-        });
-
-        // Its muscles, in the theme's colours, read from the page once the theme has changed
-        effect(() => {
-            const scene = this.scene();
-            const look = this.look();
-            if (scene) {
-                scene.setLook(look);
-                this.paint.update((count) => count + 1);
-            }
-        });
-
         const destroyRef = inject(DestroyRef);
         afterNextRender(() => {
             const observer = new IntersectionObserver(([entry]) =>
@@ -157,18 +105,6 @@ export class ExerciseDemoComponent {
                     cancelAnimationFrame(this.turning.frame);
                 }
             });
-
-            if (this.drawing() === 'loading') {
-                import('./figure-drawer')
-                    .then((module) => module.figureMaker(this.inWorker))
-                    .then(
-                        (makeFigure) => {
-                            this.makeFigure.set(makeFigure);
-                            this.drawing.set(makeFigure ? '3d' : 'flat');
-                        },
-                        () => this.drawing.set('flat')
-                    );
-            }
         });
     }
 
@@ -197,31 +133,5 @@ export class ExerciseDemoComponent {
             this.turning = t < 1 ? { to, frame: requestAnimationFrame(step) } : null;
         };
         this.turning = { to, frame: requestAnimationFrame(step) };
-    }
-
-    /** How the figure's shaded: the theme's colours, read from the page, and its muscles. */
-    private readonly look = computed((): FigureLook => {
-        const exercise = this.exercise();
-        this.theme.applied();
-        return {
-            colors: this.colors(),
-            main: exercise.mainMuscles,
-            supporting: exercise.supportingMuscles,
-        };
-    });
-
-    /** The theme's colours for the figure, as the body map shades its muscles. */
-    private colors(): FigureColors {
-        const style = getComputedStyle(this.host);
-        const css = (name: string) => style.getPropertyValue(name).trim() || '#808080';
-        return {
-            main: css('--muscle-main'),
-            supporting: css('--muscle-supporting'),
-            idle: css('--muscle-idle'),
-            other: css('--muscle-other'),
-            outline: css('--muscle-outline'),
-            page: css('--page-bg'),
-            metal: css('--text-muted'),
-        };
     }
 }

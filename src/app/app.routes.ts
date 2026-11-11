@@ -162,4 +162,19 @@ export const routes: Routes = [
     },
     // The workout page was /timer until October 2026, so links and bookmarks to it still work
     { path: 'timer', redirectTo: 'workout' },
+    // Tools for writing the app, only in development builds (ngDevMode is false in a
+    // production one, which leaves them out altogether)
+    ...(ngDevMode
+        ? [
+              {
+                  // Posing the exercises' demos (EXR-13): src/app/dev/pose-tool/
+                  path: 'dev/pose',
+                  canActivate: [exercisesLoaded],
+                  loadComponent: () =>
+                      import('./dev/pose-tool/pose-tool.component').then(
+                          (m) => m.PoseToolComponent
+                      ),
+              },
+          ]
+        : []),
 ];

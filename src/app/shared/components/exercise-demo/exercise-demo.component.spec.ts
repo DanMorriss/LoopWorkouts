@@ -4,7 +4,8 @@ import { Exercise } from '../../../models/exercise';
 import { ExerciseStore } from '../../state/exercise-store.service';
 import { SettingsStore } from '../../state/settings-store.service';
 import { fakeReducedMotion } from '../../testing/fake-reduced-motion';
-import { DEMO_IN_3D, DEMO_IN_WORKER, ExerciseDemoComponent } from './exercise-demo.component';
+import { DEMO_IN_3D, DEMO_IN_WORKER } from './demo-scene';
+import { ExerciseDemoComponent } from './exercise-demo.component';
 
 describe('ExerciseDemoComponent', () => {
     let fixture: ComponentFixture<ExerciseDemoComponent>;

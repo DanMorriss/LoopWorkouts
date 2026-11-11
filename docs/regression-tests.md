@@ -982,13 +982,13 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Legs opens as saved, without Back squat added again (`add` is gone from the address).
     4. A new workout with only Back squat; Plank's is 3 × 0:30.
 
-
 ### REG-EXR-06 · The tour of an exercise's page
 
 - **Stories:** EXR-6, EXR-10, EXR-12, EXR-13 · **Priority:** P2
 - **Preconditions:** `guest()` with `tour-exercise` removed (the fixtures mark it seen).
 - **Steps:** From the Exercises list, open Back squat. Press Next three times, then Done. Then open Plank.
 - **Expected:** "1 of 4", then Add to workout, Your note, Muscles worked and How to do it; after Done the card's gone, focus is on the name "Back squat", and `tour-exercise` is `seen`. Plank's page opens with no tour.
+
 ---
 
 ## 9. Settings and profile (`settings.md`)

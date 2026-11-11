@@ -102,6 +102,20 @@ export class WorkoutPage {
     async wait(ms: number) {
         await this.page.clock.runFor(ms);
     }
+
+    /**
+     * Swaps the exercise whose details are open for the one whose name starts with `name`,
+     * typing `search` into the swap dialog's search box (RUN-11). Types only once the box has
+     * focus: the dialog gives it focus a moment after it opens, and keys pressed before then go
+     * to the button that opened it, so only the last letters would reach the box.
+     */
+    async swapTo(search: string, name: string) {
+        await this.page.getByRole('button', { name: 'Swap exercise' }).click();
+        const swap = this.page.getByRole('dialog', { name: /^Swap / });
+        await expect(swap.getByRole('searchbox', { name: 'Search exercises' })).toBeFocused();
+        await this.page.keyboard.type(search);
+        await swap.getByRole('button', { name: new RegExp(`^${name}`) }).click();
+    }
 }
 
 /** Waits for the page to draw `count` frames. */

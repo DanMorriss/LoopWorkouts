@@ -1,5 +1,5 @@
 import { BuiltInExercise } from './exercise';
-import { ExerciseMotion, Kit, Limb, Point } from './exercise-motion';
+import { ExerciseMotion, Kit, Limb, Point, Pose } from './exercise-motion';
 
 /**
  * How built-in exercises move, by id, for their animated demos (EXR-13). Kept apart, as
@@ -139,6 +139,28 @@ const ALL_FOURS = {
     legs: both(reach(-44, -6, 'ccw')),
     feet: [-90, -90],
 } as const;
+// Thread the needle's near hand passing by the shoulder, between up and under
+const THREAD_HAND_DOWN: Pose = {
+    hips: [-5, -50],
+    torso: 107,
+    head: 100,
+    arms: [reach(40, -16, 'cw'), reach(46, -5, 'cw')],
+    legs: both(reach(-44, -6, 'ccw')),
+    feet: [-80, -80],
+};
+// The world's greatest stretch's near arm passing straight out to the side, on the way up and
+// down. Straight from here to the top, it can't bend; going straight up, a bend that points
+// the elbow back below the shoulder points it forwards above it
+const WORLDS_GREATEST_ARM_OUT: Pose = {
+    hips: [48, -36],
+    torso: 111.5,
+    head: 120,
+    twist: -22.5,
+    arms: [reach(92, -55, 'cw'), reach(55.5, -15.5, 'cw')],
+    handsOut: [70, 10],
+    legs: [reach(62.5, -4, 'ccw'), reach(-34.5, -12, 'ccw')],
+    feet: [90, 55],
+};
 
 export const BUILT_IN_EXERCISE_MOTION: Readonly<
     Partial<Record<BuiltInExercise['id'], ExerciseMotion>>
@@ -3327,7 +3349,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     head: 60,
                     arms: both(reach(66, -5, 'cw')),
                     legs: both(angles(68, -90)),
-                    feet: [-90, -90],
+                    feet: [-72, -72],
                 },
             },
         ],
@@ -3420,11 +3442,13 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 label: 'Hold',
                 ms: 1000,
                 pose: {
-                    ...STANDING,
-                    arms: [reach(-13, -90, 'ccw'), angles(20, 30)],
+                    hips: [0, -92],
+                    torso: 180,
+                    legs: [angles(-13.5, -165), reach(0, -4, 'ccw')],
+                    arms: [reach(-29.5, -79.5, 'cw'), angles(20, 30)],
                     handsOut: [-8, 0],
-                    legs: [angles(-3, -165), reach(0, -4, 'ccw')],
-                    feet: [170, 90],
+                    feet: [253.5, 90],
+                    twist: 17,
                 },
             },
         ],
@@ -3468,17 +3492,19 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 label: 'Hold',
                 ms: 1000,
                 pose: {
-                    hips: [0, -18],
-                    torso: 155,
+                    hips: [-21, -32],
+                    torso: 136.5,
                     arms: both(reach(28, -5, 'cw')),
-                    legs: [reach(2, -5, 'ccw'), angles(-78, -92)],
-                    feet: [90, -90],
+                    // Wide, so the near arm is outside the near knee
+                    handsApart: 90,
+                    legs: [reach(2, -5, 'ccw'), angles(-59.5, -92)],
+                    feet: [90, -44],
                     stance: -4,
                 },
             },
         ],
     },
-    // In a lunge on the near foot, both hands down inside it; the near elbow down to it, then
+    // In a lunge on the near foot, the far hand down inside it; the near elbow down to it, then
     // the near arm up as the chest turns towards it. In 3D only, the far hand is drawn off the
     // floor and out to the side as the chest turns, so it stays put once turned (flat, it lifts)
     'builtin:worlds-greatest-stretch': {
@@ -3489,68 +3515,78 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 hold: 300,
                 ms: 1000,
                 pose: {
-                    hips: [0, -36],
+                    hips: [50, -36.5],
                     torso: 115,
                     head: 100,
                     arms: [reach(64, -5, 'cw'), reach(60, -5, 'cw')],
-                    handsOut: [-15, 0],
-                    legs: [reach(55, -4, 'ccw'), reach(-84, -12, 'ccw')],
+                    // The near hand outside the front foot: inside, the arm goes through the leg
+                    handsOut: [20, 0],
+                    legs: [reach(62.5, -4, 'ccw'), reach(-34.5, -12, 'ccw')],
                     feet: [90, 55],
                 },
             },
             {
                 label: 'Elbow to the foot',
                 hold: 500,
-                ms: 1000,
+                ms: 500,
                 pose: {
-                    hips: [-4, -33],
+                    hips: [46, -33.5],
                     torso: 105,
                     head: 90,
-                    arms: [reach(68, -10, 'cw'), reach(60, -5, 'cw')],
-                    handsOut: [-15, 0],
-                    legs: [reach(55, -4, 'ccw'), reach(-84, -12, 'ccw')],
+                    // Outside the front knee: inside the foot, the arm goes through the leg
+                    arms: [reach(90, -4, 'cw'), reach(60, -5, 'cw')],
+                    handsOut: [5, 0],
+                    legs: [reach(62.5, -4, 'ccw'), reach(-34.5, -12, 'ccw')],
                     feet: [90, 55],
                 },
             },
+            { label: 'Arm out', through: true, ms: 500, pose: WORLDS_GREATEST_ARM_OUT },
             {
                 label: 'Arm up',
                 hold: 800,
-                ms: 1100,
+                ms: 550,
                 pose: {
-                    hips: [0, -38],
+                    hips: [50, -38.5],
                     torso: 118,
                     head: 150,
                     twist: -45,
-                    arms: [reach(47.2, -102.7, 'cw'), reach(46.5, -30.4, 'cw')],
-                    handsOut: [35, 35.5],
-                    legs: [reach(55, -4, 'ccw'), reach(-84, -12, 'ccw')],
+                    arms: [reach(97.2, -110, 'cw'), reach(51, -26, 'cw')],
+                    handsOut: [40, 20],
+                    legs: [reach(62.5, -4, 'ccw'), reach(-34.5, -12, 'ccw')],
                     feet: [90, 55],
                 },
             },
+            { label: 'Arm out', through: true, ms: 550, pose: WORLDS_GREATEST_ARM_OUT },
         ],
     },
     // On the hands and knees, the near arm up as the chest turns towards it, then threaded under
     // the body to the far side. As in the world's greatest stretch, the far hand is drawn off
-    // the floor and out to the side as the chest turns, so in 3D it stays put
+    // the floor and out to the side as the chest turns, so in 3D it stays put. The near hand
+    // passes down by the shoulder on the way, as going straight there takes the arm through
+    // the chest
     'builtin:thread-the-needle': {
         view: 'side',
         frames: [
             {
                 label: 'Arm up',
                 hold: 500,
-                ms: 1300,
+                ms: 800,
                 pose: {
-                    ...ALL_FOURS,
+                    hips: [-9.5, -50],
+                    torso: 107,
+                    arms: [reach(-26.5, -113, 'cw'), reach(41.3, -20.4, 'cw')],
+                    legs: both(reach(-44, -6, 'ccw')),
+                    feet: [-70, -70],
                     head: 150,
                     twist: -30,
-                    arms: [reach(46.5, -113.3, 'cw'), reach(41.3, -20.4, 'cw')],
                     handsOut: [26.3, 25.9],
                 },
             },
+            { label: 'Hand down', through: true, ms: 700, pose: THREAD_HAND_DOWN },
             {
                 label: 'Threaded under',
                 hold: 800,
-                ms: 1300,
+                ms: 700,
                 pose: {
                     ...ALL_FOURS,
                     torso: 75,
@@ -3559,6 +3595,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     handsOut: [-46, 0],
                 },
             },
+            { label: 'Hand down', through: true, ms: 800, pose: THREAD_HAND_DOWN },
         ],
     },
 };

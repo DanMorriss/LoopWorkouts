@@ -925,7 +925,7 @@ export const BUILT_IN_EXERCISES: readonly BuiltInExercise[] = [
         supportingMuscles: ['triceps', 'traps', 'abs'],
     },
 
-    // Tenth batch: stretches and mobility, for the ready-made plans' rest days. Their muscles
+    // Tenth batch: stretches and mobility, for the ready-made plans' mobility days. Their muscles
     // are the ones stretched, or worked to hold the stretch
     {
         id: 'builtin:downward-dog',

@@ -6,7 +6,7 @@ import {
     plansFor,
     planWorkouts,
 } from './built-in-plans';
-import { BUILT_IN_WORKOUTS } from './built-in-workouts';
+import { BUILT_IN_WORKOUTS, isMobility } from './built-in-workouts';
 import { MAX_WORKOUTS_A_DAY, WEEKDAYS } from './plan';
 
 const titles = (plans: readonly { title: string }[]) => plans.map((p) => p.title);
@@ -33,8 +33,13 @@ describe('BUILT_IN_PLANS (PLN-6)', () => {
                     ).toBe(true)
                 );
             }
-            // Rest days are left empty, for now (mobility days can come later)
+            // Rest days are left empty
             expect(plan.days.some((day) => day.length === 0)).toBe(true);
+            // Two days are for mobility, and have nothing else on them
+            const mobility = plan.days.filter((day) =>
+                day.some((id) => isMobility(BUILT_IN_WORKOUTS.find((w) => w.id === id)!))
+            );
+            expect(mobility).toEqual([['builtin:mobility-flow'], ['builtin:full-body-stretch']]);
             expect(plan.days.some((day) => day.length > 0)).toBe(true);
             expect(plan.goals.length).toBeGreaterThan(0);
             expect(plan.description.length).toBeLessThanOrEqual(90);
@@ -54,7 +59,12 @@ describe('BUILT_IN_PLANS (PLN-6)', () => {
 describe('planWorkouts', () => {
     it('lists each workout once, as it first comes up', () => {
         const plan = BUILT_IN_PLANS.find((p) => p.title === 'Dumbbells at home, 4 days')!;
-        expect(titles(planWorkouts(plan))).toEqual(['Dumbbell upper', 'Dumbbell lower']);
+        expect(titles(planWorkouts(plan))).toEqual([
+            'Dumbbell upper',
+            'Dumbbell lower',
+            'Mobility flow',
+            'Full-body stretch',
+        ]);
     });
 });
 

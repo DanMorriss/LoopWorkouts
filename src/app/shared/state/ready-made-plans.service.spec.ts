@@ -37,10 +37,10 @@ describe('ReadyMadePlans (PLN-6)', () => {
         expect([0, 1, 2, 3, 4, 5, 6].map(titlesOn)).toEqual([
             ['Dumbbell upper'],
             ['Dumbbell lower'],
-            [],
+            ['Mobility flow'],
             ['Dumbbell upper'],
             ['Dumbbell lower'],
-            [],
+            ['Full-body stretch'],
             [],
         ]);
     });

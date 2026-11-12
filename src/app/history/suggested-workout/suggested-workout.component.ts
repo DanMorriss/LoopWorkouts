@@ -1,5 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { isStretch } from '../../models/built-in-stretches';
 import { MUSCLE_LABELS } from '../../models/exercise';
 import { setsByMuscle, SuggestionAvoid, suggestNextWorkout } from '../../models/muscle-balance';
 import { nextPlannedDay, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
@@ -111,7 +112,10 @@ export class SuggestedWorkoutComponent {
         const workouts = week[day].map(
             (planned) => this.workouts.findAnyWorkout(planned.workoutId)!
         );
-        const { main } = musclesWorked(workouts, (id) => this.exercises.byId(id));
+        // A stretch leaves nothing to keep fresh, so a mobility day's muscles aren't avoided
+        const { main } = musclesWorked(workouts, (id) =>
+            isStretch(id) ? undefined : this.exercises.byId(id)
+        );
         return { day, workouts, muscles: new Set(main) };
     });
 

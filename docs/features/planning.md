@@ -58,21 +58,21 @@ Built (PLN-1–8): a weekly plan of which workouts you do on which days, the sam
 
 ### Ready-made plans (PLN-6, PLN-7)
 
-- A **ready-made plan** is a week of ready-made workouts (LIB-6, see [library](library.md)), the same every week. Days with nothing on are rest days, left empty for now; mobility days can come once there are mobility workouts.
+- A **ready-made plan** is a week of ready-made workouts (LIB-6, see [library](library.md)), the same every week. Each has two mobility days (since 2026-11-12) between its training days: **Mobility flow** early in the week and **Full-body stretch** near the end. Days with nothing on are rest days, at least one a week.
 - The first six, each made for building muscle, fitness, or both:
 
-    | Plan                      | Goal    | Days                                                                         |
-    | ------------------------- | ------- | ---------------------------------------------------------------------------- |
-    | 3-day beginner gym        | Muscle  | Gym full body Mon, Wed and Fri                                               |
-    | Push, pull, legs          | Muscle  | Gym push Mon, Gym pull Wed, Gym legs Fri, Gym extras Sat                     |
-    | Dumbbells at home, 4 days | Muscle  | Dumbbell upper Mon and Thu, Dumbbell lower Tue and Fri                       |
-    | Kettlebell, 3 days        | Both    | Kettlebell full body Mon and Fri; Kettlebell swing ladder and Core in 15 Wed |
-    | No equipment, 3 days      | Both    | Bodyweight basics Mon, Cardio intervals Wed, Core in 15 and Tabata Fri       |
-    | Fitness, 4 days           | Fitness | Tabata Mon, Kettlebell AMRAP Tue, 20-minute AMRAP Thu, Cardio intervals Sat  |
+    | Plan                      | Goal    | Training days                                                                | Mobility days                          |
+    | ------------------------- | ------- | ---------------------------------------------------------------------------- | -------------------------------------- |
+    | 3-day beginner gym        | Muscle  | Gym full body Mon, Wed and Fri                                               | Mobility flow Tue, Full-body stretch Sat |
+    | Push, pull, legs          | Muscle  | Gym push Mon, Gym pull Wed, Gym legs Fri, Gym extras Sat                     | Mobility flow Tue, Full-body stretch Sun |
+    | Dumbbells at home, 4 days | Muscle  | Dumbbell upper Mon and Thu, Dumbbell lower Tue and Fri                       | Mobility flow Wed, Full-body stretch Sat |
+    | Kettlebell, 3 days        | Both    | Kettlebell full body Mon and Fri; Kettlebell swing ladder and Core in 15 Wed | Mobility flow Tue, Full-body stretch Sat |
+    | No equipment, 3 days      | Both    | Bodyweight basics Mon, Cardio intervals Wed, Core in 15 and Tabata Fri       | Mobility flow Tue, Full-body stretch Sat |
+    | Fitness, 4 days           | Fitness | Tabata Mon, Kettlebell AMRAP Tue, 20-minute AMRAP Thu, Cardio intervals Sat  | Mobility flow Wed, Full-body stretch Sun |
 
 - **The Ready-made plans page** (`/ready-made-plans`), from Today's **More plans** (with nothing planned), Get started's **More plans**, or the Plan page's **Start from a ready-made plan**, under its hint. It slides in over the page it came from, with ‹ Today or ‹ Plan to go back (or a swipe right); the Today tab stays chosen.
     - "A week of ready-made workouts, the same every week. Using one replaces your plan with it, with Undo; its workouts are ready to start as they are." (until 2026-11-06 it said using one added the workouts you hadn't got), then **Only what I have** and **My equipment**, as on the Exercises list and ready-made workouts (one setting), and how many it hides ("5 more need equipment you haven't picked.").
-    - The plans, as cards: those made for your goal (Training for) alone first, then those that suit it among others, then the rest, each in the order above. Each card: its title, what it's for, how many days a week, the week as a strip of days with each workout numbered and coloured, those workouts with the days they're on, what it needs, and **Use this plan**.
+    - The plans, as cards: those made for your goal (Training for) alone first, then those that suit it among others, then the rest, each in the order above. Each card: its title, what it's for, how many days a week it trains (not counting the mobility days, since 2026-11-12), the week as a strip of days with each workout numbered and coloured, those workouts with the days they're on, what it needs, and **Use this plan**.
 - **Seeing a plan's workouts** (since 2026-11-05): on any plan's card, here or on Today, each of its workouts is a link to its page (`/ready-made-plans/gym-legs`), which slides in from the right as other pages do: the ready-made workout's page (LIB-6), its title, what it's for and needs, whether you have a workout called this already, every exercise with its sets, and the muscles it works, but without Add and start and Add to my workouts, as the workouts come with **Use this plan**. **‹ Today** or **‹ Plans**, or a swipe right, slides it back off to where the card was; the Today tab stays chosen. Each exercise in **What's in it** is a link, its whole line pressable: its page slides in at `/ready-made-plans/<workout>/<its name>`, with **‹** and the workout's title at its top, or a swipe right, back to the workout's page, which still goes back to where the card was.
 - **Using a plan** **replaces your plan** with its week of ready-made workouts, as they are (since 2026-11-06; until then it copied each into your workouts, using one of yours of the same title instead), dated now, so it syncs as the latest. From the page, Today opens to show the week. The Undo bar says "Your week is planned: Push, pull, legs", and **Undo** puts back the plan it replaced. There's no "Are you sure?", as elsewhere.
 - **On Today with no workouts** (PLN-7), Get started offers the first plan for your goal that your equipment allows (see [home-and-navigation](home-and-navigation.md)). No-equipment plans suit both goals, so there's always one.

@@ -46,11 +46,11 @@ Every built-in exercise has an animated figure, at the top of How to do it (see 
 
 ### Ready-made workouts (LIB-6)
 
-Eighteen ready-made workouts are listed on Workouts, under your own (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
+Twenty ready-made workouts are listed on Workouts, under your own (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
 
 - [x] **Change a ready-made workout's timed steps before running it** (2026-11-11): its Details lists timed exercises too, with Minutes and Seconds wheels for each set, kept in the same `ready-made-change` record (`seconds`, data version 16).
-- [ ] **Mobility days in the ready-made plans,** once there are mobility workouts: rest days are left empty for now. The stretches for them are written (batch 10 in `docs/writing-exercises.md`: ten stretches and mobility moves, from downward dog to thread the needle), so mobility workouts are next.
-- [ ] **More batches, once there are exercises for them:** a band workout (only Band pull-apart uses a band so far) and rings, which need new built-in exercises first (see `docs/writing-exercises.md`), and mobility or stretching, whose ten stretches are now written (batch 10). Each must pass `built-in-workouts.spec.ts`.
+- [x] **Mobility days in the ready-made plans** (2026-11-12): two mobility workouts of the batch 10 stretches, **Mobility flow** (about ten minutes, moving) and **Full-body stretch** (longer holds), and every ready-made plan has the flow early in the week and the stretch near the end, with at least one empty rest day left. A plan card's "days a week" counts only training days. Stretches no longer count as sets on Progress, and a workout of only stretches is never suggested (PRG-6, PRG-9). For Dan to look at: the holds' lengths and the order, and which days they're on (`built-in-plans.ts`).
+- [ ] **More batches, once there are exercises for them:** a band workout (only Band pull-apart uses a band so far) and rings, which need new built-in exercises first (see `docs/writing-exercises.md`). Each must pass `built-in-workouts.spec.ts`.
 
 ### Help (NAV-7)
 

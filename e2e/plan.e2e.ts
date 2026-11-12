@@ -371,10 +371,10 @@ test.describe('a ready-made plan over my own', () => {
             expect(plan?.days).toEqual([
                 ['builtin:dumbbell-upper'],
                 ['builtin:dumbbell-lower'],
-                [],
+                ['builtin:mobility-flow'],
                 ['builtin:dumbbell-upper'],
                 ['builtin:dumbbell-lower'],
-                [],
+                ['builtin:full-body-stretch'],
                 [],
             ]);
             // Planned as they are: nothing added to my workouts

@@ -1,5 +1,6 @@
+import { isStretch } from './built-in-stretches';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
-import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment } from './built-in-workouts';
+import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment, isMobility } from './built-in-workouts';
 import { canDoWith } from './exercise';
 import { allSteps, copyOf, groupKind, MAX_HEADINGS, MAX_STEPS } from './workout';
 import { readWorkout } from '../shared/state/workout-store.service';
@@ -88,6 +89,27 @@ describe('BUILT_IN_WORKOUTS', () => {
         );
         for (const muscle of ['abductors', 'adductors', 'forearms', 'traps', 'calves'] as const) {
             expect(main.has(muscle), muscle).toBe(true);
+        }
+    });
+
+    it('counts only workouts of stretches alone as mobility', () => {
+        expect(BUILT_IN_WORKOUTS.filter(isMobility).map((w) => w.title)).toEqual([
+            'Mobility flow',
+            'Full-body stretch',
+        ]);
+    });
+
+    it('has mobility workouts of stretches alone, needing nothing (the third batch)', () => {
+        for (const title of ['Mobility flow', 'Full-body stretch']) {
+            expect(isMobility(byTitle(title)), title).toBe(true);
+            expect(builtInWorkoutEquipment(byTitle(title)), title).toEqual(['none']);
+        }
+        // Every stretch is in one of them
+        const used = new Set(
+            BUILT_IN_WORKOUTS.flatMap((w) => allSteps(w)).map((s) => s.exerciseId)
+        );
+        for (const exercise of BUILT_IN_EXERCISES.filter((e) => isStretch(e.id))) {
+            expect(used.has(exercise.id), exercise.name).toBe(true);
         }
     });
 });

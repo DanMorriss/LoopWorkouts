@@ -15,8 +15,12 @@ import { BODY_FIGURES } from '../body-map/body-shapes';
  * or behind, it's the body map.
  */
 
-/** The painted drawings: the front on the left half, the back on the right. */
-export const PAINT_SIZE = 2048;
+/**
+ * The painted drawings: the front on the left half, the back on the right. 1024 square (2048
+ * until 2026-11-12, which took four times as long to paint and upload, for the slowest part of
+ * an exercise's page on a phone), still more than the figure's shown at.
+ */
+export const PAINT_SIZE = 1024;
 const HALF = PAINT_SIZE / 2;
 /** Points round each part: enough that its outline looks smooth. */
 const ROUND = 40;

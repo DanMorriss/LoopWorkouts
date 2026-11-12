@@ -18,8 +18,8 @@ test.describe('no workouts of my own', () => {
             await expect(
                 page.getByText('Start any of these, or make your own with New.')
             ).toBeVisible();
-            // The 18 ready-made ones, A to Z, each with its badge
-            await expect(library.cards).toHaveCount(18);
+            // The 20 ready-made ones, A to Z, each with its badge
+            await expect(library.cards).toHaveCount(20);
             const titles = await library.titles();
             expect(titles).toEqual([...titles].sort((a, b) => a.localeCompare(b)));
             await expect(library.card('Gym legs')).toContainText('Ready-made');
@@ -323,7 +323,7 @@ test.describe('ready-made workouts', () => {
             await app.goto('/library');
             await page.getByRole('radio', { name: 'Ready-made' }).check();
             await expect(library.card('Legs')).toHaveCount(0);
-            await expect(library.cards).toHaveCount(18);
+            await expect(library.cards).toHaveCount(20);
 
             // Only what I have, with a kettlebell: those needing nothing or a kettlebell
             await page.getByRole('button', { name: 'More filters' }).click();

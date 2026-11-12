@@ -40,11 +40,11 @@ test.describe('a new guest', () => {
             // Planned today, a Wednesday, so Monday's counts from next week (PLN-3)
             await expect(week.getByRole('listitem')).toContainText([
                 'Monday: Bodyweight basics, from next week',
-                'Tuesday: nothing planned',
+                'Tuesday: Mobility flow, from next week',
                 'Wednesday, today: Cardio intervals, due today',
                 'Thursday: nothing planned',
                 'Friday: Core in 15, to come; Tabata, to come',
-                'Saturday: nothing planned',
+                'Saturday: Full-body stretch, to come',
                 'Sunday: nothing planned',
             ]);
             await expect(

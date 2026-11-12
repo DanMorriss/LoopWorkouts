@@ -1,6 +1,6 @@
 // Builds public/share.png, the picture shown when a link to the app is shared (Open Graph and
 // Twitter cards, 1200 × 630): the name and tagline beside a phone mid-workout. Run it against
-// a running `ng serve --port 4300`, and again when the workout screen's look changes.
+// a running `ng serve --port 4400`, and again when the workout screen's look changes.
 // Usage: node tools/build-share-image.mjs
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
@@ -12,12 +12,12 @@ const phone = await browser.newPage({
     viewport: { width: 400, height: 760 },
     deviceScaleFactor: 2,
 });
-await phone.goto('http://localhost:4300/home');
+await phone.goto('http://localhost:4400/home');
 await phone.evaluate(() => {
     localStorage.setItem('welcomed', 'guest');
     localStorage.setItem('settings', JSON.stringify({ theme: 'dark' }));
 });
-await phone.goto('http://localhost:4300/library');
+await phone.goto('http://localhost:4400/library');
 await phone.getByRole('link', { name: /Kettlebell full body/ }).click();
 await phone.getByRole('button', { name: 'Start Kettlebell full body' }).click();
 await phone.waitForTimeout(3000);

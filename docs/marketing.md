@@ -98,7 +98,7 @@ Check a claim here before using it anywhere new.
 - **Runs the whole workout:** timed steps, rep steps that wait for you to tap Done, rests, sets, supersets, rounds or "until I stop", and a time limit for as many rounds as possible, with your score at the end.
 - **Remembers and suggests:** every set is logged; a rep step shows what you did last time; the summary celebrates personal bests and suggests what to step up next time (more weight, or another rep); each exercise has a chart and its bests; and it suggests a next workout for the muscles you've worked least.
 - **For kettlebells:** 21 built-in exercises use a kettlebell, and there are 3 ready-made kettlebell workouts (full body, a swing ladder and an AMRAP) and a 3-day kettlebell plan.
-- **Built in:** 107 exercises, each with an animated 3D demo you can turn round, 18 ready-made workouts and 6 ready-made weekly plans.
+- **Built in:** 117 exercises, each with an animated 3D demo you can turn round, 20 ready-made workouts and 6 ready-made weekly plans.
 - **No app store, works offline:** it runs in the browser and can be added to the home screen. Everything is saved on the device first.
 - **No account needed:** signing in (email or Google) is optional, and only syncs between devices. Data is kept in Europe (Supabase and Resend).
 - **Accessible:** every page passes axe (WCAG 2.1 AA) in both themes, and works by keyboard and screen reader.

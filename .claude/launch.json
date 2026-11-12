@@ -10,8 +10,8 @@
         {
             "name": "demos",
             "runtimeExecutable": "npx",
-            "runtimeArgs": ["ng", "serve", "--port", "4300"],
-            "port": 4300,
+            "runtimeArgs": ["ng", "serve", "--port", "4400"],
+            "port": 4400,
             "autoPort": false
         }
     ]

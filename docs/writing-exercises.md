@@ -30,6 +30,8 @@ Equipment is one of: `barbell`, `dumbbells`, `kettlebell`, `bench`, `preacher be
 
 Muscle groups are the 18 in `MuscleGroup`, the shapes on the body map. There are no separate front, side or rear shoulders, and no lats: use `shoulders` and `upper-back`.
 
+**Stretches** (batch 10 on) list the muscles they stretch, or work to hold the stretch, and their movement is `'stretch'`, which Swap only offers for another stretch. There's no hip flexor group: the front of the hip and thigh is `quads`. A stretch held for a time is `'timed'`; one flowing through a few positions and counted (world's greatest stretch) is `'reps'`. Their words say to ease in and never bounce or push into pain, and make no medical claims: "loosens your hamstrings", not "relieves back pain".
+
 ## The voice
 
 Read the first 30 before writing; new ones should sound the same.
@@ -82,7 +84,7 @@ and in `built-in-exercise-text.ts`:
 
 ## Backlog
 
-97 written (batches 1–9). The list is complete for now; more can be added at the end of the backlog.
+107 written (batches 1–10). The list is complete for now; more can be added at the end of the backlog.
 
 - [x] **Batch 4, core, carries and variations:** side plank, dead bug, Russian twist, farmer's carry, sumo deadlift, Bulgarian split squat, step-up, hammer curl, skull crusher, glute bridge
 - [x] **Batch 5, chest, shoulders and arms:** dumbbell bench press, incline bench press, close-grip bench press, dumbbell fly, cable crossover, Arnold press, rear delt fly, shrug, preacher curl, overhead triceps extension
@@ -90,3 +92,4 @@ and in `built-in-exercise-text.ts`:
 - [x] **Batch 7, back, pulling and bodyweight pushing:** inverted row, T-bar row, straight-arm pulldown, rack pull, band pull-apart, cable curl, bench dip, diamond push-up, pike push-up, dead hang
 - [x] **Batch 8, conditioning and abs:** burpee, mountain climber, jumping jack, jump squat, box jump, bodyweight squat, wall sit, crunch, bicycle crunch, ab wheel rollout
 - [x] **Batch 9, kettlebells (17, asked for by Dan):** kettlebell thruster, kettlebell clean and press, kettlebell snatch, kettlebell pistol squat, kettlebell floor press, Turkish get-up, kettlebell sumo high pull, chainsaw row, kettlebell reverse crunch, plank pull-through, half-kneeling kettlebell press, kettlebell halo, kettlebell around the world, kettlebell push-up, and kettlebell takes on dumbbell exercises: kettlebell lunge, kettlebell curl, kettlebell press
+- [x] **Batch 10, stretches and mobility (asked for by Dan):** downward dog, child's pose, cat-cow, cobra stretch, kneeling hip flexor stretch, standing quad stretch, seated hamstring stretch, pigeon stretch, world's greatest stretch, thread the needle

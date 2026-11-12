@@ -73,6 +73,14 @@ describe('swapSuggestions', () => {
         ).toEqual(['Kettlebell around the world']);
     });
 
+    it('offers a stretch only for a stretch, and only a stretch for one', () => {
+        // A cobra stretch works the abs, as a plank does; a quad stretch the quads, as a wall sit does
+        expect(names(suggested('plank'))).not.toContain('Cobra stretch');
+        expect(names(suggested('wall-sit'))).not.toContain('Standing quad stretch');
+        expect(names(suggested('standing-quad-stretch'))).not.toContain('Wall sit');
+        expect(names(suggested('standing-quad-stretch'))).toContain('Kneeling hip flexor stretch');
+    });
+
     it('offers nothing when nothing shares a main muscle or a movement', () => {
         expect(suggested('bench-press', [], [byId('calf-raise'), byId('leg-curl')])).toEqual([]);
     });

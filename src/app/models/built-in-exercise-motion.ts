@@ -1,5 +1,5 @@
 import { BuiltInExercise } from './exercise';
-import { ExerciseMotion, Kit, Limb, Point } from './exercise-motion';
+import { ExerciseMotion, Kit, Limb, Point, Pose } from './exercise-motion';
 
 /**
  * How built-in exercises move, by id, for their animated demos (EXR-13). Kept apart, as
@@ -130,6 +130,37 @@ const HALF_KNEELING = {
     legs: [reach(34, -4, 'ccw'), angles(0, -90)],
     feet: [90, -90],
 } as const;
+
+/** On the hands and knees, from the side: the hands under the shoulders, the knees under the hips. */
+const ALL_FOURS = {
+    hips: [0, -50],
+    torso: 107,
+    arms: both(reach(46, -5, 'cw')),
+    legs: both(reach(-44, -6, 'ccw')),
+    feet: [-90, -90],
+} as const;
+// Thread the needle's near hand passing by the shoulder, between up and under
+const THREAD_HAND_DOWN: Pose = {
+    hips: [-5, -50],
+    torso: 107,
+    head: 100,
+    arms: [reach(40, -16, 'cw'), reach(46, -5, 'cw')],
+    legs: both(reach(-44, -6, 'ccw')),
+    feet: [-80, -80],
+};
+// The world's greatest stretch's near arm passing straight out to the side, on the way up and
+// down. Straight from here to the top, it can't bend; going straight up, a bend that points
+// the elbow back below the shoulder points it forwards above it
+const WORLDS_GREATEST_ARM_OUT: Pose = {
+    hips: [48, -36],
+    torso: 111.5,
+    head: 120,
+    twist: -22.5,
+    arms: [reach(92, -55, 'cw'), reach(55.5, -15.5, 'cw')],
+    handsOut: [70, 10],
+    legs: [reach(62.5, -4, 'ccw'), reach(-34.5, -12, 'ccw')],
+    feet: [90, 55],
+};
 
 export const BUILT_IN_EXERCISE_MOTION: Readonly<
     Partial<Record<BuiltInExercise['id'], ExerciseMotion>>
@@ -3286,6 +3317,285 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 ms: 1200,
                 pose: { ...STANDING, arms: [touch(2, 54, 'cw'), angles(-4, 0)] },
             },
+        ],
+    },
+    'builtin:downward-dog': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Hold',
+                ms: 1000,
+                pose: {
+                    hips: [-16, -92],
+                    torso: 35,
+                    head: 30,
+                    arms: both(reach(42, -5, 'cw')),
+                    handsApart: 44,
+                    legs: both(reach(-44, -8, 'ccw')),
+                    feet: [70, 70],
+                },
+            },
+        ],
+    },
+    'builtin:childs-pose': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Hold',
+                ms: 1000,
+                pose: {
+                    hips: [-36, -22],
+                    torso: 95,
+                    head: 60,
+                    arms: both(reach(66, -5, 'cw')),
+                    legs: both(angles(68, -90)),
+                    feet: [-72, -72],
+                },
+            },
+        ],
+    },
+    // The back is one piece, so it can't round: the hips and shoulders lift and the head tucks
+    // for the cat, and they sink as the head lifts for the cow
+    'builtin:cat-cow': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Back rounded',
+                hold: 400,
+                ms: 1600,
+                pose: { ...ALL_FOURS, hips: [0, -53.5], torso: 104, head: 55 },
+            },
+            {
+                label: 'Back dipped',
+                hold: 400,
+                ms: 1600,
+                pose: { ...ALL_FOURS, hips: [0, -50], torso: 111, head: 140 },
+            },
+        ],
+    },
+    'builtin:cobra-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Lying face down',
+                hold: 300,
+                ms: 1500,
+                pose: {
+                    hips: [0, -11],
+                    torso: 90,
+                    head: 100,
+                    arms: both(reach(44, -4, 'cw')),
+                    legs: both(angles(-90, -90)),
+                    feet: [-90, -90],
+                },
+            },
+            {
+                label: 'Chest up',
+                hold: 1500,
+                ms: 1300,
+                pose: {
+                    hips: [0, -11],
+                    torso: 140,
+                    head: 150,
+                    arms: both(reach(44, -4, 'cw')),
+                    legs: both(angles(-90, -90)),
+                    feet: [-90, -90],
+                },
+            },
+        ],
+    },
+    // Kneeling on the far knee, the near foot forward, as the steps say
+    'builtin:kneeling-hip-flexor-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Kneeling tall',
+                hold: 300,
+                ms: 1400,
+                pose: {
+                    hips: [0, -50],
+                    torso: 180,
+                    arms: both(angles(-4, 0)),
+                    legs: [reach(40, -4, 'ccw'), angles(0, -90)],
+                    feet: [90, -90],
+                },
+            },
+            {
+                label: 'Hips forward',
+                hold: 1500,
+                ms: 1300,
+                pose: {
+                    hips: [14, -48],
+                    torso: 180,
+                    arms: both(angles(-4, 0)),
+                    legs: [reach(40, -4, 'ccw'), angles(-18.4, -90)],
+                    feet: [90, -90],
+                },
+            },
+        ],
+    },
+    // Standing on the far leg, the near hand holding the near foot behind
+    'builtin:standing-quad-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Hold',
+                ms: 1000,
+                pose: {
+                    hips: [0, -92],
+                    torso: 180,
+                    legs: [angles(-13.5, -165), reach(0, -4, 'ccw')],
+                    arms: [reach(-29.5, -79.5, 'cw'), angles(20, 30)],
+                    handsOut: [-8, 0],
+                    feet: [253.5, 90],
+                    twist: 17,
+                },
+            },
+        ],
+    },
+    'builtin:seated-hamstring-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Sitting tall',
+                hold: 300,
+                ms: 1600,
+                pose: {
+                    hips: [0, -12],
+                    torso: 180,
+                    arms: both(reach(35, -20, 'cw')),
+                    legs: both(angles(90, 90)),
+                    feet: [180, 180],
+                },
+            },
+            {
+                label: 'Folded forward',
+                hold: 1500,
+                ms: 1400,
+                pose: {
+                    hips: [0, -12],
+                    torso: 125,
+                    head: 115,
+                    arms: both(reach(78, -15, 'cw')),
+                    legs: both(angles(90, 90)),
+                    feet: [180, 180],
+                },
+            },
+        ],
+    },
+    // The near knee forward and the shin folded back under it; in 3D the feet are drawn closer
+    // together than the hips, so the shin runs across in front of them
+    'builtin:pigeon-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Hold',
+                ms: 1000,
+                pose: {
+                    hips: [-21, -32],
+                    torso: 136.5,
+                    arms: both(reach(28, -5, 'cw')),
+                    // Wide, so the near arm is outside the near knee
+                    handsApart: 90,
+                    legs: [reach(2, -5, 'ccw'), angles(-59.5, -92)],
+                    feet: [90, -44],
+                    stance: -4,
+                },
+            },
+        ],
+    },
+    // In a lunge on the near foot, the far hand down inside it; the near elbow down to it, then
+    // the near arm up as the chest turns towards it. In 3D only, the far hand is drawn off the
+    // floor and out to the side as the chest turns, so it stays put once turned (flat, it lifts)
+    'builtin:worlds-greatest-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Hands down',
+                hold: 300,
+                ms: 1000,
+                pose: {
+                    hips: [50, -36.5],
+                    torso: 115,
+                    head: 100,
+                    arms: [reach(64, -5, 'cw'), reach(60, -5, 'cw')],
+                    // The near hand outside the front foot: inside, the arm goes through the leg
+                    handsOut: [20, 0],
+                    legs: [reach(62.5, -4, 'ccw'), reach(-34.5, -12, 'ccw')],
+                    feet: [90, 55],
+                },
+            },
+            {
+                label: 'Elbow to the foot',
+                hold: 500,
+                ms: 500,
+                pose: {
+                    hips: [46, -33.5],
+                    torso: 105,
+                    head: 90,
+                    // Outside the front knee: inside the foot, the arm goes through the leg
+                    arms: [reach(90, -4, 'cw'), reach(60, -5, 'cw')],
+                    handsOut: [5, 0],
+                    legs: [reach(62.5, -4, 'ccw'), reach(-34.5, -12, 'ccw')],
+                    feet: [90, 55],
+                },
+            },
+            { label: 'Arm out', through: true, ms: 500, pose: WORLDS_GREATEST_ARM_OUT },
+            {
+                label: 'Arm up',
+                hold: 800,
+                ms: 550,
+                pose: {
+                    hips: [50, -38.5],
+                    torso: 118,
+                    head: 150,
+                    twist: -45,
+                    arms: [reach(97.2, -110, 'cw'), reach(51, -26, 'cw')],
+                    handsOut: [40, 20],
+                    legs: [reach(62.5, -4, 'ccw'), reach(-34.5, -12, 'ccw')],
+                    feet: [90, 55],
+                },
+            },
+            { label: 'Arm out', through: true, ms: 550, pose: WORLDS_GREATEST_ARM_OUT },
+        ],
+    },
+    // On the hands and knees, the near arm up as the chest turns towards it, then threaded under
+    // the body to the far side. As in the world's greatest stretch, the far hand is drawn off
+    // the floor and out to the side as the chest turns, so in 3D it stays put. The near hand
+    // passes down by the shoulder on the way, as going straight there takes the arm through
+    // the chest
+    'builtin:thread-the-needle': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Arm up',
+                hold: 500,
+                ms: 800,
+                pose: {
+                    hips: [-9.5, -50],
+                    torso: 107,
+                    arms: [reach(-26.5, -113, 'cw'), reach(41.3, -20.4, 'cw')],
+                    legs: both(reach(-44, -6, 'ccw')),
+                    feet: [-70, -70],
+                    head: 150,
+                    twist: -30,
+                    handsOut: [26.3, 25.9],
+                },
+            },
+            { label: 'Hand down', through: true, ms: 700, pose: THREAD_HAND_DOWN },
+            {
+                label: 'Threaded under',
+                hold: 800,
+                ms: 700,
+                pose: {
+                    ...ALL_FOURS,
+                    torso: 75,
+                    head: 60,
+                    arms: [reach(32, -5, 'cw'), reach(46, -5, 'cw')],
+                    handsOut: [-46, 0],
+                },
+            },
+            { label: 'Hand down', through: true, ms: 800, pose: THREAD_HAND_DOWN },
         ],
     },
 };

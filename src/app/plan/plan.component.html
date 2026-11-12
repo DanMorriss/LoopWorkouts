@@ -59,7 +59,7 @@
                                 [class.plan__workout--saved]="isSaved(day.day, planned.workoutId)"
                             >
                                 <span class="plan__workout-name">{{ planned.name }}</span>
-                                @if (statusText[planned.status]; as status) {
+                                @if (planned.label; as status) {
                                     <span class="plan__status">
                                         @if (planned.status === 'done') {
                                             <mat-icon aria-hidden="true">check</mat-icon>

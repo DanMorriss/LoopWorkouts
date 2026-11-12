@@ -28,6 +28,9 @@ test.describe('a new guest', () => {
             await expect(
                 getStarted.getByRole('link', { name: 'Bodyweight basics : Mon' })
             ).toBeVisible();
+            // Three days of training, and two of active rest, which are optional
+            await expect(getStarted.getByRole('article')).toContainText('3 days a week');
+            await expect(getStarted.getByRole('article')).toContainText('+ 2 active rest');
             await expect(getStarted.getByRole('link', { name: 'More plans' })).toBeVisible();
             await expect(
                 getStarted.getByRole('link', { name: 'Make your own plan' })
@@ -40,11 +43,11 @@ test.describe('a new guest', () => {
             // Planned today, a Wednesday, so Monday's counts from next week (PLN-3)
             await expect(week.getByRole('listitem')).toContainText([
                 'Monday: Bodyweight basics, from next week',
-                'Tuesday: Mobility flow, from next week',
+                'Tuesday: Mobility flow, active rest, from next week',
                 'Wednesday, today: Cardio intervals, due today',
                 'Thursday: nothing planned',
                 'Friday: Core in 15, to come; Tabata, to come',
-                'Saturday: Full-body stretch, to come',
+                'Saturday: Full-body stretch, active rest, to come',
                 'Sunday: nothing planned',
             ]);
             await expect(

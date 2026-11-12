@@ -27,6 +27,7 @@ import {
     withSteps,
 } from '../../models/workout';
 import type { BuiltInWorkout } from '../../models/built-in-workouts';
+import { isActiveRest } from '../../models/active-rest';
 import { MAX_WEIGHT_KG } from '../../models/weight';
 import { isLoggedSet, isTimedSet, RepSet } from '../../models/history';
 import { StepSwap } from '../../models/step-swap';
@@ -383,6 +384,12 @@ export class WorkoutStore {
     /** Any workout, yours or ready-made, to start, plan or show. */
     findAnyWorkout(workoutId: string): Workout | null {
         return this.allWorkouts().find((workout) => workout.id === workoutId) ?? null;
+    }
+
+    /** Whether a workout, yours or ready-made, is active rest (see `isActiveRest`). */
+    isActiveRest(workoutId: string): boolean {
+        const workout = this.findAnyWorkout(workoutId);
+        return workout !== null && isActiveRest(workout);
     }
 
     /**

@@ -155,6 +155,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 answer: [
                     "Done: you did it on its day. Missed: its day went by without it. Due: it's today's, still to do.",
                     "From next week: you planned it after its day had already gone by this week, so it isn't counted until next week.",
+                    "Active rest: a workout of only stretches, such as the ready-made plans' Mobility flow. It's there if you fancy it, so it isn't counted, and if its day goes by without it, it says Rested, not Missed.",
                 ],
             },
             {

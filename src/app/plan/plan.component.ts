@@ -4,7 +4,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { PageSlide } from '../shared/navigation/page-slide';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
-import { MAX_WORKOUTS_A_DAY, PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../models/plan';
+import {
+    MAX_WORKOUTS_A_DAY,
+    PlannedStatus,
+    PlannedWorkout,
+    thisWeek,
+    weekdayOf,
+    WEEKDAYS,
+} from '../models/plan';
 import {
     WorkoutChoice,
     WorkoutChoiceDialogComponent,
@@ -17,10 +24,14 @@ import { aToZ, isReadyMade } from '../models/workout';
 import { TourService } from '../tour/tour.service';
 import { PlanMusclesComponent } from './plan-muscles/plan-muscles.component';
 
-/** How a planned workout's place this week reads, e.g. "Done". "To come" says nothing. */
+/**
+ * How a planned workout's place this week reads, e.g. "Done". "To come" says nothing, unless
+ * it's active rest (see `statusLabel`).
+ */
 const STATUS_TEXT: Record<PlannedStatus, string> = {
     done: 'Done',
     missed: 'Missed',
+    rested: 'Rested',
     today: 'Due',
     'to come': '',
     'next week': 'From next week',
@@ -77,7 +88,6 @@ export class PlanComponent {
     }
 
     protected readonly today = weekdayOf(this.now);
-    protected readonly statusText = STATUS_TEXT;
     private readonly names = computed(
         () =>
             new Map(
@@ -89,12 +99,20 @@ export class PlanComponent {
 
     /** Each day, Monday first, with its workouts and where each is this week. */
     protected readonly days = computed(() =>
-        thisWeek(this.planStore.plan(), this.history.entries(), this.now, (id) =>
-            this.names().has(id)
+        thisWeek(
+            this.planStore.plan(),
+            this.history.entries(),
+            this.now,
+            (id) => this.names().has(id),
+            (id) => this.workouts.isActiveRest(id)
         ).map((planned, day) => ({
             day,
             name: WEEKDAYS[day],
-            workouts: planned.map((item) => ({ ...item, name: this.names().get(item.workoutId)! })),
+            workouts: planned.map((item) => ({
+                ...item,
+                name: this.names().get(item.workoutId)!,
+                label: statusLabel(item),
+            })),
         }))
     );
 
@@ -106,7 +124,7 @@ export class PlanComponent {
         const sofar = this.days()
             .filter(({ day }) => day <= this.today)
             .flatMap(({ workouts }) => workouts)
-            .filter((item) => item.status !== 'next week');
+            .filter((item) => item.status !== 'next week' && !item.activeRest);
         const done = sofar.filter((item) => item.status === 'done').length;
         return sofar.length ? `${done} of ${sofar.length} done so far this week` : '';
     });
@@ -167,4 +185,11 @@ export class PlanComponent {
         this.announcement.set(`${name} taken off ${WEEKDAYS[day]}`);
         this.focusAfterRender(`plan-add-${day}`);
     }
+}
+
+/** What a planned workout's place this week says: active rest still to do says so, as it's optional. */
+function statusLabel(item: PlannedWorkout): string {
+    return item.activeRest && (item.status === 'today' || item.status === 'to come')
+        ? 'Active rest'
+        : STATUS_TEXT[item.status];
 }

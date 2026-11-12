@@ -10,6 +10,7 @@ import { WorkoutStore } from '../shared/state/workout-store.service';
 import { greetingFor, HomeComponent } from './home.component';
 import { asOneGroup } from '../models/workout';
 import { markFor } from './week-strip/week-strip.component';
+import { PlannedStatus } from '../models/plan';
 
 const NOW = new Date(2026, 9, 18, 12, 0).getTime();
 const HOUR = 60 * 60 * 1000;
@@ -117,20 +118,22 @@ describe('HomeComponent', () => {
             expect(text('.plan-card__workout-name')).toEqual([
                 'Tabata',
                 'Kettlebell AMRAP',
-                'Mobility flow',
                 '20-minute AMRAP',
                 'Cardio intervals',
+                'Mobility flow',
                 'Full-body stretch',
             ]);
             expect(text('.plan-card__workout-days')).toEqual([
                 'Mon',
                 'Tue',
-                'Wed',
                 'Thu',
                 'Sat',
+                'Wed',
                 'Sun',
             ]);
             expect(text('.plan-card__count')).toEqual(['4 days a week']);
+            expect(text('.plan-card__rest-count')).toEqual(['+ 2 active rest']);
+            expect(text('.plan-card__rest-label')).toEqual(['On rest days']);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
             for (const link of element().querySelectorAll('.start__actions a')) {
                 expect(link.classList).toContain('btn-pill');
@@ -462,11 +465,21 @@ describe('HomeComponent', () => {
         });
 
         it('marks a day by all its workouts: done once all are, missed if any were', () => {
+            const of = (...statuses: PlannedStatus[]) => statuses.map((status) => ({ status }));
             expect(markFor([])).toBe('free');
-            expect(markFor(['done', 'done'])).toBe('done');
-            expect(markFor(['done', 'missed'])).toBe('missed');
-            expect(markFor(['done', 'today'])).toBe('planned');
-            expect(markFor(['to come'])).toBe('planned');
+            expect(markFor(of('done', 'done'))).toBe('done');
+            expect(markFor(of('done', 'missed'))).toBe('missed');
+            expect(markFor(of('done', 'today'))).toBe('planned');
+            expect(markFor(of('to come'))).toBe('planned');
+        });
+
+        it('marks a day of only active rest as such until it goes by, and ignores it beside training', () => {
+            const rest = (status: PlannedStatus) => ({ status, activeRest: true as const });
+            expect(markFor([rest('to come')])).toBe('rest');
+            expect(markFor([rest('rested')])).toBe('free');
+            expect(markFor([rest('done')])).toBe('done');
+            expect(markFor([{ status: 'done' }, rest('rested')])).toBe('done');
+            expect(markFor([{ status: 'today' }, rest('today')])).toBe('planned');
         });
     });
 
@@ -514,6 +527,70 @@ describe('HomeComponent', () => {
             // The first is the page's main button
             expect(starts[0].classList).toContain('btn-main');
             expect(element().querySelector('app-get-started')).toBeNull();
+        });
+
+        /** A workout of only stretches, which is active rest. */
+        function addStretches() {
+            return TestBed.inject(WorkoutStore).addWorkout({
+                title: 'Stretches',
+                repeats: 1,
+                blocks: asOneGroup([
+                    {
+                        kind: 'work',
+                        seconds: 60,
+                        name: "Child's pose",
+                        exerciseId: 'builtin:childs-pose',
+                    },
+                ]),
+            });
+        }
+
+        it('offers a day of only active rest, rather than pressing it', () => {
+            TestBed.inject(PlanStore).add(6, addStretches().id);
+            create();
+
+            expect(text('.due__label')).toEqual(['Active rest today']);
+            expect(text('.due__hint')).toEqual([
+                'There if you fancy it: a gentle stretch, or just rest.',
+            ]);
+            const start = element().querySelector('.due__workout button')!;
+            expect(start.classList).toContain('btn-pill');
+            expect(start.classList).not.toContain('btn-main');
+        });
+
+        it('puts active rest after training, marked as such, with a quieter Start', () => {
+            const plan = TestBed.inject(PlanStore);
+            plan.add(6, addStretches().id);
+            const { push } = planToday();
+            plan.remove(6, push.id);
+            plan.add(6, push.id);
+            create();
+
+            expect(text('.due__label')).toEqual(['Due today']);
+            expect(text('.due__title')).toEqual(['Legs', 'Push', 'Stretches']);
+            expect(text('.due__kind')).toEqual(['Active rest, if you fancy it']);
+            const starts = [
+                ...element().querySelectorAll<HTMLButtonElement>('.due__workout button'),
+            ];
+            expect(starts[0].classList).toContain('btn-main');
+            expect(starts[2].classList).toContain('btn-pill');
+        });
+
+        it('never marks active rest missed, nor counts it in the week', () => {
+            const stretches = addStretches();
+            const plan = TestBed.inject(PlanStore);
+            // Planned last week: Tuesday's gone by without it; today, Sunday, there's training
+            vi.setSystemTime(NOW - 7 * 24 * HOUR);
+            plan.add(1, stretches.id);
+            planToday();
+            vi.setSystemTime(NOW);
+            create();
+
+            const days = [...element().querySelectorAll('.week__day')];
+            expect(days[1].classList).toContain('week__day--free');
+            expect(days[1].textContent).toContain('Tuesday: Stretches, active rest, rested');
+            // Push and Legs today, and Monday's Legs missed: three, not counting the stretches
+            expect(text('.week__so-far')).toEqual(['0 of 3 done this week']);
         });
 
         it('leaves out one run today, saying so, and hides the suggestion while any are left', () => {

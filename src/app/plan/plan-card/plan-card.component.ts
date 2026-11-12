@@ -1,6 +1,7 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input, output } from '@angular/core';
 import { BuiltInPlan, builtInPlanEquipment, planWorkouts } from '../../models/built-in-plans';
-import { isMobility } from '../../models/built-in-workouts';
+import { isActiveRest } from '../../models/active-rest';
 import { capitalise, equipmentPhrases } from '../../models/exercise';
 import { WEEKDAYS } from '../../models/plan';
 import { PageSlide } from '../../shared/navigation/page-slide';
@@ -16,18 +17,19 @@ import { ShowcaseKitComponent } from '../../shared/components/showcase/showcase-
 export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
 
 /**
- * A ready-made plan (PLN-6) as a card: its title and what it's for, how many days a week, the
- * week as a strip of days with each workout numbered and coloured, those workouts with their
- * days, what it needs, and Use this plan. On the Ready-made plans page, and Today's This week
- * and Get started (NAV-6). Each of its workouts slides in its own page, to see what's in it,
- * and back to where the card is.
+ * A ready-made plan (PLN-6) as a card: its title and what it's for, how many days a week it
+ * trains (and, under that, how many are active rest), the week as a strip of days with each
+ * training workout numbered and coloured and active rest a quiet ring, those workouts with
+ * their days (active rest under "On rest days"), what it needs, and Use this plan. On the
+ * Ready-made plans page, and Today's This week and Get started (NAV-6). Each of its workouts
+ * slides in its own page, to see what's in it, and back to where the card is.
  *
  * The strip is for the eye; the list of workouts under it says the same, so the strip is
  * hidden from screen readers.
  */
 @Component({
     selector: 'app-plan-card',
-    imports: [IconComponent, ShowcaseCountComponent, ShowcaseKitComponent],
+    imports: [IconComponent, NgTemplateOutlet, ShowcaseCountComponent, ShowcaseKitComponent],
     template: `
         <article class="plan-card" [attr.aria-labelledby]="headingId()">
             <div class="plan-card__head">
@@ -40,28 +42,27 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
                     }
                     <p class="plan-card__description">{{ plan().description }}</p>
                 </div>
-                <app-showcase-count
-                    class="plan-card__count"
-                    [number]="trainingDayCount()"
-                    label="days a week"
-                />
+                <div class="plan-card__counts">
+                    <app-showcase-count
+                        class="plan-card__count"
+                        [number]="trainingDayCount()"
+                        label="days a week"
+                    />
+                    @if (restDayCount()) {
+                        <span class="plan-card__rest-count"
+                            >+ {{ restDayCount() }} active rest</span
+                        >
+                    }
+                </div>
             </div>
 
             <ol class="plan-card__week" aria-hidden="true">
                 @for (day of days(); track day.name) {
-                    <li
-                        [class]="
-                            day.workouts.length
-                                ? 'plan-card__day plan-card--c' + day.workouts[0].colour
-                                : 'plan-card__day plan-card__day--rest'
-                        "
-                    >
+                    <li [class]="day.classes">
                         <span class="plan-card__day-letter">{{ day.letter }}</span>
                         <span class="plan-card__day-marks">
                             @for (workout of day.workouts; track $index) {
-                                <span [class]="'plan-card__mark plan-card--c' + workout.colour">
-                                    {{ workout.number }}
-                                </span>
+                                <span [class]="workout.mark">{{ workout.number }}</span>
                             } @empty {
                                 <span class="plan-card__rest"></span>
                             }
@@ -71,26 +72,38 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
             </ol>
 
             <ul class="plan-card__workouts" aria-label="Its workouts">
-                @for (workout of workouts(); track workout.number) {
+                @for (workout of training(); track workout.id) {
                     <li>
-                        <a
-                            class="plan-card__workout"
-                            [href]="workout.url"
-                            (click)="slide.follow($event, workout.url, 'in')"
-                        >
-                            <span
-                                [class]="'plan-card__mark plan-card--c' + workout.colour"
-                                aria-hidden="true"
-                                >{{ workout.number }}</span
-                            >
-                            <span class="plan-card__workout-name">{{ workout.title }}</span>
-                            <span class="sr-only">: </span>
-                            <span class="plan-card__workout-days">{{ workout.days }}</span>
-                            <app-icon class="plan-card__workout-open">chevron_right</app-icon>
-                        </a>
+                        <ng-container *ngTemplateOutlet="row; context: { $implicit: workout }" />
                     </li>
                 }
             </ul>
+            @if (activeRest().length) {
+                <p class="plan-card__rest-label" [id]="headingId() + '-rest'">On rest days</p>
+                <ul class="plan-card__workouts" [attr.aria-labelledby]="headingId() + '-rest'">
+                    @for (workout of activeRest(); track workout.id) {
+                        <li>
+                            <ng-container
+                                *ngTemplateOutlet="row; context: { $implicit: workout }"
+                            />
+                        </li>
+                    }
+                </ul>
+            }
+
+            <ng-template #row let-workout>
+                <a
+                    class="plan-card__workout"
+                    [href]="workout.url"
+                    (click)="slide.follow($event, workout.url, 'in')"
+                >
+                    <span [class]="workout.mark" aria-hidden="true">{{ workout.number }}</span>
+                    <span class="plan-card__workout-name">{{ workout.title }}</span>
+                    <span class="sr-only">: </span>
+                    <span class="plan-card__workout-days">{{ workout.days }}</span>
+                    <app-icon class="plan-card__workout-open">chevron_right</app-icon>
+                </a>
+            </ng-template>
 
             <app-showcase-kit [needs]="needs()" />
 
@@ -128,40 +141,71 @@ export class PlanCardComponent {
         return needs.length ? needs : ['No equipment'];
     });
 
-    /** The days with training on them: not rest days, nor those only for mobility. */
-    protected readonly trainingDayCount = computed(() => {
-        const mobility = new Set(
-            planWorkouts(this.plan())
-                .filter(isMobility)
-                .map((w) => w.id)
-        );
-        return this.plan().days.filter((day) => day.some((id) => !mobility.has(id))).length;
+    /**
+     * Its workouts, each once in the order they first come up, with the days they're on: "Mon,
+     * Wed, Fri". Training is numbered from 1 and coloured to match (the colours go round again
+     * past four); active rest has neither, as it's optional.
+     */
+    private readonly workouts = computed(() => {
+        let number = 0;
+        return planWorkouts(this.plan()).map((workout) => {
+            const activeRest = isActiveRest(workout);
+            if (!activeRest) {
+                number++;
+            }
+            const colour = ((number - 1) % 4) + 1;
+            return {
+                id: workout.id,
+                title: workout.title,
+                url: `/ready-made-plans/${readyMadeSlug(workout)}?from=${this.workoutsFrom()}`,
+                activeRest,
+                number: activeRest ? '' : `${number}`,
+                colour,
+                mark: activeRest
+                    ? 'plan-card__mark plan-card__mark--rest'
+                    : `plan-card__mark plan-card--c${colour}`,
+                days: WEEKDAYS.filter((_, day) => this.plan().days[day].includes(workout.id))
+                    .map((name) => name.slice(0, 3))
+                    .join(', '),
+            };
+        });
     });
+
+    protected readonly training = computed(() => this.workouts().filter((w) => !w.activeRest));
+    protected readonly activeRest = computed(() => this.workouts().filter((w) => w.activeRest));
 
     /**
-     * Its workouts, each once in the order they first come up, numbered from 1 and coloured to
-     * match (the colours go round again past four), with the days they're on: "Mon, Wed, Fri".
+     * Each day, Monday first: its letter, its workouts' marks, and how it looks: a training day
+     * in its first training workout's colour, a day of active rest quieter, a rest day dashed.
      */
-    protected readonly workouts = computed(() =>
-        planWorkouts(this.plan()).map((workout, i) => ({
-            id: workout.id,
-            title: workout.title,
-            url: `/ready-made-plans/${readyMadeSlug(workout)}?from=${this.workoutsFrom()}`,
-            number: i + 1,
-            colour: (i % 4) + 1,
-            days: WEEKDAYS.filter((_, day) => this.plan().days[day].includes(workout.id))
-                .map((name) => name.slice(0, 3))
-                .join(', '),
-        }))
-    );
-
-    /** Each day, Monday first: its letter, and its workouts' numbers and colours. */
     protected readonly days = computed(() => {
         const byId = new Map(this.workouts().map((workout) => [workout.id, workout]));
-        return WEEKDAYS.map((name, day) => ({
-            name,
-            letter: name[0],
-            workouts: this.plan().days[day].map((id) => byId.get(id)!),
-        }));
+        return WEEKDAYS.map((name, day) => {
+            const workouts = this.plan().days[day].map((id) => byId.get(id)!);
+            const lead = workouts.find((workout) => !workout.activeRest);
+            return {
+                name,
+                letter: name[0],
+                workouts,
+                classes: lead
+                    ? `plan-card__day plan-card--c${lead.colour}`
+                    : workouts.length
+                      ? 'plan-card__day plan-card__day--active-rest'
+                      : 'plan-card__day plan-card__day--rest',
+            };
+        });
     });
+
+    /** The days with training on them: not rest days, nor those of only active rest. */
+    protected readonly trainingDayCount = computed(
+        () => this.days().filter((day) => day.workouts.some((w) => !w.activeRest)).length
+    );
+
+    /** The days of only active rest. */
+    protected readonly restDayCount = computed(
+        () =>
+            this.days().filter(
+                (day) => day.workouts.length > 0 && day.workouts.every((w) => w.activeRest)
+            ).length
+    );
 }

@@ -16,7 +16,7 @@ Promoting the app: a free web beta for home kettlebell and circuit trainers now,
 
 Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on its test phone (slow 4G, CPU slowed 4×). Mobile performance: Welcome 89 (desktop 98), Today 81, Workouts 88, Exercises 97, Progress 88, an exercise's page (push-up) 59. Accessibility and best practices 100, SEO 92. To measure again, Lighthouse a production build or the live site, as a guest already welcomed (`welcomed` set to `guest`), and compare total blocking time, as it's what most of these change; the lab can't stand in for real phones, so for those, see Vercel Speed Insights below.
 
-- [ ] **A smaller painting for the 3D demo:** 1024 rather than 2048 square (`PAINT_SIZE` in `figure-body.ts`) would paint and upload in about a quarter of the time. It changes how sharp the muscles are, so for Dan to look at first.
+- [x] **A smaller painting for the 3D demo** (2026-11-12): 1024 rather than 2048 square (`PAINT_SIZE` in `figure-body.ts`), a quarter of the pixels to paint and upload. Side by side at the largest size the figure is shown, at twice the screen's pixels, only the outlines are a little softer. Not measured on the live site yet: Lighthouse an exercise's page (push-up was 59) once it's released.
 
 ### Progress
 

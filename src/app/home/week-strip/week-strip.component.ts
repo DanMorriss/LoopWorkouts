@@ -4,15 +4,25 @@ import { PageSlide } from '../../shared/navigation/page-slide';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
 import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import { nextPlannedDay, PlannedStatus, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
+import {
+    nextPlannedDay,
+    PlannedStatus,
+    PlannedWorkout,
+    thisWeek,
+    weekdayOf,
+    WEEKDAYS,
+} from '../../models/plan';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { injectUsePlanOnToday, WEEK_EDIT_ID } from '../use-plan-on-today';
 
-/** How a day of the strip looks: everything on it done, some missed, still to do, or free. */
-export type DayMark = 'done' | 'missed' | 'planned' | 'free';
+/**
+ * How a day of the strip looks: everything on it done, some missed, still to do, only active
+ * rest (not done), or free.
+ */
+export type DayMark = 'done' | 'missed' | 'planned' | 'rest' | 'free';
 
 export interface StripDay {
     day: number;
@@ -27,6 +37,7 @@ export interface StripDay {
 const SPOKEN_STATUS: Record<PlannedStatus, string> = {
     done: 'done',
     missed: 'missed',
+    rested: 'rested',
     today: 'due today',
     'next week': 'from next week',
     'to come': 'to come',
@@ -128,7 +139,8 @@ export class WeekStripComponent {
             this.plan.plan(),
             this.history.entries(),
             this.now,
-            (id) => this.workouts.findAnyWorkout(id) !== null
+            (id) => this.workouts.findAnyWorkout(id) !== null,
+            (id) => this.workouts.isActiveRest(id)
         )
     );
 
@@ -154,13 +166,13 @@ export class WeekStripComponent {
             return {
                 day,
                 letter: name[0],
-                mark: markFor(planned.map((item) => item.status)),
+                mark: markFor(planned),
                 today: day === this.today,
                 spoken: planned.length
                     ? `${name}${day === this.today ? ', today' : ''}: ${planned
                           .map(
                               (item) =>
-                                  `${this.name(item.workoutId)}, ${SPOKEN_STATUS[item.status]}`
+                                  `${this.name(item.workoutId)}, ${item.activeRest ? 'active rest, ' : ''}${SPOKEN_STATUS[item.status]}`
                           )
                           .join('; ')}`
                     : `${name}${day === this.today ? ', today' : ''}: nothing planned`,
@@ -176,14 +188,19 @@ export class WeekStripComponent {
 
     /**
      * "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". Workouts
-     * planned once their day had gone by aren't counted: they start next week.
+     * planned once their day had gone by aren't counted: they start next week; nor is active
+     * rest, which is optional.
      */
     protected readonly soFar = computed(() => {
-        const all = this.week()
+        const counted = this.week()
             .flat()
             .filter((item) => item.status !== 'next week');
-        if (all.length === 0) {
+        if (counted.length === 0) {
             return 'Your plan starts next week';
+        }
+        const all = counted.filter((item) => !item.activeRest);
+        if (all.length === 0) {
+            return 'Only active rest this week';
         }
         const done = all.filter((item) => item.status === 'done').length;
         if (done === all.length) {
@@ -194,21 +211,32 @@ export class WeekStripComponent {
         if (nextDay < 0) {
             return tally;
         }
-        return `${tally} · Next: ${this.name(this.week()[nextDay][0].workoutId)} on ${WEEKDAYS[nextDay]}`;
+        const next = this.week()[nextDay].find((item) => !item.activeRest)!;
+        return `${tally} · Next: ${this.name(next.workoutId)} on ${WEEKDAYS[nextDay]}`;
     });
 }
 
 /**
  * A day's mark from its workouts: done once they all are, missed if any were, free if none.
- * Those from next week (planned once the day had gone by) don't count for this week.
+ * Those from next week (planned once the day had gone by) don't count for this week. Active
+ * rest is optional: a day of it still to come is marked as active rest, once gone by without it
+ * it's free, and beside training it's left out.
  */
-export function markFor(all: readonly PlannedStatus[]): DayMark {
-    const statuses = all.filter((status) => status !== 'next week');
-    if (statuses.length === 0) {
+export function markFor(all: readonly Pick<PlannedWorkout, 'status' | 'activeRest'>[]): DayMark {
+    const counted = all.filter((item) => item.status !== 'next week');
+    if (counted.length === 0) {
         return 'free';
     }
-    if (statuses.every((status) => status === 'done')) {
+    if (counted.every((item) => item.status === 'done')) {
         return 'done';
     }
-    return statuses.includes('missed') ? 'missed' : 'planned';
+    const training = counted.filter((item) => !item.activeRest).map((item) => item.status);
+    if (training.length === 0) {
+        // Once its day's gone by without it, it was a rest day like any other
+        return counted.every((item) => item.status === 'rested') ? 'free' : 'rest';
+    }
+    if (training.includes('missed')) {
+        return 'missed';
+    }
+    return training.every((status) => status === 'done') ? 'done' : 'planned';
 }

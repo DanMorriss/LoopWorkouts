@@ -3,6 +3,7 @@ import {
     daysPlannedOn,
     EMPTY_PLAN,
     isWeekPlan,
+    nextPlannedDay,
     planChangeText,
     plannedKey,
     startOfWeek,
@@ -136,6 +137,34 @@ describe('this week (PLN-3)', () => {
         expect(
             thisWeek(late, [{ workoutId: 'legs', startedAt: day(26, 18) }], wednesday(), all)[0]
         ).toEqual([{ workoutId: 'legs', status: 'done' }]);
+    });
+
+    it('marks active rest, and says one whose day went by was rested, not missed', () => {
+        const stretching = (id: string) => id === 'push';
+        const statuses = thisWeek(week, [], wednesday(), all, stretching).map((planned) =>
+            planned.map(
+                (item) => `${item.workoutId} ${item.status}${item.activeRest ? ' (rest)' : ''}`
+            )
+        );
+
+        expect(statuses).toEqual([
+            ['legs missed'],
+            ['push rested (rest)'],
+            ['pull today', 'legs today'],
+            [],
+            ['push to come (rest)'],
+            [],
+            [],
+        ]);
+    });
+
+    it('passes over days of only active rest for the next one planned', () => {
+        const stretching = (id: string) => id === 'push';
+        const monday = new Date(2026, 9, 26, 10).getTime();
+        // Tuesday has only active rest, so Wednesday's next; after it, Friday's is rest too
+        expect(nextPlannedDay(thisWeek(week, [], monday, all, stretching), 0)).toBe(2);
+        expect(nextPlannedDay(thisWeek(week, [], wednesday(), all, stretching), 2)).toBe(-1);
+        expect(nextPlannedDay(thisWeek(week, [], wednesday(), all), 2)).toBe(4);
     });
 
     it('leaves out workouts no longer in the library', () => {

@@ -1,6 +1,7 @@
 import { isStretch } from './built-in-stretches';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
-import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment, isMobility } from './built-in-workouts';
+import { isActiveRest } from './active-rest';
+import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment } from './built-in-workouts';
 import { canDoWith } from './exercise';
 import { allSteps, copyOf, groupKind, MAX_HEADINGS, MAX_STEPS } from './workout';
 import { readWorkout } from '../shared/state/workout-store.service';
@@ -92,8 +93,8 @@ describe('BUILT_IN_WORKOUTS', () => {
         }
     });
 
-    it('counts only workouts of stretches alone as mobility', () => {
-        expect(BUILT_IN_WORKOUTS.filter(isMobility).map((w) => w.title)).toEqual([
+    it('counts only workouts of stretches alone as active rest', () => {
+        expect(BUILT_IN_WORKOUTS.filter(isActiveRest).map((w) => w.title)).toEqual([
             'Mobility flow',
             'Full-body stretch',
         ]);
@@ -101,7 +102,7 @@ describe('BUILT_IN_WORKOUTS', () => {
 
     it('has mobility workouts of stretches alone, needing nothing (the third batch)', () => {
         for (const title of ['Mobility flow', 'Full-body stretch']) {
-            expect(isMobility(byTitle(title)), title).toBe(true);
+            expect(isActiveRest(byTitle(title)), title).toBe(true);
             expect(builtInWorkoutEquipment(byTitle(title)), title).toEqual(['none']);
         }
         // Every stretch is in one of them

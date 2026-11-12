@@ -103,16 +103,18 @@ export class SuggestedWorkoutComponent {
             this.plan.plan(),
             this.history.entries(),
             this.now,
-            (id) => this.workouts.findAnyWorkout(id) !== null
+            (id) => this.workouts.findAnyWorkout(id) !== null,
+            (id) => this.workouts.isActiveRest(id)
         );
         const day = nextPlannedDay(week, weekdayOf(this.now));
         if (day < 0) {
             return null;
         }
-        const workouts = week[day].map(
-            (planned) => this.workouts.findAnyWorkout(planned.workoutId)!
-        );
-        // A stretch leaves nothing to keep fresh, so a mobility day's muscles aren't avoided
+        // Its training: active rest on the same day leaves nothing to keep fresh
+        const workouts = week[day]
+            .filter((planned) => !planned.activeRest)
+            .map((planned) => this.workouts.findAnyWorkout(planned.workoutId)!);
+        // Nor does a stretch among its exercises
         const { main } = musclesWorked(workouts, (id) =>
             isStretch(id) ? undefined : this.exercises.byId(id)
         );

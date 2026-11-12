@@ -35,7 +35,7 @@ export const BUILT_IN_PLANS: readonly BuiltInPlan[] = [
     {
         id: 'builtin-plan:3-day-beginner-gym',
         title: '3-day beginner gym',
-        description: 'Gym full body three times a week, with mobility and a stretch between.',
+        description: 'Gym full body three times a week, with a rest day between each.',
         goals: ['muscle'],
         days: week({
             0: ['builtin:gym-full-body'],
@@ -48,8 +48,7 @@ export const BUILT_IN_PLANS: readonly BuiltInPlan[] = [
     {
         id: 'builtin-plan:push-pull-legs',
         title: 'Push, pull, legs',
-        description:
-            'A day each for pushing, pulling and legs, then the smaller muscles, and two to stretch.',
+        description: 'A day each for pushing, pulling and legs, then the smaller muscles.',
         goals: ['muscle'],
         days: week({
             0: ['builtin:gym-push'],
@@ -63,8 +62,7 @@ export const BUILT_IN_PLANS: readonly BuiltInPlan[] = [
     {
         id: 'builtin-plan:dumbbells-at-home',
         title: 'Dumbbells at home, 4 days',
-        description:
-            'Upper and lower body twice each, with dumbbells and a bench, and two days to stretch.',
+        description: 'Upper and lower body twice each, with dumbbells and a bench.',
         goals: ['muscle'],
         days: week({
             0: ['builtin:dumbbell-upper'],
@@ -78,8 +76,7 @@ export const BUILT_IN_PLANS: readonly BuiltInPlan[] = [
     {
         id: 'builtin-plan:kettlebell-3-day',
         title: 'Kettlebell, 3 days',
-        description:
-            'Full body twice, and a swing ladder with core between, with two days to stretch.',
+        description: 'Full body twice, and a swing ladder with core between.',
         goals: ['muscle', 'fitness'],
         days: week({
             0: ['builtin:kettlebell-full-body'],
@@ -92,8 +89,7 @@ export const BUILT_IN_PLANS: readonly BuiltInPlan[] = [
     {
         id: 'builtin-plan:no-equipment-3-day',
         title: 'No equipment, 3 days',
-        description:
-            'Strength, intervals, then core and a Tabata, with two days to stretch. Nothing needed.',
+        description: 'Strength, intervals, then core and a Tabata. Nothing needed.',
         goals: ['muscle', 'fitness'],
         days: week({
             0: ['builtin:bodyweight-basics'],
@@ -106,8 +102,7 @@ export const BUILT_IN_PLANS: readonly BuiltInPlan[] = [
     {
         id: 'builtin-plan:fitness-4-day',
         title: 'Fitness, 4 days',
-        description:
-            'Four short, hard sessions a week, one with a kettlebell, and two days to stretch.',
+        description: 'Four short, hard sessions a week, with a kettlebell for one of them.',
         goals: ['fitness'],
         days: week({
             0: ['builtin:tabata'],

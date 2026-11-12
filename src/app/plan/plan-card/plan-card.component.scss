@@ -1,5 +1,6 @@
 @use 'interaction' as *;
 @use 'showcase-card' as *;
+@use 'type' as *;
 
 :host {
     display: block;
@@ -18,6 +19,28 @@
 // The title and what it's for at the left, how many days a week at the right
 .plan-card__head {
     @include showcase-head;
+}
+
+// Days a week, and under it how many are active rest
+.plan-card__counts {
+    display: grid;
+    justify-items: center;
+    gap: 0.3rem;
+}
+
+.plan-card__rest-count {
+    color: var(--text-muted);
+    @include small-type(0.7rem);
+    text-align: center;
+}
+
+// Over the active rest workouts in the list
+.plan-card__rest-label {
+    margin-bottom: -0.5rem;
+    color: var(--text-muted);
+    @include small-type(0.7rem);
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .plan-card__intro {
@@ -66,12 +89,20 @@
     background: transparent;
 }
 
+// A day of active rest: quieter than training, dashed as a rest day, with a soft ring
+.plan-card__day--active-rest {
+    border-style: dashed;
+    border-color: var(--border);
+    background: transparent;
+}
+
 .plan-card__day-letter {
     color: var(--text-strong);
     font-size: 0.8rem;
     font-weight: 600;
 
-    .plan-card__day--rest & {
+    .plan-card__day--rest &,
+    .plan-card__day--active-rest & {
         color: var(--text-muted);
         font-weight: 400;
     }
@@ -109,6 +140,13 @@
         height: 1.1rem;
         font-size: 0.65rem;
     }
+}
+
+// Active rest's mark: an empty ring, optional rather than a numbered workout
+.plan-card__mark--rest {
+    border: 2px solid var(--text-muted);
+    background: transparent;
+    box-shadow: none;
 }
 
 .plan-card--c1 {

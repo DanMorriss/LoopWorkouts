@@ -97,6 +97,19 @@
     border: 2px solid var(--text-muted);
 }
 
+// Active rest, there if you fancy it: a dashed day with a faint dot, quieter than training
+.week__day--rest {
+    border-style: dashed;
+}
+
+.week__day--rest .week__mark::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
 .week__day--done {
     border-color: var(--accent-line);
     background: var(--accent-soft);

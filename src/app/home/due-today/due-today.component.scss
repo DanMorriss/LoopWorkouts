@@ -64,3 +64,23 @@
         color: var(--accent);
     }
 }
+
+// On a day of only active rest: that it's optional
+.due__hint {
+    margin: 0 0 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.due__name {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+// Beside training: that this one's active rest, and optional
+.due__kind {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}

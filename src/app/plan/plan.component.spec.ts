@@ -116,6 +116,35 @@ describe('PlanComponent', () => {
         expect(text(el().querySelector('.plan__so-far')!)).toBe('1 of 4 done so far this week');
     });
 
+    it('says active rest gone by was rested, not missed, and leaves it out of the tally', async () => {
+        const stretches = TestBed.inject(WorkoutStore).addWorkout({
+            title: 'Stretches',
+            repeats: 1,
+            blocks: asOneGroup([
+                { kind: 'work', seconds: 60, name: 'Pigeon', exerciseId: 'builtin:pigeon-stretch' },
+            ]),
+        });
+        const plan = TestBed.inject(PlanStore);
+        vi.setSystemTime(NOW - 7 * 24 * 60 * 60 * 1000);
+        plan.add(1, stretches.id);
+        plan.add(2, legs.id);
+        plan.add(2, stretches.id);
+        plan.add(4, stretches.id);
+        vi.setSystemTime(NOW);
+        await open();
+
+        expect(days()).toEqual([
+            'Monday: Nothing planned',
+            'Tuesday: Stretches Rested',
+            'Wednesday · today: Legs Due, Stretches Active rest',
+            'Thursday: Nothing planned',
+            'Friday: Stretches Active rest',
+            'Saturday: Nothing planned',
+            'Sunday: Nothing planned',
+        ]);
+        expect(text(el().querySelector('.plan__so-far')!)).toBe('0 of 1 done so far this week');
+    });
+
     it('says a workout planned once its day had gone by starts next week, not counting it', async () => {
         // NOW is a Wednesday: Monday has gone by
         TestBed.inject(PlanStore).add(0, legs.id);

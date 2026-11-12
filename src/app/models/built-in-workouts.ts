@@ -1,4 +1,3 @@
-import { isStretch } from './built-in-stretches';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
 import { EquipmentNeed, Exercise } from './exercise';
 import {
@@ -405,12 +404,6 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
         ],
     },
 ];
-
-/** Whether a workout is for mobility: stretches and nothing else, so it trains nothing. */
-export function isMobility(workout: Pick<BuiltInWorkout, 'blocks'>): boolean {
-    const steps = allSteps(workout).filter((step) => step.kind !== 'rest');
-    return steps.length > 0 && steps.every((step) => isStretch(step.exerciseId));
-}
 
 /**
  * Everything a built-in workout needs, every need of its exercises once, so it can be

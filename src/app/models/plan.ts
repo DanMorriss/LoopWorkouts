@@ -127,24 +127,29 @@ export function startOfWeek(time: number): number {
 /**
  * Where a planned workout is this week (PLN-3): done (it was run that day, finished or
  * stopped), missed (its day has gone by without it), due today, still to come, or from next
- * week (its day had already gone by this week when it was planned, so it isn't counted).
+ * week (its day had already gone by this week when it was planned, so it isn't counted). An
+ * active rest workout whose day went by without it was rested, not missed: it's optional.
  */
-export type PlannedStatus = 'done' | 'missed' | 'today' | 'to come' | 'next week';
+export type PlannedStatus = 'done' | 'missed' | 'rested' | 'today' | 'to come' | 'next week';
 
 export interface PlannedWorkout {
     workoutId: string;
     status: PlannedStatus;
+    /** Active rest (see `isActiveRest`): there if you fancy it, not training. */
+    activeRest?: true;
 }
 
 /**
  * This week's plan, day by day from Monday, with where each workout planned is (see
- * `PlannedStatus`). Workouts no longer in the library are left out (`exists`).
+ * `PlannedStatus`). Workouts no longer in the library are left out (`exists`), and those
+ * that are active rest (`isActiveRest`) are marked so.
  */
 export function thisWeek(
     plan: WeekPlan,
     entries: readonly Pick<HistoryEntry, 'workoutId' | 'startedAt'>[],
     now: number,
-    exists: (workoutId: string) => boolean
+    exists: (workoutId: string) => boolean,
+    isActiveRest: (workoutId: string) => boolean = () => false
 ): PlannedWorkout[][] {
     const today = weekdayOf(now);
     const monday = startOfWeek(now);
@@ -155,34 +160,43 @@ export function thisWeek(
             ran.add(`${weekdayOf(entry.startedAt)}/${entry.workoutId}`);
         }
     }
+    const statusOf = (workoutId: string, day: number, activeRest: boolean): PlannedStatus => {
+        if (ran.has(`${day}/${workoutId}`)) {
+            return 'done';
+        }
+        if (day === today) {
+            return 'today';
+        }
+        if (day > today) {
+            return 'to come';
+        }
+        // Planned once its day this week had gone by: it starts next week
+        const plannedAt = plan.plannedAt?.[plannedKey(day, workoutId)];
+        if (plannedAt !== undefined && plannedAt >= dayAfter(monday, day)) {
+            return 'next week';
+        }
+        return activeRest ? 'rested' : 'missed';
+    };
     return plan.days.map((ids, day) =>
         ids.filter(exists).map((workoutId): PlannedWorkout => {
-            if (ran.has(`${day}/${workoutId}`)) {
-                return { workoutId, status: 'done' };
-            }
-            if (day === today) {
-                return { workoutId, status: 'today' };
-            }
-            if (day > today) {
-                return { workoutId, status: 'to come' };
-            }
-            // Planned once its day this week had gone by: it starts next week
-            const plannedAt = plan.plannedAt?.[plannedKey(day, workoutId)];
-            const dayEnded = dayAfter(monday, day);
-            return {
-                workoutId,
-                status: plannedAt !== undefined && plannedAt >= dayEnded ? 'next week' : 'missed',
-            };
+            const activeRest = isActiveRest(workoutId);
+            const status = statusOf(workoutId, day, activeRest);
+            return activeRest ? { workoutId, status, activeRest: true } : { workoutId, status };
         })
     );
 }
 
-/** The next day after `today` (0 for Monday) with anything planned this week, or -1 for none. */
+/**
+ * The next day after `today` (0 for Monday) with training planned this week, or -1 for none:
+ * a day of only active rest is passed over.
+ */
 export function nextPlannedDay(
     week: readonly (readonly PlannedWorkout[])[],
     today: number
 ): number {
-    return week.findIndex((planned, day) => day > today && planned.length > 0);
+    return week.findIndex(
+        (planned, day) => day > today && planned.some((item) => !item.activeRest)
+    );
 }
 
 /** The start of the day after `monday`'s `day` (from 0), on the device's calendar. */

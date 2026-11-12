@@ -6,7 +6,8 @@ import {
     plansFor,
     planWorkouts,
 } from './built-in-plans';
-import { BUILT_IN_WORKOUTS, isMobility } from './built-in-workouts';
+import { isActiveRest } from './active-rest';
+import { BUILT_IN_WORKOUTS } from './built-in-workouts';
 import { MAX_WORKOUTS_A_DAY, WEEKDAYS } from './plan';
 
 const titles = (plans: readonly { title: string }[]) => plans.map((p) => p.title);
@@ -37,7 +38,7 @@ describe('BUILT_IN_PLANS (PLN-6)', () => {
             expect(plan.days.some((day) => day.length === 0)).toBe(true);
             // Two days are for mobility, and have nothing else on them
             const mobility = plan.days.filter((day) =>
-                day.some((id) => isMobility(BUILT_IN_WORKOUTS.find((w) => w.id === id)!))
+                day.some((id) => isActiveRest(BUILT_IN_WORKOUTS.find((w) => w.id === id)!))
             );
             expect(mobility).toEqual([['builtin:mobility-flow'], ['builtin:full-body-stretch']]);
             expect(plan.days.some((day) => day.length > 0)).toBe(true);

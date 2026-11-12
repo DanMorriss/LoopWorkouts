@@ -117,10 +117,20 @@ describe('HomeComponent', () => {
             expect(text('.plan-card__workout-name')).toEqual([
                 'Tabata',
                 'Kettlebell AMRAP',
+                'Mobility flow',
                 '20-minute AMRAP',
                 'Cardio intervals',
+                'Full-body stretch',
             ]);
-            expect(text('.plan-card__workout-days')).toEqual(['Mon', 'Tue', 'Thu', 'Sat']);
+            expect(text('.plan-card__workout-days')).toEqual([
+                'Mon',
+                'Tue',
+                'Wed',
+                'Thu',
+                'Sat',
+                'Sun',
+            ]);
+            expect(text('.plan-card__count')).toEqual(['4 days a week']);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
             for (const link of element().querySelectorAll('.start__actions a')) {
                 expect(link.classList).toContain('btn-pill');

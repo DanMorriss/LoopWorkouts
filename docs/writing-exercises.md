@@ -30,7 +30,7 @@ Equipment is one of: `barbell`, `dumbbells`, `kettlebell`, `bench`, `preacher be
 
 Muscle groups are the 18 in `MuscleGroup`, the shapes on the body map. There are no separate front, side or rear shoulders, and no lats: use `shoulders` and `upper-back`.
 
-**Stretches** (batch 10 on) list the muscles they stretch, or work to hold the stretch, and their movement is `'stretch'`, which Swap only offers for another stretch. There's no hip flexor group: the front of the hip and thigh is `quads`. A stretch held for a time is `'timed'`; one flowing through a few positions and counted (world's greatest stretch) is `'reps'`. Their words say to ease in and never bounce or push into pain, and make no medical claims: "loosens your hamstrings", not "relieves back pain".
+**Stretches** (batch 10 on) list the muscles they stretch, or work to hold the stretch, and their movement is `'stretch'`, which Swap only offers for another stretch. Add each to `built-in-stretches.ts` too, so its sets don't count on Progress (a test checks the two agree). There's no hip flexor group: the front of the hip and thigh is `quads`. A stretch held for a time is `'timed'`; one flowing through a few positions and counted (world's greatest stretch) is `'reps'`. Their words say to ease in and never bounce or push into pain, and make no medical claims: "loosens your hamstrings", not "relieves back pain".
 
 ## The voice
 

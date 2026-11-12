@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { BuiltInPlan, builtInPlanEquipment, planWorkouts } from '../../models/built-in-plans';
+import { isMobility } from '../../models/built-in-workouts';
 import { capitalise, equipmentPhrases } from '../../models/exercise';
 import { WEEKDAYS } from '../../models/plan';
 import { PageSlide } from '../../shared/navigation/page-slide';
@@ -127,9 +128,15 @@ export class PlanCardComponent {
         return needs.length ? needs : ['No equipment'];
     });
 
-    protected readonly trainingDayCount = computed(
-        () => this.plan().days.filter((day) => day.length > 0).length
-    );
+    /** The days with training on them: not rest days, nor those only for mobility. */
+    protected readonly trainingDayCount = computed(() => {
+        const mobility = new Set(
+            planWorkouts(this.plan())
+                .filter(isMobility)
+                .map((w) => w.id)
+        );
+        return this.plan().days.filter((day) => day.some((id) => !mobility.has(id))).length;
+    });
 
     /**
      * Its workouts, each once in the order they first come up, numbered from 1 and coloured to

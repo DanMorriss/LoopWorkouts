@@ -57,6 +57,15 @@ describe('setsByMuscle', () => {
         expect(setsByMuscle([entry(undefined, 'own:deleted')], byId).size).toBe(0);
     });
 
+    it('leaves out stretches, which ease a muscle rather than train it', () => {
+        const counts = setsByMuscle(
+            [entry('builtin:seated-hamstring-stretch', 'builtin:deadlift')],
+            byId
+        );
+        // Only the deadlift's: the hamstrings are main for it
+        expect(counts.get('hamstrings')).toBe(1);
+    });
+
     it('counts a left and a right side as one set between them', () => {
         const sided = entry('builtin:back-squat', 'builtin:back-squat');
         sided.sets = sided.sets!.map((set, i) => ({
@@ -238,5 +247,20 @@ describe('suggestNextWorkout', () => {
         expect(
             suggestNextWorkout([makeWorkout()], new Map(), byId, new Map(), 'muscle')
         ).toBeNull();
+    });
+
+    it('never suggests a workout of only stretches, as it trains nothing', () => {
+        const stretches = makeWorkout({
+            id: 'stretches',
+            title: 'Stretches',
+            steps: [linked(reps(5), 'builtin:worlds-greatest-stretch')],
+        });
+        // However far past their aims the legs workout's muscles are
+        const counts = new Map<MuscleGroup, number>(ALL_MUSCLES.map((muscle) => [muscle, 30]));
+
+        expect(suggestNextWorkout([stretches], new Map(), byId, new Map(), 'muscle')).toBeNull();
+        expect(
+            suggestNextWorkout([legs, stretches], counts, byId, new Map(), 'muscle')?.workout
+        ).toBe(legs);
     });
 });

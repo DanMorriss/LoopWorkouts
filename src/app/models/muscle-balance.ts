@@ -1,3 +1,4 @@
+import { isStretch } from './built-in-stretches';
 import { Exercise, MUSCLE_LABELS, MuscleGroup } from './exercise';
 import { HistoryEntry } from './history';
 import { allSteps, Workout } from './workout';
@@ -49,7 +50,8 @@ export interface MuscleBalance {
 /**
  * The sets each muscle has had in the entries (PRG-6): each set counts 1 for its exercise's
  * main muscles and ½ for supporting ones, and a side of an exercise done each side half that.
- * Sets with no exercise, or of one that's gone, don't count. Muscles with none are left out.
+ * Sets with no exercise, or of one that's gone, don't count, nor do stretches, which ease a
+ * muscle rather than train it. Muscles with none are left out.
  */
 export function setsByMuscle(
     entries: readonly HistoryEntry[],
@@ -58,7 +60,8 @@ export function setsByMuscle(
     const counts = new Map<MuscleGroup, number>();
     for (const entry of entries) {
         for (const set of entry.sets ?? []) {
-            const exercise = set.exerciseId ? byId(set.exerciseId) : undefined;
+            const exercise =
+                set.exerciseId && !isStretch(set.exerciseId) ? byId(set.exerciseId) : undefined;
             if (!exercise) {
                 continue;
             }
@@ -191,7 +194,10 @@ export function suggestNextWorkout(
     return best?.suggestion ?? null;
 }
 
-/** The muscles a workout works: 1 where any of its exercises has it as main, else ½. */
+/**
+ * The muscles a workout trains: 1 where any of its exercises has it as main, else ½. Stretches
+ * don't train them, so a workout of only stretches has none, and isn't suggested.
+ */
 function muscleWeights(
     workout: Workout,
     byId: (id: string) => Exercise | undefined
@@ -199,7 +205,9 @@ function muscleWeights(
     const weights = new Map<MuscleGroup, number>();
     for (const step of allSteps(workout)) {
         const exercise =
-            step.kind === 'rest' || !step.exerciseId ? undefined : byId(step.exerciseId);
+            step.kind === 'rest' || !step.exerciseId || isStretch(step.exerciseId)
+                ? undefined
+                : byId(step.exerciseId);
         for (const muscle of exercise?.supportingMuscles ?? []) {
             weights.set(muscle, Math.max(weights.get(muscle) ?? 0, 0.5));
         }

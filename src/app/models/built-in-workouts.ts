@@ -1,3 +1,4 @@
+import { isStretch } from './built-in-stretches';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
 import { EquipmentNeed, Exercise } from './exercise';
 import {
@@ -366,7 +367,50 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
             ),
         ],
     },
+    // Third batch (2026-11-12): mobility, of the tenth batch's stretches, for the ready-made
+    // plans' days between training. Each move once, in an order that keeps getting up and
+    // down to a minimum
+    {
+        id: 'builtin:mobility-flow',
+        title: 'Mobility flow',
+        description: 'Ten minutes of slow moves and holds to loosen your back, hips and shoulders.',
+        group: 'bodyweight',
+        repeats: 1,
+        blocks: [
+            once(timed('cat-cow', 60)),
+            once(reps('thread-the-needle', 5, { eachSide: true })),
+            once(timed('downward-dog', 45)),
+            once(reps('worlds-greatest-stretch', 5, { eachSide: true })),
+            once(timed('kneeling-hip-flexor-stretch', 45, { eachSide: true })),
+            once(timed('pigeon-stretch', 45, { eachSide: true })),
+            once(timed('childs-pose', 60)),
+        ],
+    },
+    {
+        id: 'builtin:full-body-stretch',
+        title: 'Full-body stretch',
+        description: 'Longer holds for your legs, hips and back, standing then on the floor.',
+        group: 'bodyweight',
+        repeats: 1,
+        blocks: [
+            heading('Standing'),
+            once(timed('standing-quad-stretch', 45, { eachSide: true })),
+            heading('On the floor'),
+            once(timed('downward-dog', 45)),
+            once(timed('kneeling-hip-flexor-stretch', 60, { eachSide: true })),
+            once(timed('pigeon-stretch', 60, { eachSide: true })),
+            once(timed('seated-hamstring-stretch', 60)),
+            once(timed('cobra-stretch', 30)),
+            once(timed('childs-pose', 90)),
+        ],
+    },
 ];
+
+/** Whether a workout is for mobility: stretches and nothing else, so it trains nothing. */
+export function isMobility(workout: Pick<BuiltInWorkout, 'blocks'>): boolean {
+    const steps = allSteps(workout).filter((step) => step.kind !== 'rest');
+    return steps.length > 0 && steps.every((step) => isStretch(step.exerciseId));
+}
 
 /**
  * Everything a built-in workout needs, every need of its exercises once, so it can be

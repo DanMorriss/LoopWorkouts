@@ -1,4 +1,5 @@
 import { BUILT_IN_MOVEMENTS } from '../../../models/built-in-exercise-movements';
+import { isStretch } from '../../../models/built-in-stretches';
 import { canDoWith, Equipment, Exercise, MeasuredBy, MuscleGroup } from '../../../models/exercise';
 
 /** How many suggestions to offer: enough to find one free, few enough to read between sets. */
@@ -31,8 +32,7 @@ export function swapSuggestions(
     const movement = BUILT_IN_MOVEMENTS[current.id];
     const sameMovement = (exercise: Exercise) =>
         movement !== undefined && BUILT_IN_MOVEMENTS[exercise.id] === movement;
-    const isStretch = (exercise: Exercise) => BUILT_IN_MOVEMENTS[exercise.id] === 'stretch';
-    const stretching = isStretch(current);
+    const stretching = isStretch(current.id);
     const kit = new Set<Equipment>(current.equipment.flat().filter((piece) => piece !== 'none'));
     const count = (muscles: readonly MuscleGroup[], of: Set<MuscleGroup>) =>
         muscles.filter((muscle) => of.has(muscle)).length;
@@ -54,7 +54,7 @@ export function swapSuggestions(
             (exercise) =>
                 exercise.id !== current.id &&
                 exercise.measuredBy === measuredBy &&
-                isStretch(exercise) === stretching &&
+                isStretch(exercise.id) === stretching &&
                 (count(exercise.mainMuscles, main) > 0 || sameMovement(exercise)) &&
                 (myEquipment.length === 0 || canDoWith(exercise, myEquipment))
         )

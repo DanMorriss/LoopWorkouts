@@ -40,11 +40,11 @@ test.describe('a new guest', () => {
             // Planned today, a Wednesday, so Monday's counts from next week (PLN-3)
             await expect(week.getByRole('listitem')).toContainText([
                 'Monday: Bodyweight basics, from next week',
-                'Tuesday: nothing planned',
+                'Tuesday: Mobility flow, from next week',
                 'Wednesday, today: Cardio intervals, due today',
                 'Thursday: nothing planned',
                 'Friday: Core in 15, to come; Tabata, to come',
-                'Saturday: nothing planned',
+                'Saturday: Full-body stretch, to come',
                 'Sunday: nothing planned',
             ]);
             await expect(
@@ -371,10 +371,10 @@ test.describe('a ready-made plan over my own', () => {
             expect(plan?.days).toEqual([
                 ['builtin:dumbbell-upper'],
                 ['builtin:dumbbell-lower'],
-                [],
+                ['builtin:mobility-flow'],
                 ['builtin:dumbbell-upper'],
                 ['builtin:dumbbell-lower'],
-                [],
+                ['builtin:full-body-stretch'],
                 [],
             ]);
             // Planned as they are: nothing added to my workouts

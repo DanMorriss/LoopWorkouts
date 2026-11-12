@@ -1,6 +1,7 @@
 import { BUILT_IN_MOVEMENTS } from './built-in-exercise-movements';
 import { BUILT_IN_EXERCISE_TEXT } from './built-in-exercise-text';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
+import { isStretch } from './built-in-stretches';
 
 // The content rules from docs/features/exercises.md, so each new batch is held to them
 describe('built-in exercises', () => {
@@ -71,6 +72,14 @@ describe('built-in exercises', () => {
         expect(Object.keys(BUILT_IN_EXERCISE_TEXT)).toEqual(
             BUILT_IN_EXERCISES.map((exercise) => exercise.id)
         );
+    });
+
+    it('are stretches, to isStretch(), when their movement is a stretch', () => {
+        for (const exercise of BUILT_IN_EXERCISES) {
+            expect(isStretch(exercise.id), exercise.name).toBe(
+                BUILT_IN_MOVEMENTS[exercise.id] === 'stretch'
+            );
+        }
     });
 
     it('each have their movement, in the same order, and there are none for anything else', () => {

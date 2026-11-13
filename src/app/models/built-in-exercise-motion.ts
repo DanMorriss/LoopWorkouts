@@ -3750,7 +3750,6 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     ...STANDING,
                     arms: both(touch(12, -2, 'cw')),
                     handsApart: 46,
-                    stance: 30,
                 },
             },
             {
@@ -3763,7 +3762,6 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     head: 155,
                     arms: both(touch(12, -2, 'cw')),
                     handsApart: 46,
-                    stance: 30,
                     legs: FEET,
                 },
             },

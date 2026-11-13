@@ -22,6 +22,12 @@ import { BODY_FIGURES } from '../body-map/body-shapes';
  */
 export const PAINT_SIZE = 1024;
 const HALF = PAINT_SIZE / 2;
+/**
+ * How far inside a drawing's edge its wrap round a part stops, in cm: the side of a part, where
+ * the front drawing meets the back, would otherwise show the drawing's outline as a line down
+ * it (the 3D figure draws its own outline round each part).
+ */
+const SEAM_INSET = 0.8;
 /** Points round each part: enough that its outline looks smooth. */
 const ROUND = 40;
 
@@ -135,12 +141,13 @@ function tube(
             const round = Math.atan2(Math.sin(angle), Math.cos(angle)) / (Math.PI / 2);
             const front = round;
             const back = Math.sign(round) * (2 - Math.abs(round));
+            const reach = Math.max(ring.half - SEAM_INSET, ring.half * 0.7);
             wrapped.push({
                 front: add3(
                     ring.centre,
-                    scale3(ring.across, ring.half * Math.max(-1, Math.min(1, front)))
+                    scale3(ring.across, reach * Math.max(-1, Math.min(1, front)))
                 ),
-                back: add3(ring.centre, scale3(ring.across, ring.half * back)),
+                back: add3(ring.centre, scale3(ring.across, reach * back)),
             });
             points.push(
                 add3(

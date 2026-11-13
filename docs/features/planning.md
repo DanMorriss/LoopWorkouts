@@ -151,7 +151,7 @@ At the bottom of the Plan page (since 2026-11-06; under the cards on Workouts un
 - Given Back squat and Bench press workouts planned, then Missing muscle groups lists Biceps, Forearms, Abs, Obliques, Traps, Upper back, Abductors, Calves, Shins and Neck, and the map lists Shoulders, Triceps, Lower back, Adductors and Hamstrings as Supporting, each a link to exercises for it, and they're not listed again; a workout in my workouts but not planned doesn't count.
 - Given no planned step linked to an exercise, then there's no Missing muscle groups section, and no body map.
 - Given Back squat and Bench press workouts planned, and an Arms workout (biceps curls) not planned, then What your plan works shades the chest, glutes and quads as main, and not the biceps.
-- Given those planned, then Gym extras is suggested, "Adds Forearms, Abs, Obliques and 7 more."; when I press Add to a day, choose Friday and press Done, then Gym extras is planned on Friday, with Undo, and another is suggested.
+- Given those planned, then Band full body is suggested, "Adds Shoulders, Biceps, Triceps and 7 more."; when I press Add to a day, choose Friday and press Done, then Band full body is planned on Friday, with Undo, and another is suggested.
 - Given Only what I have on with no equipment picked, then the workout suggested needs no equipment.
 
 ## Platform notes

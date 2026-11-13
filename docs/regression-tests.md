@@ -518,7 +518,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Stories:** LIB-5, LIB-7 · **Priority:** P2
 - **Preconditions:** `guest()`, workouts "Squat day" (Back squat) and "Bench day" (Bench press), planned Monday and Thursday.
 - **Steps:** Open the Plan page; press the Calves link.
-- **Expected:** Missing muscle groups lists Biceps, Forearms, Abs, Obliques, Traps, Upper back, Abductors, Calves, Shins and Neck; What your plan works lists Shoulders, Triceps, Lower back, Adductors and Hamstrings as Supporting; Gym extras is suggested, "Adds Forearms, Abs, Obliques and 7 more."; Calves opens `/exercises?muscles=calves` (with `&from=plan`) with the Calves chip pressed.
+- **Expected:** Missing muscle groups lists Biceps, Forearms, Abs, Obliques, Traps, Upper back, Abductors, Calves, Shins and Neck; What your plan works lists Shoulders, Triceps, Lower back, Adductors and Hamstrings as Supporting; Band full body is suggested, "Adds Shoulders, Biceps, Triceps and 7 more."; Calves opens `/exercises?muscles=calves` (with `&from=plan`) with the Calves chip pressed.
 - **In the pack:** moved from Workouts to the Plan page on 2026-11-06, and it counts only planned workouts. Adding the suggestion to days is REG-LIB-09.
 
 ### REG-LIB-07 · Ready-made workouts: filter, look, copy, start as they are
@@ -531,7 +531,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. Back on Workouts, press **Start Tabata**.
     4. Open `/ready-made/gym-legs`, `/ready-made` and `/library/builtin:nope`.
 - **Expected:**
-    1. Only the 18 ready-made; then only those needing nothing or a kettlebell (Kettlebell AMRAP, Tabata, not Gym legs).
+    1. Only the 21 ready-made; then only those needing nothing or a kettlebell (Kettlebell AMRAP, Tabata, not Gym legs).
     2. `/library/builtin:gym-legs` with its badge, "Back squat 3 sets: 12, 10, 8, rest 2:30", Muscles it works, and Make a copy where Edit would be; the copy is "Gym legs (copy)", saved and open in Create.
     3. Tabata starts as it is: no copy in your workouts.
     4. The old addresses go to `/library/builtin:gym-legs` and `/library`; the last says "Workout not found".
@@ -548,13 +548,13 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Stories:** LIB-7, PLN-1 · **Priority:** P2
 - **Preconditions:** as REG-LIB-06: "Squat day" on Monday and "Bench day" on Thursday.
 - **Steps:**
-    1. Open the Plan page. Under Missing muscle groups, press **Add to a day** on Gym extras.
+    1. Open the Plan page. Under Missing muscle groups, press **Add to a day** on Band full body.
     2. Choose Tuesday and Saturday, then press **Done**.
     3. Press **Undo**.
 - **Expected:**
-    1. A dialog "Plan Gym extras on…" lists the seven days, Monday saying "Squat day: Glutes, Quads", with **Done**.
-    2. Each day pressed is ticked (`aria-pressed`); the dialog closes; the Undo bar says "Gym extras planned on Tuesday and Saturday"; both days list Gym extras (`builtin:gym-extras`, as it is), and another workout is suggested.
-    3. Gym extras is off both days and suggested again; focus is on Tuesday's Add; `week-plan` is back to Squat day and Bench day.
+    1. A dialog "Plan Band full body on…" lists the seven days, Monday saying "Squat day: Glutes, Quads", with **Done**.
+    2. Each day pressed is ticked (`aria-pressed`); the dialog closes; the Undo bar says "Band full body planned on Tuesday and Saturday"; both days list Band full body (`builtin:band-full-body`, as it is), and another workout is suggested.
+    3. Band full body is off both days and suggested again; focus is on Tuesday's Add; `week-plan` is back to Squat day and Bench day.
 - **In the pack:** since 2026-11-10 it's the same dialog as a workout's Add to plan (REG-PLAN-08), and takes several days at once.
 
 ### REG-LIB-10 · A ready-made workout's reps and weights, set on its Details

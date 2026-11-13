@@ -93,7 +93,7 @@ Three ways to frame it, and the one I recommend:
 ## Gaps in content
 
 - **Comparison and "best free" pages:** Boostcamp, SensAI and others rank with "X vs Y", "best free workout tracker" and "no subscription" pages, and Loop Workouts has none. A few honest ones would help: "an interval timer with reps and weights", "a free workout log with no routine limits", and "an EMOM and AMRAP timer that logs your score".
-- **Exercise and workout pages:** 117 exercises with 3D demos, and 20 ready-made workouts, could each be found by search ("kettlebell swing how to"). Check whether search engines can see those pages in a single-page app before relying on it.
+- **Exercise and workout pages:** 117 exercises with 3D demos, and 21 ready-made workouts, could each be found by search ("kettlebell swing how to"). Check whether search engines can see those pages in a single-page app before relying on it.
 - **Video:** timers and logs mostly show screenshots, so a 15-second clip of the ring, Done and a 3D demo turning would stand out.
 - **No reviews or ratings yet:** the store apps show thousands. Before the app stores, quotes from the soft launch are the only social proof.
 

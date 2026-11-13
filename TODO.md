@@ -48,11 +48,12 @@ Every built-in exercise has an animated figure, at the top of How to do it (see 
 
 ### Ready-made workouts (LIB-6)
 
-Twenty ready-made workouts are listed on Workouts, under your own (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
+Twenty-one ready-made workouts are listed on Workouts, under your own (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
 
 - [x] **Change a ready-made workout's timed steps before running it** (2026-11-11): its Details lists timed exercises too, with Minutes and Seconds wheels for each set, kept in the same `ready-made-change` record (`seconds`, data version 16).
 - [x] **Mobility days in the ready-made plans** (2026-11-12): two mobility workouts of the batch 10 stretches, **Mobility flow** (about ten minutes, moving) and **Full-body stretch** (longer holds), and every ready-made plan has the flow early in the week and the stretch near the end, with at least one empty rest day left. A plan card's "days a week" counts only training days. Stretches no longer count as sets on Progress, and a workout of only stretches is never suggested (PRG-6, PRG-9). For Dan to look at: the holds' lengths and the order, and which days they're on (`built-in-plans.ts`).
-- [ ] **More batches, once there are exercises for them:** a band workout, whose exercises are now written (batch 11: ten band exercises, from the band row to the Pallof press), and rings, which need new built-in exercises first (see `docs/writing-exercises.md`). Each must pass `built-in-workouts.spec.ts`.
+- [x] **A band workout** (2026-11-13): **Band full body**, in Other kit, of all eleven band exercises (batch 11 and the band pull-apart), needing only a band and a post or door anchor to tie it to. For Dan to look at: the reps, rests and order.
+- [ ] **More batches, once there are exercises for them:** rings, which need new built-in exercises first (see `docs/writing-exercises.md`). Each must pass `built-in-workouts.spec.ts`.
 
 ### Help (NAV-7)
 

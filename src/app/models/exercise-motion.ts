@@ -89,6 +89,12 @@ export interface Pose {
      */
     readonly elbowsForward?: number;
     /**
+     * Only for the 3D figure: how far the knees point forwards rather than the way they're
+     * drawn, from 0 to 1, the feet staying put. From the front, where a knee bent as drawn
+     * points out to the side (a half squat seen from the front, as in a band lateral walk).
+     */
+    readonly kneesForward?: number;
+    /**
      * Only for the 3D figure: how far each hand is moved out to its own side, in cm, the elbow
      * bending to reach; negative is across the body (a hand reaching under it, say). From the
      * side only.
@@ -122,7 +128,7 @@ export interface Pose {
  * Equipment the figure carries, drawn where its hands or feet are: a barbell on the back or
  * in the hands, a dumbbell in each hand or one in the near hand, one kettlebell hanging from
  * the near hand (in 3D, the hand `heldBy` says) or one from each hand, an ab wheel under the
- * hands, a band between them, a machine's roller on the front of the shins or behind the
+ * hands, a band between them, a loop band round both thighs above the knees, a machine's roller on the front of the shins or behind the
  * ankles, its pad on top of the thighs by the knees, or a leg press's plate under the feet.
  */
 export type Prop =
@@ -134,6 +140,7 @@ export type Prop =
     | 'kettlebells'
     | 'ab-wheel'
     | 'band'
+    | 'leg-band'
     | 'roller-on-shins'
     | 'roller-behind-ankles'
     | 'pad-on-knees'
@@ -144,7 +151,9 @@ export type Prop =
  * a frame's post or rail, a bar end on (to hang from or hold), a step or box (its opposite
  * corners), or a cable from a pulley to the nearer hand (in 3D, with `each`, a cable from a
  * pulley to each hand, as in a cable curl, or with `bar`, a cable to the middle of a bar that
- * long, held in both hands, as in a lat pulldown).
+ * long, held in both hands, as in a lat pulldown). In 3D, with `each`, `apart` puts the two
+ * pulleys that far apart, side to side, each on its own hand's side, rather than in line with
+ * the hands (a band under the feet, coming up outside them).
  *
  * Or two bars to hold, either side of the body at `at` (in 3D `apart` apart, parallel, running
  * front to back, as a dip station's), or a landmine: a bar
@@ -165,6 +174,7 @@ export type Kit =
           readonly from: Point;
           readonly each?: boolean;
           readonly bar?: number;
+          readonly apart?: number;
       };
 
 export interface MotionFrame {
@@ -594,6 +604,11 @@ export function drawFigure(pose: Pose, motion: ExerciseMotion): FigureLayers {
     if (props.has('band') && !side) {
         near.push(line(hands[0], hands[1], 2, 'cable'));
     }
+    if (props.has('leg-band') && !side) {
+        // Across the front of the thighs, a little above the knees
+        const [a, b] = legs.map(({ root, mid }) => lerpPoint(root, mid, 0.8));
+        near.push(line(a, b, 2, 'cable'));
+    }
     drawArm(0, armLayer[0]);
     if (side && (onBack || inHands)) {
         near.push(circle(onBack ? bar : hands[0], 3, 'bar'));
@@ -695,6 +710,9 @@ export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
             : {}),
         ...(a.elbowsForward || b.elbowsForward
             ? { elbowsForward: lerp(a.elbowsForward ?? 0, b.elbowsForward ?? 0, t) }
+            : {}),
+        ...(a.kneesForward || b.kneesForward
+            ? { kneesForward: lerp(a.kneesForward ?? 0, b.kneesForward ?? 0, t) }
             : {}),
         ...(a.elbowsOut || b.elbowsOut
             ? { elbowsOut: lerp(a.elbowsOut ?? 0, b.elbowsOut ?? 0, t) }

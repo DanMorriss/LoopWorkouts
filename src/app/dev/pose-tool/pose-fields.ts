@@ -42,6 +42,7 @@ export const SOLID_FIELDS: readonly PoseField[] = [
     { key: 'elbowsOut', label: 'Elbows out', ...SHARE },
     { key: 'elbowsDown', label: 'Elbows down', ...SHARE },
     { key: 'elbowsForward', label: 'Elbows fwd', ...SHARE },
+    { key: 'kneesForward', label: 'Knees fwd', ...SHARE, view: 'front' },
     { key: 'stance', label: 'Stance', min: 0, max: 80, optional: true, view: 'side' },
     { key: 'palmsIn', label: 'Palms in', ...SHARE },
     { key: 'heldBy', label: 'Bell held by', ...SHARE },

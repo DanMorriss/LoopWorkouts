@@ -36,6 +36,8 @@ await page.goto('http://localhost:4400/home');
 await page.evaluate(
     ([theme, bodyFigure]) => {
         localStorage.setItem('welcomed', 'guest');
+        // Its tour would cover the figure
+        localStorage.setItem('tour-exercise', 'seen');
         localStorage.setItem('settings', JSON.stringify({ theme, bodyFigure }));
     },
     [theme, figure]

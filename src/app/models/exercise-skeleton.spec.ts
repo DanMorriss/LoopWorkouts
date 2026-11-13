@@ -209,6 +209,28 @@ describe('skeletonOf, placing the hands in 3D', () => {
         });
     });
 
+    it('points the knees forwards with kneesForward, the feet staying put', () => {
+        // A half squat from the front, the knees bent out to the sides as drawn
+        const pose: Pose = {
+            ...standing,
+            hips: [0, -89],
+            legs: [
+                { reach: [-12, -11.5], bend: 'cw' },
+                { reach: [12, -11.5], bend: 'ccw' },
+            ],
+        };
+        const drawn = skeletonOf(pose, front(pose));
+        const forwards = skeletonOf({ ...pose, kneesForward: 1 }, front(pose));
+
+        forwards.legs.forEach((leg, i) => {
+            close(leg.end, drawn.legs[i].end);
+            expectLengths(leg, BODY.thigh, BODY.shin);
+            expect(leg.mid[0]).toBeGreaterThan(leg.root[0] + 10);
+            // Not out past the foot, as drawn
+            expect(Math.abs(leg.mid[2])).toBeLessThan(Math.abs(drawn.legs[i].mid[2]));
+        });
+    });
+
     it('points the elbows down the body with elbowsDown, the hands staying put', () => {
         // Hands in front of the shoulders, from the front, as an Arnold press starts
         const pose: Pose = {

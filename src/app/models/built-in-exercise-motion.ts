@@ -163,14 +163,15 @@ const WORLDS_GREATEST_ARM_OUT: Pose = {
 };
 
 /**
- * A band lateral walk's half squat, from the front, hips at x: the hands together in front,
- * and each foot on the floor at its x, or lifted to it mid-step.
+ * A band lateral walk's half squat, from the front, hips at x: the hands together in front, the
+ * knees bent forwards, and each foot on the floor at its x, or lifted to it mid-step.
  */
 const lateralWalk = (x: number, near: number, far: number, lifted?: 'near' | 'far'): Pose => ({
     hips: [x, lifted ? -91 : -89],
     torso: 180,
     arms: [reach(x - 6, -118, 'cw'), reach(x + 6, -118, 'ccw')],
     handsForward: 16,
+    kneesForward: 1,
     legs: [
         reach(near, lifted === 'near' ? -22 : -11.5, 'cw'),
         reach(far, lifted === 'far' ? -22 : -11.5, 'ccw'),
@@ -3665,19 +3666,20 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
     },
     'builtin:band-overhead-press': {
         view: 'front',
-        kit: [{ kind: 'cable', from: [0, -3], each: true }],
+        // Under the feet, up in front of the body to the hands
+        kit: [{ kind: 'cable', from: [0, -3], each: true, apart: 26 }],
         frames: [
             {
                 label: 'At the shoulders',
                 hold: 200,
                 ms: 1200,
-                pose: { ...FRONT_STANDING, arms: frontHandsUp(30, -153) },
+                pose: { ...FRONT_STANDING, arms: frontHandsUp(30, -153), handsForward: 14 },
             },
             {
                 label: 'Overhead',
                 hold: 300,
                 ms: 1300,
-                pose: { ...FRONT_STANDING, arms: frontHandsUp(14, -207) },
+                pose: { ...FRONT_STANDING, arms: frontHandsUp(14, -207), handsForward: 14 },
             },
         ],
     },
@@ -3737,13 +3739,19 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
     },
     'builtin:band-squat': {
         view: 'side',
-        kit: [{ kind: 'cable', from: [4, -3], each: true }],
+        // Under the feet, up outside them to the hands
+        kit: [{ kind: 'cable', from: [4, -3], each: true, apart: 52 }],
         frames: [
             {
                 label: 'Standing',
                 hold: 300,
                 ms: 1300,
-                pose: { ...STANDING, arms: both(touch(12, -2, 'cw')), stance: 30 },
+                pose: {
+                    ...STANDING,
+                    arms: both(touch(12, -2, 'cw')),
+                    handsApart: 46,
+                    stance: 30,
+                },
             },
             {
                 label: 'Bottom',
@@ -3754,6 +3762,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     torso: 137,
                     head: 155,
                     arms: both(touch(12, -2, 'cw')),
+                    handsApart: 46,
                     stance: 30,
                     legs: FEET,
                 },
@@ -3784,7 +3793,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 ms: 1000,
                 pose: {
                     ...STANDING,
-                    arms: both(angles(-4, -4)),
+                    arms: both(angles(16, 16)),
                     handsApart: 8,
                     stance: 40,
                 },
@@ -3793,6 +3802,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
     },
     'builtin:band-lateral-walk': {
         view: 'front',
+        props: ['leg-band'],
         // A step to the figure's left and the other foot following, then back again
         frames: [
             { label: 'Feet apart', hold: 150, ms: 350, pose: lateralWalk(0, -12, 12) },

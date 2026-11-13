@@ -234,6 +234,19 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
     });
     const leg = (index: 0 | 1): Limb3 => {
         const placed = limb(solved.legs[index], index, HIP_SPREAD, [BODY.thigh, BODY.shin]);
+        if (!side && pose.kneesForward) {
+            // The knee bent forwards rather than as drawn: square to the line from the hip to
+            // the ankle
+            const along = normalize3(sub3(placed.end, placed.root));
+            const forwards = sub3(forward, scale3(along, dot3(forward, along)));
+            const drawn = sub3(placed.mid, scale3(add3(placed.root, placed.end), 0.5));
+            const towards = add3(
+                scale3(normalize3(drawn), 1 - pose.kneesForward),
+                scale3(normalize3(forwards), pose.kneesForward)
+            );
+            const mid = bend(placed.root, placed.end, BODY.thigh, BODY.shin, towards);
+            return { ...placed, mid };
+        }
         if (!side || pose.stance === undefined) {
             return placed;
         }

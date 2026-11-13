@@ -9,6 +9,7 @@
 //   --stills        every key position side by side, as with reduced motion
 //   --still=2       only that key position (from 1), as large as the moving figure
 //   --figure=female the Sex setting (the 3D figure is always male for now)
+//   --flat          the flat figure, as drawn without WebGL
 import { chromium } from 'playwright';
 
 const [out, ...rest] = process.argv.slice(2);
@@ -21,6 +22,7 @@ const stills = rest.includes('--stills') || only > 0;
 const big = rest.includes('--big');
 const drag = Number(rest.find((arg) => arg.startsWith('--drag='))?.slice(7) ?? 0);
 const at = Number(rest.find((arg) => arg.startsWith('--at='))?.slice(5) ?? 0);
+const flat = rest.includes('--flat');
 
 const browser = await chromium.launch({ args: ['--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: 420, height: 900 }, deviceScaleFactor: 2 });
@@ -29,6 +31,16 @@ page.on('console', (message) => {
         console.log(`[${message.type()}]`, message.text());
     }
 });
+if (flat) {
+    // No WebGL, on the page or in a worker (which needs OffscreenCanvas), so it's drawn flat
+    await page.addInitScript(() => {
+        delete globalThis.OffscreenCanvas;
+        const getContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function (kind, ...rest) {
+            return kind.startsWith('webgl') ? null : getContext.call(this, kind, ...rest);
+        };
+    });
+}
 if (stills) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
 }

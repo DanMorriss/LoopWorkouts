@@ -33,6 +33,7 @@ import {
     cross3,
     dot3,
     length3,
+    lerp3,
     Limb3,
     motionJoints,
     normalize3,
@@ -173,6 +174,13 @@ function orient(object: Object3D, y: Vec3, z: Vec3) {
         yAxis[0] * zAxis[1] - yAxis[1] * zAxis[0],
     ];
     object.quaternion.setFromRotationMatrix(new Matrix4().makeBasis(v(xAxis), v(yAxis), v(zAxis)));
+}
+
+/** A length of band, made 1 long along its y, stretched from `a` to `b`. */
+function stretch(band: Object3D, a: Vec3, b: Vec3) {
+    band.scale.set(1, Math.max(length3(sub3(b, a)), 0.1), 1);
+    band.position.copy(v(scale3(add3(a, b), 0.5)));
+    orient(band, sub3(b, a), [1, 0, 0]);
 }
 
 /** `front` turned by the least turn that takes `from` to `to`. */
@@ -645,8 +653,12 @@ export class FigureScene {
                     );
                     this.carried.push((skeleton) => {
                         const hand = handOf(skeleton.arms.map((arm) => arm.end));
-                        // The pulley in line with the hand it runs to
-                        const at = add3(from, scale3(depthAxis, dot3(hand, depthAxis)));
+                        // The pulley in line with the hand it runs to, or out on its side
+                        let at = add3(from, scale3(depthAxis, dot3(hand, depthAxis)));
+                        if (piece.each && piece.apart !== undefined) {
+                            const side = Math.sign(hand[2] - from[2]) || 1;
+                            at = [at[0], at[1], from[2] + (side * piece.apart) / 2];
+                        }
                         pulley.position.copy(v(at));
                         const along = sub3(hand, at);
                         cable.scale.set(1, length3(along), 1);
@@ -681,6 +693,49 @@ export class FigureScene {
             }
         }
         return points;
+    }
+
+    /**
+     * A length of band, outlined, 1 long, to stretch along its y. Open ended, as its outline's
+     * ends would be stretched with it, to float away from the band's ends.
+     */
+    private band(thick: number) {
+        return this.mesh(new CylinderGeometry(thick, thick, 1, 10, 1, true), this.kitMaterial);
+    }
+
+    /**
+     * A loop band round both thighs, a little above the knees: round the outside of each, and
+     * straight across between them in front and behind.
+     */
+    private legBand() {
+        const thick = 0.9;
+        const round = 9;
+        const halves = [0, 1].map(() =>
+            this.mesh(new TorusGeometry(round, thick, 8, 16, Math.PI), this.kitMaterial)
+        );
+        const across = [0, 1].map(() => this.band(thick));
+        this.carried.push((skeleton) => {
+            const at = skeleton.legs.map((leg) => {
+                const thigh = normalize3(sub3(leg.mid, leg.root));
+                const ahead = square(skeleton.forward, thigh, skeleton.forward);
+                const outwards = square(scale3(skeleton.right, leg.side), thigh, skeleton.right);
+                const out = square(outwards, ahead, outwards);
+                return { middle: lerp3(leg.root, leg.mid, 0.8), ahead, out };
+            });
+            at.forEach(({ middle, ahead, out }, i) => {
+                // The torus's half from its +x round through +y, so +x ahead and +y out
+                halves[i].position.copy(v(middle));
+                halves[i].quaternion.setFromRotationMatrix(
+                    new Matrix4().makeBasis(v(ahead), v(out), v(cross3(ahead, out)))
+                );
+            });
+            [1, -1].forEach((way, i) => {
+                const [a, b] = at.map(({ middle, ahead }) =>
+                    add3(middle, scale3(ahead, way * round))
+                );
+                stretch(across[i], a, b);
+            });
+        });
     }
 
     /** The kit the figure carries, each piece placed with it in every pose. */
@@ -837,13 +892,13 @@ export class FigureScene {
             });
         }
         if (props.has('band')) {
-            const band = this.mesh(new CylinderGeometry(1, 1, 1, 10), this.kitMaterial);
+            const band = this.band(1);
             this.carried.push((skeleton) => {
-                const [a, b] = [skeleton.arms[0].end, skeleton.arms[1].end];
-                band.scale.set(1, Math.max(length3(sub3(b, a)), 0.1), 1);
-                band.position.copy(v(scale3(add3(a, b), 0.5)));
-                orient(band, sub3(b, a), [1, 0, 0]);
+                stretch(band, skeleton.arms[0].end, skeleton.arms[1].end);
             });
+        }
+        if (props.has('leg-band')) {
+            this.legBand();
         }
         if (props.has('roller-on-shins') || props.has('roller-behind-ankles')) {
             const roller = this.mesh(new CylinderGeometry(5, 5, 36, 24), this.kitMaterial);

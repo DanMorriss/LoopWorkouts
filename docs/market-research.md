@@ -60,7 +60,7 @@ Loop Workouts sits in the gap between the timer and the log. **The best opportun
 | Promise        | Runs your workout and remembers it                        | Times your intervals          | Log every set, see progress            | Plans the workout for you |
 | Runs a circuit | Yes: timed, reps, rests, supersets, EMOM-style, AMRAP     | Timed only                    | No, a rest timer only                  | Partly                    |
 | Remembers      | Every set, last time, PBs, suggested next weight          | No                            | Yes, the best of the four              | Yes                       |
-| How-to         | 107 exercises with a 3D demo you can turn                 | None                          | Images or video                        | Video                     |
+| How-to         | 117 exercises with a 3D demo you can turn                 | None                          | Images or video                        | Video                     |
 | Price          | Free, no limits                                           | Free to about $8, or $12/year | Free with caps, or $24–30/year         | About $80–96/year         |
 | Getting it     | A link: no store, no install, no account                  | App store                     | App store, with an account             | App store, with an account|
 | Phone locked   | iPhone: beeps stop (keeps screen on instead)              | Yes                           | Rest timer notifications               | Yes                       |
@@ -85,7 +85,7 @@ Three ways to frame it, and the one I recommend:
 2. **Remembers it.** Last time, personal bests and the suggested next weight.
 3. **Free, with no catch.** No routine caps, no paywall, no account. (People will ask "what's the catch?", so have an honest answer ready: who makes it, and why it's free.)
 4. **Opens from a link.** Nothing to install, and it works offline. This is the reason a PWA matters to users. Never lead with the word "PWA".
-5. **3D demos** for all 107 exercises: good in videos.
+5. **3D demos** for all 117 exercises: good in videos.
 6. **Accessible.** It's a proof point for Show HN and accessibility communities, not the headline for everyone.
 
 **Avoid:** "AI" as a selling point (Fitbod and SensAI own it, and the AI import is a niche feature), "social", programmes, and anything about using it in your pocket or with the phone locked (ALM-2).
@@ -93,7 +93,7 @@ Three ways to frame it, and the one I recommend:
 ## Gaps in content
 
 - **Comparison and "best free" pages:** Boostcamp, SensAI and others rank with "X vs Y", "best free workout tracker" and "no subscription" pages, and Loop Workouts has none. A few honest ones would help: "an interval timer with reps and weights", "a free workout log with no routine limits", and "an EMOM and AMRAP timer that logs your score".
-- **Exercise and workout pages:** 107 exercises with 3D demos, and 18 ready-made workouts, could each be found by search ("kettlebell swing how to"). Check whether search engines can see those pages in a single-page app before relying on it.
+- **Exercise and workout pages:** 117 exercises with 3D demos, and 20 ready-made workouts, could each be found by search ("kettlebell swing how to"). Check whether search engines can see those pages in a single-page app before relying on it.
 - **Video:** timers and logs mostly show screenshots, so a 15-second clip of the ring, Done and a 3D demo turning would stand out.
 - **No reviews or ratings yet:** the store apps show thousands. Before the app stores, quotes from the soft launch are the only social proof.
 

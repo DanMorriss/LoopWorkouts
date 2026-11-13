@@ -37,8 +37,9 @@ Built: exercises are in the data (#86), with the built-in list, your own exercis
 
 ### The built-in list (EXR-6, EXR-7)
 
-- A curated list of about **100 common exercises** (107 today), not an exhaustive database. Every one has muscles, equipment and a description; how-to steps and tips where they help.
+- A curated list of about **100 common exercises** (117 today), not an exhaustive database. Every one has muscles, equipment and a description; how-to steps and tips where they help.
 - **Stretches and mobility moves** (10, since batch 10, for mobility days in the ready-made plans) are built-in exercises like any other: their muscles are the ones they stretch (there's no hip flexor group, so the front of the hip is the quads), most are timed, and Swap only offers a stretch for a stretch, and never one for anything else.
+- **Resistance band exercises** (10, since batch 11, for a band workout at home): rows, presses, a face pull, a curl and a pushdown, a squat, a pull-through, a lateral walk and the Pallof press. Their demos draw the band as a cable from where it's held: under the feet, round the back, or tied to something, whose steps say where. The Pallof press takes a band or a cable.
 - **Written in our own words**, in the app's voice: a one-line description of what it is and why, 3–5 short how-to steps, and a tip or two. Plain and short enough to read between sets.
 - [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (public domain, Unlicense) is a **reference only**: for which exercises to include, their equipment and their muscles, each checked by hand (it lists glutes as only supporting in a back squat, for one). Its text isn't copied, and its photos aren't used: where they came from isn't stated.
 - Built-in ids are fixed text that never changes (e.g. `builtin:back-squat`), so history keeps pointing to them across app updates. An exercise taken out of the list stays readable by its id for history's sake.

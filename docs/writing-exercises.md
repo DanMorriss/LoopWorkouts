@@ -8,7 +8,7 @@ How the exercises that come with Loop Workouts are written, and which are still 
 - Their words (`description`, `steps` and `tips`): `src/app/models/built-in-exercise-text.ts`, under each one's id, in the same order and under the same batch comment. They're kept apart so they aren't in the app's first download.
 - Their movement (squat, hinge, horizontal push, vertical pull, …), which Swap ranks by (RUN-11): `src/app/models/built-in-exercise-movements.ts`, under each one's id, in the same order. Pick one of its `Movement`s, adding a new one only for a way of moving none of them is. Every built-in exercise has one; a test checks.
 - Their shape: `BuiltInExercise` and `ExerciseText` in `src/app/models/exercise.ts`.
-- How they move, for their animated demos (EXR-13): `src/app/models/built-in-exercise-motion.ts`, under each one's id, written as `exercise-motion.ts` explains. Every built-in exercise has one, so a new one needs one too; a test checks. Look at it drawn before raising it, in 3D and turned round (see [exercises](features/exercises.md)): a flat pose can look right from the side and wrong from the front. `tools/shoot-demos.mjs` screenshots demos from `ng serve --port 4300`, turned round if asked. To pose one, open the posing tool at `/dev/pose?exercise=<id without builtin:>` on `ng serve`: a slider for each number of each position, the figure drawn as it moves, and Copy pose to paste the result in (then `npm run format`).
+- How they move, for their animated demos (EXR-13): `src/app/models/built-in-exercise-motion.ts`, under each one's id, written as `exercise-motion.ts` explains. Every built-in exercise has one, so a new one needs one too; a test checks. Look at it drawn before raising it, in 3D and turned round (see [exercises](features/exercises.md)): a flat pose can look right from the side and wrong from the front. `tools/shoot-demos.mjs` screenshots demos from `ng serve --port 4400`, turned round if asked. To pose one, open the posing tool at `/dev/pose?exercise=<id without builtin:>` on `ng serve`: a slider for each number of each position, the figure drawn as it moves, and Copy pose to paste the result in (then `npm run format`).
 - The rules below that can be checked are checked by `src/app/models/built-in-exercises.spec.ts`. Run it after every batch.
 
 ## Each field
@@ -84,7 +84,7 @@ and in `built-in-exercise-text.ts`:
 
 ## Backlog
 
-107 written (batches 1–10). The list is complete for now; more can be added at the end of the backlog.
+117 written (batches 1–11). The list is complete for now; more can be added at the end of the backlog.
 
 - [x] **Batch 4, core, carries and variations:** side plank, dead bug, Russian twist, farmer's carry, sumo deadlift, Bulgarian split squat, step-up, hammer curl, skull crusher, glute bridge
 - [x] **Batch 5, chest, shoulders and arms:** dumbbell bench press, incline bench press, close-grip bench press, dumbbell fly, cable crossover, Arnold press, rear delt fly, shrug, preacher curl, overhead triceps extension
@@ -93,3 +93,4 @@ and in `built-in-exercise-text.ts`:
 - [x] **Batch 8, conditioning and abs:** burpee, mountain climber, jumping jack, jump squat, box jump, bodyweight squat, wall sit, crunch, bicycle crunch, ab wheel rollout
 - [x] **Batch 9, kettlebells (17, asked for by Dan):** kettlebell thruster, kettlebell clean and press, kettlebell snatch, kettlebell pistol squat, kettlebell floor press, Turkish get-up, kettlebell sumo high pull, chainsaw row, kettlebell reverse crunch, plank pull-through, half-kneeling kettlebell press, kettlebell halo, kettlebell around the world, kettlebell push-up, and kettlebell takes on dumbbell exercises: kettlebell lunge, kettlebell curl, kettlebell press
 - [x] **Batch 10, stretches and mobility (asked for by Dan):** downward dog, child's pose, cat-cow, cobra stretch, kneeling hip flexor stretch, standing quad stretch, seated hamstring stretch, pigeon stretch, world's greatest stretch, thread the needle
+- [x] **Batch 11, resistance bands (for a band workout):** band row, band chest press, band overhead press, band face pull, band curl, band triceps pushdown, band squat, band pull-through, band lateral walk, Pallof press (a band or a cable)

@@ -48,7 +48,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     - `settings({...})`: `settings` as in data.md (theme, sound, weightUnit, bodyFigure, myEquipment, onlyMyEquipment, eachSideFirst, switchSidesSeconds, name, trainingFor).
     - `plan(days)`: `week-plan` with `days` (seven lists of workout ids, Monday first) and no `plannedAt`, so every workout counts this week.
     - `signedIn(email)`: a Supabase session under `sb-cpgacyzlfyskifzhkotu-auth-token`, with `welcomed = "signed-in"`.
-- **Ids** in the steps below are the real ones: built-in exercises are `builtin:<kebab name>` (107 of them today, e.g. `back-squat`, `bench-press`, `push-up`, `goblet-squat`, `plank`, `seated-cable-row`, `dumbbell-shoulder-press`, `leg-press`, `side-plank`, `chainsaw-row`); ready-made workouts `builtin:gym-legs` and so on; plans `builtin-plan:no-equipment-3-day` and so on.
+- **Ids** in the steps below are the real ones: built-in exercises are `builtin:<kebab name>` (117 of them today, e.g. `back-squat`, `bench-press`, `push-up`, `goblet-squat`, `plank`, `seated-cable-row`, `dumbbell-shoulder-press`, `leg-press`, `side-plank`, `chainsaw-row`); ready-made workouts `builtin:gym-legs` and so on; plans `builtin-plan:no-equipment-3-day` and so on.
 
 ### Tags used below
 
@@ -908,14 +908,14 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     6. Search "zzzz"; press **Clear search and filters**.
     7. Open `/exercises?muscles=quads,notamuscle`.
 - **Expected:**
-    1. "Exercises" with **New**; "107 exercises" (read the number from `BUILT_IN_EXERCISES` rather than hard-coding it), A to Z.
+    1. "Exercises" with **New**; "117 exercises" (read the number from `BUILT_IN_EXERCISES` rather than hard-coding it), A to Z.
     2. Push-up first, saying "Also called Press-up".
     3. The address is `/exercises?muscles=quads,glutes`; both chips pressed, both shaded on the map and listed with × buttons; the count drops and is read out.
     4. The exercise page keeps the muscles for its ‹ link: the list comes back still filtered.
     5. Only no-equipment exercises; then barbell-and-rack ones too ("My equipment: 2 pieces").
     6. "No exercises match." then everything back.
     7. Only Quads picked; the unknown one is ignored.
-- **In the pack:** the count is read from the page's status ("107 exercises") rather than hard-coded; the body map's Glutes is pressed by its keys, as a click in the middle of its box lands on the drawing around the shape.
+- **In the pack:** the count is read from the page's status ("117 exercises") rather than hard-coded; the body map's Glutes is pressed by its keys, as a click in the middle of its box lands on the drawing around the shape.
 
 ### REG-EXR-02 · An exercise's page and its demo
 

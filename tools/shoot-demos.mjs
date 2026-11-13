@@ -1,4 +1,4 @@
-// Screenshots exercise demos (EXR-13) from a running `ng serve --port 4300`, to check the 3D
+// Screenshots exercise demos (EXR-13) from a running `ng serve --port 4400`, to check the 3D
 // figure by eye. Ids are as in the page's address (back-squat, not builtin:back-squat).
 // Usage: node tools/shoot-demos.mjs <out-dir> <id>... [options]
 //   --theme=light   the light theme (dark if not given)
@@ -32,7 +32,7 @@ page.on('console', (message) => {
 if (stills) {
     await page.emulateMedia({ reducedMotion: 'reduce' });
 }
-await page.goto('http://localhost:4300/home');
+await page.goto('http://localhost:4400/home');
 await page.evaluate(
     ([theme, bodyFigure]) => {
         localStorage.setItem('welcomed', 'guest');
@@ -41,7 +41,7 @@ await page.evaluate(
     [theme, figure]
 );
 for (const id of ids) {
-    await page.goto(`http://localhost:4300/exercises/${id}`);
+    await page.goto(`http://localhost:4400/exercises/${id}`);
     const demo = page.locator('app-exercise-demo');
     try {
         await demo.waitFor({ timeout: 15000 });

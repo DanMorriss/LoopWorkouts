@@ -1363,4 +1363,134 @@ export const BUILT_IN_EXERCISE_TEXT: Readonly<Record<BuiltInExercise['id'], Exer
             'Rather hold it? Rest in the threaded position for a few slow breaths each side.',
         ],
     },
+    // Eleventh batch: resistance bands
+    'builtin:band-row': {
+        description:
+            'Sitting with a band round your feet, you pull the ends to your belly. Works your upper back, with nothing to tie it to.',
+        steps: [
+            'Sit tall with your legs out in front, knees soft, and loop the middle of the band round the soles of your feet.',
+            'Hold an end in each hand, arms straight, with the band a little tight.',
+            'Pull your hands to your belly, elbows close to your sides, squeezing your shoulder blades together.',
+            'Let your arms straighten slowly, keeping your back tall.',
+        ],
+        tips: [
+            "Don't lean back to pull: your body stays still and only your arms move.",
+            'Too easy? Hold the band shorter, or use a stronger one.',
+        ],
+    },
+    'builtin:band-chest-press': {
+        description:
+            'With a band round your upper back, you press the ends out in front of you. Works your chest anywhere, with nothing to tie it to.',
+        steps: [
+            'Stand tall with the band across your upper back, under your arms, an end in each hand by your chest.',
+            'Press both hands straight out in front of you at chest height until your arms are straight.',
+            'Bring your hands back to your chest slowly, against the band.',
+        ],
+        tips: [
+            'Keep your shoulders down and your wrists straight as you press.',
+            'Too easy? Wrap the ends round your hands to shorten the band, or step one foot forward and lean in.',
+        ],
+    },
+    'builtin:band-overhead-press': {
+        description:
+            'Standing on a band, you press the ends from your shoulders to overhead. Works your shoulders, and your middle holds you steady.',
+        steps: [
+            'Stand on the middle of the band, feet hip-width apart, and hold an end in each hand at your shoulders.',
+            'Brace your middle and press your hands straight up until your arms are straight overhead.',
+            'Lower your hands slowly back to your shoulders.',
+        ],
+        tips: [
+            "Don't lean back to get the band up: squeeze your glutes and keep your ribs down.",
+            'Too easy? Stand with your feet wider on the band, or use a stronger one.',
+        ],
+    },
+    'builtin:band-face-pull': {
+        description:
+            'With a band tied at head height, you pull it towards your face, hands apart. Good for the backs of your shoulders.',
+        steps: [
+            'Tie the band to a post or door anchor at head height, and hold an end in each hand, thumbs towards you.',
+            'Step back until your arms are straight and the band is a little tight.',
+            'Pull towards your face, elbows high, so your hands finish beside your ears.',
+            'Let your arms straighten slowly.',
+        ],
+        tips: ['Keep it light and slow: this is about control, not how hard the band is.'],
+    },
+    'builtin:band-curl': {
+        description:
+            'Standing on a band, you curl the ends up to your shoulders. Works your biceps, and the band pulls hardest at the top.',
+        steps: [
+            'Stand on the middle of the band, feet hip-width apart, an end in each hand, palms facing forward.',
+            'Keeping your elbows by your sides, curl your hands up towards your shoulders.',
+            'Lower them slowly until your arms are straight.',
+        ],
+        tips: [
+            'Keep your elbows still: if they swing forward, your shoulders are doing the work.',
+            'Too easy? Stand with your feet wider on the band.',
+        ],
+    },
+    'builtin:band-triceps-pushdown': {
+        description:
+            'With a band tied up high, you push the ends down until your arms are straight. Works the backs of your arms.',
+        steps: [
+            'Tie the band over a door or to something high, and hold an end in each hand.',
+            'Stand tall, tuck your elbows in at your sides, and start with your hands at chest height.',
+            'Push your hands down until your arms are straight, then let them come back up slowly.',
+        ],
+        tips: ['Only your forearms move: keep your elbows pinned to your sides.'],
+    },
+    'builtin:band-squat': {
+        description:
+            'Standing on a band with the ends at your shoulders, you squat down and stand back up. Works your legs and glutes at home.',
+        steps: [
+            'Stand on the middle of the band, feet shoulder-width apart, holding the ends at your shoulders.',
+            'Sit your hips back and down, knees over your toes, until your thighs are level with the floor or as low as is comfortable.',
+            'Push through your whole foot to stand back up, against the band.',
+        ],
+        tips: [
+            'Keep your chest up and your heels down all the way.',
+            'Too easy? Use a stronger band, or slow down on the way down.',
+        ],
+    },
+    'builtin:band-pull-through': {
+        description:
+            'With a band tied low behind you, you hinge forward and pull it through your legs as you stand. Works your glutes and hamstrings.',
+        steps: [
+            'Tie the band low to a post, face away from it, and hold the band in both hands between your legs.',
+            'Walk forward until the band is tight, feet a little wider than your hips.',
+            'Push your hips back, letting your hands go back through your legs, with a flat back and soft knees.',
+            'Squeeze your glutes and push your hips forward to stand tall.',
+        ],
+        tips: [
+            "It's a hip movement: your arms just hold the band, they don't pull it.",
+            "Don't lean back at the top; stand tall and stop.",
+        ],
+    },
+    'builtin:band-lateral-walk': {
+        description:
+            'With a small band round your legs, you step sideways in a half squat. Works the sides of your hips and your glutes.',
+        steps: [
+            'Put a small loop band round your legs, just above your knees or round your ankles.',
+            'Stand with your feet hip-width apart, then bend your knees and sit back a little.',
+            'Step sideways with one foot, then follow with the other, keeping the band tight.',
+            'Take your steps one way, then the same back the other way.',
+        ],
+        tips: [
+            'Keep your knees pushed out and your toes forward, not turned out.',
+            'Stay low the whole time; standing up between steps makes it easier.',
+        ],
+    },
+    'builtin:pallof-press': {
+        description:
+            'Side-on to a band or cable, you press your hands out and hold them still. Works your middle by not letting it twist.',
+        steps: [
+            'Tie the band at chest height, or set a cable there, and stand side-on to it, holding it at your chest in both hands.',
+            'Step away until it pulls, feet hip-width apart and knees soft.',
+            'Press your hands straight out in front of your chest, and hold for a moment without turning.',
+            'Bring your hands back to your chest. Do all your reps, then turn round for the other side.',
+        ],
+        tips: [
+            'The band tries to turn you: keep your hips and shoulders facing straight ahead.',
+            'Too easy? Step further away from where the band is tied.',
+        ],
+    },
 };

@@ -162,6 +162,21 @@ const WORLDS_GREATEST_ARM_OUT: Pose = {
     feet: [90, 55],
 };
 
+/**
+ * A band lateral walk's half squat, from the front, hips at x: the hands together in front,
+ * and each foot on the floor at its x, or lifted to it mid-step.
+ */
+const lateralWalk = (x: number, near: number, far: number, lifted?: 'near' | 'far'): Pose => ({
+    hips: [x, lifted ? -91 : -89],
+    torso: 180,
+    arms: [reach(x - 6, -118, 'cw'), reach(x + 6, -118, 'ccw')],
+    handsForward: 16,
+    legs: [
+        reach(near, lifted === 'near' ? -22 : -11.5, 'cw'),
+        reach(far, lifted === 'far' ? -22 : -11.5, 'ccw'),
+    ],
+});
+
 export const BUILT_IN_EXERCISE_MOTION: Readonly<
     Partial<Record<BuiltInExercise['id'], ExerciseMotion>>
 > = {
@@ -3596,6 +3611,241 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 },
             },
             { label: 'Hand down', through: true, ms: 800, pose: THREAD_HAND_DOWN },
+        ],
+    },
+    // Eleventh batch: resistance bands. A band tied to something, or under the feet, is drawn
+    // as a cable from where it's held to the hands
+    'builtin:band-row': {
+        view: 'side',
+        kit: [{ kind: 'cable', from: [86, -14], each: true }],
+        frames: [
+            {
+                label: 'Arms long',
+                hold: 200,
+                ms: 1000,
+                pose: {
+                    hips: [0, -12],
+                    torso: 175,
+                    arms: both(reach(52, -44, 'cw')),
+                    legs: both(angles(88, 90)),
+                    feet: [180, 180],
+                },
+            },
+            {
+                label: 'Hands to the belly',
+                hold: 300,
+                ms: 1200,
+                pose: {
+                    hips: [0, -12],
+                    torso: 182,
+                    arms: both(reach(10, -40, 'cw')),
+                    legs: both(angles(88, 90)),
+                    feet: [180, 180],
+                },
+            },
+        ],
+    },
+    'builtin:band-chest-press': {
+        view: 'side',
+        kit: [{ kind: 'cable', from: [-10, -132], each: true }],
+        frames: [
+            {
+                label: 'Hands at the chest',
+                hold: 200,
+                ms: 1000,
+                pose: { ...STANDING, arms: both(reach(16, -126, 'cw')), elbowsOut: 0.5 },
+            },
+            {
+                label: 'Arms straight',
+                hold: 300,
+                ms: 1200,
+                pose: { ...STANDING, arms: both(reach(58, -130, 'cw')), handsApart: 30 },
+            },
+        ],
+    },
+    'builtin:band-overhead-press': {
+        view: 'front',
+        kit: [{ kind: 'cable', from: [0, -3], each: true }],
+        frames: [
+            {
+                label: 'At the shoulders',
+                hold: 200,
+                ms: 1200,
+                pose: { ...FRONT_STANDING, arms: frontHandsUp(30, -153) },
+            },
+            {
+                label: 'Overhead',
+                hold: 300,
+                ms: 1300,
+                pose: { ...FRONT_STANDING, arms: frontHandsUp(14, -207) },
+            },
+        ],
+    },
+    'builtin:band-face-pull': {
+        view: 'side',
+        kit: [{ kind: 'cable', from: [95, -160], each: true }],
+        frames: [
+            {
+                label: 'Arms long',
+                hold: 200,
+                ms: 1000,
+                pose: { ...STANDING, arms: both(reach(52, -150, 'cw')) },
+            },
+            {
+                label: 'Hands to the face',
+                hold: 400,
+                ms: 1200,
+                pose: { ...STANDING, arms: both(reach(18, -160, 'cw')), elbowsOut: 1 },
+            },
+        ],
+    },
+    'builtin:band-curl': {
+        view: 'side',
+        kit: [{ kind: 'cable', from: [4, -3], each: true }],
+        frames: [
+            {
+                label: 'Arms long',
+                hold: 200,
+                ms: 1100,
+                pose: { ...STANDING, arms: both(angles(4, 6)) },
+            },
+            {
+                label: 'Curled',
+                hold: 300,
+                ms: 1400,
+                pose: { ...STANDING, arms: both(angles(8, 150)) },
+            },
+        ],
+    },
+    'builtin:band-triceps-pushdown': {
+        view: 'side',
+        kit: [{ kind: 'cable', from: [34, -225], each: true }],
+        frames: [
+            {
+                label: 'Hands up',
+                hold: 200,
+                ms: 1100,
+                pose: { ...STANDING, torso: 174, arms: both(angles(10, 140)), handsApart: 26 },
+            },
+            {
+                label: 'Arms straight',
+                hold: 300,
+                ms: 1200,
+                pose: { ...STANDING, torso: 174, arms: both(angles(6, 14)), handsApart: 26 },
+            },
+        ],
+    },
+    'builtin:band-squat': {
+        view: 'side',
+        kit: [{ kind: 'cable', from: [4, -3], each: true }],
+        frames: [
+            {
+                label: 'Standing',
+                hold: 300,
+                ms: 1300,
+                pose: { ...STANDING, arms: both(touch(12, -2, 'cw')), stance: 30 },
+            },
+            {
+                label: 'Bottom',
+                hold: 150,
+                ms: 1100,
+                pose: {
+                    hips: [-22, -46],
+                    torso: 137,
+                    head: 155,
+                    arms: both(touch(12, -2, 'cw')),
+                    stance: 30,
+                    legs: FEET,
+                },
+            },
+        ],
+    },
+    'builtin:band-pull-through': {
+        view: 'side',
+        kit: [{ kind: 'cable', from: [-120, -24] }],
+        frames: [
+            {
+                label: 'Hips back',
+                hold: 150,
+                ms: 900,
+                pose: {
+                    hips: [-24, -84],
+                    torso: 110,
+                    head: 135,
+                    arms: both(angles(-25, -25)),
+                    handsApart: 8,
+                    stance: 40,
+                    legs: FEET,
+                },
+            },
+            {
+                label: 'Standing tall',
+                hold: 300,
+                ms: 1000,
+                pose: {
+                    ...STANDING,
+                    arms: both(angles(-4, -4)),
+                    handsApart: 8,
+                    stance: 40,
+                },
+            },
+        ],
+    },
+    'builtin:band-lateral-walk': {
+        view: 'front',
+        // A step to the figure's left and the other foot following, then back again
+        frames: [
+            { label: 'Feet apart', hold: 150, ms: 350, pose: lateralWalk(0, -12, 12) },
+            {
+                label: 'Stepping out',
+                through: true,
+                ms: 350,
+                pose: lateralWalk(7, -12, 34, 'far'),
+            },
+            { label: 'Wide', hold: 100, ms: 350, pose: lateralWalk(14, -12, 40) },
+            {
+                label: 'The other foot following',
+                through: true,
+                ms: 350,
+                pose: lateralWalk(21, 4, 40, 'near'),
+            },
+            { label: 'Feet apart again', hold: 150, ms: 350, pose: lateralWalk(28, 16, 40) },
+            {
+                label: 'Stepping back',
+                through: true,
+                ms: 350,
+                pose: lateralWalk(21, -2, 40, 'near'),
+            },
+            { label: 'Wide again', hold: 100, ms: 350, pose: lateralWalk(14, -12, 40) },
+            {
+                label: 'Following back',
+                through: true,
+                ms: 350,
+                pose: lateralWalk(7, -12, 22, 'far'),
+            },
+        ],
+    },
+    'builtin:pallof-press': {
+        view: 'front',
+        seenFrom: 35,
+        kit: [{ kind: 'cable', from: [-95, -130] }],
+        frames: [
+            {
+                label: 'Hands at the chest',
+                hold: 200,
+                ms: 1000,
+                pose: { ...FRONT_STANDING, arms: frontHands(4, -128), handsForward: 14 },
+            },
+            {
+                label: 'Pressed out',
+                hold: 800,
+                ms: 1000,
+                pose: {
+                    ...FRONT_STANDING,
+                    arms: frontHands(3, -136),
+                    handsForward: 50,
+                },
+            },
         ],
     },
 };

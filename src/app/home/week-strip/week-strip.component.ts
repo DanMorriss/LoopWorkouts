@@ -1,5 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
-import { firstPlan } from '../../models/built-in-plans';
+import { BuiltInPlan, firstPlan } from '../../models/built-in-plans';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
 import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
@@ -99,7 +99,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                     Nothing planned yet. Here's a week of ready-made workouts for your goal and
                     equipment, or plan your own and Today shows what's due each day.
                 </p>
-                <app-plan-card [plan]="suggestedPlan()" [main]="true" (used)="use()" />
+                <app-plan-card [plan]="suggestedPlan()" [main]="true" (used)="use($event)" />
                 <div class="week__actions">
                     <a
                         href="/ready-made-plans"
@@ -150,11 +150,12 @@ export class WeekStripComponent {
     );
 
     /**
-     * Uses it, with Undo: the week planned with its ready-made workouts, as they are.
-     * The week then shows in its place, so focus moves to Edit plan.
+     * Uses it as its card shows it, with or without its active rest, with Undo: the week
+     * planned with its ready-made workouts, as they are. The week then shows in its place, so
+     * focus moves to Edit plan.
      */
-    protected use() {
-        this.usePlan(this.suggestedPlan());
+    protected use(plan: BuiltInPlan) {
+        this.usePlan(plan);
     }
 
     /** Whether anything's planned this week, of the workouts still in the library. */

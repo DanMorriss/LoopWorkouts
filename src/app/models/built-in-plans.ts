@@ -1,3 +1,4 @@
+import { isActiveRest } from './active-rest';
 import { BUILT_IN_WORKOUTS, BuiltInWorkout, builtInWorkoutEquipment } from './built-in-workouts';
 import { canDoWith, Equipment, EquipmentNeed } from './exercise';
 import { TrainingGoal } from './muscle-balance';
@@ -128,6 +129,19 @@ export function planWorkouts(plan: Pick<BuiltInPlan, 'days'>): BuiltInWorkout[] 
 }
 
 /** Everything a plan's workouts need, as `builtInWorkoutEquipment()` has it for one. */
+/**
+ * `plan` without its active rest (its mobility days), for those who'd rather rest: those days
+ * are left empty, and its training days stay as they are.
+ */
+export function withoutActiveRest(plan: BuiltInPlan): BuiltInPlan {
+    const rest = new Set(
+        planWorkouts(plan)
+            .filter(isActiveRest)
+            .map((workout) => workout.id)
+    );
+    return { ...plan, days: plan.days.map((day) => day.filter((id) => !rest.has(id))) };
+}
+
 export function builtInPlanEquipment(plan: Pick<BuiltInPlan, 'days'>): EquipmentNeed[] {
     return builtInWorkoutEquipment({
         blocks: planWorkouts(plan).flatMap((workout) => workout.blocks),

@@ -73,6 +73,8 @@ describe('BUILT_IN_WORKOUTS', () => {
         // Other kit: each needs only its own piece
         expect(needs('Pull-up bar and dips')).toEqual(['pull-up bar', 'parallel bars']);
         expect(needs('Step circuit')).toEqual(['step']);
+        // The Pallof press's band or cable is met by the band
+        expect(needs('Band full body')).toEqual(['band']);
     });
 
     it('fills the gaps the first batch left (the second batch, 2026-11-03)', () => {
@@ -90,6 +92,14 @@ describe('BUILT_IN_WORKOUTS', () => {
         );
         for (const muscle of ['abductors', 'adductors', 'forearms', 'traps', 'calves'] as const) {
             expect(main.has(muscle), muscle).toBe(true);
+        }
+    });
+
+    it('uses every band exercise in the band workout (the fourth batch, 2026-11-13)', () => {
+        const used = new Set(allSteps(byTitle('Band full body')).map((s) => s.exerciseId));
+        const banded = BUILT_IN_EXERCISES.filter((e) => e.equipment.flat().includes('band'));
+        for (const exercise of banded) {
+            expect(used.has(exercise.id), exercise.name).toBe(true);
         }
     });
 

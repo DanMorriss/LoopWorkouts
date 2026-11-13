@@ -119,9 +119,9 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                 expect(el('.plan-muscles__filler-label')?.textContent?.trim()).toBe(
                     'Or plan a ready-made workout for them:'
                 );
-                expect(suggested()).toBe('Gym extras');
+                expect(suggested()).toBe('Band full body');
                 expect(el('.plan-muscles__filler-fills')?.textContent?.trim()).toBe(
-                    'Adds Forearms, Abs, Obliques and 7 more.'
+                    'Adds Shoulders, Biceps, Triceps and 7 more.'
                 );
             });
 
@@ -170,16 +170,18 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
                 fixture.detectChanges();
                 await fixture.whenStable();
 
-                expect(plan.plan().days[3]).toEqual(['builtin:gym-extras']);
-                expect(plan.plan().days[5]).toEqual(['builtin:gym-extras']);
+                expect(plan.plan().days[3]).toEqual(['builtin:band-full-body']);
+                expect(plan.plan().days[5]).toEqual(['builtin:band-full-body']);
                 const undo = TestBed.inject(UndoService);
-                expect(undo.offer()?.message).toBe('Gym extras planned on Thursday and Saturday');
+                expect(undo.offer()?.message).toBe(
+                    'Band full body planned on Thursday and Saturday'
+                );
                 // Not copied: it's planned as it is
                 expect(store.workouts().map((w) => w.title)).toEqual(['Legs', 'Push', 'Arms']);
-                expect(suggested()).not.toBe('Gym extras');
+                expect(suggested()).not.toBe('Band full body');
 
                 undo.undo();
-                expect(plan.plan().days.flat()).not.toContain('builtin:gym-extras');
+                expect(plan.plan().days.flat()).not.toContain('builtin:band-full-body');
             });
 
             it('with Only what I have on, suggests only what your equipment allows', () => {

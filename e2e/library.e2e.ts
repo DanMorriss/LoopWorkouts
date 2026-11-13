@@ -18,8 +18,8 @@ test.describe('no workouts of my own', () => {
             await expect(
                 page.getByText('Start any of these, or make your own with New.')
             ).toBeVisible();
-            // The 20 ready-made ones, A to Z, each with its badge
-            await expect(library.cards).toHaveCount(20);
+            // The 21 ready-made ones, A to Z, each with its badge
+            await expect(library.cards).toHaveCount(21);
             const titles = await library.titles();
             expect(titles).toEqual([...titles].sort((a, b) => a.localeCompare(b)));
             await expect(library.card('Gym legs')).toContainText('Ready-made');
@@ -249,8 +249,8 @@ test.describe('the plan page suggests a workout', () => {
             await expect(
                 works.getByRole('list', { name: 'Supporting' }).getByRole('link')
             ).toHaveText(['Shoulders', 'Triceps', 'Lower back', 'Adductors', 'Hamstrings']);
-            await expect(missing).toContainText('Gym extras');
-            await expect(missing).toContainText('Adds Forearms, Abs, Obliques and 7 more.');
+            await expect(missing).toContainText('Band full body');
+            await expect(missing).toContainText('Adds Shoulders, Biceps, Triceps and 7 more.');
 
             await missing.getByRole('link', { name: 'Calves' }).click();
             await expect(page).toHaveURL(/\/exercises\?muscles=calves(&|$)/);
@@ -268,9 +268,9 @@ test.describe('the plan page suggests a workout', () => {
         async ({ app, page }) => {
             await app.goto('/plan');
             const missing = page.getByRole('region', { name: 'Missing muscle groups' });
-            const add = missing.getByRole('button', { name: 'Plan Gym extras on a day' });
+            const add = missing.getByRole('button', { name: 'Plan Band full body on a day' });
             await add.click();
-            const dialog = page.getByRole('dialog', { name: 'Plan Gym extras on…' });
+            const dialog = page.getByRole('dialog', { name: 'Plan Band full body on…' });
             await expect(dialog).toBeVisible();
             // Each day says what's on it already, and the muscles those work
             await expect(dialog.getByRole('button', { name: /^Monday/ })).toContainText(
@@ -285,20 +285,22 @@ test.describe('the plan page suggests a workout', () => {
             await dialog.getByRole('button', { name: 'Done' }).click();
             await expect(dialog).toBeHidden();
 
-            await expect(app.undoBar).toContainText('Gym extras planned on Tuesday and Saturday');
+            await expect(app.undoBar).toContainText(
+                'Band full body planned on Tuesday and Saturday'
+            );
             for (const name of ['Tuesday', 'Saturday']) {
                 await expect(
                     page.getByRole('region', { name, exact: true }).getByRole('listitem')
-                ).toContainText(['Gym extras']);
+                ).toContainText(['Band full body']);
             }
             // Planned now, so another is suggested for what's left
-            await expect(missing).not.toContainText('Gym extras');
+            await expect(missing).not.toContainText('Band full body');
             const plan = await app.stored<{ days: string[][] }>('week-plan');
-            expect(plan?.days[1]).toEqual(['builtin:gym-extras']);
-            expect(plan?.days[5]).toEqual(['builtin:gym-extras']);
+            expect(plan?.days[1]).toEqual(['builtin:band-full-body']);
+            expect(plan?.days[5]).toEqual(['builtin:band-full-body']);
 
             await app.undo.click();
-            await expect(missing).toContainText('Gym extras');
+            await expect(missing).toContainText('Band full body');
             await expect(page.getByRole('region', { name: 'Tuesday', exact: true })).toContainText(
                 'Nothing planned'
             );
@@ -323,7 +325,7 @@ test.describe('ready-made workouts', () => {
             await app.goto('/library');
             await page.getByRole('radio', { name: 'Ready-made' }).check();
             await expect(library.card('Legs')).toHaveCount(0);
-            await expect(library.cards).toHaveCount(20);
+            await expect(library.cards).toHaveCount(21);
 
             // Only what I have, with a kettlebell: those needing nothing or a kettlebell
             await page.getByRole('button', { name: 'More filters' }).click();

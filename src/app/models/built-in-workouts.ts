@@ -366,6 +366,35 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
             ),
         ],
     },
+    {
+        id: 'builtin:band-full-body',
+        title: 'Band full body',
+        description: 'Every main muscle with resistance bands and a post or door anchor to tie to.',
+        group: 'other',
+        repeats: 1,
+        blocks: [
+            heading('Warmup'),
+            once(reps('band-pull-apart', 15)),
+            heading('Main'),
+            sets(3, 60, reps('band-squat', 12)),
+            sets(3, 60, reps('band-row', 12)),
+            sets(3, 60, reps('band-chest-press', 12)),
+            sets(3, 60, reps('band-overhead-press', 10)),
+            superset(
+                3,
+                60,
+                reps('band-pull-through', 12),
+                reps('band-lateral-walk', 10, { eachSide: true })
+            ),
+            superset(3, 45, reps('band-curl', 12), reps('band-triceps-pushdown', 12)),
+            superset(
+                3,
+                45,
+                reps('band-face-pull', 15),
+                reps('pallof-press', 10, { eachSide: true })
+            ),
+        ],
+    },
     // Third batch (2026-11-12): mobility, of the tenth batch's stretches, for the ready-made
     // plans' days between training. Each move once, in an order that keeps getting up and
     // down to a minimum

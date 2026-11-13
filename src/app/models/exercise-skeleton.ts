@@ -7,6 +7,7 @@ import {
     Point,
     Pose,
     SolvedLimb,
+    SolvedPose,
     solvePose,
     STANCE,
 } from './exercise-motion';
@@ -108,6 +109,10 @@ export function rotateAbout(point: Vec3, through: Vec3, axis: Vec3, degrees: num
 /** A point or a direction of the drawing, in 3D: see the top of this file. */
 const lift = (view: MotionView, [x, y]: Point): Vec3 =>
     view === 'side' ? [x, -y, 0] : [0, -y, -x];
+
+/** A point in 3D, back in the drawing: as seen from the view, how far towards you dropped. */
+const flatten = (view: MotionView, [x, y, z]: Vec3): Point =>
+    view === 'side' ? [x, -y] : [-z, -y];
 
 /**
  * The elbow or knee of a limb from `root` to `end` (out of reach, it stretches straight), bent
@@ -395,4 +400,38 @@ export function motionJoints(motion: ExerciseMotion): Vec3[] {
             ...skeleton.legs.map((leg, i) => add3(leg.end, scale3(skeleton.feet[i], 22))),
         ];
     });
+}
+
+/**
+ * The flat figure's joints in `pose`, for a browser without WebGL: as drawn, unless the motion
+ * twists the shoulders (`Pose.twist`), which a drawing can't show. Then its arms are the 3D
+ * figure's, seen from the side or the front, in every position, so they don't jump as the
+ * twist starts: a hand the twist puts on the floor is drawn there, rather than in the air, and
+ * hands turned away from you go behind the body. A part pointing towards you or away is drawn
+ * shorter, as in a drawing. Other motions keep their drawn arms, posed to look right flat,
+ * whatever their 3D-only fields do in 3D.
+ */
+export function flatPose(pose: Pose, motion: ExerciseMotion): SolvedPose {
+    const solved = solvePose(pose, motion.view);
+    if (!motion.frames.some((frame) => frame.pose.twist)) {
+        return solved;
+    }
+    const skeleton = skeletonOf(pose, motion);
+    // Without the lift between the thighs, as the torso's drawing doesn't ride up with them
+    const seat = sub3(skeleton.hips, lift(motion.view, pose.hips));
+    const flat = (point: Vec3) => flatten(motion.view, sub3(point, seat));
+    const arm = (index: 0 | 1): SolvedLimb => {
+        const { root, mid, end } = skeleton.arms[index];
+        const [from, elbow, hand] = [flat(root), flat(mid), flat(end)];
+        const shown = (a: Point, b: Point, length: number) =>
+            Math.min(1, Math.hypot(b[0] - a[0], b[1] - a[1]) / length);
+        return {
+            root: from,
+            mid: elbow,
+            end: hand,
+            upperScale: shown(from, elbow, BODY.upperArm),
+            lowerScale: shown(elbow, hand, BODY.forearm),
+        };
+    };
+    return { ...solved, arms: [arm(0), arm(1)] };
 }

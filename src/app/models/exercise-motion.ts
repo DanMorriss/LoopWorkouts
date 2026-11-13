@@ -425,13 +425,25 @@ export function solvePose(pose: Pose, view: MotionView): SolvedPose {
     };
 }
 
+/**
+ * Where the flat figure's joints are: as drawn, unless something else works them out (the 3D
+ * figure's arms, flattened, in `flatPose()`).
+ */
+export type SolveFlat = (pose: Pose, motion: ExerciseMotion) => SolvedPose;
+
+const asDrawn: SolveFlat = (pose, motion) => solvePose(pose, motion.view);
+
 /** The figure in `pose`: its parts placed, and its kit, in drawing order. */
-export function drawFigure(pose: Pose, motion: ExerciseMotion): FigureLayers {
+export function drawFigure(
+    pose: Pose,
+    motion: ExerciseMotion,
+    solve: SolveFlat = asDrawn
+): FigureLayers {
     const view = VIEWS[motion.view];
     const art = FIGURE_ART[motion.view];
     const side = motion.view === 'side';
     const props = new Set(motion.props ?? []);
-    const { up, across, shoulders, bar, arms, legs } = solvePose(pose, motion.view);
+    const { up, across, shoulders, bar, arms, legs } = solve(pose, motion);
     const hands = [arms[0].end, arms[1].end] as const;
     const place = (
         name: PartName,
@@ -794,7 +806,7 @@ export function poseAt(motion: ExerciseMotion, elapsed: number): Pose {
 }
 
 /** The box around everything the motion draws, in all its positions, and the floor under it. */
-export function motionBox(motion: ExerciseMotion): Box {
+export function motionBox(motion: ExerciseMotion, solve: SolveFlat = asDrawn): Box {
     let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, 0];
     // The key positions, and halfway between each, which an IK limb can swing out past
     const poses = motion.frames.flatMap((frame, i) => [
@@ -802,7 +814,7 @@ export function motionBox(motion: ExerciseMotion): Box {
         lerpPose(frame.pose, motion.frames[(i + 1) % motion.frames.length].pose, 0.5, motion.view),
     ]);
     for (const pose of poses) {
-        const layers = drawFigure(pose, motion);
+        const layers = drawFigure(pose, motion, solve);
         for (const item of [...layers.kit, ...layers.far, ...layers.body, ...layers.near]) {
             const [left, top, right, bottom] = itemBounds(item);
             minX = Math.min(minX, left);

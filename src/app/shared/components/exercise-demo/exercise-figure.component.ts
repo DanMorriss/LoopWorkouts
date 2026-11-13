@@ -9,6 +9,7 @@ import {
     Point,
     Pose,
 } from '../../../models/exercise-motion';
+import { flatPose } from '../../../models/exercise-skeleton';
 
 /**
  * The figure of an exercise's demo in one pose (EXR-13), drawn as the body map is: a
@@ -28,13 +29,13 @@ export class ExerciseFigureComponent {
     readonly main = input<readonly MuscleGroup[]>([]);
     readonly supporting = input<readonly MuscleGroup[]>([]);
 
-    protected readonly box = computed(() => motionBox(this.motion()));
+    protected readonly box = computed(() => motionBox(this.motion(), flatPose));
     protected readonly viewBox = computed(() => {
         const box = this.box();
         return `${box.x} ${box.y} ${box.width} ${box.height}`;
     });
     protected readonly layers = computed(() => {
-        const layers = drawFigure(this.pose(), this.motion());
+        const layers = drawFigure(this.pose(), this.motion(), flatPose);
         return [
             { name: 'kit', items: layers.kit },
             { name: 'far', items: layers.far },

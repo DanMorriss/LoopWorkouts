@@ -1,7 +1,8 @@
 import { BUILT_IN_EXERCISE_MOTION } from './built-in-exercise-motion';
-import { BODY, ExerciseMotion, loopLength, Pose, poseAt } from './exercise-motion';
+import { BODY, ExerciseMotion, loopLength, Pose, poseAt, solvePose } from './exercise-motion';
 import {
     dot3,
+    flatPose,
     HIP_SPREAD,
     length3,
     Limb3,
@@ -384,6 +385,49 @@ describe('BUILT_IN_EXERCISE_MOTION in 3D', () => {
                 expect(distance(limb.mid, limb.end)).toBeLessThanOrEqual(lower + 1e-6);
             }
             expect(dot3(skeleton.up, skeleton.right)).toBeCloseTo(0, 6);
+        }
+    });
+});
+
+describe('flatPose', () => {
+    const motion = (id: string) => BUILT_IN_EXERCISE_MOTION[`builtin:${id}`]!;
+
+    it('keeps the drawn arms of a motion with no twist, whatever its 3D-only fields', () => {
+        // The halo's elbows point forwards in 3D, but it's posed to look right flat
+        const halo = motion('kettlebell-halo');
+        for (const { pose } of halo.frames) {
+            expect(flatPose(pose, halo)).toEqual(solvePose(pose, halo.view));
+        }
+    });
+
+    it("puts a hand the twist moves to the floor on it, where it's drawn in the air", () => {
+        const thread = motion('thread-the-needle');
+        const armUp = thread.frames[0].pose;
+        expect(armUp.twist).toBeTruthy();
+        // Drawn 20 cm up; in 3D the twist turns it down to the floor
+        const drawn = solvePose(armUp, thread.view).arms[1].end;
+        const flat = flatPose(armUp, thread).arms[1].end;
+        expect(drawn[1]).toBeLessThan(-15);
+        expect(Math.abs(flat[1])).toBeLessThan(6);
+    });
+
+    it('draws a twist one way and the other differently', () => {
+        const twist = motion('russian-twist');
+        const [left, right] = twist.frames.map(({ pose }) => flatPose(pose, twist).arms);
+        expect(left).not.toEqual(right);
+    });
+
+    it('draws a part pointing out of the drawing shorter, never longer than it is', () => {
+        for (const id of ['russian-twist', 'worlds-greatest-stretch', 'thread-the-needle']) {
+            const shown = motion(id);
+            for (let t = 0; t < loopLength(shown); t += 100) {
+                for (const arm of flatPose(poseAt(shown, t), shown).arms) {
+                    expect(arm.upperScale).toBeLessThanOrEqual(1);
+                    expect(arm.lowerScale).toBeLessThanOrEqual(1);
+                    const length = Math.hypot(arm.end[0] - arm.mid[0], arm.end[1] - arm.mid[1]);
+                    expect(length).toBeCloseTo(BODY.forearm * arm.lowerScale, 5);
+                }
+            }
         }
     });
 });

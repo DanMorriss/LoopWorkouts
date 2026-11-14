@@ -221,7 +221,7 @@ test.describe("the week's exercises", () => {
             await expect(rows).toHaveCount(3);
             // Those with a new best first, then most sets
             await expect(rows.nth(0)).toContainText('Back squat');
-            await expect(rows.nth(0)).toContainText('20 reps in 2 sets');
+            await expect(rows.nth(0)).toContainText('20 reps in 2 sets, 1,250 kg lifted');
             await expect(rows.nth(0)).toContainText('New best, heaviest: 62.5 kg for 10 reps');
             await expect(rows.nth(1)).toContainText('Plank');
             await expect(rows.nth(1)).toContainText('1 minute in 1 set');

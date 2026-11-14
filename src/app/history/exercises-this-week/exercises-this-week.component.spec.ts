@@ -2,6 +2,8 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HistoryEntry, LoggedSet } from '../../models/history';
+import { weightToKg } from '../../models/weight';
+import { SettingsStore } from '../../shared/state/settings-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { ExercisesThisWeekComponent } from './exercises-this-week.component';
 
@@ -89,13 +91,13 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
 
         expect(texts('.exercises-week__name')).toEqual(['Back squat', 'Bench press', 'Plank']);
         expect(texts('.exercises-week__total [aria-hidden="true"]')).toEqual([
-            '28 reps · 3 sets',
-            '16 reps · 2 sets',
+            '28 reps · 3 sets · 1,680 kg lifted',
+            '16 reps · 2 sets · 960 kg lifted',
             '1:45 · 2 sets',
         ]);
         expect(texts('.exercises-week__total .sr-only')).toEqual([
-            '28 reps in 3 sets',
-            '16 reps in 2 sets',
+            '28 reps in 3 sets, 1,680 kg lifted',
+            '16 reps in 2 sets, 960 kg lifted',
             '1 minute 45 seconds in 2 sets',
         ]);
         // Squats' first weight is its heaviest, but 50 reps 10 days ago stands; bench's 8 beat
@@ -112,6 +114,14 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
         expect(el().querySelector('a')!.getAttribute('href')).toBe(
             '/exercises/back-squat?from=progress'
         );
+    });
+
+    it('shows the volume in pounds when they are chosen', () => {
+        TestBed.inject(SettingsStore).update({ weightUnit: 'lb' });
+        create(entry(1, [squat(10, weightToKg(135, 'lb')), squat(10, weightToKg(135, 'lb'))]));
+        expect(texts('.exercises-week__total [aria-hidden="true"]')).toEqual([
+            '20 reps · 2 sets · 2,700 lb lifted',
+        ]);
     });
 
     it('shows nothing with nothing done in the last 7 days', () => {

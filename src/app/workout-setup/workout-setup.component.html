@@ -250,6 +250,12 @@
             @if (setup.noSetAmountError(); as error) {
                 <mat-error>{{ error.message }}</mat-error>
             }
+            <!-- How long it takes, as it's set up now (LIB-9) -->
+            @if (setup.workoutForm().valid()) {
+                <div class="mx-4 mt-4 text-center">
+                    <app-workout-time [workout]="setup.estimated()" />
+                </div>
+            }
             <!-- Start is the main one; Save keeps it in the library for later (BLD-15) -->
             <div class="m-4 flex flex-wrap items-center justify-center gap-3" data-tour="save">
                 <button

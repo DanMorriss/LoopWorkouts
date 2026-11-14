@@ -1046,7 +1046,6 @@ describe('WorkoutComponent', () => {
                     roundsCompleted: 2,
                     totalRounds: 2,
                     outcome: 'finished',
-                    expected: { timedSeconds: 8, repSeconds: 0 },
                     updatedAt: expect.any(Number),
                 },
             ]);
@@ -1128,25 +1127,23 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('logs what it was expected to take, so the estimate can learn your pace', () => {
+        it('logs the time spent on rep steps, so the estimate can learn your pace', () => {
             start(makeWorkout({ steps: [work(1), reps(2)], repeats: 1 }));
             advance(1000);
+            // 4 seconds on the reps, then Done
+            advance(4000);
             (fixture.nativeElement.querySelector('.workout-next--done') as HTMLElement).click();
             fixture.detectChanges();
 
-            expect(entries()[0].expected).toEqual({
-                timedSeconds: 1,
-                // 2 reps at about 3 seconds each, and 5 to get ready
-                repSeconds: 2 * 3 + 5,
-            });
+            expect(entries()[0].repSeconds).toBe(4);
             fixture.destroy();
         });
 
-        it('logs nothing expected of a workout with a time limit', () => {
-            start(makeWorkout({ workSeconds: 1, restSeconds: 0, timeLimitSeconds: 2 }));
-            advance(2000);
+        it('logs no time on rep steps for a workout without them', () => {
+            start(makeWorkout({ workSeconds: 1, restSeconds: 0, repeats: 1 }));
+            advance(1000);
 
-            expect('expected' in entries()[0]).toBe(false);
+            expect('repSeconds' in entries()[0]).toBe(false);
             fixture.destroy();
         });
 

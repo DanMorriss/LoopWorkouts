@@ -741,24 +741,26 @@ export class WorkoutSetupForm {
         });
     }
 
-    /** Saves the form to the library, as a new workout or over the one being edited. */
-    private save(): Workout {
+    /**
+     * The workout as it's set up, as Save saves it: what the page's estimate of how long it
+     * takes is worked out from, as it changes (LIB-9).
+     */
+    readonly fields = computed((): WorkoutFields => {
         const setup = this.model();
         const { title, steps } = setup;
+        const blocks = toBlocks(steps, this.weightUnit);
         // A time limit runs as many rounds as fit, so its rounds are UNTIL_STOPPED
-        const workout: WorkoutFields =
-            setup.repeatMode === 'time'
-                ? {
-                      title,
-                      blocks: toBlocks(steps, this.weightUnit),
-                      repeats: UNTIL_STOPPED,
-                      timeLimitSeconds: timeLimitSeconds(setup),
-                  }
-                : {
-                      title,
-                      blocks: toBlocks(steps, this.weightUnit),
-                      repeats: setup.repeats,
-                  };
+        return setup.repeatMode === 'time'
+            ? { title, blocks, repeats: UNTIL_STOPPED, timeLimitSeconds: timeLimitSeconds(setup) }
+            : { title, blocks, repeats: setup.repeats };
+    });
+
+    /** As `fields()`, with the id of the workout being edited, so its runs give your pace. */
+    readonly estimated = computed(() => ({ id: this.editingWorkoutId() ?? '', ...this.fields() }));
+
+    /** Saves the form to the library, as a new workout or over the one being edited. */
+    private save(): Workout {
+        const workout = this.fields();
 
         const editingId = this.editingWorkoutId();
         if (editingId) {

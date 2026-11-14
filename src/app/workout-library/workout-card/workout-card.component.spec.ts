@@ -162,7 +162,9 @@ describe('WorkoutCardComponent', () => {
                 roundsCompleted: 10,
                 totalRounds: 10,
                 outcome: 'finished',
-                expected: { timedSeconds: 0, repSeconds: 650 },
+                // One set of 20 reps, guessed at 65 seconds, done in twice that
+                repSeconds: 130,
+                sets: [{ round: 0, step: 0, name: 'Push-ups', reps: 20 }],
             });
             fixture.detectChanges();
 

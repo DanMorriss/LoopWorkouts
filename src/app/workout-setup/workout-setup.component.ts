@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WEEKDAYS } from '../models/plan';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { WorkoutTimeComponent } from '../shared/components/workout-time/workout-time.component';
 import { LeaveCheck, LeaveQuestion } from '../shared/navigation/leave-check';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
 import { ExerciseEditorComponent } from '../shared/components/exercise-editor/exercise-editor.component';
@@ -41,6 +42,7 @@ import { WorkoutSetupForm } from './workout-setup-form';
     },
     imports: [
         BackLinkComponent,
+        WorkoutTimeComponent,
         UnsavedChangesDialogComponent,
         CdkDropList,
         CdkDrag,

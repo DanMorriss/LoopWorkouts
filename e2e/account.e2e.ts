@@ -118,7 +118,7 @@ test.describe('signing in by email', () => {
         });
         await expect(
             page.getByText(
-                'On 11 November 2026 you agreed that notes you write, which may mention your health, are kept with your account (under the privacy notice of 10 November 2026).'
+                'On 11 November 2026 you agreed that notes you write, which may mention your health, are kept with your account (under the privacy notice of 14 November 2026).'
             )
         ).toBeVisible();
     });

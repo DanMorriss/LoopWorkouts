@@ -1,4 +1,5 @@
-import { expect, seed, test, timed, workout } from './fixtures';
+import { expect, NOW, seed, test, timed, workout } from './fixtures';
+import { FakeSupabase, signedIn } from './supabase';
 import { HistoryPage } from './history-page';
 import { WorkoutPage } from './workout-page';
 
@@ -50,4 +51,50 @@ test.describe('with no body weight', () => {
         await run.summaryDone.click();
         await expect(new HistoryPage(page).entry('Planks')).not.toContainText('kcal');
     });
+});
+
+test.describe('signed in, keeping the body weight with the account', () => {
+    test.use({
+        storage: {
+            ...signedIn('me@example.com', Date.parse(NOW)),
+            ...seed.settings({ bodyWeight: 80, bodyWeightUpdatedAt: Date.parse(NOW) - 60_000 }),
+        },
+    });
+
+    test(
+        'REG-CAL-03 consent to keeping it, sending it, and withdrawing it',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const supabase = new FakeSupabase(page);
+            await supabase.install();
+            await app.goto('/account');
+            const tick = page.getByRole('checkbox', {
+                name: /my body weight, which is health data/,
+            });
+            const hint = page.getByText(/^For calories burnt\./);
+            await expect(tick).not.toBeChecked();
+            await expect(hint).toHaveText('For calories burnt. Kept on this device only');
+
+            await tick.check();
+            await expect(hint).toHaveText('For calories burnt. Kept with your account');
+            await expect(
+                page.getByRole('status').filter({ hasText: 'Agreed on 11 November 2026.' })
+            ).toBeVisible();
+            expect(supabase.callsTo('rpc/give_body_weight_consent')[0].body).toEqual({
+                notice_date: '2026-11-14',
+            });
+            // Sent with the rest, as a record of its own
+            await expect
+                .poll(() => JSON.stringify(supabase.callsTo('rpc/push_records')))
+                .toContain('"kind":"body-weight"');
+
+            await tick.uncheck();
+            await expect(hint).toHaveText('For calories burnt. Kept on this device only');
+            expect(supabase.callsTo('rpc/withdraw_body_weight_consent')).toHaveLength(1);
+            // It stays on this device
+            await expect(
+                page.getByRole('textbox', { name: 'Body weight in kilograms' })
+            ).toHaveValue('80');
+        }
+    );
 });

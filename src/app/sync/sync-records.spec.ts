@@ -23,6 +23,7 @@ function copyHere(overrides: Partial<CopyHere> = {}): CopyHere {
         libraryOrder: { ids: [], updatedAt: 0 },
         plan: { days: [[], [], [], [], [], [], []], updatedAt: 0 },
         profile: profile(0),
+        bodyWeight: null,
         deleted: [],
         ...overrides,
     };
@@ -53,6 +54,25 @@ describe('recordsHere', () => {
                 updated_at: 9,
                 deleted_at: null,
                 data: { id: 'me', ...profile(9) },
+                version: BACKUP_VERSION,
+            },
+        ]);
+    });
+
+    // Null without consent to keeping it with the account, or if never set here
+    it('gives the body weight as one record, only when there is one to keep (CAL-6)', () => {
+        expect(recordsHere(copyHere()).filter((r) => r.kind === 'body-weight')).toEqual([]);
+        expect(
+            recordsHere(copyHere({ bodyWeight: { kg: 72.5, updatedAt: 9 } })).filter(
+                (record) => record.kind === 'body-weight'
+            )
+        ).toEqual([
+            {
+                kind: 'body-weight',
+                id: 'me',
+                updated_at: 9,
+                deleted_at: null,
+                data: { id: 'me', kg: 72.5, updatedAt: 9 },
                 version: BACKUP_VERSION,
             },
         ]);
@@ -219,6 +239,27 @@ describe('readPulled', () => {
 
         expect(page.copy.profile).toEqual(profile(6));
         expect(page.read.map(keyOf)).toEqual(['profile:me']);
+    });
+
+    it('reads the body weight, dated as the server has it, and none, but not a broken one', () => {
+        const weight = (seq: number, id: string, kg: unknown) =>
+            row({ seq, kind: 'body-weight', id, updated_at: seq, data: { id, kg } });
+
+        expect(readPulled([weight(1, 'me', 72.5)]).copy.bodyWeight).toEqual({
+            kg: 72.5,
+            updatedAt: 1,
+        });
+        expect(readPulled([weight(2, 'me', null)]).copy.bodyWeight).toEqual({
+            kg: null,
+            updatedAt: 2,
+        });
+        const broken = readPulled([
+            weight(3, 'other', 70),
+            weight(4, 'me', 5),
+            weight(5, 'me', '70'),
+        ]);
+        expect(broken.copy.bodyWeight).toBeNull();
+        expect(broken.read).toEqual([]);
     });
 
     it('reads records and deletions to merge, dated as the server has them', () => {

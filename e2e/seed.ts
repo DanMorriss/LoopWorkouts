@@ -218,6 +218,8 @@ export interface Settings {
     name: string;
     /** In kg, on this device only (CAL-2). */
     bodyWeight: number | null;
+    /** When it last changed; it's sent to an account only once it has a date (CAL-6). */
+    bodyWeightUpdatedAt: number;
 }
 
 /** The keys a test's `storage` takes, made from the data above. */

@@ -2,6 +2,7 @@ import { DestroyRef, DOCUMENT, effect, inject, Service, untracked } from '@angul
 import { DeviceDataService } from '../shared/state/device-data.service';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { AccountClient, ACCOUNT_CLIENT } from '../account/account-client';
+import { ConsentService } from '../account/consent.service';
 import { BackupService } from '../shared/backup/backup.service';
 import { ReadyMadeFavourites } from '../shared/state/ready-made-favourites.service';
 import { ReadyMadeChanges } from '../shared/state/ready-made-changes.service';
@@ -56,6 +57,7 @@ export class SyncService {
     private readonly readyMadeChanges = inject(ReadyMadeChanges);
     private readonly plan = inject(PlanStore);
     private readonly settings = inject(SettingsStore);
+    private readonly consent = inject(ConsentService);
     private readonly clock = inject(SyncClock);
     private readonly starter = inject(SyncStarter);
     private readonly status = this.starter.status;
@@ -77,6 +79,7 @@ export class SyncService {
             this.workouts.libraryOrder();
             this.plan.plan();
             this.settings.profile();
+            this.keptBodyWeight();
             this.history.entries();
             this.exercises.own();
             this.exercises.notes();
@@ -306,8 +309,14 @@ export class SyncService {
             libraryOrder: this.workouts.libraryOrder(),
             plan: this.plan.plan(),
             profile: this.settings.profile(),
+            bodyWeight: this.keptBodyWeight(),
             deleted: [...this.deletions.all()],
         };
+    }
+
+    /** The body weight, to keep with the account only with its consent (CAL-6). */
+    private keptBodyWeight() {
+        return this.consent.weightGiven() ? this.settings.bodyWeightRecord() : null;
     }
 }
 

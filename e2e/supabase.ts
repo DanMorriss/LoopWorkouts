@@ -73,6 +73,8 @@ export class FakeSupabase {
     consentAnswer: Answer = 200;
     /** The account's consent to keeping notes, as the server keeps it: null for none on record. */
     consent: { at: number; notice: string } | null = null;
+    /** And to keeping the body weight (CAL-6), answered as `consentAnswer` says. */
+    weightConsent: { at: number; notice: string } | null = null;
 
     constructor(private readonly page: Page) {}
 
@@ -165,6 +167,19 @@ export class FakeSupabase {
                 return json(this.consentAnswer, this.consent);
             case '/rest/v1/rpc/my_health_consent':
                 return json(this.consentAnswer, this.consent);
+            case '/rest/v1/rpc/give_body_weight_consent':
+                if (this.consentAnswer === 200) {
+                    const { notice_date } = body as { notice_date: string };
+                    this.weightConsent = { at: now, notice: notice_date };
+                }
+                return json(this.consentAnswer, this.weightConsent);
+            case '/rest/v1/rpc/my_body_weight_consent':
+                return json(this.consentAnswer, this.weightConsent);
+            case '/rest/v1/rpc/withdraw_body_weight_consent':
+                if (this.consentAnswer === 200) {
+                    this.weightConsent = null;
+                }
+                return json(this.consentAnswer, null);
             case '/rest/v1/rpc/delete_my_account':
                 return this.deleteAccount === 'abort'
                     ? route.abort('internetdisconnected')

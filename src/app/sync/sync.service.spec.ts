@@ -5,6 +5,9 @@ import { HistoryEntry } from '../models/history';
 import { WorkoutFields } from '../models/workout';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { HistoryStore } from '../shared/state/history-store.service';
+import { SettingsStore } from '../shared/state/settings-store.service';
+import { ConsentService } from '../account/consent.service';
+import type { AccountClient } from '../account/account-client';
 import { SyncClock } from '../shared/state/sync-clock.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import {
@@ -128,6 +131,53 @@ describe('SyncService', () => {
         expect((args as { changes: { id: string }[] }).changes.map((r) => r.id)).toEqual([
             workout.id,
         ]);
+    });
+
+    describe('the body weight (CAL-6)', () => {
+        const settings = () => TestBed.inject(SettingsStore);
+        /** The account consents to keeping it, as the server says on signing in. */
+        async function consenting() {
+            client.rpc.mockImplementation(async (fn: string, args?: unknown) =>
+                fn === 'my_body_weight_consent'
+                    ? { data: { at: 1000, notice: '2026-11-14' }, error: null }
+                    : server.rpc(fn, args)
+            );
+            await TestBed.inject(ConsentService).signedIn(client as unknown as AccountClient);
+        }
+
+        it("isn't sent without consent to keeping it with the account", async () => {
+            settings().update({ bodyWeight: 80 });
+
+            await start();
+
+            expect(onServer('body-weight', 'me')).toBeUndefined();
+        });
+
+        it('is sent with consent, and changes to it after', async () => {
+            await consenting();
+            settings().update({ bodyWeight: 80 });
+
+            await start();
+            expect(onServer('body-weight', 'me')!.data).toMatchObject({ kg: 80 });
+
+            settings().update({ bodyWeight: null });
+            await sync.sync();
+            expect(onServer('body-weight', 'me')!.data).toMatchObject({ kg: null });
+        });
+
+        it("takes another device's, if it's newer", async () => {
+            server.write({
+                kind: 'body-weight',
+                id: 'me',
+                updated_at: 5,
+                deleted_at: null,
+                data: { id: 'me', kg: 72.5, updatedAt: 5 },
+            });
+
+            await start();
+
+            expect(settings().bodyWeight()).toBe(72.5);
+        });
     });
 
     it("merges in what's been written from another device", async () => {

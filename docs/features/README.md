@@ -128,11 +128,12 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | PLN-6  | Start from a ready-made week: workouts and plan in one go                | ✅  | —   | [planning](planning.md)                       |
 | PLN-7  | Be offered a ready-made week on Today, for my goal and equipment         | ✅  | —   | [planning](planning.md)                       |
 | PLN-8  | A tour of the Plan page, the first time I open it                        | ✅  | —   | [planning](planning.md)                       |
-| CAL-1  | See about how many calories a workout burnt                              | ✅   | —   | [calories](calories.md)                       |
-| CAL-2  | Give my body weight once, kept on this device only                       | ✅   | —   | [calories](calories.md)                       |
+| CAL-1  | See about how many calories a workout burnt                              | ✅  | —   | [calories](calories.md)                       |
+| CAL-2  | Give my body weight once, for the calories                               | ✅  | —   | [calories](calories.md)                       |
 | CAL-3  | See the calories I've burnt this week on Progress                        | —   | —   | [calories](calories.md)                       |
 | CAL-4  | Say how hard an exercise of my own is, for its calories                  | —   | —   | [calories](calories.md)                       |
 | CAL-5  | Use my heart rate from a watch for calories                              | —   | —   | [calories](calories.md)                       |
+| CAL-6  | Agree to keeping my body weight with my account                          | ✅  | —   | [calories](calories.md)                       |
 
 What's saved on the device, and in what shape, is in [data](data.md). Where the app is heading, and why the planned stories are in the order they are, is in [direction](../direction.md).
 

@@ -82,3 +82,24 @@ export function bodyWeightIn(kg: number, unit: WeightUnit): number {
     const value = unit === 'kg' ? kg : kg / KG_PER_LB;
     return Math.round(value * 10) / 10;
 }
+
+/**
+ * Your body weight as it syncs, with consent (CAL-6): in kg, or null for none given, and when
+ * it last changed, in ms since the epoch.
+ */
+export interface BodyWeightRecord {
+    kg: number | null;
+    updatedAt: number;
+}
+
+/** A body weight, in kg, as it's kept: in range, or null for none. Anything else is undefined. */
+export function readBodyWeightKg(value: unknown): number | null | undefined {
+    if (value === null) {
+        return null;
+    }
+    return typeof value === 'number' &&
+        value >= BODY_WEIGHT_RANGE_KG.min &&
+        value <= BODY_WEIGHT_RANGE_KG.max
+        ? value
+        : undefined;
+}

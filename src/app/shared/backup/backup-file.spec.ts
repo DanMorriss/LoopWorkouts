@@ -5,7 +5,7 @@ import { Settings } from '../state/settings-store.service';
 import { makeWorkout, rest, savedBeforeGroups, work } from '../testing/make-workout';
 import { BACKUP_VERSION, backupFileName, makeBackup, readBackup } from './backup-file';
 
-const SETTINGS: Omit<Settings, 'profileUpdatedAt'> = {
+const SETTINGS: Omit<Settings, 'profileUpdatedAt' | 'bodyWeightUpdatedAt'> = {
     theme: 'dark',
     sound: true,
     vibration: true,

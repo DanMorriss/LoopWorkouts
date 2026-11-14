@@ -1,5 +1,6 @@
 import { copyPlan, isWeekPlan, WeekPlan } from '../models/plan';
 import { Profile, readProfile } from '../models/profile';
+import { BodyWeightRecord, readBodyWeightKg } from '../models/weight';
 import { isDeletion, isLibraryOrder, LibraryOrder, SyncedKind } from '../models/sync';
 import { BACKUP_VERSION } from '../shared/backup/backup-file';
 import { CopyToMerge } from '../shared/backup/backup.service';
@@ -15,9 +16,9 @@ import { readReadyMadeChange } from '../models/ready-made-change';
 
 /**
  * The kinds of record on the server: those that leave a deletion, the library's order, the
- * weekly plan and the profile.
+ * weekly plan, the profile and, with consent, the body weight (CAL-6).
  */
-export type RecordKind = SyncedKind | 'library-order' | 'plan' | 'profile';
+export type RecordKind = SyncedKind | 'library-order' | 'plan' | 'profile' | 'body-weight';
 
 /** The library's order is one record, under this id. */
 export const LIBRARY_ORDER_ID = 'library';
@@ -27,6 +28,9 @@ export const PLAN_ID = 'week';
 
 /** The profile is one record, under this id. */
 export const PROFILE_ID = 'me';
+
+/** And so is the body weight. */
+export const BODY_WEIGHT_ID = 'me';
 
 /** A record as the server keeps it (see supabase/schema.sql). A deletion has `deleted_at`. */
 export interface ServerRecord {
@@ -44,11 +48,13 @@ export interface ServerRecord {
 /** Everything on this device that syncs. */
 export type CopyHere = Omit<
     CopyToMerge,
-    'libraryOrder' | 'plan' | 'profile' | 'fromVersion1' | 'newWorkouts'
+    'libraryOrder' | 'plan' | 'profile' | 'bodyWeight' | 'fromVersion1' | 'newWorkouts'
 > & {
     libraryOrder: LibraryOrder;
     plan: WeekPlan;
     profile: Profile;
+    /** Null without consent to keeping it with the account, or if it's never been set here. */
+    bodyWeight: BodyWeightRecord | null;
 };
 
 /** Everything on this device, as the server keeps it. */
@@ -78,6 +84,9 @@ export function recordsHere(copy: CopyHere): ServerRecord[] {
         // Not set up here, so there's no profile to give
         ...(copy.profile.updatedAt > 0
             ? [record('profile', { id: PROFILE_ID, ...copy.profile })]
+            : []),
+        ...(copy.bodyWeight
+            ? [record('body-weight', { id: BODY_WEIGHT_ID, ...copy.bodyWeight })]
             : []),
         ...copy.deleted.map(
             (deletion): ServerRecord => ({
@@ -144,6 +153,7 @@ export function readPulled(fetched: readonly unknown[]): PulledPage {
         libraryOrder: null,
         plan: null,
         profile: null,
+        bodyWeight: null,
         deleted: [],
     };
     const read: ServerRecord[] = [];
@@ -204,6 +214,7 @@ const RECORD_KINDS: readonly RecordKind[] = [
     'library-order',
     'plan',
     'profile',
+    'body-weight',
 ];
 
 /** Adds a record to the copy to merge, if it's usable, and gives whether it was. */
@@ -254,6 +265,15 @@ function addTo(copy: CopyToMerge, record: ServerRecord): boolean {
                 return false;
             }
             copy.profile = { ...profile, updatedAt: record.updated_at };
+            return true;
+        }
+        case 'body-weight': {
+            const data = record.data as Record<string, unknown> | null;
+            const kg = record.id === BODY_WEIGHT_ID ? readBodyWeightKg(data?.['kg']) : undefined;
+            if (kg === undefined) {
+                return false;
+            }
+            copy.bodyWeight = { kg, updatedAt: record.updated_at };
             return true;
         }
     }

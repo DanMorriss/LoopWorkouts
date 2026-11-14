@@ -33,6 +33,7 @@ describe('SettingsStore', () => {
             switchSidesSeconds: 5,
             name: '',
             bodyWeight: null,
+            bodyWeightUpdatedAt: 0,
             profileUpdatedAt: 0,
         });
 
@@ -154,13 +155,42 @@ describe('SettingsStore', () => {
         expect(createStore().bodyWeight()).toBe(72.575);
     });
 
-    // Health data: it stays on this device, so a change to it doesn't date the profile
-    it("keeps the body weight out of the profile, so it doesn't sync", () => {
+    // Health data: it syncs on its own, with consent, so a change to it doesn't date the profile
+    it('keeps the body weight out of the profile, dated on its own (CAL-6)', () => {
         const store = createStore();
+        expect(store.bodyWeightRecord()).toBeNull();
+
         store.update({ bodyWeight: 80 });
         expect(store.bodyWeight()).toBe(80);
         expect(store.hasProfile()).toBe(false);
         expect(store.profile()).not.toHaveProperty('bodyWeight');
+        const first = store.bodyWeightRecord()!;
+        expect(first.kg).toBe(80);
+        expect(first.updatedAt).toBeGreaterThan(0);
+
+        store.update({ theme: 'light', bodyWeight: 80 });
+        expect(store.bodyWeightRecord()!.updatedAt).toBe(first.updatedAt);
+        store.update({ bodyWeight: null });
+        expect(store.bodyWeightRecord()!.kg).toBeNull();
+        expect(store.bodyWeightRecord()!.updatedAt).toBeGreaterThan(first.updatedAt);
+    });
+
+    it("takes another device's body weight only if it's newer, and forgets it on leaving", () => {
+        const store = createStore();
+        store.update({ bodyWeight: 80 });
+        const here = store.bodyWeightRecord()!.updatedAt;
+
+        expect(store.mergeBodyWeight({ kg: 90, updatedAt: here - 1 })).toBe(false);
+        expect(store.bodyWeight()).toBe(80);
+        expect(store.mergeBodyWeight({ kg: 90, updatedAt: here + 1 })).toBe(true);
+        expect(store.bodyWeight()).toBe(90);
+
+        TestBed.resetTestingModule();
+        expect(createStore().bodyWeightRecord()).toEqual({ kg: 90, updatedAt: here + 1 });
+
+        createStore().forgetBodyWeight();
+        expect(createStore().bodyWeight()).toBeNull();
+        expect(createStore().bodyWeightRecord()).toBeNull();
     });
 
     describe('the profile (NAV-4)', () => {

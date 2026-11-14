@@ -31,6 +31,13 @@ export class ConsentService {
      */
     readonly given = this._given.asReadonly();
 
+    private readonly _weightGiven = signal<HealthConsent | null | undefined>(undefined);
+    /**
+     * The account's consent to keeping your body weight with it (CAL-6), apart from notes';
+     * null if it has none; undefined while signed out, not yet looked up, or unreachable.
+     */
+    readonly weightGiven = this._weightGiven.asReadonly();
+
     /** Ticked, ahead of signing in: saved with the account once it's signed in. */
     agree() {
         try {
@@ -45,16 +52,57 @@ export class ConsentService {
      * account's. Leaves it unknown if the server can't be reached.
      */
     async signedIn(client: AccountClient) {
+        await Promise.all([this.checkNotes(client), this.checkWeight(client)]);
+    }
+
+    /** Ticked on Profile, signed in: keeps the body weight with the account. Gives whether. */
+    async giveWeight(client: AccountClient): Promise<boolean> {
+        try {
+            const { data, error } = await client.rpc('give_body_weight_consent', {
+                notice_date: PRIVACY_NOTICE_DATE,
+            });
+            const consent = error ? null : toConsent(data);
+            if (consent) {
+                this._weightGiven.set(consent);
+            }
+            return consent !== null;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Unticked: the account stops keeping the body weight, which the server deletes. Gives
+     * whether it was done.
+     */
+    async withdrawWeight(client: AccountClient): Promise<boolean> {
+        try {
+            const { error } = await client.rpc('withdraw_body_weight_consent');
+            if (error) {
+                return false;
+            }
+            this._weightGiven.set(null);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    private async checkNotes(client: AccountClient) {
         const pending = readPending();
         if (pending !== null && (await this.give(client, pending))) {
             return;
         }
-        const { data, error } = await client.rpc('my_health_consent').then(
-            (result) => result,
-            () => ({ data: null, error: true })
-        );
-        if (!error) {
-            this._given.set(toConsent(data));
+        const looked = await lookUp(client, 'my_health_consent');
+        if (looked !== undefined) {
+            this._given.set(looked);
+        }
+    }
+
+    private async checkWeight(client: AccountClient) {
+        const looked = await lookUp(client, 'my_body_weight_consent');
+        if (looked !== undefined) {
+            this._weightGiven.set(looked);
         }
     }
 
@@ -65,6 +113,7 @@ export class ConsentService {
 
     signedOut() {
         this._given.set(undefined);
+        this._weightGiven.set(undefined);
     }
 
     private async give(client: AccountClient, notice: string): Promise<boolean> {
@@ -83,6 +132,18 @@ export class ConsentService {
             return false;
         }
     }
+}
+
+/** The account's consent of one kind, null for none, or undefined if it can't be reached. */
+async function lookUp(
+    client: AccountClient,
+    fn: 'my_health_consent' | 'my_body_weight_consent'
+): Promise<HealthConsent | null | undefined> {
+    const { data, error } = await client.rpc(fn).then(
+        (result) => result,
+        () => ({ data: null, error: true })
+    );
+    return error ? undefined : toConsent(data);
 }
 
 function readPending(): string | null {

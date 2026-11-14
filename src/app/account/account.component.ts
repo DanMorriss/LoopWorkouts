@@ -67,6 +67,12 @@ export class AccountComponent {
     private readonly returning = hasSignInTokens(this.document.location);
 
     constructor() {
+        // From the workout summary's Add your weight to see calories (CAL-2)
+        const url =
+            this.router.currentNavigation()?.finalUrl ?? this.router.parseUrl(this.router.url);
+        if (url.queryParamMap.get('focus') === 'body-weight') {
+            this.focus('body-weight');
+        }
         effect(() => {
             if (this.returning && this.account.state().status === 'signed-in') {
                 this.goHome();

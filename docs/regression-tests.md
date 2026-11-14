@@ -72,7 +72,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Expected:**
     1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, "Welcome to Loop Workouts", the sign-in (Continue with Google, Email, Email me a sign-in link) and **Continue as guest**, with no tab bar.
     2. localStorage has `setup = "due"` once the welcome screen is shown.
-    3. After Continue as guest: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 6" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
+    3. After Continue as guest: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 5" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
 - **Variants (same test file):**
     - A device with a saved workout but no `welcomed` key (in use before the welcome screen) opens `/home` straight away, and `welcomed` becomes `"guest"`.
     - A new device opening `/exercises/back-squat` directly gets that page, not the welcome screen.
@@ -86,14 +86,13 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     2. Pick **Fitness**, Next.
     3. Pick the **Kettlebell** chip, Next.
     4. Pick **Female**, Next.
-    5. Leave **Kilograms**, Next.
-    6. Type **72.5** in Your weight, press **Done**.
-    7. Reload. Open You.
+    5. Leave **Kilograms**, press **Done**.
+    6. Reload. Open You.
 - **Expected:**
-    1. Each question's heading takes focus as it shows, and "Question N of 6" counts up. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
+    1. Each question's heading takes focus as it shows, and "Question N of 5" counts up. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
     2. After Done, `/home` opens with "Good morning, Sam" and the Undo bar showing "You're all set, Sam. Change any of it on You, under Profile." with no Undo; the `setup` key is gone.
     3. Today shows **Get started** offering a ready-made plan. For Fitness with a kettlebell that's **Fitness, 4 days** (`firstPlan()`), not a single workout: see mismatch M3.
-    4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Weight units kg, Body weight 72.5 (on this device only, CAL-2). The Exercises page has **Only what I have** on with "My equipment: 1 piece".
+    4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Weight units kg. The Exercises page has **Only what I have** on with "My equipment: 1 piece".
 
 ### REG-NAV-03 · Skipping the setup
 
@@ -1362,12 +1361,12 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     1. The summary has a third stat, **Calories**, "About 50 kcal" (3.8 METs × 75 kg × 10 minutes is 47.5), heard as "about 50 calories".
     2. The run's line in the log ends "· about 50 kcal", heard as "… · 10:00 spent · about 50 calories".
 
-### REG-CAL-02 · No calories without a body weight
+### REG-CAL-02 · No calories without a body weight, and a way to add one
 
 - **Stories:** CAL-2 · **Priority:** P2
 - **Preconditions:** as REG-CAL-01, with no body weight.
-- **Steps:** Run Planks to the end, and press Done.
-- **Expected:** The summary has Time and Rounds only, and the log's line has no kcal.
+- **Steps:** Run Planks to the end. Press **Add your weight to see calories**. Then open Progress.
+- **Expected:** The summary has Time and Rounds only, and Add your weight to see calories. Pressing it opens `/account?focus=body-weight` with focus in Body weight. The log's line has no kcal.
 
 ### REG-CAL-03 · Keeping the body weight with the account, and withdrawing it
 

@@ -202,37 +202,6 @@
     text-align: center;
 }
 
-.summary__stats {
-    display: grid;
-    // Two or three: Time, Rounds and, with a body weight, Calories
-    grid-auto-columns: 1fr;
-    grid-auto-flow: column;
-    gap: 0.75rem;
-    margin: 1.25rem 0 0;
-}
-
-.summary__stat {
-    padding: 0.75rem;
-    border: 1px solid var(--border-soft);
-    border-radius: 0.75rem;
-    background: var(--card);
-    text-align: center;
-
-    dt {
-        color: var(--text-muted);
-        font-size: 0.8rem;
-        letter-spacing: 0.04em;
-    }
-
-    // The workout's numbers, in the display face
-    dd {
-        margin: 0.2rem 0 0;
-        @include display;
-        color: var(--text-strong);
-        font-size: 1.15rem;
-    }
-}
-
 .summary__section {
     margin-top: 1.5rem;
 

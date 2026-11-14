@@ -76,7 +76,7 @@ Twenty-one ready-made workouts are listed on Workouts, under your own (see `docs
 How the estimate works, and why the body weight stays on the device, is in `docs/features/calories.md`.
 
 - [x] **An estimate of each workout's calories** (CAL-1, 2026-11-14): "About 210 kcal" on the workout summary and in the history, from each exercise's movement (a MET each), the time on its sets, and rest at 1.5 METs.
-- [x] **Body weight, on this device only** (CAL-2, 2026-11-14): a sixth question in the setup, and Body weight on You → Profile. It's not part of the synced profile, as weight is health data.
+- [x] **Body weight, on this device only** (CAL-2, 2026-11-14): Body weight on You → Profile, and **Add your weight to see calories** on the workout summary, which opens it. Not asked in the setup, so a new user's first workout isn't held up by it. It's not part of the synced profile, as weight is health data.
 - [ ] **For Dan to look at:** the METs per movement and their exceptions (`models/calories.ts`), against the Compendium of Physical Activities, and whether resting at 1.5 METs is fair.
 - [ ] **The week's calories on Progress** (CAL-3): beside the time per week's bars, or as a second chart they switch to.
 - [ ] **How hard an exercise of your own is** (CAL-4): Light, Moderate or Hard on its page, for its MET, rather than 3.5 for all of them.

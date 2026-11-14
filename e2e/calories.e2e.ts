@@ -39,18 +39,30 @@ test.describe('with a body weight given', () => {
 test.describe('with no body weight', () => {
     test.use({ storage: seed.workouts([planks]) });
 
-    test('REG-CAL-02 no calories are shown', { tag: '@p2' }, async ({ app, page }) => {
-        const run = new WorkoutPage(page);
-        await app.goto('/library');
-        await run.startFromLibrary('Planks');
-        await run.wait(600_000);
+    test(
+        'REG-CAL-02 no calories without a body weight, and a way to add one',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Planks');
+            await run.wait(600_000);
 
-        await expect(run.summary).toHaveAccessibleName('Workout finished');
-        await expect(run.stat('Time')).toHaveText('10:00');
-        await expect(run.stat('Calories')).toHaveCount(0);
-        await run.summaryDone.click();
-        await expect(new HistoryPage(page).entry('Planks')).not.toContainText('kcal');
-    });
+            await expect(run.summary).toHaveAccessibleName('Workout finished');
+            await expect(run.stat('Time')).toHaveText('10:00');
+            await expect(run.stat('Calories')).toHaveCount(0);
+            // Asked for here, not in the setup: the run ends, and You opens on Body weight
+            await run.summary
+                .getByRole('button', { name: 'Add your weight to see calories' })
+                .click();
+            await expect(page).toHaveURL('/account?focus=body-weight');
+            await expect(
+                page.getByRole('textbox', { name: 'Body weight in kilograms' })
+            ).toBeFocused();
+            await app.goto('/history');
+            await expect(new HistoryPage(page).entry('Planks')).not.toContainText('kcal');
+        }
+    );
 });
 
 test.describe('signed in, keeping the body weight with the account', () => {

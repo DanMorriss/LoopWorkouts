@@ -3753,6 +3753,24 @@ describe('WorkoutComponent', () => {
                 'About 10 kcal'
             );
             expect(calories.querySelector('.sr-only')!.textContent).toBe('about 10 calories');
+            expect(summaryButton('Add your weight to see calories')).toBeUndefined();
+            fixture.destroy();
+        });
+
+        it('offers to add a body weight, without one, ending the run on Profile (CAL-2)', async () => {
+            start(makeWorkout({ workSeconds: 60, restSeconds: 0, repeats: 1 }));
+            advance(60_000);
+            const navigate = mockNavigate();
+            expect(stats().map((stat) => stat.split(':')[0])).toEqual(['Time', 'Rounds']);
+
+            pressInSummary('Add your weight to see calories');
+            await fixture.whenStable();
+
+            expect(store.activeWorkout()).toBeNull();
+            expect(entries()).toHaveLength(1);
+            expect(navigate).toHaveBeenCalledWith(['/account'], {
+                queryParams: { focus: 'body-weight' },
+            });
             fixture.destroy();
         });
 

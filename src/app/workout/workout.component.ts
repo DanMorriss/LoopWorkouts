@@ -356,6 +356,12 @@ export class WorkoutComponent {
         await this.router.navigateByUrl(editUrl(copy));
     }
 
+    /** From the summary: the run is over, on to the Body weight box on You → Profile. */
+    async addWeight() {
+        this.run.stop();
+        await this.router.navigate(['/account'], { queryParams: { focus: 'body-weight' } });
+    }
+
     async closeSummary() {
         const run = this.run.runId();
         this.run.stop();

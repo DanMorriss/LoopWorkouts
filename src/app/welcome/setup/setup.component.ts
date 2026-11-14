@@ -24,10 +24,9 @@ import { SyncStarter } from '../../sync/sync-starter.service';
 import { SETUP_KEY } from '../welcome-first';
 import { UndoService } from '../../shared/undo/undo.service';
 import { EquipmentChipsComponent } from '../../shared/components/equipment-chips/equipment-chips.component';
-import { BodyWeightFieldComponent } from '../../shared/components/body-weight-field/body-weight-field.component';
 
 /** The questions, in the order they're asked. */
-const QUESTIONS = ['name', 'goal', 'equipment', 'body', 'units', 'weight'] as const;
+const QUESTIONS = ['name', 'goal', 'equipment', 'body', 'units'] as const;
 type Step = (typeof QUESTIONS)[number];
 
 /** How long to wait for the account's profile before asking anyway (offline, say). */
@@ -35,8 +34,7 @@ export const PROFILE_WAIT_MS = 8000;
 
 /**
  * The setup (NAV-4), once, after the welcome screen: your name, what you train for, the
- * equipment you have, the body the muscle maps show, the units you lift in and your body
- * weight, for calories (CAL-2), one question
+ * equipment you have, the body the muscle maps show and the units you lift in, one question
  * at a time, then on to Today, which says it's all set and starts you off with a workout to add
  * (until 2026-11-03, a last screen here offered one to start straight away). Each answer is
  * saved as it's picked, so leaving part way keeps them. Signed in, it first waits for the account's profile: one set
@@ -44,7 +42,7 @@ export const PROFILE_WAIT_MS = 8000;
  */
 @Component({
     selector: 'app-setup',
-    imports: [BodyMapComponent, BodyWeightFieldComponent, EquipmentChipsComponent],
+    imports: [BodyMapComponent, EquipmentChipsComponent],
     templateUrl: './setup.component.html',
     styleUrl: './setup.component.scss',
 })

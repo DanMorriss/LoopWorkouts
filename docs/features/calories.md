@@ -1,11 +1,11 @@
 # Calories
 
-Built: an estimate of the calories each workout burnt, on its summary and in the history (CAL-1), from a body weight given in the setup or on You → Profile (CAL-2), kept on the device unless you agree to keep it with your account (CAL-6). To come: the week's calories on Progress (CAL-3), how hard an exercise of your own is (CAL-4), and heart rate from a watch (CAL-5).
+Built: an estimate of the calories each workout burnt, on its summary and in the history (CAL-1), from a body weight given on You → Profile, which the summary offers to add (CAL-2), kept on the device unless you agree to keep it with your account (CAL-6). To come: the week's calories on Progress (CAL-3), how hard an exercise of your own is (CAL-4), and heart rate from a watch (CAL-5).
 
 ## Stories
 
 - **CAL-1** As a user I want to see about how many calories a workout burnt, on its summary and in the history, so I have a sense of how much work it was.
-- **CAL-2** As a user I want to give my body weight once, as I set up or on my profile, and have it kept on this device only, so the estimate is mine without my weight leaving my phone.
+- **CAL-2** As a user I want to give my body weight once, on my profile, and have it kept on this device only, so the estimate is mine without my weight leaving my phone; and be shown where, without being asked it before I've even worked out.
 - **CAL-3** As a user I want to see the calories I've burnt in the last 7 days on Progress, beside the time I've spent.
 - **CAL-4** As a user I want to say how hard an exercise of my own is, so its calories are closer than a general guess.
 - **CAL-5** As a user with a watch I want the estimate to use my heart rate, so it's closer still.
@@ -18,7 +18,7 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 - **Body weight** is all that's needed. Sex is asked already (SET-5) but isn't used: the estimate below doesn't depend on it. Age and height would only refine it a little (by correcting for resting metabolism), so they aren't asked.
 - **It's optional.** With none given, no calories are shown anywhere, and nothing says they're missing. Taking it away (emptying the box) stops them showing again. There's no separate switch.
 - **It stays on this device unless you agree otherwise.** It's saved with this device's settings, not with the profile, as weight is health data under UK GDPR, which needs explicit consent to keep with the account. Signed in, a tick on Profile gives that consent (CAL-6, below). It is in an exported backup, as the settings are, as that's your own file.
-- **In the setup**, a sixth question, after the units, as it's asked in the unit just picked: **"What do you weigh?"**, "For an estimate of the calories each workout burns. It stays on this device unless you choose to keep it with your account, on Profile. You can leave it empty." A box, "Your weight", with the unit after it ("kg" or "lb"). Enter is Done, as it's the last question. The counts become "Question 1 of 6" and so on.
+- **Not in the setup.** It's asked for only on Profile, and from the workout summary, which with no body weight given has **Add your weight to see calories** under its stats (a button that reads as a link). It ends the run, as Done does, and opens You with focus in the Body weight box (`/account?focus=body-weight`). Asking every new user their weight before their first workout was judged a cost for the beta, both for how some people feel about being asked and for getting people to that first workout quickly (Dan, 2026-11-14). For a day before that, it was the setup's sixth question.
 - **On You → Profile**, under Weight units: **Body weight**, the same box and unit, with the hint "For calories burnt. Kept on this device only" ("Kept with your account" with consent, CAL-6).
 - **The value:** a number in the unit chosen, to one decimal place (e.g. 72.5); saved in kg, as lifted weights are, so switching units loses nothing. It's saved as the box is left (or on Next or Done in the setup), and shown back as it's kept: whole numbers without a ".0", e.g. "72" or "72.5". From 20 kg to 300 kg (44 to 661 lb); anything outside that, or not a number, is taken as none and the box is emptied.
 
@@ -66,8 +66,9 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 
 ## Acceptance criteria
 
-- Given a first visit, when I go through the setup, then question 6 of 6 is "What do you weigh?", in kg (or lb if I chose pounds), and Done goes to Today; given I type 72.5 and press Done, then You → Profile shows 72.5 kg under Body weight.
-- Given I leave the weight empty in the setup, then no calories show on the summary or in the history.
+- Given a first visit, then the setup doesn't ask for a weight (5 questions).
+- Given no body weight, when a workout finishes, then the summary has no Calories, and has Add your weight to see calories; when I press it, then the run ends and You opens with focus in Body weight; and the history shows no calories.
+- Given I type 72.5 in Body weight, then it's saved, and the summary shows Calories, not Add your weight.
 - Given I type 160 in lb, then 72.6 kg is saved, and choosing Kilograms shows 72.6.
 - Given 10 in kg, then it's emptied and none is saved.
 - Given a body weight, then it isn't in the synced profile, and without consent signing in on another device doesn't bring it.

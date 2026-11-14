@@ -1,11 +1,12 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { bodyWeightIn, bodyWeightToKg } from '../../../models/weight';
-import { SettingsStore } from '../../state/settings-store.service';
+import { bodyWeightIn, bodyWeightToKg } from '../../models/weight';
+import { SettingsStore } from '../../shared/state/settings-store.service';
 
 /**
- * A box for your body weight (CAL-2), in the unit you lift in, which is shown after it. Saved
- * as it's left, or on Enter, as it's kept: to one decimal place, and emptied when it isn't a
- * weight. The label is what's put inside it, so each page styles its own.
+ * Profile's box for your body weight (CAL-2), in the unit you lift in, which is shown after
+ * it. Saved as it's left, or on Enter, as it's kept: to one decimal place, and emptied when
+ * it isn't a weight. The label is what's put inside it. Focus it by its id, `body-weight`, as
+ * the workout summary's Add your weight does.
  */
 @Component({
     selector: 'app-body-weight-field',
@@ -17,6 +18,7 @@ import { SettingsStore } from '../../state/settings-store.service';
             </span>
             <span class="body-weight">
                 <input
+                    id="body-weight"
                     class="picker-field__input body-weight__input"
                     type="text"
                     inputmode="decimal"

@@ -3,7 +3,7 @@ import { BodyFigure } from '../../models/exercise';
 import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
 import { MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
-import { BodyWeightFieldComponent } from '../../shared/components/body-weight-field/body-weight-field.component';
+import { BodyWeightFieldComponent } from './body-weight-field.component';
 import { ConsentService } from '../consent.service';
 import { BodyWeightConsentComponent } from './body-weight-consent.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';

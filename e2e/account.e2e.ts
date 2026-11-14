@@ -227,7 +227,7 @@ test.describe('signing in from the welcome screen', () => {
                     await expect(page.getByRole('radio', { name: 'Pounds (lb)' })).toBeChecked();
                 } else {
                     await expect(page).toHaveURL('/welcome/setup');
-                    await expect(page.getByText('Question 1 of 6')).toBeVisible();
+                    await expect(page.getByText('Question 1 of 5')).toBeVisible();
                 }
             }
         );

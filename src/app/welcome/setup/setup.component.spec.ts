@@ -94,7 +94,7 @@ describe('SetupComponent (NAV-4)', () => {
 
     it('asks one question at a time, saving each answer, then goes on to Today, all set', async () => {
         await create();
-        expect(element.textContent).toContain('Question 1 of 6');
+        expect(element.textContent).toContain('Question 1 of 5');
         expect(heading()).toBe('What should we call you?');
         expect(document.activeElement).toBe(element.querySelector('h2'));
 
@@ -126,19 +126,6 @@ describe('SetupComponent (NAV-4)', () => {
         expect(heading()).toBe('Do you lift in kilograms or pounds?');
         await choose('Pounds');
         expect(settings().weightUnit()).toBe('lb');
-        await press('Next');
-
-        // Asked in the unit just picked, and kept on this device only (CAL-2)
-        expect(heading()).toBe('What do you weigh?');
-        expect(element.textContent).toContain('Question 6 of 6');
-        const weight = element.querySelector<HTMLInputElement>('app-body-weight-field input')!;
-        expect(element.querySelector('app-body-weight-field label')!.textContent).toContain(
-            'Your weight in pounds'
-        );
-        weight.value = '160';
-        weight.dispatchEvent(new Event('change'));
-        expect(settings().bodyWeight()).toBe(72.575);
-        expect(settings().profile()).not.toHaveProperty('bodyWeight');
         // The last question's Next is Done, which goes straight on to Today
         await press('Done');
 
@@ -150,21 +137,6 @@ describe('SetupComponent (NAV-4)', () => {
         );
         // Nothing's added or started for you: Today offers a workout to add
         expect(TestBed.inject(WorkoutStore).workouts()).toEqual([]);
-    });
-
-    it("saves the weight and finishes by Enter, or leaves none if it isn't a weight", async () => {
-        await create();
-        for (let question = 1; question < 6; question++) {
-            await press('Next');
-        }
-        const weight = element.querySelector<HTMLInputElement>('app-body-weight-field input')!;
-        weight.focus();
-        await userEvent.keyboard('12{Enter}');
-        await fixture.whenStable();
-
-        expect(settings().bodyWeight()).toBeNull();
-        expect(weight.value).toBe('');
-        expect(navigate).toHaveBeenCalledWith('/home', { replaceUrl: true });
     });
 
     it('goes back to the question before, as it was answered', async () => {

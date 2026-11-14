@@ -5,6 +5,7 @@ import {
     firstPlan,
     plansFor,
     planWorkouts,
+    withoutActiveRest,
 } from './built-in-plans';
 import { isActiveRest } from './active-rest';
 import { BUILT_IN_WORKOUTS } from './built-in-workouts';
@@ -115,5 +116,22 @@ describe('firstPlan (PLN-7)', () => {
         expect(firstPlan('muscle', []).title).toBe('No equipment, 3 days');
         expect(firstPlan('fitness', ['kettlebell']).title).toBe('Fitness, 4 days');
         expect(firstPlan('fitness', []).title).toBe('No equipment, 3 days');
+    });
+});
+
+describe('withoutActiveRest', () => {
+    it('leaves the mobility days empty, and the training days as they are', () => {
+        for (const plan of BUILT_IN_PLANS) {
+            const without = withoutActiveRest(plan);
+            expect(planWorkouts(without).some(isActiveRest), plan.title).toBe(false);
+            plan.days.forEach((day, i) =>
+                expect(without.days[i]).toEqual(
+                    day.filter((id) => !isActiveRest(BUILT_IN_WORKOUTS.find((w) => w.id === id)!))
+                )
+            );
+            expect({ ...without, days: plan.days }).toEqual(plan);
+        }
+        const gym = BUILT_IN_PLANS.find((p) => p.title === '3-day beginner gym')!;
+        expect(withoutActiveRest(gym).days.map((day) => day.length)).toEqual([1, 0, 1, 0, 1, 0, 0]);
     });
 });

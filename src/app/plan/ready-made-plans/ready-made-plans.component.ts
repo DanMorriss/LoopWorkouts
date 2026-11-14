@@ -41,7 +41,7 @@ import { hiddenByEquipmentText } from '../../models/exercise';
                                 [plan]="plan"
                                 [headingLevel]="3"
                                 [workoutsFrom]="back.url === '/plan' ? 'plan' : 'plans'"
-                                (used)="use(plan)"
+                                (used)="use($event)"
                             />
                         </li>
                     }

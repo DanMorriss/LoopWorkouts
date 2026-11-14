@@ -237,3 +237,21 @@
         justify-self: center;
     }
 }
+
+// Whether to keep its active rest: what it is at the left, the switch at the right
+.plan-card__rest-choice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.plan-card__rest-text {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.plan-card__rest-hint {
+    color: var(--text-muted);
+    @include small-type(0.75rem);
+}

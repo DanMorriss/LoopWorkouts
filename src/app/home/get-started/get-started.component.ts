@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { PageSlide } from '../../shared/navigation/page-slide';
-import { firstPlan } from '../../models/built-in-plans';
+import { BuiltInPlan, firstPlan } from '../../models/built-in-plans';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { injectUsePlanOnToday } from '../use-plan-on-today';
@@ -21,7 +21,7 @@ import { injectUsePlanOnToday } from '../use-plan-on-today';
                 Start with a week of workouts, planned for you. Here's one for your goal and
                 equipment:
             </p>
-            <app-plan-card [plan]="plan()" [main]="true" (used)="use()" />
+            <app-plan-card [plan]="plan()" [main]="true" (used)="use($event)" />
             <!-- The other ways, as on This week once there are workouts: side by side -->
             <div class="start__actions">
                 <a
@@ -49,10 +49,10 @@ export class GetStartedComponent {
     );
 
     /**
-     * Uses it, with Undo. This card then goes, and the week takes its place, so focus moves
-     * there, to Edit plan.
+     * Uses it as its card shows it, with or without its active rest, with Undo. This card then
+     * goes, and the week takes its place, so focus moves there, to Edit plan.
      */
-    protected use() {
-        this.usePlan(this.plan());
+    protected use(plan: BuiltInPlan) {
+        this.usePlan(plan);
     }
 }

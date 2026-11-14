@@ -114,4 +114,36 @@ describe('ReadyMadePlansComponent (PLN-6)', () => {
             'Your week is planned: Push, pull, legs'
         );
     });
+
+    it('leaves out its active rest days, with its switch off', async () => {
+        await open();
+        const card = [...el().querySelectorAll<HTMLElement>('app-plan-card')].find((c) =>
+            c.textContent!.includes('Push, pull, legs')
+        )!;
+        const toggle = card.querySelector<HTMLButtonElement>('[role="switch"]')!;
+        // Named, and on as the plan comes
+        const label = document.getElementById(toggle.getAttribute('aria-labelledby')!)!;
+        expect(label.textContent!.trim()).toBe('Include active rest days');
+        expect(
+            document.getElementById(toggle.getAttribute('aria-describedby')!)!.textContent!.trim()
+        ).toBe('Optional stretching on 2 rest days.');
+        expect(toggle.getAttribute('aria-checked')).toBe('true');
+        expect(card.textContent).toContain('+ 2 active rest');
+        expect(card.textContent).toContain('Mobility flow');
+
+        toggle.click();
+        harness.fixture.detectChanges();
+        // The card shows the plan as it'll be used: no active rest, the training as it was
+        expect(toggle.getAttribute('aria-checked')).toBe('false');
+        expect(card.textContent).not.toContain('+ 2 active rest');
+        expect(card.textContent).not.toContain('Mobility flow');
+        expect(card.querySelector('.plan-card__count')!.textContent).toContain('4');
+
+        card.querySelector<HTMLButtonElement>('[aria-label="Use Push, pull, legs"]')!.click();
+        await harness.fixture.whenStable();
+        const planned = TestBed.inject(PlanStore).plan().days.flat();
+        expect(planned).toContain('builtin:gym-push');
+        expect(planned).not.toContain('builtin:mobility-flow');
+        expect(planned).not.toContain('builtin:full-body-stretch');
+    });
 });

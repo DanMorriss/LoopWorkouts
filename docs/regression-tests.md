@@ -891,6 +891,16 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:** Open Today; press the suggestion's Start.
 - **Expected:** Under the week: Push, "For Chest (0 of 10 sets), the least worked this week."; Start starts Push. With a plan this week the card isn't there (REG-PLAN-03).
 
+### REG-PRG-04 · The week's exercises, with their new bests
+
+- **Stories:** PRG-13 · **Priority:** P2
+- **Preconditions:** `guest()`, clock Wed 11 Nov. History on 10 Nov: Back squat 2 × 10 at 62.5 kg, a 1:00 Plank, and Dumbbell lunge 2 × 10 each side; on 2 Nov (9 days before): Back squat 10 at 60 kg and a 0:45 Plank.
+- **Steps:** Open Progress; read Exercises this week; press Back squat.
+- **Expected:**
+    1. Three rows, those with a new best first: Back squat, "20 reps in 2 sets", "New best, heaviest: 62.5 kg for 10 reps"; Plank, "1 minute in 1 set", "New best, longest: 1 minute"; then Dumbbell lunge, "20 reps each side in 2 sets", with no best, as it's the first time.
+    2. Back squat goes to `/exercises/back-squat`.
+- **In the pack:** as above (the screen reader wording, which says the same as what's shown).
+
 ---
 
 ## 8. Exercises (`exercises.md`)
@@ -1367,7 +1377,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Workouts and ready-made   | REG-LIB-01 – 10  | LIB-1 – LIB-7, CTL-4                                                                                                          |
 | Running a workout         | REG-RUN-01 – 15  | RUN-1 – RUN-12, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 04  | HIS-1 – HIS-5, CTL-3                                                                                                          |
-| Progress                  | REG-PRG-01 – 03  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9                                                                                             |
+| Progress                  | REG-PRG-01 – 04  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-13                                                                                     |
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                            |
 | Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                               |
@@ -1375,7 +1385,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                    |
 | Gestures and dragging     | REG-GES-01 – 03  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12                                                                                     |
 
-**Count:** 81 tests: 40 P1, 32 P2, 9 P3.
+**Count:** 82 tests: 40 P1, 33 P2, 9 P3.
 
 | Area      | P1     | P2     | P3    | Total  |
 | --------- | ------ | ------ | ----- | ------ |
@@ -1385,14 +1395,14 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | LIB       | 5      | 2      | 1     | 8      |
 | RUN       | 6      | 7      | 2     | 15     |
 | HIS       | 3      | 0      | 1     | 4      |
-| PRG       | 0      | 3      | 0     | 3      |
+| PRG       | 0      | 4      | 0     | 4      |
 | EXR       | 2      | 3      | 0     | 5      |
 | SET       | 2      | 1      | 1     | 4      |
 | DATA      | 4      | 0      | 1     | 5      |
 | ACC       | 5      | 2      | 0     | 7      |
 | A11Y      | 3      | 3      | 0     | 6      |
 | GES       | 0      | 0      | 3     | 3      |
-| **Total** | **40** | **32** | **9** | **81** |
+| **Total** | **40** | **33** | **9** | **82** |
 
 ### In the pack
 
@@ -1406,7 +1416,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | LIB  | `e2e/library.e2e.ts`   | 11    | 0                               | 0                                                     |
 | RUN  | `e2e/run.e2e.ts`       | 23    | 0                               | 1 (real sound, manual)                                |
 | HIS  | `e2e/history.e2e.ts`   | 6     | 0                               | 0                                                     |
-| PRG  | `e2e/progress.e2e.ts`  | 4     | 0                               | 0                                                     |
+| PRG  | `e2e/progress.e2e.ts`  | 5     | 0                               | 0                                                     |
 | EXR  | `e2e/exercises.e2e.ts` | 9     | 0                               | 1 (3D figure, manual)                                 |
 | SET  | `e2e/settings.e2e.ts`  | 6     | 0                               | 0                                                     |
 | DATA | `e2e/data.e2e.ts`      | 6     | 0                               | 0                                                     |

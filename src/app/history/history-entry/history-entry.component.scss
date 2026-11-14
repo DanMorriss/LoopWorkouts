@@ -116,24 +116,7 @@
 // The exercise's name goes to its page, with its progress (PRG-4)
 .entry__exercise {
     position: relative;
-    color: var(--glow-text);
-    text-decoration: underline;
-    text-decoration-color: var(--border);
-    text-underline-offset: 2px;
-
-    @include hover {
-        text-decoration-color: currentColor;
-    }
-
-    // Its underline strengthens the moment it's pressed, as the buttons light up
-    @include pressed {
-        text-decoration-color: currentColor;
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-    }
+    @include text-link;
 }
 
 // The user's own words, set apart from the figures above with a quote line

@@ -167,6 +167,84 @@ export function exerciseBests(sessions: readonly ExerciseSession[]): ExerciseBes
 }
 
 /**
+ * The bests that beat an earlier session, as the workout summary counts them (PRG-2): not one
+ * from an exercise's first session, when everything would be a best, nor an equal, as the
+ * first time stands. `sessions` are newest first.
+ */
+export function newBests(sessions: readonly ExerciseSession[]): ExerciseBests {
+    const first = sessions.at(-1)?.entryId;
+    return Object.fromEntries(
+        Object.entries(exerciseBests(sessions)).filter(([, best]) => best.entryId !== first)
+    );
+}
+
+/** An exercise's week (PRG-13): what was done of it in the last 7 days, and its new bests. */
+export interface ExerciseWeek {
+    exerciseId: string;
+    /** Sets done; a left and a right make one. */
+    sets: number;
+    /** Reps done, on one side of an exercise done each side. 0 with only timed sets. */
+    reps: number;
+    /** Time held in timed sets, in seconds, on one side of one done each side. */
+    seconds: number;
+    /** Whether every set was one side of it, so the totals are each side's. */
+    eachSide: boolean;
+    /** The heaviest, most reps and longest it set this week that beat an earlier session. */
+    bests: Omit<ExerciseBests, 'oneRepMax'>;
+}
+
+/**
+ * Each exercise done in the 7 days from `from`, with its totals and new bests, from the
+ * history (newest first). Each side's sets count apart, then the side that did more stands
+ * for both, so "3 × 10 each side" is 3 sets of 30 reps, as is one ended before its last right.
+ */
+export function exerciseWeeks(history: readonly HistoryEntry[], from: number): ExerciseWeek[] {
+    const weeks: ExerciseWeek[] = [];
+    for (const [exerciseId, sessions] of sessionsByExercise(history)) {
+        const sets = sessions
+            .filter((session) => session.startedAt >= from)
+            .flatMap((session) => session.sets);
+        if (sets.length === 0) {
+            continue;
+        }
+        const tally = { none: totals(), left: totals(), right: totals() };
+        for (const set of sets) {
+            const side = tally[set.side ?? 'none'];
+            side.sets++;
+            if (isTimedSet(set)) {
+                side.seconds += set.seconds;
+            } else {
+                side.reps += set.reps;
+            }
+        }
+        const sided = (key: keyof Totals) =>
+            tally.none[key] + Math.max(tally.left[key], tally.right[key]);
+        // Not the one-rep max: it's a guess, not something done
+        const bests = newBests(sessions);
+        delete bests.oneRepMax;
+        weeks.push({
+            exerciseId,
+            sets: sided('sets'),
+            reps: sided('reps'),
+            seconds: sided('seconds'),
+            eachSide: tally.none.sets === 0,
+            bests: Object.fromEntries(Object.entries(bests).filter(([, best]) => best.at >= from)),
+        });
+    }
+    return weeks;
+}
+
+interface Totals {
+    sets: number;
+    reps: number;
+    seconds: number;
+}
+
+function totals(): Totals {
+    return { sets: 0, reps: 0, seconds: 0 };
+}
+
+/**
  * A session's point on the chart, as `measure` measures it: its best estimated one-rep max
  * in kg, its most reps in a set, or its longest set in seconds. Null if it has no set that
  * counts, e.g. a bodyweight session on a chart of weights.

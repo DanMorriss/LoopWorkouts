@@ -33,8 +33,9 @@
     margin: 0 0 1rem;
 }
 
-// Where the cards for the muscles worked and the workout to do next sit, when there are any
-.history__muscles:not(:empty) {
+// Where the cards for the muscles worked and the exercises done sit, when there are any
+.history__muscles:not(:empty),
+.history__exercises:not(:empty) {
     display: block;
     margin: 0 0 1.25rem;
 }

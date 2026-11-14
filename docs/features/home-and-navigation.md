@@ -53,7 +53,7 @@
     - **Today** (`/home`): what to do now. The week's plan, what's due today and the workout to do next. The weekly plan slides in over it.
     - **Workouts** (`/library`): what you can run. Your workouts, New, and the ready-made workouts, which slide in over it.
     - **Exercises** (`/exercises`): how to do each one, and how you're getting on with it.
-    - **Progress** (`/history`): whether you're improving. The muscles worked this week, then the log of every workout done.
+    - **Progress** (`/history`): whether you're improving. The time per week, the muscles worked and exercises done this week (the last 7 days), then the log of every workout done.
     - **You** (`/account`): your things. Sync and signing in, your profile, your data, About, and Settings, which slides in over it.
 - **How they came to be:** Home was added as the first tab on 2026-10-28, and Exercises moved before Library. Settings was a fifth tab until 2026-10-28; it's now a row on You that slides in over it (see [settings](settings.md)). On 2026-11-03 they were regrouped by what each is for: Home became **Today**, taking the weekly plan from the Library (its Plan button became Today's week); Library became **Workouts** and moved before Exercises; History became **Progress**, the muscles worked this week moving there from Home and the suggested workout leaving it for Today; and Account became **You**. Each page kept its address.
 - It's a capsule floating over the bottom of the page, the same shape on a phone and on a wide screen (up to 26rem wide, centred), in a frosted material the page scrolls under. It sits clear of an iPhone's home bar.

@@ -52,6 +52,22 @@ export interface HistoryEntry extends Synced {
     repSeconds?: number;
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** When the last 7 days began: what "this week" means on Progress and Today (not the plan's). */
+export function lastSevenDaysFrom(now: number): number {
+    return now - 7 * DAY_MS;
+}
+
+/** The runs started in the 7 × 24 hours up to `now`. */
+export function inLastSevenDays<T extends Pick<HistoryEntry, 'startedAt'>>(
+    entries: readonly T[],
+    now: number
+): T[] {
+    const from = lastSevenDaysFrom(now);
+    return entries.filter((entry) => entry.startedAt >= from);
+}
+
 /** Long enough for a line about how it went, short enough to sit under the entry. */
 export const MAX_NOTE_LENGTH = 120;
 

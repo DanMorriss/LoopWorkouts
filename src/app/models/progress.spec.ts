@@ -6,6 +6,8 @@ import {
     estimatedOneRepMax,
     exerciseBests,
     ExerciseSession,
+    exerciseWeeks,
+    newBests,
     isMostRounds,
     progressionSuggestions,
     progressMeasure,
@@ -331,5 +333,100 @@ describe('a step whose sets vary (BLD-11)', () => {
                 { step: 0, kind: 'reps', from: 12, to: 13, eachSet: true },
             ]);
         });
+    });
+});
+
+describe("the week's exercises (PRG-13)", () => {
+    const DAY = 24 * 60 * 60 * 1000;
+    const now = 100 * DAY;
+    const from = now - 7 * DAY;
+    const lunge = (reps: number, side: 'left' | 'right'): LoggedSet => ({
+        round: 0,
+        step: 2,
+        side,
+        name: 'Lunge',
+        reps,
+        exerciseId: 'lunge',
+    });
+    const week = (history: HistoryEntry[], id: string) =>
+        exerciseWeeks(history, from).find((one) => one.exerciseId === id);
+
+    it('totals the sets and reps of the last 7 days, not before', () => {
+        const history = [
+            entry(now - DAY, [squat(10, 60), squat(8, 60)]),
+            entry(from, [squat(12)]),
+            entry(from - 1, [squat(50)]),
+        ];
+        expect(week(history, 'squat')).toEqual(
+            expect.objectContaining({ sets: 3, reps: 30, seconds: 0, eachSide: false })
+        );
+    });
+
+    it('leaves out exercises not done this week, and sets with no exercise', () => {
+        const unnamed: LoggedSet = { round: 0, step: 3, name: '', reps: 10 };
+        const history = [entry(now - DAY, [unnamed]), entry(from - DAY, [squat(10)])];
+        expect(exerciseWeeks(history, from)).toEqual([]);
+    });
+
+    it('totals the time of timed sets', () => {
+        const history = [entry(now - DAY, [plank(45), plank(60)])];
+        expect(week(history, 'plank')).toEqual(
+            expect.objectContaining({ sets: 2, reps: 0, seconds: 105 })
+        );
+    });
+
+    it("counts each side's, the side that did more standing for both", () => {
+        const history = [
+            entry(now - DAY, [lunge(10, 'left'), lunge(10, 'right'), lunge(10, 'left')]),
+        ];
+        expect(week(history, 'lunge')).toEqual(
+            expect.objectContaining({ sets: 2, reps: 20, eachSide: true })
+        );
+    });
+
+    it('lists the heaviest, most reps and longest that beat an earlier session', () => {
+        const history = [
+            entry(now - DAY, [squat(10, 62.5), plank(90)]),
+            entry(from - DAY, [squat(10, 60), plank(60)]),
+        ];
+        const squats = week(history, 'squat')!;
+        expect(squats.bests.heaviest).toEqual(expect.objectContaining({ weight: 62.5, reps: 10 }));
+        // As many reps, but heavier
+        expect(squats.bests.mostReps).toEqual(expect.objectContaining({ reps: 10, weight: 62.5 }));
+        expect('oneRepMax' in squats.bests).toBe(false);
+        expect(week(history, 'plank')!.bests.longest).toEqual(
+            expect.objectContaining({ seconds: 90 })
+        );
+    });
+
+    it('has no bests from a first session, or one set before the week', () => {
+        expect(week([entry(now - DAY, [squat(10, 60)])], 'squat')!.bests).toEqual({});
+        // An equal isn't one, as the first time stands
+        const equal = [entry(now - DAY, [squat(10, 60)]), entry(from - DAY, [squat(10, 60)])];
+        expect(week(equal, 'squat')!.bests).toEqual({});
+        const history = [
+            entry(now - DAY, [squat(5, 40)]),
+            entry(from - DAY, [squat(10, 60)]),
+            entry(from - 2 * DAY, [squat(8, 50)]),
+        ];
+        expect(week(history, 'squat')!.bests).toEqual({});
+    });
+
+    it('counts a best beating a session earlier in the same week', () => {
+        const history = [entry(now - DAY, [squat(12)]), entry(now - 2 * DAY, [squat(10)])];
+        expect(week(history, 'squat')!.bests.mostReps).toEqual(
+            expect.objectContaining({ reps: 12 })
+        );
+    });
+});
+
+describe('newBests', () => {
+    it("leaves out the first session's bests", () => {
+        const first = { entryId: 'a', startedAt: 1, title: 'Legs', sets: [squat(10, 60)] };
+        const second = { entryId: 'b', startedAt: 2, title: 'Legs', sets: [squat(8, 70)] };
+        expect(newBests([first])).toEqual({});
+        const bests = newBests([second, first]);
+        expect(bests.heaviest?.entryId).toBe('b');
+        expect(bests.mostReps).toBeUndefined();
     });
 });

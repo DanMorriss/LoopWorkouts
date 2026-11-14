@@ -24,9 +24,12 @@ const STEPS = [5, 10, 15, 20, 30, 60, 90, 120, 180, 240, 300, 360, 480, 600];
 
 /** One week's bar, with what's said of it. */
 interface WeekBar extends WeekTotal {
-    /** "This week", "Last week", or its days, e.g. "19–25 Oct" or "28 Sep – 4 Oct". */
+    /**
+     * Its days, e.g. "19–25 Oct" or "28 Sep – 4 Oct": never "This week", which on Progress
+     * means the last 7 days.
+     */
     label: string;
-    /** What a screen reader hears of it: "This week", or e.g. "Week of 19 October". */
+    /** What a screen reader hears of it, e.g. "Week of 19 October". */
     spokenLabel: string;
     time: string;
     count: string;
@@ -66,9 +69,11 @@ export class TimePerWeekComponent {
     private readonly count = computed(() => this.totals().length);
     private readonly slot = computed(() => (WIDTH - RIGHT - LEFT) / this.count());
     protected readonly barWidth = computed(() => Math.min(MAX_BAR, this.slot() * 0.62));
-    /** For a screen reader: "The last 12 weeks", "The last 3 weeks" or "This week". */
+    /** For a screen reader: "The last 12 weeks", "The last 3 weeks" or "The week of 2 November". */
     protected readonly span = computed(() =>
-        this.count() === 1 ? 'This week' : `The last ${this.count()} weeks`
+        this.count() === 1
+            ? `The week of ${formatDate(this.totals()[0].start, 'd MMMM', this.locale)}`
+            : `The last ${this.count()} weeks`
     );
 
     /** The time axis, in minutes: from 0 to a round number at or over the longest week. */
@@ -88,16 +93,14 @@ export class TimePerWeekComponent {
     });
 
     protected readonly bars = computed((): WeekBar[] =>
-        this.totals().map((week, i, weeks) => {
-            const named =
-                i === weeks.length - 1 ? 'This week' : i === weeks.length - 2 ? 'Last week' : '';
+        this.totals().map((week, i) => {
             const time = formatDuration(week.seconds);
             const count = counted(week.workouts, 'workout');
             const y = this.yOf(week.seconds / 60);
             return {
                 ...week,
-                label: named || this.days(week.start),
-                spokenLabel: named || `Week of ${formatDate(week.start, 'd MMMM', this.locale)}`,
+                label: this.days(week.start),
+                spokenLabel: `Week of ${formatDate(week.start, 'd MMMM', this.locale)}`,
                 time,
                 count,
                 spoken: `${spokenTime(week.seconds)}, ${count}`,
@@ -110,7 +113,7 @@ export class TimePerWeekComponent {
 
     protected readonly anyTime = computed(() => this.totals().some((week) => week.seconds > 0));
 
-    /** The week chosen by a tap, hover or the arrow keys; this week with none. */
+    /** The week chosen by a tap, hover or the arrow keys; the latest with none. */
     protected readonly active = signal<number | null>(null);
     protected readonly shown = computed(() => this.bars()[this.active() ?? this.count() - 1]);
 

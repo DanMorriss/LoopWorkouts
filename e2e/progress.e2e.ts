@@ -175,3 +175,63 @@ test.describe('the suggested next workout', () => {
         }
     );
 });
+
+test.describe("the week's exercises", () => {
+    const lunge = (side: 'left' | 'right', round: number): LoggedSet => ({
+        round,
+        step: 2,
+        side,
+        name: 'Dumbbell lunge',
+        reps: 10,
+        exerciseId: 'builtin:dumbbell-lunge',
+    });
+    const plank = (seconds: number): LoggedSet => ({
+        round: 0,
+        step: 1,
+        name: 'Plank',
+        seconds,
+        exerciseId: 'builtin:plank',
+    });
+    test.use({
+        storage: seed.history([
+            run('legs', '2026-11-10T10:00', {
+                title: 'Legs',
+                sets: [
+                    squat(10, 62.5),
+                    squat(10, 62.5, 1),
+                    plank(60),
+                    lunge('left', 0),
+                    lunge('right', 0),
+                    lunge('left', 1),
+                    lunge('right', 1),
+                ],
+            }),
+            // 9 days ago: not this week's, but what this week beat
+            run('legs', '2026-11-02T10:00', { title: 'Legs', sets: [squat(10, 60), plank(45)] }),
+        ]),
+    });
+
+    test(
+        "REG-PRG-04 the week's exercises, with their new bests",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/history');
+            const week = page.getByRole('region', { name: 'Exercises this week' });
+            const rows = week.getByRole('listitem');
+            await expect(rows).toHaveCount(3);
+            // Those with a new best first, then most sets
+            await expect(rows.nth(0)).toContainText('Back squat');
+            await expect(rows.nth(0)).toContainText('20 reps in 2 sets');
+            await expect(rows.nth(0)).toContainText('New best, heaviest: 62.5 kg for 10 reps');
+            await expect(rows.nth(1)).toContainText('Plank');
+            await expect(rows.nth(1)).toContainText('1 minute in 1 set');
+            await expect(rows.nth(1)).toContainText('New best, longest: 1 minute');
+            // Each side's reps, a left and a right making a set; a first time sets no best
+            await expect(rows.nth(2)).toContainText('20 reps each side in 2 sets');
+            await expect(rows.nth(2)).not.toContainText('New best');
+
+            await week.getByRole('link', { name: 'Back squat' }).click();
+            await expect(page).toHaveURL('/exercises/back-squat');
+        }
+    );
+});

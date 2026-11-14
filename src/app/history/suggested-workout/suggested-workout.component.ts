@@ -1,6 +1,7 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isStretch } from '../../models/built-in-stretches';
+import { inLastSevenDays } from '../../models/history';
 import { MUSCLE_LABELS } from '../../models/exercise';
 import { setsByMuscle, SuggestionAvoid, suggestNextWorkout } from '../../models/muscle-balance';
 import { nextPlannedDay, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
@@ -13,8 +14,6 @@ import { HistoryStore } from '../../shared/state/history-store.service';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** "Glutes, Quads and Calves". */
 const LIST = new Intl.ListFormat('en-GB');
@@ -85,9 +84,8 @@ export class SuggestedWorkoutComponent {
 
     /** Sets per muscle in the last seven days. */
     private readonly weekSets = computed(() =>
-        setsByMuscle(
-            this.history.entries().filter((entry) => entry.startedAt >= this.now - 7 * DAY_MS),
-            (id) => this.exercises.byId(id)
+        setsByMuscle(inLastSevenDays(this.history.entries(), this.now), (id) =>
+            this.exercises.byId(id)
         )
     );
 

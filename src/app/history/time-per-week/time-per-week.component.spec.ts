@@ -55,13 +55,14 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         create(entry(day(11, 3), 1800), entry(day(11, 5), 3390), entry(day(8, 20), 600));
 
         expect(text('.weeks__time')).toBe('1:26:30');
-        expect(text('.weeks__when')).toBe('This week · 2 workouts');
+        expect(text('.weeks__when')).toBe('2–8 Nov · 2 workouts');
         // Only the weeks with time in them have a bar, this week's lit
         expect(el().querySelectorAll('.weeks__bar')).toHaveLength(2);
         expect(el().querySelector('.weeks__bar--shown')).toBe(
             el().querySelectorAll('.weeks__bar')[1]
         );
-        expect(text('.weeks__axis:last-of-type')).toBe('This week');
+        // Its Monday, as at the left: "This week" on Progress means the last 7 days
+        expect(text('.weeks__axis:last-of-type')).toBe('2 Nov');
     });
 
     it('steps through the weeks with the arrow keys, saying each one', () => {
@@ -74,8 +75,8 @@ describe('TimePerWeekComponent (PRG-12)', () => {
 
         chart().focus();
         press('ArrowLeft');
-        expect(text('.weeks__when')).toBe('Last week · 1 workout');
-        expect(text(`#time-per-week-spoken`)).toBe('Last week: 10 minutes, 1 workout');
+        expect(text('.weeks__when')).toBe('26 Oct – 1 Nov · 1 workout');
+        expect(text(`#time-per-week-spoken`)).toBe('Week of 26 October: 10 minutes, 1 workout');
 
         press('ArrowLeft');
         expect(text('.weeks__when')).toBe('19–25 Oct · 1 workout');
@@ -91,7 +92,7 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         // Leaving the chart goes back to this week
         chart().dispatchEvent(new FocusEvent('blur'));
         fixture.detectChanges();
-        expect(text('.weeks__when')).toBe('This week · 1 workout');
+        expect(text('.weeks__when')).toBe('2–8 Nov · 1 workout');
     });
 
     it('picks the week under a finger or the pointer', () => {
@@ -146,7 +147,7 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         expect(Number(bars[0].getAttribute('width'))).toBe(32);
         expect(text('#time-per-week-help')).toMatch(/^The last 2 weeks, Monday to Sunday/);
         press('Home');
-        expect(text('.weeks__when')).toBe('Last week · 1 workout');
+        expect(text('.weeks__when')).toBe('26 Oct – 1 Nov · 1 workout');
     });
 
     it("has only this week's bar, with no first date, in someone's first week", () => {
@@ -156,8 +157,8 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         const dates = [...el().querySelectorAll('text.weeks__axis')].filter(
             (label) => !label.hasAttribute('dy')
         );
-        expect(dates.map((label) => label.textContent!.trim())).toEqual(['This week']);
-        expect(text('#time-per-week-help')).toMatch(/^This week, Monday to Sunday/);
+        expect(dates.map((label) => label.textContent!.trim())).toEqual(['2 Nov']);
+        expect(text('#time-per-week-help')).toMatch(/^The week of 2 November, Monday to Sunday/);
     });
 
     it('says so when nothing was done in the last 12 weeks', () => {

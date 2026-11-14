@@ -9,7 +9,7 @@ import {
     signal,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HistoryEntry } from '../models/history';
+import { HistoryEntry, inLastSevenDays } from '../models/history';
 import { changeSmoothly } from '../shared/layout-change';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { HistoryStore } from '../shared/state/history-store.service';
@@ -17,6 +17,7 @@ import { ShownHistory } from './shown-history';
 import { provideShownHistoryWithSample } from './shown-history-with-sample';
 import { UndoService } from '../shared/undo/undo.service';
 import { HistoryEntryComponent } from './history-entry/history-entry.component';
+import { ExercisesThisWeekComponent } from './exercises-this-week/exercises-this-week.component';
 import { MusclesThisWeekComponent } from './muscles-this-week/muscles-this-week.component';
 import { TimePerWeekComponent } from './time-per-week/time-per-week.component';
 import { entryName, formatDuration } from './history-format';
@@ -41,8 +42,8 @@ function dayKey(time: number): string {
 }
 
 /**
- * The Progress tab: the last seven days, the time per week (PRG-12), the muscles worked this week (PRG-6, PRG-8), then the
- * log, every workout done by day. The workout to do next is on Today and the workout summary,
+ * The Progress tab: the last seven days, the time per week (PRG-12), the muscles worked this week (PRG-6, PRG-8), the
+ * exercises done this week with their new bests (PRG-13), then the log, every workout done by day. The workout to do next is on Today and the workout summary,
  * not here. Its address stays /history, as links to a run in it use it. Arriving from the workout summary, `?run=<id>` highlights that run and
  * brings it into view, and `?note=<id>` does the same with its note box open.
  */
@@ -50,6 +51,7 @@ function dayKey(time: number): string {
     selector: 'app-history',
     imports: [
         DatePipe,
+        ExercisesThisWeekComponent,
         HistoryEntryComponent,
         MusclesThisWeekComponent,
         RouterLink,
@@ -92,9 +94,7 @@ export class HistoryComponent {
 
     /** Workouts and time spent over the last seven days. */
     protected readonly lastWeek = computed(() => {
-        const recent = this.shown
-            .entries()
-            .filter((entry) => entry.startedAt >= this.now - 7 * DAY_MS);
+        const recent = inLastSevenDays(this.shown.entries(), this.now);
         return {
             workouts: recent.length,
             time: formatDuration(recent.reduce((total, entry) => total + entry.activeSeconds, 0)),

@@ -1,4 +1,5 @@
 @use 'interaction' as *;
+@use 'type' as *;
 
 // A chip to filter by, pressed (aria-pressed) while it's picked: the Exercises list's muscles,
 // and the equipment you have. A mixin rather than a global class, so it's only in the pages'
@@ -53,4 +54,13 @@
     width: 1rem;
     height: 1rem;
     font-size: 1rem;
+}
+
+// A small label in a pill, not pressed: an exercise card's "Your own", or "New best" on Progress.
+@mixin tag {
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--reps);
+    border-radius: 999px;
+    color: var(--text);
+    @include small-type(0.65rem);
 }

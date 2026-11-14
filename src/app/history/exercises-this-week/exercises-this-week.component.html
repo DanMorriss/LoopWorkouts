@@ -1,0 +1,30 @@
+@if (rows().length) {
+    <section class="exercises-week" aria-labelledby="exercises-week-title">
+        <h3 class="exercises-week__title" id="exercises-week-title">Exercises this week</h3>
+        <ul class="exercises-week__list">
+            @for (row of shown(); track row.id) {
+                <li class="exercises-week__row">
+                    <span class="exercises-week__line">
+                        <a class="exercises-week__name" [routerLink]="row.path">{{ row.name }}</a>
+                        <span class="exercises-week__total">
+                            <span aria-hidden="true">{{ row.text }}</span>
+                            <span class="sr-only">{{ row.spoken }}</span>
+                        </span>
+                    </span>
+                    @for (best of row.bests; track best.text) {
+                        <span class="exercises-week__best">
+                            <span class="exercises-week__tag" aria-hidden="true">New best</span>
+                            <span aria-hidden="true">{{ best.text }}</span>
+                            <span class="sr-only">{{ best.spoken }}</span>
+                        </span>
+                    }
+                </li>
+            }
+        </ul>
+        @if (rows().length > shownCount) {
+            <button type="button" class="exercises-week__toggle" (click)="showAll.set(!showAll())">
+                {{ showAll() ? 'Show fewer' : 'Show all ' + rows().length }}
+            </button>
+        }
+    </section>
+}

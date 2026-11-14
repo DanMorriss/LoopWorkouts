@@ -115,7 +115,7 @@
                             [attr.y]="height - 4"
                             text-anchor="end"
                         >
-                            This week
+                            {{ bars()[bars().length - 1].start | date: 'd MMM' }}
                         </text>
                     </svg>
                     <span class="sr-only" [id]="id + '-spoken'" aria-live="polite"

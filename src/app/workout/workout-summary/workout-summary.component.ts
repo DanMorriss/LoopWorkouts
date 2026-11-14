@@ -121,8 +121,8 @@ export class WorkoutSummaryComponent {
     protected readonly weightUnit = this.settings.weightUnit;
     private readonly exerciseName = ownExerciseName(this.exercises);
     /**
-     * The bests this run set (PRG-2), e.g. "Heaviest: 80 kg × 5", and "Most rounds" for a
-     * time limit (PRG-7). Equalling a best isn't one, and nor is doing it for the first time.
+     * The bests this run set (PRG-2), each with its exercise, e.g. "Bench press: heaviest
+     * 80 kg × 5", and "Most rounds" for a time limit (PRG-7). Equalling a best isn't one, and nor is doing it for the first time.
      */
     protected readonly personalBests = computed(() => {
         const entry = this.entry();
@@ -144,9 +144,14 @@ export class WorkoutSummaryComponent {
             }
             // Newest first, as the history is, so on a tie the earlier best stands
             const bests = exerciseBests([session, ...earlier]);
+            const name =
+                this.exerciseName(exerciseId) ||
+                session.sets.find((set) => set.name.trim())?.name.trim() ||
+                this.exercises.byId(exerciseId)?.name;
             for (const line of bestLines(bests, this.weightUnit())) {
                 if (line.entryId === entry.id) {
-                    lines.push(`${line.label}: ${line.text}`);
+                    const best = `${line.label}: ${line.text}`;
+                    lines.push(name ? `${name}: ${line.label.toLowerCase()} ${line.text}` : best);
                 }
             }
         }

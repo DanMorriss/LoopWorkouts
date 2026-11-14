@@ -3225,7 +3225,7 @@ describe('WorkoutComponent', () => {
 
             expect(view().summaryOpen()).toBe(true);
             expect(summaryText()).toContain('Personal bests');
-            expect(summaryText()).toContain('Heaviest: 100 kg × 5');
+            expect(summaryText()).toContain('Bench press: heaviest 100 kg × 5');
             fixture.destroy();
         });
 
@@ -3270,6 +3270,37 @@ describe('WorkoutComponent', () => {
 
             expect(view().summaryOpen()).toBe(true);
             expect(summaryText()).not.toContain('Personal bests');
+            fixture.destroy();
+        });
+
+        it('names the exercise of a timed best', () => {
+            TestBed.inject(HistoryStore).record({
+                id: 'old-plank',
+                workoutId: 'old-workout',
+                title: 'Old plank',
+                startedAt: Date.now() - 10 * 60 * 1000,
+                endedAt: Date.now() - 9 * 60 * 1000,
+                activeSeconds: 3,
+                roundsCompleted: 1,
+                totalRounds: 1,
+                outcome: 'finished',
+                sets: [
+                    { round: 0, step: 0, name: 'Plank', seconds: 3, exerciseId: 'builtin:plank' },
+                ],
+            });
+            start(
+                makeWorkout({
+                    steps: [
+                        { kind: 'work', seconds: 4, name: 'Plank', exerciseId: 'builtin:plank' },
+                    ],
+                    repeats: 1,
+                })
+            );
+            advance(4000);
+            fixture.detectChanges();
+
+            expect(view().summaryOpen()).toBe(true);
+            expect(summaryText()).toContain('Plank: longest 0:04');
             fixture.destroy();
         });
 

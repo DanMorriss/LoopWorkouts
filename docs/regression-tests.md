@@ -766,7 +766,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Expected:**
     1. "Last time: 10, 10, 12 @ 60 kg" and a button "↑ Try 62.5 kg".
     2. The weight wheel is 62.5 kg and the button goes; the saved workout is 62.5 kg.
-    3. The summary lists Personal bests with "Heaviest: 62.5 kg × 10"; Next time "Back squat: try 65 kg, up from 62.5 kg"; Muscles worked shades Quads and Glutes as main.
+    3. The summary lists Personal bests with "Back squat: heaviest 62.5 kg × 10"; Next time "Back squat: try 65 kg, up from 62.5 kg"; Muscles worked shades Quads and Glutes as main.
     4. The line says Applied, with focus on it; the saved step is 65 kg.
 
 ### REG-RUN-14 · One side at a time

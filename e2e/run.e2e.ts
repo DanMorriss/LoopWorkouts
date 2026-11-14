@@ -711,7 +711,7 @@ test.describe('last time and step-ups', () => {
             await expect(
                 run.summary.getByRole('heading', { name: 'Personal bests' })
             ).toBeVisible();
-            await expect(run.summary).toContainText('Heaviest: 62.5 kg × 10');
+            await expect(run.summary).toContainText('Back squat: heaviest 62.5 kg × 10');
             await expect(run.summary).toContainText('Back squat: try 65 kg, up from 62.5 kg');
             await expect(
                 run.summary.getByRole('heading', { name: 'Muscles worked' })

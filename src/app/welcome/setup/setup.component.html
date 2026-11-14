@@ -126,6 +126,22 @@
                         }
                     </div>
                 }
+
+                @case ('weight') {
+                    <!-- Enter is Done: the box saves itself on Enter, then the form submits -->
+                    <form class="setup__form" (submit)="next($event)">
+                        <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
+                            What do you weigh?
+                        </h2>
+                        <p class="setup__hint" id="setup-weight-hint">
+                            For an estimate of the calories each workout burns. It stays on this
+                            device, and you can leave it empty.
+                        </p>
+                        <app-body-weight-field describedBy="setup-weight-hint">
+                            <span class="picker-field__label">Your weight</span>
+                        </app-body-weight-field>
+                    </form>
+                }
             }
 
             <!-- Fixed to the bottom of the screen, so they're in the same place on every question -->

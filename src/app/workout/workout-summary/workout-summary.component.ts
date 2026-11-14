@@ -18,6 +18,7 @@ import { BodyMapComponent } from '../../shared/components/body-map/body-map.comp
 import { WheelPickerComponent } from '../../shared/components/wheel-picker/wheel-picker.component';
 import { ActiveRunService } from '../../shared/run/active-run.service';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
+import { CaloriesService } from '../../shared/state/calories.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import {
@@ -69,6 +70,7 @@ export class WorkoutSummaryComponent {
     private readonly history = inject(HistoryStore);
     private readonly settings = inject(SettingsStore);
     private readonly exercises = inject(ExerciseStore);
+    private readonly calories = inject(CaloriesService);
 
     /** Back to workout: the run carries on from where it was ended. */
     readonly back = output<void>();
@@ -111,6 +113,11 @@ export class WorkoutSummaryComponent {
     protected readonly rounds = computed(() => {
         const entry = this.entry();
         return entry ? describeRounds(entry) : '';
+    });
+    /** About how many calories it burnt (CAL-1), with a body weight given. */
+    protected readonly burnt = computed(() => {
+        const entry = this.entry();
+        return entry ? this.calories.describe(entry) : null;
     });
 
     protected readonly weightUnit = this.settings.weightUnit;

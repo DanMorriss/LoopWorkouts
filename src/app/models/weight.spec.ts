@@ -1,4 +1,11 @@
-import { formatWeight, volumeIn, weightIn, weightToKg } from './weight';
+import {
+    bodyWeightIn,
+    bodyWeightToKg,
+    formatWeight,
+    volumeIn,
+    weightIn,
+    weightToKg,
+} from './weight';
 
 describe('weights', () => {
     it('shows a weight in kg or lb, to the nearest half', () => {
@@ -35,5 +42,29 @@ describe('weights', () => {
         expect(volumeIn(1250.4, 'kg')).toBe(1250);
         // 10 reps at 135 lb, saved in kg, comes back as picked
         expect(volumeIn(weightToKg(135, 'lb') * 10, 'lb')).toBe(1350);
+    });
+
+    describe('body weight (CAL-2)', () => {
+        it('saves it in kg, to one decimal place as typed', () => {
+            expect(bodyWeightToKg(72.5, 'kg')).toBe(72.5);
+            expect(bodyWeightToKg(72.54, 'kg')).toBe(72.5);
+            expect(bodyWeightToKg(160, 'lb')).toBe(72.575);
+        });
+
+        it('shows it as typed, in either unit', () => {
+            expect(bodyWeightIn(72.575, 'lb')).toBe(160);
+            expect(bodyWeightIn(72.575, 'kg')).toBe(72.6);
+            for (const lb of [100, 160.5, 245.3]) {
+                expect(bodyWeightIn(bodyWeightToKg(lb, 'lb')!, 'lb')).toBe(lb);
+            }
+        });
+
+        it('takes anything out of range, or not a number, as none', () => {
+            expect(bodyWeightToKg(19.9, 'kg')).toBeNull();
+            expect(bodyWeightToKg(301, 'kg')).toBeNull();
+            expect(bodyWeightToKg(40, 'lb')).toBeNull();
+            expect(bodyWeightToKg(Number.NaN, 'kg')).toBeNull();
+            expect(bodyWeightToKg(20, 'kg')).toBe(20);
+        });
     });
 });

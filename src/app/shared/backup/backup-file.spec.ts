@@ -19,6 +19,7 @@ const SETTINGS: Omit<Settings, 'profileUpdatedAt'> = {
     eachSideFirst: 'right',
     switchSidesSeconds: 10,
     name: 'Sam',
+    bodyWeight: 72.5,
 };
 
 const ENTRY: HistoryEntry = {

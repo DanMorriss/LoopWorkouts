@@ -68,6 +68,16 @@
                     <dt>Rounds</dt>
                     <dd>{{ rounds() }}</dd>
                 </div>
+                <!-- With a body weight given (CAL-1): an estimate, so said as one -->
+                @if (burnt(); as burnt) {
+                    <div class="summary__stat">
+                        <dt>Calories</dt>
+                        <dd>
+                            <span aria-hidden="true">About {{ burnt.kcal }}</span
+                            ><span class="sr-only">{{ burnt.spoken }}</span>
+                        </dd>
+                    </div>
+                }
             </dl>
 
             <!-- Time ran out part-way through a rep step: how much of it was done? -->

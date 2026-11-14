@@ -2,7 +2,7 @@ import { computed, inject, Service, signal } from '@angular/core';
 import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, readMyEquipment } from '../../models/exercise';
 import { TRAINING_GOALS, TrainingGoal } from '../../models/muscle-balance';
 import { cleanName, Profile, PROFILE_FIELDS } from '../../models/profile';
-import { WEIGHT_UNITS, WeightUnit } from '../../models/weight';
+import { BODY_WEIGHT_RANGE_KG, WEIGHT_UNITS, WeightUnit } from '../../models/weight';
 import { DEFAULT_RUN_SIDES, MAX_SWITCH_SECONDS, Side } from '../../models/workout';
 import { SyncClock } from './sync-clock.service';
 
@@ -37,6 +37,11 @@ export interface Settings {
     /** What Home greets you by (NAV-4); '' if not given. */
     name: string;
     /**
+     * Your body weight in kg, for the calories a workout burns (CAL-2), or null if not given.
+     * Health data, so it stays on this device: it isn't part of the profile, and doesn't sync.
+     */
+    bodyWeight: number | null;
+    /**
      * When the profile (`PROFILE_FIELDS`), which syncs, last changed; 0 if it never has here,
      * as on a device that's not been set up, or signed out of.
      */
@@ -57,6 +62,7 @@ const DEFAULT_SETTINGS: Settings = {
     eachSideFirst: DEFAULT_RUN_SIDES.first,
     switchSidesSeconds: DEFAULT_RUN_SIDES.switchSeconds,
     name: '',
+    bodyWeight: null,
     profileUpdatedAt: 0,
 };
 const STORAGE_KEY = 'settings';
@@ -83,6 +89,7 @@ export class SettingsStore {
     readonly eachSideFirst = computed(() => this.settings().eachSideFirst);
     readonly switchSidesSeconds = computed(() => this.settings().switchSidesSeconds);
     readonly name = computed(() => this.settings().name);
+    readonly bodyWeight = computed(() => this.settings().bodyWeight);
 
     /** The profile, as it syncs. */
     readonly profile = computed(
@@ -204,6 +211,12 @@ function loadSettings(): Settings {
                 ? (saved['switchSidesSeconds'] as number)
                 : DEFAULT_SETTINGS.switchSidesSeconds,
         name: typeof saved['name'] === 'string' ? cleanName(saved['name']) : DEFAULT_SETTINGS.name,
+        bodyWeight:
+            typeof saved['bodyWeight'] === 'number' &&
+            saved['bodyWeight'] >= BODY_WEIGHT_RANGE_KG.min &&
+            saved['bodyWeight'] <= BODY_WEIGHT_RANGE_KG.max
+                ? saved['bodyWeight']
+                : DEFAULT_SETTINGS.bodyWeight,
         profileUpdatedAt:
             Number.isSafeInteger(saved['profileUpdatedAt']) &&
             (saved['profileUpdatedAt'] as number) >= 0

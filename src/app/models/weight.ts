@@ -61,3 +61,24 @@ export function weightOptions(
         }),
     ];
 }
+
+/** The lightest and heaviest a body weight can be (CAL-2), in kg: about 44 to 661 lb. */
+export const BODY_WEIGHT_RANGE_KG = { min: 20, max: 300 };
+
+/**
+ * A body weight typed in `unit`, to one decimal place, in kg to the gram as it's saved, or
+ * null for none: not a number, or out of range.
+ */
+export function bodyWeightToKg(value: number, unit: WeightUnit): number | null {
+    if (!Number.isFinite(value)) {
+        return null;
+    }
+    const kg = weightToKg(Math.round(value * 10) / 10, unit);
+    return kg >= BODY_WEIGHT_RANGE_KG.min && kg <= BODY_WEIGHT_RANGE_KG.max ? kg : null;
+}
+
+/** A body weight saved in kg, as shown in `unit`: to one decimal place, e.g. 72.5. */
+export function bodyWeightIn(kg: number, unit: WeightUnit): number {
+    const value = unit === 'kg' ? kg : kg / KG_PER_LB;
+    return Math.round(value * 10) / 10;
+}

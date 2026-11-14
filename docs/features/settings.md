@@ -18,6 +18,7 @@
     - **Sex** (SET-5): Male (the default) or Female, with the hint "The body the muscle maps show": the figure the body map draws (see [exercises](exercises.md)). Called Sex, not Gender, as it picks an anatomical drawing.
     - **Training for** (PRG-8): Muscle (the default) or Fitness, with the hint "Aim for 10 to 20 sets a week on each muscle, 4 to 10 on small ones" (or 6 to 12 and 2 to 6 for Fitness): the sets a week the muscle bars aim at (see [progress](progress.md)).
     - **Weight units** (SET-4): Kilograms (kg) (the default) or Pounds (lb). Weights are always saved in kg, so switching loses nothing.
+- Under them, **Body weight** (CAL-2, since 2026-11-14), a box in the weight unit, with the hint "For calories burnt. Kept on this device only". It's first asked in the setup too, but isn't part of the profile and doesn't sync, as it's health data. See [calories](calories.md).
 
 | Section      | Setting                        | Default | Hint                                                                           | Notes                                                                        |
 | ------------ | ------------------------------ | ------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |

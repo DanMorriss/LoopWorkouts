@@ -16,12 +16,12 @@ describe('ConsentService (SYN-10)', () => {
 
     it('saves consent ticked before signing in with the account, dated by the server', async () => {
         consent.agree();
-        rpc.mockResolvedValue({ data: { at: 1000, notice: '2026-11-10' }, error: null });
+        rpc.mockResolvedValue({ data: { at: 1000, notice: '2026-11-14' }, error: null });
 
         await consent.signedIn(client);
 
-        expect(rpc).toHaveBeenCalledWith('give_health_consent', { notice_date: '2026-11-10' });
-        expect(consent.given()).toEqual({ at: 1000, notice: '2026-11-10' });
+        expect(rpc).toHaveBeenCalledWith('give_health_consent', { notice_date: '2026-11-14' });
+        expect(consent.given()).toEqual({ at: 1000, notice: '2026-11-14' });
         expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBeNull();
     });
 
@@ -34,7 +34,7 @@ describe('ConsentService (SYN-10)', () => {
 
         expect(rpc).toHaveBeenLastCalledWith('my_health_consent');
         expect(consent.given()).toBeNull();
-        expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBe('2026-11-10');
+        expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBe('2026-11-14');
     });
 
     it("leaves it unknown when the account's can't be looked up, e.g. offline", async () => {
@@ -46,7 +46,7 @@ describe('ConsentService (SYN-10)', () => {
     });
 
     it('forgets it on signing out', async () => {
-        rpc.mockResolvedValue({ data: { at: 1000, notice: '2026-11-10' }, error: null });
+        rpc.mockResolvedValue({ data: { at: 1000, notice: '2026-11-14' }, error: null });
         await consent.signedIn(client);
 
         consent.signedOut();

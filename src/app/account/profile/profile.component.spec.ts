@@ -119,4 +119,47 @@ describe('ProfileComponent', () => {
             expect(radios('weightUnit').find((r) => r.checked)?.value).toBe('lb');
         });
     });
+
+    describe('body weight (CAL-2)', () => {
+        const box = () =>
+            fixture.nativeElement.querySelector('app-body-weight-field input') as HTMLInputElement;
+        const type = (value: string) => {
+            box().value = value;
+            box().dispatchEvent(new Event('change'));
+            fixture.detectChanges();
+        };
+
+        it('saves it in kg as it is left, shown in the unit chosen, on this device only', () => {
+            create();
+            expect(box().closest('label')!.textContent).toContain('Body weight in kilograms');
+            expect(
+                fixture.nativeElement.querySelector(`#${box().getAttribute('aria-describedby')}`)
+                    .textContent
+            ).toContain('Kept on this device only');
+
+            type('72.54');
+            expect(settings.bodyWeight()).toBe(72.5);
+            expect(box().value).toBe('72.5');
+            expect(settings.hasProfile()).toBe(false);
+
+            settings.update({ weightUnit: 'lb' });
+            fixture.detectChanges();
+            expect(box().value).toBe('159.8');
+        });
+
+        it('takes an empty box, or one out of range, as none', () => {
+            settings.update({ bodyWeight: 80 });
+            create();
+            expect(box().value).toBe('80');
+
+            type('500');
+            expect(settings.bodyWeight()).toBeNull();
+            expect(box().value).toBe('');
+
+            type('80,5');
+            expect(settings.bodyWeight()).toBe(80.5);
+            type('');
+            expect(settings.bodyWeight()).toBeNull();
+        });
+    });
 });

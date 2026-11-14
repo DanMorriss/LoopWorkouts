@@ -87,7 +87,7 @@ export class WorkoutPage {
     }
 
     /** One of the summary's figures, by its term: `stat('Time')`, `stat('Rounds')`. */
-    stat(term: 'Time' | 'Rounds'): Locator {
+    stat(term: 'Time' | 'Rounds' | 'Calories'): Locator {
         return this.summary.getByRole('term').filter({ hasText: term }).locator('+ dd');
     }
 

@@ -3,16 +3,19 @@ import { BodyFigure } from '../../models/exercise';
 import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
 import { MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
+import { BodyWeightFieldComponent } from '../../shared/components/body-weight-field/body-weight-field.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 
 /**
  * Account → Profile: your name, for Home's greeting (SET-7), your sex, for the body map's
  * figure (SET-5), what you train for, for the muscle bars' aims (PRG-8), and the weight unit
  * you lift in (SET-4). They're saved with the settings, and synced with your account when
- * you're signed in, with your equipment, as your profile.
+ * you're signed in, with your equipment, as your profile. Your body weight, for calories
+ * (CAL-2), is here too, but stays on this device.
  */
 @Component({
     selector: 'app-profile',
+    imports: [BodyWeightFieldComponent],
     template: `
         <!-- Saved as it's left, trimmed -->
         <label class="picker-field profile__field">
@@ -115,6 +118,14 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
                 }
             </div>
         </fieldset>
+
+        <!-- Health data, so it isn't synced with the rest -->
+        <app-body-weight-field class="profile__weight" describedBy="body-weight-hint">
+            <span class="profile__name">Body weight</span>
+        </app-body-weight-field>
+        <p class="profile__hint" id="body-weight-hint">
+            For calories burnt. Kept on this device only
+        </p>
     `,
     styles: `
         :host {
@@ -136,6 +147,10 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
 
         .profile__field {
             padding-top: 0.25rem;
+        }
+
+        .profile__weight {
+            margin-top: 1rem;
         }
 
         .profile__hint {

@@ -72,7 +72,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Expected:**
     1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, "Welcome to Loop Workouts", the sign-in (Continue with Google, Email, Email me a sign-in link) and **Continue as guest**, with no tab bar.
     2. localStorage has `setup = "due"` once the welcome screen is shown.
-    3. After Continue as guest: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 5" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
+    3. After Continue as guest: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 6" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
 - **Variants (same test file):**
     - A device with a saved workout but no `welcomed` key (in use before the welcome screen) opens `/home` straight away, and `welcomed` becomes `"guest"`.
     - A new device opening `/exercises/back-squat` directly gets that page, not the welcome screen.
@@ -86,13 +86,14 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     2. Pick **Fitness**, Next.
     3. Pick the **Kettlebell** chip, Next.
     4. Pick **Female**, Next.
-    5. Leave **Kilograms**, press **Done**.
-    6. Reload. Open You.
+    5. Leave **Kilograms**, Next.
+    6. Type **72.5** in Your weight, press **Done**.
+    7. Reload. Open You.
 - **Expected:**
-    1. Each question's heading takes focus as it shows, and "Question N of 5" counts up. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
+    1. Each question's heading takes focus as it shows, and "Question N of 6" counts up. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
     2. After Done, `/home` opens with "Good morning, Sam" and the Undo bar showing "You're all set, Sam. Change any of it on You, under Profile." with no Undo; the `setup` key is gone.
     3. Today shows **Get started** offering a ready-made plan. For Fitness with a kettlebell that's **Fitness, 4 days** (`firstPlan()`), not a single workout: see mismatch M3.
-    4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Weight units kg. The Exercises page has **Only what I have** on with "My equipment: 1 piece".
+    4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Weight units kg, Body weight 72.5 (on this device only, CAL-2). The Exercises page has **Only what I have** on with "My equipment: 1 piece".
 
 ### REG-NAV-03 · Skipping the setup
 
@@ -1348,6 +1349,28 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 ---
 
+## 14. Calories (`calories.md`)
+
+### REG-CAL-01 · The summary and the history estimate the calories burnt
+
+- **Stories:** CAL-1, CAL-2 · **Priority:** P2
+- **Preconditions:** `guest()`; a workout "Planks" of one 10:00 timed step of the plank; `bodyWeight: 75` in the settings.
+- **Steps:**
+    1. Start Planks from Workouts and let it run to the end.
+    2. Press Done.
+- **Expected:**
+    1. The summary has a third stat, **Calories**, "About 50 kcal" (3.8 METs × 75 kg × 10 minutes is 47.5), heard as "about 50 calories".
+    2. The run's line in the log ends "· about 50 kcal", heard as "… · 10:00 spent · about 50 calories".
+
+### REG-CAL-02 · No calories without a body weight
+
+- **Stories:** CAL-2 · **Priority:** P2
+- **Preconditions:** as REG-CAL-01, with no body weight.
+- **Steps:** Run Planks to the end, and press Done.
+- **Expected:** The summary has Time and Rounds only, and the log's line has no kcal.
+
+---
+
 ## Known issues: what to skip or mark
 
 | TODO.md Known issue                                                                | Where it lands here                                  | How                                                                                              |
@@ -1382,6 +1405,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                            |
 | Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                               |
+| Calories                  | REG-CAL-01 – 02  | CAL-1, CAL-2                                                                                                                  |
 | Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                         |
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                    |
 | Gestures and dragging     | REG-GES-01 – 03  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12                                                                                     |

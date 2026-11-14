@@ -114,7 +114,7 @@ test.describe('signing in by email', () => {
         await expect(sync.getByRole('button', { name: 'Delete account' })).toBeVisible();
         // The tick was saved with the account, dated by the server, under the notice's date
         expect(supabase.callsTo('rpc/give_health_consent')[0].body).toEqual({
-            notice_date: '2026-11-10',
+            notice_date: '2026-11-14',
         });
         await expect(
             page.getByText(
@@ -227,7 +227,7 @@ test.describe('signing in from the welcome screen', () => {
                     await expect(page.getByRole('radio', { name: 'Pounds (lb)' })).toBeChecked();
                 } else {
                     await expect(page).toHaveURL('/welcome/setup');
-                    await expect(page.getByText('Question 1 of 5')).toBeVisible();
+                    await expect(page.getByText('Question 1 of 6')).toBeVisible();
                 }
             }
         );

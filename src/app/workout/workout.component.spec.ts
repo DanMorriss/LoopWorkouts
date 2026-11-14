@@ -3741,6 +3741,21 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
+        it('estimates the calories burnt, with a body weight given (CAL-1)', () => {
+            TestBed.inject(SettingsStore).update({ bodyWeight: 300 });
+            // A minute of an unnamed step, at 1.5 METs: 1.5 × 300 × 60 ÷ 3600 = 7.5, about 10
+            start(makeWorkout({ workSeconds: 60, restSeconds: 0, repeats: 1 }));
+            advance(60_000);
+
+            const calories = Array.from(summary()!.querySelectorAll('.summary__stat')).at(-1)!;
+            expect(calories.querySelector('dt')!.textContent!.trim()).toBe('Calories');
+            expect(calories.querySelector('[aria-hidden="true"]')!.textContent).toBe(
+                'About 10 kcal'
+            );
+            expect(calories.querySelector('.sr-only')!.textContent).toBe('about 10 calories');
+            fixture.destroy();
+        });
+
         it('opens by itself once finished, with no way back to the workout', async () => {
             start(makeWorkout({ workSeconds: 1, restSeconds: 0, repeats: 1 }));
             advance(1000);

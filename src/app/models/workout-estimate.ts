@@ -30,7 +30,7 @@ const PACE_RUNS = 3;
 const PACE_RANGE = { min: 0.25, max: 4 };
 
 /** The guess for one set of reps, e.g. 10 reps: 35 seconds. Each side of one is a set. */
-function repSetSeconds(reps: number): number {
+export function repSetSeconds(reps: number): number {
     return reps * SECONDS_PER_REP + SECONDS_PER_REP_SET;
 }
 

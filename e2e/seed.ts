@@ -216,6 +216,8 @@ export interface Settings {
     eachSideFirst: 'left' | 'right';
     switchSidesSeconds: number;
     name: string;
+    /** In kg, on this device only (CAL-2). */
+    bodyWeight: number | null;
 }
 
 /** The keys a test's `storage` takes, made from the data above. */

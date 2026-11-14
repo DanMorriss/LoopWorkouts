@@ -32,6 +32,7 @@ describe('SettingsStore', () => {
             eachSideFirst: 'left',
             switchSidesSeconds: 5,
             name: '',
+            bodyWeight: null,
             profileUpdatedAt: 0,
         });
 
@@ -137,6 +138,29 @@ describe('SettingsStore', () => {
         localStorage.setItem('settings', '{"eachSideFirst": "right", "switchSidesSeconds": 0}');
         expect(createStore().eachSideFirst()).toBe('right');
         expect(createStore().switchSidesSeconds()).toBe(0);
+    });
+
+    it('has no body weight to begin with, keeping only one in range (CAL-2)', () => {
+        expect(createStore().bodyWeight()).toBeNull();
+
+        for (const saved of ['"72"', '19.9', '300.5']) {
+            TestBed.resetTestingModule();
+            localStorage.setItem('settings', `{"bodyWeight": ${saved}}`);
+            expect(createStore().bodyWeight()).toBeNull();
+        }
+
+        TestBed.resetTestingModule();
+        localStorage.setItem('settings', '{"bodyWeight": 72.575}');
+        expect(createStore().bodyWeight()).toBe(72.575);
+    });
+
+    // Health data: it stays on this device, so a change to it doesn't date the profile
+    it("keeps the body weight out of the profile, so it doesn't sync", () => {
+        const store = createStore();
+        store.update({ bodyWeight: 80 });
+        expect(store.bodyWeight()).toBe(80);
+        expect(store.hasProfile()).toBe(false);
+        expect(store.profile()).not.toHaveProperty('bodyWeight');
     });
 
     describe('the profile (NAV-4)', () => {

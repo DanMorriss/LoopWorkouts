@@ -28,7 +28,7 @@ test.describe('a device new to the app', () => {
             await page.getByRole('button', { name: 'Continue as guest' }).click();
             await expect(page).toHaveURL('/welcome/setup');
             expect(await app.storageItem('welcomed')).toBe('guest');
-            await expect(page.getByText('Question 1 of 5')).toBeVisible();
+            await expect(page.getByText('Question 1 of 6')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What should we call you?' })
             ).toBeFocused();
@@ -64,7 +64,7 @@ test.describe('a device new to the app', () => {
             // Enter is Next
             await page.getByRole('textbox', { name: 'Your name' }).press('Enter');
 
-            await expect(page.getByText('Question 2 of 5')).toBeVisible();
+            await expect(page.getByText('Question 2 of 6')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What do you train for?' })
             ).toBeFocused();
@@ -73,22 +73,27 @@ test.describe('a device new to the app', () => {
             await page.getByRole('radio', { name: /^Fitness/ }).check();
             await next.click();
 
-            await expect(page.getByText('Question 3 of 5')).toBeVisible();
+            await expect(page.getByText('Question 3 of 6')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What equipment do you have?' })
             ).toBeFocused();
             await page.getByRole('button', { name: 'Kettlebell', exact: true }).click();
             await next.click();
 
-            await expect(page.getByText('Question 4 of 5')).toBeVisible();
+            await expect(page.getByText('Question 4 of 6')).toBeVisible();
             await page.getByRole('radio', { name: 'Female' }).check();
             await next.click();
 
-            await expect(page.getByText('Question 5 of 5')).toBeVisible();
+            await expect(page.getByText('Question 5 of 6')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'Do you lift in kilograms or pounds?' })
             ).toBeFocused();
             await expect(page.getByRole('radio', { name: /^Kilograms/ })).toBeChecked();
+            await next.click();
+
+            await expect(page.getByText('Question 6 of 6')).toBeVisible();
+            await expect(page.getByRole('heading', { name: 'What do you weigh?' })).toBeFocused();
+            await page.getByRole('textbox', { name: 'Your weight in kilograms' }).fill('72.5');
             await page.getByRole('button', { name: 'Done' }).click();
 
             await expect(page).toHaveURL('/home');
@@ -111,6 +116,9 @@ test.describe('a device new to the app', () => {
             await expect(profile.getByRole('radio', { name: 'Female' })).toBeChecked();
             await expect(profile.getByRole('radio', { name: 'Fitness' })).toBeChecked();
             await expect(profile.getByRole('radio', { name: 'Kilograms (kg)' })).toBeChecked();
+            await expect(
+                profile.getByRole('textbox', { name: 'Body weight in kilograms' })
+            ).toHaveValue('72.5');
 
             await app.tab('Exercises').click();
             await expect(page.getByRole('switch', { name: 'Only what I have' })).toBeChecked();

@@ -124,7 +124,7 @@
 - It fits the screen however much it shows: its content scrolls, with the buttons always in reach under it.
 - It shows:
     - "**Workout finished**", "**Time's up**" (a time limit that ran out) or "**Workout ended**", and the workout's title.
-    - **Time** (as in the history, pauses left out) and **Rounds**, e.g. "1 of 3 rounds · stopped", or "7 rounds + 3 in 20:00" for a time limit.
+    - **Time** (as in the history, pauses left out) and **Rounds**, e.g. "1 of 3 rounds · stopped", or "7 rounds + 3 in 20:00" for a time limit. With a body weight given, a third, **Calories**: "About 210 kcal", heard as "about 210 calories" (CAL-1, since 2026-11-14; see [calories](calories.md)).
     - When time ran out part-way through a rep step: "**Time ran out during Push-ups. How many reps did you get?**", with a Reps wheel (starting at the step's reps) and **Add set**, which logs that many reps at the step's weight. It's a set like any other after that, and can be changed with the rest, but it doesn't make the score "+ 1", as the step wasn't finished, and "Use these settings next time?" leaves it out.
     - **Personal bests** this workout set (PRG-2), and "Most rounds: 7 rounds + 3" for a time limit beaten (PRG-7; see [progress](progress.md)).
     - **Sets**, one line per step as in the history, e.g. "Squats: 10, 10, 8 @ 60 kg" or "Plank: 3 × 0:45".

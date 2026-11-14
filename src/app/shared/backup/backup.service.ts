@@ -109,6 +109,7 @@ export class BackupService {
                     eachSideFirst: this.settings.eachSideFirst(),
                     switchSidesSeconds: this.settings.switchSidesSeconds(),
                     name: this.settings.name(),
+                    bodyWeight: this.settings.bodyWeight(),
                 },
             },
             exportedAt

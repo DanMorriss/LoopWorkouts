@@ -97,7 +97,6 @@ This adds what that needs: sets and rest on an exercise, exercises done one side
 - **The section line**, above the ring: the heading of the part it's in, if there's one before it, and how far through the workout's exercises it is, e.g. "Knee rehabilitation · 2 of 7". Supersets count as one, and Rest steps and headings don't count. Screen readers hear "Knee rehabilitation, exercise 2 of 7" as each exercise starts.
 - **The round line** is the exercise's or superset's:
     - "set 2 of 3" for an exercise of more than one set, and "round 2 of 3" for a superset, with a dot per set or round when there are 15 or fewer.
-    - "**Last one!**" in place of the count in the last set or round.
     - Nothing for an exercise of one set.
     - When the whole workout repeats, its round follows, e.g. "set 2 of 3 · round 1 of 2". With a time limit, it's "round 3" and the time left, as now.
 - **The face** has "Left side" or "Right side" under the name for an exercise done each side.

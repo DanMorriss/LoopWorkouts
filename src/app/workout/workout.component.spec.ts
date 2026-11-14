@@ -269,13 +269,13 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('says "Last one!" instead of the count in the final round', async () => {
+        it('says "Last round!" instead of the count in the final round', async () => {
             start(makeWorkout({ workSeconds: 3, restSeconds: 2, repeats: 2 }));
-            expect(status()).not.toContain('Last one!');
+            expect(status()).not.toContain('Last round!');
 
             await advanceAndRoll(5000);
 
-            expect(status()).toContain('Last one!');
+            expect(status()).toContain('Last round!');
             expect(status()).not.toContain('round 2 of 2');
             expect(dots()).toEqual(['done', 'current']);
             fixture.destroy();
@@ -284,7 +284,9 @@ describe('WorkoutComponent', () => {
         it('shows no rounds for a single-round workout, just the time left', () => {
             start(makeWorkout({ repeats: 1 }));
 
+            // Its one round is its last, but there's no "Last round!" for a workout of one
             expect(status()).toBe('00:03 left');
+            expect(text()).not.toContain('Last round!');
             expect(dots()).toEqual([]);
             fixture.destroy();
         });
@@ -319,7 +321,7 @@ describe('WorkoutComponent', () => {
             await advanceAndRoll(6000);
 
             expect(view().isComplete()).toBe(true);
-            expect(text()).not.toContain('Last one!');
+            expect(text()).not.toContain('Last round!');
             expect(dots()).toEqual([]);
             fixture.destroy();
         });
@@ -1535,7 +1537,7 @@ describe('WorkoutComponent', () => {
 
             expect(text()).toContain('round 7 of ∞');
             expect(fixture.nativeElement.querySelectorAll('.round-dot')).toHaveLength(0);
-            expect(text()).not.toContain('Last one!');
+            expect(text()).not.toContain('Last round!');
             fixture.destroy();
         });
 
@@ -3908,7 +3910,7 @@ describe('WorkoutComponent', () => {
         beforeEach(() => localStorage.clear());
         afterEach(() => localStorage.clear());
 
-        it('says which set it is on, with a dot per set, and Last one! on the last', async () => {
+        it('says which set it is on, with a dot per set, the last included', async () => {
             start(legDay());
 
             expect(status()).toBe('set 1 of 3');
@@ -3933,9 +3935,10 @@ describe('WorkoutComponent', () => {
             await roll();
             await advanceAndRoll(5000);
 
-            expect(status()).toBe('Last one!');
+            // A set isn't a round of the workout, so no "Last round!" here
+            expect(status()).toBe('set 3 of 3');
+            expect(dots()).toEqual(['done', 'done', 'current']);
             expect(said()).toBe('Leg press, 10 reps, last set');
-            // Resting after it, it's done: no Last one! any more
             pressDone();
             await roll();
             expect(view().isRestActive()).toBe(true);
@@ -4067,7 +4070,7 @@ describe('WorkoutComponent', () => {
             await roll();
             await advanceAndRoll(5000);
 
-            expect(status()).toBe('Last one!');
+            expect(status()).toBe('superset round 3 of 3');
             expect(said()).toBe('Bench, 10 reps, superset, last round');
             pressDone();
             await roll();

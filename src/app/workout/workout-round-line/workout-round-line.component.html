@@ -2,12 +2,8 @@
 @if (line.set; as set) {
     <!-- An exercise's sets, or a superset's rounds, and the whole
                                  workout's round after them when it has more than one -->
-    <p class="text-2xl" [class.workout-status__last]="line.last">
-        @if (line.last) {
-            Last one!
-        } @else {
-            {{ setText(set) }}
-        }
+    <p class="text-2xl">
+        {{ setText(set) }}
         @if (line.timeLimited) {
             · round {{ line.round }}
         } @else if (line.untilStopped) {
@@ -42,7 +38,7 @@
     </p>
 } @else if (line.totalRounds > 1) {
     @if (line.last) {
-        <p class="workout-status__last text-2xl">Last one!</p>
+        <p class="workout-status__last text-2xl">Last round!</p>
     } @else {
         <p class="text-2xl">round {{ line.round }} of {{ line.totalRounds }}</p>
     }

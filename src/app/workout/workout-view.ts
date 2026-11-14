@@ -140,18 +140,6 @@ export class WorkoutView {
             : null;
     });
 
-    /** In the rest that ends a set: done with it, so its last isn't "Last one!" any more. */
-    private readonly restingAfterSet = computed(() => {
-        const state = this.state();
-        const workout = this.running();
-        if (!state || !workout || state.phase !== 'rest') {
-            return false;
-        }
-        const { places, sets } = runPlan(workout);
-        const i = state.stepIndex;
-        return places[i] === null && sets[i + 1] !== sets[i];
-    });
-
     /**
      * Whether to say which step it is (the step strip, and to screen readers). Only for rounds
      * with more than one work or rep step: a plain work-and-rest workout doesn't need
@@ -347,9 +335,8 @@ export class WorkoutView {
                 timeNearlyUp: this.timeNearlyUp(),
                 totalRounds: this.totalRounds(),
                 totalLeft: this.totalLeft(),
-                last: set
-                    ? set.set === set.of - 1 && !this.restingAfterSet()
-                    : this.repeats() === 1,
+                // The workout's last round, shown only when it has more than one
+                last: !set && this.repeats() === 1,
                 dots: set ? setDots(set) : this.totalRounds() > 1 ? this.roundDots() : [],
                 strip: this.stepStrip(),
             },

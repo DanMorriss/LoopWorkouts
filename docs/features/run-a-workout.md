@@ -60,12 +60,12 @@
 - **Round line**:
 
     - "round 2 of 5" for a workout of more than one round, with a dot per round (done, current, to go) when there are 15 rounds or fewer.
-    - "**Last one!**" in place of the count in the final round.
+    - "**Last round!**" in place of the count in the final round. Never for a single-round workout, nor for the last of an exercise's sets or a superset's rounds.
     - "round 3 of ∞" for a workout that runs until stopped.
     - "round 3" for a time limit, with the **time left** under it, e.g. "12:34 left", in the accent colour for its last 10 seconds. Screen readers hear it with the round as each round starts, e.g. "Timed, round 3, 12:34 left"; the time left itself isn't read out as it ticks.
     - Nothing for a single-round workout.
-    - **On a step with sets** (BLD-9), its sets instead: "set 2 of 3", with a dot per set when there are 15 or fewer, and "**Last one!**" in the last set. The rest after a set is part of that set: resting after set 1 still says "set 1 of 3", and the next set's line turns in as it starts. Resting after the last set says "set 3 of 3", not "Last one!", as it's done. When the whole workout repeats, its round follows on the same line: "set 2 of 3 · round 1 of 2", "· round 3 of ∞", or "· round 3" with the time left under it for a time limit. Screen readers hear "set 2 of 3", or "last set", with each set. (RUN-10; the section line is above.)
-    - **In a superset** (BLD-12), its rounds the same way: "superset round 2 of 3", or "giant set round 2 of 3" for three exercises or more, with a dot per round and "**Last one!**" in the last, for each of its steps. Screen readers hear "superset round 2 of 3", or "superset, last round".
+    - **On a step with sets** (BLD-9), its sets instead: "set 2 of 3", with a dot per set when there are 15 or fewer. The rest after a set is part of that set: resting after set 1 still says "set 1 of 3", and the next set's line turns in as it starts. The last set says "set 3 of 3" too. When the whole workout repeats, its round follows on the same line: "set 2 of 3 · round 1 of 2", "· round 3 of ∞", or "· round 3" with the time left under it for a time limit. Screen readers hear "set 2 of 3", or "last set", with each set. (RUN-10; the section line is above.)
+    - **In a superset** (BLD-12), its rounds the same way: "superset round 2 of 3", or "giant set round 2 of 3" for three exercises or more, with a dot per round, for each of its steps. Screen readers hear "superset round 2 of 3", or "superset, last round".
     - The **time left of the whole workout**, e.g. "01:20 left", beside the dots, for a set number of rounds of timed steps only. Not with rep steps, which take as long as they take, nor until stopped.
     - A **strip of the round's steps** under it, one segment per step in its kind's colour: an outline to go, filled but quieter when done, and taller with a glow for the one in progress. Only when a round has more than one work or rep step (a plain work-and-rest workout leaves it out), and no step has sets (whose round line says where it is). In a workout with sets, a superset's round (BLD-12) has one, of its steps and the rest after it; hidden from screen readers, which hear the step number, e.g. "step 2 of 5", with each step.
 
@@ -171,7 +171,7 @@
 - Given a workout of one exercise and no headings, then there's no section line.
 - Given work 0:03, rest 0:02, 2 rounds, then it shows work 00:03 at the start, switches to rest exactly at 3s, starts round 2 at 5s, and finishes at 8s with no rest after the last work.
 - Given rest of 0:00, then there's no rest phase at all.
-- Given a workout of 5 rounds in its last round, then it says "Last one!".
+- Given a workout of 5 rounds in its last round, then it says "Last round!"; given a workout of 1 round, then it never does.
 - Given a workout of 20 rounds, then it says "round 1 of 20" with no dots.
 - Given the app is held up for 10 seconds mid-step, when it catches up, then it shows the right time and phase straight away.
 - Given a rep step is reached, when an hour goes by, then it's still waiting on the same step.
@@ -203,7 +203,7 @@
 - Given work 0:03 then 10 push-ups and a time limit of 0:20, when the push-ups take 12 seconds, then after Done 00:05 are left.
 - Given time runs out while push-ups are waited on, then the summary asks how many reps I got; Add set with 6 logs 6 push-ups, and the score stays as it was.
 - Given work 0:03, rest 0:02, 2 rounds, then it says "00:08 left" at the start and "00:05 left" at the rest; given a rep step in the round, then there's no time left.
-- Given bench and row as a superset of 3 rounds with 0:05 between, then it runs bench, row, rest, bench, row, rest, bench, row, saying "superset round 1 of 3" on bench and row, "then Bench · superset round 2 of 3 · 10 reps" in the rest, and "Last one!" in round 3; with shoulder press too, it's "giant set round 1 of 3".
+- Given bench and row as a superset of 3 rounds with 0:05 between, then it runs bench, row, rest, bench, row, rest, bench, row, saying "superset round 1 of 3" on bench and row, "then Bench · superset round 2 of 3 · 10 reps" in the rest, and "superset round 3 of 3" in round 3; with shoulder press too, it's "giant set round 1 of 3".
 - Given that superset, then the strip shows bench and row; in round 2, the rest before them too.
 - Given Squats, Plank and Rest, then the strip shows work (current), work, rest (to go); at the rest, the two works are done and rest is current.
 - Given work 0:10, then the time pops at 00:03, 00:02 and 00:01, and not in the rest after.

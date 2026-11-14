@@ -84,7 +84,7 @@ The marketing skills (`/draft-content`, `/brand-review`, `/email-sequence`, `/ca
 
 **Style:**
 
-- British English (colour, programme, kg first), sentence case for headings, and no exclamation marks except "Last one!", which is the app's own.
+- British English (colour, programme, kg first), sentence case for headings, and no exclamation marks except "Last round!", which is the app's own.
 - The name is **Loop Workouts** (two words, both capitals), never LoopTimer or "Loop". The site is **loopworkouts.com**, lower case.
 - The app's words: workout, exercise, step (timed, rep or rest), round, set, rep, ready-made workout, plan, the log, personal best. Not "routine", "session" or "WOD", except in a community that uses them.
 - Calls to action are an action: "Open loopworkouts.com and press start." Tag links with `?ref=`.

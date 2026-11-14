@@ -230,8 +230,18 @@ test.describe("the week's exercises", () => {
             await expect(rows.nth(2)).toContainText('20 reps each side in 2 sets');
             await expect(rows.nth(2)).not.toContainText('New best');
 
+            // Its page's ‹ comes back to its row, focused
             await week.getByRole('link', { name: 'Back squat' }).click();
-            await expect(page).toHaveURL('/exercises/back-squat');
+            await expect(page).toHaveURL('/exercises/back-squat?from=progress');
+            await page.locator('.back-link', { hasText: 'Progress' }).click();
+            await expect(page).toHaveURL('/history?exercise=back-squat');
+            await expect(week.getByRole('link', { name: 'Back squat' })).toBeFocused();
+
+            // And from the log, back to the run it was in
+            await page.locator('.entry__exercise', { hasText: 'Plank' }).first().click();
+            await expect(page).toHaveURL(/\/exercises\/plank\?run=/);
+            await page.locator('.back-link', { hasText: 'Progress' }).click();
+            await expect(page).toHaveURL(/\/history\?run=/);
         }
     );
 });

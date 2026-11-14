@@ -118,6 +118,24 @@ describe('ExercisePageComponent', () => {
         });
     });
 
+    describe('from Progress', () => {
+        it('goes back to the run in the log it was opened from', async () => {
+            await open('/exercises/back-squat?run=1700000000000-legs');
+            const back = el().querySelector('.back-link')!;
+
+            expect(back.getAttribute('href')).toBe('/history?run=1700000000000-legs');
+            expect(back.textContent).toContain('Progress');
+        });
+
+        it("goes back to its row in the week's exercises", async () => {
+            await open('/exercises/back-squat?from=progress');
+            const back = el().querySelector('.back-link')!;
+
+            expect(back.getAttribute('href')).toBe('/history?exercise=back-squat');
+            expect(back.textContent).toContain('Progress');
+        });
+    });
+
     describe("the tour of an exercise's page", () => {
         it('starts on the first one opened, and not again', async () => {
             const tour = TestBed.inject(TourService);

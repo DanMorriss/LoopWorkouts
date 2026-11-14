@@ -91,7 +91,11 @@
     <app-set-lines class="entry__sets" [sections]="sections()">
         <ng-template let-line>
             @if (line.path) {
-                <a class="entry__exercise" [routerLink]="line.path">{{ line.name }}</a
+                <a
+                    class="entry__exercise"
+                    [routerLink]="line.path"
+                    [queryParams]="{ run: entry().id }"
+                    >{{ line.name }}</a
                 ><span aria-hidden="true">: {{ line.text }}</span>
                 <span class="sr-only">, {{ line.spoken }}</span>
             } @else {

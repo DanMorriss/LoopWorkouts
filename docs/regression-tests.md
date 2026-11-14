@@ -809,7 +809,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Expected:**
     1. "Last 7 days: 3 workouts · 1:02:30" (AMRAP is outside the last 7 × 24 hours).
     2. Under Log: "Today", "Yesterday", "Monday 9 November", then "Tuesday 3 November", newest first.
-    3. Sprints: "8:00 AM · 12:30 · 3 rounds", "Back squat: 3 × 10 @ 60 kg", its name a link to `/exercises/back-squat`. Legs: "2 of 5 rounds · stopped", "Back squat: 10 @ 60, 8 @ 62.5 kg". AMRAP: "7 rounds + 3 in 20:00".
+    3. Sprints: "8:00 AM · 12:30 · 3 rounds", "Back squat: 3 × 10 @ 60 kg", its name a link to `/exercises/back-squat?run=<its id>`, whose ‹ Progress comes back to it. Legs: "2 of 5 rounds · stopped", "Back squat: 10 @ 60, 8 @ 62.5 kg". AMRAP: "7 rounds + 3 in 20:00".
     4. Gym's lines sit under "Warmup", and its superset's under "Superset", as a list of their own.
     5. In pounds, 60 kg shows as 132.5 lb.
 - **Empty state (separate case):** with no history, "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to your workouts**.
@@ -895,10 +895,11 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 
 - **Stories:** PRG-13 · **Priority:** P2
 - **Preconditions:** `guest()`, clock Wed 11 Nov. History on 10 Nov: Back squat 2 × 10 at 62.5 kg, a 1:00 Plank, and Dumbbell lunge 2 × 10 each side; on 2 Nov (9 days before): Back squat 10 at 60 kg and a 0:45 Plank.
-- **Steps:** Open Progress; read Exercises this week; press Back squat.
+- **Steps:** Open Progress; read Exercises this week; press Back squat, then ‹ Progress; press Plank in the log, then ‹ Progress.
 - **Expected:**
     1. Three rows, those with a new best first: Back squat, "20 reps in 2 sets", "New best, heaviest: 62.5 kg for 10 reps"; Plank, "1 minute in 1 set", "New best, longest: 1 minute"; then Dumbbell lunge, "20 reps each side in 2 sets", with no best, as it's the first time.
-    2. Back squat goes to `/exercises/back-squat`.
+    2. Back squat goes to `/exercises/back-squat?from=progress`; its **‹ Progress** comes back to `/history?exercise=back-squat`, with Back squat's link focused.
+    3. A set's exercise in the log goes to its page with `?run=<id>`, and ‹ Progress comes back to that run (`/history?run=<id>`).
 - **In the pack:** as above (the screen reader wording, which says the same as what's shown).
 
 ---

@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, untracked } from '@angular/core';
 import { formatWeight, weightIn } from '../models/weight';
 import {
     hasSets,
@@ -278,6 +278,18 @@ export class WorkoutView {
             return false;
         }
         return state.remainingSeconds <= (state.phaseSeconds < 15 ? 3 : 5);
+    });
+    /**
+     * Where the pulse starts in its one-second loop, as a negative animation delay, so each
+     * beat lands on the clock's second, as the countdown beeps do, however late in the
+     * second it started (e.g. on resuming). Worked out as it starts, not every tick.
+     */
+    readonly pulseDelay = computed(() => {
+        if (!this.nextSoon()) {
+            return null;
+        }
+        const state = untracked(this.state);
+        return `${-((state?.phaseElapsedMs ?? 0) % 1000)}ms`;
     });
     /** What comes next, for the colour of the "Next:" pulse: a step's kind, or finish. */
     readonly nextKind = computed(() => this.nextState()?.step?.kind ?? 'finish');

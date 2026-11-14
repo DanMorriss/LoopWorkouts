@@ -3065,6 +3065,21 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
+        it("beats the pulse on the clock's second, with the countdown beeps, however late it starts", () => {
+            start(makeWorkout({ workSeconds: 20, restSeconds: 30 }));
+            const startedAt = Date.now();
+
+            // A tick 300ms into the step's 16th second: the loop starts 300ms in
+            vi.spyOn(Date, 'now').mockReturnValue(startedAt + 15_300);
+            advance(250);
+
+            expect(pulsing()).toBe(true);
+            expect(getComputedStyle(next()).animationDelay).toBe('-0.3s');
+            expect(getComputedStyle(next(), '::before').animationDelay).toBe('-0.3s');
+            expect(getComputedStyle(face(), '::before').animationDelay).toBe('-0.3s');
+            fixture.destroy();
+        });
+
         it('pulses for only the last 3 seconds of a step under 15 seconds', () => {
             start(makeWorkout({ workSeconds: 10, restSeconds: 10 }));
 

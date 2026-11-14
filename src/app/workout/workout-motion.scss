@@ -3,7 +3,7 @@
 // near its size budget.
 
 // What's next, under the ring. As the step nears its end it's a pill in the next step's
-// colour that swells gently once a second. The glow is its own layer, so only transform and
+// colour that swells once a second, on the beat of the countdown beeps, and eases back. The glow is its own layer, so only transform and
 // opacity animate.
 .workout-next {
     position: relative;
@@ -84,21 +84,21 @@
 
 .workout-next--soon {
     border-color: var(--next-color);
-    animation: next-swell 1s ease-in-out infinite;
+    animation: next-swell 1s ease-out infinite;
 
     &::before {
-        animation: next-glow 1s ease-in-out infinite;
+        animation: next-glow 1s ease-out infinite;
     }
 }
 
 @keyframes next-swell {
-    50% {
+    from {
         transform: scale(1.06);
     }
 }
 
 @keyframes next-glow {
-    50% {
+    from {
         opacity: 1;
     }
 }
@@ -117,6 +117,14 @@
     to {
         opacity: 0.5;
     }
+}
+
+// Each beat peaks at the start of its loop, so the pill, the face and the beep land together.
+// --pulse-delay (WorkoutView.pulseDelay) puts the loop's start on the clock's second.
+.workout-next--soon,
+.workout-next--soon::before,
+.workout-face--soon::before {
+    animation-delay: var(--pulse-delay, 0ms);
 }
 
 // A new step rolls up into the face as the last one rolls away over the top, as if both were

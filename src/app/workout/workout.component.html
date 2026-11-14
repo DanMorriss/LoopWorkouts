@@ -68,6 +68,7 @@
                             'workout-face--soon': view.nextSoon(),
                             'workout-face--new-round': view.newRound(),
                         }"
+                        [style.--pulse-delay]="view.pulseDelay()"
                     >
                         <!-- Keyed by step: the last step's text rolls away over the top as the
                              next one's rolls up from below, as if on a drum like the number
@@ -164,6 +165,7 @@
                     class="workout-next"
                     data-tour="next"
                     [class.workout-next--soon]="view.nextSoon()"
+                    [style.--pulse-delay]="view.pulseDelay()"
                     [attr.data-next]="view.nextKind()"
                 >
                     Next: {{ view.upNext() }}

@@ -71,6 +71,19 @@ Twenty-one ready-made workouts are listed on Workouts, under your own (see `docs
 - [x] **Tour of Create, light up all of Rounds** (2026-11-11): `data-tour="repeat"` is on an element round the switch and what's under it.
 - [x] **A tour of an exercise's page** (2026-11-11): on the first one opened, four stops (Add to workout, your note, the muscles it works and the demo, turned with a finger), and in Help's Tours (`TOURS.exercise`, `tour-exercise`).
 
+### Calories (CAL)
+
+How the estimate works, and why the body weight stays on the device, is in `docs/features/calories.md`.
+
+- [ ] **Dan: run `supabase/schema.sql` again in the SQL editor before releasing #324.** It adds the `body_weight_consents` table and its three functions, and lets `push_records()` take `body-weight` records. Until then, ticking to keep the body weight with the account fails to save.
+- [x] **An estimate of each workout's calories** (CAL-1, 2026-11-14): "About 210 kcal" on the workout summary and in the history, from each exercise's movement (a MET each), the time on its sets, and rest at 1.5 METs.
+- [x] **Body weight, on this device only** (CAL-2, 2026-11-14): Body weight on You → Profile, and **Add your weight to see calories** on the workout summary, which opens it. Not asked in the setup, so a new user's first workout isn't held up by it. It's not part of the synced profile, as weight is health data.
+- [ ] **For Dan to look at:** the METs per movement and their exceptions (`models/calories.ts`), against the Compendium of Physical Activities, and whether resting at 1.5 METs is fair.
+- [ ] **The week's calories on Progress** (CAL-3): beside the time per week's bars, or as a second chart they switch to.
+- [ ] **How hard an exercise of your own is** (CAL-4): Light, Moderate or Hard on its page, for its MET, rather than 3.5 for all of them.
+- [x] **Sync the body weight, with consent** (CAL-6, 2026-11-14): a tick on Profile, signed in, a consent of its own, apart from notes'; unticking deletes it from the account. Needs the schema run again: see the first item here.
+- [ ] **Heart rate from a watch** (CAL-5): on iOS, HealthKit's active energy instead of the estimate.
+
 ### Setup and profile (NAV-4, SET-7)
 
 The setup after the welcome screen and the synced profile are in `docs/features/home-and-navigation.md` and `docs/features/settings.md`.
@@ -90,7 +103,7 @@ How to keep the codebase from degrading is in `CLAUDE.md`.
 ## 2. Known issues
 
 - [ ] **Have the Privacy notice and Terms of use looked over:** written on 2026-10-26 from what the app does, and updated on 2026-10-28 for accounts and sync (Supabase and Resend in Europe; workouts, history and exercises kept with the account) and dan@loopworkouts.com to contact, and on 2026-10-30 for the weekly plan and signing in with Google, and on 2026-11-01 for Vercel Web Analytics, and on 2026-11-07 for Vercel Speed Insights, and on 2026-11-08 for what UK GDPR asks a notice to say (Dan Morriss as controller, the lawful bases, transfers to the US, retention, age 13, rights and the ICO) and England and Wales as the terms' law, and on 2026-11-10 to take out Google Fonts, now served from the app.
-- [ ] **Keep the initial load under its 500 kB budget:** it's 478.72 kB (2026-11-14, up 0.4 kB for logging each run's time on rep steps), since the built-in exercises' list came out of the first download (`ExerciseStore.load()`, with the pages that need it waiting on `exercisesLoaded` in `app.routes.ts`). It had crept up to 502 kB before; what keeps it down: anything on every page uses `app-icon`, not `mat-icon`, and each new built-in exercise still adds about 300 bytes up front (its name, muscles and equipment).
+- [ ] **Keep the initial load under its 500 kB budget:** it was 479.37 kB (2026-11-14, up 0.4 kB for logging each run's time on rep steps, then 0.65 kB for the body weight setting, CAL-2, and 0.6 kB for syncing it with consent, CAL-6); it's 479.95 kB now, since the built-in exercises' list came out of the first download (`ExerciseStore.load()`, with the pages that need it waiting on `exercisesLoaded` in `app.routes.ts`). It had crept up to 502 kB before; what keeps it down: anything on every page uses `app-icon`, not `mat-icon`, and each new built-in exercise still adds about 300 bytes up front (its name, muscles and equipment).
     - **Only the pages that need them download the exercises' list and the ready-made workouts** (2026-11-11): `WorkoutStore.loadReadyMade()` loads the ready-made workouts when a page that shows, plans or runs workouts opens (`readyMadeLoaded` in `app.routes.ts`), so the welcome screen, Settings and Help download neither.
 - [ ] **Dan to check the exercises' movements (RUN-11, BLD-14):** each built-in exercise's movement, which Swap ranks by first, is in `src/app/models/built-in-exercise-movements.ts` (#213), picked by Claude. The least sure: farmer's carry (a movement of its own), kettlebell halo and around the world (both "circle", so each is offered for the other), wall sit (a squat), and the kettlebell thruster, clean and press, snatch, sumo high pull and Turkish get-up (all "whole body"). The ten stretches (batch 10) are all "stretch", a movement of their own, and Swap only offers a stretch for a stretch.
 - [ ] **No hip flexor muscle group:** the body map has no shape for the hip flexors, so the kneeling hip flexor stretch (and the back leg of the pigeon and world's greatest stretch) lists the quads, the closest group, at the front of the hip and thigh.

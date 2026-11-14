@@ -14,11 +14,15 @@ export function sessionFor(email: string): Session {
  * can change what it answers. As the real one does, it keeps a session in localStorage while
  * signed in, which is how the app knows there may be one before loading Supabase's code: so
  * make it after a test empties localStorage. The account has consent to keeping notes that
- * may mention health on record (SYN-10), unless `consent` is null.
+ * may mention health on record (SYN-10), unless `consent` is null; and none to keeping the
+ * body weight (CAL-6), unless `weightConsent` is given.
  */
 export function fakeAccountClient(
     email: string | null = null,
-    { consent = { at: Date.UTC(2026, 10, 8, 12), notice: '2026-11-08' } as unknown } = {}
+    {
+        consent = { at: Date.UTC(2026, 10, 8, 12), notice: '2026-11-08' } as unknown,
+        weightConsent = null as unknown,
+    } = {}
 ) {
     let session = email === null ? null : sessionFor(email);
     let listener: ((event: string, session: Session | null) => void) | null = null;
@@ -66,7 +70,17 @@ export function fakeAccountClient(
             const { notice_date } = args as { notice_date: string };
             consent = { at: Date.UTC(2026, 10, 9, 12), notice: notice_date };
         }
-        const data = fn.endsWith('_health_consent') ? consent : null;
+        if (fn === 'give_body_weight_consent') {
+            const { notice_date } = args as { notice_date: string };
+            weightConsent = { at: Date.UTC(2026, 10, 14, 12), notice: notice_date };
+        } else if (fn === 'withdraw_body_weight_consent') {
+            weightConsent = null;
+        }
+        const data = fn.endsWith('_health_consent')
+            ? consent
+            : fn.endsWith('_body_weight_consent')
+              ? weightConsent
+              : null;
         return { data: data as unknown, error: null as unknown };
     });
     return { auth, rpc, change };

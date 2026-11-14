@@ -10,6 +10,7 @@ import { ReadyMadeFavourites } from '../state/ready-made-favourites.service';
 import { ReadyMadeChanges } from '../state/ready-made-changes.service';
 import { PlanStore } from '../state/plan-store.service';
 import { Profile } from '../../models/profile';
+import { BodyWeightRecord } from '../../models/weight';
 import { WorkoutStore } from '../state/workout-store.service';
 import {
     BackupProblem,
@@ -60,6 +61,8 @@ export type CopyToMerge = Pick<
     Partial<Pick<Extract<ReadBackup, { ok: true }>, 'fromVersion1' | 'newWorkouts'>> & {
         /** The profile, from another device by sync (a backup's settings aren't imported). */
         profile?: Profile | null;
+        /** The body weight, from another device by sync, with consent (CAL-6). */
+        bodyWeight?: BodyWeightRecord | null;
     };
 
 export type ImportResult =
@@ -109,6 +112,7 @@ export class BackupService {
                     eachSideFirst: this.settings.eachSideFirst(),
                     switchSidesSeconds: this.settings.switchSidesSeconds(),
                     name: this.settings.name(),
+                    bodyWeight: this.settings.bodyWeight(),
                 },
             },
             exportedAt
@@ -200,6 +204,9 @@ export class BackupService {
         }
         if (backup.profile) {
             this.settings.mergeProfile(backup.profile);
+        }
+        if (backup.bodyWeight) {
+            this.settings.mergeBodyWeight(backup.bodyWeight);
         }
         const entries = this.history.mergeEntries(linkedHistory, backup.deleted);
         return {

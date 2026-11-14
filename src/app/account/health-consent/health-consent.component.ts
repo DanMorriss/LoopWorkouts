@@ -28,34 +28,18 @@ import { FieldTree, FormField } from '@angular/forms/signals';
         }
     `,
     styles: `
+        @use 'consent' as *;
+
         :host {
             display: block;
         }
 
-        // The whole line is the tick's label, so it's at least 44px to press
         .consent {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            min-height: 44px;
-            padding: 0.6rem 0;
-            color: var(--text);
-            font-size: 0.9rem;
-            cursor: pointer;
+            @include consent-line;
         }
 
         .consent__box {
-            flex-shrink: 0;
-            width: 1.25rem;
-            height: 1.25rem;
-            margin: 0;
-            accent-color: var(--accent);
-            cursor: pointer;
-
-            &:focus-visible {
-                outline: 2px solid var(--accent);
-                outline-offset: 2px;
-            }
+            @include consent-box;
         }
 
         .consent__error {

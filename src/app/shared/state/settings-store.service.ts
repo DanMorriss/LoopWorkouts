@@ -2,7 +2,7 @@ import { computed, inject, Service, signal } from '@angular/core';
 import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, readMyEquipment } from '../../models/exercise';
 import { TRAINING_GOALS, TrainingGoal } from '../../models/muscle-balance';
 import { cleanName, Profile, PROFILE_FIELDS } from '../../models/profile';
-import { WEIGHT_UNITS, WeightUnit } from '../../models/weight';
+import { BodyWeightRecord, readBodyWeightKg, WEIGHT_UNITS, WeightUnit } from '../../models/weight';
 import { DEFAULT_RUN_SIDES, MAX_SWITCH_SECONDS, Side } from '../../models/workout';
 import { SyncClock } from './sync-clock.service';
 
@@ -37,6 +37,14 @@ export interface Settings {
     /** What Home greets you by (NAV-4); '' if not given. */
     name: string;
     /**
+     * Your body weight in kg, for the calories a workout burns (CAL-2), or null if not given.
+     * Health data, so it isn't part of the profile: it syncs on its own, and only with consent
+     * (CAL-6).
+     */
+    bodyWeight: number | null;
+    /** When the body weight last changed, by the sync clock; 0 if it never has here. */
+    bodyWeightUpdatedAt: number;
+    /**
      * When the profile (`PROFILE_FIELDS`), which syncs, last changed; 0 if it never has here,
      * as on a device that's not been set up, or signed out of.
      */
@@ -57,6 +65,8 @@ const DEFAULT_SETTINGS: Settings = {
     eachSideFirst: DEFAULT_RUN_SIDES.first,
     switchSidesSeconds: DEFAULT_RUN_SIDES.switchSeconds,
     name: '',
+    bodyWeight: null,
+    bodyWeightUpdatedAt: 0,
     profileUpdatedAt: 0,
 };
 const STORAGE_KEY = 'settings';
@@ -83,6 +93,17 @@ export class SettingsStore {
     readonly eachSideFirst = computed(() => this.settings().eachSideFirst);
     readonly switchSidesSeconds = computed(() => this.settings().switchSidesSeconds);
     readonly name = computed(() => this.settings().name);
+    readonly bodyWeight = computed(() => this.settings().bodyWeight);
+    /** The body weight as it syncs, with consent (CAL-6); null if it's never been set here. */
+    readonly bodyWeightRecord = computed(
+        (): BodyWeightRecord | null => {
+            const { bodyWeight, bodyWeightUpdatedAt } = this.settings();
+            return bodyWeightUpdatedAt > 0
+                ? { kg: bodyWeight, updatedAt: bodyWeightUpdatedAt }
+                : null;
+        },
+        { equal: (a, b) => a?.updatedAt === b?.updatedAt }
+    );
 
     /** The profile, as it syncs. */
     readonly profile = computed(
@@ -102,8 +123,8 @@ export class SettingsStore {
     /** Whether the profile's been set on this device, or fetched from the account. */
     readonly hasProfile = computed(() => this.settings().profileUpdatedAt > 0);
 
-    /** Changes settings; a change to the profile is dated, so it syncs. */
-    update(changes: Partial<Omit<Settings, 'profileUpdatedAt'>>) {
+    /** Changes settings; a change to the profile, or the body weight, is dated, so it syncs. */
+    update(changes: Partial<Omit<Settings, 'profileUpdatedAt' | 'bodyWeightUpdatedAt'>>) {
         const settings = this.settings();
         const next = { ...settings, ...changes };
         if (changes.name !== undefined) {
@@ -111,6 +132,9 @@ export class SettingsStore {
         }
         if (PROFILE_FIELDS.some((field) => !sameValue(next[field], settings[field]))) {
             next.profileUpdatedAt = this.clock.now(settings.profileUpdatedAt);
+        }
+        if (next.bodyWeight !== settings.bodyWeight) {
+            next.bodyWeightUpdatedAt = this.clock.now(settings.bodyWeightUpdatedAt);
         }
         this.save(next);
     }
@@ -138,6 +162,30 @@ export class SettingsStore {
             profileUpdatedAt: updatedAt,
         });
         return true;
+    }
+
+    /**
+     * Takes the body weight kept with the account (CAL-6), from another device, if it changed
+     * more recently than this one. Returns whether it did.
+     */
+    mergeBodyWeight(record: BodyWeightRecord): boolean {
+        if (record.updatedAt <= this.settings().bodyWeightUpdatedAt) {
+            return false;
+        }
+        this.save({
+            ...this.settings(),
+            bodyWeight: record.kg,
+            bodyWeightUpdatedAt: record.updatedAt,
+        });
+        return true;
+    }
+
+    /**
+     * Leaving an account the body weight was kept with (CAL-6): it goes from this device too,
+     * as the account's name does.
+     */
+    forgetBodyWeight() {
+        this.save({ ...this.settings(), bodyWeight: null, bodyWeightUpdatedAt: 0 });
     }
 
     /**
@@ -204,6 +252,12 @@ function loadSettings(): Settings {
                 ? (saved['switchSidesSeconds'] as number)
                 : DEFAULT_SETTINGS.switchSidesSeconds,
         name: typeof saved['name'] === 'string' ? cleanName(saved['name']) : DEFAULT_SETTINGS.name,
+        bodyWeight: readBodyWeightKg(saved['bodyWeight']) ?? DEFAULT_SETTINGS.bodyWeight,
+        bodyWeightUpdatedAt:
+            Number.isSafeInteger(saved['bodyWeightUpdatedAt']) &&
+            (saved['bodyWeightUpdatedAt'] as number) >= 0
+                ? (saved['bodyWeightUpdatedAt'] as number)
+                : DEFAULT_SETTINGS.bodyWeightUpdatedAt,
         profileUpdatedAt:
             Number.isSafeInteger(saved['profileUpdatedAt']) &&
             (saved['profileUpdatedAt'] as number) >= 0

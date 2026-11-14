@@ -7,6 +7,7 @@ import { AccountClient, ACCOUNT_CLIENT, SIGN_IN_PATH, SignInProvider } from './a
 import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
 import { hasSignInTokens } from './sign-in-landing';
 import { ConsentService } from './consent.service';
+import { SettingsStore } from '../shared/state/settings-store.service';
 
 export type AccountState =
     | { status: 'loading' }
@@ -30,6 +31,7 @@ export class AccountService {
     private readonly sync = inject(SyncStarter);
     private readonly undo = inject(UndoService);
     private readonly consent = inject(ConsentService);
+    private readonly settings = inject(SettingsStore);
     /** The account whose consent (SYN-10) has been saved or looked up, once signed in. */
     private consentChecked: string | null = null;
     private client: Promise<AccountClient> | null = null;
@@ -225,9 +227,14 @@ export class AccountService {
         );
     }
 
-    /** Signs this device out. Gives whether it worked. */
+    /**
+     * Signs this device out. Gives whether it worked. A body weight kept with the account
+     * (CAL-6) goes from the device, as the account's name does: the device is cleared either
+     * way.
+     */
     async signOut(): Promise<boolean> {
         this.sync.leaving = true;
+        this.forgetKeptBodyWeight();
         try {
             const client = await this.connect();
             const { error } = await client.auth.signOut({ scope: 'local' });
@@ -250,10 +257,33 @@ export class AccountService {
                 this.sync.leaving = false;
                 return false;
             }
+            this.forgetKeptBodyWeight();
             await client.auth.signOut({ scope: 'local' });
             return true;
         } catch {
             return false;
+        }
+    }
+
+    /**
+     * Agreed on Profile, signed in, to keeping the body weight with the account (CAL-6), or
+     * withdrawn, which deletes it there. Gives whether it was saved.
+     */
+    async keepBodyWeight(keep: boolean): Promise<boolean> {
+        try {
+            const client = await this.connect();
+            return await (keep
+                ? this.consent.giveWeight(client)
+                : this.consent.withdrawWeight(client));
+        } catch {
+            return false;
+        }
+    }
+
+    /** Leaving an account that kept the body weight: it was the account's. */
+    private forgetKeptBodyWeight() {
+        if (this.consent.weightGiven()) {
+            this.settings.forgetBodyWeight();
         }
     }
 

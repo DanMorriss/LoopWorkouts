@@ -9,7 +9,8 @@ create sequence if not exists public.records_seq;
 create table if not exists public.records (
     user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
     -- 'workout', 'history', 'exercise', 'exercise-note', 'hidden-exercise',
-    -- 'ready-made-favourite', 'ready-made-change', 'library-order', 'plan' or 'profile'
+    -- 'ready-made-favourite', 'ready-made-change', 'library-order', 'plan', 'profile' or
+    -- 'body-weight' (only with consent: see body_weight_consents, below)
     kind text not null,
     id text not null,
     -- When it last changed, and was deleted, in ms since the epoch, as on the device
@@ -101,7 +102,10 @@ begin
     from jsonb_to_recordset(changes) as c(
         kind text, id text, updated_at bigint, deleted_at bigint, data jsonb, version integer
     )
-    where c.kind in ('workout', 'history', 'exercise', 'exercise-note', 'hidden-exercise', 'ready-made-favourite', 'ready-made-change', 'library-order', 'plan', 'profile')
+    where c.kind in ('workout', 'history', 'exercise', 'exercise-note', 'hidden-exercise', 'ready-made-favourite', 'ready-made-change', 'library-order', 'plan', 'profile', 'body-weight')
+        -- Body weight is health data: kept only while the account consents to it (CAL-6)
+        and (c.kind <> 'body-weight'
+            or exists (select from public.body_weight_consents w where w.user_id = me))
         and c.id <> ''
         and c.updated_at > 0
         and (c.deleted_at is not null or c.data is not null)
@@ -220,3 +224,78 @@ $$;
 
 revoke execute on function public.my_health_consent() from public, anon;
 grant execute on function public.my_health_consent() to authenticated;
+
+-- Consent to keeping your body weight, which is health data, with the account (CAL-6), apart
+-- from consent to notes, so either can be given or withdrawn alone: ticked on You → Profile.
+-- Without it, push_records() leaves the 'body-weight' record out. Read and written only
+-- through the functions below; deleted with the account.
+create table if not exists public.body_weight_consents (
+    user_id uuid primary key references auth.users (id) on delete cascade,
+    given_at timestamptz not null,
+    notice date not null
+);
+
+alter table public.body_weight_consents enable row level security;
+
+drop policy if exists "Read own body weight consent" on public.body_weight_consents;
+create policy "Read own body weight consent" on public.body_weight_consents
+    for select to authenticated
+    using ((select auth.uid()) = user_id);
+
+-- Gives consent under the notice of `notice_date`, replacing any given before, and gives
+-- {at, notice}, at in ms since the epoch.
+create or replace function public.give_body_weight_consent(notice_date date) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+    me uuid := auth.uid();
+    given timestamptz := now();
+begin
+    if me is null then
+        raise exception 'Not signed in';
+    end if;
+    insert into public.body_weight_consents (user_id, given_at, notice)
+    values (me, given, notice_date)
+    on conflict (user_id) do update
+        set given_at = excluded.given_at, notice = excluded.notice;
+    return jsonb_build_object(
+        'at', (extract(epoch from given) * 1000)::bigint,
+        'notice', notice_date
+    );
+end;
+$$;
+
+revoke execute on function public.give_body_weight_consent(date) from public, anon;
+grant execute on function public.give_body_weight_consent(date) to authenticated;
+
+-- The signed-in account's consent to keeping its body weight, as {at, notice}, or null.
+create or replace function public.my_body_weight_consent() returns jsonb
+language sql stable set search_path = '' as $$
+    select jsonb_build_object(
+        'at', (extract(epoch from given_at) * 1000)::bigint,
+        'notice', notice
+    )
+    from public.body_weight_consents
+    where user_id = (select auth.uid());
+$$;
+
+revoke execute on function public.my_body_weight_consent() from public, anon;
+grant execute on function public.my_body_weight_consent() to authenticated;
+
+-- Withdraws it: the consent goes, and so does the body weight kept with the account, at once
+-- and for good (not left as a deletion), so other devices keep only their own copy.
+create or replace function public.withdraw_body_weight_consent() returns void
+language plpgsql security definer set search_path = '' as $$
+declare
+    me uuid := auth.uid();
+begin
+    if me is null then
+        raise exception 'Not signed in';
+    end if;
+    perform pg_advisory_xact_lock(hashtextextended(me::text, 0));
+    delete from public.body_weight_consents where user_id = me;
+    delete from public.records where user_id = me and kind = 'body-weight';
+end;
+$$;
+
+revoke execute on function public.withdraw_body_weight_consent() from public, anon;
+grant execute on function public.withdraw_body_weight_consent() to authenticated;

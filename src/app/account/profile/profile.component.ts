@@ -3,16 +3,21 @@ import { BodyFigure } from '../../models/exercise';
 import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
 import { MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
+import { BodyWeightFieldComponent } from './body-weight-field.component';
+import { ConsentService } from '../consent.service';
+import { BodyWeightConsentComponent } from './body-weight-consent.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 
 /**
  * Account → Profile: your name, for Home's greeting (SET-7), your sex, for the body map's
  * figure (SET-5), what you train for, for the muscle bars' aims (PRG-8), and the weight unit
  * you lift in (SET-4). They're saved with the settings, and synced with your account when
- * you're signed in, with your equipment, as your profile.
+ * you're signed in, with your equipment, as your profile. Your body weight, for calories
+ * (CAL-2), is here too, but syncs only with its own consent (CAL-6).
  */
 @Component({
     selector: 'app-profile',
+    imports: [BodyWeightConsentComponent, BodyWeightFieldComponent],
     template: `
         <!-- Saved as it's left, trimmed -->
         <label class="picker-field profile__field">
@@ -115,6 +120,13 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
                 }
             </div>
         </fieldset>
+
+        <!-- Health data, so it syncs only with its own consent, given below -->
+        <app-body-weight-field class="profile__weight" describedBy="body-weight-hint">
+            <span class="profile__name">Body weight</span>
+        </app-body-weight-field>
+        <p class="profile__hint" id="body-weight-hint">{{ weightHint() }}</p>
+        <app-body-weight-consent />
     `,
     styles: `
         :host {
@@ -138,6 +150,10 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
             padding-top: 0.25rem;
         }
 
+        .profile__weight {
+            margin-top: 1rem;
+        }
+
         .profile__hint {
             margin: 0.5rem 0 0;
             font-size: 0.85rem;
@@ -147,6 +163,7 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
 })
 export class ProfileComponent {
     protected readonly settings = inject(SettingsStore);
+    private readonly consent = inject(ConsentService);
     protected readonly maxNameLength = MAX_NAME_LENGTH;
 
     protected setName(event: Event) {
@@ -175,6 +192,12 @@ export class ProfileComponent {
         const { large, small } = WEEKLY_AIMS[this.settings.trainingGoal()];
         return `Aim for ${large.low} to ${large.high} sets a week on each muscle, ${small.low} to ${small.high} on small ones`;
     });
+
+    protected readonly weightHint = computed(() =>
+        this.consent.weightGiven()
+            ? 'For calories burnt. Kept with your account'
+            : 'For calories burnt. Kept on this device only'
+    );
 
     protected readonly weightUnits: { value: WeightUnit; label: string }[] = [
         { value: 'kg', label: 'Kilograms (kg)' },

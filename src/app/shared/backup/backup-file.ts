@@ -84,7 +84,7 @@ export interface BackupFile {
     /** Records deleted on the device it came from, so importing deletes them here too. */
     deleted: Deletion[];
     /** This device's settings, its profile included, but not when the profile changed. */
-    settings: Omit<Settings, 'profileUpdatedAt'>;
+    settings: Omit<Settings, 'profileUpdatedAt' | 'bodyWeightUpdatedAt'>;
 }
 
 export type BackupProblem = 'unreadable' | 'not-a-backup' | 'too-new';

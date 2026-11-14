@@ -26,6 +26,7 @@ import {
 } from '../history-format';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
+import { CaloriesService } from '../../shared/state/calories.service';
 import { exercisePath, isBuiltIn } from '../../models/exercise';
 import { SetLinesComponent } from '../set-lines/set-lines.component';
 import { musclesInSets, musclesOnACard } from '../../models/workout-muscles';
@@ -73,6 +74,7 @@ export class HistoryEntryComponent {
     private readonly history = inject(HistoryStore);
     private readonly settings = inject(SettingsStore);
     private readonly exercises = inject(ExerciseStore);
+    private readonly calories = inject(CaloriesService);
     private readonly workouts = inject(WorkoutStore);
     private readonly slide = inject(PageSlide);
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -95,6 +97,8 @@ export class HistoryEntryComponent {
     protected readonly name = computed(() => entryName(this.entry()));
     protected readonly duration = computed(() => formatDuration(this.entry().activeSeconds));
     protected readonly rounds = computed(() => describeRounds(this.entry()));
+    /** About how many calories it burnt (CAL-1), with a body weight given. */
+    protected readonly burnt = computed(() => this.calories.describe(this.entry()));
     /**
      * Its sets, one line per step, in the unit chosen in settings. Each is linked to its
      * exercise's page, where it has one.

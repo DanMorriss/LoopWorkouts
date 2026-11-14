@@ -1348,6 +1348,39 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 ---
 
+## 14. Calories (`calories.md`)
+
+### REG-CAL-01 · The summary and the history estimate the calories burnt
+
+- **Stories:** CAL-1, CAL-2 · **Priority:** P2
+- **Preconditions:** `guest()`; a workout "Planks" of one 10:00 timed step of the plank; `bodyWeight: 75` in the settings.
+- **Steps:**
+    1. Start Planks from Workouts and let it run to the end.
+    2. Press Done.
+- **Expected:**
+    1. The summary has a third stat, **Calories**, "About 50 kcal" (3.8 METs × 75 kg × 10 minutes is 47.5), heard as "about 50 calories".
+    2. The run's line in the log ends "· about 50 kcal", heard as "… · 10:00 spent · about 50 calories".
+
+### REG-CAL-02 · No calories without a body weight, and a way to add one
+
+- **Stories:** CAL-2 · **Priority:** P2
+- **Preconditions:** as REG-CAL-01, with no body weight.
+- **Steps:** Run Planks to the end. Press **Add your weight to see calories**. Then open Progress.
+- **Expected:** The summary has Time and Rounds only, and Add your weight to see calories. Pressing it opens `/account?focus=body-weight` with focus in Body weight. The log's line has no kcal.
+
+### REG-CAL-03 · Keeping the body weight with the account, and withdrawing it
+
+- **Stories:** CAL-6 · **Priority:** P2
+- **Preconditions:** signed in (`signedIn()`), with FakeSupabase; a body weight of 80 kg, dated.
+- **Steps:**
+    1. Open You. Tick "I agree that my body weight, which is health data, is kept with my account".
+    2. Untick it.
+- **Expected:**
+    1. Unticked to begin with, with the hint "For calories burnt. Kept on this device only". Ticked, `give_body_weight_consent` is called with the notice's date, it says "Agreed on …", the hint says "Kept with your account", and a `body-weight` record is pushed.
+    2. `withdraw_body_weight_consent` is called, the hint is back to "Kept on this device only", and the box still has 80.
+
+---
+
 ## Known issues: what to skip or mark
 
 | TODO.md Known issue                                                                | Where it lands here                                  | How                                                                                              |
@@ -1382,6 +1415,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                            |
 | Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                               |
+| Calories                  | REG-CAL-01 – 03  | CAL-1, CAL-2, CAL-6                                                                                                           |
 | Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                         |
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                    |
 | Gestures and dragging     | REG-GES-01 – 03  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12                                                                                     |

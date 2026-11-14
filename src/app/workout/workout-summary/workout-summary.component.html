@@ -59,16 +59,7 @@
         }
 
         @if (entry()) {
-            <dl class="summary__stats">
-                <div class="summary__stat">
-                    <dt>Time</dt>
-                    <dd>{{ duration() }}</dd>
-                </div>
-                <div class="summary__stat">
-                    <dt>Rounds</dt>
-                    <dd>{{ rounds() }}</dd>
-                </div>
-            </dl>
+            <app-summary-stats [entry]="entry()!" (addWeight)="addWeight.emit()" />
 
             <!-- Time ran out part-way through a rep step: how much of it was done? -->
             @if (lastSet(); as last) {

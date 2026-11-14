@@ -17,8 +17,12 @@
             ></a
         >
         <span class="entry__detail"
-            >{{ time }} · {{ rounds() }}<span class="sr-only"> · {{ duration() }} spent</span></span
-        >
+            >{{ time }} · {{ rounds() }}<span class="sr-only"> · {{ duration() }} spent</span>
+            @if (burnt(); as burnt) {
+                <span aria-hidden="true"> · about {{ burnt.kcal }}</span
+                ><span class="sr-only"> · {{ burnt.spoken }}</span>
+            }
+        </span>
     </div>
     <app-showcase-count class="entry__time" aria-hidden="true" [number]="duration()" label="time" />
     <div

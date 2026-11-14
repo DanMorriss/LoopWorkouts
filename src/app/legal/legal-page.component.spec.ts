@@ -37,10 +37,11 @@ describe('the Privacy notice and Terms of use', () => {
         expect(page.textContent).toContain('without one, none of it is sent anywhere');
         expect(page.textContent).toContain("Syncing, while you're signed in.");
         expect(page.textContent).toContain('Counting visits.');
+        expect(page.textContent).toContain('Your body weight, if you give it');
         expect(page.textContent).toContain('Loop Workouts is run by Dan Morriss');
         expect(page.textContent).toContain('we ask for your explicit consent when you sign in');
         expect(page.textContent).toContain('You can withdraw your consent at any time');
-        expect(page.textContent).toContain('Last updated 10 November 2026');
+        expect(page.textContent).toContain('Last updated 14 November 2026');
         expect(page.querySelector('a[href="https://ico.org.uk/make-a-complaint/"]')).not.toBeNull();
         expect(page.textContent).toContain('Last updated');
     });

@@ -20,12 +20,7 @@ import { ActiveRunService } from '../../shared/run/active-run.service';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
-import {
-    describeRounds,
-    describeScore,
-    entryName,
-    formatDuration,
-} from '../../history/history-format';
+import { describeScore, entryName } from '../../history/history-format';
 import { SuggestedWorkoutComponent } from '../../history/suggested-workout/suggested-workout.component';
 import { bestLines } from '../../exercises/progress-format';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
@@ -38,6 +33,7 @@ import { SummaryCopyComponent } from './summary-copy/summary-copy.component';
 import { SummaryStepUpsComponent } from './summary-step-ups/summary-step-ups.component';
 import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';
 import { SheetDrag } from './sheet-drag';
+import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
 
 /**
  * How the workout went, once it's finished or ended with End workout: the time, rounds and
@@ -56,6 +52,7 @@ import { SheetDrag } from './sheet-drag';
         SuggestedWorkoutComponent,
         SummaryCopyComponent,
         SummarySetsComponent,
+        SummaryStatsComponent,
         SummaryStepUpsComponent,
         SummarySwapsComponent,
         WheelPickerComponent,
@@ -74,6 +71,8 @@ export class WorkoutSummaryComponent {
     readonly back = output<void>();
     /** Done: the run is over, on to it in the history. */
     readonly done = output<void>();
+    /** Add your weight to see calories: the run is over, on to Profile's Body weight. */
+    readonly addWeight = output<void>();
     /** Make a copy, of a ready-made workout: the copy, to open in Create. */
     readonly copied = output<Workout>();
 
@@ -106,11 +105,6 @@ export class WorkoutSummaryComponent {
     protected readonly title = computed(() => {
         const entry = this.entry();
         return entry ? entryName(entry) : (this.run.workout()?.title.trim() ?? '');
-    });
-    protected readonly duration = computed(() => formatDuration(this.entry()?.activeSeconds ?? 0));
-    protected readonly rounds = computed(() => {
-        const entry = this.entry();
-        return entry ? describeRounds(entry) : '';
     });
 
     protected readonly weightUnit = this.settings.weightUnit;

@@ -14,6 +14,7 @@ import {
 } from '../shared/testing/fake-sync';
 import { AccountComponent } from './account.component';
 import { PENDING_CONSENT_KEY } from './consent.service';
+import { SettingsStore } from '../shared/state/settings-store.service';
 
 describe('AccountComponent', () => {
     let fixture: ComponentFixture<AccountComponent>;
@@ -151,12 +152,12 @@ describe('AccountComponent', () => {
             await press('Email me a sign-in link');
             expect(client.auth.signInWithOtp).toHaveBeenCalled();
             // Kept until signed in, as an email link may open in another tab
-            expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBe('2026-11-10');
+            expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBe('2026-11-14');
 
             await type('account-code', '123456');
             await press('Sign in');
             expect(client.rpc).toHaveBeenCalledWith('give_health_consent', {
-                notice_date: '2026-11-10',
+                notice_date: '2026-11-14',
             });
             expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBeNull();
         });
@@ -440,7 +441,7 @@ describe('AccountComponent', () => {
             await press('Agree');
 
             expect(client.rpc).toHaveBeenCalledWith('give_health_consent', {
-                notice_date: '2026-11-10',
+                notice_date: '2026-11-14',
             });
             expect(element.querySelector('#health-consent')).toBeNull();
             expect(document.activeElement!.id).toBe('consent-given');
@@ -454,6 +455,75 @@ describe('AccountComponent', () => {
 
             expect(status()).toContain("That couldn't be saved.");
             expect(element.querySelector('#health-consent')).not.toBeNull();
+        });
+    });
+
+    describe('keeping the body weight with the account (CAL-6)', () => {
+        const box = () => element.querySelector<HTMLInputElement>('#body-weight-consent');
+        const hint = () => element.querySelector('#body-weight-hint')!.textContent!.trim();
+        async function toggle() {
+            box()!.click();
+            await settle();
+        }
+
+        it("isn't offered signed out", async () => {
+            await create();
+            expect(box()).toBeNull();
+            expect(hint()).toBe('For calories burnt. Kept on this device only');
+        });
+
+        it('signed in, asks for consent, saves it when ticked, and withdraws it unticked', async () => {
+            await create('me@example.com');
+            expect(client.rpc).toHaveBeenCalledWith('my_body_weight_consent');
+            expect(box()!.checked).toBe(false);
+            expect(box()!.closest('label')!.textContent).toContain(
+                'I agree that my body weight, which is health data, is kept with my account'
+            );
+
+            await toggle();
+            expect(client.rpc).toHaveBeenCalledWith('give_body_weight_consent', {
+                notice_date: '2026-11-14',
+            });
+            expect(box()!.checked).toBe(true);
+            expect(hint()).toBe('For calories burnt. Kept with your account');
+            expect(status()).toContain('Agreed on 14 November 2026.');
+
+            await toggle();
+            expect(client.rpc).toHaveBeenCalledWith('withdraw_body_weight_consent');
+            expect(box()!.checked).toBe(false);
+            expect(hint()).toBe('For calories burnt. Kept on this device only');
+        });
+
+        it("says when it couldn't be saved, leaving the tick as it was", async () => {
+            await create('me@example.com');
+            client.rpc.mockResolvedValueOnce({ data: null, error: { message: 'down' } });
+
+            await toggle();
+
+            expect(box()!.checked).toBe(false);
+            expect(status()).toContain("That couldn't be saved.");
+        });
+
+        it('signing out removes a body weight the account kept, as its name', async () => {
+            await create('me@example.com', {
+                weightConsent: { at: Date.UTC(2026, 10, 14), notice: '2026-11-14' },
+            });
+            const settings = TestBed.inject(SettingsStore);
+            settings.update({ bodyWeight: 80 });
+
+            await press('Sign out');
+
+            expect(settings.bodyWeight()).toBeNull();
+        });
+
+        it("signing out keeps a body weight the account didn't keep", async () => {
+            await create('me@example.com');
+            const settings = TestBed.inject(SettingsStore);
+            settings.update({ bodyWeight: 80 });
+
+            await press('Sign out');
+
+            expect(settings.bodyWeight()).toBe(80);
         });
     });
 

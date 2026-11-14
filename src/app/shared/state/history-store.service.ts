@@ -254,8 +254,8 @@ export function readHistoryEntry(value: unknown): HistoryEntry | null {
     if (!isHistoryEntry(value)) {
         return null;
     }
-    const entry = withUsableSupersets(
-        withUsableHeadings(withUsableTimeLimit(withUsableSets(value)))
+    const entry = withUsableExpected(
+        withUsableSupersets(withUsableHeadings(withUsableTimeLimit(withUsableSets(value))))
     );
     return isWholeNumber(entry.updatedAt) ? entry : { ...entry, updatedAt: entry.endedAt };
 }
@@ -312,6 +312,22 @@ function withUsableSupersets(entry: HistoryEntry): HistoryEntry {
         : [];
     return usable.length > 0
         ? { ...rest, supersets: usable.map(({ kind, step, steps }) => ({ kind, step, steps })) }
+        : rest;
+}
+
+// A broken expected time only refines an estimate, so it's dropped
+function withUsableExpected(entry: HistoryEntry): HistoryEntry {
+    const { expected, ...rest } = entry;
+    const usable =
+        typeof expected === 'object' &&
+        expected !== null &&
+        isWholeNumber(expected.timedSeconds) &&
+        isWholeNumber(expected.repSeconds);
+    return usable
+        ? {
+              ...rest,
+              expected: { timedSeconds: expected.timedSeconds, repSeconds: expected.repSeconds },
+          }
         : rest;
 }
 

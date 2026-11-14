@@ -222,6 +222,63 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         expect(text()).toContain('None of its steps is an exercise yet');
     });
 
+    describe('how long it takes', () => {
+        const time = () => el().querySelector('app-workout-time');
+        const said = () => Array.from(time()!.querySelectorAll('p'), (p) => text(p));
+
+        it("says it under its title, the clock for a workout that's all timed", async () => {
+            // 3 rounds of 0:30 and 0:10, the last rest skipped
+            await open(addSprints().id);
+
+            expect(said()).toEqual(['About 2 min']);
+        });
+
+        it('guesses at rep steps, then goes by your pace once finished, following changes', async () => {
+            const { id: _id, ...fields } = baseWorkout({
+                title: 'Push-ups',
+                steps: [{ kind: 'reps', reps: 20, name: 'Push-ups' }],
+                repeats: 10,
+            });
+            const workout = store.addWorkout(fields);
+            await open(workout.id);
+            // 10 sets of 20 reps, at about 3 seconds a rep and 5 to get ready
+            expect(said()).toEqual([
+                'About 11 min',
+                "A first guess at the rep steps. Once you've finished it, it's from your own pace.",
+            ]);
+
+            TestBed.inject(HistoryStore).record({
+                id: `1000-${workout.id}`,
+                workoutId: workout.id,
+                title: 'Push-ups',
+                startedAt: 1_000,
+                endedAt: 1_000 + 1_300_000,
+                activeSeconds: 1_300,
+                roundsCompleted: 10,
+                totalRounds: 10,
+                outcome: 'finished',
+                expected: { timedSeconds: 0, repSeconds: 650 },
+            });
+            harness.fixture.detectChanges();
+            expect(said()).toEqual(['About 22 min', 'At your pace, from your last runs of it.']);
+
+            // Half the sets, at the same pace
+            store.updateWorkout(workout.id, { ...fields, repeats: 5 });
+            harness.fixture.detectChanges();
+            expect(said()).toEqual(['About 11 min', 'At your pace, from your last runs of it.']);
+        });
+
+        it('says a time limit as it is, and nothing for a workout until stopped', async () => {
+            const { id: _id, ...limited } = baseWorkout({ timeLimitSeconds: 1200 });
+            await open(store.addWorkout(limited).id);
+            expect(said()).toEqual(['20 min', 'Its time limit.']);
+
+            const { id: _id2, ...endless } = baseWorkout({ repeats: 0 });
+            await open(store.addWorkout(endless).id);
+            expect(time()!.querySelector('p')).toBeNull();
+        });
+    });
+
     it('lists its runs, newest first, linking to them in the history', async () => {
         const sprints = addSprints();
         const run = (startedAt: number): HistoryEntry => ({

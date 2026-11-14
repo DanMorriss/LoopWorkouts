@@ -14,6 +14,7 @@ import { PageSlide } from '../../shared/navigation/page-slide';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { WorkoutOutlineComponent } from '../../shared/components/workout-outline/workout-outline.component';
+import { WorkoutTimeComponent } from '../../shared/components/workout-time/workout-time.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { injectStartWorkout } from '../../shared/run/start-workout';
@@ -35,8 +36,8 @@ const RECENT_RUNS = 5;
 const PLAN_BUTTON_ID = 'workout-details-plan';
 
 /**
- * A workout's details (LIB-4), at /library/<its id>, from its card in the library: the
- * Start, to do it now, as its card's play button does; Add to plan, saying which days it's on
+ * A workout's details (LIB-4), at /library/<its id>, from its card in the library: how long it
+ * takes; the Start, to do it now, as its card's play button does; Add to plan, saying which days it's on
  * (PLN-1); the muscles its exercises work, on the body map; its history, with its latest runs linking to them
  * on the Progress page; a heart to make it a favourite; and what's in it, each step and its sets, so it can be read without
  * opening Edit, each exercise sliding in its page. It slides in over Workouts, and back off with
@@ -57,6 +58,7 @@ const PLAN_BUTTON_ID = 'workout-details-plan';
         RouterLink,
         SwipeBackDirective,
         WorkoutOutlineComponent,
+        WorkoutTimeComponent,
     ],
     templateUrl: './workout-details.component.html',
     styleUrl: './workout-details.component.scss',

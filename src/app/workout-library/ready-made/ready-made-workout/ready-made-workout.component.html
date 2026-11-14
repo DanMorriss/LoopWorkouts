@@ -6,6 +6,7 @@
             @let workout = card.workout;
             <h2 class="preview__title">{{ workout.title }}</h2>
             <p class="preview__description">{{ workout.description }}</p>
+            <app-workout-time class="preview__time" [workout]="workout" />
             <ul class="preview__chips" aria-label="Equipment">
                 @for (need of card.equipment; track need) {
                     <li class="preview__chip">{{ need }}</li>

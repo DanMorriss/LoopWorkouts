@@ -48,6 +48,15 @@ describe("ReadyMadeWorkoutComponent, a ready-made plan's workout (PLN-6)", () =>
         expect(el().querySelector('button')).toBeNull();
     });
 
+    it('says about how long it takes, a first guess until you have done it', async () => {
+        await openFrom('gym-legs');
+
+        const time = Array.from(el().querySelectorAll('app-workout-time p'), (p) => text(p));
+        expect(time).toHaveLength(2);
+        expect(time[0]).toMatch(/^About \d+ min$/);
+        expect(time[1]).toContain('A first guess');
+    });
+
     it.each([
         ['today', 'chevron_left Today', '/home'],
         ['plans', 'chevron_left Plans', '/ready-made-plans'],

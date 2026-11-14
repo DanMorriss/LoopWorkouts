@@ -24,6 +24,7 @@ import { PageSlide } from '../../shared/navigation/page-slide';
 import { formatSeconds } from '../../shared/format-time';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
+import { WorkoutEstimates } from '../../shared/state/workout-estimates.service';
 import { counted } from '../../shared/format-count';
 import { CardGestures } from './card-gestures';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
@@ -82,6 +83,7 @@ export class WorkoutCardComponent {
 
     private readonly exercises = inject(ExerciseStore);
     private readonly slide = inject(PageSlide);
+    private readonly estimates = inject(WorkoutEstimates);
 
     protected readonly detailsUrl = computed(() => `/library/${this.workout().id}`);
     /** A ready-made workout (LIB-6), which can't be changed or deleted, only copied. */
@@ -177,6 +179,20 @@ export class WorkoutCardComponent {
         return runsUntilStopped(this.workout())
             ? 'repeated until stopped'
             : `repeated ${repeats} times`;
+    });
+
+    /**
+     * How long it takes, "About 25 min", from its steps or your pace; none for one that runs
+     * until stopped, or to a time limit, which its rounds already say.
+     */
+    protected readonly time = computed(() => {
+        const time = this.estimates.of(this.workout());
+        return time?.basis === 'limit' ? null : time;
+    });
+    /** The same for screen readers, added to its summary: ", takes about 25 minutes". */
+    protected readonly spokenTime = computed(() => {
+        const time = this.time();
+        return time ? `, takes ${time.spoken}` : '';
     });
 
     private readonly face = viewChild.required<ElementRef<HTMLElement>>('face');

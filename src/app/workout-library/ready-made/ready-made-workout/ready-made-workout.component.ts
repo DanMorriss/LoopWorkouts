@@ -9,20 +9,27 @@ import { BackLinkComponent } from '../../../nav/back-link/back-link.component';
 import { SwipeBackDirective } from '../../../nav/swipe-back.directive';
 import { BodyMapComponent } from '../../../shared/components/body-map/body-map.component';
 import { WorkoutOutlineComponent } from '../../../shared/components/workout-outline/workout-outline.component';
+import { WorkoutTimeComponent } from '../../../shared/components/workout-time/workout-time.component';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { readyMadeCard } from '../ready-made-card';
 
 /**
  * One of a ready-made plan's workouts (PLN-6), from the plan's card, at
- * /ready-made-plans/<its name>, e.g. /ready-made-plans/gym-legs: what it is and needs, every
- * exercise with its sets, and the muscles it works, only to look at, as it comes with the
- * plan. It slides in over the card, and back to where it was with ‹ or a swipe right. Its
+ * /ready-made-plans/<its name>, e.g. /ready-made-plans/gym-legs: what it is and needs, how long
+ * it takes, every exercise with its sets, and the muscles it works, only to look at, as it
+ * comes with the plan. It slides in over the card, and back to where it was with ‹ or a swipe right. Its
  * exercises link to their pages, which come back to it. On Workouts, a ready-made workout's
  * page is its Details, as yours is.
  */
 @Component({
     selector: 'app-ready-made-workout',
-    imports: [BackLinkComponent, BodyMapComponent, SwipeBackDirective, WorkoutOutlineComponent],
+    imports: [
+        BackLinkComponent,
+        BodyMapComponent,
+        SwipeBackDirective,
+        WorkoutOutlineComponent,
+        WorkoutTimeComponent,
+    ],
     templateUrl: './ready-made-workout.component.html',
     styleUrl: './ready-made-workout.component.scss',
 })

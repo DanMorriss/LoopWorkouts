@@ -1,14 +1,13 @@
 import { counted } from '../shared/format-count';
-import type { HistoryEntry } from './history';
+import { HistoryEntry, isTimedSet, RepSet } from './history';
 import { endlessRounds, RunningWorkout, runPlan, workoutSeconds } from './workout';
 
 /**
- * How long a run of a workout is expected to take, in whole seconds, in two parts: its clock
- * (timed steps and rests, which take exactly that) and its rep steps, which take as long as
- * they take, so are a guess. Kept on each run in the history (`HistoryEntry.expected`), so
- * what it really took can be set against what was expected of the workout as it was then.
+ * How long a workout is expected to take, in whole seconds, in two parts: its clock (timed
+ * steps and rests, which take exactly that) and its rep steps, which take as long as they
+ * take, so are a guess.
  */
-export interface ExpectedTime {
+interface ExpectedTime {
     timedSeconds: number;
     repSeconds: number;
 }
@@ -19,7 +18,7 @@ const SECONDS_PER_REP = 3;
 const SECONDS_PER_REP_SET = 5;
 
 /**
- * How many of a workout's latest finished runs its pace is taken from, so it follows how you
+ * How many of a workout's latest runs its pace is taken from, so it follows how you
  * do it now rather than how you did months ago.
  */
 const PACE_RUNS = 3;
@@ -30,22 +29,24 @@ const PACE_RUNS = 3;
  */
 const PACE_RANGE = { min: 0.25, max: 4 };
 
+/** The guess for one set of reps, e.g. 10 reps: 35 seconds. Each side of one is a set. */
+function repSetSeconds(reps: number): number {
+    return reps * SECONDS_PER_REP + SECONDS_PER_REP_SET;
+}
+
 /**
  * A workout's expected time, as it is now, or null for one whose rounds aren't counted (until
  * stopped, or a time limit), which has no end to expect. A step done each side counts twice,
  * with Switch sides between a timed one's, as `sides` has them.
  */
-export function expectedTime(
+function expectedTime(
     workout: Pick<RunningWorkout, 'blocks' | 'repeats' | 'sides'>
 ): ExpectedTime | null {
     if (endlessRounds(workout)) {
         return null;
     }
     const repsPerRound = runPlan(workout).steps.reduce(
-        (total, step) =>
-            step.kind === 'reps'
-                ? total + step.reps * SECONDS_PER_REP + SECONDS_PER_REP_SET
-                : total,
+        (total, step) => (step.kind === 'reps' ? total + repSetSeconds(step.reps) : total),
         0
     );
     return {
@@ -54,24 +55,26 @@ export function expectedTime(
     };
 }
 
+/** What a run's pace is worked out from: the time it spent on rep steps, and its sets. */
+export type PacedRun = Pick<HistoryEntry, 'repSeconds' | 'sets'>;
+
 /**
  * Your pace on a workout's rep steps against the guess, e.g. 1.5 for half as long again, from
- * the median of its latest finished runs (newest first, as the history keeps them) that
- * kept what was expected of them and had rep steps; null with none. A run's time on rep steps
- * is its time, pauses left out, less its clock.
+ * the median of its latest runs (newest first, as the history keeps them) that logged their
+ * time on rep steps and did some; null with none. Each run's is its time on rep steps
+ * (`HistoryEntry.repSeconds`, pauses left out) against the guess for the sets of reps it
+ * logged, so a step skipped, a run stopped part-way or one to a time limit counts only what
+ * was done.
  */
-export function repPace(
-    runs: readonly Pick<HistoryEntry, 'outcome' | 'activeSeconds' | 'expected'>[]
-): number | null {
+export function repPace(runs: readonly PacedRun[]): number | null {
     const paces = runs
-        .filter(
-            (run): run is typeof run & { expected: ExpectedTime } =>
-                run.outcome === 'finished' && (run.expected?.repSeconds ?? 0) > 0
-        )
+        .flatMap(({ repSeconds, sets = [] }) => {
+            const guess = sets
+                .filter((set): set is RepSet => !isTimedSet(set))
+                .reduce((total, set) => total + repSetSeconds(set.reps), 0);
+            return repSeconds !== undefined && guess > 0 ? [clamp(repSeconds / guess)] : [];
+        })
         .slice(0, PACE_RUNS)
-        .map(({ activeSeconds, expected }) =>
-            clamp((activeSeconds - expected.timedSeconds) / expected.repSeconds)
-        )
         .sort((a, b) => a - b);
     if (paces.length === 0) {
         return null;
@@ -87,7 +90,7 @@ function clamp(pace: number): number {
 /**
  * How long a workout will take: `seconds`, and what it's from. A `clock` is all timed steps
  * and rests, which take that long whoever does them; a `guess` has rep steps, guessed at;
- * `yours` has them at your pace from finished runs, so it's how long it takes you; a `limit`
+ * `yours` has them at your pace from your runs, so it's how long it takes you; a `limit`
  * is its time limit, exactly.
  */
 export interface Estimate {
@@ -104,7 +107,7 @@ export type EstimateBasis = 'clock' | 'guess' | 'yours' | 'limit';
  */
 export function estimateWorkout(
     workout: Pick<RunningWorkout, 'blocks' | 'repeats' | 'sides' | 'timeLimitSeconds'>,
-    runs: readonly Pick<HistoryEntry, 'outcome' | 'activeSeconds' | 'expected'>[]
+    runs: readonly PacedRun[]
 ): Estimate | null {
     if (workout.timeLimitSeconds !== undefined) {
         return { seconds: workout.timeLimitSeconds, basis: 'limit' };

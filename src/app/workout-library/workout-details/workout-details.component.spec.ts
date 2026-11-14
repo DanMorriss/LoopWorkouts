@@ -244,7 +244,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             // 10 sets of 20 reps, at about 3 seconds a rep and 5 to get ready
             expect(said()).toEqual([
                 'About 11 min',
-                "A first guess at the rep steps. Once you've finished it, it's from your own pace.",
+                "A first guess at the rep steps. Once you've done them, it's from your own pace.",
             ]);
 
             TestBed.inject(HistoryStore).record({
@@ -257,7 +257,9 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
                 roundsCompleted: 10,
                 totalRounds: 10,
                 outcome: 'finished',
-                expected: { timedSeconds: 0, repSeconds: 650 },
+                // One set of 20 reps, guessed at 65 seconds, done in twice that
+                repSeconds: 130,
+                sets: [{ round: 0, step: 0, name: 'Push-ups', reps: 20 }],
             });
             harness.fixture.detectChanges();
             expect(said()).toEqual(['About 22 min', 'At your pace, from your last runs of it.']);

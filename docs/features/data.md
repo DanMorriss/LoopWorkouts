@@ -79,7 +79,7 @@ In IndexedDB on the web: the `history` store of the `loop-workouts` database, on
         "outcome": "finished",
         "note": "felt strong",
         "headings": [{ "text": "Circuit", "step": 0 }],
-        "expected": { "timedSeconds": 405, "repSeconds": 275 },
+        "repSeconds": 310,
         "sets": [
             { "round": 0, "step": 0, "name": "Squats", "reps": 10, "weight": 60 },
             {
@@ -105,7 +105,7 @@ In IndexedDB on the web: the `history` store of the `loop-workouts` database, on
 - `headings` (optional): the workout's headings when it ran (BLD-13), in order, each `text` (trimmed, not empty) and `step`, the number of the first step after it, counted as a set's `step` is. The history groups an entry's sets under them. Missing for none, as in every entry from before headings; a broken one is dropped when loading, keeping the rest.
 - `supersets` (optional): the workout's supersets and giant sets when it ran (BLD-12), in order, each `kind` (`"superset"` or `"giant set"`), `step`, the number of its first step, counted as a set's `step` is, and `steps`, how many steps it has, rests included (at least 1). The history groups the lines of its steps together. Missing for none, as in every entry from before; a broken one is dropped when loading, keeping the rest.
 
-- `expected` (optional, since 2026-11-14): what the run was expected to take, in whole seconds, from the workout as it was then: `timedSeconds`, its clock (timed steps and rests), and `repSeconds`, the guess for its rep steps (see How long it takes in [library](library.md), LIB-9). What it really took against these is your pace on the workout. Missing for a workout that ran until stopped or to a time limit, and in entries from before; a broken one is dropped when loading, keeping the entry. An older app keeps it as it is, so the backup's version didn't change.
+- `repSeconds` (optional, since 2026-11-14): the time spent on rep steps, in whole seconds, pauses left out. Against a guess for the sets of reps logged, it's your pace on the workout, for the estimate of how long it takes (see How long it takes in [library](library.md), LIB-9). Missing for a run with no sets of reps, and in entries from before; a broken one is dropped when loading, keeping the entry. An older app keeps it as it is, so the backup's version didn't change. For a short time before it, runs logged `expected` (`timedSeconds` and `repSeconds`, what the run was expected to take) for the same reason; it's dropped when loading.
 
 **`history-pending` (`localStorage`):** each change to the history is kept here too until IndexedDB confirms it, as a JSON list of entries, since a write started as the page closes (logging a run left mid-way) may never finish. On the next load anything still here is saved to IndexedDB, the most recent change to each entry winning, and a deletion made after an entry's last change (in `deleted`) wins over it. If IndexedDB can't be used at all, the history stays here.
 

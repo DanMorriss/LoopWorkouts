@@ -6,7 +6,7 @@ import { WorkoutEstimates } from '../../state/workout-estimates.service';
 /** What a workout's estimate is from, under it; nothing to add for one that's all timed. */
 const HINTS: Record<EstimateBasis, string> = {
     clock: '',
-    guess: "A first guess at the rep steps. Once you've finished it, it's from your own pace.",
+    guess: "A first guess at the rep steps. Once you've done them, it's from your own pace.",
     yours: 'At your pace, from your last runs of it.',
     limit: 'Its time limit.',
 };

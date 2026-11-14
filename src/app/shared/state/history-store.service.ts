@@ -254,7 +254,7 @@ export function readHistoryEntry(value: unknown): HistoryEntry | null {
     if (!isHistoryEntry(value)) {
         return null;
     }
-    const entry = withUsableExpected(
+    const entry = withUsableRepSeconds(
         withUsableSupersets(withUsableHeadings(withUsableTimeLimit(withUsableSets(value))))
     );
     return isWholeNumber(entry.updatedAt) ? entry : { ...entry, updatedAt: entry.endedAt };
@@ -315,20 +315,17 @@ function withUsableSupersets(entry: HistoryEntry): HistoryEntry {
         : rest;
 }
 
-// A broken expected time only refines an estimate, so it's dropped
-function withUsableExpected(entry: HistoryEntry): HistoryEntry {
-    const { expected, ...rest } = entry;
-    const usable =
-        typeof expected === 'object' &&
-        expected !== null &&
-        isWholeNumber(expected.timedSeconds) &&
-        isWholeNumber(expected.repSeconds);
-    return usable
-        ? {
-              ...rest,
-              expected: { timedSeconds: expected.timedSeconds, repSeconds: expected.repSeconds },
-          }
-        : rest;
+// A broken time on rep steps only refines an estimate, so it's dropped. So is `expected`,
+// which runs logged for the same reason for a few days from 2026-11-14
+function withUsableRepSeconds(entry: HistoryEntry): HistoryEntry {
+    const {
+        repSeconds,
+        expected: _expected,
+        ...rest
+    } = entry as HistoryEntry & {
+        expected?: unknown;
+    };
+    return isWholeNumber(repSeconds) ? { ...rest, repSeconds } : rest;
 }
 
 function isWholeNumber(value: unknown, min = 0): value is number {

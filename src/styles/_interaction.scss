@@ -31,6 +31,28 @@
     }
 }
 
+// An underlined link in a line of text, e.g. an exercise's name in the log, its underline
+// strengthening on hover and the moment it's pressed.
+@mixin text-link {
+    color: var(--glow-text);
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 2px;
+
+    @include hover {
+        text-decoration-color: currentColor;
+    }
+
+    @include pressed {
+        text-decoration-color: currentColor;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}
+
 // A button that reads as a link: a disclosure such as "My equipment: none", or "Hidden".
 @mixin link-button {
     display: inline-flex;

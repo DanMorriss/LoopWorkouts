@@ -1,0 +1,76 @@
+@use 'interaction' as *;
+@use 'chip' as *;
+@use 'panel-card' as *;
+
+:host {
+    display: block;
+}
+
+// A card on the panel, as the muscles worked above it is
+.exercises-week {
+    @include panel-card;
+}
+
+.exercises-week__title {
+    margin: 0 0 0.5rem;
+    color: var(--text-strong);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.exercises-week__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.exercises-week__row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.6rem 0;
+
+    & + & {
+        border-top: 1px solid var(--border-soft);
+    }
+}
+
+// The name at the left, what was done at the right, wrapping under it on a narrow screen
+.exercises-week__line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.1rem 0.75rem;
+}
+
+// Linked as the log's exercise names are, 44px to a finger
+.exercises-week__name {
+    font-size: 0.9rem;
+    @include text-link;
+    @include hit-area(10px);
+}
+
+.exercises-week__total {
+    color: var(--text);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.exercises-week__best {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text);
+    font-size: 0.8rem;
+}
+
+// As an exercise card's "Your own"
+.exercises-week__tag {
+    flex: none;
+    @include tag;
+}
+
+.exercises-week__toggle {
+    @include link-button;
+}

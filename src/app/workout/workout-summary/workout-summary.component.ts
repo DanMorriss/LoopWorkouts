@@ -12,12 +12,7 @@ import {
 import { form, FormField, maxLength } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
 import { MAX_NOTE_LENGTH } from '../../models/history';
-import {
-    exerciseBests,
-    isMostRounds,
-    roundsScore,
-    sessionsByExercise,
-} from '../../models/progress';
+import { isMostRounds, newBests, roundsScore, sessionsByExercise } from '../../models/progress';
 import { musclesInSets } from '../../models/workout-muscles';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { WheelPickerComponent } from '../../shared/components/wheel-picker/wheel-picker.component';
@@ -138,12 +133,8 @@ export class WorkoutSummaryComponent {
             lines.push(`Most rounds: ${describeScore(score)}`);
         }
         for (const [exerciseId, [session]] of sessionsByExercise([entry])) {
-            const earlier = before.get(exerciseId);
-            if (!earlier) {
-                continue;
-            }
             // Newest first, as the history is, so on a tie the earlier best stands
-            const bests = exerciseBests([session, ...earlier]);
+            const bests = newBests([session, ...(before.get(exerciseId) ?? [])]);
             for (const line of bestLines(bests, this.weightUnit())) {
                 if (line.entryId === entry.id) {
                     lines.push(`${line.label}: ${line.text}`);

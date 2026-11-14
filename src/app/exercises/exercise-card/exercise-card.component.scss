@@ -1,5 +1,6 @@
 @use 'type' as *;
 @use 'interaction' as *;
+@use 'chip' as *;
 
 :host {
     display: block;
@@ -59,11 +60,7 @@
 }
 
 .exercise-card__tag {
-    padding: 0.1rem 0.5rem;
-    border: 1px solid var(--reps);
-    border-radius: 999px;
-    color: var(--text);
-    @include small-type(0.65rem);
+    @include tag;
 }
 
 .exercise-card__also {

@@ -12,14 +12,13 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../shared/components/icon/icon.component';
+import { inLastSevenDays } from '../../models/history';
 import { muscleBalance, setsByMuscle } from '../../models/muscle-balance';
 import type { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { ShownHistory } from '../shown-history';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { MuscleBarsComponent } from '../muscle-bars/muscle-bars.component';
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 let nextId = 0;
 
@@ -74,9 +73,8 @@ export class MusclesThisWeekComponent {
 
     /** Sets per muscle in the last seven days. */
     private readonly weekSets = computed(() =>
-        setsByMuscle(
-            this.history.entries().filter((entry) => entry.startedAt >= this.now - 7 * DAY_MS),
-            (id) => this.exercises.byId(id)
+        setsByMuscle(inLastSevenDays(this.history.entries(), this.now), (id) =>
+            this.exercises.byId(id)
         )
     );
 

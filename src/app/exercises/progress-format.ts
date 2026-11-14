@@ -1,5 +1,5 @@
 import { formatDuration, spokenDuration } from '../history/history-format';
-import { ExerciseBests, ProgressMeasure } from '../models/progress';
+import { ExerciseBests, ExerciseWeek, ProgressMeasure } from '../models/progress';
 import { estimateIn, WeightUnit, weightIn } from '../models/weight';
 import { counted } from '../shared/format-count';
 
@@ -64,6 +64,38 @@ export function bestLines(bests: ExerciseBests, unit: WeightUnit): BestLine[] {
         });
     }
     return lines;
+}
+
+/** An exercise's week as Progress lists it (PRG-13), e.g. "120 reps · 12 sets". */
+export interface WeekLine {
+    text: string;
+    /** e.g. "120 reps in 12 sets". */
+    spoken: string;
+    /** Its new bests, e.g. "Heaviest 100 kg × 5", with what's heard. */
+    bests: { text: string; spoken: string }[];
+}
+
+export function describeWeek(week: ExerciseWeek, unit: WeightUnit): WeekLine {
+    const side = week.eachSide ? ' each side' : '';
+    const shown: string[] = [];
+    const heard: string[] = [];
+    if (week.reps > 0) {
+        shown.push(reps(week.reps) + side);
+        heard.push(reps(week.reps) + side);
+    }
+    if (week.seconds > 0) {
+        shown.push(formatDuration(week.seconds) + side);
+        heard.push(spokenDuration(week.seconds) + side);
+    }
+    const sets = counted(week.sets, 'set');
+    return {
+        text: [...shown, sets].join(' · '),
+        spoken: `${heard.join(' and ')} in ${sets}`,
+        bests: bestLines(week.bests, unit).map((line) => ({
+            text: `${line.label} ${line.text}`,
+            spoken: `New best, ${line.label.toLowerCase()}: ${line.spoken}`,
+        })),
+    };
 }
 
 /**

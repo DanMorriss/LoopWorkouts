@@ -37,6 +37,9 @@
                     <app-ready-made-badge class="workout-card__badge" />
                 }
                 <span class="workout-card__summary">{{ summary().text }} {{ rounds() }}</span>
+                @if (time(); as time) {
+                    <span class="workout-card__time">{{ time.text }}</span>
+                }
             </span>
             <app-showcase-count
                 class="workout-card__count"
@@ -58,7 +61,7 @@
     </a>
     <span class="sr-only" [id]="'workout-summary-' + workout().id">
         {{ readyMade() ? 'Ready-made. ' : '' }}{{ summary().spoken }}, {{ spokenRounds()
-        }}{{ spokenWorks() }}
+        }}{{ spokenTime() }}{{ spokenWorks() }}
     </span>
 
     <!-- Over the link, which covers the whole card: the heart at the left, the middle starts

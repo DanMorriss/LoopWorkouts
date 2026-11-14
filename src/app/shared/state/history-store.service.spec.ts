@@ -397,6 +397,27 @@ describe('HistoryStore', () => {
         expect('supersets' in before).toBe(false);
     });
 
+    it('loads what a run was expected to take, dropping it when broken', async () => {
+        const expected = { timedSeconds: 600, repSeconds: 300 };
+        localStorage.setItem(
+            'history',
+            JSON.stringify([
+                makeEntry({ startedAt: 3_000, expected }),
+                {
+                    ...makeEntry({ startedAt: 2_000 }),
+                    expected: { timedSeconds: -1, repSeconds: 3 },
+                },
+                makeEntry({ startedAt: 1_000 }),
+            ])
+        );
+
+        const [withExpected, broken, before] = (await createStore()).entries();
+
+        expect(withExpected.expected).toEqual(expected);
+        expect(broken).toEqual(makeEntry({ startedAt: 2_000 }));
+        expect('expected' in before).toBe(false);
+    });
+
     it('loads timed sets, dropping ones that are also reps or weighed', async () => {
         const held = { round: 0, step: 0, name: 'Plank', seconds: 45, exerciseId: 'plank' };
         localStorage.setItem(

@@ -613,7 +613,7 @@ export function trailingRestSeconds(workout: Pick<Workout, 'blocks'>): number {
  * Seconds of countdown in the whole workout, or Infinity for one whose rounds don't end by
  * being counted (until stopped, or a time limit). Time spent on rep steps comes on top.
  */
-export function workoutSeconds(workout: Workout): number {
+export function workoutSeconds(workout: Pick<Workout, 'blocks' | 'repeats'>): number {
     if (endlessRounds(workout)) {
         return Infinity;
     }

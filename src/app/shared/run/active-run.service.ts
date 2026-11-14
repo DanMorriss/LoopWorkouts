@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { Exercise } from '../../models/exercise';
 import { HistoryEntry, historyId, RepSet } from '../../models/history';
+import { expectedTime } from '../../models/workout-estimate';
 import { runPosition, StepSwap, swappedStep, withSwaps } from '../../models/step-swap';
 import {
     allSteps,
@@ -720,6 +721,7 @@ export class ActiveRunService {
         const sets = this.sets();
         const headings = placedHeadings(workout);
         const supersets = placedSupersets(workout);
+        const expected = limit === undefined ? expectedTime(workout) : null;
         const timeLimit =
             limit === undefined
                 ? {}
@@ -742,6 +744,7 @@ export class ActiveRunService {
             ...(sets.length > 0 ? { sets } : {}),
             ...(headings.length > 0 ? { headings } : {}),
             ...(supersets.length > 0 ? { supersets } : {}),
+            ...(expected ? { expected } : {}),
         });
     }
 }

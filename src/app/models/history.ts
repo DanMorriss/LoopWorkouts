@@ -1,5 +1,6 @@
 import { Synced } from './sync';
 import { MAX_WEIGHT_KG } from './weight';
+import type { ExpectedTime } from './workout-estimate';
 import { MAX_STEP_SECONDS, PlacedHeading, PlacedSuperset, Side } from './workout';
 
 /** One workout in the history: a workout run that finished, or was stopped part-way. */
@@ -44,6 +45,12 @@ export interface HistoryEntry extends Synced {
      * it covers, so their sets can be grouped under them (BLD-12). Missing for none.
      */
     supersets?: PlacedSuperset[];
+    /**
+     * How long the workout, as it was when it ran, was expected to take: its clock and the guess
+     * for its rep steps, so the estimate can learn your pace from what it really took. Missing
+     * for one that runs until stopped or to a time limit, and in runs from before estimates.
+     */
+    expected?: ExpectedTime;
 }
 
 /** Long enough for a line about how it went, short enough to sit under the entry. */

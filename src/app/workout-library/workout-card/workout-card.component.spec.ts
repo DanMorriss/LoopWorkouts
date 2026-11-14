@@ -4,6 +4,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { asOneGroup, UNTIL_STOPPED, Workout } from '../../models/workout';
 import { makeWorkout, reps, rest, work } from '../../shared/testing/make-workout';
 import { WorkoutCardComponent } from './workout-card.component';
+import { historyId } from '../../models/history';
+import { HistoryStore } from '../../shared/state/history-store.service';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { fakeReducedMotion } from '../../shared/testing/fake-reduced-motion';
 
@@ -135,6 +137,49 @@ describe('WorkoutCardComponent', () => {
         });
     });
 
+    describe('how long it takes', () => {
+        const time = () => card().querySelector('.workout-card__time')?.textContent?.trim();
+
+        it('says it under the summary, and to screen readers', () => {
+            // 4 rounds of 1:05 and 0:20, the last rest skipped
+            expect(time()).toBe('About 5 min');
+            expect(spoken()).toContain('repeated 4 times, takes about 5 minutes');
+        });
+
+        it('guesses at rep steps, then goes by your pace once it has been finished', () => {
+            const workout = { ...sprints, blocks: asOneGroup([reps(20)]), repeats: 10 };
+            set({ workout });
+            // 10 sets of 20 reps, at about 3 seconds a rep and 5 to get ready
+            expect(time()).toBe('About 11 min');
+
+            TestBed.inject(HistoryStore).record({
+                id: historyId(1_000, workout.id),
+                workoutId: workout.id,
+                title: workout.title,
+                startedAt: 1_000,
+                endedAt: 1_000 + 1_300_000,
+                activeSeconds: 1_300,
+                roundsCompleted: 10,
+                totalRounds: 10,
+                outcome: 'finished',
+                expected: { timedSeconds: 0, repSeconds: 650 },
+            });
+            fixture.detectChanges();
+
+            // Twice as long as the guess
+            expect(time()).toBe('About 22 min');
+        });
+
+        it('says nothing for a workout until stopped, or one with a time limit, which its rounds say', () => {
+            set({ workout: { ...sprints, repeats: UNTIL_STOPPED } });
+            expect(time()).toBeUndefined();
+
+            set({ workout: { ...sprints, repeats: UNTIL_STOPPED, timeLimitSeconds: 1200 } });
+            expect(time()).toBeUndefined();
+            expect(spoken()).not.toContain('takes');
+        });
+    });
+
     it('shows a time limit in place of the rounds', () => {
         set({ workout: { ...sprints, repeats: UNTIL_STOPPED, timeLimitSeconds: 1200 } });
 
@@ -146,7 +191,7 @@ describe('WorkoutCardComponent', () => {
         expect(card().classList).toContain('workout-card');
         expect(el('.workout-card__title').textContent?.trim()).toBe('Sprints');
         expect(el('.workout-card__summary').textContent).toContain('01:05 - 00:20 x 4');
-        expect(spoken()).toBe('Timed 01:05, rest 00:20, repeated 4 times');
+        expect(spoken()).toBe('Timed 01:05, rest 00:20, repeated 4 times, takes about 5 minutes');
     });
 
     it('shows ∞ for a workout that runs until stopped', () => {
@@ -160,14 +205,16 @@ describe('WorkoutCardComponent', () => {
         set({ workout: { ...sprints, blocks: asOneGroup([work(30), work(45), rest(20)]) } });
 
         expect(el('.workout-card__summary').textContent).toContain('3 steps · 01:35 x 4');
-        expect(spoken()).toBe('3 steps, 01:35 a round, repeated 4 times');
+        expect(spoken()).toBe('3 steps, 01:35 a round, repeated 4 times, takes about 6 minutes');
     });
 
     it('adds "+ reps" to the time of an unnamed round with rep steps', () => {
         set({ workout: { ...sprints, blocks: asOneGroup([work(30), reps(20), rest(20)]) } });
 
         expect(el('.workout-card__summary').textContent).toContain('3 steps · 00:50 + reps x 4');
-        expect(spoken()).toBe('3 steps, 00:50 a round plus reps, repeated 4 times');
+        expect(spoken()).toBe(
+            '3 steps, 00:50 a round plus reps, repeated 4 times, takes about 7 minutes'
+        );
     });
 
     it('lists the named exercises in the round when the workout has them', () => {
@@ -186,14 +233,16 @@ describe('WorkoutCardComponent', () => {
         expect(el('.workout-card__summary').textContent).toContain(
             'Squats, Bench press + 1 more x 4'
         );
-        expect(spoken()).toBe('Squats, Bench press + 1 more, repeated 4 times');
+        expect(spoken()).toBe(
+            'Squats, Bench press + 1 more, repeated 4 times, takes about 9 minutes'
+        );
     });
 
     it('says "reps" alone for a round with no timed steps', () => {
         set({ workout: { ...sprints, blocks: asOneGroup([reps(10)]) } });
 
         expect(el('.workout-card__summary').textContent).toContain('1 step · reps x 4');
-        expect(spoken()).toBe('1 step, all reps, repeated 4 times');
+        expect(spoken()).toBe('1 step, all reps, repeated 4 times, takes about 2 minutes');
     });
 
     it('shows a workout with no rest as rest 00:00, as before', () => {
@@ -214,7 +263,7 @@ describe('WorkoutCardComponent', () => {
 
         expect(host.events).toEqual(['started']);
         expect(el('.workout-card__start').getAttribute('aria-label')).toBe('Start Sprints');
-        expect(spoken()).toBe('Timed 01:05, rest 00:20, repeated 4 times');
+        expect(spoken()).toBe('Timed 01:05, rest 00:20, repeated 4 times, takes about 5 minutes');
     });
 
     it('toggles its options, which offer edit and delete, without starting', () => {

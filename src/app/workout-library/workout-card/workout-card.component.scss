@@ -145,6 +145,13 @@
     text-wrap: balance;
 }
 
+// How long it takes, under the summary, quieter than it
+.workout-card__time {
+    @include showcase-description;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
 .workout-card__action-icon {
     width: 24px;
     height: 24px;

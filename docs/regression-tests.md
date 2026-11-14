@@ -586,7 +586,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. `runFor` 3000, 2000, 3000, reading the page after each.
 - **Expected:**
     1. Title "Short" in the header; the face shows the stopwatch icon, "Squats", "00:03"; "round 1 of 2" with two dots; "Next: Rest · 00:02"; only **Pause** and **Skip** under the ring.
-    2. At 3 s it's rest ("Rest", 00:02, "then Squats · 00:03"); at 5 s round 2 with "Last one!"; at 8 s "You're finished!", with no rest after the last work, and the summary opens: "Workout finished", "Short", Time 0:08, "2 rounds", no **Back to workout**.
+    2. At 3 s it's rest ("Rest", 00:02, "then Squats · 00:03"); at 5 s round 2 with "Last round!"; at 8 s "You're finished!", with no rest after the last work, and the summary opens: "Workout finished", "Short", Time 0:08, "2 rounds", no **Back to workout**.
     3. The audio stub recorded the work alarm (880 Hz ×2) at 0 s and 5 s, the rest (440 Hz) at 3 s, and the finish (523/659/784 Hz) at 8 s; the vibrate stub recorded `[150,100,150]`, `[500]`, … in the same order.
     4. Pressing **Done** opens Progress with Short highlighted under Today: "9:00 AM · 0:08 · 2 rounds".
 - **In the pack:** work 0:30 and rest 0:20 (alarms at 0, 30, 50 and 80 s), so a busy machine can't miss a phase; the log reads "9:00 AM · 2 rounds · …".
@@ -681,7 +681,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     1. On the bike: section line "Warmup · 1 of 3".
     2. Leg press set 1: "Legs · 2 of 3", "set 1 of 3" with dots; "Legs, exercise 2 of 3" announced once.
     3. Its rest: still "set 1 of 3", and "then Leg press · set 2 of 3 · 10 reps".
-    4. Set 3: "Last one!"; its rest says "set 3 of 3"; then Plank, "Legs · 3 of 3". The announcement for exercise 2 isn't repeated on its sets.
+    4. Set 3: "set 3 of 3", with no "Last round!"; its rest says "set 3 of 3" too; then Plank, "Legs · 3 of 3". The announcement for exercise 2 isn't repeated on its sets.
 
 ### REG-RUN-08 · Change reps or weight mid-workout
 

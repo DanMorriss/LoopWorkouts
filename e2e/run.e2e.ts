@@ -61,7 +61,7 @@ test.describe('a simple workout', () => {
             await expect(run.next).toHaveText('Next: Squats · 00:30');
 
             await run.wait(20_000);
-            await expect(run.main.getByText('Last one!')).toBeVisible();
+            await expect(run.main.getByText('Last round!')).toBeVisible();
             await expect(run.next).toHaveText('Next: finish');
 
             await run.wait(30_000);
@@ -281,7 +281,7 @@ test.describe('skipping', () => {
 
         await expect(run.skip).toHaveAccessibleName('Skip rest');
         await run.skip.click();
-        await expect(run.main.getByText('Last one!')).toBeVisible();
+        await expect(run.main.getByText('Last round!')).toBeVisible();
 
         // Skipping the last work finishes it: the rest after it doesn't run
         await run.close.click();
@@ -390,7 +390,8 @@ test.describe('sets and sections', () => {
         await run.wait(60_500);
         await run.done.click();
         await run.wait(60_500);
-        await expect(run.main.getByText('Last one!')).toBeVisible();
+        await expect(run.main.getByText(/set 3 of 3/).first()).toBeVisible();
+        await expect(run.main.getByText('Last round!')).toHaveCount(0);
         await run.done.click();
         await expect(run.main.getByText(/set 3 of 3/).first()).toBeVisible();
         await run.wait(60_500);
@@ -445,7 +446,7 @@ test.describe('changing reps mid-workout', () => {
 
         await run.done.click();
         await run.wait(5500);
-        await expect(run.main.getByText('Last one!')).toBeVisible();
+        await expect(run.main.getByText('Last round!')).toBeVisible();
         await expect(run.wheel('reps')).toHaveAttribute('aria-valuenow', '15');
         await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '22.5');
 

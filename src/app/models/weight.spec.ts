@@ -1,4 +1,4 @@
-import { formatWeight, weightIn, weightToKg } from './weight';
+import { formatWeight, volumeIn, weightIn, weightToKg } from './weight';
 
 describe('weights', () => {
     it('shows a weight in kg or lb, to the nearest half', () => {
@@ -28,5 +28,12 @@ describe('weights', () => {
         expect(formatWeight(60, 'kg')).toBe('60 kg');
         expect(formatWeight(22.5, 'kg')).toBe('22.5 kg');
         expect(formatWeight(20.412, 'lb')).toBe('45 lb');
+    });
+
+    it('shows a volume to the whole kg or lb, with no top', () => {
+        expect(volumeIn(1680, 'kg')).toBe(1680);
+        expect(volumeIn(1250.4, 'kg')).toBe(1250);
+        // 10 reps at 135 lb, saved in kg, comes back as picked
+        expect(volumeIn(weightToKg(135, 'lb') * 10, 'lb')).toBe(1350);
     });
 });

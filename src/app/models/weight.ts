@@ -33,6 +33,11 @@ export function estimateIn(kg: number, unit: WeightUnit): number {
     return Math.round(value / WEIGHT_STEP) * WEIGHT_STEP;
 }
 
+/** A total of weight × reps (volume), as shown in `unit`: to the nearest whole kg or lb. */
+export function volumeIn(kg: number, unit: WeightUnit): number {
+    return Math.round(unit === 'kg' ? kg : kg / KG_PER_LB);
+}
+
 /** A weight picked in `unit`, in kg to the gram, as it's saved. */
 export function weightToKg(value: number, unit: WeightUnit): number {
     const kg = unit === 'kg' ? value : value * KG_PER_LB;

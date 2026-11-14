@@ -1,6 +1,6 @@
 import { formatDuration, spokenDuration } from '../history/history-format';
 import { ExerciseBests, ExerciseWeek, ProgressMeasure } from '../models/progress';
-import { estimateIn, WeightUnit, weightIn } from '../models/weight';
+import { estimateIn, volumeIn, WeightUnit, weightIn } from '../models/weight';
 import { counted } from '../shared/format-count';
 
 /** One personal best as the exercise page lists it, e.g. "Heaviest: 80 kg × 3". */
@@ -66,16 +66,19 @@ export function bestLines(bests: ExerciseBests, unit: WeightUnit): BestLine[] {
     return lines;
 }
 
-/** An exercise's week as Progress lists it (PRG-13), e.g. "120 reps · 12 sets". */
+/**
+ * An exercise's week as Progress lists it (PRG-13), e.g. "120 reps · 12 sets", with its volume
+ * where any set had a weight: "28 reps · 3 sets · 1,680 kg lifted".
+ */
 export interface WeekLine {
     text: string;
-    /** e.g. "120 reps in 12 sets". */
+    /** e.g. "120 reps in 12 sets", or "28 reps in 3 sets, 1,680 kg lifted". */
     spoken: string;
     /** Its new bests, e.g. "Heaviest 100 kg × 5", with what's heard. */
     bests: { text: string; spoken: string }[];
 }
 
-export function describeWeek(week: ExerciseWeek, unit: WeightUnit): WeekLine {
+export function describeWeek(week: ExerciseWeek, unit: WeightUnit, locale: string): WeekLine {
     const side = week.eachSide ? ' each side' : '';
     const shown: string[] = [];
     const heard: string[] = [];
@@ -88,9 +91,13 @@ export function describeWeek(week: ExerciseWeek, unit: WeightUnit): WeekLine {
         heard.push(spokenDuration(week.seconds) + side);
     }
     const sets = counted(week.sets, 'set');
+    const lifted =
+        week.volume > 0
+            ? `${volumeIn(week.volume, unit).toLocaleString(locale)} ${unit} lifted`
+            : '';
     return {
-        text: [...shown, sets].join(' · '),
-        spoken: `${heard.join(' and ')} in ${sets}`,
+        text: [...shown, sets, ...(lifted ? [lifted] : [])].join(' · '),
+        spoken: `${heard.join(' and ')} in ${sets}${lifted ? `, ${lifted}` : ''}`,
         bests: bestLines(week.bests, unit).map((line) => ({
             text: `${line.label} ${line.text}`,
             spoken: `New best, ${line.label.toLowerCase()}: ${line.spoken}`,

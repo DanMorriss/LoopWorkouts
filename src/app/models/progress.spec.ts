@@ -360,6 +360,8 @@ describe("the week's exercises (PRG-13)", () => {
         expect(week(history, 'squat')).toEqual(
             expect.objectContaining({ sets: 3, reps: 30, seconds: 0, eachSide: false })
         );
+        // Volume from the sets with a weight: 10 × 60 + 8 × 60
+        expect(week(history, 'squat')!.volume).toBe(1080);
     });
 
     it('leaves out exercises not done this week, and sets with no exercise', () => {
@@ -382,6 +384,17 @@ describe("the week's exercises (PRG-13)", () => {
         expect(week(history, 'lunge')).toEqual(
             expect.objectContaining({ sets: 2, reps: 20, eachSide: true })
         );
+    });
+
+    it("adds up both sides' volume, the total lifted, and none with no weight", () => {
+        const weighted = (side: 'left' | 'right'): LoggedSet => ({
+            ...lunge(10, side),
+            weight: 20,
+        });
+        const history = [entry(now - DAY, [weighted('left'), weighted('right')])];
+        expect(week(history, 'lunge')!.volume).toBe(400);
+        expect(week([entry(now - DAY, [lunge(10, 'left')])], 'lunge')!.volume).toBe(0);
+        expect(week([entry(now - DAY, [plank(60)])], 'plank')!.volume).toBe(0);
     });
 
     it('lists the heaviest, most reps and longest that beat an earlier session', () => {

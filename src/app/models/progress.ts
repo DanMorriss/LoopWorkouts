@@ -187,6 +187,11 @@ export interface ExerciseWeek {
     reps: number;
     /** Time held in timed sets, in seconds, on one side of one done each side. */
     seconds: number;
+    /**
+     * Volume: weight × reps over the sets with a weight, in kg, both sides together, as it's
+     * the total lifted. 0 with none.
+     */
+    volume: number;
     /** Whether every set was one side of it, so the totals are each side's. */
     eachSide: boolean;
     /** The heaviest, most reps and longest it set this week that beat an earlier session. */
@@ -197,6 +202,7 @@ export interface ExerciseWeek {
  * Each exercise done in the 7 days from `from`, with its totals and new bests, from the
  * history (newest first). Each side's sets count apart, then the side that did more stands
  * for both, so "3 × 10 each side" is 3 sets of 30 reps, as is one ended before its last right.
+ * Volume is both sides' together.
  */
 export function exerciseWeeks(history: readonly HistoryEntry[], from: number): ExerciseWeek[] {
     const weeks: ExerciseWeek[] = [];
@@ -208,6 +214,7 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
             continue;
         }
         const tally = { none: totals(), left: totals(), right: totals() };
+        let volume = 0;
         for (const set of sets) {
             const side = tally[set.side ?? 'none'];
             side.sets++;
@@ -215,6 +222,7 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
                 side.seconds += set.seconds;
             } else {
                 side.reps += set.reps;
+                volume += (set.weight ?? 0) * set.reps;
             }
         }
         const sided = (key: keyof Totals) =>
@@ -227,6 +235,7 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
             sets: sided('sets'),
             reps: sided('reps'),
             seconds: sided('seconds'),
+            volume,
             eachSide: tally.none.sets === 0,
             bests: Object.fromEntries(Object.entries(bests).filter(([, best]) => best.at >= from)),
         });

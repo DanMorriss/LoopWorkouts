@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { describeWeek, WeekLine } from '../../exercises/progress-format';
 import { exercisePath, exerciseSlug } from '../../models/exercise';
@@ -22,7 +22,7 @@ interface WeekRow extends WeekLine {
 }
 
 /**
- * Each exercise done in the last 7 days, on Progress (PRG-13): its reps (or time) and sets,
+ * Each exercise done in the last 7 days, on Progress (PRG-13): its reps (or time), sets and volume,
  * and the personal bests it set, those with one first, then most sets, then A to Z. The first
  * few show, and the rest on Show all. Nothing shows with nothing done. Each links to its page,
  * whose ‹ comes back with `?exercise=<slug>`, which brings its row back into view and focuses it.
@@ -37,6 +37,7 @@ export class ExercisesThisWeekComponent {
     private readonly history = inject(ShownHistory);
     private readonly exercises = inject(ExerciseStore);
     private readonly settings = inject(SettingsStore);
+    private readonly locale = inject(LOCALE_ID);
     private readonly now = Date.now();
 
     protected readonly shownCount = SHOWN;
@@ -54,7 +55,7 @@ export class ExercisesThisWeekComponent {
                     slug: exerciseSlug(exercise),
                     path: exercisePath(exercise),
                     sets: week.sets,
-                    ...describeWeek(week, this.settings.weightUnit()),
+                    ...describeWeek(week, this.settings.weightUnit(), this.locale),
                 });
             }
         }

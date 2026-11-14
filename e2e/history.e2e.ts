@@ -77,7 +77,8 @@ test.describe('the log', () => {
         await expect(today).toContainText('Back squat: 3 × 10 @ 60 kg');
         await expect(today.getByRole('link', { name: 'Back squat' })).toHaveAttribute(
             'href',
-            '/exercises/back-squat'
+            // Its run, for the page's ‹ to come back to
+            /^\/exercises\/back-squat\?run=\d+-sprints$/
         );
         await expect(history.entry('Legs')).toContainText('2 of 5 rounds · stopped');
         await expect(history.entry('Legs')).toContainText('Back squat: 10 @ 60, 8 @ 62.5 kg');

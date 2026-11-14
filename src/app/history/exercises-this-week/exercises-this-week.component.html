@@ -5,7 +5,13 @@
             @for (row of shown(); track row.id) {
                 <li class="exercises-week__row">
                     <span class="exercises-week__line">
-                        <a class="exercises-week__name" [routerLink]="row.path">{{ row.name }}</a>
+                        <a
+                            class="exercises-week__name"
+                            [id]="'week-' + row.slug"
+                            [routerLink]="row.path"
+                            [queryParams]="{ from: 'progress' }"
+                            >{{ row.name }}</a
+                        >
                         <span class="exercises-week__total">
                             <span aria-hidden="true">{{ row.text }}</span>
                             <span class="sr-only">{{ row.spoken }}</span>

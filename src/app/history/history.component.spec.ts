@@ -284,7 +284,7 @@ describe('HistoryComponent', () => {
         expect(text('.entry__sets li [aria-hidden="true"]')).toEqual([': 5 reps', ': 8 reps']);
     });
 
-    it("links each exercise's sets to its page", () => {
+    it("links each exercise's sets to its page, which comes back to the run", () => {
         create(
             makeEntry({
                 sets: [
@@ -302,7 +302,7 @@ describe('HistoryComponent', () => {
 
         const links = fixture.nativeElement.querySelectorAll('.entry__exercise');
         expect(links).toHaveLength(1);
-        expect(links[0].getAttribute('href')).toBe('/exercises/back-squat');
+        expect(links[0].getAttribute('href')).toMatch(/^\/exercises\/back-squat\?run=\d+-/);
         expect(text('.entry__sets li .sr-only')).toEqual([', 8 reps', 'Reps, 5 reps']);
     });
 

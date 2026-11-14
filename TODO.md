@@ -20,7 +20,7 @@ Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on 
 
 ### Progress
 
-- [x] **Each exercise's week** (2026-11-14): Exercises this week on Progress (PRG-13), each exercise's reps (or time) and sets in the last 7 days, each side counted once, with its new bests (heaviest, most reps, longest) tagged. "This week" on Progress and Today now always means the last 7 days, so the time per week's bars are named by their days rather than "This week" and "Last week". See Exercises this week in `docs/features/progress.md`.
+- [x] **Each exercise's week** (2026-11-14): Exercises this week on Progress (PRG-13), each exercise's reps (or time) and sets in the last 7 days, each side counted once, with its new bests (heaviest, most reps, longest) tagged. "This week" on Progress and Today now always means the last 7 days, so the time per week's bars are named by their days rather than "This week" and "Last week". See Exercises this week in `docs/features/progress.md`. An exercise's page opened from Progress (this card or a set in the log) now goes back there with ‹ Progress, not to the Exercises list.
 - [ ] **Volume for weighted exercises,** if wanted: weight × reps beside the reps in Exercises this week (PRG-13).
 - [ ] **More charts, if wanted:** e.g. workouts per week (the same chart could switch between time and workouts), or a range to look further back than 12 weeks.
 

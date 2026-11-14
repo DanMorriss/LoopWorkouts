@@ -84,10 +84,20 @@ export class ExercisePageComponent {
     /**
      * The workout it was opened from: your own's details (/library/<workout>/<exercise>), or a
      * ready-made plan's workout (/ready-made-plans/<workout>/<exercise>, which keeps where that
-     * goes back to); otherwise the list, e.g. "/exercises?muscles=quads".
+     * goes back to); Progress, from a run in its log (`?run=<id>`, which it marks) or its
+     * exercises this week (`?from=progress`, back to this one's row); otherwise the list,
+     * e.g. "/exercises?muscles=quads".
      */
     private backLink(): { url: string; label: string } {
         const { paramMap, queryParamMap, data } = this.route.snapshot;
+        const run = queryParamMap.get('run');
+        if (run) {
+            return { url: `/history?run=${encodeURIComponent(run)}`, label: 'Progress' };
+        }
+        if (queryParamMap.get('from') === 'progress') {
+            const slug = encodeURIComponent(paramMap.get('id') ?? '');
+            return { url: `/history?exercise=${slug}`, label: 'Progress' };
+        }
         const workoutId = paramMap.get('workoutId');
         if (workoutId && data['inPlan']) {
             const from = queryParamMap.get('from');

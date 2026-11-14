@@ -44,7 +44,7 @@
     - "Push-ups: 3 × 20", or "Push-ups: 20 reps" for one set: no weight. An unnamed step is called "Reps".
     - "Plank: 3 × 0:45", "Plank: 0:45" for one set, or "Plank: 1:00, 0:45" if the lengths differ: a timed step. Screen readers hear "Plank, 3 sets of 45 seconds".
     - "Step-up: 2 × 10 each side" for a step done each side (BLD-10) whose sides went alike, a left and a right being one set; or each side's sets, left first, when they didn't: "Step-up: left 10, 8 · right 2 × 10". A workout ended between the sides says the one done: "left 10 reps". Each side is logged as a set of its own, with its `side`.
-    - The name links to its exercise's page (PRG-4), where the line is linked to an exercise that's still there.
+    - The name links to its exercise's page (PRG-4), where the line is linked to an exercise that's still there. Its **‹ Progress** comes back to this run, marked and in view (since 2026-11-14; until then it went to the Exercises list).
     - A line is named as the step was when it ran, except for an exercise of your own, which shows its name now, so renaming it (EXR-3) renames it here too. Built-in exercises can't be renamed, so a set from a step called "Squats" stays "Squats".
     - Screen readers hear words, e.g. "Squats, 3 sets of 10 reps at 60 kg".
     - **Under the workout's headings** as they were when it ran (BLD-13), in order: e.g. "Warmup", then "Exercise bike: 5:00"; "Knee rehabilitation", then its lines. Lines before the first heading come first, with none over them, and a heading with no sets under it (e.g. a part stopped before) isn't shown. Screen readers hear them as headings within the entry. The workout summary's sets are grouped the same way.

@@ -1,4 +1,5 @@
 import { provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HistoryEntry, LoggedSet } from '../../models/history';
 import { HistoryStore } from '../../shared/state/history-store.service';
@@ -54,7 +55,11 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
     beforeEach(() => {
         vi.useFakeTimers({ now: NOW, toFake: ['Date'] });
         localStorage.clear();
-        TestBed.configureTestingModule({ providers: [provideRouter([])] });
+        TestBed.configureTestingModule({
+            providers: [
+                provideRouter([{ path: 'history', component: ExercisesThisWeekComponent }]),
+            ],
+        });
     });
     afterEach(() => {
         fixture?.destroy();
@@ -103,7 +108,10 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
             'New best, heaviest: 60 kg for 10 reps',
             'New best, most reps: 8 reps at 60 kg',
         ]);
-        expect(el().querySelector('a')!.getAttribute('href')).toBe('/exercises/back-squat');
+        // Its ‹ comes back here
+        expect(el().querySelector('a')!.getAttribute('href')).toBe(
+            '/exercises/back-squat?from=progress'
+        );
     });
 
     it('shows nothing with nothing done in the last 7 days', () => {
@@ -141,5 +149,52 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
         fixture.detectChanges();
         expect(el().querySelectorAll('.exercises-week__row')).toHaveLength(7);
         expect(toggle.textContent!.trim()).toBe('Show fewer');
+    });
+
+    it('brings the row come back to from its page into view, focused, past Show all', async () => {
+        const ids = [
+            'back-squat',
+            'bench-press',
+            'plank',
+            'push-up',
+            'dumbbell-lunge',
+            'walking-lunge',
+        ];
+        const history = TestBed.inject(HistoryStore);
+        history.record(
+            entry(1, [
+                ...ids.map((id, step) => ({
+                    round: 0,
+                    step,
+                    name: id,
+                    reps: 5,
+                    exerciseId: `builtin:${id}`,
+                })),
+                // Fewest sets of all, so last
+                { round: 0, step: 9, name: 'Deadlift', reps: 1, exerciseId: 'builtin:deadlift' },
+            ])
+        );
+        history.record(
+            entry(
+                2,
+                ids.map((id, step) => ({
+                    round: 0,
+                    step,
+                    name: id,
+                    reps: 5,
+                    exerciseId: `builtin:${id}`,
+                }))
+            )
+        );
+
+        const harness = await RouterTestingHarness.create();
+        await harness.navigateByUrl('/history?exercise=deadlift');
+        harness.fixture.detectChanges();
+        await harness.fixture.whenStable();
+
+        const page = harness.fixture.nativeElement as HTMLElement;
+        expect(page.querySelectorAll('.exercises-week__row')).toHaveLength(7);
+        expect(document.activeElement?.id).toBe('week-deadlift');
+        expect(document.activeElement?.textContent?.trim()).toBe('Deadlift');
     });
 });

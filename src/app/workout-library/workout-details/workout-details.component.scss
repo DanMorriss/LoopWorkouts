@@ -6,7 +6,7 @@
     color: var(--text);
 }
 
-// Its name at the left, its heart at the right
+// Its name at the left, its stopwatch and heart at the right
 .details__top {
     display: flex;
     align-items: flex-start;
@@ -42,6 +42,14 @@
 }
 
 // How long it takes, under its name
+// The stopwatch and the heart, lined up along the bottom of the dial
+.details__marks {
+    display: flex;
+    flex: none;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
 .details__time {
     margin-top: 0.75rem;
 }

@@ -148,16 +148,21 @@ export function estimateText(estimate: Estimate): { text: string; spoken: string
 
 /**
  * An estimate as it's drawn, a stopwatch with "About" over it: the word over it, if any
- * ("About", "Under" a minute, or none for a time limit), and the lines inside it, "10 mins",
- * or "1 hr" over "5 mins".
+ * ("About", "Under" a minute, or none for a time limit), and inside it a number over its
+ * unit, "10" over "mins", or "1:05" over "hrs" for an hour or more.
  */
-export function estimateFace(estimate: Estimate): { over: string; lines: string[] } {
+export function estimateFace(estimate: Estimate): { over: string; value: string; unit: string } {
     const minutes = Math.round(estimate.seconds / 60);
     if (minutes === 0) {
-        return { over: 'Under', lines: ['1 min'] };
+        return { over: 'Under', value: '1', unit: 'min' };
+    }
+    const over = estimate.basis === 'limit' ? '' : 'About';
+    if (minutes < 60) {
+        return { over, value: `${minutes}`, unit: minutes === 1 ? 'min' : 'mins' };
     }
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
-    const lines = [h ? `${h} hr` : '', m ? `${m} ${m === 1 ? 'min' : 'mins'}` : ''].filter(Boolean);
-    return { over: estimate.basis === 'limit' ? '' : 'About', lines };
+    return m
+        ? { over, value: `${h}:${String(m).padStart(2, '0')}`, unit: 'hrs' }
+        : { over, value: `${h}`, unit: h === 1 ? 'hr' : 'hrs' };
 }

@@ -48,7 +48,7 @@ export class WorkoutEstimates {
     of(workout: Pick<Workout, 'id' | 'blocks' | 'repeats' | 'timeLimitSeconds'>): {
         text: string;
         spoken: string;
-        face: { over: string; lines: string[] };
+        face: { over: string; value: string; unit: string };
         basis: EstimateBasis;
     } | null {
         const estimate = estimateWorkout(

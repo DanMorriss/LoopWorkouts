@@ -229,15 +229,15 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
     });
 
     describe('how long it takes', () => {
-        const time = () => el().querySelector('app-workout-time');
-        // The stopwatch as screen readers hear it, then what it's from
+        // The stopwatch by the heart as screen readers hear it, then what it's from
+        const parts = '.details__top [role="img"], app-workout-time p';
         const said = () =>
             Array.from(
-                time()!.querySelectorAll('[role="img"], p'),
+                el().querySelectorAll(parts),
                 (part) => part.getAttribute('aria-label') ?? text(part)
             );
 
-        it("says it under its title, the clock for a workout that's all timed", async () => {
+        it("says it beside its title, the clock for a workout that's all timed", async () => {
             // 3 rounds of 0:30 and 0:10, the last rest skipped
             await open(addSprints().id);
 
@@ -294,7 +294,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
 
             const { id: _id2, ...endless } = baseWorkout({ repeats: 0 });
             await open(store.addWorkout(endless).id);
-            expect(time()!.querySelector('[role="img"], p')).toBeNull();
+            expect(el().querySelector(parts)).toBeNull();
         });
     });
 

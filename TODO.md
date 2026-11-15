@@ -95,6 +95,10 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 - [ ] **Devices from before the setup:** they're never asked, so they have no name to greet by unless it's given on You → Profile. If that's wanted, a card on Today ("Add your name") that can be closed.
 - [ ] **The female 3D figure:** picking Female in the setup changes the body map, but the 3D demos still draw the male figure (see Exercise demos).
 
+### Running a workout
+
+- [x] **What's next, easier to see in a rest** (2026-11-15): the "then …" line on the face and "Next:" under the ring, which said the same thing twice, small, are one **Up next** card under the ring: the next step's kind icon and colour, its name big, the set and amount under it, and, for an exercise, the whole card a button for its details and Swap (RUN-2, RUN-11). For Dan to look at on a phone, mid-workout: its size beside the ring, and whether every step (not only rests) should have the card.
+
 ### Code health
 
 How to keep the codebase from degrading is in `CLAUDE.md`.

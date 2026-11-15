@@ -2,9 +2,12 @@
 // sliding in as the last one's slides out. Kept apart from workout.component.scss, which is
 // near its size budget.
 
+@use 'next-pulse' as *;
+
+@include next-keyframes;
+
 // What's next, under the ring. As the step nears its end it's a pill in the next step's
-// colour that swells once a second, on the beat of the countdown beeps, and eases back. The glow is its own layer, so only transform and
-// opacity animate.
+// colour that swells once a second, on the beat of the countdown beeps, and eases back.
 .workout-next {
     position: relative;
     margin: 1rem 0 0;
@@ -15,30 +18,7 @@
     border: 1.5px solid transparent;
     border-radius: 999px;
 
-    &[data-next='work'] {
-        --next-color: var(--work);
-    }
-
-    &[data-next='rest'] {
-        --next-color: var(--rest);
-    }
-
-    &[data-next='reps'] {
-        --next-color: var(--reps);
-    }
-
-    &[data-next='finish'] {
-        --next-color: var(--glow);
-    }
-
-    &::before {
-        content: '';
-        position: absolute;
-        inset: -1.5px;
-        border-radius: inherit;
-        box-shadow: 0 0 14px var(--next-color);
-        opacity: 0;
-    }
+    @include next-colours;
 }
 
 // On a rep step it's Done: the pill all the time, steady, with an arrow on to what's next
@@ -83,24 +63,7 @@
 }
 
 .workout-next--soon {
-    border-color: var(--next-color);
-    animation: next-swell 1s ease-out infinite;
-
-    &::before {
-        animation: next-glow 1s ease-out infinite;
-    }
-}
-
-@keyframes next-swell {
-    from {
-        transform: scale(1.06);
-    }
-}
-
-@keyframes next-glow {
-    from {
-        opacity: 1;
-    }
+    @include next-soon;
 }
 
 // The face, steady in the phase colour for most of a step, flares to full colour on each of
@@ -119,10 +82,7 @@
     }
 }
 
-// Each beat peaks at the start of its loop, so the pill, the face and the beep land together.
-// --pulse-delay (WorkoutView.pulseDelay) puts the loop's start on the clock's second.
-.workout-next--soon,
-.workout-next--soon::before,
+// On the beat of the "Next:" pulse (next-pulse.scss)
 .workout-face--soon::before {
     animation-delay: var(--pulse-delay, 0ms);
 }
@@ -148,8 +108,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .workout-next--soon,
-    .workout-next--soon::before,
     .workout-face--soon::before {
         animation: none;
     }

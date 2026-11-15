@@ -1,0 +1,116 @@
+@use 'type' as *;
+@use 'interaction' as *;
+@use '../next-pulse' as *;
+
+@include next-keyframes;
+
+:host {
+    display: block;
+    width: min(100%, 22rem);
+    margin-top: 1rem;
+}
+
+// A card in the next step's colour: its kind's icon in a disc, then "Up next", the name and
+// the set, and a › when it opens the exercise's details
+.up-next {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    border: 2px solid var(--next-color);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--next-color) 12%, transparent);
+    color: var(--text-strong);
+    font: inherit;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        color 0.3s ease,
+        border-color 0.3s ease,
+        background-color 0.2s ease,
+        scale 0.2s ease-out;
+
+    @include next-colours;
+
+    &::before {
+        inset: -2px;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+button.up-next {
+    cursor: pointer;
+
+    @include hover {
+        background: color-mix(in srgb, var(--next-color) 22%, transparent);
+    }
+
+    @include pressed-scale;
+}
+
+.up-next--soon {
+    @include next-soon;
+}
+
+// Paused, it steps back with the rest of the page (over data-next's colour, so as specific)
+.up-next--muted[data-next] {
+    --next-color: var(--text-muted);
+    color: var(--text-muted);
+}
+
+.up-next__kind {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--next-color);
+    color: var(--page-bg);
+}
+
+.up-next__text {
+    display: grid;
+    min-width: 0;
+}
+
+.up-next__eyebrow {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--next-color);
+}
+
+.up-next--muted .up-next__eyebrow {
+    color: var(--text-muted);
+}
+
+.up-next__name {
+    @include display;
+    font-size: 1.35rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.up-next__detail {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+.up-next__more {
+    color: var(--text-muted);
+}

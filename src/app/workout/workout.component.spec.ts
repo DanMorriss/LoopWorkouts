@@ -97,6 +97,14 @@ describe('WorkoutComponent', () => {
         return (fixture.nativeElement as HTMLElement).textContent?.replace(/\s+/g, ' ') ?? '';
     }
 
+    /** The Up next card under the ring in a rest, as it's read out, or undefined. */
+    function upNextCard(): string | undefined {
+        return (fixture.nativeElement as HTMLElement)
+            .querySelector('.up-next__text')
+            ?.textContent?.replace(/\s+/g, ' ')
+            .trim();
+    }
+
     /** Ends the run the only way there is: Pause, then End workout over the ring. */
     function endWorkout() {
         // Already paused, e.g. back from the summary
@@ -1482,16 +1490,16 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it("shows what's after a rest on the face, under its countdown", () => {
+        it("shows what's after a rest in a card under the ring, leaving the face to the rest", async () => {
             start(circuit());
-            const then = () =>
-                fixture.nativeElement.querySelector('.workout-face__then') as HTMLElement | null;
-            expect(then()).toBeNull();
+            expect(upNextCard()).toBeUndefined();
 
-            advance(5000);
-            expect(then()!.textContent!.replace(/\s+/g, ' ').trim()).toBe('then Squats · 00:03');
-            // "Next:" says it to screen readers
-            expect(then()!.getAttribute('aria-hidden')).toBe('true');
+            await advanceAndRoll(5000);
+            expect(upNextCard()).toBe('Up next: Squats, 00:03');
+            expect(face()).toBe('Rest 00:02');
+            expect(next()).toBeUndefined();
+            // Squats has no exercise to show the details of, so it isn't a button
+            expect(fixture.nativeElement.querySelector('app-up-next-card button')).toBeNull();
             fixture.destroy();
         });
 
@@ -3075,9 +3083,14 @@ describe('WorkoutComponent', () => {
             expect(pulsing()).toBe(true);
             expect(next().dataset['next']).toBe('rest');
 
-            // Rest's own last 5 seconds come long after its first
+            // Rest's own last 5 seconds come long after its first, on the Up next card
+            const card = () => fixture.nativeElement.querySelector('.up-next') as HTMLElement;
             advance(5000);
-            expect(pulsing()).toBe(false);
+            expect(card().classList).not.toContain('up-next--soon');
+
+            advance(25_000);
+            expect(card().classList).toContain('up-next--soon');
+            expect(card().dataset['next']).toBe('work');
             fixture.destroy();
         });
 
@@ -4043,7 +4056,7 @@ describe('WorkoutComponent', () => {
             expect(view().isRestActive()).toBe(true);
             expect(status()).toBe('set 1 of 3');
             expect(dots()).toEqual(['current', 'left', 'left']);
-            expect(text()).toContain('then Leg press · set 2 of 3 · 10 reps');
+            expect(upNextCard()).toBe('Up next: Leg press, Set 2 of 3 · 10 reps');
 
             await advanceAndRoll(5000);
             expect(view().isRepsActive()).toBe(true);
@@ -4078,7 +4091,7 @@ describe('WorkoutComponent', () => {
             pressDone();
             await roll();
             expect(view().isRestActive()).toBe(true);
-            expect(text()).toContain('then Plank · 00:03');
+            expect(upNextCard()).toBe('Up next: Plank, 00:03');
             await advanceAndRoll(5000);
 
             expect(view().isWorkActive()).toBe(true);
@@ -4179,7 +4192,7 @@ describe('WorkoutComponent', () => {
 
             expect(view().isRestActive()).toBe(true);
             expect(status()).toBe('superset round 1 of 3');
-            expect(text()).toContain('then Bench · superset round 2 of 3 · 10 reps');
+            expect(upNextCard()).toBe('Up next: Bench, Superset round 2 of 3 · 10 reps');
             await advanceAndRoll(5000);
             expect(status()).toBe('superset round 2 of 3');
             expect(said()).toBe('Bench, 10 reps, superset round 2 of 3');
@@ -4279,7 +4292,7 @@ describe('WorkoutComponent', () => {
 
             advance(3000);
             expect(face()).toContain('Switch sides');
-            expect(face()).toContain('then Right side · 00:03');
+            expect(upNextCard()).toBe('Up next: Right side, 00:03');
             advance(2000);
             expect(face()).toContain('Side plank');
             expect(face()).toContain('Right side');
@@ -4363,7 +4376,7 @@ describe('WorkoutComponent', () => {
 
             expect([view().reps(), view().weight()]).toEqual([12, '40 kg']);
             pressDone();
-            expect(text()).toContain('then Leg press · set 2 of 3 · 10 reps @ 45 kg');
+            expect(upNextCard()).toBe('Up next: Leg press, Set 2 of 3 · 10 reps @ 45 kg');
             advance(5000);
             expect([view().reps(), view().weight()]).toEqual([10, '45 kg']);
             nextSet();
@@ -4637,7 +4650,8 @@ describe('WorkoutComponent', () => {
         });
 
         function openSwap() {
-            el('.workout-face__info')!.click();
+            // In a rest, the Up next card opens the next exercise's details
+            (el('.workout-face__info') ?? el('app-up-next-card button'))!.click();
             fixture.detectChanges();
             el('.details__pick-another')!.click();
             fixture.detectChanges();
@@ -4764,17 +4778,18 @@ describe('WorkoutComponent', () => {
 
         describe('in the rest before it', () => {
             const label = () => el('.workout-face__label')!.textContent!.trim();
-            const then = () => el('.workout-face__then')?.textContent?.trim();
+            const card = () => el('app-up-next-card button');
             beforeEach(() => {
                 component.finishReps();
                 fixture.detectChanges();
             });
 
-            it("offers the next exercise's details beside what's next", () => {
-                const info = el('.workout-face__info')!;
-
-                expect(info.getAttribute('aria-label')).toBe('Details of Back squat, next');
-                info.click();
+            it("offers the next exercise's details from the Up next card", () => {
+                // The face is the rest's own: the card is the way to the next exercise
+                expect(el('.workout-face__info')).toBeNull();
+                expect(upNextCard()).toMatch(/^Up next: Back squat, 10 reps/);
+                expect(card()!.getAttribute('aria-haspopup')).toBe('dialog');
+                card()!.click();
                 fixture.detectChanges();
                 el('.details__pick-another')!.click();
                 fixture.detectChanges();
@@ -4787,9 +4802,9 @@ describe('WorkoutComponent', () => {
                 pick('Goblet squat');
                 await fixture.whenStable();
 
-                expect(then()).toMatch(/^then Goblet squat · .*10 reps @ 24 kg$/);
+                expect(upNextCard()).toMatch(/^Up next: Goblet squat, .*10 reps @ 24 kg$/);
                 expect(undo().offer()?.message).toBe('Swapped to Goblet squat');
-                expect(document.activeElement).toBe(el('.workout-face__info'));
+                expect(document.activeElement).toBe(card());
                 // The set before the rest was back squats
                 expect(TestBed.inject(ActiveRunService).sets()[0].name).toBe('Back squat');
 

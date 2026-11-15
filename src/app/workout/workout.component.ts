@@ -31,6 +31,7 @@ import { WorkoutRingComponent } from './workout-ring/workout-ring.component';
 import { WorkoutRoundLineComponent } from './workout-round-line/workout-round-line.component';
 import { WorkoutSummaryComponent } from './workout-summary/workout-summary.component';
 import { WorkoutSwap } from './workout-swap';
+import { UpNextCardComponent } from './up-next-card/up-next-card.component';
 import { tourWorkoutPage } from './workout-tour';
 import { WorkoutView } from './workout-view';
 
@@ -56,6 +57,7 @@ const SPACE_HANDLED_BY =
         WorkoutRingComponent,
         WorkoutRoundLineComponent,
         SwapExerciseDialogComponent,
+        UpNextCardComponent,
     ],
     providers: [WorkoutView],
     templateUrl: './workout.component.html',
@@ -320,10 +322,11 @@ export class WorkoutComponent {
     private focusInfo() {
         afterNextRender(
             () => {
+                // In a rest, the Up next card, which opens the next exercise's details
                 const info = this.host.nativeElement.querySelector<HTMLElement>(
                     this.view.isPaused()
                         ? '.workout-paused__info'
-                        : `.workout-face [data-step="${this.view.stepKey()}"] .workout-face__info`
+                        : `.workout-face [data-step="${this.view.stepKey()}"] .workout-face__info, app-up-next-card button`
                 );
                 (
                     info ??

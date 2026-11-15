@@ -1,0 +1,66 @@
+// What's next, in the next step's colour, swelling and glowing once a second as a step nears its
+// end: "Next:" under the ring, and the Up next card in a rest. The glow is its own layer, so
+// only transform and opacity animate. Include `next-keyframes` once at the top of a file.
+
+// --next-color from data-next (WorkoutView.nextKind), and the glow, hidden until it pulses
+@mixin next-colours {
+    &[data-next='work'] {
+        --next-color: var(--work);
+    }
+
+    &[data-next='rest'] {
+        --next-color: var(--rest);
+    }
+
+    &[data-next='reps'] {
+        --next-color: var(--reps);
+    }
+
+    &[data-next='finish'] {
+        --next-color: var(--glow);
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: -1.5px;
+        border-radius: inherit;
+        box-shadow: 0 0 14px var(--next-color);
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+// Each beat peaks at the start of its loop, so the pulse, the face and the beep land together.
+// --pulse-delay (WorkoutView.pulseDelay) puts the loop's start on the clock's second.
+@mixin next-soon {
+    border-color: var(--next-color);
+    animation: next-swell 1s ease-out infinite;
+    animation-delay: var(--pulse-delay, 0ms);
+
+    &::before {
+        animation: next-glow 1s ease-out infinite;
+        animation-delay: var(--pulse-delay, 0ms);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &,
+        &::before {
+            animation: none;
+        }
+    }
+}
+
+@mixin next-keyframes {
+    @keyframes next-swell {
+        from {
+            transform: scale(1.06);
+        }
+    }
+
+    @keyframes next-glow {
+        from {
+            opacity: 1;
+        }
+    }
+}

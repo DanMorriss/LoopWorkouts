@@ -14,7 +14,7 @@
                     class="workout-face__info"
                     data-tour="info"
                     [attr.aria-label]="'Details of ' + exercise.name"
-                    (click)="details.emit({ exercise, next: false })"
+                    (click)="details.emit(exercise)"
                 >
                     <mat-icon aria-hidden="true">info</mat-icon>
                 </button>
@@ -83,25 +83,6 @@
         }
     } @else {
         <p><app-clock-digits [time]="face.time" /></p>
-    }
-    <!-- What's after the rest, to get ready for. "Next:" says it
-                                         to screen readers. -->
-    @if (face.then) {
-        <div class="workout-face__name">
-            <p class="workout-face__then" aria-hidden="true">then {{ face.then }}</p>
-            <!-- Its details, and Swap: the rest is when the
-                                                 machine's found taken (RUN-11) -->
-            @if (face.nextExercise; as next) {
-                <button
-                    type="button"
-                    class="workout-face__info"
-                    [attr.aria-label]="'Details of ' + next.name + ', next'"
-                    (click)="details.emit({ exercise: next, next: true })"
-                >
-                    <mat-icon aria-hidden="true">info</mat-icon>
-                </button>
-            }
-        </div>
     }
 } @else {
     <p>You're finished!</p>

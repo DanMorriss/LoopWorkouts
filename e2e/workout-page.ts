@@ -20,13 +20,17 @@ export class WorkoutPage {
     }
 
     /**
-     * The ring's face: the step's name, its time or its reps and weight, and "then …" in a
-     * rest. (By its component, as nothing names it: the text in it is what's checked.) As one
-     * step rolls on to the next, the last one's face is there a moment longer, after the new
-     * one: the first is the step now.
+     * The ring's face: the step's name, and its time or its reps and weight. (By its component,
+     * as nothing names it: the text in it is what's checked.) As one step rolls on to the next,
+     * the last one's face is there a moment longer, after the new one: the first is the step now.
      */
     get face(): Locator {
         return this.main.locator('app-workout-face-slide').first();
+    }
+
+    /** In a rest, the Up next card under the ring: "Up next", the name, and the set and amount. */
+    get upNext(): Locator {
+        return this.main.locator('app-up-next-card');
     }
 
     /** The time on the face, e.g. "00:10" (the countdown, as screen readers have it). */

@@ -102,16 +102,6 @@ app-wheel-picker:not(.wheel-picker--open) {
     line-height: 1.2;
 }
 
-// What's after the rest, under its countdown
-.workout-face__then {
-    max-width: 15em;
-    margin-inline: auto;
-    color: $face-muted;
-    font-size: 0.95rem;
-    line-height: 1.25;
-    text-wrap: balance;
-}
-
 .workout-face__reps {
     font-size: 1.5rem;
 }

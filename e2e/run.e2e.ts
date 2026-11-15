@@ -385,7 +385,7 @@ test.describe('sets and sections', () => {
 
         await run.done.click();
         await expect(run.main.getByText(/set 1 of 3/).first()).toBeVisible();
-        await expect(run.main.getByText('then Leg press · set 2 of 3 · 10 reps')).toBeVisible();
+        await expect(run.upNext).toHaveText(/Up next.*Leg press.*Set 2 of 3 · 10 reps/);
 
         await run.wait(60_500);
         await run.done.click();

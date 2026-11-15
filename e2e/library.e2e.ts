@@ -461,3 +461,41 @@ test.describe('deleting the workout that is running', () => {
         }
     );
 });
+
+test.describe('favourites saved by an older version', () => {
+    const legs = workout('Legs', { steps: [timed(30)] });
+    test.use({
+        storage: {
+            // Data version 5, when your workouts' hearts were on the workouts themselves
+            'data-version': '5',
+            workouts: JSON.stringify([
+                { ...legs, favourite: true },
+                workout('Arms', { steps: [timed(45)] }),
+            ]),
+            'ready-made-favourites': JSON.stringify([{ id: 'builtin:gym-legs', updatedAt: 1 }]),
+        },
+    });
+
+    test(
+        'REG-LIB-11 hearts on your workouts become favourites of their own',
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            const library = new LibraryPage(page);
+            await app.goto('/library');
+            await page.getByRole('button', { name: 'Favourites' }).click();
+
+            expect(await library.titles()).toEqual(['Gym legs', 'Legs']);
+            await expect(page.getByRole('button', { name: 'Favourite Legs' })).toHaveAttribute(
+                'aria-pressed',
+                'true'
+            );
+            expect(await app.stored('favourites')).toEqual([
+                { id: 'builtin:gym-legs', updatedAt: 1 },
+                { id: legs.id, updatedAt: legs.updatedAt },
+            ]);
+            const saved = await app.stored<Record<string, unknown>[]>('workouts');
+            expect(saved?.map((w) => 'favourite' in w)).toEqual([false, false]);
+            expect(await app.stored('ready-made-favourites')).toBeNull();
+        }
+    );
+});

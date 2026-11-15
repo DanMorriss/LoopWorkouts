@@ -4,6 +4,7 @@ import { aToZ } from '../models/workout';
 import { filterWorkouts, WorkoutFilters } from '../models/workout-filter';
 import { counted } from '../shared/format-count';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
+import { Favourites } from '../shared/state/favourites.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 
@@ -27,6 +28,7 @@ export class LibraryFilters {
     private readonly workouts = inject(WorkoutStore);
     private readonly exercises = inject(ExerciseStore);
     private readonly settings = inject(SettingsStore);
+    private readonly favouriteIds = inject(Favourites).ids;
 
     readonly source = signal<LibrarySource>('all');
     readonly query = signal('');
@@ -56,9 +58,17 @@ export class LibraryFilters {
     });
 
     /** The workouts shown, yours and ready-made, A to Z (LIB-3). */
-    readonly shown = computed(() =>
-        aToZ(filterWorkouts(this.listed(), this.filters(), (id) => this.exercises.byId(id)))
-    );
+    readonly shown = computed(() => {
+        const favourites = this.favouriteIds();
+        return aToZ(
+            filterWorkouts(
+                this.listed(),
+                this.filters(),
+                (id) => this.exercises.byId(id),
+                (id) => favourites.has(id)
+            )
+        );
+    });
 
     /**
      * How many show while any is hidden: "3 of 20 workouts" or "No workouts match". Null when

@@ -34,7 +34,6 @@ import { StepSwap } from '../../models/step-swap';
 import { StepSkip } from '../../models/workout-state';
 import { Deletion, inOrder, LibraryOrder, mergeRecords, newId } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
-import { ReadyMadeFavourites } from './ready-made-favourites.service';
 import { ReadyMadeChanges } from './ready-made-changes.service';
 import { withAmounts } from '../../models/ready-made-change';
 import { SyncClock } from './sync-clock.service';
@@ -47,7 +46,6 @@ export class WorkoutStore {
     private readonly deletions = inject(DeletionStore);
     private readonly clock = inject(SyncClock);
     private readonly exercises = inject(ExerciseStore);
-    private readonly favourites = inject(ReadyMadeFavourites);
     private readonly readyMadeChanges = inject(ReadyMadeChanges);
     private _workouts = signal<Workout[]>([]);
     private readonly _builtIns = signal<readonly BuiltInWorkout[]>([]);
@@ -88,17 +86,12 @@ export class WorkoutStore {
         return this.readyMadeLoading;
     }
 
-    /**
-     * The ready-made workouts, used as they are but with your own reps and weights on them,
-     * each a favourite if it's been made one.
-     */
+    /** The ready-made workouts, used as they are but with your own reps and weights on them. */
     readonly readyMade = computed<ReadyMadeWorkout[]>(() => {
-        const favourites = this.favourites.ids();
         const changes = this.readyMadeChanges.byId();
         return this._builtIns().map((workout) => ({
             ...withAmounts(workout, changes.get(workout.id)?.steps ?? []),
             updatedAt: 0,
-            ...(favourites.has(workout.id) ? { favourite: true as const } : {}),
         }));
     });
 
@@ -333,31 +326,6 @@ export class WorkoutStore {
     }
 
     /**
-     * Marks a workout as a favourite, or not: one of yours as a change to it that syncs, and a
-     * ready-made one by a record of its own (ReadyMadeFavourites).
-     */
-    setFavourite(workoutId: string, favourite: boolean) {
-        if (isReadyMadeId(workoutId)) {
-            this.favourites.set(workoutId, favourite);
-            return;
-        }
-        const existing = this.findWorkoutById(workoutId);
-        if (!existing || (existing.favourite === true) === favourite) {
-            return;
-        }
-        const { favourite: _, ...rest } = existing;
-        const changed: Workout = {
-            ...rest,
-            ...(favourite ? { favourite: true as const } : {}),
-            updatedAt: this.clock.now(existing.updatedAt),
-        };
-        this._workouts.update((workouts) =>
-            workouts.map((workout) => (workout.id === workoutId ? changed : workout))
-        );
-        this.saveWorkouts();
-    }
-
-    /**
      * Takes another copy's library order if a workout was moved there more recently than here:
      * the workouts it lists go in its order, and any others after them. Returns whether the
      * order here changed.
@@ -412,14 +380,11 @@ export class WorkoutStore {
             return null;
         }
 
-        // A favourite stays one, as that's set on Workouts rather than in Create
-        const { favourite } = existingWorkout;
         const updatedWorkout: Workout = {
             ...workoutUpdate,
             blocks: this.linked(workoutUpdate.blocks),
             id: workoutId,
             updatedAt: this.clock.now(existingWorkout.updatedAt),
-            ...(favourite ? { favourite } : {}),
         };
 
         this._workouts.update((workouts) =>
@@ -876,7 +841,8 @@ function readBlocks(saved: unknown): Block[] | null {
  * isn't usable. Workouts saved before groups (data version 5) have a list of `steps`, which
  * become one group run once a round, and run exactly as before. Workouts saved before steps
  * existed (a single work and rest time) become a work step and,
- * if there was any rest, a rest step, which runs exactly as before.
+ * if there was any rest, a rest step, which runs exactly as before. A `favourite` on it, from
+ * before favourites were records of their own, is left out: `legacyFavourite()` reads that.
  */
 export function readWorkout(value: unknown): Workout | null {
     if (typeof value !== 'object' || value === null) {
@@ -914,7 +880,6 @@ export function readWorkout(value: unknown): Workout | null {
         blocks,
         repeats: saved['repeats'] as number,
         ...timeLimit,
-        ...(saved['favourite'] === true ? { favourite: true as const } : {}),
         // Missing only if saved oddly: older than any real change, so any other copy wins
         updatedAt: isWholeNumber(saved['updatedAt'], 0) ? (saved['updatedAt'] as number) : 0,
     };

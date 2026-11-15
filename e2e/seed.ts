@@ -8,7 +8,7 @@
 // IndexedDB itself.
 
 /** The shape of the saved data these are in (`data-version`): older data would be converted. */
-const DATA_VERSION = { 'data-version': '5' };
+const DATA_VERSION = { 'data-version': '6' };
 
 /** The time every test starts at unless it says otherwise: Wednesday 11 November 2026, 09:00. */
 export const NOW = '2026-11-11T09:00:00Z';
@@ -55,7 +55,6 @@ export interface Workout {
     repeats: number;
     blocks: Block[];
     timeLimitSeconds?: number;
-    favourite?: true;
 }
 
 /** A timed step: `timed(30, 'Plank', 'plank')` links it to the built-in Plank. */

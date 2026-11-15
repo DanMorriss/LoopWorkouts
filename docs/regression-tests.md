@@ -571,6 +571,14 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. The workout page opens on Back squat with its Weight wheel at 60; nothing was copied into your workouts (`workouts` isn't saved).
 - **In the pack, a timed exercise too:** on Core in 15 the heading is "Your reps, weights and times"; Plank ("Change Plank, 3 × 0:45") set to 0:30 for each round is "3 × 0:30", still after a reload, kept as `{ "step": 4, "exerciseId": "builtin:plank", "seconds": 30 }`.
 
+### REG-LIB-11 · Favourites saved by an older version
+
+- **Stories:** LIB-8 · **Priority:** P1
+- **Preconditions:** `guest()`, data version 5: "Legs" saved with `favourite: true` on it, "Arms" without, and Gym legs in `ready-made-favourites`.
+- **Steps:** Open Workouts; press **Favourites**.
+- **Expected:** Only Gym legs and Legs show, Legs's heart pressed. `favourites` holds both, Legs's dated as the workout; the saved workouts have no `favourite`, and `ready-made-favourites` is gone.
+- **In the pack:** since 2026-11-15, when favourites became records of their own. That a heart and an edit made on two devices both survive the sync is a Vitest case (`favourites.service.spec.ts`).
+
 ---
 
 ## 5. Running a workout (`run-a-workout.md`, `pause-and-stop.md`, `alarms.md`)
@@ -1408,7 +1416,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                              |
 | Today and planning        | REG-PLAN-01 – 08 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
 | Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                   |
-| Workouts and ready-made   | REG-LIB-01 – 10  | LIB-1 – LIB-7, CTL-4                                                                                                          |
+| Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                          |
 | Running a workout         | REG-RUN-01 – 15  | RUN-1 – RUN-12, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 04  | HIS-1 – HIS-5, CTL-3                                                                                                          |
 | Progress                  | REG-PRG-01 – 04  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-13                                                                                     |

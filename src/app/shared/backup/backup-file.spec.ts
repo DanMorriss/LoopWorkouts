@@ -71,7 +71,7 @@ describe('backup file', () => {
                 exercises: [],
                 exerciseNotes: [],
                 hiddenExercises: [],
-                readyMadeFavourites: [],
+                favourites: [],
                 readyMadeChanges: [],
                 libraryOrder: ORDER,
                 plan: PLAN,
@@ -90,7 +90,7 @@ describe('backup file', () => {
             exercises: [],
             exerciseNotes: [],
             hiddenExercises: [],
-            readyMadeFavourites: [],
+            favourites: [],
             readyMadeChanges: [],
             libraryOrder: ORDER,
             plan: PLAN,
@@ -109,7 +109,7 @@ describe('backup file', () => {
                     exercises: [],
                     exerciseNotes: [],
                     hiddenExercises: [],
-                    readyMadeFavourites: [],
+                    favourites: [],
                     readyMadeChanges: [],
                     libraryOrder: ORDER,
                     plan: PLAN,
@@ -127,7 +127,7 @@ describe('backup file', () => {
             exercises: [],
             exerciseNotes: [],
             hiddenExercises: [],
-            readyMadeFavourites: [],
+            favourites: [],
             readyMadeChanges: [],
             libraryOrder: ORDER,
             plan: PLAN,
@@ -208,7 +208,7 @@ describe('backup file', () => {
             exercises: [],
             exerciseNotes: [],
             hiddenExercises: [],
-            readyMadeFavourites: [],
+            favourites: [],
             readyMadeChanges: [],
             libraryOrder: null,
             plan: null,
@@ -251,6 +251,27 @@ describe('backup file', () => {
         expect(workout.blocks).toEqual([
             { kind: 'group', rounds: 1, restSeconds: 0, steps: [work(30, 'Squats'), rest(10)] },
         ]);
+    });
+
+    it('reads a file from before version 17, a heart on a workout becoming a favourite', () => {
+        const legs = { ...makeWorkout({ id: 'legs' }), updatedAt: 20 };
+        const readyMade = { id: 'builtin:gym-legs', updatedAt: 10 };
+
+        const result = readBackup(
+            fileWith({
+                version: 16,
+                workouts: [{ ...legs, favourite: true }],
+                readyMadeFavourites: [readyMade],
+            })
+        );
+
+        expect(result).toEqual(
+            expect.objectContaining({
+                ok: true,
+                workouts: [legs],
+                favourites: [readyMade, { id: 'legs', updatedAt: 20 }],
+            })
+        );
     });
 
     describe('written by hand', () => {

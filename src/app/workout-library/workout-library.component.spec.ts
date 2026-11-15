@@ -1,4 +1,5 @@
 import type { Mock } from 'vitest';
+import { Favourites } from '../shared/state/favourites.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { Workout } from '../models/workout';
@@ -212,7 +213,7 @@ describe('WorkoutLibraryComponent', () => {
                 const heart = card(1).querySelector<HTMLElement>('.favourite-button')!;
                 expect(heart.getAttribute('aria-label')).toBe('Favourite workout');
                 click(heart);
-                expect(store.workouts()[1].favourite).toBe(true);
+                expect(TestBed.inject(Favourites).ids().has(store.workouts()[1].id)).toBe(true);
                 expect(
                     card(1).querySelector('.favourite-button')?.getAttribute('aria-pressed')
                 ).toBe('true');

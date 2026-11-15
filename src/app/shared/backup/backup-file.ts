@@ -1,8 +1,15 @@
 import { ExerciseNote, HiddenExercise, OwnExercise } from '../../models/exercise';
 import { HistoryEntry } from '../../models/history';
 import { copyPlan, isWeekPlan, WeekPlan } from '../../models/plan';
-import { Deletion, isDeletion, isLibraryOrder, LibraryOrder, newId } from '../../models/sync';
-import { Workout } from '../../models/workout';
+import {
+    Deletion,
+    isDeletion,
+    isLibraryOrder,
+    LibraryOrder,
+    newId,
+    readMark,
+} from '../../models/sync';
+import { legacyFavourite, Workout } from '../../models/workout';
 import {
     readExerciseNote,
     readHiddenExercise,
@@ -17,7 +24,7 @@ import {
 } from '../state/migrate';
 import { Settings } from '../state/settings-store.service';
 import { readWorkout } from '../state/workout-store.service';
-import { ReadyMadeFavourite, readReadyMadeFavourite } from '../state/ready-made-favourites.service';
+import { Favourite } from '../state/favourites.service';
 import { ReadyMadeChange, readReadyMadeChange } from '../../models/ready-made-change';
 
 /**
@@ -54,8 +61,12 @@ import { ReadyMadeChange, readReadyMadeChange } from '../../models/ready-made-ch
  * 16: a timed exercise's time in `readyMadeChanges` (`seconds`, and each set's where they vary).
  *    Nothing to convert; an older app turns the file down, and leaves synced records this new
  *    alone, rather than dropping the times and writing the record back without them.
+ * 17: `favourites` in place of `readyMadeFavourites`, the favourites of your workouts as well
+ *    as the ready-made ones, in place of `favourite: true` on each of yours. A heart on a
+ *    workout in an older file is read as a favourite dated as the workout. An older app turns
+ *    the file down, and leaves synced records this new alone, rather than losing the hearts.
  */
-export const BACKUP_VERSION = 16;
+export const BACKUP_VERSION = 17;
 
 /** Far more than years of workouts take (about 1 KB each), so a bigger file isn't a backup. */
 export const MAX_BACKUP_BYTES = 50 * 1024 * 1024;
@@ -73,8 +84,8 @@ export interface BackupFile {
     exerciseNotes: ExerciseNote[];
     /** Exercises hidden from the picker, built-in or your own. */
     hiddenExercises: HiddenExercise[];
-    /** Ready-made workouts made favourites. */
-    readyMadeFavourites: ReadyMadeFavourite[];
+    /** Workouts made favourites, yours and ready-made. */
+    favourites: Favourite[];
     /** Your own reps and weights on ready-made workouts. */
     readyMadeChanges: ReadyMadeChange[];
     /** The library's order, taken by an import if a workout was moved there more recently. */
@@ -99,8 +110,11 @@ export type ReadBackup =
           exerciseNotes: ExerciseNote[];
           /** None before version 5. */
           hiddenExercises: HiddenExercise[];
-          /** None before version 14. */
-          readyMadeFavourites: ReadyMadeFavourite[];
+          /**
+           * None before version 14, which had only the ready-made workouts', and before 17 those
+           * and a heart on each of your workouts that had one.
+           */
+          favourites: Favourite[];
           /** None before version 15. */
           readyMadeChanges: ReadyMadeChange[];
           /** None before version 7, or in a file written by hand. */
@@ -131,7 +145,7 @@ export function makeBackup(
         | 'exercises'
         | 'exerciseNotes'
         | 'hiddenExercises'
-        | 'readyMadeFavourites'
+        | 'favourites'
         | 'readyMadeChanges'
         | 'libraryOrder'
         | 'plan'
@@ -214,11 +228,12 @@ export function readBackup(text: string, now = Date.now()): ReadBackup {
     const hiddenExercises = (Array.isArray(file['hiddenExercises']) ? file['hiddenExercises'] : [])
         .map((item) => readHiddenExercise(item))
         .filter((hidden) => hidden !== null);
-    const readyMadeFavourites = (
-        Array.isArray(file['readyMadeFavourites']) ? file['readyMadeFavourites'] : []
-    )
-        .map((item) => readReadyMadeFavourite(item))
-        .filter((favourite) => favourite !== null);
+    const savedFavourites = file['favourites'] ?? file['readyMadeFavourites'];
+    const favourites = [
+        ...(Array.isArray(savedFavourites) ? savedFavourites : []).map((item) => readMark(item)),
+        // From before version 17, a heart on the workout itself
+        ...savedWorkouts.filter((item) => !isNew(item)).map(legacyFavourite),
+    ].filter((favourite) => favourite !== null);
     const readyMadeChanges = (
         Array.isArray(file['readyMadeChanges']) ? file['readyMadeChanges'] : []
     )
@@ -241,7 +256,7 @@ export function readBackup(text: string, now = Date.now()): ReadBackup {
         exercises,
         exerciseNotes,
         hiddenExercises,
-        readyMadeFavourites,
+        favourites,
         readyMadeChanges,
         libraryOrder,
         plan,

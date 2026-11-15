@@ -63,8 +63,8 @@ Built (PLN-1–8): a weekly plan of which workouts you do on which days, the sam
 - A **ready-made plan** is a week of ready-made workouts (LIB-6, see [library](library.md)), the same every week. Each has two days of active rest (since 2026-11-12, the mobility days) between its training days: **Mobility flow** early in the week and **Full-body stretch** near the end. They're optional (see PLN-2 and PLN-3). Days with nothing on are rest days, at least one a week.
 - The first six, each made for building muscle, fitness, or both:
 
-    | Plan                      | Goal    | Training days                                                                | Active rest                            |
-    | ------------------------- | ------- | ---------------------------------------------------------------------------- | -------------------------------------- |
+    | Plan                      | Goal    | Training days                                                                | Active rest                              |
+    | ------------------------- | ------- | ---------------------------------------------------------------------------- | ---------------------------------------- |
     | 3-day beginner gym        | Muscle  | Gym full body Mon, Wed and Fri                                               | Mobility flow Tue, Full-body stretch Sat |
     | Push, pull, legs          | Muscle  | Gym push Mon, Gym pull Wed, Gym legs Fri, Gym extras Sat                     | Mobility flow Tue, Full-body stretch Sun |
     | Dumbbells at home, 4 days | Muscle  | Dumbbell upper Mon and Thu, Dumbbell lower Tue and Fri                       | Mobility flow Wed, Full-body stretch Sat |

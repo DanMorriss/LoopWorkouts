@@ -591,23 +591,47 @@ export class WorkoutStore {
         if (!workout || !steps[stepIndex]) {
             return;
         }
-        const updated: Workout = {
+        this._activeWorkout.set({
             ...workout,
             blocks: withSteps(
                 workout.blocks,
                 steps.map((existing, i) => (i === stepIndex ? step : existing))
             ),
             updatedAt: this.clock.now(workout.updatedAt),
-        };
-        this._activeWorkout.set(updated);
-        if (this.findWorkoutById(workout.id)) {
-            this._workouts.update((workouts) =>
-                workouts.map((t) => (t.id === workout.id ? updated : t))
-            );
-            this.saveWorkouts();
+        });
+        this.updateSavedStep(stepIndex, step);
+    }
+
+    /**
+     * Changes a step of the running workout as saved, for next time, but not of this run, e.g.
+     * a timed exercise made longer on the summary, which would move the run's clock.
+     */
+    updateSavedStep(stepIndex: number, step: Step) {
+        const workoutId = this._activeWorkout()?.id;
+        if (workoutId === undefined) {
             return;
         }
-        this.setReadyMadeStep(workout.id, stepIndex, step);
+        const saved = this.findWorkoutById(workoutId);
+        if (!saved) {
+            this.setReadyMadeStep(workoutId, stepIndex, step);
+            return;
+        }
+        const steps = allSteps(saved);
+        if (!steps[stepIndex]) {
+            return;
+        }
+        const updated: Workout = {
+            ...saved,
+            blocks: withSteps(
+                saved.blocks,
+                steps.map((existing, i) => (i === stepIndex ? step : existing))
+            ),
+            updatedAt: this.clock.now(saved.updatedAt),
+        };
+        this._workouts.update((workouts) =>
+            workouts.map((t) => (t.id === workoutId ? updated : t))
+        );
+        this.saveWorkouts();
     }
 
     /**

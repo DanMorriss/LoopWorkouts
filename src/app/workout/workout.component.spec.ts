@@ -3442,6 +3442,45 @@ describe('WorkoutComponent', () => {
                 fixture.destroy();
             });
 
+            it('makes a timed exercise longer where every set ran its whole time', () => {
+                const saved = TestBed.inject(WorkoutStore).addWorkout({
+                    title: 'Core',
+                    repeats: 1,
+                    blocks: [
+                        {
+                            kind: 'group',
+                            rounds: 2,
+                            restSeconds: 0,
+                            steps: [
+                                {
+                                    kind: 'work',
+                                    seconds: 3,
+                                    name: 'Plank',
+                                    exerciseId: 'builtin:plank',
+                                },
+                            ],
+                        },
+                    ],
+                });
+                start(saved);
+                advance(6000);
+
+                const line = 'Plank: try 8 seconds, up from 3 seconds';
+                expect(summaryText()).toContain(line);
+                apply(line)!.click();
+                fixture.detectChanges();
+
+                expect(savedSteps(saved.id)[0]).toEqual(expect.objectContaining({ seconds: 8 }));
+                // Not on this run, whose clock it would move: it's still finished, said as applied
+                expect(view().isComplete()).toBe(true);
+                expect(allSteps(store.activeWorkout()!)[0]).toEqual(
+                    expect.objectContaining({ seconds: 3 })
+                );
+                expect(summaryText()).toContain(line);
+                expect(apply(line)).toBeNull();
+                fixture.destroy();
+            });
+
             it('keeps what was applied on "Yes, use next time", carrying the rest over', () => {
                 const saved = finishPushDay();
                 apply('Bench press: try 82.5 kg, up from 80 kg')!.click();

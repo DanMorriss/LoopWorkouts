@@ -5,6 +5,7 @@ import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
+import { BUILT_IN_EXERCISE_TEXT } from '../models/built-in-exercise-text';
 import { AlarmService } from '../shared/alarms/alarm.service';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { KeepAwakeService } from '../shared/run/keep-awake.service';
@@ -2235,6 +2236,37 @@ describe('WorkoutComponent', () => {
 
                 expect(info()!.getAttribute('aria-label')).toBe('Details of Push-up');
                 expect(info()!.closest('.workout-face__name')!.textContent).toContain('Push-ups');
+            });
+
+            it('shows just how it is done: the demo, description, note, steps and tips', async () => {
+                const exercises = TestBed.inject(ExerciseStore);
+                exercises.setNote('builtin:push-up', 'Elbows in');
+                advance(3000);
+                info()!.click();
+                await exercises.loadText();
+                await exercises.loadMotion();
+                fixture.detectChanges();
+                const words = BUILT_IN_EXERCISE_TEXT['builtin:push-up'];
+                const details = el('app-exercise-details-dialog app-exercise-details')!;
+                const all = (selector: string) =>
+                    Array.from(details.querySelectorAll(selector), (item) =>
+                        item.textContent!.trim()
+                    );
+
+                // The demo first, then the words
+                expect(details.firstElementChild!.tagName).toBe('APP-EXERCISE-DEMO');
+                expect(details.querySelector('.exercise__description')!.textContent!.trim()).toBe(
+                    words.description
+                );
+                expect(details.querySelector('.exercise__note-text')!.textContent).toContain(
+                    'Elbows in'
+                );
+                expect(all('.exercise__steps li')).toEqual(words.steps);
+                expect(all('.exercise__tips li')).toEqual(words.tips);
+                // Not what it is, which can wait till after the set
+                expect(details.querySelector('.exercise__chips')).toBeNull();
+                expect(details.querySelector('.exercise__also')).toBeNull();
+                expect(details.querySelector('app-body-map')).toBeNull();
             });
 
             it('opens them over the workout, which waits under it, and Done goes back', async () => {

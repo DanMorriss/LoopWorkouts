@@ -364,9 +364,19 @@ const JOIN_STOPS: readonly TourStop[] = [
 
 /**
  * The tour of an exercise's page, the first one opened: what can be done with it, top to
- * bottom. An exercise of your own has no demo, so the last stop says it in words.
+ * bottom. An exercise of your own has no demo, so the first stop says it in words.
  */
 const EXERCISE_STOPS: readonly TourStop[] = [
+    {
+        title: 'How to do it',
+        parts: [
+            {
+                part: 'exercise-demo',
+                text: 'The figure shows the move. Drag it sideways to turn it round, or press Turn, to see it from any side.',
+            },
+        ],
+        text: 'A built-in exercise shows how it’s done: a figure you can turn round with a finger, then the steps and tips.',
+    },
     {
         title: 'Add to workout',
         parts: [
@@ -396,16 +406,6 @@ const EXERCISE_STOPS: readonly TourStop[] = [
             },
         ],
         text: 'What it works, and once you’ve done it, your bests and a chart.',
-    },
-    {
-        title: 'How to do it',
-        parts: [
-            {
-                part: 'exercise-demo',
-                text: 'The figure shows the move. Drag it sideways to turn it round, or press Turn, to see it from any side.',
-            },
-        ],
-        text: 'A built-in exercise shows how it’s done: a figure you can turn round with a finger, then the steps and tips.',
     },
 ];
 

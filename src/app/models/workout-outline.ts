@@ -9,8 +9,12 @@ export type OutlineLine =
 
 /** A step as written out, with the exercise it's linked to, if any. */
 export interface OutlineStep {
+    /** Its place in `allSteps()`. */
+    index: number;
     name: string;
     amount: string;
+    /** "rest 1:00": the rest between its sets, at the end of `amount` too. */
+    rest?: string;
     exerciseId?: string;
 }
 
@@ -38,6 +42,13 @@ function amountOf(step: Step): string {
     return step.eachSide ? `${amount} each side` : amount;
 }
 
+/** "rest 1:00" between an exercise's sets, or nothing for one set or no rest. */
+function restOf(step: Step, rounds: number, restSeconds: number): Pick<OutlineStep, 'rest'> {
+    return step.kind !== 'rest' && rounds > 1 && restSeconds > 0
+        ? { rest: `rest ${clock(restSeconds)}` }
+        : {};
+}
+
 /**
  * How a step's sets read: "3 × 10, rest 1:00"; "3 sets: 12, 10, 8, rest 2:30" where they
  * vary; "15" for one set; and a rest step's time.
@@ -46,7 +57,8 @@ function setsOf(step: Step, rounds: number, restSeconds: number): string {
     if (step.kind === 'rest') {
         return clock(step.seconds);
     }
-    const restText = rounds > 1 && restSeconds > 0 ? `, rest ${clock(restSeconds)}` : '';
+    const { rest } = restOf(step, rounds, restSeconds);
+    const restText = rest ? `, ${rest}` : '';
     if (step.sets && rounds > 1) {
         const each = step.sets.map((set) =>
             'reps' in set ? String(set.reps) : clock(set.seconds)
@@ -62,17 +74,26 @@ function setsOf(step: Step, rounds: number, restSeconds: number): string {
  * and its sets, and each superset with its rounds and steps.
  */
 export function outline(workout: Pick<Workout, 'blocks'>): OutlineLine[] {
+    let first = 0;
     return workout.blocks.map((block): OutlineLine => {
         if (block.kind === 'heading') {
             return { kind: 'heading', text: block.text };
         }
+        const start = first;
+        first += block.steps.length;
         const exercises = block.steps.filter((step) => step.kind !== 'rest').length;
         if (exercises <= 1) {
-            const step = block.steps.find((s) => s.kind !== 'rest') ?? block.steps[0];
+            const at = Math.max(
+                0,
+                block.steps.findIndex((s) => s.kind !== 'rest')
+            );
+            const step = block.steps[at];
             return {
                 kind: 'step',
+                index: start + at,
                 name: nameOf(step),
                 amount: setsOf(step, block.rounds, block.restSeconds),
+                ...restOf(step, block.rounds, block.restSeconds),
                 ...linkOf(step),
             };
         }
@@ -81,7 +102,8 @@ export function outline(workout: Pick<Workout, 'blocks'>): OutlineLine[] {
             kind: 'superset',
             name: supersetName(block.steps),
             amount: block.rounds > 1 ? `${block.rounds} rounds${restText}` : 'Once',
-            steps: block.steps.map((step) => ({
+            steps: block.steps.map((step, at) => ({
+                index: start + at,
                 name: nameOf(step),
                 amount: step.kind === 'rest' ? clock(step.seconds) : amountOf(step),
                 ...linkOf(step),

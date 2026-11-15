@@ -37,6 +37,10 @@
     .outline__amount {
         padding-right: 1.25rem;
     }
+
+    .outline__sets {
+        padding-right: 1.25rem;
+    }
 }
 
 // A part of the workout, as its heading reads in Create
@@ -105,4 +109,32 @@
     color: var(--text-muted);
     font-size: 0.9rem;
     text-align: right;
+}
+
+// Sets that can be changed: a pill at the right, pressed above its line's link (::after),
+// with the rest between them after it
+.outline__sets {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.15rem 0.5rem;
+}
+
+.outline__change {
+    position: relative;
+    z-index: 1;
+    gap: 0.3rem;
+    padding: 0 0.6rem 0 0.8rem;
+    font-size: 0.85rem;
+}
+
+.outline__pencil {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.outline__rest {
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }

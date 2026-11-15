@@ -21,8 +21,8 @@ describe('outline', () => {
                 ],
             })
         ).toEqual([
-            { kind: 'step', name: 'Reps', amount: '8' },
-            { kind: 'step', name: 'Work', amount: '0:45' },
+            { kind: 'step', index: 0, name: 'Reps', amount: '8' },
+            { kind: 'step', index: 1, name: 'Work', amount: '0:45' },
         ]);
     });
 
@@ -75,17 +75,35 @@ describe('outline', () => {
             })
         ).toEqual([
             { kind: 'heading', text: 'Main' },
-            { kind: 'step', name: 'Goblet squat', amount: '3 × 10, rest 1:30' },
-            { kind: 'step', name: 'Back squat', amount: '3 sets: 12, 10, 8, rest 2:30' },
-            { kind: 'step', name: 'Side plank', amount: '2 × 0:30 each side, rest 1:00' },
-            { kind: 'step', name: 'Rest', amount: '0:20' },
+            {
+                kind: 'step',
+                index: 0,
+                name: 'Goblet squat',
+                amount: '3 × 10, rest 1:30',
+                rest: 'rest 1:30',
+            },
+            {
+                kind: 'step',
+                index: 1,
+                name: 'Back squat',
+                amount: '3 sets: 12, 10, 8, rest 2:30',
+                rest: 'rest 2:30',
+            },
+            {
+                kind: 'step',
+                index: 2,
+                name: 'Side plank',
+                amount: '2 × 0:30 each side, rest 1:00',
+                rest: 'rest 1:00',
+            },
+            { kind: 'step', index: 3, name: 'Rest', amount: '0:20' },
             {
                 kind: 'superset',
                 name: 'Superset',
                 amount: '3 rounds, rest 1:00',
                 steps: [
-                    { name: 'Lateral raise', amount: '12' },
-                    { name: 'Reverse lunge', amount: '8 each side' },
+                    { index: 4, name: 'Lateral raise', amount: '12' },
+                    { index: 5, name: 'Reverse lunge', amount: '8 each side' },
                 ],
             },
         ]);
@@ -103,7 +121,7 @@ describe('outline', () => {
                     },
                 ],
             })
-        ).toEqual([{ kind: 'step', name: 'Burpee', amount: '0:40' }]);
+        ).toEqual([{ kind: 'step', index: 0, name: 'Burpee', amount: '0:40' }]);
     });
 });
 

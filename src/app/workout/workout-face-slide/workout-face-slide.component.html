@@ -5,20 +5,23 @@
     <mat-icon class="workout-face__kind" aria-hidden="true">{{ face.icon }}</mat-icon>
     @if (face.label) {
         <div class="workout-face__name">
-            <p class="workout-face__label">{{ face.label }}</p>
-            <!-- How the exercise is done, over the workout,
-                                                 which carries on underneath (RUN-9) -->
-            @if (face.exercise; as exercise) {
-                <button
-                    type="button"
-                    class="workout-face__info"
-                    data-tour="info"
-                    [attr.aria-label]="'Details of ' + exercise.name"
-                    (click)="details.emit(exercise)"
-                >
-                    <mat-icon aria-hidden="true">info</mat-icon>
-                </button>
-            }
+            <!-- An exercise's name is a button for how it's done, over the workout, which
+                 carries on underneath (RUN-9) -->
+            <p class="workout-face__label">
+                @if (face.exercise; as exercise) {
+                    <button
+                        type="button"
+                        class="workout-face__link"
+                        data-tour="info"
+                        aria-haspopup="dialog"
+                        (click)="details.emit(exercise)"
+                    >
+                        {{ face.label }}
+                    </button>
+                } @else {
+                    {{ face.label }}
+                }
+            </p>
         </div>
     }
     <!-- Which side, for an exercise done one side at a time -->

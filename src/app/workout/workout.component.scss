@@ -181,20 +181,17 @@
 
 // Everything else on the page steps back too, in the muted text colour
 .workout-page--paused {
-    .workout-status,
-    .workout-next {
+    .workout-status {
         color: var(--text-muted);
     }
 }
 
-.workout-status,
-.workout-next {
+.workout-status {
     transition: color 0.3s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .workout-status,
-    .workout-next {
+    .workout-status {
         transition: none;
     }
 

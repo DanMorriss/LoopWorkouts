@@ -83,7 +83,7 @@
                             >
                                 <app-workout-face-slide
                                     [slide]="slide"
-                                    (details)="swap.showExercise($event)"
+                                    (details)="openDetails($event, false, 'face')"
                                 />
                             </div>
                         }
@@ -95,25 +95,24 @@
                  Ending only happens from here, two presses away, so it's never hit by mistake. -->
             @if (view.isPaused() && view.isComplete() === false) {
                 <div class="workout-paused">
-                    <!-- Which step it's paused on, with its (i) still there: pausing to read
-                         how it's done is what the details are for (RUN-9). In a rest, the
+                    <!-- Which step it's paused on, its name a button for its details: pausing to
+                         read how it's done is what they're for (RUN-9). In a rest, the
                          exercise after it, to swap while paused (RUN-11) -->
                     @if (view.pausedName(); as name) {
-                        <div class="workout-paused__name">
-                            <p class="workout-paused__step">{{ name.text }}</p>
+                        <p class="workout-paused__step">
                             @if (name.exercise; as exercise) {
                                 <button
                                     type="button"
-                                    class="workout-face__info workout-paused__info"
-                                    [attr.aria-label]="
-                                        'Details of ' + exercise.name + (name.next ? ', next' : '')
-                                    "
-                                    (click)="swap.showExercise(exercise, name.next)"
+                                    class="workout-paused__link"
+                                    aria-haspopup="dialog"
+                                    (click)="openDetails(exercise, name.next, 'paused')"
                                 >
-                                    <mat-icon aria-hidden="true">info</mat-icon>
+                                    {{ name.text }}
                                 </button>
+                            } @else {
+                                {{ name.text }}
                             }
-                        </div>
+                        </p>
                     }
                     <p class="workout-paused__label">Paused · {{ view.pausedOn() }}</p>
                     <button
@@ -140,53 +139,25 @@
             <app-workout-note [text]="view.exerciseNote()!" [muted]="view.isPaused()" />
         }
 
-        @if (view.restUpNext(); as next) {
-            <!-- In a rest, a card: the name big, to get ready for, and its details and Swap
-                 (RUN-11) a tap away -->
+        <!-- What's next, in a card: on a rep step it's Done, on to it (Space presses it too);
+             otherwise an (i) for the next exercise's details and Swap (RUN-11), to get ready -->
+        @if (view.upNextCard(); as next) {
             <app-up-next-card
                 [next]="next"
+                [said]="view.upNext()"
+                [done]="view.isRepsActive() && !view.isPaused()"
                 [soon]="view.nextSoon()"
                 [pulseDelay]="view.pulseDelay()"
                 [muted]="view.isPaused()"
-                (details)="swap.showExercise($event, true)"
+                (pressed)="finishReps()"
+                (details)="openDetails($event, true, 'card')"
             />
-        } @else if (view.upNext()) {
-            @if (view.isRepsActive() && !view.isPaused()) {
-                <!-- On a rep step it's Done: a pill in the next step's colour, with an arrow
-                     on to it. Space presses it too. -->
-                <button
-                    #doneButton
-                    type="button"
-                    class="workout-next workout-next--done"
-                    data-tour="next"
-                    [attr.data-next]="view.nextKind()"
-                    [attr.aria-label]="'Done. Next: ' + view.upNext()"
-                    aria-keyshortcuts="Space"
-                    (click)="finishReps()"
-                >
-                    <span>Next: {{ view.upNext() }}</span>
-                    <mat-icon class="workout-next__arrow" aria-hidden="true"
-                        >arrow_forward</mat-icon
-                    >
-                </button>
-            } @else {
-                <!-- Pulses in the next step's colour as this one nears its end, to get ready -->
-                <p
-                    class="workout-next"
-                    data-tour="next"
-                    [class.workout-next--soon]="view.nextSoon()"
-                    [style.--pulse-delay]="view.pulseDelay()"
-                    [attr.data-next]="view.nextKind()"
-                >
-                    Next: {{ view.upNext() }}
-                </p>
-            }
         }
 
         @if (view.isComplete() === false) {
             @if (view.isPaused() === false) {
                 <!-- Media-player controls: a big Pause in the middle and Skip to its right
-                 (RUN-12), on every kind of step (on a rep step, Done is the "Next:" pill above,
+                 (RUN-12), on every kind of step (on a rep step, Done is the Up next card above,
                  and Skip moves on without logging the set). Resume and End workout are over the ring while paused. The
                  captions repeat the buttons' names for sighted users, so screen readers skip
                  them. -->

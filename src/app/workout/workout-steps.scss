@@ -1,6 +1,6 @@
 @use 'interaction' as *;
 @use 'workout-colours' as *;
-@use 'workout-face-info' as *;
+@use 'workout-face-link' as *;
 
 // Each kind of step's own look, on top of its colour: timed work hurries you through its last
 // seconds, rest settles in slowly and breathes, and a rep step's count is the big thing on the
@@ -42,15 +42,19 @@
     }
 }
 
-// While paused, the step's name and its (i) over the greyed ring, above "Paused · 00:23": one
-// line, cut short with "…", so Resume and End workout still fit inside the circle
-.workout-paused__name {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
+// While paused, the step's name over the greyed ring, above "Paused · 00:23", a button for its
+// exercise's details: one line, cut short with "…", so Resume and End workout still fit inside
+// the circle. Padded to a fingertip's height, as the line cuts off the button's own hit area.
+.workout-paused__step {
+    min-width: 0;
     max-width: 70%;
-    margin-bottom: -0.5rem;
+    margin: -0.5rem 0 -1rem;
+    padding-block: 0.5rem;
+    overflow: hidden;
+    color: $face-muted;
+    font-size: 1.125rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     animation: paused-in 0.2s ease-out;
 
     @media (prefers-reduced-motion: reduce) {
@@ -58,16 +62,6 @@
     }
 }
 
-.workout-paused__step {
-    min-width: 0;
-    margin: 0;
-    overflow: hidden;
-    color: $face-muted;
-    font-size: 1.125rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.workout-paused__info {
-    @include face-info;
+.workout-paused__link {
+    @include face-link;
 }

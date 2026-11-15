@@ -28,11 +28,6 @@ export class WorkoutPage {
         return this.main.locator('app-workout-face-slide').first();
     }
 
-    /** In a rest, the Up next card under the ring: "Up next", the name, and the set and amount. */
-    get upNext(): Locator {
-        return this.main.locator('app-up-next-card');
-    }
-
     /** The time on the face, e.g. "00:10" (the countdown, as screen readers have it). */
     get faceTime(): Locator {
         return this.face.getByText(/^\d\d:\d\d$/).first();
@@ -65,14 +60,22 @@ export class WorkoutPage {
         return this.main.getByRole('button', { name: /^Skip (step|rest)$/ });
     }
 
-    /** A rep step's Done, the "Next: …" pill (named "Done. Next: Rest · 00:10"). */
+    /** A rep step's Done, the Up next card (named "Done. Next: Rest · 00:10"). */
     get done(): Locator {
         return this.main.getByRole('button', { name: /^Done\. Next/ });
     }
 
-    /** What's next, under the ring: "Next: Rest · 00:10". */
+    /** What's next, the text of the Up next card under the ring: "Up next: Rest, 00:10". */
     get next(): Locator {
-        return this.main.getByText(/^\s*Next: /);
+        return this.main.locator('app-up-next-card .up-next__text');
+    }
+
+    /**
+     * An exercise's name as a button for its details: on the face, e.g. "Back squat", or
+     * paused, e.g. "Rest, then Deadlift".
+     */
+    exercise(name: string): Locator {
+        return this.main.getByRole('button', { name, exact: true });
     }
 
     /** A wheel on the face of a rep step: `wheel('reps')`, `wheel('Weight, kg')`. */

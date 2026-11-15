@@ -97,7 +97,7 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 
 ### Running a workout
 
-- [x] **What's next, easier to see in a rest** (2026-11-15): the "then …" line on the face and "Next:" under the ring, which said the same thing twice, small, are one **Up next** card under the ring: the next step's kind icon and colour, its name big, the set and amount under it, and, for an exercise, the whole card a button for its details and Swap (RUN-2, RUN-11). For Dan to look at on a phone, mid-workout: its size beside the ring, and whether every step (not only rests) should have the card.
+- [x] **What's next, easier to see** (2026-11-15): the "Next:" line under the ring, and Done, the pill it became on a rep step, are one **Up next** card on every step: the next step's kind icon and colour, its name big, the set and amount under it. On a rep step it's Done (→); otherwise, for an exercise, an (i) for its details and Swap, to get ready or swap it before it starts (RUN-2, RUN-11). The (i) beside a step's name is gone: the name itself, dotted under, opens its details, on the face and paused. For Dan to look at on a phone, mid-workout: the card's size beside the ring, and whether the dotted line says "tap me" enough.
 
 ### Code health
 

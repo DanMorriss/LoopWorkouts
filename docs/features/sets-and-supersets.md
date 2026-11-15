@@ -100,7 +100,7 @@ This adds what that needs: sets and rest on an exercise, exercises done one side
     - Nothing for an exercise of one set.
     - When the whole workout repeats, its round follows, e.g. "set 2 of 3 · round 1 of 2". With a time limit, it's "round 3" and the time left, as now.
 - **The face** has "Left side" or "Right side" under the name for an exercise done each side.
-- **Next**: during the rest between sets, the Up next card says which set, e.g. "Single leg press", "Set 3 of 3 · 10 reps @ 40 kg". "Next:" on a rep step says the rest, the other side ("Next: Right side · 10 reps"), or the next exercise.
+- **Next**: during the rest between sets, the Up next card says which set, e.g. "Single leg press", "Set 3 of 3 · 10 reps @ 40 kg". On a rep step, Done (the same card) says the rest, the other side ("Right side", "10 reps"), or the next exercise.
 - **The step strip** shows the steps of the current set or round, as it shows a round now, only for a superset with more than one work or rep step.
 - **Moving on**: a new set or round turns the face's drum right to left, as a new round does now; a new exercise, or the other side, rolls up from below as a new step does.
 - **Time left of the whole workout** works as now: shown only when every step is timed and the workout has a set number of rounds.

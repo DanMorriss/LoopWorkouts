@@ -34,6 +34,10 @@ import { WorkoutSwap } from './workout-swap';
 import { UpNextCardComponent } from './up-next-card/up-next-card.component';
 import { tourWorkoutPage } from './workout-tour';
 import { WorkoutView } from './workout-view';
+import { Exercise } from '../models/exercise';
+
+/** What opened an exercise's details: its name on the face, or paused, or the Up next card. */
+type DetailsFrom = 'face' | 'paused' | 'card';
 
 // Space on one of these already does something, e.g. presses the focused button
 const SPACE_HANDLED_BY =
@@ -122,7 +126,12 @@ export class WorkoutComponent {
     }
 
     private readonly mainButton = viewChild<ElementRef<HTMLButtonElement>>('mainButton');
-    private readonly doneButton = viewChild<ElementRef<HTMLButtonElement>>('doneButton');
+    private readonly upNextCard = viewChild(UpNextCardComponent);
+    /** On a rep step, the Up next card is Done. */
+    private doneButton() {
+        const card = this.upNextCard();
+        return card?.done() ? card.button() : undefined;
+    }
     private readonly resumeButton = viewChild<ElementRef<HTMLButtonElement>>('resumeButton');
     private readonly ring = viewChild(WorkoutRingComponent);
     private readonly reducedMotion = injectPrefersReducedMotion();
@@ -315,21 +324,36 @@ export class WorkoutComponent {
         }
     }
 
+    /** Where the open details were opened from, for focus to go back there as they close. */
+    private detailsFrom: DetailsFrom = 'face';
+
     /**
-     * Focus on the step's (i), on the face or, while paused, over it; if the workout has moved
-     * on to a step with no exercise meanwhile, on Done or Pause (or Resume), so it isn't lost.
+     * An exercise's details over the workout (RUN-9): from its name on the face or while
+     * paused, or, for the next step's, from the Up next card's (i).
+     */
+    protected openDetails(exercise: Exercise, next: boolean, from: DetailsFrom) {
+        this.detailsFrom = from;
+        this.swap.showExercise(exercise, next);
+    }
+
+    /**
+     * Focus back on what opened the details: the exercise's name, on the face or, while
+     * paused, over it, or the Up next card. If the workout has moved on meanwhile, so that's
+     * gone, on Done or Pause (or Resume), so it isn't lost.
      */
     private focusInfo() {
         afterNextRender(
             () => {
-                // In a rest, the Up next card, which opens the next exercise's details
-                const info = this.host.nativeElement.querySelector<HTMLElement>(
-                    this.view.isPaused()
-                        ? '.workout-paused__info'
-                        : `.workout-face [data-step="${this.view.stepKey()}"] .workout-face__info, app-up-next-card button`
-                );
+                const name = this.view.isPaused()
+                    ? '.workout-paused__link'
+                    : `.workout-face [data-step="${this.view.stepKey()}"] .workout-face__link`;
+                const card = this.upNextCard();
+                const opener =
+                    this.detailsFrom === 'card' && !card?.done()
+                        ? card?.button()?.nativeElement
+                        : this.host.nativeElement.querySelector<HTMLElement>(name);
                 (
-                    info ??
+                    opener ??
                     (this.view.isPaused() ? this.resumeButton() : undefined)?.nativeElement ??
                     this.doneButton()?.nativeElement ??
                     this.mainButton()?.nativeElement

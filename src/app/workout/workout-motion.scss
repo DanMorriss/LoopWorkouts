@@ -1,73 +1,9 @@
-// The workout page's motion: "Next:" pulsing as a step nears its end, and each step's text
+// The workout page's motion: the face pulsing as a step nears its end, and each step's text
 // sliding in as the last one's slides out. Kept apart from workout.component.scss, which is
 // near its size budget.
 
-@use 'next-pulse' as *;
-
-@include next-keyframes;
-
-// What's next, under the ring. As the step nears its end it's a pill in the next step's
-// colour that swells once a second, on the beat of the countdown beeps, and eases back.
-.workout-next {
-    position: relative;
-    margin: 1rem 0 0;
-    color: var(--text-strong);
-    font-size: 1.25rem;
-    text-align: center;
-    padding: 0.2rem 0.9rem;
-    border: 1.5px solid transparent;
-    border-radius: 999px;
-
-    @include next-colours;
-}
-
-// On a rep step it's Done: the pill all the time, steady, with an arrow on to what's next
-.workout-next--done {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    min-height: 44px;
-    padding-inline: 1.1rem 0.8rem;
-    border-color: var(--next-color);
-    background: transparent;
-    font: inherit;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition:
-        background-color 0.2s ease,
-        scale 0.2s ease-out;
-
-    @media (hover: hover) {
-        &:hover {
-            background: var(--control);
-        }
-    }
-
-    &:active {
-        scale: 0.97;
-        transition-duration: 0.08s;
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 3px;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        transition: none;
-    }
-}
-
-.workout-next__arrow {
-    flex: none;
-}
-
-.workout-next--soon {
-    @include next-soon;
-}
-
 // The face, steady in the phase colour for most of a step, flares to full colour on each of
-// its last seconds and eases back, in time with the "Next:" pulse: one "get ready" cue, only
+// its last seconds and eases back, in time with the Up next card's pulse: one "get ready" cue, only
 // when it's needed, rather than a flash all step long.
 .workout-face--soon::before {
     animation: face-tick 1s ease-out infinite;
@@ -82,7 +18,7 @@
     }
 }
 
-// On the beat of the "Next:" pulse (next-pulse.scss)
+// On the beat of the Up next card's pulse
 .workout-face--soon::before {
     animation-delay: var(--pulse-delay, 0ms);
 }

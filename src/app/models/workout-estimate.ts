@@ -145,3 +145,19 @@ export function estimateText(estimate: Estimate): { text: string; spoken: string
         ? { text: short, spoken: long }
         : { text: `About ${short}`, spoken: `about ${long}` };
 }
+
+/**
+ * An estimate as it's drawn, a stopwatch with "About" over it: the word over it, if any
+ * ("About", "Under" a minute, or none for a time limit), and the lines inside it, "10 mins",
+ * or "1 hr" over "5 mins".
+ */
+export function estimateFace(estimate: Estimate): { over: string; lines: string[] } {
+    const minutes = Math.round(estimate.seconds / 60);
+    if (minutes === 0) {
+        return { over: 'Under', lines: ['1 min'] };
+    }
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    const lines = [h ? `${h} hr` : '', m ? `${m} ${m === 1 ? 'min' : 'mins'}` : ''].filter(Boolean);
+    return { over: estimate.basis === 'limit' ? '' : 'About', lines };
+}

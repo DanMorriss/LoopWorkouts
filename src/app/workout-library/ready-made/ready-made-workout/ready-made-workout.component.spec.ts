@@ -51,10 +51,10 @@ describe("ReadyMadeWorkoutComponent, a ready-made plan's workout (PLN-6)", () =>
     it('says about how long it takes, a first guess until you have done it', async () => {
         await openFrom('gym-legs');
 
-        const time = Array.from(el().querySelectorAll('app-workout-time p'), (p) => text(p));
-        expect(time).toHaveLength(2);
-        expect(time[0]).toMatch(/^About \d+ min$/);
-        expect(time[1]).toContain('A first guess');
+        const watch = el().querySelector('app-workout-time [role="img"]')!;
+        expect(watch.getAttribute('aria-label')).toMatch(/^Takes about \d+ minutes$/);
+        expect(text(watch)).toMatch(/^About\s*\d+ mins$/);
+        expect(text(el().querySelector('app-workout-time p')!)).toContain('A first guess');
     });
 
     it.each([

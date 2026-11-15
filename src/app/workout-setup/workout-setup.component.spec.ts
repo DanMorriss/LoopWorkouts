@@ -622,8 +622,13 @@ describe('WorkoutSetupComponent', () => {
 
         it('says how long it takes as it changes, once there is something to do (LIB-9)', async () => {
             const time = () =>
-                Array.from(fixture.nativeElement.querySelectorAll('app-workout-time p'), (p) =>
-                    (p as HTMLElement).textContent!.trim()
+                Array.from(
+                    fixture.nativeElement.querySelectorAll(
+                        'app-workout-time [role="img"], app-workout-time p'
+                    ),
+                    (part) =>
+                        (part as HTMLElement).getAttribute('aria-label') ??
+                        (part as HTMLElement).textContent!.trim()
                 );
             expect(time()).toEqual([]);
 
@@ -631,13 +636,13 @@ describe('WorkoutSetupComponent', () => {
             chooseTime(1, 'seconds', '30');
             chooseRounds('4');
             // 4 rounds of 1:00 and 0:30, the last rest skipped
-            expect(time()).toEqual(['About 6 min']);
+            expect(time()).toEqual(['Takes about 6 minutes']);
 
             await addStep('Reps');
             chooseReps(2, '20');
             // And 20 reps a round, guessed at 65 seconds, so the last rest isn't skipped now
             expect(time()).toEqual([
-                'About 10 min',
+                'Takes about 10 minutes',
                 "A first guess at the rep steps. Once you've done them, it's from your own pace.",
             ]);
         });

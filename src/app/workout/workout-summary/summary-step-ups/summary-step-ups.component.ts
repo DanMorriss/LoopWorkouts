@@ -1,9 +1,15 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { describeSets } from '../../../history/history-format';
-import { progressionSuggestions, ProgressionSuggestion, steppedUp } from '../../../models/progress';
+import { describeSets, spokenDuration } from '../../../history/history-format';
+import {
+    progressionSuggestions,
+    ProgressionSuggestion,
+    steppedUp,
+    TIME_INCREASE,
+    withLongerTime,
+} from '../../../models/progress';
 import { weightToKg } from '../../../models/weight';
-import { allSteps, withEachRepSet } from '../../../models/workout';
+import { allSteps, Step, withEachRepSet } from '../../../models/workout';
 import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
@@ -14,7 +20,8 @@ import { injectFocusAfterRender } from '../../../shared/focus-after-render';
 /**
  * What to step up next time on the workout summary (PRG-10), e.g. "Squats: try 62.5 kg, up
  * from 60 kg", for each rep step where every set got its reps: a weight step up (as PRG-5
- * offers mid-workout), or one more rep with no weight. Follows the sets as they're corrected.
+ * offers mid-workout), or one more rep with no weight; and for each timed exercise where every
+ * set ran its whole time, a few seconds longer. Follows the sets as they're corrected.
  * Apply puts a step-up on the saved workout's step, and it stays said as applied; "Yes, use
  * next time" in Sets leaves it there (ActiveRunService.keepStepUp()).
  */
@@ -25,7 +32,7 @@ import { injectFocusAfterRender } from '../../../shared/focus-after-render';
         @if (lines().length) {
             <section class="step-ups" aria-labelledby="summary-step-ups">
                 <h3 id="summary-step-ups">Next time</h3>
-                <p class="step-ups__hint">Every set got its reps, so step up:</p>
+                <p class="step-ups__hint">Every set was done in full, so step up:</p>
                 <ul class="step-ups__list">
                     @for (line of lines(); track line.step) {
                         <li>
@@ -100,20 +107,14 @@ export class SummaryStepUpsComponent {
         ]
             .sort((a, b) => a.step - b.step)
             .map((suggestion) => {
-                const { step, kind, from, to } = suggestion;
+                const { step } = suggestion;
                 // Named as its line in Sets is
                 const [line] = describeSets(
                     sets.filter((set) => set.step === step),
                     unit,
                     this.exerciseName
                 );
-                const text = suggestion.eachSet
-                    ? kind === 'weight'
-                        ? `${line.name}: try ${to - from} ${unit} more on each set`
-                        : `${line.name}: try 1 more rep on each set`
-                    : kind === 'weight'
-                      ? `${line.name}: try ${to} ${unit}, up from ${from} ${unit}`
-                      : `${line.name}: try ${to} reps, up from ${from}`;
+                const text = `${line.name}: ${stepUpText(suggestion, unit)}`;
                 return { step, text, suggestion, applied: applied.has(step) };
             });
     });
@@ -127,33 +128,67 @@ export class SummaryStepUpsComponent {
     /**
      * Puts the step-up on its step (and its twin's, where it's said once), of the saved
      * workout and of this run, so Back to workout carries on with it, as turning the face's
-     * wheel would. Focus moves to its Applied.
+     * wheel would; a longer time only on the saved workout. Focus moves to its Applied.
      */
     protected apply(text: string, step: number) {
         const steps = allSteps(this.run.workout() ?? { blocks: [] });
         const next = new Map(this.applied());
         for (const { suggestion } of this.items().filter((item) => item.text === text)) {
             const current = steps[suggestion.step];
-            if (current?.kind !== 'reps') {
+            const stepped = current && this.steppedUp(current, suggestion);
+            if (!stepped) {
                 continue;
             }
-            // On each set of a step whose sets vary, so it keeps its shape (BLD-11)
-            this.store.updateActiveStep(
-                suggestion.step,
-                suggestion.eachSet
-                    ? withEachRepSet(current, (amount) =>
-                          suggestion.kind === 'weight'
-                              ? steppedUp(amount, this.weightUnit())
-                              : { ...amount, reps: amount.reps + 1 }
-                      )
-                    : suggestion.kind === 'weight'
-                      ? { ...current, weight: weightToKg(suggestion.to, this.weightUnit()) }
-                      : { ...current, reps: suggestion.to }
-            );
+            // A longer time is for next time only: on this run it would move the clock
+            if (suggestion.kind === 'time') {
+                this.store.updateSavedStep(suggestion.step, stepped);
+            } else {
+                this.store.updateActiveStep(suggestion.step, stepped);
+            }
             next.set(suggestion.step, suggestion);
             this.run.keepStepUp(suggestion.step);
         }
         this.applied.set(next);
         this.focusAfterRender(`step-up-${step}`);
     }
+
+    /**
+     * The step with its step-up on, on each set of a step whose sets vary, so it keeps its
+     * shape (BLD-11). Null if it's no longer the kind of step the step-up is for.
+     */
+    private steppedUp(step: Step, suggestion: ProgressionSuggestion): Step | null {
+        const unit = this.weightUnit();
+        if (step.kind === 'work') {
+            return suggestion.kind === 'time' ? withLongerTime(step) : null;
+        }
+        if (step.kind !== 'reps' || suggestion.kind === 'time') {
+            return null;
+        }
+        if (suggestion.eachSet) {
+            return withEachRepSet(step, (amount) =>
+                suggestion.kind === 'weight'
+                    ? steppedUp(amount, unit)
+                    : { ...amount, reps: amount.reps + 1 }
+            );
+        }
+        return suggestion.kind === 'weight'
+            ? { ...step, weight: weightToKg(suggestion.to, unit) }
+            : { ...step, reps: suggestion.to };
+    }
+}
+
+/** How a step-up reads after the exercise's name, e.g. "try 62.5 kg, up from 60 kg". */
+function stepUpText({ kind, from, to, eachSet }: ProgressionSuggestion, unit: string): string {
+    if (eachSet) {
+        return kind === 'weight'
+            ? `try ${to - from} ${unit} more on each set`
+            : kind === 'reps'
+              ? 'try 1 more rep on each set'
+              : `try ${spokenDuration(TIME_INCREASE)} more on each set`;
+    }
+    return kind === 'weight'
+        ? `try ${to} ${unit}, up from ${from} ${unit}`
+        : kind === 'reps'
+          ? `try ${to} reps, up from ${from}`
+          : `try ${spokenDuration(to)}, up from ${spokenDuration(from)}`;
 }

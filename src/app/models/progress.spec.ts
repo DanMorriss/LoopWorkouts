@@ -1,5 +1,5 @@
 import { HistoryEntry, LoggedSet } from './history';
-import { RepStep, Step, withEachRepSet, withRepSet } from './workout';
+import { MAX_STEP_SECONDS, RepStep, Step, TimedStep, withEachRepSet, withRepSet } from './workout';
 import {
     canStepUpEachSet,
     compareScores,
@@ -15,6 +15,7 @@ import {
     sessionValue,
     steppedUp,
     suggestedWeight,
+    withLongerTime,
 } from './progress';
 
 const squat = (reps: number, weight?: number, round = 0): LoggedSet => ({
@@ -229,8 +230,41 @@ describe('next time on the workout summary', () => {
 
         expect(progressionSuggestions(sets, steps, 'kg')).toEqual([
             { step: 0, kind: 'weight', from: 60, to: 62.5 },
+            { step: 1, kind: 'time', from: 60, to: 65 },
             { step: 2, kind: 'reps', from: 12, to: 13 },
         ]);
+    });
+
+    it('makes a timed exercise longer where every set ran its whole time', () => {
+        expect(progressionSuggestions([plank(60), plank(60, 1)], steps, 'kg')).toEqual([
+            { step: 1, kind: 'time', from: 60, to: 65 },
+        ]);
+        // One skipped part-way (RUN-12) has none
+        expect(progressionSuggestions([plank(60), plank(40, 1)], steps, 'kg')).toEqual([]);
+        // Nor one at the longest a step can be
+        const longest: Step = { ...plankStep, seconds: MAX_STEP_SECONDS };
+        expect(progressionSuggestions([plank(MAX_STEP_SECONDS)], [squats, longest], 'kg')).toEqual(
+            []
+        );
+    });
+
+    it('makes each set longer alike where the sets vary (BLD-11)', () => {
+        const varied: Step = {
+            ...plankStep,
+            seconds: 30,
+            sets: [{ seconds: 30 }, { seconds: 45 }],
+        };
+        const done = [plank(30), { ...plank(45, 1), set: 1 }];
+        expect(progressionSuggestions(done, [squats, varied], 'kg')).toEqual([
+            { step: 1, kind: 'time', from: 30, to: 35, eachSet: true },
+        ]);
+        const short = [plank(30), { ...plank(40, 1), set: 1 }];
+        expect(progressionSuggestions(short, [squats, varied], 'kg')).toEqual([]);
+        expect(withLongerTime(varied as TimedStep)).toEqual({
+            ...varied,
+            seconds: 35,
+            sets: [{ seconds: 35 }, { seconds: 50 }],
+        });
     });
 
     it('suggests nothing for a step that missed its reps, or is at the top', () => {

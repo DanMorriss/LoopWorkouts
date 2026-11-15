@@ -1,6 +1,17 @@
 import { HistoryEntry, isTimedSet, LoggedSet, RepSet, TimedSet } from './history';
 import { MAX_WEIGHT, WEIGHT_INCREASE, WeightUnit, weightIn, weightToKg } from './weight';
-import { MAX_REPS, RepSetAmount, RepStep, Step } from './workout';
+import {
+    MAX_REPS,
+    MAX_STEP_SECONDS,
+    RepSetAmount,
+    RepStep,
+    Step,
+    TimedSetAmount,
+    TimedStep,
+} from './workout';
+
+/** How much longer a timed exercise goes next time, where every set ran its whole time. */
+export const TIME_INCREASE = 5;
 
 /** How far a workout got in its time limit: full rounds, then steps done of the next. */
 export interface RoundsScore {
@@ -357,19 +368,37 @@ export function steppedUp(amount: RepSetAmount, unit: WeightUnit): RepSetAmount 
     return { ...amount, weight: weightToKg(next, unit) };
 }
 
+/**
+ * A timed exercise TIME_INCREASE seconds longer, on each set where its sets vary (BLD-11), so
+ * the shape stays: a Next time step-up of time, applied.
+ */
+export function withLongerTime(step: TimedStep): TimedStep {
+    const seconds = step.seconds + TIME_INCREASE;
+    return step.sets
+        ? {
+              ...step,
+              seconds,
+              sets: step.sets.map((set) => ({ seconds: set.seconds + TIME_INCREASE })),
+          }
+        : { ...step, seconds };
+}
+
 function atMostWeight(amount: RepSetAmount, unit: WeightUnit): boolean {
     return amount.weight !== undefined && weightIn(amount.weight, unit) >= MAX_WEIGHT[unit];
 }
 
-/** A step up to try next time, from how a rep step went this time (on the workout summary). */
+/**
+ * A step up to try next time, from how a rep step or timed exercise went this time (on the
+ * workout summary).
+ */
 export interface ProgressionSuggestion {
     /** Which step of the round it's for, from 0. */
     step: number;
-    /** A heavier weight, or (with no weight) one more rep. */
-    kind: 'weight' | 'reps';
+    /** A heavier weight, one more rep (with no weight), or longer (a timed exercise). */
+    kind: 'weight' | 'reps' | 'time';
     /**
-     * The weight (in the unit shown) or reps it's from, and the one to try. For a step whose
-     * sets vary, set 1's, and every set goes up by as much.
+     * The weight (in the unit shown), reps or seconds it's from, and the one to try. For a
+     * step whose sets vary, set 1's, and every set goes up by as much.
      */
     from: number;
     to: number;
@@ -378,9 +407,11 @@ export interface ProgressionSuggestion {
 }
 
 /**
- * What to step up next time, a rep step at a time, from this run's `sets` of `steps`: where
- * every set got the step's reps, one weight step up (as `suggestedWeight()` does), or one more
- * rep for a step with no weight. Nothing for a step that missed its reps, or is at the top.
+ * What to step up next time, a step at a time, from this run's `sets` of `steps`: where every
+ * set got the step's reps, one weight step up (as `suggestedWeight()` does), or one more rep
+ * for a step with no weight; where every set of a timed exercise ran its whole time,
+ * TIME_INCREASE seconds more. Nothing for a step that missed its reps, had a set skipped
+ * part-way, or is at the top.
  */
 export function progressionSuggestions(
     sets: readonly LoggedSet[],
@@ -388,12 +419,22 @@ export function progressionSuggestions(
     unit: WeightUnit
 ): ProgressionSuggestion[] {
     const byStep = new Map<number, RepSet[]>();
+    const timedByStep = new Map<number, TimedSet[]>();
     for (const set of sets) {
-        if (!isTimedSet(set)) {
+        if (isTimedSet(set)) {
+            timedByStep.set(set.step, [...(timedByStep.get(set.step) ?? []), set]);
+        } else {
             byStep.set(set.step, [...(byStep.get(set.step) ?? []), set]);
         }
     }
     const suggestions: ProgressionSuggestion[] = [];
+    for (const [index, stepSets] of timedByStep) {
+        const step = steps[index];
+        const suggestion = step?.kind === 'work' && timeSuggestion(index, step, stepSets);
+        if (suggestion) {
+            suggestions.push(suggestion);
+        }
+    }
     for (const [index, stepSets] of byStep) {
         const step = steps[index];
         if (step?.kind !== 'reps') {
@@ -421,6 +462,32 @@ export function progressionSuggestions(
         }
     }
     return suggestions.sort((a, b) => a.step - b.step);
+}
+
+/**
+ * Next time's step up for a timed exercise, where every set (both sides) ran its whole time:
+ * TIME_INCREASE seconds more, on each set where its sets vary (BLD-11), so the shape stays.
+ * Null where any was skipped part-way (RUN-12), or it would go past the longest a step can be.
+ */
+function timeSuggestion(
+    index: number,
+    step: TimedStep,
+    stepSets: readonly TimedSet[]
+): ProgressionSuggestion | null {
+    const amounts: readonly TimedSetAmount[] = step.sets ?? [{ seconds: step.seconds }];
+    const ranAll = stepSets.every(
+        (set) => set.seconds >= (amounts[set.set ?? 0] ?? amounts[0]).seconds
+    );
+    if (!ranAll || amounts.some((amount) => amount.seconds + TIME_INCREASE > MAX_STEP_SECONDS)) {
+        return null;
+    }
+    return {
+        step: index,
+        kind: 'time',
+        from: step.seconds,
+        to: step.seconds + TIME_INCREASE,
+        ...(step.sets ? { eachSet: true as const } : {}),
+    };
 }
 
 /**

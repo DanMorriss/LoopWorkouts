@@ -42,8 +42,8 @@ interface WeekBar extends WeekTotal {
 /**
  * The time spent working out each week, for the last 12 weeks, as bars (PRG-12), from the
  * week of the first workout for someone newer. The chosen week's time and workouts sit over
- * the bars, starting on this week; a tap, hover or the arrow keys choose another. A table can
- * stand in for the bars.
+ * the bars, starting on this week; a tap or the arrow keys choose another, which stays chosen,
+ * and hovering shows one for as long as the pointer's over it. A table can stand in for the bars.
  */
 @Component({
     selector: 'app-time-per-week',
@@ -113,30 +113,54 @@ export class TimePerWeekComponent {
 
     protected readonly anyTime = computed(() => this.totals().some((week) => week.seconds > 0));
 
-    /** The week chosen by a tap, hover or the arrow keys; the latest with none. */
-    protected readonly active = signal<number | null>(null);
-    protected readonly shown = computed(() => this.bars()[this.active() ?? this.count() - 1]);
+    /** The week chosen by a tap or the arrow keys, which stays chosen; the latest with none. */
+    private readonly chosen = signal<number | null>(null);
+    /** The week under a hovering mouse or pen, shown over the chosen one while it's there. */
+    protected readonly hovered = signal<number | null>(null);
+    private readonly shownIndex = computed(
+        () => this.hovered() ?? this.chosen() ?? this.count() - 1
+    );
+    protected readonly shown = computed(() => this.bars()[this.shownIndex()]);
 
     /** Whether the table is showing in place of the bars. */
     protected readonly asTable = signal(false);
 
+    /**
+     * A press, or a finger or button dragged across, chooses the week under it; a mouse or pen
+     * moving with nothing pressed only hovers. A finger's pointer leaves as it lifts, so leaving
+     * can't be what ends a tap's choice.
+     */
     protected onPointer(event: PointerEvent) {
-        const box = (event.currentTarget as SVGSVGElement).getBoundingClientRect();
-        if (box.width === 0) {
+        const week = this.weekAt(event);
+        if (week === null) {
             return;
         }
-        const x = ((event.clientX - box.left) / box.width) * WIDTH;
-        const week = Math.floor((x - LEFT) / this.slot());
-        this.active.set(Math.min(this.count() - 1, Math.max(0, week)));
+        if (event.type === 'pointerdown' || event.buttons !== 0) {
+            this.chosen.set(week);
+            this.hovered.set(null);
+        } else if (event.pointerType !== 'touch') {
+            this.hovered.set(week);
+        }
     }
 
     protected onKeydown(event: KeyboardEvent) {
-        // From this week, which is showing with none chosen
-        const moved = chartKeyMove(event.key, this.active() ?? this.count() - 1, this.count());
+        // From the week showing: this one with none chosen
+        const moved = chartKeyMove(event.key, this.shownIndex(), this.count());
         if (moved !== null) {
             event.preventDefault();
-            this.active.set(moved);
+            this.chosen.set(moved);
+            this.hovered.set(null);
         }
+    }
+
+    private weekAt(event: PointerEvent): number | null {
+        const box = (event.currentTarget as SVGSVGElement).getBoundingClientRect();
+        if (box.width === 0) {
+            return null;
+        }
+        const x = ((event.clientX - box.left) / box.width) * WIDTH;
+        const week = Math.floor((x - LEFT) / this.slot());
+        return Math.min(this.count() - 1, Math.max(0, week));
     }
 
     /** A week's days: "19–25 Oct" in one month, "28 Sep – 4 Oct" across two. */

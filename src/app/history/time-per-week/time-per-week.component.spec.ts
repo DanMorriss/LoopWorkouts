@@ -89,10 +89,10 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         expect(text('.weeks__when')).toBe('24–30 Aug · 0 workouts');
         expect(text(`#time-per-week-spoken`)).toBe('Week of 24 August: no time, 0 workouts');
 
-        // Leaving the chart goes back to this week
+        // The week chosen stays chosen as focus leaves
         chart().dispatchEvent(new FocusEvent('blur'));
         fixture.detectChanges();
-        expect(text('.weeks__when')).toBe('2–8 Nov · 1 workout');
+        expect(text('.weeks__when')).toBe('24–30 Aug · 0 workouts');
     });
 
     it('picks the week under a finger or the pointer', () => {
@@ -111,6 +111,40 @@ describe('TimePerWeekComponent (PRG-12)', () => {
 
         expect(text('.weeks__when')).toBe('17–23 Aug · 1 workout');
         expect(text('.weeks__time')).toBe('10:00');
+    });
+
+    it('keeps a tapped week chosen as the finger lifts, and a hover shows another till it leaves', () => {
+        create(entry(day(11, 3), 1800), entry(day(8, 18), 600));
+        const svg = el().querySelector<SVGSVGElement>('.weeks__svg')!;
+        const box = svg.getBoundingClientRect();
+        const at = (type: string, share: number, init: PointerEventInit = {}) => {
+            svg.dispatchEvent(
+                new PointerEvent(type, {
+                    clientX: box.left + box.width * share,
+                    clientY: box.top + box.height / 2,
+                    ...init,
+                })
+            );
+            fixture.detectChanges();
+        };
+        const lit = () =>
+            [...el().querySelectorAll('.weeks__bar')].indexOf(
+                el().querySelector('.weeks__bar--shown')!
+            );
+
+        // A tap on the first week: a finger's pointer leaves as it lifts
+        at('pointerdown', 0.12, { pointerType: 'touch', buttons: 1 });
+        at('pointerup', 0.12, { pointerType: 'touch' });
+        at('pointerleave', 0.12, { pointerType: 'touch' });
+        expect(text('.weeks__when')).toBe('17–23 Aug · 1 workout');
+        expect(lit()).toBe(0);
+
+        // A mouse hovering over this week shows it, and leaving goes back to the tapped one
+        at('pointermove', 0.97, { pointerType: 'mouse' });
+        expect(text('.weeks__when')).toBe('2–8 Nov · 1 workout');
+        at('pointerleave', 0.97, { pointerType: 'mouse' });
+        expect(text('.weeks__when')).toBe('17–23 Aug · 1 workout');
+        expect(lit()).toBe(0);
     });
 
     it('swaps the bars for a table, a row a week, and back, keeping focus on its button', () => {

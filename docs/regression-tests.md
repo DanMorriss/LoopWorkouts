@@ -1121,7 +1121,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Stories:** EXR-4 · **Priority:** P1
 - **Preconditions:** `guest()`, `data-version` 2, and a workout "Squat day" saved as version 2 did: a list of `steps`, one rep step named "Back squat" with no `exerciseId`.
 - **Steps:** Open its Details (`/library/squat-day`).
-- **Expected:** Its muscles show (not "None of its steps is an exercise yet."); the saved step's `exerciseId` is `builtin:back-squat`; no exercise of your own was made (`exercises` isn't saved); `data-version` is 5.
+- **Expected:** Its muscles show (not "None of its steps is an exercise yet."); the saved step's `exerciseId` is `builtin:back-squat`; no exercise of your own was made (`exercises` isn't saved); `data-version` is the current one (6).
 - **In the pack:** the built-in exercises aren't in the first download, so this device loads them before the app starts (`prepareSavedData()`); without them, the conversion would make an exercise of your own called Back squat.
 
 ### REG-DATA-05 · Years of history

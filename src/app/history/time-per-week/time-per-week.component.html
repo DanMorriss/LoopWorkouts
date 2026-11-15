@@ -59,7 +59,6 @@
                     [attr.aria-labelledby]="id + '-title'"
                     [attr.aria-describedby]="id + '-help ' + id + '-spoken'"
                     (keydown)="onKeydown($event)"
-                    (blur)="active.set(null)"
                 >
                     <span class="sr-only" [id]="id + '-help'"
                         >{{ span() }}, Monday to Sunday. Use the left and right arrow keys to hear
@@ -71,7 +70,7 @@
                         aria-hidden="true"
                         (pointerdown)="onPointer($event)"
                         (pointermove)="onPointer($event)"
-                        (pointerleave)="active.set(null)"
+                        (pointerleave)="hovered.set(null)"
                     >
                         @for (tick of ticks(); track tick.label) {
                             <line

@@ -184,6 +184,17 @@ describe('ExercisePageComponent', () => {
             expect(el().querySelector('#exercise-page-delete')).toBeNull();
         });
 
+        it('shows its demo first, above the rest', async () => {
+            await open('/exercises/back-squat');
+            await exercises.loadMotion();
+            await render();
+
+            const details = el().querySelector('app-exercise-details')!;
+            expect(details.firstElementChild!.tagName).toBe('APP-EXERCISE-DEMO');
+            expect(details.querySelector('.exercise__chips')).not.toBeNull();
+            expect(details.querySelector('app-body-map')).not.toBeNull();
+        });
+
         it('reads a choice across two needs as one', async () => {
             await open('/exercises/inverted-row');
 

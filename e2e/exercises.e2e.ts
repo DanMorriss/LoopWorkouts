@@ -123,15 +123,20 @@ test.describe("an exercise's page", () => {
         const how = page.getByRole('region', { name: 'How to do it' });
         await expect(how.getByRole('listitem')).toHaveCount(4);
         await expect(page.getByRole('region', { name: 'Tips' })).toBeVisible();
-        // Reduced motion: its key positions side by side, with no Pause
-        await expect(how.getByText('Standing', { exact: true })).toBeVisible();
-        await expect(how.getByText('Bottom', { exact: true })).toBeVisible();
+        // The demo at the top, before the chips. Reduced motion: its key positions side by
+        // side, with no Pause
+        const main = page.getByRole('main');
+        await expect(main.getByText('Standing', { exact: true })).toBeVisible();
+        await expect(main.getByText('Bottom', { exact: true })).toBeVisible();
+        const still = await main.getByText('Bottom', { exact: true }).boundingBox();
+        const chips = await main
+            .getByRole('list', { name: "Equipment and how it's measured" })
+            .boundingBox();
+        expect(still!.y).toBeLessThan(chips!.y);
         await expect(page.getByRole('button', { name: 'Pause the demo' })).toHaveCount(0);
 
         await app.goto('/exercises/plank');
-        await expect(
-            page.getByRole('region', { name: 'How to do it' }).getByText('Hold', { exact: true })
-        ).toBeVisible();
+        await expect(page.getByRole('main').getByText('Hold', { exact: true })).toBeVisible();
         await app.goto('/exercises/inverted-row');
         await expect(page.getByRole('main')).toContainText(
             'Barbell and rack, Smith machine, or rings'
@@ -388,10 +393,10 @@ test.describe("the tour of an exercise's page", () => {
             await page.evaluate(() => localStorage.removeItem('tour-exercise'));
             await page.getByRole('link', { name: /^Back squat/ }).click();
 
-            const tour = page.getByRole('dialog', { name: 'Add to workout' });
+            const tour = page.getByRole('dialog', { name: 'How to do it' });
             await expect(tour).toBeVisible();
             await expect(tour).toContainText('1 of 4');
-            const titles = ['Add to workout', 'Your note', 'Muscles worked', 'How to do it'];
+            const titles = ['How to do it', 'Add to workout', 'Your note', 'Muscles worked'];
             for (const [stop, title] of titles.entries()) {
                 const card = page.getByRole('dialog', { name: title });
                 await expect(card).toBeVisible();

@@ -5,7 +5,7 @@
         @if (workout(); as workout) {
             <div class="details__top">
                 <h2 class="details__title" tabindex="-1">{{ name() }}</h2>
-                <!-- How long it takes, beside the heart, its dial the same size -->
+                <!-- How long it takes, beside the heart, the same height -->
                 <div class="details__marks">
                     <app-workout-watch [workout]="workout" />
                     <app-favourite-button [workout]="workout" />

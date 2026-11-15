@@ -42,11 +42,11 @@
 }
 
 // How long it takes, under its name
-// The stopwatch and the heart, lined up along the bottom of the dial
+// The stopwatch and the heart, the same height side by side
 .details__marks {
     display: flex;
     flex: none;
-    align-items: flex-end;
+    align-items: center;
     gap: 0.75rem;
 }
 

@@ -3,9 +3,8 @@ import { Workout } from '../../../models/workout';
 import { WorkoutEstimates } from '../../state/workout-estimates.service';
 
 /**
- * How long a workout takes, drawn: a stopwatch the size of an icon button (its dial matches
- * the 44px circle), "10" over "mins" in it. One picture to
- * screen readers, "Takes about 10 minutes". Nothing for one that runs until stopped.
+ * How long a workout takes, drawn: a stopwatch as tall as an icon button (44px, its top
+ * button and all), "10" over "mins" in it. One picture to screen readers, "Takes about 10 minutes". Nothing for one that runs until stopped.
  */
 @Component({
     selector: 'app-workout-watch',
@@ -34,11 +33,11 @@ import { WorkoutEstimates } from '../../state/workout-estimates.service';
             flex: none;
         }
 
-        // 100 by 112 units, the dial 84 across: 44px, as an icon button's circle
+        // 100 by 112 units: 44px tall, as an icon button
         .workout-watch__body {
             position: relative;
             display: block;
-            width: calc(44px * 100 / 84);
+            width: calc(44px * 100 / 112);
             aspect-ratio: 100 / 112;
         }
 
@@ -49,14 +48,14 @@ import { WorkoutEstimates } from '../../state/workout-estimates.service';
             height: 100%;
             fill: none;
             stroke: var(--accent);
-            stroke-width: 4;
+            stroke-width: 4.5;
             stroke-linecap: round;
         }
 
         // In the dial: its middle is 65 of the 112 down
         .workout-watch__face {
             position: absolute;
-            inset: 20% 8% 3%;
+            inset: 20% 4% 3%;
             display: grid;
             place-content: center;
             justify-items: center;
@@ -66,13 +65,13 @@ import { WorkoutEstimates } from '../../state/workout-estimates.service';
         }
 
         .workout-watch__value {
-            font-size: 0.95rem;
+            font-size: 0.8rem;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
         }
 
         .workout-watch__unit {
-            @include small-type(0.6rem);
+            @include small-type(0.55rem);
             font-weight: 600;
         }
     `,

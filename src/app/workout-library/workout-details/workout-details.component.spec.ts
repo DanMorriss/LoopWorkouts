@@ -33,7 +33,11 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         harness = await RouterTestingHarness.create();
     });
 
-    afterEach(() => localStorage.clear());
+    afterEach(() => {
+        localStorage.clear();
+        // A run started here would otherwise carry on into the next spec's store
+        sessionStorage.clear();
+    });
 
     function addSprints() {
         const { id: _id, ...workout } = baseWorkout({ title: 'Sprints' });

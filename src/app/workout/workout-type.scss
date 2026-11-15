@@ -9,7 +9,6 @@
 .workout-status,
 .workout-face,
 .workout-paused__label,
-.workout-next,
 .no-workout p {
     @include display;
 }
@@ -18,9 +17,4 @@
 .workout-status *,
 .workout-face * {
     @include display-tracking;
-}
-
-// A long "Next:" splits into two even lines, rather than leaving a word on its own
-.workout-next {
-    text-wrap: balance;
 }

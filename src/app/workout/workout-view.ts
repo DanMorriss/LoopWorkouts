@@ -212,9 +212,9 @@ export class WorkoutView {
         const id = this.state()?.step?.exerciseId;
         return id ? this.exercises.byId(id) : undefined;
     });
-    /** During a rest, the exercise after it, for its details and Swap from the face (RUN-11). */
+    /** The next step's exercise, for its details and Swap from the Up next card (RUN-11). */
     readonly nextExercise = computed(() => {
-        const id = this.state()?.phase === 'rest' ? this.nextState()?.step?.exerciseId : undefined;
+        const id = this.nextState()?.step?.exerciseId;
         return id ? this.exercises.byId(id) : undefined;
     });
 
@@ -232,24 +232,24 @@ export class WorkoutView {
         if (own) {
             return { text, exercise: own, next: false };
         }
-        const next = this.nextExercise();
-        // As the step's named, as "then …" on the face has it
+        const next = this.state()?.phase === 'rest' ? this.nextExercise() : undefined;
+        // As the step's named, as the Up next card has it
         const name = this.nextState()?.step?.name || next?.name;
         return next
             ? { text: `${text}, then ${name}`, exercise: next, next: true }
             : { text, exercise: undefined, next: false };
     });
 
-    /** e.g. "Plank · 00:45", "Squats · 10 reps @ 60 kg", or "finish" when the workout ends after this step. */
-    readonly upNext = computed(() => {
+    /**
+     * What's next in two parts: its name ("Squats", or "Right side" for a step's second side)
+     * and its set and amount ("set 2 of 3 · 10 reps @ 60 kg", "00:45"). Null at the finish.
+     */
+    private readonly nextParts = computed(() => {
         const next = this.nextState();
-        if (!next) {
-            return '';
+        const step = next?.step;
+        if (!step) {
+            return null;
         }
-        if (!next.step) {
-            return 'finish';
-        }
-        const step = next.step;
         const workout = this.running();
         // Which set, as one starts: a superset's other steps are in the round already said
         const set =
@@ -258,14 +258,50 @@ export class WorkoutView {
                 : null;
         // A step's second side is the same exercise again, so it's only the side
         const side = workout && secondSide(workout, next.stepIndex);
-        const name = side
-            ? sideName(side)
-            : `${step.name || stepKindName(step.kind)}${set ? ` · ${setText(set)}` : ''}`;
-        if (step.kind === 'reps') {
-            const weight = this.weightText(step);
-            return `${name} · ${step.reps} reps${weight ? ` @ ${weight}` : ''}`;
+        const name = side ? sideName(side) : step.name || stepKindName(step.kind);
+        const weight = step.kind === 'reps' ? this.weightText(step) : '';
+        const amount =
+            step.kind === 'reps'
+                ? `${step.reps} reps${weight ? ` @ ${weight}` : ''}`
+                : formatSeconds(step.seconds);
+        const detail = side || !set ? amount : `${setText(set)} · ${amount}`;
+        return { name, detail, kind: step.kind };
+    });
+
+    /** e.g. "Plank · 00:45", "Squats · 10 reps @ 60 kg", or "finish" when the workout ends after this step. */
+    readonly upNext = computed(() => {
+        if (!this.nextState()) {
+            return '';
         }
-        return `${name} · ${formatSeconds(step.seconds)}`;
+        const parts = this.nextParts();
+        return parts ? `${parts.name} · ${parts.detail}` : 'finish';
+    });
+
+    /**
+     * What's next, for the Up next card under the ring: its name, its set and amount ("Set 2
+     * of 3 · 10 reps @ 60 kg"), its kind and icon, and its exercise, whose details and Swap the
+     * card's (i) opens (RUN-11). "Finish" before the end; null once finished.
+     */
+    readonly upNextCard = computed(() => {
+        if (!this.nextState()) {
+            return null;
+        }
+        const parts = this.nextParts();
+        if (!parts) {
+            return {
+                name: 'Finish',
+                detail: '',
+                kind: 'finish',
+                icon: 'check',
+                exercise: undefined,
+            };
+        }
+        return {
+            ...parts,
+            detail: parts.detail.charAt(0).toUpperCase() + parts.detail.slice(1),
+            icon: KIND_ICONS[parts.kind],
+            exercise: this.nextExercise(),
+        };
     });
 
     /**
@@ -291,8 +327,6 @@ export class WorkoutView {
         const state = untracked(this.state);
         return `${-((state?.phaseElapsedMs ?? 0) % 1000)}ms`;
     });
-    /** What comes next, for the colour of the "Next:" pulse: a step's kind, or finish. */
-    readonly nextKind = computed(() => this.nextState()?.step?.kind ?? 'finish');
 
     // The face's text is keyed by step, so a new step's text slides in as the last one's
     // slides out; a new round slides right to left, with the round line, rather than up.
@@ -326,9 +360,6 @@ export class WorkoutView {
                     state?.phase === 'work' &&
                     state.phaseSeconds > POP_SECONDS &&
                     state.remainingSeconds <= POP_SECONDS,
-                // Rest is for getting ready, so it shows what's coming on the face itself
-                then: state?.phase === 'rest' && this.nextState()?.step ? this.upNext() : '',
-                nextExercise: this.nextExercise(),
             },
         ];
     });

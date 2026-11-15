@@ -233,30 +233,30 @@ const WORKOUT_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'next',
-                text: 'What comes after this step. It pulses in its colour as this one nears its end, to get ready.',
+                text: "What comes after this step, with ⓘ to see how it's done. It pulses in its colour as this one nears its end, to get ready.",
             },
         ],
-        text: 'Under the bubble is what comes next, to get ready for.',
+        text: "Under the bubble is what comes next, to get ready for, with ⓘ to see how it's done.",
     },
     {
         title: 'Rep steps',
         parts: [
             {
                 part: 'reps',
-                text: "On a rep step the clock waits for you. Tap the reps or weight to change them to what you did, then, when you're done, press what's next, under the bubble.",
+                text: "On a rep step the clock waits for you. Tap the reps or weight to change them to what you did, then, when you're done, press Done, under the bubble.",
             },
         ],
-        text: "On a rep step the clock waits for you. Tap the reps or weight on the bubble to change them to what you did, then, when you're done, press what's next, under it.",
+        text: "On a rep step the clock waits for you. Tap the reps or weight on the bubble to change them to what you did, then, when you're done, press Done, under it.",
     },
     {
         title: "How it's done",
         parts: [
             {
                 part: 'info',
-                text: "Tap ⓘ to see how the exercise is done. Swap exercise there finds another for the same muscles, e.g. if the machine's taken.",
+                text: "Tap the exercise's name to see how it's done. Swap exercise there finds another for the same muscles, e.g. if the machine's taken.",
             },
         ],
-        text: "On an exercise, ⓘ beside its name shows how it's done, with Swap exercise if, say, the machine's taken.",
+        text: "On an exercise, tapping its name shows how it's done, with Swap exercise if, say, the machine's taken.",
     },
     {
         title: 'Pause and skip',

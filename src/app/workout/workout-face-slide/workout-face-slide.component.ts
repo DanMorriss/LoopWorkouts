@@ -17,7 +17,7 @@ import { FaceSlide, WorkoutView } from '../workout-view';
 
 /**
  * A step's text on the workout's face: its name, the time or the reps and weight, which can be
- * changed there, what to try next time, and what's coming after a rest.
+ * changed there, and what to try next time. What's after a rest is the Up next card's.
  */
 @Component({
     selector: 'app-workout-face-slide',
@@ -27,8 +27,8 @@ import { FaceSlide, WorkoutView } from '../workout-view';
 })
 export class WorkoutFaceSlideComponent {
     readonly slide = input.required<FaceSlide>();
-    /** The (i) was pressed: the exercise, and whether it's the next step's, during a rest. */
-    readonly details = output<{ exercise: Exercise; next: boolean }>();
+    /** The (i) beside the step's name was pressed, for its exercise's details (RUN-9). */
+    readonly details = output<Exercise>();
 
     private readonly run = inject(ActiveRunService);
     private readonly history = inject(HistoryStore);

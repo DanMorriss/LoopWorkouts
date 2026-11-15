@@ -50,7 +50,7 @@ test.describe('a simple workout', () => {
             await expect(run.face.getByText('Squats', { exact: true })).toBeVisible();
             await expect(run.faceTime).toHaveText(/^00:(30|29)$/);
             await expect(run.main.getByText('round 1 of 2', { exact: true })).toBeVisible();
-            await expect(run.next).toHaveText('Next: Rest · 00:20');
+            await expect(run.next).toHaveText('Up next: Rest, 00:20');
             // Only Pause and Skip under the ring
             await expect(run.main.getByRole('button')).toHaveCount(2);
             await expect(run.pause).toBeVisible();
@@ -58,11 +58,11 @@ test.describe('a simple workout', () => {
 
             await run.wait(30_000);
             await expect(run.face.getByText('Rest', { exact: true })).toBeVisible();
-            await expect(run.next).toHaveText('Next: Squats · 00:30');
+            await expect(run.next).toHaveText('Up next: Squats, 00:30');
 
             await run.wait(20_000);
             await expect(run.main.getByText('Last round!')).toBeVisible();
-            await expect(run.next).toHaveText('Next: finish');
+            await expect(run.next).toHaveText('Up next: Finish');
 
             await run.wait(30_000);
             await expect(run.main.getByText("You're finished!")).toBeVisible();
@@ -120,7 +120,7 @@ test.describe('rep steps', () => {
         await expect(run.wheel('reps')).toHaveAttribute('aria-valuenow', '10');
         await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '20');
         await expect(run.done).toHaveAccessibleName('Done. Next: Rest · 00:10');
-        await expect(run.done).toHaveText(/Next: Rest · 00:10/);
+        await expect(run.next).toHaveText('Done · up next: Rest, 00:10');
         await expect(run.pause).toBeVisible();
         await expect(run.skip).toBeVisible();
 
@@ -163,7 +163,7 @@ test.describe('pausing', () => {
         const shown = await run.main.getByText(/^Paused · /).textContent();
         await expect(run.resume).toBeFocused();
         await expect(run.end).toBeVisible();
-        await expect(run.main.getByRole('button', { name: 'Details of Plank' })).toBeVisible();
+        await expect(run.exercise('Plank')).toBeVisible();
         await expect(run.pause).toHaveCount(0);
         await expect(run.skip).toHaveCount(0);
         expect(await app.announcements()).toContain('Paused');
@@ -385,7 +385,7 @@ test.describe('sets and sections', () => {
 
         await run.done.click();
         await expect(run.main.getByText(/set 1 of 3/).first()).toBeVisible();
-        await expect(run.main.getByText('then Leg press · set 2 of 3 · 10 reps')).toBeVisible();
+        await expect(run.next).toHaveText('Up next: Leg press, Set 2 of 3 · 10 reps');
 
         await run.wait(60_500);
         await run.done.click();
@@ -576,10 +576,10 @@ test.describe('swapping mid-workout', () => {
             const run = new WorkoutPage(page);
             await app.goto('/library');
             await run.startFromLibrary('Legs');
-            await expect(run.main.getByRole('button', { name: /^Details of/ })).toHaveCount(0);
+            await expect(run.face.getByRole('button')).toHaveCount(0);
             await run.wait(3500);
 
-            const info = run.main.getByRole('button', { name: 'Details of Back squat' });
+            const info = run.exercise('Back squat');
             await info.click();
             const details = page.getByRole('dialog', { name: 'Back squat' });
             await expect(details).toBeVisible();
@@ -632,18 +632,16 @@ test.describe('swapping mid-workout', () => {
     );
 
     test(
-        'REG-RUN-11 focus goes back to the (i) after a swap',
+        'REG-RUN-11 focus goes back to the name after a swap',
         { tag: '@p2' },
         async ({ app, page }) => {
             const run = new WorkoutPage(page);
             await app.goto('/library');
             await run.startFromLibrary('Legs');
             await run.wait(3500);
-            await run.main.getByRole('button', { name: 'Details of Back squat' }).click();
+            await run.exercise('Back squat').click();
             await run.swapTo('goblet', 'Goblet squat');
-            await expect(
-                run.main.getByRole('button', { name: 'Details of Goblet squat' })
-            ).toBeFocused();
+            await expect(run.exercise('Goblet squat')).toBeFocused();
         }
     );
 });
@@ -668,14 +666,12 @@ test.describe('swapping while paused in a rest', () => {
             await run.done.click();
             await run.pause.click();
             await expect(run.main.getByText('Rest, then Deadlift')).toBeVisible();
-            await run.main.getByRole('button', { name: 'Details of Deadlift, next' }).click();
+            await run.exercise('Rest, then Deadlift').click();
             await run.swapTo('romanian', 'Romanian deadlift');
-            // Still paused, the next exercise swapped, and focus back on its (i)
+            // Still paused, the next exercise swapped, and focus back on its name
             await expect(run.main.getByText('Rest, then Romanian deadlift')).toBeVisible();
             await expect(run.resume).toBeVisible();
-            await expect(
-                run.main.getByRole('button', { name: 'Details of Romanian deadlift, next' })
-            ).toBeFocused();
+            await expect(run.exercise('Rest, then Romanian deadlift')).toBeFocused();
         }
     );
 });

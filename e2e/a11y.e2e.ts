@@ -236,7 +236,7 @@ test.describe('dialogs', () => {
         const details = page.getByRole('dialog', { name: 'Back squat' });
         await checkDialog(
             page,
-            run.main.getByRole('button', { name: 'Details of Back squat' }),
+            run.exercise('Back squat'),
             details,
             details.getByRole('heading', { name: 'Back squat' })
         );
@@ -492,8 +492,8 @@ test.describe('phone widths', () => {
                 const run = new WorkoutPage(page);
                 await app.goto('/library');
                 await run.startFromLibrary('Legs');
-                const info = run.main.getByRole('button', { name: 'Details of Back squat' });
-                expect(await hitAcross(info), "the step's (i)").toBe(true);
+                const name = run.exercise('Back squat');
+                expect(await hitAcross(name), "the step's name").toBe(true);
             }
         );
     });

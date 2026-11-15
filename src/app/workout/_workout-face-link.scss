@@ -1,0 +1,37 @@
+@use 'interaction' as *;
+@use 'workout-colours' as *;
+
+// An exercise's name on the face, and while paused, as a button for its details (RUN-9): the
+// name as it is, with a faint dotted line under it to say it can be tapped, as the wheels
+// have, and a fingertip's height to hit.
+@mixin face-link {
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    text-decoration: underline dotted;
+    text-decoration-color: color-mix(in srgb, $face-muted 60%, transparent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:focus-visible {
+        outline: 2px solid $face-muted;
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
+    @include hover {
+        text-decoration-color: $face-muted;
+    }
+
+    @include pressed {
+        text-decoration-color: $face-muted;
+    }
+
+    @include hit-area(8px);
+}

@@ -1,7 +1,7 @@
 @use 'interaction' as *;
 @use 'type' as *;
 @use '../workout-colours' as *;
-@use '../workout-face-info' as *;
+@use '../workout-face-link' as *;
 
 // In the face's own layout, as if its parts were directly on the slide
 :host {
@@ -13,8 +13,8 @@
     @include display-tracking;
 }
 
-.workout-face__info {
-    @include face-info;
+.workout-face__link {
+    @include face-link;
 }
 
 // The step's name: on one line if it fits, otherwise two even lines (three for the longest),
@@ -33,7 +33,7 @@
     overflow: hidden;
 }
 
-// The name, with the (i) for its exercise's details beside it, which the name makes room for
+// The step's name, kept clear of the circle's sides
 .workout-face__name {
     display: flex;
     align-items: center;
@@ -100,16 +100,6 @@ app-wheel-picker:not(.wheel-picker--open) {
     font-size: 1.25rem;
     font-weight: 600;
     line-height: 1.2;
-}
-
-// What's after the rest, under its countdown
-.workout-face__then {
-    max-width: 15em;
-    margin-inline: auto;
-    color: $face-muted;
-    font-size: 0.95rem;
-    line-height: 1.25;
-    text-wrap: balance;
 }
 
 .workout-face__reps {

@@ -50,13 +50,13 @@ export class WorkoutSwap {
      */
     private swapOffer: { id: number | undefined; steps: string[] } | null = null;
 
-    /** `next` for the exercise after a rest, from the (i) beside "then …" on its face. */
+    /** `next` for the exercise after a rest, from the Up next card under the ring. */
     showExercise(exercise: Exercise, next = false) {
         this.detailsOfNext = next;
         this.exerciseInDetails.set(exercise);
     }
 
-    /** Back to the (i) that opened the details. */
+    /** Back to the (i), or the Up next card, that opened the details. */
     closeExercise() {
         this.exerciseInDetails.set(null);
         this.focusInfo();

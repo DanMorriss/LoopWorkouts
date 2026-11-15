@@ -1045,7 +1045,7 @@ for (const theme of ['dark', 'light'] as const) {
                     store.addWorkout(makeWorkout({ steps: [reps(20, 'Push-ups'), work(30)] }))
                 );
                 await open('/workout');
-                expect(fixture.nativeElement.querySelector('.workout-next--done')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.up-next--done')).not.toBeNull();
                 await expectNoViolations();
             });
 
@@ -1067,7 +1067,7 @@ for (const theme of ['dark', 'light'] as const) {
                 await open('/workout');
                 await expectNoViolations();
 
-                click('.workout-face__info');
+                click('.workout-face__link');
                 await settle();
                 expect(
                     fixture.nativeElement.querySelector('app-exercise-details-dialog')
@@ -1143,7 +1143,7 @@ for (const theme of ['dark', 'light'] as const) {
                 );
                 store.pause();
                 await open('/workout');
-                expect(fixture.nativeElement.querySelector('.workout-paused__info')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.workout-paused__link')).not.toBeNull();
                 await expectNoViolations();
             });
 
@@ -1157,7 +1157,7 @@ for (const theme of ['dark', 'light'] as const) {
                     )
                 );
                 await open('/workout');
-                click('.workout-next--done');
+                click('.up-next--done');
                 await settle();
                 click('.workout-control--main button'); // Pause
                 await settle();
@@ -1191,7 +1191,7 @@ for (const theme of ['dark', 'light'] as const) {
                     )
                 );
                 await open('/workout');
-                click('.workout-face__info');
+                click('.workout-face__link');
                 await settle();
                 click('.details__pick-another');
                 await settle();
@@ -1202,9 +1202,9 @@ for (const theme of ['dark', 'light'] as const) {
 
                 click('.swap__option');
                 await settle();
-                click('.workout-next--done');
+                click('.up-next--done');
                 await settle();
-                click('.workout-next--done');
+                click('.up-next--done');
                 await settle();
                 expect(fixture.nativeElement.textContent).toContain('next time?');
                 await expectNoViolations();

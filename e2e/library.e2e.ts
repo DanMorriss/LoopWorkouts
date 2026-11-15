@@ -342,7 +342,7 @@ test.describe('ready-made workouts', () => {
             await expect(page).toHaveURL('/library/builtin:gym-legs');
             await expect(page.getByRole('main')).toContainText('Ready-made');
             await expect(page.getByRole('region', { name: "What's in it" })).toContainText(
-                /Back squat.*3 sets: 12, 10, 8, rest 2:30/
+                /Back squat.*12, 10, 8.*rest 2:30/
             );
             await expect(page.getByRole('region', { name: 'Muscles it works' })).toBeVisible();
             await expect(page.getByRole('button', { name: 'Edit' })).toHaveCount(0);
@@ -379,7 +379,7 @@ test.describe("a ready-made workout's reps and weights", () => {
         { tag: '@p1' },
         async ({ app, page }) => {
             await app.goto('/library/builtin:gym-legs');
-            const amounts = page.getByRole('region', { name: 'Your reps and weights' });
+            const amounts = page.getByRole('region', { name: "What's in it" });
             const squat = amounts.getByRole('button', { name: /^Change Back squat/ });
             await expect(squat).toHaveAccessibleName('Change Back squat, 12, 10, 8');
 
@@ -412,7 +412,7 @@ test.describe("a ready-made workout's reps and weights", () => {
         { tag: '@p2' },
         async ({ app, page }) => {
             await app.goto('/library/builtin:core-in-15');
-            const amounts = page.getByRole('region', { name: 'Your reps, weights and times' });
+            const amounts = page.getByRole('region', { name: "What's in it" });
             const plank = amounts.getByRole('button', { name: /^Change Plank/ });
             await expect(plank).toHaveAccessibleName('Change Plank, 3 × 0:45');
 

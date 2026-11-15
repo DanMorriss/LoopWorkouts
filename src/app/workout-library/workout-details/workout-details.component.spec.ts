@@ -144,7 +144,8 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
     it('has no reps and weights to set for one of yours, which has Edit', async () => {
         await open(addSprints().id);
 
-        expect(el().querySelector('app-ready-made-amounts .amounts')).toBeNull();
+        expect(el().querySelector('app-ready-made-amounts')).toBeNull();
+        expect(el().querySelector('.outline__change')).toBeNull();
     });
 
     it("lists what's in it at the bottom, so it can be read without Edit", async () => {
@@ -416,7 +417,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
                 await harness.fixture.whenStable();
             };
             const lines = () =>
-                Array.from(el().querySelectorAll('.amounts__line'), (line) =>
+                Array.from(el().querySelectorAll('.outline__change'), (line) =>
                     line.getAttribute('aria-label')
                 );
             const squat = () => el().querySelector<HTMLButtonElement>('#ready-made-amounts-0')!;
@@ -436,7 +437,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             beforeEach(() => document.body.appendChild(el()));
             afterEach(() => el().remove());
 
-            it('lists each rep exercise with its sets', () => {
+            it("lists each rep exercise with its sets in What's in it, each a button", () => {
                 expect(lines()).toEqual([
                     'Change Back squat, 12, 10, 8',
                     'Change Romanian deadlift, 3 × 10',
@@ -477,8 +478,8 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             it("keeps a timed exercise's time, with Minutes and Seconds for each round", async () => {
                 fakeReducedMotion(true);
                 await open('builtin:core-in-15');
-                expect(text(el().querySelector('.amounts__heading')!)).toBe(
-                    'Your reps, weights and times'
+                expect(text(el().querySelector('.amounts__text')!)).toBe(
+                    "Press an exercise's sets to set your reps, weights and times before you start."
                 );
                 expect(lines().slice(-2)).toEqual([
                     'Change Side plank, 3 × 0:30 each side',

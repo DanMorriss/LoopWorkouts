@@ -562,14 +562,14 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Stories:** LIB-6 · **Priority:** P1
 - **Preconditions:** `guest()`, nothing of your own.
 - **Steps:**
-    1. Open Gym legs's Details (`/library/builtin:gym-legs`). Under Your reps and weights, press Back squat.
+    1. Open Gym legs's Details (`/library/builtin:gym-legs`). Under What's in it, press Back squat's sets (12, 10, 8).
     2. Set each set's Weight wheel to 60 kg, and press **Save**.
     3. Press **Start workout**.
 - **Expected:**
-    1. The row is "Change Back squat, 12, 10, 8"; a dialog "Back squat" opens with Set 1–3, each with Reps and Weight wheels.
-    2. The dialog closes; the row is "Change Back squat, 12, 10, 8 @ 60 kg"; the Undo bar says "Back squat: 12, 10, 8 @ 60 kg"; "With your own reps and weights." shows.
+    1. The button is "Change Back squat, 12, 10, 8", with "rest 2:30" after it; a dialog "Back squat" opens with Set 1–3, each with Reps and Weight wheels.
+    2. The dialog closes; the button is "Change Back squat, 12, 10, 8 @ 60 kg"; the Undo bar says "Back squat: 12, 10, 8 @ 60 kg"; "With your own reps and weights." shows.
     3. The workout page opens on Back squat with its Weight wheel at 60; nothing was copied into your workouts (`workouts` isn't saved).
-- **In the pack, a timed exercise too:** on Core in 15 the heading is "Your reps, weights and times"; Plank ("Change Plank, 3 × 0:45") set to 0:30 for each round is "3 × 0:30", still after a reload, kept as `{ "step": 4, "exerciseId": "builtin:plank", "seconds": 30 }`.
+- **In the pack, a timed exercise too:** on Core in 15 the hint says "your reps, weights and times"; Plank ("Change Plank, 3 × 0:45") set to 0:30 for each round is "3 × 0:30", still after a reload, kept as `{ "step": 4, "exerciseId": "builtin:plank", "seconds": 30 }`.
 
 ### REG-LIB-11 · Favourites saved by an older version
 

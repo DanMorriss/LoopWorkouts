@@ -63,6 +63,7 @@ Twenty-one ready-made workouts are listed on Workouts, under your own (see `docs
 
 - [x] **An estimate on the workout cards and pages** (2026-11-14): "About 25 min" on each card, its Details and a ready-made plan's workout's page, from its clock and a guess at its rep steps (3 seconds a rep, 5 to get ready for each set), then from your own pace on its rep steps once you've done some (the middle of its last 3 runs), so a change to the workout changes it at once, keeping your pace. Each run now logs its time on rep steps (`repSeconds` in the history), set against the guess for the sets of reps it logged, so skipped steps and stopped runs count only what was done. See How long it takes in `docs/features/library.md`.
 - [x] **In Create too** (2026-11-14): above Save, changing as the workout's set up.
+- [x] **The estimate as a stopwatch** (2026-11-15): on a workout's Details, a ready-made plan's workout's page and Create, "10" over "mins" inside a stopwatch as tall as an icon button (`WorkoutWatchComponent`, `estimateFace()`). On Details it's beside the heart, with what it's from under the description; elsewhere what it's from is beside it. The cards keep their "About 25 min" line.
 - [ ] **For Dan to look at:** the guess's 3 seconds a rep and 5 a set (`workout-estimate.ts`), against how long the ready-made workouts really take: Gym legs comes out at about 30 minutes, Core in 15 at 15. A workout you've not finished yet could also start from your pace on other workouts, rather than the guess.
 
 ### Help (NAV-7)

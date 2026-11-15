@@ -145,3 +145,22 @@ export function estimateText(estimate: Estimate): { text: string; spoken: string
         ? { text: short, spoken: long }
         : { text: `About ${short}`, spoken: `about ${long}` };
 }
+
+/**
+ * An estimate as it's drawn in a stopwatch: a number over its unit, "10" over "mins", "1:05"
+ * over "hrs" for an hour or more, or "<1" over "min".
+ */
+export function estimateFace(estimate: Estimate): { value: string; unit: string } {
+    const minutes = Math.round(estimate.seconds / 60);
+    if (minutes === 0) {
+        return { value: '<1', unit: 'min' };
+    }
+    if (minutes < 60) {
+        return { value: `${minutes}`, unit: minutes === 1 ? 'min' : 'mins' };
+    }
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m
+        ? { value: `${h}:${String(m).padStart(2, '0')}`, unit: 'hrs' }
+        : { value: `${h}`, unit: h === 1 ? 'hr' : 'hrs' };
+}

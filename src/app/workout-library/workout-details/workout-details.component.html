@@ -5,7 +5,11 @@
         @if (workout(); as workout) {
             <div class="details__top">
                 <h2 class="details__title" tabindex="-1">{{ name() }}</h2>
-                <app-favourite-button [workout]="workout" />
+                <!-- How long it takes, beside the heart, the same height -->
+                <div class="details__marks">
+                    <app-workout-watch [workout]="workout" />
+                    <app-favourite-button [workout]="workout" />
+                </div>
             </div>
             @if (readyMade(); as ready) {
                 <app-ready-made-badge />
@@ -15,8 +19,8 @@
                 }
             }
 
-            <!-- How long it takes, and what that's from -->
-            <app-workout-time class="details__time" [workout]="workout" />
+            <!-- What its time is from -->
+            <app-workout-time class="details__time" [workout]="workout" [watch]="false" />
 
             <!-- Started from here, as from its card, without going back to the list -->
             <button

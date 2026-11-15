@@ -15,6 +15,7 @@ import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { WorkoutOutlineComponent } from '../../shared/components/workout-outline/workout-outline.component';
 import { WorkoutTimeComponent } from '../../shared/components/workout-time/workout-time.component';
+import { WorkoutWatchComponent } from '../../shared/components/workout-watch/workout-watch.component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { injectStartWorkout } from '../../shared/run/start-workout';
@@ -59,6 +60,7 @@ const PLAN_BUTTON_ID = 'workout-details-plan';
         SwipeBackDirective,
         WorkoutOutlineComponent,
         WorkoutTimeComponent,
+        WorkoutWatchComponent,
     ],
     templateUrl: './workout-details.component.html',
     styleUrl: './workout-details.component.scss',

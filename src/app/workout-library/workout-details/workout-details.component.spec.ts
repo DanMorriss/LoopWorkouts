@@ -229,14 +229,19 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
     });
 
     describe('how long it takes', () => {
-        const time = () => el().querySelector('app-workout-time');
-        const said = () => Array.from(time()!.querySelectorAll('p'), (p) => text(p));
+        // The stopwatch by the heart as screen readers hear it, then what it's from
+        const parts = '.details__top [role="img"], app-workout-time p';
+        const said = () =>
+            Array.from(
+                el().querySelectorAll(parts),
+                (part) => part.getAttribute('aria-label') ?? text(part)
+            );
 
-        it("says it under its title, the clock for a workout that's all timed", async () => {
+        it("says it beside its title, the clock for a workout that's all timed", async () => {
             // 3 rounds of 0:30 and 0:10, the last rest skipped
             await open(addSprints().id);
 
-            expect(said()).toEqual(['About 2 min']);
+            expect(said()).toEqual(['Takes about 2 minutes']);
         });
 
         it('guesses at rep steps, then goes by your pace once finished, following changes', async () => {
@@ -249,7 +254,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             await open(workout.id);
             // 10 sets of 20 reps, at about 3 seconds a rep and 5 to get ready
             expect(said()).toEqual([
-                'About 11 min',
+                'Takes about 11 minutes',
                 "A first guess at the rep steps. Once you've done them, it's from your own pace.",
             ]);
 
@@ -268,22 +273,28 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
                 sets: [{ round: 0, step: 0, name: 'Push-ups', reps: 20 }],
             });
             harness.fixture.detectChanges();
-            expect(said()).toEqual(['About 22 min', 'At your pace, from your last runs of it.']);
+            expect(said()).toEqual([
+                'Takes about 22 minutes',
+                'At your pace, from your last runs of it.',
+            ]);
 
             // Half the sets, at the same pace
             store.updateWorkout(workout.id, { ...fields, repeats: 5 });
             harness.fixture.detectChanges();
-            expect(said()).toEqual(['About 11 min', 'At your pace, from your last runs of it.']);
+            expect(said()).toEqual([
+                'Takes about 11 minutes',
+                'At your pace, from your last runs of it.',
+            ]);
         });
 
         it('says a time limit as it is, and nothing for a workout until stopped', async () => {
             const { id: _id, ...limited } = baseWorkout({ timeLimitSeconds: 1200 });
             await open(store.addWorkout(limited).id);
-            expect(said()).toEqual(['20 min', 'Its time limit.']);
+            expect(said()).toEqual(['Takes 20 minutes', 'Its time limit.']);
 
             const { id: _id2, ...endless } = baseWorkout({ repeats: 0 });
             await open(store.addWorkout(endless).id);
-            expect(time()!.querySelector('p')).toBeNull();
+            expect(el().querySelector(parts)).toBeNull();
         });
     });
 

@@ -1,7 +1,12 @@
 import { computed, inject, Service } from '@angular/core';
 import { HistoryEntry } from '../../models/history';
 import { RunSides, Workout } from '../../models/workout';
-import { EstimateBasis, estimateText, estimateWorkout } from '../../models/workout-estimate';
+import {
+    EstimateBasis,
+    estimateFace,
+    estimateText,
+    estimateWorkout,
+} from '../../models/workout-estimate';
 import { HistoryStore } from './history-store.service';
 import { SettingsStore } from './settings-store.service';
 
@@ -36,16 +41,26 @@ export class WorkoutEstimates {
     );
 
     /**
-     * How long `workout` will take, as it's shown and heard ("About 25 min"), and what it's
-     * from; null for one that runs until stopped.
+     * How long `workout` will take, as it's shown and heard ("About 25 min"), as it's drawn
+     * in a stopwatch (`estimateFace()`), and what it's from; null for one that runs until
+     * stopped.
      */
-    of(
-        workout: Pick<Workout, 'id' | 'blocks' | 'repeats' | 'timeLimitSeconds'>
-    ): { text: string; spoken: string; basis: EstimateBasis } | null {
+    of(workout: Pick<Workout, 'id' | 'blocks' | 'repeats' | 'timeLimitSeconds'>): {
+        text: string;
+        spoken: string;
+        face: { value: string; unit: string };
+        basis: EstimateBasis;
+    } | null {
         const estimate = estimateWorkout(
             { ...workout, sides: this.sides() },
             this.runsById().get(workout.id) ?? []
         );
-        return estimate && { ...estimateText(estimate), basis: estimate.basis };
+        return (
+            estimate && {
+                ...estimateText(estimate),
+                face: estimateFace(estimate),
+                basis: estimate.basis,
+            }
+        );
     }
 }

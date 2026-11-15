@@ -1,7 +1,7 @@
 import { eachAGroup, makeWorkout, reps, rest, work } from '../shared/testing/make-workout';
 import { LoggedSet } from './history';
 import { UNTIL_STOPPED } from './workout';
-import { estimateText, estimateWorkout, PacedRun, repPace } from './workout-estimate';
+import { estimateFace, estimateText, estimateWorkout, PacedRun, repPace } from './workout-estimate';
 
 // About 3 seconds a rep, and 5 to get ready for each set
 const SECONDS_PER_REP = 3;
@@ -151,6 +151,42 @@ describe('estimateText', () => {
         expect(estimateText({ seconds: 1200, basis: 'limit' })).toEqual({
             text: '20 min',
             spoken: '20 minutes',
+        });
+    });
+});
+
+describe('estimateFace', () => {
+    it('puts the number over its unit in the stopwatch', () => {
+        expect(estimateFace({ seconds: 10 * 60, basis: 'guess' })).toEqual({
+            value: '10',
+            unit: 'mins',
+        });
+        expect(estimateFace({ seconds: 61, basis: 'clock' })).toEqual({
+            value: '1',
+            unit: 'min',
+        });
+        expect(estimateFace({ seconds: 65 * 60, basis: 'yours' })).toEqual({
+            value: '1:05',
+            unit: 'hrs',
+        });
+        expect(estimateFace({ seconds: 60 * 60, basis: 'clock' })).toEqual({
+            value: '1',
+            unit: 'hr',
+        });
+        expect(estimateFace({ seconds: 120 * 60, basis: 'clock' })).toEqual({
+            value: '2',
+            unit: 'hrs',
+        });
+    });
+
+    it('says under a minute, and a time limit as it is', () => {
+        expect(estimateFace({ seconds: 20, basis: 'clock' })).toEqual({
+            value: '<1',
+            unit: 'min',
+        });
+        expect(estimateFace({ seconds: 1200, basis: 'limit' })).toEqual({
+            value: '20',
+            unit: 'mins',
         });
     });
 });

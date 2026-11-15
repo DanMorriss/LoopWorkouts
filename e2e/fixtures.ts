@@ -22,7 +22,7 @@ const ONBOARDED: Record<string, string> = {
     'tip-join': 'seen',
     'tour-exercise': 'seen',
     // The data's shape now, so nothing seeded is converted as if from an older version
-    'data-version': '5',
+    'data-version': '6',
 };
 
 /** Where the app's sign-in and sync go: Loop Workouts' Supabase project. */

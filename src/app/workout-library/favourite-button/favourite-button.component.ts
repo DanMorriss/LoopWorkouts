@@ -1,7 +1,7 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { Workout } from '../../models/workout';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { Favourites } from '../../shared/state/favourites.service';
 
 /**
  * A heart that marks a workout as a favourite, or not, to filter Workouts by: a toggle, so
@@ -31,12 +31,12 @@ import { WorkoutStore } from '../../shared/state/workout-store.service';
 export class FavouriteButtonComponent {
     readonly workout = input.required<Workout>();
 
-    private readonly workouts = inject(WorkoutStore);
+    private readonly favourites = inject(Favourites);
 
-    protected readonly on = computed(() => this.workout().favourite === true);
+    protected readonly on = computed(() => this.favourites.ids().has(this.workout().id));
     protected readonly name = computed(() => this.workout().title.trim() || 'workout');
 
     protected toggle() {
-        this.workouts.setFavourite(this.workout().id, !this.on());
+        this.favourites.set(this.workout().id, !this.on());
     }
 }

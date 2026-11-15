@@ -357,7 +357,7 @@ describe('migrating saved data to version 5: groups', () => {
             },
         ]);
         expect(saved('history')[0].sets).toEqual(sets);
-        expect(localStorage.getItem('data-version')).toBe('5');
+        expect(localStorage.getItem('data-version')).toBe(String(DATA_VERSION));
     });
 
     it('leaves a workout already in groups as it is', () => {
@@ -367,5 +367,54 @@ describe('migrating saved data to version 5: groups', () => {
         migrateSavedData(7000);
 
         expect(saved('workouts')).toEqual([circuit]);
+    });
+});
+
+describe('migrating saved data to version 6: favourites of their own', () => {
+    beforeEach(() => {
+        localStorage.clear();
+        localStorage.setItem('data-version', '5');
+    });
+    afterEach(() => localStorage.clear());
+
+    it("moves each workout's heart to a favourite dated as the workout, with the ready-made ones", () => {
+        const legs = { ...makeWorkout({ id: 'legs' }), updatedAt: 20, favourite: true };
+        const arms = { ...makeWorkout({ id: 'arms' }), updatedAt: 30 };
+        localStorage.setItem('workouts', JSON.stringify([legs, arms]));
+        const readyMade = { id: 'builtin:gym-legs', updatedAt: 10 };
+        localStorage.setItem('ready-made-favourites', JSON.stringify([readyMade]));
+
+        migrateSavedData(7000);
+
+        expect(saved('favourites')).toEqual([readyMade, { id: 'legs', updatedAt: 20 }]);
+        expect(localStorage.getItem('ready-made-favourites')).toBeNull();
+        // Keeping its date, so it isn't synced again for the change
+        const { favourite: _, ...withoutHeart } = legs;
+        expect(saved('workouts')).toEqual([withoutHeart, arms]);
+        expect(localStorage.getItem('data-version')).toBe('6');
+    });
+
+    it('leaves the workouts as they are with no hearts, and saves no favourites for none', () => {
+        const legs = JSON.stringify([makeWorkout({ id: 'legs' })]);
+        localStorage.setItem('workouts', legs);
+
+        migrateSavedData(7000);
+
+        expect(localStorage.getItem('workouts')).toBe(legs);
+        expect(localStorage.getItem('favourites')).toBeNull();
+    });
+
+    it("drops a heart that isn't true, and a workout with no id gives none", () => {
+        localStorage.setItem(
+            'workouts',
+            JSON.stringify([
+                { ...makeWorkout({ id: 'odd' }), favourite: 'yes' },
+                { title: 'Broken', updatedAt: 1, favourite: true },
+            ])
+        );
+
+        migrateSavedData(7000);
+
+        expect(localStorage.getItem('favourites')).toBeNull();
     });
 });

@@ -4,7 +4,7 @@ import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { AccountClient, ACCOUNT_CLIENT } from '../account/account-client';
 import { ConsentService } from '../account/consent.service';
 import { BackupService } from '../shared/backup/backup.service';
-import { ReadyMadeFavourites } from '../shared/state/ready-made-favourites.service';
+import { Favourites } from '../shared/state/favourites.service';
 import { ReadyMadeChanges } from '../shared/state/ready-made-changes.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
@@ -53,7 +53,7 @@ export class SyncService {
     private readonly exercises = inject(ExerciseStore);
     private readonly deletions = inject(DeletionStore);
     private readonly backup = inject(BackupService);
-    private readonly favourites = inject(ReadyMadeFavourites);
+    private readonly favourites = inject(Favourites);
     private readonly readyMadeChanges = inject(ReadyMadeChanges);
     private readonly plan = inject(PlanStore);
     private readonly settings = inject(SettingsStore);
@@ -304,7 +304,7 @@ export class SyncService {
             exercises: this.exercises.own(),
             exerciseNotes: this.exercises.notes(),
             hiddenExercises: this.exercises.hidden(),
-            readyMadeFavourites: this.favourites.list(),
+            favourites: this.favourites.list(),
             readyMadeChanges: this.readyMadeChanges.list(),
             libraryOrder: this.workouts.libraryOrder(),
             plan: this.plan.plan(),

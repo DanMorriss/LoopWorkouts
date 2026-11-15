@@ -307,7 +307,7 @@ test.describe('data saved by an older version of the app', () => {
             expect(steps?.map((step) => step.exerciseId)).toEqual(['builtin:back-squat']);
             // Linked to the built-in one, not a copy of your own
             expect(await app.stored('exercises')).toBeNull();
-            expect(await app.storageItem('data-version')).toBe('5');
+            expect(await app.storageItem('data-version')).toBe('6');
         }
     );
 });

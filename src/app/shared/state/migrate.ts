@@ -2,12 +2,12 @@ import { BuiltInExercise, Exercise, MeasuredBy, OwnExercise } from '../../models
 import { ExerciseFinder, findByName, linkSets, linkSteps } from '../../models/exercise-links';
 import { isLoggedSet } from '../../models/history';
 import { Deletion, newId } from '../../models/sync';
-import { asOneGroup, Step } from '../../models/workout';
+import { asOneGroup, legacyFavourite, Step } from '../../models/workout';
 import { loadBuiltInExercises, loadedBuiltInExercises } from './built-in-exercises-loader';
 
 /** Which shape the saved data is in. Missing means 1, from before this was saved. */
 const VERSION_KEY = 'data-version';
-export const DATA_VERSION = 5;
+export const DATA_VERSION = 6;
 
 /** Each old workout id and the new one it was given, so a run in progress can still find it. */
 export const LEGACY_WORKOUT_IDS_KEY = 'legacy-workout-ids';
@@ -68,6 +68,9 @@ export function migrateSavedData(
     }
     if (version < 5) {
         toVersion5();
+    }
+    if (version < 6) {
+        toVersion6();
     }
     localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
 }
@@ -339,4 +342,34 @@ function withBlocks(value: unknown): unknown {
     }
     const { steps, ...workout } = value as Record<string, unknown>;
     return Array.isArray(steps) ? { ...workout, blocks: asOneGroup(steps as Step[]) } : value;
+}
+
+/**
+ * Version 6: favourites are records of their own (LIB-8), for your workouts as they were for
+ * the ready-made ones, so a heart pressed on one device and an edit made on another don't
+ * overwrite each other. The ready-made workouts' favourites move from `ready-made-favourites`
+ * to `favourites`, and each of your workouts with `favourite: true` joins them, dated as the
+ * workout last changed, and loses it. The workout keeps its date, so it isn't synced again:
+ * the copy on the server still has its heart, which reads as the same favourite.
+ */
+function toVersion6() {
+    const readyMade = readList('ready-made-favourites') ?? [];
+    const workouts = readList('workouts');
+    const hearts = (workouts ?? []).map(legacyFavourite).filter((heart) => heart !== null);
+    if (readyMade.length + hearts.length > 0) {
+        localStorage.setItem('favourites', JSON.stringify([...readyMade, ...hearts]));
+    }
+    localStorage.removeItem('ready-made-favourites');
+    if (hearts.length > 0) {
+        localStorage.setItem('workouts', JSON.stringify(workouts!.map(withoutFavourite)));
+    }
+}
+
+/** A saved workout without the `favourite` it had before version 6. */
+function withoutFavourite(value: unknown): unknown {
+    if (typeof value !== 'object' || value === null || !('favourite' in value)) {
+        return value;
+    }
+    const { favourite: _, ...workout } = value as Record<string, unknown>;
+    return workout;
 }

@@ -1,7 +1,8 @@
 import { copyPlan, isWeekPlan, WeekPlan } from '../models/plan';
 import { Profile, readProfile } from '../models/profile';
 import { BodyWeightRecord, readBodyWeightKg } from '../models/weight';
-import { isDeletion, isLibraryOrder, LibraryOrder, SyncedKind } from '../models/sync';
+import { isDeletion, isLibraryOrder, LibraryOrder, readMark, SyncedKind } from '../models/sync';
+import { legacyFavourite } from '../models/workout';
 import { BACKUP_VERSION } from '../shared/backup/backup-file';
 import { CopyToMerge } from '../shared/backup/backup.service';
 import {
@@ -11,7 +12,6 @@ import {
 } from '../shared/state/exercise-store.service';
 import { readHistoryEntry } from '../shared/state/history-store.service';
 import { readWorkout } from '../shared/state/workout-store.service';
-import { readReadyMadeFavourite } from '../shared/state/ready-made-favourites.service';
 import { readReadyMadeChange } from '../models/ready-made-change';
 
 /**
@@ -73,7 +73,7 @@ export function recordsHere(copy: CopyHere): ServerRecord[] {
         ...copy.exercises.map((exercise) => record('exercise', exercise)),
         ...copy.exerciseNotes.map((note) => record('exercise-note', note)),
         ...copy.hiddenExercises.map((hidden) => record('hidden-exercise', hidden)),
-        ...copy.readyMadeFavourites.map((favourite) => record('ready-made-favourite', favourite)),
+        ...copy.favourites.map((favourite) => record('ready-made-favourite', favourite)),
         ...copy.readyMadeChanges.map((change) => record('ready-made-change', change)),
         // Never moved, so there's no order to give
         ...(copy.libraryOrder.updatedAt > 0
@@ -148,7 +148,7 @@ export function readPulled(fetched: readonly unknown[]): PulledPage {
         exercises: [],
         exerciseNotes: [],
         hiddenExercises: [],
-        readyMadeFavourites: [],
+        favourites: [],
         readyMadeChanges: [],
         libraryOrder: null,
         plan: null,
@@ -234,6 +234,8 @@ function addTo(copy: CopyToMerge, record: ServerRecord): boolean {
             : null;
     switch (record.kind) {
         case 'workout':
+            // Written before favourites were records of their own, with its heart on it
+            push(copy.favourites, dated(legacyFavourite(record.data)));
             return push(copy.workouts, dated(readWorkout(record.data)));
         case 'history':
             return push(copy.history, dated(readHistoryEntry(record.data)));
@@ -244,7 +246,7 @@ function addTo(copy: CopyToMerge, record: ServerRecord): boolean {
         case 'hidden-exercise':
             return push(copy.hiddenExercises, dated(readHiddenExercise(record.data)));
         case 'ready-made-favourite':
-            return push(copy.readyMadeFavourites, dated(readReadyMadeFavourite(record.data)));
+            return push(copy.favourites, dated(readMark(record.data)));
         case 'ready-made-change':
             return push(copy.readyMadeChanges, dated(readReadyMadeChange(record.data)));
         case 'library-order':

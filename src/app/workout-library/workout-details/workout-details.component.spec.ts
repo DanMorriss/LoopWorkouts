@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Favourites } from '../../shared/state/favourites.service';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../../models/history';
@@ -32,7 +33,11 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         harness = await RouterTestingHarness.create();
     });
 
-    afterEach(() => localStorage.clear());
+    afterEach(() => {
+        localStorage.clear();
+        // A run started here would otherwise carry on into the next spec's store
+        sessionStorage.clear();
+    });
 
     function addSprints() {
         const { id: _id, ...workout } = baseWorkout({ title: 'Sprints' });
@@ -540,7 +545,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             el().querySelector<HTMLElement>('.details__top .favourite-button')!.click();
             harness.detectChanges();
 
-            expect(store.findAnyWorkout('builtin:gym-legs')?.favourite).toBe(true);
+            expect(TestBed.inject(Favourites).ids().has('builtin:gym-legs')).toBe(true);
             expect(store.workouts()).toEqual([]);
         });
     });
@@ -554,12 +559,12 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
 
         heart().click();
         harness.detectChanges();
-        expect(store.findWorkoutById(sprints.id)?.favourite).toBe(true);
+        expect(TestBed.inject(Favourites).ids().has(sprints.id)).toBe(true);
         expect(heart().getAttribute('aria-pressed')).toBe('true');
 
         heart().click();
         harness.detectChanges();
-        expect(store.findWorkoutById(sprints.id)?.favourite).toBeUndefined();
+        expect(TestBed.inject(Favourites).ids().has(sprints.id)).toBe(false);
     });
 
     describe('arriving from Save in Create', () => {

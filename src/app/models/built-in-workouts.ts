@@ -143,7 +143,7 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
     {
         id: 'builtin:tabata',
         title: 'Tabata',
-        description: 'Four moves, each 8 rounds of 20 seconds hard and 10 easy. About 20 minutes.',
+        description: 'Four moves, each 8 rounds of 20 seconds hard and 10 easy.',
         group: 'bodyweight',
         repeats: 1,
         blocks: [

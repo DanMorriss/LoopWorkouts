@@ -747,7 +747,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     6. On the summary's Swapped, press **No, just this time**.
 - **Expected:**
     1. Jog has no (i).
-    2. The details open over the workout, which still waits; Space doesn't press Done; ‹ Back closes them with focus back on the (i).
+    2. The details open over the workout, which still waits, with How to do it and Tips but no chips or Muscles worked; Space doesn't press Done; ‹ Back closes them with focus back on the (i).
     3. "Swap Back squat", "For the rest of this workout. Sets done so far stay.", focus in **Search exercises**; after picking, the face says Goblet squat at 24 kg, the Undo bar "Swapped to Goblet squat", focus on the (i).
     4. Still Goblet squat (swaps are kept for the tab).
     5. Round 2 is goblet squats too.
@@ -945,7 +945,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Without reduced motion: press **Pause the demo**, then **Play the demo**.
     3. Open `/exercises/plank`, `/exercises/inverted-row` and `/exercises/nope`.
 - **Expected:**
-    1. ‹ Exercises; "Back squat"; chips for its kit and **Reps**; the description; **Add to workout** and **Add note**; Muscles worked with Quads and Glutes as Main, Hamstrings and Lower back as Supporting; How to do it with numbered steps and Tips. With reduced motion, the demo shows its stills side by side, labelled "Standing" and "Bottom", with no Pause.
+    1. ‹ Exercises; "Back squat"; the demo, above the chips; chips for its kit and **Reps**; the description; **Add to workout** and **Add note**; Muscles worked with Quads and Glutes as Main, Hamstrings and Lower back as Supporting; How to do it with numbered steps and Tips. With reduced motion, the demo shows its stills side by side, labelled "Standing" and "Bottom", with no Pause.
     2. Pause becomes Play and back. (The 3D figure needs WebGL: headless Chromium falls back to software rendering, which is slow, so keep this to one page; CLAUDE.md warns the 3D demos starve other tests of frames.)
     3. Plank's demo is one still labelled "Hold" with no Pause; inverted row's kit reads "Barbell and rack, Smith machine, or rings"; the last says "Exercise not found" with a link to all exercises.
 - **Manual:** dragging the 3D figure and **Turn the figure**; the look of the figure.
@@ -1006,7 +1006,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Stories:** EXR-6, EXR-10, EXR-12, EXR-13 · **Priority:** P2
 - **Preconditions:** `guest()` with `tour-exercise` removed (the fixtures mark it seen).
 - **Steps:** From the Exercises list, open Back squat. Press Next three times, then Done. Then open Plank.
-- **Expected:** "1 of 4", then Add to workout, Your note, Muscles worked and How to do it; after Done the card's gone, focus is on the name "Back squat", and `tour-exercise` is `seen`. Plank's page opens with no tour.
+- **Expected:** "1 of 4", then How to do it, Add to workout, Your note and Muscles worked; after Done the card's gone, focus is on the name "Back squat", and `tour-exercise` is `seen`. Plank's page opens with no tour.
 
 ---
 

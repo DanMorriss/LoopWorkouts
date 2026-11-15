@@ -1,24 +1,32 @@
 @let shown = exercise();
 @let words = text();
-<div class="exercise__head">
-    @if (shown.otherNames.length > 0) {
-        <p class="exercise__also">Also called: {{ shown.otherNames.join(', ') }}</p>
-    }
-    <ul class="exercise__chips" aria-label="Equipment and how it's measured">
-        @for (phrase of equipment(); track phrase) {
-            <li class="exercise__chip">{{ phrase }}</li>
+<!-- How the move goes, first: what's wanted most, on its page and mid-set alike.
+     data-tour: what the tour of an exercise's page lights up -->
+@if (hasDemo()) {
+    <app-exercise-demo class="exercise__demo" [exercise]="shown" data-tour="exercise-demo" />
+}
+
+@if (!brief()) {
+    <div class="exercise__head">
+        @if (shown.otherNames.length > 0) {
+            <p class="exercise__also">Also called: {{ shown.otherNames.join(', ') }}</p>
         }
-        <li class="exercise__chip exercise__chip--measured">
-            {{ shown.measuredBy === 'reps' ? 'Reps' : 'Timed' }}
-        </li>
-        @if (!builtIn()) {
-            <li class="exercise__chip exercise__chip--own">Your own</li>
+        <ul class="exercise__chips" aria-label="Equipment and how it's measured">
+            @for (phrase of equipment(); track phrase) {
+                <li class="exercise__chip">{{ phrase }}</li>
+            }
+            <li class="exercise__chip exercise__chip--measured">
+                {{ shown.measuredBy === 'reps' ? 'Reps' : 'Timed' }}
+            </li>
+            @if (!builtIn()) {
+                <li class="exercise__chip exercise__chip--own">Your own</li>
+            }
+        </ul>
+        @if (hidden()) {
+            <p class="exercise__hidden">Hidden from the picker in Create.</p>
         }
-    </ul>
-    @if (hidden()) {
-        <p class="exercise__hidden">Hidden from the picker in Create.</p>
-    }
-</div>
+    </div>
+}
 
 @if (words?.description) {
     <p class="exercise__description">{{ words!.description }}</p>
@@ -34,23 +42,24 @@
 <!-- The buttons that go with it, e.g. Edit, under the description and note -->
 <ng-content />
 
-<!-- data-tour: what the tour of an exercise's page lights up -->
-<section
-    class="exercise__section"
-    [attr.aria-labelledby]="id + '-muscles'"
-    data-tour="exercise-muscles"
->
-    <h3 [id]="id + '-muscles'" class="exercise__heading">Muscles worked</h3>
-    <app-body-map [main]="shown.mainMuscles" [supporting]="shown.supportingMuscles" />
-</section>
+@if (!brief()) {
+    <!-- data-tour: what the tour of an exercise's page lights up -->
+    <section
+        class="exercise__section"
+        [attr.aria-labelledby]="id + '-muscles'"
+        data-tour="exercise-muscles"
+    >
+        <h3 [id]="id + '-muscles'" class="exercise__heading">Muscles worked</h3>
+        <app-body-map [main]="shown.mainMuscles" [supporting]="shown.supportingMuscles" />
+    </section>
 
-<!-- What goes under the body map, e.g. the exercise page's progress -->
-<ng-content select="[underMuscles]" />
+    <!-- What goes under the body map, e.g. the exercise page's progress -->
+    <ng-content select="[underMuscles]" />
+}
 
 @if (words?.steps?.length) {
     <section class="exercise__section" [attr.aria-labelledby]="id + '-how'">
         <h3 [id]="id + '-how'" class="exercise__heading">How to do it</h3>
-        <app-exercise-demo class="exercise__demo" [exercise]="shown" data-tour="exercise-demo" />
         <ol class="exercise__steps">
             @for (step of words!.steps; track $index) {
                 <li>{{ step }}</li>

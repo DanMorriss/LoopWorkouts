@@ -583,6 +583,13 @@ test.describe('swapping mid-workout', () => {
             await info.click();
             const details = page.getByRole('dialog', { name: 'Back squat' });
             await expect(details).toBeVisible();
+            // Just how it's done: no chips or body map mid-set
+            await expect(details.getByRole('region', { name: 'How to do it' })).toBeVisible();
+            await expect(details.getByRole('region', { name: 'Tips' })).toBeVisible();
+            await expect(details.getByRole('region', { name: 'Muscles worked' })).toHaveCount(0);
+            await expect(
+                details.getByRole('list', { name: "Equipment and how it's measured" })
+            ).toHaveCount(0);
             // The workout still waits, and Space doesn't press Done
             await page.keyboard.press('Space');
             await expect(details).toBeVisible();

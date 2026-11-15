@@ -355,7 +355,7 @@ test.describe('signed in', () => {
                         .map((call) => JSON.stringify(call.body))
                         .join()
                 )
-                .toContain('"favourite":true');
+                .toContain('"kind":"ready-made-favourite"');
         }
     );
 

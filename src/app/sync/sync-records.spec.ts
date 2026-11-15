@@ -18,7 +18,7 @@ function copyHere(overrides: Partial<CopyHere> = {}): CopyHere {
         exercises: [],
         exerciseNotes: [],
         hiddenExercises: [],
-        readyMadeFavourites: [],
+        favourites: [],
         readyMadeChanges: [],
         libraryOrder: { ids: [], updatedAt: 0 },
         plan: { days: [[], [], [], [], [], [], []], updatedAt: 0 },
@@ -285,6 +285,37 @@ describe('readPulled', () => {
         ]);
         expect(page.lastSeq).toBe(3);
         expect(page.tooNewAt).toBeNull();
+    });
+
+    it('reads favourites of your workouts and ready-made ones alike', () => {
+        const page = readPulled([
+            row({ seq: 1, kind: 'ready-made-favourite', id: 'w1', data: { id: 'w1' } }),
+            row({
+                seq: 2,
+                kind: 'ready-made-favourite',
+                id: 'builtin:gym-legs',
+                updated_at: 7,
+                data: { id: 'builtin:gym-legs', updatedAt: 1 },
+            }),
+        ]);
+
+        expect(page.copy.favourites).toEqual([{ id: 'builtin:gym-legs', updatedAt: 7 }]);
+    });
+
+    it('reads a heart on a workout written by an older version as a favourite dated as it', () => {
+        const page = readPulled([
+            row({
+                seq: 1,
+                updated_at: 9,
+                version: 16,
+                data: { ...makeWorkout({ id: 'w1', updatedAt: 5 }), favourite: true },
+            }),
+            row({ seq: 2, id: 'w2', data: makeWorkout({ id: 'w2', updatedAt: 5 }) }),
+        ]);
+
+        expect(page.copy.workouts.map((w) => w.id)).toEqual(['w1', 'w2']);
+        expect('favourite' in page.copy.workouts[0]).toBe(false);
+        expect(page.copy.favourites).toEqual([{ id: 'w1', updatedAt: 9 }]);
     });
 
     it("leaves out what isn't usable, but moves past it", () => {

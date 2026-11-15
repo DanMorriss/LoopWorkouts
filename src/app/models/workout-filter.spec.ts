@@ -1,6 +1,6 @@
 import { makeWorkout, reps, work } from '../shared/testing/make-workout';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
-import { Step, Workout } from './workout';
+import { Step } from './workout';
 import { filterWorkouts, WorkoutFilters } from './workout-filter';
 
 const byId = (id: string) => BUILT_IN_EXERCISES.find((exercise) => exercise.id === id);
@@ -11,14 +11,11 @@ const legs = makeWorkout({
     title: 'Legs day',
     steps: [linked(reps(10, 'Back squat'), 'builtin:back-squat')],
 });
-const push: Workout = {
-    ...makeWorkout({
-        id: 'push',
-        title: 'Push',
-        steps: [linked(reps(10, 'Push-up'), 'builtin:push-up')],
-    }),
-    favourite: true,
-};
+const push = makeWorkout({
+    id: 'push',
+    title: 'Push',
+    steps: [linked(reps(10, 'Push-up'), 'builtin:push-up')],
+});
 const goblet = makeWorkout({
     id: 'goblet',
     title: 'At home',
@@ -36,7 +33,9 @@ const none: WorkoutFilters = {
     myEquipment: [],
 };
 const ids = (filters: Partial<WorkoutFilters>) =>
-    filterWorkouts(all, { ...none, ...filters }, byId).map((workout) => workout.id);
+    filterWorkouts(all, { ...none, ...filters }, byId, (id) => id === 'push').map(
+        (workout) => workout.id
+    );
 
 describe('filterWorkouts', () => {
     it('keeps them all, in order, with nothing chosen', () => {

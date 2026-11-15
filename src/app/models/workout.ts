@@ -1,5 +1,5 @@
 import type { BuiltInWorkout } from './built-in-workouts';
-import { Synced } from './sync';
+import { readMark, Synced } from './sync';
 
 export type TimedKind = 'work' | 'rest';
 export type StepKind = TimedKind | 'reps';
@@ -143,21 +143,26 @@ export interface Workout extends Synced {
     repeats: number;
     /** The time limit, in whole seconds, rep steps and rests included. Missing for none. */
     timeLimitSeconds?: number;
-    /** Marked as a favourite on Workouts, to filter by. Missing for not. */
-    favourite?: true;
 }
 
-/**
- * What's set up to make a workout: everything but what the store keeps (its id and dates) and
- * what's set on Workouts rather than in Create (whether it's a favourite).
- */
-export type WorkoutFields = Omit<Workout, 'id' | 'updatedAt' | 'favourite'>;
+/** What's set up to make a workout: everything but what the store keeps (its id and dates). */
+export type WorkoutFields = Omit<Workout, 'id' | 'updatedAt'>;
 
 /**
  * A ready-made workout (LIB-6) as the list has it, alongside yours: used as it is, never
- * saved, so it's dated 0, and a favourite when it's been made one.
+ * saved, so it's dated 0.
  */
-export type ReadyMadeWorkout = BuiltInWorkout & Pick<Workout, 'updatedAt' | 'favourite'>;
+export type ReadyMadeWorkout = BuiltInWorkout & Pick<Workout, 'updatedAt'>;
+
+/**
+ * The favourite on a workout saved before favourites were records of their own (data version
+ * 6, backup version 17): `favourite: true` on the workout, which becomes a favourite dated as
+ * the workout last changed. Null if it isn't one.
+ */
+export function legacyFavourite(saved: unknown): Synced | null {
+    const mark = readMark(saved);
+    return mark && (saved as Record<string, unknown>)['favourite'] === true ? mark : null;
+}
 
 /** Whether a workout's id is a ready-made one's (LIB-6), which are `builtin:<its name>`. */
 export function isReadyMadeId(id: string): boolean {
@@ -184,8 +189,8 @@ export function aToZ<T extends Workout>(workouts: readonly T[]): T[] {
 
 /**
  * A workout's fields as a new one of your own: its own copy, to change as you like, e.g. Make a
- * copy (of yours or a ready-made one), leaving out what isn't set in Create (its id, dates and
- * whether it's a favourite).
+ * copy (of yours or a ready-made one), leaving out what isn't set in Create (its id and dates).
+ * A copy isn't a favourite, as favourites are kept apart from their workouts.
  */
 export function copyOf(
     workout: Pick<Workout, 'title' | 'blocks' | 'repeats' | 'timeLimitSeconds'>

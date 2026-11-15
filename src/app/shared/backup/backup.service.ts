@@ -6,7 +6,7 @@ import { DeletionStore } from '../state/deletion-store.service';
 import { ExerciseStore } from '../state/exercise-store.service';
 import { HistoryStore } from '../state/history-store.service';
 import { SettingsStore } from '../state/settings-store.service';
-import { ReadyMadeFavourites } from '../state/ready-made-favourites.service';
+import { Favourites } from '../state/favourites.service';
 import { ReadyMadeChanges } from '../state/ready-made-changes.service';
 import { PlanStore } from '../state/plan-store.service';
 import { Profile } from '../../models/profile';
@@ -52,7 +52,7 @@ export type CopyToMerge = Pick<
     | 'exercises'
     | 'exerciseNotes'
     | 'hiddenExercises'
-    | 'readyMadeFavourites'
+    | 'favourites'
     | 'readyMadeChanges'
     | 'libraryOrder'
     | 'plan'
@@ -78,7 +78,7 @@ export class BackupService {
     private readonly deletions = inject(DeletionStore);
     private readonly settings = inject(SettingsStore);
     private readonly plan = inject(PlanStore);
-    private readonly favourites = inject(ReadyMadeFavourites);
+    private readonly favourites = inject(Favourites);
     private readonly readyMadeChanges = inject(ReadyMadeChanges);
     private readonly document = inject(DOCUMENT);
 
@@ -93,7 +93,7 @@ export class BackupService {
                 exercises: this.exercises.own(),
                 exerciseNotes: this.exercises.notes(),
                 hiddenExercises: this.exercises.hidden(),
-                readyMadeFavourites: this.favourites.list(),
+                favourites: this.favourites.list(),
                 readyMadeChanges: this.readyMadeChanges.list(),
                 libraryOrder: this.workouts.libraryOrder(),
                 plan: this.plan.plan(),
@@ -184,7 +184,7 @@ export class BackupService {
             backup.hiddenExercises.map((hidden) => ({ ...hidden, id: idHere(hidden.id) })),
             backup.deleted
         );
-        this.favourites.merge(backup.readyMadeFavourites, backup.deleted);
+        this.favourites.merge(backup.favourites, backup.deleted);
         this.readyMadeChanges.merge(backup.readyMadeChanges, backup.deleted);
         const linkedWorkouts = backup.workouts.map((workout) => this.linked(workout, idHere));
         const linkedHistory = backup.history.map((entry) => this.linkedSets(entry, idHere));

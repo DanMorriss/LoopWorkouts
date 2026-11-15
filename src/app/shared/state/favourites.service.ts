@@ -1,29 +1,32 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import { Deletion, mergeRecords, readMark, Synced } from '../../models/sync';
-import { isReadyMadeId } from '../../models/workout';
 import { DeletionStore } from './deletion-store.service';
+import { migrateSavedData } from './migrate';
 import { SyncClock } from './sync-clock.service';
 
-export const READY_MADE_FAVOURITES_KEY = 'ready-made-favourites';
+export const FAVOURITES_KEY = 'favourites';
 
-/** A ready-made workout made a favourite (LIB-8), by its id, e.g. `builtin:gym-legs`. */
-export type ReadyMadeFavourite = Synced;
+/** A workout made a favourite (LIB-8), yours or ready-made, by its id. */
+export type Favourite = Synced;
 
 /**
- * Which ready-made workouts are favourites. Yours are marked on the workout itself, but a
- * ready-made one isn't your data, so each favourite is a record of its own: there while it's
- * a favourite, and deleted, leaving a deletion, when it's taken off, as hidden exercises are.
+ * Which workouts are favourites, yours and ready-made. Each favourite is a record of its own,
+ * apart from its workout: there while it's a favourite, and deleted, leaving a deletion, when
+ * it's taken off, as hidden exercises are. So a heart pressed on one device and an edit to the
+ * workout on another both survive the sync. They sync as `ready-made-favourite` records, the
+ * name from when only ready-made workouts' favourites were records of their own, as the server
+ * and saved deletions know them by it.
  */
 @Service()
-export class ReadyMadeFavourites {
+export class Favourites {
     private readonly deletions = inject(DeletionStore);
     private readonly clock = inject(SyncClock);
-    private readonly _list = signal<ReadyMadeFavourite[]>(load());
+    private readonly _list = signal<Favourite[]>(load());
 
     readonly list = this._list.asReadonly();
     readonly ids = computed(() => new Set(this._list().map((favourite) => favourite.id)));
 
-    /** Makes a ready-made workout a favourite, or not. */
+    /** Makes a workout a favourite, or not. */
     set(id: string, favourite: boolean) {
         if (favourite === this.ids().has(id)) {
             return;
@@ -45,7 +48,7 @@ export class ReadyMadeFavourites {
     }
 
     /** Merges another copy's favourites in, as hidden exercises merge. */
-    merge(favourites: readonly ReadyMadeFavourite[], deletedThere: readonly Deletion[]) {
+    merge(favourites: readonly Favourite[], deletedThere: readonly Deletion[]) {
         const result = mergeRecords(
             'ready-made-favourite',
             this._list(),
@@ -61,21 +64,16 @@ export class ReadyMadeFavourites {
     }
 
     private save() {
-        localStorage.setItem(READY_MADE_FAVOURITES_KEY, JSON.stringify(this._list()));
+        localStorage.setItem(FAVOURITES_KEY, JSON.stringify(this._list()));
     }
 }
 
-/** A saved favourite, or null if it isn't usable: one for a ready-made workout's id. */
-export function readReadyMadeFavourite(value: unknown): ReadyMadeFavourite | null {
-    const mark = readMark(value);
-    return mark && isReadyMadeId(mark.id) ? mark : null;
-}
-
-function load(): ReadyMadeFavourite[] {
+function load(): Favourite[] {
+    migrateSavedData();
     try {
-        const parsed: unknown = JSON.parse(localStorage.getItem(READY_MADE_FAVOURITES_KEY) ?? '[]');
+        const parsed: unknown = JSON.parse(localStorage.getItem(FAVOURITES_KEY) ?? '[]');
         return Array.isArray(parsed)
-            ? parsed.map(readReadyMadeFavourite).filter((favourite) => favourite !== null)
+            ? parsed.map(readMark).filter((favourite) => favourite !== null)
             : [];
     } catch {
         return [];

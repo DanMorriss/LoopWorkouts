@@ -11,7 +11,7 @@ import {
 } from '../testing/make-workout';
 import { DeletionStore } from './deletion-store.service';
 import { ExerciseStore } from './exercise-store.service';
-import { WorkoutStore } from './workout-store.service';
+import { readWorkout, WorkoutStore } from './workout-store.service';
 
 // What Done logs in the rep step tests: round 1's push-ups
 const SET: LoggedSet = { round: 0, step: 1, name: '', reps: 20 };
@@ -403,21 +403,10 @@ describe('WorkoutStore', () => {
             expect('timeLimitSeconds' in workouts[1]).toBe(false);
         });
 
-        it('keeps a favourite, and drops anything else saved there', () => {
-            const saved = (id: string, favourite: unknown) => ({
-                ...makeWorkout(),
-                id,
-                updatedAt: 1,
-                favourite,
-            });
-            localStorage.setItem(
-                'workouts',
-                JSON.stringify([saved('yes', true), saved('odd', 'yes'), saved('no', false)])
-            );
+        it('leaves out a heart saved on a workout, as favourites are records of their own', () => {
+            const saved = { ...makeWorkout(), id: 'yes', updatedAt: 1, favourite: true };
 
-            const workouts = createStore().workouts();
-            expect(workouts.map((w) => w.favourite)).toEqual([true, undefined, undefined]);
-            expect('favourite' in workouts[1]).toBe(false);
+            expect('favourite' in readWorkout(saved)!).toBe(false);
         });
     });
 
@@ -435,26 +424,6 @@ describe('WorkoutStore', () => {
             expect(store.workouts()).toEqual([mine]);
         });
 
-        it('makes one a favourite as a record of its own, not a workout of yours', async () => {
-            const store = createStore();
-            await store.loadReadyMade();
-
-            store.setFavourite('builtin:gym-legs', true);
-
-            expect(store.findAnyWorkout('builtin:gym-legs')?.favourite).toBe(true);
-            expect(store.workouts()).toEqual([]);
-            expect(JSON.parse(localStorage.getItem('ready-made-favourites')!)).toEqual([
-                { id: 'builtin:gym-legs', updatedAt: expect.any(Number) },
-            ]);
-
-            store.setFavourite('builtin:gym-legs', false);
-
-            expect(store.findAnyWorkout('builtin:gym-legs')?.favourite).toBeUndefined();
-            expect(
-                TestBed.inject(DeletionStore).deletedAt('ready-made-favourite', 'builtin:gym-legs')
-            ).toBeGreaterThan(0);
-        });
-
         it('makes a copy of one, "(copy)", as a workout of your own', async () => {
             const store = createStore();
             await store.loadReadyMade();
@@ -468,10 +437,9 @@ describe('WorkoutStore', () => {
             expect(store.copyWorkout('builtin:nothing')).toBeNull();
         });
 
-        it('makes a copy of one of yours too, keeping both, the copy no favourite', () => {
+        it('makes a copy of one of yours too, keeping both', () => {
             const store = createStore();
             const legs = store.addWorkout(makeWorkout({ title: 'Legs', steps: [reps(10)] }));
-            store.setFavourite(legs.id, true);
 
             const copy = store.copyWorkout(legs.id)!;
 
@@ -479,7 +447,6 @@ describe('WorkoutStore', () => {
             expect(copy.id).not.toBe(legs.id);
             expect(allSteps(copy)).toEqual(allSteps(store.findWorkoutById(legs.id)!));
             expect(copy.blocks).not.toBe(store.findWorkoutById(legs.id)!.blocks);
-            expect(copy.favourite).toBeUndefined();
         });
 
         it("doesn't load them until asked, as they bring the built-in exercises", async () => {
@@ -564,44 +531,6 @@ describe('WorkoutStore', () => {
             expect(allSteps(store.activeWorkout()!)[0].name).toBe('Changed');
             expect(allSteps(store.findAnyWorkout('builtin:gym-legs')!)[0].name).not.toBe('Changed');
             expect(store.workouts()).toEqual([]);
-        });
-    });
-
-    describe('setFavourite', () => {
-        it('marks a workout as a favourite, and not, dated as a change that syncs', () => {
-            const store = createStore();
-            const added = store.addWorkout(makeWorkout());
-
-            store.setFavourite(added.id, true);
-            const favourite = store.findWorkoutById(added.id)!;
-            expect(favourite.favourite).toBe(true);
-            expect(favourite.updatedAt).toBeGreaterThan(added.updatedAt);
-            expect(savedWorkouts()[0].favourite).toBe(true);
-
-            store.setFavourite(added.id, false);
-            const not = store.findWorkoutById(added.id)!;
-            expect('favourite' in not).toBe(false);
-            expect(not.updatedAt).toBeGreaterThan(favourite.updatedAt);
-        });
-
-        it("changes nothing when it's already so", () => {
-            const store = createStore();
-            const added = store.addWorkout(makeWorkout());
-
-            store.setFavourite(added.id, false);
-
-            expect(store.findWorkoutById(added.id)).toBe(added);
-        });
-
-        it('stays a favourite when edited in Create', () => {
-            const store = createStore();
-            const added = store.addWorkout(makeWorkout());
-            store.setFavourite(added.id, true);
-
-            const edited = store.updateWorkout(added.id, makeWorkout({ title: 'Renamed' }))!;
-
-            expect(edited.title).toBe('Renamed');
-            expect(edited.favourite).toBe(true);
         });
     });
 

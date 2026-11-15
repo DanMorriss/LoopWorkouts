@@ -156,42 +156,35 @@ describe('estimateText', () => {
 });
 
 describe('estimateFace', () => {
-    it('puts the number over its unit in the stopwatch, and "About" over it', () => {
+    it('puts the number over its unit in the stopwatch', () => {
         expect(estimateFace({ seconds: 10 * 60, basis: 'guess' })).toEqual({
-            over: 'About',
             value: '10',
             unit: 'mins',
         });
         expect(estimateFace({ seconds: 61, basis: 'clock' })).toEqual({
-            over: 'About',
             value: '1',
             unit: 'min',
         });
         expect(estimateFace({ seconds: 65 * 60, basis: 'yours' })).toEqual({
-            over: 'About',
             value: '1:05',
             unit: 'hrs',
         });
         expect(estimateFace({ seconds: 60 * 60, basis: 'clock' })).toEqual({
-            over: 'About',
             value: '1',
             unit: 'hr',
         });
         expect(estimateFace({ seconds: 120 * 60, basis: 'clock' })).toEqual({
-            over: 'About',
             value: '2',
             unit: 'hrs',
         });
     });
 
-    it('says under a minute, and a time limit with nothing over it', () => {
+    it('says under a minute, and a time limit as it is', () => {
         expect(estimateFace({ seconds: 20, basis: 'clock' })).toEqual({
-            over: 'Under',
-            value: '1',
+            value: '<1',
             unit: 'min',
         });
         expect(estimateFace({ seconds: 1200, basis: 'limit' })).toEqual({
-            over: '',
             value: '20',
             unit: 'mins',
         });

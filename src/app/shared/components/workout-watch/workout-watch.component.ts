@@ -4,17 +4,14 @@ import { WorkoutEstimates } from '../../state/workout-estimates.service';
 
 /**
  * How long a workout takes, drawn: a stopwatch the size of an icon button (its dial matches
- * the 44px circle), "10" over "mins" in it and "About" over it. One picture to screen
- * readers, "Takes about 10 minutes". Nothing for one that runs until stopped.
+ * the 44px circle), "10" over "mins" in it. One picture to
+ * screen readers, "Takes about 10 minutes". Nothing for one that runs until stopped.
  */
 @Component({
     selector: 'app-workout-watch',
     template: `
         @if (time(); as time) {
             <div class="workout-watch" role="img" [attr.aria-label]="time.label">
-                @if (time.face.over) {
-                    <span class="workout-watch__over" aria-hidden="true">{{ time.face.over }}</span>
-                }
                 <span class="workout-watch__body" aria-hidden="true">
                     <svg class="workout-watch__outline" viewBox="0 0 100 112">
                         <rect x="40" y="3" width="20" height="8" rx="3" />
@@ -35,19 +32,6 @@ import { WorkoutEstimates } from '../../state/workout-estimates.service';
         :host {
             display: block;
             flex: none;
-        }
-
-        .workout-watch {
-            display: grid;
-            justify-items: center;
-        }
-
-        .workout-watch__over {
-            @include small-type(0.65rem);
-            color: var(--text-muted);
-            font-weight: 600;
-            line-height: 1.2;
-            text-transform: uppercase;
         }
 
         // 100 by 112 units, the dial 84 across: 44px, as an icon button's circle

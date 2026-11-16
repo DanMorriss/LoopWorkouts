@@ -157,6 +157,17 @@ describe('SettingsComponent', () => {
         expect(isOn('countdown')).toBe(false);
     });
 
+    it('waits for Start after long rests to begin with, and stops waiting', () => {
+        create();
+        expect(isOn('wait')).toBe(true);
+
+        toggle('wait').click();
+        fixture.detectChanges();
+
+        expect(settings.waitToStart()).toBe(false);
+        expect(isOn('wait')).toBe(false);
+    });
+
     it('turns vibration off where the device can vibrate', () => {
         Object.defineProperty(TestBed.inject(AlarmService), 'canVibrate', { value: true });
         create();

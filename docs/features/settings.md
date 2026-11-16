@@ -25,6 +25,7 @@
 | Appearance   | Theme                          | Dark    | —                                                                              | Dark, Light or System. System follows the device, including when it changes. |
 | Workouts     | Each side: start with          | Left    | —                                                                              | Left or Right: which side an exercise done each side starts with (BLD-10).   |
 | Workouts     | Switch sides                   | 5 s     | Time between a timed exercise's two sides, e.g. a side plank                   | A wheel: Off, or 1 to 30 seconds.                                            |
+| Workouts     | Wait for me after rests        | On      | A timed exercise after a rest of 30 seconds or more waits for Start            | RUN-14 (since 2026-11-16; see [run-a-workout](run-a-workout.md)).            |
 | Alarms       | Sound                          | On      | Beeps as each phase starts                                                     |                                                                              |
 | Alarms       | Countdown beeps                | On      | Ticks in the last 3 seconds of each timed step and rest                        | Steps of 10 seconds or more (ALM-5; see [alarms](alarms.md)).                |
 | Alarms       | Vibration                      | On      | Buzzes as each phase starts                                                    | Disabled, saying "This device can't vibrate", where it can't.                |
@@ -32,7 +33,7 @@
 | Alarm sounds | Timed, Rest, Finish, Countdown | —       | Two short high beeps / One long low tone / Three rising notes / One short tick | A Play button for each.                                                      |
 
 - **Your equipment** and **Only what I have** are saved with the settings too, but set on the Exercises page (see [exercises](exercises.md#the-exercises-list-exr-6)), not here.
-- Changes are **saved at once** and apply at once, mid-workout too (e.g. turning sound off silences alarms already booked). The two Workouts settings are the exception: a workout keeps them as they were when it started, so its clock can't move, and the next one uses the new ones.
+- Changes are **saved at once** and apply at once, mid-workout too (e.g. turning sound off silences alarms already booked). The Workouts settings are the exception: a workout keeps them as they were when it started, so its clock can't move, and the next one uses the new ones.
 - **Play** plays that alarm straight away, even with Sound turned off (it was asked for), without touching any booked alarms.
 - Switching theme **fades** from one to the other, unless reduced motion is on, when it changes at once. A tap mid-fade ends the fade and lands, so choosing again doesn't wait for it.
 - The **switches** flip with a tap, or their knob can be dragged across, as on an iPhone: where it's let go (and which way it was flicked) decides. The knob swells as it's pressed and moves on a spring with no bounce. The pickers' highlights slide on the same spring.

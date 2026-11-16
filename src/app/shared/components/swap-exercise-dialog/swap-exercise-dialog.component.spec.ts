@@ -8,10 +8,11 @@ describe('SwapExerciseDialogComponent', () => {
         (exercise) => exercise.id === 'builtin:chainsaw-row'
     )!;
 
-    function open() {
+    function open(inWorkout: string[] = []) {
         const fixture = TestBed.createComponent(SwapExerciseDialogComponent);
         fixture.componentRef.setInput('exercise', chainsawRow);
         fixture.componentRef.setInput('measuredBy', 'reps');
+        fixture.componentRef.setInput('inWorkout', inWorkout);
         fixture.detectChanges();
         const text = (selector: string) =>
             (fixture.nativeElement as HTMLElement).querySelector(selector)?.textContent?.trim();
@@ -19,7 +20,12 @@ describe('SwapExerciseDialogComponent', () => {
             Array.from(
                 (fixture.nativeElement as HTMLElement).querySelectorAll('.swap__option .swap__name')
             ).map((name) => name.textContent!.trim());
-        return { text, names };
+        /** The options' lines under their names, e.g. "Already in this workout". */
+        const details = (name: string) =>
+            Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.swap__option'))
+                .find((option) => option.querySelector('.swap__name')!.textContent!.trim() === name)
+                ?.querySelectorAll('.swap__detail') ?? [];
+        return { text, names, details };
     }
 
     beforeEach(() => localStorage.clear());
@@ -42,5 +48,15 @@ describe('SwapExerciseDialogComponent', () => {
         expect(names()).toHaveLength(5);
         expect(names()).toContain('Barbell row');
         expect(text('.swap__none')).toBeUndefined();
+    });
+
+    it('says which are in the workout already, as doing one twice is often meant', () => {
+        TestBed.inject(SettingsStore).update({ myEquipment: ['pull-up bar', 'kettlebell'] });
+        const { details } = open(['builtin:chin-up']);
+
+        expect(details('Chin-up')[0].textContent!.replace(/\s+/g, ' ').trim()).toBe(
+            ', Already in this workout'
+        );
+        expect(details('Pull-up')[0].textContent).not.toContain('Already');
     });
 });

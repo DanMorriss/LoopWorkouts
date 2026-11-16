@@ -11,6 +11,7 @@ const SETTINGS: Omit<Settings, 'profileUpdatedAt' | 'bodyWeightUpdatedAt'> = {
     vibration: true,
     countdownBeeps: true,
     keepScreenOn: true,
+    waitToStart: false,
     weightUnit: 'kg',
     bodyFigure: 'male',
     trainingGoal: 'muscle',

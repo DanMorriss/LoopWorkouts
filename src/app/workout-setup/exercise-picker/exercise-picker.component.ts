@@ -7,7 +7,13 @@ import { ExerciseStore } from '../../shared/state/exercise-store.service';
 
 /** One row of the list: an exercise to pick, or making a new one from what's typed. */
 type PickerOption =
-    | { kind: 'exercise'; exercise: Exercise; otherName?: string; hint: string }
+    | {
+          kind: 'exercise';
+          exercise: Exercise;
+          otherName?: string;
+          hint: string;
+          inWorkout: boolean;
+      }
     | { kind: 'make'; name: string };
 
 let nextId = 0;
@@ -39,6 +45,8 @@ export class ExercisePickerComponent implements FormValueControl<string> {
     readonly inputId = input.required<string>();
     readonly placeholder = input('');
     readonly describedBy = input<string>();
+    /** The exercises the workout's other steps are, each said to be in it already. */
+    readonly inWorkout = input<readonly string[]>([]);
     /**
      * The step is now this exercise, which it wasn't when the box was last left: picked, or
      * its name typed. Not as each letter is typed, so a half-typed name doesn't count.
@@ -60,6 +68,7 @@ export class ExercisePickerComponent implements FormValueControl<string> {
                 kind: 'exercise',
                 ...match,
                 hint: exerciseHint(match.exercise),
+                inWorkout: this.inWorkout().includes(match.exercise.id),
             })
         );
         return typed && !named

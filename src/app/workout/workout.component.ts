@@ -83,7 +83,7 @@ export class WorkoutComponent {
     private readonly router = inject(Router);
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly injector = inject(Injector);
-    private readonly run = inject(ActiveRunService);
+    protected readonly run = inject(ActiveRunService);
     private readonly settings = inject(SettingsStore);
     protected readonly view = inject(WorkoutView);
     protected readonly swap = new WorkoutSwap(() => this.focusInfo());
@@ -296,7 +296,10 @@ export class WorkoutComponent {
         this.spaceHeld = false;
     }
 
-    /** Space pauses and resumes, like most media players, or presses Done on a rep step. */
+    /**
+     * Space pauses and resumes, like most media players, presses Done on a rep step, or Start
+     * on a timed exercise waiting for it.
+     */
     onSpace(event: Event) {
         if ((event as KeyboardEvent).repeat && this.spaceHeld) {
             event.preventDefault();
@@ -319,6 +322,8 @@ export class WorkoutComponent {
         this.spaceHeld = true;
         if (this.view.isRepsActive()) {
             this.finishReps();
+        } else if (this.view.isWaiting()) {
+            this.run.startExercise();
         } else {
             this.togglePause();
         }

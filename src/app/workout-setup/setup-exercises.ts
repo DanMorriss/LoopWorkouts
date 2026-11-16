@@ -64,6 +64,17 @@ export class SetupExercises {
         );
     }
 
+    /**
+     * The exercises the workout's other steps are, so the pickers can say one's in it already:
+     * the same exercise twice is often meant, so it's said, not stopped.
+     */
+    inWorkoutBesides(stepKey: number): string[] {
+        return this.form
+            .model()
+            .steps.filter((step) => step.key !== stepKey)
+            .flatMap((step) => this.exerciseFor(step)?.id ?? []);
+    }
+
     noteFor(exercise: Exercise): string | undefined {
         return this.exercises.noteFor(exercise.id);
     }

@@ -163,18 +163,25 @@
                  them. -->
                 <div class="workout-controls" data-tour="controls">
                     <div class="workout-control workout-control--main">
+                        <!-- Start, for a timed exercise after a long rest that waits for it
+                             (with the setting on); the same button, so focus stays on it -->
+                        @let waiting = view.isWaiting();
                         <button
                             #mainButton
                             id="workout-pause"
                             type="button"
                             class="btn-main btn-main--round"
-                            aria-label="Pause"
+                            [attr.aria-label]="waiting ? 'Start' : 'Pause'"
                             [attr.aria-keyshortcuts]="view.isRepsActive() ? null : 'Space'"
-                            (click)="togglePause()"
+                            (click)="waiting ? run.startExercise() : togglePause()"
                         >
-                            <mat-icon aria-hidden="true">pause</mat-icon>
+                            <mat-icon aria-hidden="true">{{
+                                waiting ? 'play_arrow' : 'pause'
+                            }}</mat-icon>
                         </button>
-                        <span class="workout-control__caption" aria-hidden="true">Pause</span>
+                        <span class="workout-control__caption" aria-hidden="true">{{
+                            waiting ? 'Start' : 'Pause'
+                        }}</span>
                         <!-- Shown where there's likely a keyboard; screen readers get
                              aria-keyshortcuts. On a rep step Space is Done, so it's hidden,
                              keeping its room so Pause doesn't move. -->
@@ -238,6 +245,7 @@
                 animate.leave="dialog-leave"
                 [exercise]="swapping.exercise"
                 [measuredBy]="swapping.measuredBy"
+                [inWorkout]="swap.inWorkout()"
                 hint="For the rest of this workout. Sets done so far stay."
                 (closed)="swap.closeSwap()"
                 (picked)="swap.swapFor($event)"

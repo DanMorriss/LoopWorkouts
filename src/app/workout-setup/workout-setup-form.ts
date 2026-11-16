@@ -731,7 +731,7 @@ export class WorkoutSetupForm {
             this.savedState.set(JSON.stringify(this.model()));
             this.slide.navigate(
                 editing
-                    ? `/library/${savedWorkout.id}?saved=1`
+                    ? `/library/${savedWorkout.id}?saved=${this.savedForRun(savedWorkout)}`
                     : planned
                       ? `/plan?saved=${savedWorkout.id}`
                       : `/library?saved=${savedWorkout.id}`,
@@ -739,6 +739,19 @@ export class WorkoutSetupForm {
             );
             return undefined;
         });
+    }
+
+    /**
+     * What a saved edit means for the workout running, for its Details to say: `running` when
+     * it's that workout and has taken the change from where it is, `later` when it carries on
+     * as it was (see `ActiveRunService.takeEdit()`), and `1` when it isn't running.
+     */
+    private savedForRun(saved: Workout): 'running' | 'later' | '1' {
+        const running = this.run.workout();
+        if (running?.id !== saved.id || this.run.summaryOpen()) {
+            return '1';
+        }
+        return this.run.takeEdit(saved) ? 'running' : 'later';
     }
 
     /**

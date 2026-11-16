@@ -321,6 +321,7 @@
         animate.leave="dialog-leave"
         [exercise]="opened.exercise"
         [measuredBy]="opened.measuredBy"
+        [inWorkout]="exercises.inWorkoutBesides(opened.stepKey)"
         hint="Keeps the step's reps or time, at the weight you did it at last time."
         (closed)="exercises.closeSwap()"
         (picked)="exercises.swapFor($event)"

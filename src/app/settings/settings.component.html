@@ -77,6 +77,21 @@
                     labelledBy="switch-sides-label switch-sides-hint"
                 />
             </div>
+
+            <div class="setting">
+                <div class="setting__text">
+                    <span class="setting__name" id="wait-label">Wait for me after rests</span>
+                    <span class="setting__hint" id="wait-hint">
+                        A timed exercise after a rest of 30 seconds or more waits for Start
+                    </span>
+                </div>
+                <app-toggle-switch
+                    [checked]="settings.waitToStart()"
+                    (checkedChange)="settings.update({ waitToStart: $event })"
+                    labelledBy="wait-label"
+                    describedBy="wait-hint"
+                />
+            </div>
         </section>
 
         <section class="settings__section" aria-labelledby="alarms-heading">

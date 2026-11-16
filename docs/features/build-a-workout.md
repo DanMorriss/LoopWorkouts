@@ -139,6 +139,7 @@
 - **Save** (BLD-15) sits to its left, a smaller pill, so Start stays the main one. It saves the workout as Start does, without starting it, and Create slides back out to the right, as ‹ does, still showing what was saved (since 2026-11-06; until then it emptied the form and Workouts came in at once). A **new** workout goes back to Workouts, with it highlighted, in view and focused; one **being edited** goes back to its Details, where the change shows, scrolled where it was left, with focus on Edit if that's in view (or on its title, e.g. for a copy just made). Either way screen readers hear "Saved Sprints" (see [library](library.md)). It's held back by the same checks as Start.
 - Saving a new workout gives it the next id (one more than the highest saved).
 - Editing replaces the saved workout, keeping its id. If it's been deleted meanwhile, it's saved as a new one.
+- Editing the workout that's **running** gives the run the change from where it is, or saves it for next time when it would move the run's clock, and its Details say which (RUN-15; see [run-a-workout](run-a-workout.md)).
 
 ### The tour of Create (BLD-17)
 

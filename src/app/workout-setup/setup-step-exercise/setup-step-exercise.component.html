@@ -13,6 +13,7 @@
             [formField]="step.name"
             [(exerciseId)]="step.exerciseId().value"
             (exerciseChange)="exercises.exerciseChanged(key, $event)"
+            [inWorkout]="exercises.inWorkoutBesides(key)"
             [placeholder]="setup.nameExamples[kind === 'work' ? 'work' : 'reps']"
             [describedBy]="'step-' + key + '-title step-' + key + '-exercise-status'"
         />

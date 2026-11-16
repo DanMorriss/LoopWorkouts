@@ -14,6 +14,7 @@ import {
     workout,
     type Workout,
 } from './fixtures';
+import { CreatePage } from './create-page';
 import { HistoryPage } from './history-page';
 import { setWheel, WorkoutPage } from './workout-page';
 
@@ -856,4 +857,78 @@ test.describe('sound, beeps and the screen', () => {
             'Manual on a phone: hear the beeps, feel the vibration (Android), and see the screen stay on through a workout. Alarms with the phone locked (ALM-2) are a known web limit on iPhone.'
         );
     });
+});
+
+test.describe('waiting for Start after a long rest', () => {
+    const holds = workout('Holds', {
+        steps: [timed(30, 'Plank', 'plank'), rest(40), timed(30, 'Plank', 'plank')],
+        repeats: 1,
+    });
+    test.use({ storage: seed.workouts([holds]) });
+
+    test(
+        'REG-RUN-16 a timed exercise after a long rest waits for Start, a reload too',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            const start = run.main.getByRole('button', { name: 'Start', exact: true });
+            await app.goto('/library');
+            await run.startFromLibrary('Holds');
+
+            // Through the plank and the rest, then well past where the plank would have ended
+            await run.wait(30_000 + 40_000 + 45_000);
+            await expect(run.faceTime).toHaveText('00:30');
+            await expect(start).toBeVisible();
+
+            await app.reload();
+            await expect(run.faceTime).toHaveText('00:30');
+
+            await start.click();
+            await run.wait(5500);
+            await expect(run.faceTime).toHaveText(/^00:2[3-5]$/);
+            await expect(run.pause).toBeVisible();
+        }
+    );
+});
+
+test.describe('changing the workout while it runs', () => {
+    const push = workout('Push', {
+        steps: [
+            reps(10, 'Push-up', { exercise: 'push-up' }),
+            rest(20),
+            reps(10, 'Diamond push-up', { exercise: 'diamond-push-up' }),
+        ],
+    });
+    test.use({ storage: seed.workouts([push]) });
+
+    test(
+        'REG-RUN-17 a change saved in Create reaches the workout going',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            const create = new CreatePage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Push');
+            await run.done.click();
+
+            await app.goto('/setup?editId=push');
+            await create.open(3);
+            await page.getByRole('button', { name: 'Swap Diamond push-up' }).click();
+            const swap = page.getByRole('dialog', { name: /^Swap / });
+            await expect(swap.getByRole('searchbox', { name: 'Search exercises' })).toBeFocused();
+            await page.keyboard.type('push-up');
+            // The one in the workout already says so
+            await expect(swap.getByRole('button', { name: /^Push-up/ }).first()).toContainText(
+                'Already in this workout'
+            );
+            await swap.getByRole('button', { name: /^Kettlebell push-up/ }).click();
+            await create.save.click();
+
+            await expect(app.undoBar).toContainText(
+                "Saved. The workout that's going has the change from here."
+            );
+            await app.undoBar.getByRole('link', { name: 'Back to workout' }).click();
+            await expect(run.next).toContainText('Kettlebell push-up');
+        }
+    );
 });

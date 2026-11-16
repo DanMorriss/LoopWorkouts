@@ -24,6 +24,7 @@ describe('SettingsStore', () => {
             vibration: true,
             countdownBeeps: true,
             keepScreenOn: true,
+            waitToStart: true,
             weightUnit: 'kg',
             bodyFigure: 'male',
             trainingGoal: 'muscle',

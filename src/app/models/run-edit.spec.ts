@@ -58,6 +58,10 @@ describe('canTakeEdit', () => {
         expect(canTakeEdit(running, edited([plank, rest(20), pushUps], { repeats: 3 }))).toBe(
             false
         );
+        // Carrying straight on after rests changes what waits for Start, which holds the clock
+        expect(canTakeEdit(running, edited([plank, rest(20), pushUps], { carryOn: true }))).toBe(
+            false
+        );
     });
 });
 

@@ -403,6 +403,23 @@ describe('WorkoutStore', () => {
             expect('timeLimitSeconds' in workouts[1]).toBe(false);
         });
 
+        it('keeps carrying straight on after rests, and drops anything but true', () => {
+            const saved = (id: string, carryOn: unknown) => ({
+                ...makeWorkout(),
+                id,
+                updatedAt: 1,
+                carryOn,
+            });
+            localStorage.setItem(
+                'workouts',
+                JSON.stringify([saved('tabata', true), saved('odd', 'yes')])
+            );
+
+            const workouts = createStore().workouts();
+            expect(workouts[0].carryOn).toBe(true);
+            expect('carryOn' in workouts[1]).toBe(false);
+        });
+
         it('leaves out a heart saved on a workout, as favourites are records of their own', () => {
             const saved = { ...makeWorkout(), id: 'yes', updatedAt: 1, favourite: true };
 

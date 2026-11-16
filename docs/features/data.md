@@ -41,6 +41,7 @@ A JSON list of workouts:
     - A group: `rounds`, how many times its `steps` run, 1–30 (an exercise's sets, or a superset's rounds: a group of two or more steps is a superset, made in Create with Join with next, BLD-12); `restSeconds`, the rest after each of its rounds, 0–5999 (0 for none, and none with one round): after the last round too, unless the next group is only rest (which takes its place) or it ends the workout; and `steps`, at least one, as below. A broken one (or a block of any other `kind`) makes the workout unusable.
     - A heading: `text`, a label, trimmed, 1–40 characters, which takes no time (BLD-13). Up to 10; a broken one, or any past 10, is dropped, keeping the workout.
     - A workout's steps are numbered in order across its groups, from 0, each once however many rounds its group has: that's a set's `step` in the history.
+- `carryOn` (optional, since 2026-11-16): `true` for a workout that runs straight on after every rest, never waiting for Start (BLD-18, RUN-14), e.g. Tabata. Missing for one that waits; anything but `true` is dropped when loading.
 - `timeLimitSeconds` (optional): a time limit, 1–5999 (99:59), for as many rounds as fit in it (BLD-8). Only with `repeats` 0, so a copy of the app from before time limits runs it until stopped. Missing for none; one that's broken, or with `repeats` above 0, is dropped when loading, leaving the workout as it was set to repeat.
 - A workout has no `favourite` of its own since data version 6 (2026-11-15): its heart is in `favourites`, below, so a heart pressed on one device and an edit made on another don't overwrite each other. Saved before that, `favourite: true` on a workout (since 2026-11-06) is moved there when loading, and read the same way from an older backup file or a record synced by an older version of the app.
 - `seconds`: 1–5999 (99:59). `reps`: 1–100. `name`: may be empty.
@@ -293,7 +294,7 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 ```json
 {
     "app": "Loop Workouts",
-    "version": 17,
+    "version": 18,
     "exportedAt": 1761055200000,
     "workouts": [],
     "history": [],
@@ -326,6 +327,7 @@ From these, everything on the workout page is worked out (see [run-a-workout](ru
 - `version` goes up whenever the file's shape changes. A file from an older version is converted when imported; one from a newer version is turned down.
 - **Version 1** files (from before random ids) have number workout ids, no `updatedAt` and no `deleted`. They're converted as saved data is: their workouts get new random ids, so they're matched on what they are (title, steps and rounds) rather than by id.
 - **Version 3 and older** files call workouts timers: a `timers` list in place of `workouts`, `timerId` in the history and the kind `timer` in `deleted`. They're renamed as they're read.
+- **Version 17 and older** files have no `carryOn` on workouts: nothing to convert. An older app turns a version 18 file down, and leaves synced records written by version 18 alone until it's updated, rather than writing a workout back without it.
 - **Version 16 and older** files have `readyMadeFavourites`, only the ready-made workouts' favourites, in place of `favourites`, and `favourite: true` on each of your workouts with its heart pressed: both are read as `favourites`, a workout's dated as it last changed. An older app turns a version 17 file down, and leaves synced records written by version 17 alone until it's updated, rather than losing your workouts' hearts.
 - **Version 14 and older** files have no `readyMadeChanges`: nothing to convert. An older app turns a version 15 file down rather than leaving them out.
 - **Version 15 and older** files have no times in `readyMadeChanges`: nothing to convert. An older app turns a version 16 file down, and leaves synced records written by version 16 alone until it's updated, rather than dropping the times and writing the record back without them.

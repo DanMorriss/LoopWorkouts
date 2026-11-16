@@ -5,6 +5,7 @@ import { BUILT_IN_WORKOUTS, builtInWorkoutEquipment } from './built-in-workouts'
 import { canDoWith } from './exercise';
 import { allSteps, copyOf, groupKind, MAX_HEADINGS, MAX_STEPS } from './workout';
 import { readWorkout } from '../shared/state/workout-store.service';
+import { nextWait } from './wait-to-start';
 
 const byTitle = (title: string) => BUILT_IN_WORKOUTS.find((w) => w.title === title)!;
 
@@ -125,6 +126,21 @@ describe('BUILT_IN_WORKOUTS', () => {
     });
 });
 
+describe('waiting for Start in the ready-made workouts (RUN-14)', () => {
+    it('carries straight on in the interval circuits, whose rests are part of them', () => {
+        expect(BUILT_IN_WORKOUTS.filter((w) => w.carryOn).map((w) => w.title)).toEqual([
+            'Cardio intervals',
+            'Tabata',
+        ]);
+        expect(nextWait({ ...byTitle('Tabata'), updatedAt: 0 }, -1)).toBeNull();
+    });
+
+    it('waits before a hold or a carry after a long rest in the others', () => {
+        expect(nextWait({ ...byTitle('Gym full body'), updatedAt: 0 }, -1)).not.toBeNull();
+        expect(nextWait({ ...byTitle('Kettlebell full body'), updatedAt: 0 }, -1)).not.toBeNull();
+    });
+});
+
 describe('builtInWorkoutEquipment', () => {
     it('lists each need once, leaving out choices met by a piece it needs anyway', () => {
         expect(builtInWorkoutEquipment(byTitle('Kettlebell full body'))).toEqual(['kettlebell']);
@@ -160,5 +176,10 @@ describe('copyOf, a ready-made workout', () => {
 
     it('keeps a time limit', () => {
         expect(copyOf(byTitle('20-minute AMRAP')).timeLimitSeconds).toBe(1200);
+    });
+
+    it('keeps carrying straight on after rests', () => {
+        expect(copyOf(byTitle('Tabata')).carryOn).toBe(true);
+        expect(copyOf(byTitle('Gym legs'))).not.toHaveProperty('carryOn');
     });
 });

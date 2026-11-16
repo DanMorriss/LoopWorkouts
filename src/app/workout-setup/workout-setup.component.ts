@@ -25,6 +25,7 @@ import { BACK_PAGE } from './step-model';
 import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-changes-dialog.component';
 import { SetupStepBodyComponent } from './setup-step-body/setup-step-body.component';
 import { SetupStepHeaderComponent } from './setup-step-header/setup-step-header.component';
+import { SetupCarryOnComponent } from './setup-carry-on/setup-carry-on.component';
 import { WorkoutSetupForm } from './workout-setup-form';
 
 /**
@@ -59,6 +60,7 @@ import { WorkoutSetupForm } from './workout-setup-form';
         StepDragPreviewComponent,
         SetupStepHeaderComponent,
         SetupStepBodyComponent,
+        SetupCarryOnComponent,
         MatFormFieldModule,
         MatIconModule,
     ],

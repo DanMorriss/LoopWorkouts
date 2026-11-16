@@ -883,6 +883,7 @@ function sameWorkout(a: Workout, b: Workout): boolean {
         a.title === b.title &&
         a.repeats === b.repeats &&
         a.timeLimitSeconds === b.timeLimitSeconds &&
+        !!a.carryOn === !!b.carryOn &&
         blocks(a) === blocks(b)
     );
 }
@@ -975,6 +976,7 @@ export function readWorkout(value: unknown): Workout | null {
         blocks,
         repeats: saved['repeats'] as number,
         ...timeLimit,
+        ...(saved['carryOn'] === true ? { carryOn: true as const } : {}),
         // Missing only if saved oddly: older than any real change, so any other copy wins
         updatedAt: isWholeNumber(saved['updatedAt'], 0) ? (saved['updatedAt'] as number) : 0,
     };

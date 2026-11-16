@@ -1,0 +1,24 @@
+// A switch with its name and a hint beside it, as Settings lists them: the name and hint on
+// the left, the switch on the right. Mixins, as only some pages have them.
+
+@mixin switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+@mixin switch-row-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+@mixin switch-row-name {
+    color: var(--text);
+}
+
+@mixin switch-row-hint {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}

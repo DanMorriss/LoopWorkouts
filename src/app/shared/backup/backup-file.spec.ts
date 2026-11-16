@@ -18,6 +18,8 @@ const SETTINGS: Omit<Settings, 'profileUpdatedAt' | 'bodyWeightUpdatedAt'> = {
     onlyMyEquipment: true,
     eachSideFirst: 'right',
     switchSidesSeconds: 10,
+    includeActiveRest: false,
+    canTrainOn: [0, 2, 4],
     name: 'Sam',
     bodyWeight: 72.5,
 };

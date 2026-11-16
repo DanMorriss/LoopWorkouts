@@ -184,6 +184,10 @@ export class WorkoutDetailsComponent {
 
     private backFrom(route: ActivatedRouteSnapshot) {
         const run = route.queryParamMap.get('run');
+        if (route.queryParamMap.get('from') === 'plan') {
+            // From a planned workout's menu on the Plan page (PLN-1)
+            return { url: '/plan', label: 'Plan' };
+        }
         return run
             ? { url: `/history?run=${encodeURIComponent(run)}`, label: 'Progress' }
             : { url: `/library?details=${route.paramMap.get('id') ?? ''}`, label: 'Workouts' };

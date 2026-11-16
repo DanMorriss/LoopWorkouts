@@ -273,6 +273,19 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     4. "On your plan: Thu"; the Undo bar says "Legs taken off Monday".
     5. "On your plan: Mon, Thu" again; focus on Change days; `week-plan` has Legs on Monday and Thursday.
 
+### REG-PLAN-09 · Do a missed workout today instead
+
+- **Stories:** PLN-1, PLN-2, PLN-3 · **Priority:** P2
+- **Preconditions:** `guest()`, workouts Legs and Push, Legs planned on Tuesday, clock Wednesday.
+- **Steps:**
+    1. On the Plan page, press Legs, then **Do it today instead**.
+    2. Open Today.
+    3. Back on the Plan page, press Legs (today's), then **Put back on Tuesday**.
+- **Expected:**
+    1. Wednesday lists Legs, Due, "From Tuesday, this week"; Tuesday says "Nothing planned"; the Undo bar says "Legs moved to today".
+    2. Due today lists Legs, "Moved from Tuesday".
+    3. Tuesday's Legs is Missed again.
+
 ---
 
 ## 3. Building a workout (`build-a-workout.md`, `sets-and-supersets.md`, `exercises.md`)
@@ -1356,6 +1369,19 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     3. Plank first, then the superset with Bench and Row still in it, open as before; "Moved superset to the end" is announced.
 - **In the pack:** the library's cards no longer drag (A to Z), so only Create's steps are dragged, with the mouse; an open superset stays put as its handle is pressed, then drags whole past Plank (fixed 2026-11-11).
 
+### REG-GES-04 · Dragging the plan: a planned workout, and a ready-made plan's days
+
+- **Stories:** PLN-1, PLN-6 · **Priority:** P2 (the touch hold P3) · **[Drag]**
+- **Preconditions:** `guest()`; workouts Legs and Push, Legs planned on Tuesday, Push on Thursday.
+- **Steps:**
+    1. On the Plan page, drag Legs's handle with the mouse onto Monday.
+    2. On the Ready-made plans page, drag Push, pull, legs's Monday onto Thursday, then press Use this plan.
+    3. On the phone, hold Monday a moment and drag it onto Thursday.
+- **Expected:**
+    1. Monday lists Legs, From next week; Tuesday says "Nothing planned"; "Legs moved to Monday" is announced; still on `/plan`.
+    2. Thursday is Gym push, its link says "Thu"; `week-plan` has Gym push on Thursday.
+    3. Gym push says "Thu", and the page didn't swipe back.
+
 ---
 
 ## 14. Calories (`calories.md`)
@@ -1416,7 +1442,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Area                      | Tests            | Stories covered                                                                                                               |
 | ------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                              |
-| Today and planning        | REG-PLAN-01 – 08 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
+| Today and planning        | REG-PLAN-01 – 09 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
 | Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                   |
 | Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                          |
 | Running a workout         | REG-RUN-01 – 15  | RUN-1 – RUN-12, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
@@ -1428,14 +1454,14 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Calories                  | REG-CAL-01 – 03  | CAL-1, CAL-2, CAL-6                                                                                                           |
 | Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                         |
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                    |
-| Gestures and dragging     | REG-GES-01 – 03  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12                                                                                     |
+| Gestures and dragging     | REG-GES-01 – 04  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                       |
 
-**Count:** 82 tests: 40 P1, 33 P2, 9 P3.
+**Count:** 84 tests: 40 P1, 35 P2, 9 P3.
 
 | Area      | P1     | P2     | P3    | Total  |
 | --------- | ------ | ------ | ----- | ------ |
 | NAV       | 4      | 2      | 0     | 6      |
-| PLAN      | 3      | 3      | 0     | 6      |
+| PLAN      | 3      | 4      | 0     | 7      |
 | BLD       | 3      | 6      | 0     | 9      |
 | LIB       | 5      | 2      | 1     | 8      |
 | RUN       | 6      | 7      | 2     | 15     |
@@ -1446,8 +1472,8 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | DATA      | 4      | 0      | 1     | 5      |
 | ACC       | 5      | 2      | 0     | 7      |
 | A11Y      | 3      | 3      | 0     | 6      |
-| GES       | 0      | 0      | 3     | 3      |
-| **Total** | **40** | **33** | **9** | **82** |
+| GES       | 0      | 1      | 3     | 4      |
+| **Total** | **40** | **35** | **9** | **84** |
 
 ### In the pack
 
@@ -1456,7 +1482,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | Area | Spec                   | Tests | fixme                           | skip                                                  |
 | ---- | ---------------------- | ----- | ------------------------------- | ----------------------------------------------------- |
 | NAV  | `e2e/nav.e2e.ts`       | 10    | 0                               | 0                                                     |
-| PLAN | `e2e/plan.e2e.ts`      | 11    | 0                               | 0                                                     |
+| PLAN | `e2e/plan.e2e.ts`      | 12    | 0                               | 0                                                     |
 | BLD  | `e2e/build.e2e.ts`     | 13    | 0                               | 0                                                     |
 | LIB  | `e2e/library.e2e.ts`   | 11    | 0                               | 0                                                     |
 | RUN  | `e2e/run.e2e.ts`       | 23    | 0                               | 1 (real sound, manual)                                |
@@ -1467,7 +1493,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | DATA | `e2e/data.e2e.ts`      | 6     | 0                               | 0                                                     |
 | ACC  | `e2e/account.e2e.ts`   | 17    | 0                               | 1 (real Google, manual)                               |
 | A11Y | `e2e/a11y.e2e.ts`      | 21    | 0                               | 0 (the 4 phone-width tests skip on `desktop`)         |
-| GES  | `e2e/gestures.e2e.ts`  | 7     | 1 (Known issue: superset folds) | 1 (iPhone, manual); the touch tests skip on `desktop` |
+| GES  | `e2e/gestures.e2e.ts`  | 10    | 1 (Known issue: superset folds) | 1 (iPhone, manual); the touch tests skip on `desktop` |
 
 ### Left out on purpose
 

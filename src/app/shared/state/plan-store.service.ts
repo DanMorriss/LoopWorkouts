@@ -4,6 +4,8 @@ import {
     EMPTY_PLAN,
     isWeekPlan,
     MAX_WORKOUTS_A_DAY,
+    movesThisWeek,
+    startOfWeek,
     plannedKey,
     WeekPlan,
 } from '../../models/plan';
@@ -45,6 +47,58 @@ export class PlanStore {
     }
 
     /**
+     * Moves `workoutId` from `from` to `to` (from 0 for Monday), just before `before` there, or
+     * at its end with null: dragged on the Plan page. On the same day it's put in its new
+     * place, keeping when it was planned; on another, it's planned there now, as Add does,
+     * unless it's there already or that day's full.
+     */
+    move(workoutId: string, from: number, to: number, before: string | null) {
+        const plan = this._plan();
+        const source = plan.days[from];
+        const target = plan.days[to];
+        if (!source?.includes(workoutId) || !target || workoutId === before) {
+            return;
+        }
+        const sameDay = from === to;
+        if (!sameDay && (target.includes(workoutId) || target.length >= MAX_WORKOUTS_A_DAY)) {
+            return;
+        }
+        const ids = target.filter((id) => id !== workoutId);
+        const at = before === null ? -1 : ids.indexOf(before);
+        ids.splice(at < 0 ? ids.length : at, 0, workoutId);
+        const plannedAt = { ...plan.plannedAt };
+        if (!sameDay) {
+            plannedAt[plannedKey(to, workoutId)] = Date.now();
+        }
+        const days = plan.days.map((other, day) =>
+            day === to ? ids : day === from ? other.filter((id) => id !== workoutId) : other
+        );
+        this.save(
+            copyPlan({
+                days,
+                updatedAt: this.clock.now(plan.updatedAt),
+                plannedAt,
+                moves: movesThisWeek(plan, Date.now()),
+            })
+        );
+    }
+
+    /**
+     * Has `workoutId`, planned on `from`, done on `to` instead this week only, e.g. a missed
+     * one today; or, with `to` null, back on its day. Other weeks' moves are dropped.
+     */
+    moveThisWeek(workoutId: string, from: number, to: number | null) {
+        const plan = this._plan();
+        const now = Date.now();
+        const week = startOfWeek(now);
+        const others = movesThisWeek(plan, now).filter(
+            (move) => move.workoutId !== workoutId || move.from !== from
+        );
+        const moves = to === null ? others : [...others, { week, workoutId, from, to }];
+        this.save(copyPlan({ ...plan, updatedAt: this.clock.now(plan.updatedAt), moves }));
+    }
+
+    /**
      * Plans `workoutId` on just `days` (from 0 for Monday): at the end of each it isn't on yet,
      * unless that's full, and off the others. One change, dated now.
      */
@@ -63,13 +117,19 @@ export class PlanStore {
             return [...ids, workoutId];
         });
         this.save(
-            copyPlan({ days: newDays, updatedAt: this.clock.now(plan.updatedAt), plannedAt })
+            copyPlan({
+                days: newDays,
+                updatedAt: this.clock.now(plan.updatedAt),
+                plannedAt,
+                moves: movesThisWeek(plan, now),
+            })
         );
     }
 
     /**
      * Sets every day at once, Monday first, e.g. from a ready-made plan (PLN-6). A workout
-     * already on its day keeps when it was planned; the rest are planned now. Dated now, as any
+     * already on its day keeps when it was planned; the rest are planned now. This week's
+     * one-off moves go with the old week. Dated now, as any
      * change is, so it syncs as the latest.
      */
     replace(days: readonly (readonly string[])[]) {
@@ -118,6 +178,7 @@ export class PlanStore {
                 days: plan.days.map((other, i) => (i === day ? ids : other)),
                 updatedAt: this.clock.now(plan.updatedAt),
                 plannedAt: { ...plan.plannedAt, ...planned },
+                moves: movesThisWeek(plan, Date.now()),
             })
         );
     }

@@ -56,121 +56,17 @@
     @include showcase-description;
 }
 
-// The week: a day to a column, Monday first, each workout a numbered, coloured mark
+// Over the week: fitted to the days you can train, or why not
+.plan-card__fit {
+    margin-bottom: -0.5rem;
+    color: var(--text-muted);
+    @include small-type(0.75rem);
+}
+
+// The week, as tall as it'll be while it loads
 .plan-card__week {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0.3rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.plan-card__day {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.45rem 0 0.55rem;
-    border: 1px solid var(--border-soft);
-    border-radius: 0.65rem;
-    // A training day takes on its (first) workout's colour, faintly
-    border-color: color-mix(in srgb, var(--c, var(--border-soft)) 45%, transparent);
-    background: linear-gradient(
-        to bottom,
-        color-mix(in srgb, var(--c, transparent) 16%, transparent),
-        color-mix(in srgb, var(--c, transparent) 4%, transparent)
-    );
-}
-
-.plan-card__day--rest {
-    border-style: dashed;
-    border-color: var(--border-soft);
-    background: transparent;
-}
-
-// A day of active rest: quieter than training, dashed as a rest day, with a soft ring
-.plan-card__day--active-rest {
-    border-style: dashed;
-    border-color: var(--border);
-    background: transparent;
-}
-
-.plan-card__day-letter {
-    color: var(--text-strong);
-    font-size: 0.8rem;
-    font-weight: 600;
-
-    .plan-card__day--rest &,
-    .plan-card__day--active-rest & {
-        color: var(--text-muted);
-        font-weight: 400;
-    }
-}
-
-.plan-card__day-marks {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 0.15rem;
-    min-height: 1.5rem;
-}
-
-// A workout's number in its colour, in the week and the list alike
-.plan-card__mark {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    background: var(--c);
-    box-shadow: 0 0 0.7rem color-mix(in srgb, var(--c) 45%, transparent);
-    color: var(--plan-ink);
-    font-size: 0.75rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-
-    // Two on a day share its column, smaller
-    .plan-card__day-marks &:not(:only-child) {
-        width: 1.1rem;
-        height: 1.1rem;
-        font-size: 0.65rem;
-    }
-}
-
-// Active rest's mark: an empty ring, optional rather than a numbered workout
-.plan-card__mark--rest {
-    border: 2px solid var(--text-muted);
-    background: transparent;
-    box-shadow: none;
-}
-
-.plan-card--c1 {
-    --c: var(--plan-1);
-}
-
-.plan-card--c2 {
-    --c: var(--plan-2);
-}
-
-.plan-card--c3 {
-    --c: var(--plan-3);
-}
-
-.plan-card--c4 {
-    --c: var(--plan-4);
-}
-
-// A rest day: a short, quiet dash
-.plan-card__rest {
-    width: 0.6rem;
-    height: 2px;
-    border-radius: 1px;
-    background: var(--border);
+    min-height: 6.2rem;
 }
 
 // Its workouts, each with the days it's on, each a link to its page

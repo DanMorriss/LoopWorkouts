@@ -34,6 +34,13 @@ export interface Settings {
     eachSideFirst: Side;
     /** The countdown between a timed step's two sides, in seconds; 0 for none. */
     switchSidesSeconds: number;
+    /** Whether a ready-made plan's card starts with its active rest days in (PLN-6). */
+    includeActiveRest: boolean;
+    /**
+     * The days you can train, from 0 for Monday, that ready-made plans are fitted to (PLN-6);
+     * none for each as it comes.
+     */
+    canTrainOn: number[];
     /** What Home greets you by (NAV-4); '' if not given. */
     name: string;
     /**
@@ -64,6 +71,8 @@ const DEFAULT_SETTINGS: Settings = {
     onlyMyEquipment: false,
     eachSideFirst: DEFAULT_RUN_SIDES.first,
     switchSidesSeconds: DEFAULT_RUN_SIDES.switchSeconds,
+    includeActiveRest: true,
+    canTrainOn: [],
     name: '',
     bodyWeight: null,
     bodyWeightUpdatedAt: 0,
@@ -92,6 +101,8 @@ export class SettingsStore {
     readonly onlyMyEquipment = computed(() => this.settings().onlyMyEquipment);
     readonly eachSideFirst = computed(() => this.settings().eachSideFirst);
     readonly switchSidesSeconds = computed(() => this.settings().switchSidesSeconds);
+    readonly includeActiveRest = computed(() => this.settings().includeActiveRest);
+    readonly canTrainOn = computed(() => this.settings().canTrainOn);
     readonly name = computed(() => this.settings().name);
     readonly bodyWeight = computed(() => this.settings().bodyWeight);
     /** The body weight as it syncs, with consent (CAL-6); null if it's never been set here. */
@@ -220,7 +231,13 @@ function loadSettings(): Settings {
         // Corrupted: use the defaults
     }
     const flag = (
-        key: 'sound' | 'vibration' | 'countdownBeeps' | 'keepScreenOn' | 'onlyMyEquipment'
+        key:
+            | 'sound'
+            | 'vibration'
+            | 'countdownBeeps'
+            | 'keepScreenOn'
+            | 'onlyMyEquipment'
+            | 'includeActiveRest'
     ) => (typeof saved[key] === 'boolean' ? saved[key] : DEFAULT_SETTINGS[key]);
     const theme = THEMES.find((t) => t === saved['theme']) ?? DEFAULT_SETTINGS.theme;
     const weightUnit =
@@ -251,6 +268,8 @@ function loadSettings(): Settings {
             (saved['switchSidesSeconds'] as number) <= MAX_SWITCH_SECONDS
                 ? (saved['switchSidesSeconds'] as number)
                 : DEFAULT_SETTINGS.switchSidesSeconds,
+        includeActiveRest: flag('includeActiveRest'),
+        canTrainOn: readDays(saved['canTrainOn']),
         name: typeof saved['name'] === 'string' ? cleanName(saved['name']) : DEFAULT_SETTINGS.name,
         bodyWeight: readBodyWeightKg(saved['bodyWeight']) ?? DEFAULT_SETTINGS.bodyWeight,
         bodyWeightUpdatedAt:
@@ -264,4 +283,13 @@ function loadSettings(): Settings {
                 ? (saved['profileUpdatedAt'] as number)
                 : DEFAULT_SETTINGS.profileUpdatedAt,
     };
+}
+
+/** Days of the week, from 0 for Monday, each once and in order; none if it isn't a list. */
+function readDays(value: unknown): number[] {
+    return Array.isArray(value)
+        ? [...new Set(value)]
+              .filter((day): day is number => Number.isInteger(day) && day >= 0 && day < 7)
+              .sort((a, b) => a - b)
+        : [];
 }

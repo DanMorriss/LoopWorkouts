@@ -46,11 +46,12 @@
         "timer",
         "today",
         "tune",
+        "undo",
         "unfold_less",
         "unfold_more",
         "view_list",
         "visibility",
         "visibility_off"
     ],
-    "sha256": "24ed8c2c4acb0e10667364f21fb61d26f02ec056c994f03659beaa92050683f9"
+    "sha256": "3d3e83d37dae236c44b71f45c4884276691b26141f5d8522080bd1b7a50bd8ea"
 }

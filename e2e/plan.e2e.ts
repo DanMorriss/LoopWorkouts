@@ -389,3 +389,35 @@ test.describe('a ready-made plan over my own', () => {
         }
     );
 });
+
+test.describe('a missed workout', () => {
+    test.use({ storage: { ...seed.workouts([legs, push]), ...seed.plan({ tue: ['legs'] }) } });
+
+    test(
+        'REG-PLAN-09 do a missed workout today instead, this week only, then put it back',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/plan');
+            const tuesday = day(page, 'Tuesday');
+            const today = day(page, 'Wednesday · today');
+            await expect(tuesday).toContainText('Missed');
+
+            await tuesday.getByRole('button', { name: 'Legs', exact: true }).click();
+            await page.getByRole('button', { name: 'Do it today instead' }).click();
+            await expect(today).toContainText('From Tuesday, this week');
+            await expect(today).toContainText('Due');
+            await expect(tuesday).toContainText('Nothing planned');
+            await expect(app.undoBar).toContainText('Legs moved to today');
+
+            // Today has it due, saying where from
+            await app.goto('/home');
+            const due = page.getByRole('region', { name: 'Due today' });
+            await expect(due).toContainText('Moved from Tuesday');
+
+            await app.goto('/plan');
+            await today.getByRole('button', { name: /^Legs/ }).click();
+            await page.getByRole('button', { name: 'Put back on Tuesday' }).click();
+            await expect(tuesday).toContainText('Missed');
+        }
+    );
+});

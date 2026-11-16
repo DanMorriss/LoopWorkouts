@@ -31,6 +31,8 @@ describe('SettingsStore', () => {
             onlyMyEquipment: false,
             eachSideFirst: 'left',
             switchSidesSeconds: 5,
+            includeActiveRest: true,
+            canTrainOn: [],
             name: '',
             bodyWeight: null,
             bodyWeightUpdatedAt: 0,
@@ -139,6 +141,21 @@ describe('SettingsStore', () => {
         localStorage.setItem('settings', '{"eachSideFirst": "right", "switchSidesSeconds": 0}');
         expect(createStore().eachSideFirst()).toBe('right');
         expect(createStore().switchSidesSeconds()).toBe(0);
+    });
+
+    it('remembers the days you can train, each once and in order, and leaves out the rest', () => {
+        localStorage.setItem(
+            'settings',
+            '{"canTrainOn": [4, 0, 9, 4, "2", 2], "includeActiveRest": false}'
+        );
+        const store = createStore();
+        expect(store.canTrainOn()).toEqual([0, 2, 4]);
+        expect(store.includeActiveRest()).toBe(false);
+
+        TestBed.resetTestingModule();
+        localStorage.setItem('settings', '{"canTrainOn": "Mon"}');
+        expect(createStore().canTrainOn()).toEqual([]);
+        expect(createStore().includeActiveRest()).toBe(true);
     });
 
     it('has no body weight to begin with, keeping only one in range (CAL-2)', () => {

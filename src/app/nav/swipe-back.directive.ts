@@ -6,10 +6,11 @@ import { prefersReducedMotion } from '../shared/reduced-motion';
 
 /**
  * Where a swipe can't start: things a finger moves sideways on for their own sake (the
- * progress chart, which follows a finger across it), and anything typed in.
+ * progress chart, which follows a finger across it; anything dragged, by its handle or marked
+ * `data-drags`, such as a ready-made plan's days), and anything typed in.
  */
 const OWN_GESTURES =
-    '.progress__svg, app-exercise-figure-3d, input, textarea, select, [contenteditable]';
+    '.progress__svg, app-exercise-figure-3d, .cdk-drag-handle, [data-drags], input, textarea, select, [contenteditable]';
 
 /**
  * Swiping right on a page goes back to `appSwipeBack` (a url), as on a phone: the page

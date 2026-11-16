@@ -1,0 +1,107 @@
+@use 'interaction' as *;
+
+// Its parts sit in the page's row (the li it drags by)
+:host {
+    display: contents;
+}
+
+// Its handle, at its left: dragged, it takes the workout to another day; pressed, its days
+.row__move {
+    flex-shrink: 0;
+    color: var(--text-muted);
+    cursor: grab;
+}
+
+.row__menu-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+// Its name, which opens its menu: reads as the name, pressed as a row
+.row__name {
+    display: grid;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.2rem 0.4rem;
+    margin-left: -0.4rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    align-content: center;
+
+    @include hover {
+        background: var(--control-hover);
+    }
+
+    @include pressed {
+        background: var(--control-hover);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+    }
+}
+
+.row__title {
+    overflow-wrap: anywhere;
+}
+
+// Moved here this week only: where from
+.row__moved {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.row__menu {
+    position: absolute;
+    top: calc(100% + 0.2rem);
+    left: 0;
+    z-index: 9;
+    min-width: 200px;
+    transform-origin: top left;
+}
+
+.row__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+
+    .mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+}
+
+:host(.row--done) .row__status,
+:host(.row--today) .row__status {
+    color: var(--accent);
+}
+
+// Gone by without it, or planned once its day had gone (from next week): the name steps back
+:host(.row--missed) .row__name,
+:host(.row--later) .row__name {
+    color: var(--text-muted);
+}
+
+.row__remove {
+    flex-shrink: 0;
+}
+
+// The copy following the finger as it's dragged: just its handle and name
+:host-context(.cdk-drag-preview) {
+    .row__status,
+    .row__remove,
+    .row__moved {
+        display: none;
+    }
+}

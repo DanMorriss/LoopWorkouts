@@ -19,7 +19,7 @@
             class="workout-status__time-left"
             [class.workout-status__time-left--nearly-up]="line.timeNearlyUp"
         >
-            {{ line.timeLeft }} left
+            {{ line.timeLeft }}
         </p>
     }
 } @else if (line.timeLimited) {
@@ -28,7 +28,7 @@
         class="workout-status__time-left"
         [class.workout-status__time-left--nearly-up]="line.timeNearlyUp"
     >
-        {{ line.timeLeft }} left
+        {{ line.timeLeft }}
     </p>
 } @else if (line.untilStopped) {
     <p class="text-2xl">

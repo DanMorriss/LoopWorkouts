@@ -1656,6 +1656,31 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
+        it("lets the timed exercise time's up comes in be finished, and counts it", () => {
+            // 1:01 is a second into the 13th round's work, which runs on to 1:03
+            start(makeWorkout({ workSeconds: 3, restSeconds: 2, timeLimitSeconds: 61 }));
+            advance(61_000);
+
+            expect(view().isComplete()).toBe(false);
+            expect(text()).toContain("Time's up · finish this one");
+            expect(
+                fixture.nativeElement.querySelector('.workout-status__time-left--nearly-up')
+            ).not.toBeNull();
+
+            advance(2000);
+            expect(view().isComplete()).toBe(true);
+            expect(summaryText()).toContain('12 rounds + 1 in 1:01');
+            expect(entries()[0]).toEqual(
+                expect.objectContaining({
+                    outcome: 'finished',
+                    roundsCompleted: 12,
+                    stepsIntoRound: 1,
+                    activeSeconds: 63,
+                })
+            );
+            fixture.destroy();
+        });
+
         it('counts time on rep steps towards it', () => {
             start(makeWorkout({ steps: [work(3), reps(10, 'Push-ups')], timeLimitSeconds: 20 }));
             advance(3000);

@@ -509,7 +509,9 @@ test.describe('a time limit', () => {
         steps: [timed(3), reps(10, 'Push-ups', { exercise: 'push-up' })],
         timeLimitSeconds: 20,
     });
-    test.use({ storage: seed.workouts([a, b]) });
+    // 1:01 is a second into the 13th round's timed step, which runs on to 1:03
+    const c = workout('C', { steps: [timed(3), rest(2)], timeLimitSeconds: 61 });
+    test.use({ storage: seed.workouts([a, b, c]) });
 
     test('REG-RUN-10 a time limit runs out', { tag: '@p2' }, async ({ app, page, device }) => {
         const run = new WorkoutPage(page);
@@ -530,6 +532,27 @@ test.describe('a time limit', () => {
         const finish = await device.alarms([ALARM.finish]);
         expect(finish.map((alarm) => alarm.second)).toEqual([64]);
     });
+
+    test(
+        'REG-RUN-10 the timed step time runs out in is finished',
+        { tag: '@p2' },
+        async ({ app, page, device }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('C');
+            await run.wait(61_500);
+            await expect(
+                run.main.getByText("Time's up · finish this one", { exact: true })
+            ).toBeVisible();
+            await expect(run.summary).toBeHidden();
+
+            await run.wait(2000);
+            await expect(run.summary).toHaveAccessibleName("Time's up");
+            await expect(run.stat('Rounds')).toHaveText('12 rounds + 1 in 1:01');
+            const finish = await device.alarms([ALARM.finish]);
+            expect(finish.map((alarm) => alarm.second)).toEqual([63]);
+        }
+    );
 
     test('REG-RUN-10 time runs out during a rep step', { tag: '@p2' }, async ({ app, page }) => {
         const run = new WorkoutPage(page);

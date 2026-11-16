@@ -32,9 +32,11 @@
 ### A time limit (RUN-8)
 
 - Rounds go on one after another, **as many as fit**. Time's up when the countdown plus the time spent on rep steps, less any time skipped, reaches the limit: **reps and rests count**, pauses don't, and the time a skip saves goes to **more rounds** (RUN-12).
-- When time's up the workout **finishes at once**, part-way through a step or not, as if it ran to its end: "Time's up" on the summary, the finish alarm, and logged as finished.
-- **The score** is the full rounds done, and the steps done of the round it ran out in, rests left out: "7 rounds + 3". The step it ran out in isn't done, so a timed set of it isn't logged.
-- **Alarms**: the steps' alarms as usual, up to the end; a short tick (see [alarms](alarms.md)) at 10 seconds left, and at 3, 2 and 1; then the finish. The end is known even while a rep step is waited on, so it's booked then too.
+- When time's up part-way through a **timed exercise**, it **runs on to its end**, so the last one can be finished (since 2026-11-16): the time left reads "**Time's up · finish this one**", in the accent colour, and the workout finishes as the step ends. Skip finishes it there and then, logging the time it ran.
+- Otherwise, in a rest, Switch sides or a rep step, or just as a step was due to start, the workout **finishes at once**, as if it ran to its end. Either way: "Time's up" on the summary, the finish alarm, and logged as finished.
+- **The score** is the full rounds done, and the steps done of the round it ran out in, rests left out: "7 rounds + 3". A timed exercise run on to its end counts, and is logged as a timed set; a rep step time ran out in isn't done (see the summary, below).
+- **Time spent** is the time limit, plus the time a last timed exercise ran on past it.
+- **Alarms**: the steps' alarms as usual, up to the end; a short tick (see [alarms](alarms.md)) at 10 seconds left, and at 3, 2 and 1; then the finish, as the last timed exercise ends if it runs on (with its own countdown beeps after time's up, when those are on). The end is known even while a rep step is waited on, so it's booked then too.
 
 ### Rep steps
 
@@ -205,6 +207,7 @@
 - Given a new step in the same round, then its text rolls up from below; given round 2 starting, then the text and "round 2 of 3" turn in from the right; given a rest, then it settles in gently from just below.
 - Given work 0:03, rest 0:02 and a time limit of 1:04, then 12s in it says "round 3" and "00:52 left", and screen readers heard "Timed, round 1, 01:04 left" at the start.
 - Given that workout, when 1:04 has gone by, then it finishes with "Time's up" and "12 rounds + 1 in 1:04", logged as finished with 12 rounds and 1 step.
+- Given work 0:03, rest 0:02 and a time limit of 1:01, when 1:01 has gone by, then the work it ran out in is still going, with "Time's up · finish this one"; at 1:03 it finishes with "12 rounds + 1 in 1:01", logged with 63 seconds spent and that work's timed set.
 - Given work 0:03 then 10 push-ups and a time limit of 0:20, when the push-ups take 12 seconds, then after Done 00:05 are left.
 - Given time runs out while push-ups are waited on, then the summary asks how many reps I got; Add set with 6 logs 6 push-ups, and the score stays as it was.
 - Given work 0:03, rest 0:02, 2 rounds, then it says "00:08 left" at the start and "00:05 left" at the rest; given a rep step in the round, then there's no time left.

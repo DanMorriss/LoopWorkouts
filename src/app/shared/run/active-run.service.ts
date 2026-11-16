@@ -34,6 +34,7 @@ import {
     placeFields,
     setsDone,
     stepsIntoRound,
+    timeLimitEnd,
     workoutStateAt,
 } from '../../models/workout-state';
 import { AlarmService } from '../alarms/alarm.service';
@@ -174,7 +175,7 @@ export class ActiveRunService {
     readonly unloggedLastSet = computed(() => {
         const workout = this.running();
         const state = this.state();
-        if (workout?.timeLimitSeconds === undefined || state?.phase !== 'complete') {
+        if (!workout || !state?.cutShort) {
             return null;
         }
         const step = runPlan(workout).steps[state.stepIndex];
@@ -613,10 +614,7 @@ export class ActiveRunService {
             return;
         }
         // The step time ran out on, which isn't done
-        const cutAt =
-            workout.timeLimitSeconds !== undefined && state?.phase === 'complete'
-                ? placeAt(workout, state.stepIndex)
-                : null;
+        const cutAt = state?.cutShort ? placeAt(workout, state.stepIndex) : null;
         const cutShort = (set: RepSet) => !!cutAt && isSetAt(set, state!.round, cutAt);
         const done = this.store.activeSets().filter((set) => !cutShort(set));
         const lastSets = new Map(done.map((set) => [`${set.step}/${set.set ?? 0}`, set]));
@@ -710,11 +708,13 @@ export class ActiveRunService {
         // later (e.g. it was in the background); startedAt has moved on by any pauses and by
         // the time spent on rep steps, which the clock leaves out, and back by any time
         // skipped, which it adds. A time limit ends when the clock and the time off it add up
-        // to it.
+        // to it, or at the end of the timed exercise it ran out in.
         const limit = workout.timeLimitSeconds;
         const offClockMs = this.store.activeOffClockMs();
         const finishMs =
-            limit === undefined ? workoutSeconds(workout) * 1000 : limit * 1000 - offClockMs;
+            limit === undefined
+                ? workoutSeconds(workout) * 1000
+                : timeLimitEnd(workout, this.store.activeRepStepsDone(), offClockMs).endMs;
         const countdownMs = finished ? finishMs : elapsedMs;
         const activeSeconds = Math.floor((countdownMs + offClockMs) / 1000);
         const sets = this.sets();

@@ -21,7 +21,8 @@ export interface WorkoutState {
     step: Step | null;
     /**
      * Which step of the round is in progress, starting at 0. Once complete, 0; or, when time
-     * ran out, the step it was on, which isn't done.
+     * ran out, the first step not done: the one it was on (see `cutShort`), or, when that was a
+     * timed exercise, which runs on to its end, the one after it.
      */
     stepIndex: number;
     /** Whole seconds left in the current step (0 for reps, and once complete). */
@@ -40,6 +41,12 @@ export interface WorkoutState {
     round: number;
     /** Exact time spent in the current step so far, in ms (0 once complete). */
     phaseElapsedMs: number;
+    /**
+     * Once complete, true when time ran out part-way through the step at `stepIndex`: a rest
+     * or a rep step, as a timed exercise runs on to its end (and `stepIndex` is the one after
+     * it). Missing otherwise.
+     */
+    cutShort?: true;
 }
 
 /**
@@ -60,7 +67,9 @@ export interface StepSkip {
  * the end of the last round is skipped, and a workout that runs until stopped never
  * completes. One with a time limit completes when the time's up: the clock plus `repMs`,
  * the time off the clock (see `WorkoutStore.activeOffClockMs`): the time spent on rep steps
- * already done (the one being waited on is still on the clock), less any time skipped.
+ * already done (the one being waited on is still on the clock), less any time skipped. If
+ * that's part-way through a timed exercise, it runs on to that step's end first (see
+ * `timeLimitEnd()`).
  *
  * A rep step takes no time on this clock: the workout stops at the first one not yet done
  * and stays there however long it runs, until Done adds it to `repStepsDone` and moves the
@@ -77,13 +86,27 @@ export function workoutStateAt(
 ): WorkoutState {
     const elapsedMsClamped = Math.max(0, elapsedMs);
 
-    // Time's up: complete, where it had got to the moment it ran out
+    // Time's up: complete, where it had got to the moment it ran out, or once the timed
+    // exercise it ran out in has run to its end
     if (workout.timeLimitSeconds !== undefined) {
         const limitMs = workout.timeLimitSeconds * 1000;
         if (elapsedMsClamped + repMs >= limitMs) {
-            const { timeLimitSeconds: _limit, ...untimed } = workout;
-            const cut = workoutStateAt(untimed, limitMs - repMs, repStepsDone);
-            return complete(cut.round, cut.stepIndex);
+            const { untimed, cut, endMs } = timeLimitEnd(workout, repStepsDone, repMs);
+            if (cut.phase !== 'work') {
+                return { ...complete(cut.round, cut.stepIndex), cutShort: true };
+            }
+            // Out of time just as a timed exercise was due to start: not started, so not done
+            if (cut.phaseElapsedMs === 0) {
+                return complete(cut.round, cut.stepIndex);
+            }
+            if (elapsedMsClamped < endMs) {
+                return workoutStateAt(untimed, elapsedMsClamped, repStepsDone);
+            }
+            // The step it ran out in is done: complete at the start of the one after it
+            const next = cut.stepIndex + 1;
+            return next < runPlan(workout).steps.length
+                ? complete(cut.round, next)
+                : complete(cut.round + 1, 0);
         }
     }
 
@@ -136,6 +159,27 @@ export function workoutStateAt(
         round,
         phaseElapsedMs: elapsedMsClamped - stepStartMs,
     };
+}
+
+/**
+ * Where a workout with a time limit stands the moment its time runs out (`cut`, of the
+ * workout without its limit, `untimed`), and when it ends, in ms on the clock (as
+ * `elapsedMs` in `workoutStateAt()`): then, or, when it ran out part-way through a timed
+ * exercise, once that has run to its end, so the last one can be finished. With `repMs` and
+ * `repStepsDone` as for `workoutStateAt()`; while a rep step is waited on, the end is the
+ * moment time runs out, as Done moves the clock on.
+ */
+export function timeLimitEnd(
+    workout: Workout,
+    repStepsDone = 0,
+    repMs = 0
+): { untimed: Workout; cut: WorkoutState; endMs: number } {
+    const { timeLimitSeconds, ...untimed } = workout;
+    const limitMs = (timeLimitSeconds ?? 0) * 1000 - repMs;
+    const cut = workoutStateAt(untimed, limitMs, repStepsDone);
+    const runsOn = cut.phase === 'work' && cut.phaseElapsedMs > 0;
+    const endMs = runsOn ? limitMs - cut.phaseElapsedMs + cut.phaseSeconds * 1000 : limitMs;
+    return { untimed, cut, endMs };
 }
 
 function complete(round: number, stepIndex: number): WorkoutState {

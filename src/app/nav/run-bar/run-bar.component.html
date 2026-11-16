@@ -28,10 +28,10 @@
             <button
                 type="button"
                 class="btn-icon run-bar__pause"
-                [attr.aria-label]="isPaused() ? 'Resume' : 'Pause'"
+                [attr.aria-label]="isPaused() ? 'Resume' : waiting() ? 'Start' : 'Pause'"
                 (click)="togglePause()"
             >
-                <app-icon>{{ isPaused() ? 'play_arrow' : 'pause' }}</app-icon>
+                <app-icon>{{ isPaused() || waiting() ? 'play_arrow' : 'pause' }}</app-icon>
             </button>
         }
     </aside>

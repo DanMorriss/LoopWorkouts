@@ -1,6 +1,7 @@
-import { effect, inject, signal, untracked } from '@angular/core';
+import { computed, effect, inject, signal, untracked } from '@angular/core';
 import { lastRepSets } from '../history/last-sets';
 import { Exercise, MeasuredBy } from '../models/exercise';
+import { allSteps } from '../models/workout';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { UndoService } from '../shared/undo/undo.service';
@@ -32,6 +33,11 @@ export class WorkoutSwap {
 
     /** The exercise whose details are open over the workout, which carries on underneath. */
     readonly exerciseInDetails = signal<Exercise | null>(null);
+    /** The exercises in the workout as it runs, swaps and all, for Swap to say so (RUN-11). */
+    readonly inWorkout = computed(() => {
+        const running = this.run.running();
+        return running ? allSteps(running).flatMap((step) => step.exerciseId ?? []) : [];
+    });
     /** Whether those details are of the next step's exercise, opened during the rest before it. */
     private detailsOfNext = false;
     /**

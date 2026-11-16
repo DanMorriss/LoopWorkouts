@@ -56,6 +56,12 @@ import { SearchFieldComponent } from '../search-field/search-field.component';
                                 <mat-icon aria-hidden="true">swap_horiz</mat-icon>
                                 <span class="swap__text">
                                     <span class="swap__name">{{ option.name }}</span>
+                                    @if (inWorkout().includes(option.id)) {
+                                        <span class="swap__detail"
+                                            ><span class="sr-only">, </span>Already in this
+                                            workout</span
+                                        >
+                                    }
                                     @if (hintOf(option); as line) {
                                         <span class="swap__detail">{{ line }}</span>
                                     }
@@ -78,6 +84,11 @@ export class SwapExerciseDialogComponent {
     readonly measuredBy = input.required<MeasuredBy>();
     /** A line under the title on what swapping does, e.g. "For the rest of this workout." */
     readonly hint = input('');
+    /**
+     * The exercises in the workout, each said to be in it already: the same exercise twice is
+     * often meant, so it's said, not stopped.
+     */
+    readonly inWorkout = input<readonly string[]>([]);
     readonly closed = output<void>();
     readonly picked = output<Exercise>();
 

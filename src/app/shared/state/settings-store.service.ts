@@ -20,6 +20,11 @@ export interface Settings {
     countdownBeeps: boolean;
     /** Stop the screen locking during a workout, where the browser can. */
     keepScreenOn: boolean;
+    /**
+     * A timed exercise after a long rest waits for Start, rather than starting as the rest
+     * ends (see `models/wait-to-start.ts`).
+     */
+    waitToStart: boolean;
     /** What weights are shown and picked in; they're always saved in kg. */
     weightUnit: WeightUnit;
     /** Which figure the body map draws. */
@@ -64,6 +69,7 @@ const DEFAULT_SETTINGS: Settings = {
     vibration: true,
     countdownBeeps: true,
     keepScreenOn: true,
+    waitToStart: true,
     weightUnit: 'kg',
     bodyFigure: 'male',
     trainingGoal: 'muscle',
@@ -94,6 +100,7 @@ export class SettingsStore {
     readonly vibration = computed(() => this.settings().vibration);
     readonly countdownBeeps = computed(() => this.settings().countdownBeeps);
     readonly keepScreenOn = computed(() => this.settings().keepScreenOn);
+    readonly waitToStart = computed(() => this.settings().waitToStart);
     readonly weightUnit = computed(() => this.settings().weightUnit);
     readonly bodyFigure = computed(() => this.settings().bodyFigure);
     readonly trainingGoal = computed(() => this.settings().trainingGoal);
@@ -236,6 +243,7 @@ function loadSettings(): Settings {
             | 'vibration'
             | 'countdownBeeps'
             | 'keepScreenOn'
+            | 'waitToStart'
             | 'onlyMyEquipment'
             | 'includeActiveRest'
     ) => (typeof saved[key] === 'boolean' ? saved[key] : DEFAULT_SETTINGS[key]);
@@ -248,6 +256,7 @@ function loadSettings(): Settings {
         vibration: flag('vibration'),
         countdownBeeps: flag('countdownBeeps'),
         keepScreenOn: flag('keepScreenOn'),
+        waitToStart: flag('waitToStart'),
         weightUnit,
         bodyFigure:
             BODY_FIGURE_CHOICES.find((f) => f === saved['bodyFigure']) ??

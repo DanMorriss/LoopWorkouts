@@ -10,6 +10,7 @@ import { ExercisePickerComponent } from './exercise-picker.component';
             inputId="name"
             [(value)]="name"
             [(exerciseId)]="exerciseId"
+            [inWorkout]="inWorkout()"
             placeholder="e.g. Push-ups"
             (exerciseChange)="changes.push($event.name)"
         />
@@ -18,6 +19,7 @@ import { ExercisePickerComponent } from './exercise-picker.component';
 class HostComponent {
     readonly name = signal('');
     readonly exerciseId = signal('');
+    readonly inWorkout = signal<string[]>([]);
     readonly changes: string[] = [];
 }
 
@@ -129,6 +131,14 @@ describe('ExercisePickerComponent', () => {
         await type('sled');
 
         expect(optionText()[0]).toBe('Sled push, Your own');
+    });
+
+    it("says which are in the workout's other steps already, without stopping them", async () => {
+        host.inWorkout.set(['builtin:diamond-push-up']);
+
+        await type('diamond push');
+
+        expect(optionText()[0]).toBe('Diamond push-up, Already in this workout');
     });
 
     it('moves through the list with the arrow keys, and Enter picks one', async () => {

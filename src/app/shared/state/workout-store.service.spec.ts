@@ -559,6 +559,33 @@ describe('WorkoutStore', () => {
             expect(createStore().activeWorkout()).toEqual(saved);
         });
 
+        it('carries on after a reload as it was running, though the saved one has changed', () => {
+            const store = createStore();
+            const workout = store.addWorkout(makeWorkout({ title: 'Legs' }));
+            store.setActiveWorkout(workout);
+            // A change the run couldn't take, e.g. another step added
+            store.updateWorkout(workout.id, makeWorkout({ title: 'Legs', repeats: 5 }));
+
+            TestBed.resetTestingModule();
+
+            expect(createStore().activeWorkout()).toEqual(workout);
+        });
+
+        it('keeps whether the run waits for Start, and the waits behind it, across a reload', () => {
+            const store = createStore();
+            store.setActiveWorkout(store.addWorkout(makeWorkout()), undefined, true);
+            store.passWait(2, 5000);
+
+            TestBed.resetTestingModule();
+            const reloaded = createStore();
+            expect(reloaded.activeWaitToStart()).toBe(true);
+            expect(reloaded.activeWaitsPassed()).toBe(3);
+
+            reloaded.stop();
+            expect(reloaded.activeWaitToStart()).toBe(false);
+            expect(reloaded.activeWaitsPassed()).toBe(0);
+        });
+
         describe('swaps (RUN-11)', () => {
             const original = { kind: 'work' as const, seconds: 30, name: 'Plank' };
             const swap = {

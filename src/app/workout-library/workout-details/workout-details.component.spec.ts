@@ -580,9 +580,9 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
     });
 
     describe('arriving from Save in Create', () => {
-        async function arrive() {
+        async function arrive(saved = '1') {
             const sprints = addSprints();
-            await harness.navigateByUrl(`/library/${sprints.id}?saved=1`);
+            await harness.navigateByUrl(`/library/${sprints.id}?saved=${saved}`);
             harness.fixture.detectChanges();
             await harness.fixture.whenStable();
             await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -594,6 +594,26 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
 
             expect(text(el().querySelector('[aria-live]')!)).toBe('Saved Sprints');
             expect(document.activeElement).toBe(el().querySelector('.details__edit'));
+        });
+
+        it('says the workout going has the change, with a way back to it', async () => {
+            await arrive('running');
+
+            const offer = TestBed.inject(UndoService).offer();
+            expect(offer?.message).toBe(
+                "Saved. The workout that's going has the change from here."
+            );
+            expect(offer?.link).toEqual({ label: 'Back to workout', url: '/workout' });
+            // The bar reads it out, in place of "Saved Sprints"
+            expect(text(el().querySelector('[aria-live]')!)).toBe('');
+        });
+
+        it("says when the change is for next time, as the workout going couldn't take it", async () => {
+            await arrive('later');
+
+            expect(TestBed.inject(UndoService).offer()?.message).toBe(
+                "Saved for next time. The workout that's going carries on as it was."
+            );
         });
 
         it('puts focus on its title when Edit is out of view, as for a new copy', async () => {

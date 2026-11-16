@@ -35,6 +35,8 @@ export class RunBarComponent {
         () => !!this.run.workout() && !isOnPage(this.url(), '/workout')
     );
     protected readonly isPaused = this.run.isPaused;
+    /** A timed exercise after a long rest waiting for Start, which the bar's button presses. */
+    protected readonly waiting = computed(() => this.run.waiting() && !this.isPaused());
     /** Over, and waiting on its summary. */
     protected readonly finished = this.run.summaryOpen;
 
@@ -46,7 +48,10 @@ export class RunBarComponent {
         }
         return this.isPaused() ? 'paused' : (this.run.state()?.phase ?? 'work');
     });
-    /** e.g. "Squats · 00:23", "Push-ups · 20 reps", "Paused · Rest · 00:12". */
+    /**
+     * e.g. "Squats · 00:23", "Push-ups · 20 reps", "Paused · Rest · 00:12", or, waiting for
+     * Start, "Ready · Plank · 00:45".
+     */
     protected readonly status = computed(() => {
         if (this.finished()) {
             return this.run.isComplete() ? 'Finished: see how it went' : 'See how it went';
@@ -59,11 +64,17 @@ export class RunBarComponent {
         const name = step.name || stepKindName(step.kind);
         const amount =
             step.kind === 'reps' ? `${step.reps} reps` : formatSeconds(state.remainingSeconds);
-        return `${this.isPaused() ? 'Paused · ' : ''}${name} · ${amount}`;
+        const before = this.isPaused() ? 'Paused · ' : this.waiting() ? 'Ready · ' : '';
+        return `${before}${name} · ${amount}`;
     });
 
+    /** Pause or Resume, or Start on a timed exercise waiting for it. */
     protected togglePause() {
-        this.run.togglePause();
+        if (this.waiting()) {
+            this.run.startExercise();
+        } else {
+            this.run.togglePause();
+        }
     }
 
     // Swiping right to end the workout

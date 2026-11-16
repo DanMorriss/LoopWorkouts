@@ -96,7 +96,8 @@ export class WorkoutDetailsComponent {
     constructor() {
         // Just saved in Create (BLD-15), and say so. Focus goes to Edit, where it was left, if
         // the page came back scrolled there; otherwise, new to it, to its title at the top
-        if (this.route.snapshot.queryParamMap.has('saved')) {
+        const saved = this.route.snapshot.queryParamMap.get('saved');
+        if (saved !== null) {
             // A frame on, as the page slide scrolls it back to where it was just after rendering
             afterNextRender(() =>
                 requestAnimationFrame(() => {
@@ -107,10 +108,28 @@ export class WorkoutDetailsComponent {
                     (inView ? edit : page.querySelector<HTMLElement>('.details__title'))?.focus({
                         preventScroll: true,
                     });
-                    this.announcement.set(`Saved ${this.name()}`);
+                    if (!this.sayWhatTheRunDoes(saved)) {
+                        this.announcement.set(`Saved ${this.name()}`);
+                    }
                 })
             );
         }
+    }
+
+    /**
+     * Saved while it was running (`saved` from Create): whether the run took the change, with
+     * a way back to it, as it carries on out of sight. Returns whether there was a run to say
+     * it of, as the bar reads it out in place of "Saved".
+     */
+    private sayWhatTheRunDoes(saved: string): boolean {
+        const said = {
+            running: "Saved. The workout that's going has the change from here.",
+            later: "Saved for next time. The workout that's going carries on as it was.",
+        }[saved];
+        if (said) {
+            this.undo.notify(said, { link: { label: 'Back to workout', url: '/workout' } });
+        }
+        return !!said;
     }
 
     /** It, yours or ready-made, or null for a link to one there isn't, such as one deleted since. */

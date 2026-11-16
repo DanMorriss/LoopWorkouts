@@ -10,7 +10,15 @@ import {
 } from '@angular/core';
 import { Exercise } from '../../models/exercise';
 import { HistoryEntry, historyId, isTimedSet, RepSet } from '../../models/history';
-import { runPosition, StepSwap, swappedStep, withSwaps } from '../../models/step-swap';
+import { canTakeEdit, editSwaps } from '../../models/run-edit';
+import { nextWait } from '../../models/wait-to-start';
+import {
+    runPosition,
+    StepSwap,
+    swappedStep,
+    swapsInForce,
+    withSwaps,
+} from '../../models/step-swap';
 import {
     allSteps,
     placedHeadings,
@@ -30,6 +38,7 @@ import {
 import { alarmEvents } from '../../models/alarm-schedule';
 import {
     isSetAt,
+    nextRepStep,
     placeAt,
     placeFields,
     setsDone,
@@ -98,14 +107,51 @@ export class ActiveRunService {
     // so the workout stays correct even when ticks arrive late or not at all
     private readonly now = signal(Date.now());
 
-    /** How long the workout has run, in ms, or null if there's no workout. */
-    readonly elapsedMs = computed(() => {
+    /**
+     * How long the clock has run, in ms, or null if there's no workout: on past a rep step or
+     * a timed exercise being waited on, so Done or Start knows how long that took.
+     */
+    private readonly clockMs = computed(() => {
         const startedAt = this.store.activeWorkoutStartedAt();
         // While paused, time stands still at the moment of the pause. The clock only moves on
         // a tick, so a run started since the last one could look a moment short of its
         // start (e.g. 20:01 left of 20:00): it never counts from before it began.
         const at = this.store.activeWorkoutPausedAt() ?? Math.max(this.now(), startedAt ?? 0);
         return this.workout() && startedAt !== null ? at - startedAt : null;
+    });
+
+    /**
+     * The next timed exercise to wait for Start after a long rest (see `nextWait()`), when the
+     * run waits, and no rep step comes before it: the clock is held at a rep step first.
+     */
+    private readonly nextWait = computed(() => {
+        const workout = this.running();
+        if (!workout || !this.store.activeWaitToStart()) {
+            return null;
+        }
+        const wait = nextWait(workout, this.store.activeWaitsPassed() - 1);
+        const repStep = nextRepStep(workout, this.store.activeRepStepsDone());
+        return wait && (!repStep || repStep.atMs > wait.atMs) ? wait : null;
+    });
+
+    /**
+     * A timed exercise after a long rest is waiting for Start (see `startExercise()`), with the
+     * setting on: its time stands full, and nothing sounds, until it's pressed.
+     */
+    readonly waiting = computed(() => {
+        const wait = this.nextWait();
+        const clockMs = this.clockMs();
+        return !!wait && clockMs !== null && clockMs >= wait.atMs;
+    });
+
+    /**
+     * How long the workout has run, in ms, or null if there's no workout: the clock, held at
+     * a timed exercise waiting for Start.
+     */
+    readonly elapsedMs = computed(() => {
+        const clockMs = this.clockMs();
+        const wait = this.nextWait();
+        return clockMs !== null && wait ? Math.min(clockMs, wait.atMs) : clockMs;
     });
 
     readonly state = computed(() => {
@@ -216,6 +262,9 @@ export class ActiveRunService {
         const startedAt = this.store.activeWorkoutStartedAt();
         const fromRound = (this.alarmBatch() * ALARM_WINDOW) / 2;
         const resumedAt = this.resumedAt();
+        // Nothing past a timed exercise waiting for Start, as no one knows when that will be
+        const wait = this.nextWait();
+        const waitAt = startedAt !== null && wait ? startedAt + wait.atMs : Infinity;
         return workout && startedAt !== null && !this.isPaused()
             ? alarmEvents(
                   workout,
@@ -225,7 +274,7 @@ export class ActiveRunService {
                   this.store.activeRepStepsDone(),
                   this.store.activeOffClockMs(),
                   this.settings.countdownBeeps()
-              ).filter((event) => event.at > resumedAt)
+              ).filter((event) => event.at > resumedAt && event.at < waitAt)
             : [];
     });
     private lastAlarmCheck = Date.now() - VIBRATE_LATE_LIMIT_MS;
@@ -310,10 +359,14 @@ export class ActiveRunService {
             this.sync();
             this.recordRun('stopped');
         }
-        this.store.setActiveWorkout(workout, {
-            first: this.settings.eachSideFirst(),
-            switchSeconds: this.settings.switchSidesSeconds(),
-        });
+        this.store.setActiveWorkout(
+            workout,
+            {
+                first: this.settings.eachSideFirst(),
+                switchSeconds: this.settings.switchSidesSeconds(),
+            },
+            this.settings.waitToStart()
+        );
         this.resumedAt.set(0);
         this._held.set(false);
         this.ending.set(false);
@@ -393,6 +446,8 @@ export class ActiveRunService {
      */
     skipStep() {
         this.sync();
+        // Skip on a timed exercise waiting for Start skips it from its full time
+        this.passWait();
         const state = this.state();
         if (state?.phase === 'reps') {
             this.store.finishRepStep(state.phaseElapsedMs);
@@ -404,9 +459,37 @@ export class ActiveRunService {
         }
         const skippedMs = state.phaseSeconds * 1000 - state.phaseElapsedMs;
         this.store.skipStep({ round: state.round, stepIndex: state.stepIndex, skippedMs });
+        this.sync();
+        // Skipping a rest says you're ready, so a timed exercise after it starts at once
+        this.passWait();
         // The next step starts now, and its alarm with it
         this.resumedAt.set(Date.now() - 1);
         this.sync();
+    }
+
+    /**
+     * Start on a timed exercise waiting for it after a long rest (see `waiting`): its time
+     * starts now, and its alarm with it. From a pause too, which it ends.
+     */
+    startExercise() {
+        this.sync();
+        if (!this.passWait()) {
+            return;
+        }
+        this.resumedAt.set(Date.now() - 1);
+        this.sync();
+    }
+
+    /** Lets the run past the timed exercise waiting for Start, if there is one. */
+    private passWait(): boolean {
+        const wait = this.nextWait();
+        const clockMs = this.clockMs();
+        if (!this.waiting() || !wait || clockMs === null) {
+            return false;
+        }
+        this.store.passWait(wait.position, clockMs - wait.atMs);
+        this.sync();
+        return true;
     }
 
     /**
@@ -465,6 +548,11 @@ export class ActiveRunService {
     readonly swaps = computed(() => {
         const latest = new Map<number, { step: number; was: Step; now: Step }>();
         for (const swap of this.store.activeSwaps()) {
+            // An edit made it what the saved workout has, so it starts again from there
+            if (swap.edited) {
+                latest.delete(swap.step);
+                continue;
+            }
             const was = latest.get(swap.step)?.was ?? swap.original;
             latest.set(swap.step, { step: swap.step, was, now: swap.swapped });
         }
@@ -473,9 +561,12 @@ export class ActiveRunService {
             .filter((swap) => swap.now.exerciseId !== swap.was.exerciseId)
             .sort((a, b) => a.step - b.step);
     });
-    /** The steps swapped in this run (RUN-11), by their place in the workout. */
+    /**
+     * The steps swapped in this run (RUN-11), by their place in the workout, and not edited
+     * back to the workout's own since.
+     */
     readonly swappedSteps = computed(
-        () => new Set(this.store.activeSwaps().map((swap) => swap.step))
+        () => new Set(swapsInForce(this.store.activeSwaps()).map((swap) => swap.step))
     );
 
     private readonly _keptSwaps = signal<ReadonlySet<number>>(new Set());
@@ -525,6 +616,32 @@ export class ActiveRunService {
         }
         this.store.updateActiveStep(step, swap.now);
         this._keptSwaps.update((steps) => new Set([...steps, step]));
+    }
+
+    /**
+     * The running workout saved in Create with changes (`edited`): the run takes them from
+     * where it is, as long as they keep it to the same clock (see `canTakeEdit()`). Sets done
+     * already stay as they were, as with a swap. Returns whether it took them; if not, they're
+     * for next time, as is any change once the run's over.
+     */
+    takeEdit(edited: Workout): boolean {
+        this.sync();
+        const workout = this.workout();
+        const running = this.running();
+        const state = this.state();
+        if (
+            !workout ||
+            !running ||
+            !state ||
+            workout.id !== edited.id ||
+            this.summaryOpen() ||
+            !canTakeEdit(workout, edited)
+        ) {
+            return false;
+        }
+        const from = runPosition(state.round, state.stepIndex, runPlan(running).steps.length);
+        this.store.takeActiveEdit(edited, editSwaps(workout, edited, from));
+        return true;
     }
 
     /**

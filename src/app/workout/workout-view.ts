@@ -56,6 +56,11 @@ export class WorkoutView {
     readonly isWorkActive = computed(() => this.state()?.phase === 'work');
     readonly isRestActive = computed(() => this.state()?.phase === 'rest');
     readonly isRepsActive = computed(() => this.state()?.phase === 'reps');
+    /**
+     * A timed exercise after a long rest waiting for Start (see `ActiveRunService.waiting`):
+     * Pause is Start, and Space presses it.
+     */
+    readonly isWaiting = computed(() => this.run.waiting() && !this.isPaused());
     readonly isComplete = computed(() => this.state()?.phase === 'complete');
     /** The rep step's count, e.g. 20, or 0 when it isn't a rep step. */
     readonly reps = computed(() => {
@@ -536,6 +541,9 @@ export class WorkoutView {
         if (state.step.kind === 'reps') {
             const weight = this.weightText(state.step);
             parts.push(`${state.step.reps} reps${weight ? ` at ${weight}` : ''}`);
+        }
+        if (this.isWaiting()) {
+            parts.push('waiting: press Start when you are ready');
         }
         if (this.exerciseNote()) {
             parts.push(`your note: ${this.exerciseNote()}`);

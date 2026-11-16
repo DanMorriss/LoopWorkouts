@@ -60,6 +60,8 @@ export class WorkoutStore {
     private _activeSides = signal<RunSides>(DEFAULT_RUN_SIDES);
     private _activeSwaps = signal<StepSwap[]>([]);
     private _activeSkips = signal<StepSkip[]>([]);
+    private _activeWaitToStart = signal(false);
+    private _activeWaitsPassed = signal(0);
 
     /** Your own workouts, which are your data: saved, backed up and synced. */
     readonly workouts = computed(() => this._workouts());
@@ -148,6 +150,17 @@ export class WorkoutStore {
      * with the run, so changing them mid-workout can't move its clock.
      */
     readonly activeSides = computed(() => this._activeSides());
+    /**
+     * Whether the current run waits for Start after long rests (see `nextWait()`), from the
+     * settings when it started: kept with the run, as turning it off mid-wait would otherwise
+     * move the clock on by the wait.
+     */
+    readonly activeWaitToStart = computed(() => this._activeWaitToStart());
+    /**
+     * How far into the run the waits for Start are behind it: those before this position (as
+     * `runPosition()` counts) were started, or skipped past.
+     */
+    readonly activeWaitsPassed = computed(() => this._activeWaitsPassed());
 
     constructor() {
         renameActiveRunKeys();
@@ -172,7 +185,7 @@ export class WorkoutStore {
 
     /** Takes up the run of `workout` this tab had going, from where it was saved. */
     private restoreRun(workout: Workout) {
-        this._activeWorkout.set(workout);
+        this._activeWorkout.set(this.asItRan(workout));
         const startedAt = this.loadActiveWorkoutStartedAt();
         this._activeWorkoutStartedAt.set(startedAt);
         this._activeWorkoutPausedAt.set(this.loadActiveWorkoutPausedAt(startedAt));
@@ -189,6 +202,8 @@ export class WorkoutStore {
         this._activeSides.set(readSides(sessionStorage.getItem('activeSides')));
         this._activeSwaps.set(readSwaps(sessionStorage.getItem('activeSwaps')));
         this._activeSkips.set(readSkips(sessionStorage.getItem('activeSkips')));
+        this._activeWaitToStart.set(sessionStorage.getItem('activeWaitToStart') === 'true');
+        this._activeWaitsPassed.set(readCount(sessionStorage.getItem('activeWaitsPassed')));
     }
 
     private loadWorkouts(): Workout[] {
@@ -208,6 +223,26 @@ export class WorkoutStore {
         } catch {
             return [];
         }
+    }
+
+    /**
+     * The run's own copy of `workout`, as it was running (see `setRunning()`), as the saved one
+     * may have been changed since in ways the run couldn't take (see `canTakeEdit()`). The
+     * saved one for a run from before copies were kept.
+     */
+    private asItRan(workout: Workout): Workout {
+        try {
+            const copy = readWorkout(JSON.parse(sessionStorage.getItem('activeWorkout') ?? 'null'));
+            return copy?.id === workout.id ? copy : workout;
+        } catch {
+            return workout;
+        }
+    }
+
+    /** The workout as this run has it, kept for the tab so a reload carries on with it. */
+    private setRunning(workout: Workout) {
+        this._activeWorkout.set(workout);
+        sessionStorage.setItem('activeWorkout', JSON.stringify(workout));
     }
 
     // The active workout and its start time are remembered per tab, so refreshing
@@ -417,7 +452,7 @@ export class WorkoutStore {
         }
         const active = this._activeWorkout();
         if (active) {
-            this._activeWorkout.set(renamed(active));
+            this.setRunning(renamed(active));
         }
     }
 
@@ -425,11 +460,13 @@ export class WorkoutStore {
      * Makes `workout` the active workout and starts it from the beginning, doing exercises
      * each side as `sides` says (the settings, as they are now).
      */
-    setActiveWorkout(workout: Workout, sides: RunSides = DEFAULT_RUN_SIDES) {
+    setActiveWorkout(workout: Workout, sides: RunSides = DEFAULT_RUN_SIDES, waitToStart = false) {
         const startedAt = Date.now();
-        this._activeWorkout.set(workout);
+        this.setRunning(workout);
         this._activeSides.set(sides);
         sessionStorage.setItem('activeSides', JSON.stringify(sides));
+        this._activeWaitToStart.set(waitToStart);
+        sessionStorage.setItem('activeWaitToStart', String(waitToStart));
         this._activeWorkoutStartedAt.set(startedAt);
         sessionStorage.setItem('activeWorkoutId', String(workout.id));
         sessionStorage.setItem('activeWorkoutStartedAt', String(startedAt));
@@ -452,6 +489,17 @@ export class WorkoutStore {
         const last = swaps.map((swap) => swap.step).lastIndexOf(step);
         if (last >= 0) {
             this.setSwaps(swaps.map((swap, i) => (i === last ? { ...swap, swapped } : swap)));
+        }
+    }
+
+    /**
+     * The running workout, saved with changes it can take part-way (see `canTakeEdit()`), runs
+     * as `edited` from here, with `swaps` keeping the sets done before as they were.
+     */
+    takeActiveEdit(edited: Workout, swaps: readonly StepSwap[]) {
+        this.setRunning(edited);
+        if (swaps.length > 0) {
+            this.setSwaps([...this._activeSwaps(), ...swaps]);
         }
     }
 
@@ -513,6 +561,24 @@ export class WorkoutStore {
         sessionStorage.setItem('activeSkips', JSON.stringify(this._activeSkips()));
     }
 
+    /**
+     * Start on a timed exercise waiting for it (see `nextWait()`), or Skip past it: the clock
+     * starts it now, its start time moving on by `waitedMs`, how long the clock ran on past it
+     * while it waited, as Done does on a rep step. It's behind the run from here, at `position`.
+     */
+    passWait(position: number, waitedMs: number) {
+        if (!this._activeWorkout() || this._activeWorkoutStartedAt() === null) {
+            return;
+        }
+        // Start straight from a pause carries on running
+        this.resume();
+        const movedStart = this._activeWorkoutStartedAt()! + Math.max(0, Math.round(waitedMs));
+        this._activeWorkoutStartedAt.set(movedStart);
+        sessionStorage.setItem('activeWorkoutStartedAt', String(movedStart));
+        this._activeWaitsPassed.set(position + 1);
+        sessionStorage.setItem('activeWaitsPassed', String(position + 1));
+    }
+
     /** Adds a set without moving the workout on, e.g. the one time ran out in. */
     addActiveSet(set: RepSet) {
         if (!this._activeWorkout()) {
@@ -538,6 +604,8 @@ export class WorkoutStore {
         this._activeRepMs.set(0);
         this._activeSets.set([]);
         this._activeSkips.set([]);
+        this._activeWaitsPassed.set(0);
+        sessionStorage.removeItem('activeWaitsPassed');
         sessionStorage.removeItem('activeRepStepsDone');
         sessionStorage.removeItem('activeRepMs');
         sessionStorage.removeItem('activeSets');
@@ -556,7 +624,7 @@ export class WorkoutStore {
         if (!workout || !steps[stepIndex]) {
             return;
         }
-        this._activeWorkout.set({
+        this.setRunning({
             ...workout,
             blocks: withSteps(
                 workout.blocks,
@@ -642,6 +710,7 @@ export class WorkoutStore {
     /** Ends the active workout, leaving no workout selected. */
     stop() {
         this._activeWorkout.set(null);
+        sessionStorage.removeItem('activeWorkout');
         this._activeWorkoutStartedAt.set(null);
         this._activeWorkoutPausedAt.set(null);
         this._activeRunStartedAt.set(null);
@@ -650,6 +719,8 @@ export class WorkoutStore {
         sessionStorage.removeItem('activeWorkoutPausedAt');
         sessionStorage.removeItem('activeRunStartedAt');
         sessionStorage.removeItem('activeSides');
+        this._activeWaitToStart.set(false);
+        sessionStorage.removeItem('activeWaitToStart');
         this.clearStepsDone();
         this.setSwaps([]);
     }
@@ -987,7 +1058,8 @@ function isSwap(value: unknown): value is StepSwap {
         isWholeNumber(swap['step'], 0) &&
         isWholeNumber(swap['from'], 0) &&
         isStep(swap['original']) &&
-        isStep(swap['swapped'])
+        isStep(swap['swapped']) &&
+        (swap['edited'] === undefined || swap['edited'] === true)
     );
 }
 

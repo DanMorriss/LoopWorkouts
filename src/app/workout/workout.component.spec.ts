@@ -4948,4 +4948,191 @@ describe('WorkoutComponent', () => {
             });
         });
     });
+
+    describe('waiting for Start after a long rest', () => {
+        afterEach(() => localStorage.clear());
+
+        const plank: Step = { kind: 'work', seconds: 20, name: 'Plank' };
+        // Plank, a long rest, then the plank again, which waits for Start
+        const workout = () => makeWorkout({ steps: [plank, rest(30), plank], repeats: 1 });
+        const mainButton = () =>
+            fixture.nativeElement.querySelector('#workout-pause') as HTMLButtonElement;
+
+        /** As start(), as the run starts from a Start button, with the setting as it is. */
+        function startFromSettings(workout: Workout) {
+            localStorage.setItem(WORKOUT_TOUR_KEY, 'seen');
+            TestBed.inject(ActiveRunService).start(workout);
+            fixture = TestBed.createComponent(WorkoutComponent);
+            fixture.detectChanges();
+        }
+
+        it("holds a timed exercise at its full time, with Start for Pause, till it's pressed", () => {
+            startFromSettings(workout());
+
+            advance(50_000 + 10_000);
+
+            expect(view().isWorkActive()).toBe(true);
+            expect(text()).toContain('00:20');
+            expect(mainButton().getAttribute('aria-label')).toBe('Start');
+            expect(text()).toContain('Start');
+            expect(view().announcement()).toContain('press Start when you are ready');
+
+            mainButton().click();
+            advance(5000);
+
+            expect(text()).toContain('00:15');
+            expect(mainButton().getAttribute('aria-label')).toBe('Pause');
+            fixture.destroy();
+        });
+
+        it('starts with Space too, as Space presses Done on a rep step', () => {
+            startFromSettings(workout());
+            advance(50_000);
+
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space' }));
+            fixture.detectChanges();
+            advance(1000);
+
+            expect(text()).toContain('00:19');
+            fixture.destroy();
+        });
+
+        it("doesn't wait after a short rest, as in an interval circuit", () => {
+            startFromSettings(makeWorkout({ steps: [plank, rest(29), plank], repeats: 1 }));
+
+            advance(49_000 + 5000);
+
+            expect(text()).toContain('00:15');
+            fixture.destroy();
+        });
+
+        it('starts at once when the rest before it is skipped, as that says you are ready', () => {
+            startFromSettings(workout());
+            advance(25_000);
+
+            (
+                fixture.nativeElement.querySelector('.workout-control--skip button') as HTMLElement
+            ).click();
+            fixture.detectChanges();
+            advance(1000);
+
+            expect(text()).toContain('00:19');
+            fixture.destroy();
+        });
+
+        it('skips the exercise from its full time with Skip while it waits', () => {
+            startFromSettings(workout());
+            advance(60_000);
+
+            (
+                fixture.nativeElement.querySelector('.workout-control--skip button') as HTMLElement
+            ).click();
+            fixture.detectChanges();
+
+            expect(view().isComplete()).toBe(true);
+            fixture.destroy();
+        });
+
+        it("doesn't wait with the setting off", () => {
+            TestBed.inject(SettingsStore).update({ waitToStart: false });
+            startFromSettings(workout());
+
+            advance(50_000 + 5000);
+
+            expect(text()).toContain('00:15');
+            fixture.destroy();
+        });
+
+        it("keeps waiting if the setting's turned off mid-workout, so the clock doesn't jump", () => {
+            startFromSettings(workout());
+            advance(60_000);
+
+            TestBed.inject(SettingsStore).update({ waitToStart: false });
+            advance(1000);
+
+            expect(text()).toContain('00:20');
+            fixture.destroy();
+        });
+
+        it("books no alarm for the exercise till it's started, then sounds it at once", () => {
+            startFromSettings(workout());
+            TestBed.inject(AlarmService).unlock();
+            fixture.detectChanges();
+
+            expect(audio.scheduledNotes()).toContain('440@20');
+            expect(audio.scheduledNotes()).not.toContain('880@50');
+
+            advance(60_000);
+            mainButton().click();
+            fixture.detectChanges();
+
+            expect(audio.scheduledNotes()).toContain('880@60');
+            fixture.destroy();
+        });
+
+        it('leaves the wait out of the time spent, as a pause is', () => {
+            startFromSettings(workout());
+            advance(60_000);
+
+            mainButton().click();
+            advance(20_000);
+
+            expect(view().isComplete()).toBe(true);
+            expect(TestBed.inject(HistoryStore).entries()[0].activeSeconds).toBe(70);
+            fixture.destroy();
+        });
+    });
+
+    describe('editing the workout while it runs', () => {
+        const plank: Step = {
+            kind: 'work',
+            seconds: 3,
+            name: 'Plank',
+            exerciseId: 'builtin:plank',
+        };
+        const sidePlank: Step = {
+            kind: 'work',
+            seconds: 3,
+            name: 'Side plank',
+            exerciseId: 'builtin:side-plank',
+        };
+        const running = () => makeWorkout({ steps: [plank, rest(2)], repeats: 2 });
+        const run = () => TestBed.inject(ActiveRunService);
+
+        it('runs the change from where it is, the sets done before staying as they were', () => {
+            start(running());
+            advance(5000 + 1000); // round 1 done, a second into round 2's plank
+
+            const took = run().takeEdit(makeWorkout({ steps: [sidePlank, rest(2)], repeats: 2 }));
+            fixture.detectChanges();
+
+            expect(took).toBe(true);
+            expect(text()).toContain('Side plank');
+            advance(2000);
+            expect(view().isComplete()).toBe(true);
+            expect(
+                run()
+                    .sets()
+                    .map((set) => set.name)
+            ).toEqual(['Plank', 'Side plank']);
+            // Saved already, so it's no swap to offer to keep
+            expect(run().swaps()).toEqual([]);
+            fixture.destroy();
+        });
+
+        it("carries on as it was when the change would move its clock, e.g. a step's time", () => {
+            start(running());
+            advance(1000);
+
+            const took = run().takeEdit(
+                makeWorkout({ steps: [{ ...sidePlank, seconds: 30 }, rest(2)], repeats: 2 })
+            );
+            fixture.detectChanges();
+
+            expect(took).toBe(false);
+            expect(text()).toContain('Plank');
+            expect(text()).toContain('00:02');
+            fixture.destroy();
+        });
+    });
 });

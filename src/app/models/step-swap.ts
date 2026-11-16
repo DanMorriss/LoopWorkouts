@@ -16,6 +16,23 @@ export interface StepSwap {
     original: Step;
     /** The step as it runs now: the other exercise, its name, and its weight from last time. */
     swapped: Step;
+    /**
+     * Made by editing the workout while it ran, so the saved workout has it already: from
+     * here on the step runs as the workout has it, and it's no swap to keep or list.
+     */
+    edited?: true;
+}
+
+/**
+ * The swaps still in force, by step: each step's latest, unless that was an edit (see
+ * `StepSwap.edited`), which leaves the step as the workout has it.
+ */
+export function swapsInForce(swaps: readonly StepSwap[]): StepSwap[] {
+    const latest = new Map<number, StepSwap>();
+    for (const swap of swaps) {
+        latest.set(swap.step, swap);
+    }
+    return [...latest.values()].filter((swap) => !swap.edited);
 }
 
 /** How far into the run a step is: rounds before it, each of `stepsPerRound`, then its place. */
@@ -23,15 +40,19 @@ export function runPosition(round: number, stepIndex: number, stepsPerRound: num
     return round * stepsPerRound + stepIndex;
 }
 
-/** The workout as it runs with its swaps: each swapped step as it was last swapped. */
+/**
+ * The workout as it runs with its swaps: each swapped step as it was last swapped, or as the
+ * workout has it when that was an edit.
+ */
 export function withSwaps<T extends Workout>(workout: T, swaps: readonly StepSwap[]): T {
     if (swaps.length === 0) {
         return workout;
     }
-    const steps = allSteps(workout);
+    const own = allSteps(workout);
+    const steps = [...own];
     for (const swap of swaps) {
         if (steps[swap.step]) {
-            steps[swap.step] = swap.swapped;
+            steps[swap.step] = swap.edited ? own[swap.step] : swap.swapped;
         }
     }
     return { ...workout, blocks: withSteps(workout.blocks, steps) };

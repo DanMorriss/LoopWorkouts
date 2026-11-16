@@ -48,6 +48,11 @@
                         ><span class="sr-only">, </span>Your own</span
                     >
                 }
+                @if (option.inWorkout) {
+                    <span class="exercise-picker__detail"
+                        ><span class="sr-only">, </span>Already in this workout</span
+                    >
+                }
                 @if (option.hint) {
                     <span class="exercise-picker__detail exercise-picker__hint"
                         ><span class="sr-only">, </span>{{ option.hint }}</span

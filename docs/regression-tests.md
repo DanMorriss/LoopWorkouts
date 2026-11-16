@@ -816,6 +816,35 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     4. A wake lock is requested while running and released on pause and on finish.
 - **Manual:** real beeps, vibration (Android), and the screen staying on, on a phone; alarms with the phone locked (ALM-2) don't work on iPhone (a known web limit).
 
+### REG-RUN-16 · A timed exercise after a long rest waits for Start
+
+- **Stories:** RUN-14 · **Priority:** P2 · **[Clock]**
+- **Preconditions:** workout "Holds": Plank (`builtin:plank`) 0:30, rest 0:40, Plank 0:30, once; default settings (Wait for me after rests on).
+- **Steps:**
+    1. Start; `runFor` the plank, the rest and 45 s more.
+    2. Reload.
+    3. Press **Start**; `runFor` 5500.
+- **Expected:**
+    1. The second plank waits at 00:30, with Start where Pause was.
+    2. Still waiting at 00:30.
+    3. It counts down from 00:30, with Pause back.
+- **Left to Vitest:** shorter rests not waiting, Skip, the setting off (and turned off mid-wait), Space, the alarms and the time spent (`workout.component.spec.ts`), and `nextWait()` (`wait-to-start.spec.ts`).
+
+### REG-RUN-17 · A change saved in Create reaches the workout going
+
+- **Stories:** RUN-15, RUN-11, BLD-14 · **Priority:** P2
+- **Preconditions:** workout "Push": Push-up (`builtin:push-up`) 10, rest 0:20, Diamond push-up (`builtin:diamond-push-up`) 10.
+- **Steps:**
+    1. Start; Done.
+    2. Open `/setup?editId=push`; open step 3; **Swap Diamond push-up**; type "push-up".
+    3. Pick Kettlebell push-up; **Save**.
+    4. **Back to workout** in the bar.
+- **Expected:**
+    2. Push-up says "Already in this workout".
+    3. The bar says "Saved. The workout that's going has the change from here.", with Back to workout.
+    4. Up next is Kettlebell push-up.
+- **Left to Vitest:** a change that would move the clock (saved for next time, the run as it was after a reload), and the sets before the change staying as they were (`workout.component.spec.ts`, `run-edit.spec.ts`, `workout-store.service.spec.ts`).
+
 ---
 
 ## 6. History, on the Progress tab (`history.md`)
@@ -1445,7 +1474,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Today and planning        | REG-PLAN-01 – 09 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
 | Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                   |
 | Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                          |
-| Running a workout         | REG-RUN-01 – 15  | RUN-1 – RUN-12, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
+| Running a workout         | REG-RUN-01 – 17  | RUN-1 – RUN-12, RUN-14, RUN-15, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 04  | HIS-1 – HIS-5, CTL-3                                                                                                          |
 | Progress                  | REG-PRG-01 – 04  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-13                                                                                     |
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |

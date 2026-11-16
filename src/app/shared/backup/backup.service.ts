@@ -104,6 +104,7 @@ export class BackupService {
                     vibration: this.settings.vibration(),
                     countdownBeeps: this.settings.countdownBeeps(),
                     keepScreenOn: this.settings.keepScreenOn(),
+                    waitToStart: this.settings.waitToStart(),
                     weightUnit: this.settings.weightUnit(),
                     bodyFigure: this.settings.bodyFigure(),
                     trainingGoal: this.settings.trainingGoal(),

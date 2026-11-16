@@ -39,6 +39,7 @@ import {
 import { WorkoutSetupComponent } from './workout-setup.component';
 import { WorkoutSetupForm } from './workout-setup-form';
 import { LeaveCheck } from '../shared/navigation/leave-check';
+import { ActiveRunService } from '../shared/run/active-run.service';
 import { PageSlide } from '../shared/navigation/page-slide';
 import { CREATE_TOUR_KEY, JOIN_TIP_KEY, TourService } from '../tour/tour.service';
 
@@ -2921,6 +2922,21 @@ describe('WorkoutSetupComponent', () => {
             expect(store.workouts()[0]).toMatchObject({ id: 'workout-1', title: 'Renamed' });
             expect(store.activeWorkout()).toBeNull();
             expect(slide).toHaveBeenCalledWith('/library/workout-1?saved=1', 'out');
+        });
+
+        it('gives the workout running the change, and says so on its details', async () => {
+            await setup({ editId: 'workout-1' });
+            TestBed.inject(ActiveRunService).start(store.addWorkout(savedWorkout));
+            await create();
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+
+            typeTitle('Renamed');
+            await press('Save');
+
+            expect(store.activeWorkout()?.title).toBe('Renamed');
+            expect(slide).toHaveBeenCalledWith('/library/workout-1?saved=running', 'out');
         });
 
         it('empties the form for a new workout when the editId goes, as Create from the menu does', async () => {

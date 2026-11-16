@@ -56,6 +56,13 @@
     @include showcase-description;
 }
 
+// Over the week: fitted to the days you can train, or why not
+.plan-card__fit {
+    margin-bottom: -0.5rem;
+    color: var(--text-muted);
+    @include small-type(0.75rem);
+}
+
 // The week, as tall as it'll be while it loads
 .plan-card__week {
     display: grid;

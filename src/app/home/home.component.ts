@@ -9,7 +9,7 @@ import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
-import { weekdayOf } from '../models/plan';
+import { thisWeek, weekdayOf } from '../models/plan';
 
 /**
  * Today, where the app opens, greeting you by name (NAV-4) for the time of day: the week's plan
@@ -50,16 +50,20 @@ export class HomeComponent {
             .plan()
             .days.some((day) => day.some((id) => this.workouts.findAnyWorkout(id) !== null))
     );
-    /** A day of a planned week with nothing planned on it: a rest day, or a chance to train. */
-    protected readonly restDay = computed(
-        () =>
-            this.hasPlan() &&
-            !this.planStore
-                .plan()
-                .days[
-                    weekdayOf(this.openedAt.getTime())
-                ].some((id) => this.workouts.findAnyWorkout(id) !== null)
-    );
+    /**
+     * A day of a planned week with nothing planned on it this week (one moved here this week
+     * counts, and one moved off doesn't): a rest day, or a chance to train.
+     */
+    protected readonly restDay = computed(() => {
+        const now = this.openedAt.getTime();
+        const week = thisWeek(
+            this.planStore.plan(),
+            [],
+            now,
+            (id) => this.workouts.findAnyWorkout(id) !== null
+        );
+        return this.hasPlan() && week[weekdayOf(now)].length === 0;
+    });
     protected readonly greeting = computed(() => {
         const name = this.settings.name();
         const hello = greetingFor(this.openedAt.getHours());

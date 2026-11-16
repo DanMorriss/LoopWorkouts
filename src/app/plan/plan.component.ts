@@ -1,52 +1,29 @@
-import {
-    CdkDrag,
-    CdkDragDrop,
-    CdkDragHandle,
-    CdkDropList,
-    CdkDropListGroup,
-} from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { afterNextRender, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BackLinkComponent } from '../nav/back-link/back-link.component';
 import { PageSlide } from '../shared/navigation/page-slide';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
-import {
-    MAX_WORKOUTS_A_DAY,
-    PlannedStatus,
-    PlannedWorkout,
-    thisWeek,
-    weekdayOf,
-    WEEKDAYS,
-} from '../models/plan';
-import {
-    WorkoutChoice,
-    WorkoutChoiceDialogComponent,
-} from '../shared/components/workout-choice-dialog/workout-choice-dialog.component';
-import { HistoryStore } from '../shared/state/history-store.service';
+import { WEEKDAYS } from '../models/plan';
+import { WorkoutChoiceDialogComponent } from '../shared/components/workout-choice-dialog/workout-choice-dialog.component';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
-import { aToZ, isReadyMade } from '../models/workout';
 import { TourService } from '../tour/tour.service';
 import { PlanMusclesComponent } from './plan-muscles/plan-muscles.component';
 import { AddToPlanDialogComponent } from '../shared/components/add-to-plan-dialog/add-to-plan-dialog.component';
 import { injectPlanOnDays } from '../shared/plan-on-days';
+import { injectStartWorkout } from '../shared/run/start-workout';
+import { UndoService } from '../shared/undo/undo.service';
 import { Workout } from '../models/workout';
 import { PlanDrag, PlannedDrag } from './plan-drag';
-
-/**
- * How a planned workout's place this week reads, e.g. "Done". "To come" says nothing, unless
- * it's active rest (see `statusLabel`).
- */
-const STATUS_TEXT: Record<PlannedStatus, string> = {
-    done: 'Done',
-    missed: 'Missed',
-    rested: 'Rested',
-    today: 'Due',
-    'to come': '',
-    'next week': 'From next week',
-};
+import { PlanPageView, PlanRow } from './plan-page-view';
+import {
+    PlanAction,
+    planNameId,
+    PlanWorkoutComponent,
+} from './plan-workout/plan-workout.component';
 
 /**
  * The weekly plan (PLN-1): Monday to Sunday, the workouts planned on each, the same every week,
@@ -54,7 +31,8 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
  * workout, yours or ready-made, or takes one off; the dialog's **Make a new workout** opens
  * Create, whose Save plans it on that day and comes back here (PLN-5). A workout's handle drags
  * it to another day, or another place on its own; pressed, it opens the days to plan it on.
- * It slides in over Today, from its week (PLN-4), and back off with ‹ Today or a swipe right.
+ * Its name opens a menu: Start, Details, and Do it today instead, this week only (or, done so,
+ * Put back). What it shows is `PlanPageView`. It slides in over Today, from its week (PLN-4), and back off with ‹ Today or a swipe right.
  */
 @Component({
     selector: 'app-plan',
@@ -62,25 +40,28 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
         AddToPlanDialogComponent,
         BackLinkComponent,
         CdkDrag,
-        CdkDragHandle,
         CdkDropList,
         CdkDropListGroup,
         MatIconModule,
         PlanMusclesComponent,
+        PlanWorkoutComponent,
         SwipeBackDirective,
         WorkoutChoiceDialogComponent,
     ],
+    providers: [PlanPageView],
+    host: { '(document:click)': 'menuFor.set(null)' },
     templateUrl: './plan.component.html',
     styleUrl: './plan.component.scss',
 })
 export class PlanComponent {
     private readonly planStore = inject(PlanStore);
     private readonly workouts = inject(WorkoutStore);
-    private readonly history = inject(HistoryStore);
+    private readonly undo = inject(UndoService);
+    protected readonly view = inject(PlanPageView);
     private readonly focusAfterRender = injectFocusAfterRender();
     protected readonly slide = inject(PageSlide);
     private readonly planOnDays = injectPlanOnDays();
-    private readonly now = Date.now();
+    private readonly start = injectStartWorkout();
     protected readonly drag = new PlanDrag(this.planStore.plan);
 
     constructor() {
@@ -91,9 +72,9 @@ export class PlanComponent {
         const day = saved ? this.planStore.plan().days.findIndex((ids) => ids.includes(saved)) : -1;
         if (saved && day >= 0) {
             this.saved.set({ id: saved, day });
-            this.focusAfterRender(this.canAdd(day) ? `plan-add-${day}` : 'plan-title');
+            this.focusAfterRender(this.view.canAdd(day) ? `plan-add-${day}` : 'plan-title');
             // Once the live region's on the page, as one filled before it isn't heard
-            const said = `Saved ${this.names().get(saved)}, planned on ${WEEKDAYS[day]}`;
+            const said = `Saved ${this.name(saved)}, planned on ${WEEKDAYS[day]}`;
             afterNextRender(() => this.announcement.set(said));
         }
     }
@@ -106,73 +87,13 @@ export class PlanComponent {
         return saved?.day === day && saved.id === workoutId;
     }
 
-    protected readonly today = weekdayOf(this.now);
-    private readonly names = computed(
-        () =>
-            new Map(
-                this.workouts
-                    .allWorkouts()
-                    .map((workout) => [workout.id, workout.title.trim() || 'Untitled workout'])
-            )
-    );
-
-    /** Each day, Monday first, with its workouts and where each is this week. */
-    protected readonly days = computed(() =>
-        thisWeek(
-            this.planStore.plan(),
-            this.history.entries(),
-            this.now,
-            (id) => this.names().has(id),
-            (id) => this.workouts.isActiveRest(id)
-        ).map((planned, day) => ({
-            day,
-            name: WEEKDAYS[day],
-            workouts: planned.map((item) => ({
-                ...item,
-                name: this.names().get(item.workoutId)!,
-                label: statusLabel(item),
-            })),
-        }))
-    );
-
-    /**
-     * "2 of 5 done this week", counting only days gone by and today, and not those planned once
-     * their day had gone by (from next week).
-     */
-    protected readonly weekSoFar = computed(() => {
-        const sofar = this.days()
-            .filter(({ day }) => day <= this.today)
-            .flatMap(({ workouts }) => workouts)
-            .filter((item) => item.status !== 'next week' && !item.activeRest);
-        const done = sofar.filter((item) => item.status === 'done').length;
-        return sofar.length ? `${done} of ${sofar.length} done so far this week` : '';
-    });
-
     /** The day a workout is being added to, while its dialog is open. */
     protected readonly addingTo = signal<number | null>(null);
     /** Said to screen readers after a change, e.g. "Leg day planned on Monday". */
     protected readonly announcement = signal('');
 
-    protected readonly choices = computed((): WorkoutChoice[] => {
-        const day = this.addingTo();
-        const planned = day === null ? [] : this.planStore.plan().days[day];
-        // Yours A to Z, then the ready-made ones A to Z
-        return [...aToZ(this.workouts.workouts()), ...aToZ(this.workouts.readyMade())].map(
-            (workout) => {
-                const already = planned.includes(workout.id);
-                return {
-                    id: workout.id,
-                    name: this.names().get(workout.id)!,
-                    detail: already ? 'Planned' : '',
-                    disabled: already,
-                    readyMade: isReadyMade(workout),
-                };
-            }
-        );
-    });
-
-    protected canAdd(day: number): boolean {
-        return this.days()[day].workouts.length < MAX_WORKOUTS_A_DAY;
+    private name(workoutId: string): string {
+        return this.view.names().get(workoutId) ?? 'Untitled workout';
     }
 
     /**
@@ -186,7 +107,7 @@ export class PlanComponent {
             return;
         }
         this.planStore.add(day, workoutId);
-        this.announcement.set(`${this.names().get(workoutId)} planned on ${WEEKDAYS[day]}`);
+        this.announcement.set(`${this.name(workoutId)} planned on ${WEEKDAYS[day]}`);
         this.focusAfterRender(`plan-add-${day}`);
     }
 
@@ -209,7 +130,8 @@ export class PlanComponent {
             return;
         }
         // Where it's let go among those shown there, without it
-        const shown = this.days()
+        const shown = this.view
+            .days()
             [to].workouts.map((planned) => planned.workoutId)
             .filter((id) => id !== workoutId);
         this.planStore.move(workoutId, from, to, shown[event.currentIndex] ?? null);
@@ -217,13 +139,71 @@ export class PlanComponent {
         if (!ids.includes(workoutId)) {
             return;
         }
-        const name = this.names().get(workoutId);
+        const name = this.name(workoutId);
         this.announcement.set(
             from === to
                 ? `${name} moved to ${ids.indexOf(workoutId) + 1} of ${ids.length} on ${WEEKDAYS[to]}`
                 : `${name} moved to ${WEEKDAYS[to]}`
         );
         this.focusAfterRender(`plan-move-${to}-${workoutId}`);
+    }
+
+    /** Which row's menu is open, by `menuKey`; null for none. */
+    protected readonly menuFor = signal<string | null>(null);
+
+    protected menuKey(row: PlanRow): string {
+        return planNameId(row.day, row.workoutId);
+    }
+
+    /** Its name pressed, or Escape in its menu: opens it, or closes it, focus on the name. */
+    protected toggleMenu(row: PlanRow) {
+        const key = this.menuKey(row);
+        const open = this.menuFor() === key;
+        this.menuFor.set(open ? null : key);
+        if (open) {
+            this.focusAfterRender(key);
+        }
+    }
+
+    /** Something done from a workout's row: its handle, its ✕, or its menu. */
+    protected act(row: PlanRow, action: PlanAction) {
+        this.menuFor.set(null);
+        const planned = row.movedFrom ?? row.day;
+        const workout = this.workouts.findAnyWorkout(row.workoutId);
+        switch (action) {
+            case 'days':
+                return this.pickDays(row.day, row.workoutId);
+            case 'remove':
+                return this.remove(planned, row.workoutId);
+            case 'start':
+                return workout && this.start(workout);
+            case 'details':
+                return this.slide.navigate(`/library/${row.workoutId}?from=plan`, 'in');
+            case 'today':
+                return this.doToday(row);
+            case 'back':
+                this.planStore.moveThisWeek(row.workoutId, planned, null);
+                this.announcement.set(`${row.name} back on ${WEEKDAYS[planned]}`);
+                this.focusAfterRender(planNameId(planned, row.workoutId));
+        }
+    }
+
+    /**
+     * Done today instead, this week only (PLN-3): it shows today, due, and isn't missed on its
+     * own day. With Undo; focus to the Undo bar, then its name, today.
+     */
+    private doToday(row: PlanRow) {
+        const before = this.planStore.plan();
+        const today = this.view.today;
+        this.planStore.moveThisWeek(row.workoutId, row.day, today);
+        this.undo.offerUndo({
+            message: `${row.name} moved to today`,
+            undo: () => {
+                this.planStore.restore(before);
+                this.focusAfterRender(planNameId(row.day, row.workoutId));
+            },
+            dismissed: () => this.focusAfterRender(planNameId(today, row.workoutId)),
+        });
     }
 
     /** The workout whose days are being picked, from its handle, while the dialog's open. */
@@ -235,7 +215,7 @@ export class PlanComponent {
     /** The day its handle was pressed on, for focus to go back to. */
     private movingFrom = -1;
 
-    protected pickDays(day: number, workoutId: string) {
+    private pickDays(day: number, workoutId: string) {
         if (this.drag.pressed()) {
             this.movingFrom = day;
             this.moving.set(workoutId);
@@ -265,17 +245,9 @@ export class PlanComponent {
         );
     }
 
-    protected remove(day: number, workoutId: string) {
-        const name = this.names().get(workoutId);
+    private remove(day: number, workoutId: string) {
         this.planStore.remove(day, workoutId);
-        this.announcement.set(`${name} taken off ${WEEKDAYS[day]}`);
+        this.announcement.set(`${this.name(workoutId)} taken off ${WEEKDAYS[day]}`);
         this.focusAfterRender(`plan-add-${day}`);
     }
-}
-
-/** What a planned workout's place this week says: active rest still to do says so, as it's optional. */
-function statusLabel(item: PlannedWorkout): string {
-    return item.activeRest && (item.status === 'today' || item.status === 'to come')
-        ? 'Active rest'
-        : STATUS_TEXT[item.status];
 }

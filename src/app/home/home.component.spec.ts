@@ -558,6 +558,28 @@ describe('HomeComponent', () => {
             expect(start.classList).not.toContain('btn-main');
         });
 
+        it('lists one done today instead, this week only, saying where from', () => {
+            const { legs } = planToday();
+            const plan = TestBed.inject(PlanStore);
+            plan.remove(6, legs.id);
+            plan.moveThisWeek(legs.id, 0, 6);
+            create();
+
+            expect(text('.due__title')).toEqual(['Push', 'Legs']);
+            expect(text('.due__kind')).toEqual(['Moved from Monday']);
+        });
+
+        it("offers a workout on a day whose only one was moved off it this week, and not on the day it's moved to", () => {
+            const plan = TestBed.inject(PlanStore);
+            const { push, legs } = planToday();
+            plan.remove(6, legs.id);
+            plan.moveThisWeek(push.id, 6, 5);
+            create();
+
+            expect(element().querySelector('app-due-today .due')).toBeNull();
+            expect(element().textContent).toContain('Fancy a workout today?');
+        });
+
         it('puts active rest after training, marked as such, with a quieter Start', () => {
             const plan = TestBed.inject(PlanStore);
             plan.add(6, addStretches().id);

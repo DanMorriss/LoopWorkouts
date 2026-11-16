@@ -31,6 +31,20 @@ export interface WeekPlan {
      * those planned before this came in (2026-11-04), which count as they always did.
      */
     plannedAt?: Record<string, number>;
+    /**
+     * Workouts done on another day this week only (since 2026-11-16), such as a missed one
+     * done today instead: `week` is the start of the Monday of that week, by the device's
+     * calendar. Other weeks' are ignored, and dropped at the next change.
+     */
+    moves?: OneOffMove[];
+}
+
+/** A workout planned on `from` done on `to` instead, in one week only (`WeekPlan.moves`). */
+export interface OneOffMove {
+    week: number;
+    workoutId: string;
+    from: number;
+    to: number;
 }
 
 /** The key of a workout on a day in `plannedAt`: "2:workout-id" for Wednesday. */
@@ -81,14 +95,31 @@ export function isWeekPlan(value: unknown): value is WeekPlan {
         Number.isSafeInteger(plan['updatedAt']) &&
         (plan['updatedAt'] as number) >= 0 &&
         (plan['plannedAt'] === undefined ||
-            (typeof plan['plannedAt'] === 'object' && plan['plannedAt'] !== null))
+            (typeof plan['plannedAt'] === 'object' && plan['plannedAt'] !== null)) &&
+        (plan['moves'] === undefined || Array.isArray(plan['moves']))
+    );
+}
+
+/** Whether a saved one-off move is usable: a week, a workout, and two days of the week. */
+function isMove(value: unknown): value is OneOffMove {
+    const move = value as Record<string, unknown> | null;
+    const day = (n: unknown) => Number.isInteger(n) && (n as number) >= 0 && (n as number) < 7;
+    return (
+        typeof move === 'object' &&
+        move !== null &&
+        Number.isSafeInteger(move['week']) &&
+        typeof move['workoutId'] === 'string' &&
+        day(move['from']) &&
+        day(move['to']) &&
+        move['from'] !== move['to']
     );
 }
 
 /**
  * A copy of a plan, so a saved or fetched one shares nothing with what's kept. Of
  * `plannedAt`, only the times of workouts still planned, and only those that are times, are
- * kept; with none, it's left out.
+ * kept; with none, it's left out. Of `moves`, only usable ones of workouts still on the day
+ * they're moved from, one for each; with none, it's left out too.
  */
 export function copyPlan(plan: WeekPlan): WeekPlan {
     const days = plan.days.map((day) => [...day]);
@@ -101,9 +132,31 @@ export function copyPlan(plan: WeekPlan): WeekPlan {
             }
         })
     );
-    return Object.keys(plannedAt).length
-        ? { days, updatedAt: plan.updatedAt, plannedAt }
-        : { days, updatedAt: plan.updatedAt };
+    const moves = (Array.isArray(plan.moves) ? plan.moves : [])
+        .filter(isMove)
+        .filter((move) => days[move.from].includes(move.workoutId))
+        .filter(
+            (move, i, all) =>
+                all.findIndex(
+                    (other) =>
+                        other.week === move.week &&
+                        other.workoutId === move.workoutId &&
+                        other.from === move.from
+                ) === i
+        )
+        .map(({ week, workoutId, from, to }) => ({ week, workoutId, from, to }));
+    return {
+        days,
+        updatedAt: plan.updatedAt,
+        ...(Object.keys(plannedAt).length && { plannedAt }),
+        ...(moves.length && { moves }),
+    };
+}
+
+/** This week's one-off moves, by the device's calendar, at `now`. */
+export function movesThisWeek(plan: WeekPlan, now: number): OneOffMove[] {
+    const monday = startOfWeek(now);
+    return (plan.moves ?? []).filter((move) => move.week === monday);
 }
 
 /** Which day of the week `time` is on the device's calendar, from 0 for Monday. */
@@ -137,12 +190,16 @@ export interface PlannedWorkout {
     status: PlannedStatus;
     /** Active rest (see `isActiveRest`): there if you fancy it, not training. */
     activeRest?: true;
+    /** The day it's planned on, when it's moved to this one this week only (`WeekPlan.moves`). */
+    movedFrom?: number;
 }
 
 /**
  * This week's plan, day by day from Monday, with where each workout planned is (see
  * `PlannedStatus`). Workouts no longer in the library are left out (`exists`), and those
- * that are active rest (`isActiveRest`) are marked so.
+ * that are active rest (`isActiveRest`) are marked so. One moved to another day this week only
+ * is on that day, at its end, marked with the day it came from (`movedFrom`), unless it's
+ * planned there already.
  */
 export function thisWeek(
     plan: WeekPlan,
@@ -160,7 +217,12 @@ export function thisWeek(
             ran.add(`${weekdayOf(entry.startedAt)}/${entry.workoutId}`);
         }
     }
-    const statusOf = (workoutId: string, day: number, activeRest: boolean): PlannedStatus => {
+    const statusOf = (
+        workoutId: string,
+        day: number,
+        activeRest: boolean,
+        moved = false
+    ): PlannedStatus => {
         if (ran.has(`${day}/${workoutId}`)) {
             return 'done';
         }
@@ -172,17 +234,41 @@ export function thisWeek(
         }
         // Planned once its day this week had gone by: it starts next week
         const plannedAt = plan.plannedAt?.[plannedKey(day, workoutId)];
-        if (plannedAt !== undefined && plannedAt >= dayAfter(monday, day)) {
+        if (!moved && plannedAt !== undefined && plannedAt >= dayAfter(monday, day)) {
             return 'next week';
         }
         return activeRest ? 'rested' : 'missed';
     };
-    return plan.days.map((ids, day) =>
-        ids.filter(exists).map((workoutId): PlannedWorkout => {
-            const activeRest = isActiveRest(workoutId);
-            const status = statusOf(workoutId, day, activeRest);
-            return activeRest ? { workoutId, status, activeRest: true } : { workoutId, status };
-        })
+    const moves = movesThisWeek(plan, now).filter(
+        (move) => !plan.days[move.to].includes(move.workoutId)
+    );
+    const movedOff = (day: number, workoutId: string) =>
+        moves.some((move) => move.from === day && move.workoutId === workoutId);
+    const shown = plan.days.map((ids, day) => [
+        ...ids
+            .filter((workoutId) => !movedOff(day, workoutId))
+            .map((workoutId) => ({ workoutId, movedFrom: undefined as number | undefined })),
+        ...moves
+            .filter((move) => move.to === day)
+            .map(({ workoutId, from }) => ({ workoutId, movedFrom: from as number | undefined })),
+    ]);
+    return shown.map((items, day) =>
+        items
+            .filter(({ workoutId }) => exists(workoutId))
+            .map(({ workoutId, movedFrom }): PlannedWorkout => {
+                const activeRest = isActiveRest(workoutId);
+                // Moved here, it's this day's, whenever it was planned
+                const status =
+                    movedFrom === undefined
+                        ? statusOf(workoutId, day, activeRest)
+                        : statusOf(workoutId, day, activeRest, true);
+                return {
+                    workoutId,
+                    status,
+                    ...(activeRest && { activeRest: true as const }),
+                    ...(movedFrom !== undefined && { movedFrom }),
+                };
+            })
     );
 }
 

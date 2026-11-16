@@ -69,8 +69,8 @@ describe('PlanComponent', () => {
             const name = text(day.querySelector('.plan__day-name')!);
             const workouts = Array.from(day.querySelectorAll('.plan__workout'), (row) =>
                 [
-                    row.querySelector('.plan__workout-name')!.textContent!.trim(),
-                    row.querySelector('.plan__status')?.textContent!.replace('check', '').trim(),
+                    row.querySelector('.row__title')!.textContent!.trim(),
+                    row.querySelector('.row__status')?.textContent!.replace('check', '').trim(),
                 ]
                     .filter(Boolean)
                     .join(' ')
@@ -312,6 +312,71 @@ describe('PlanComponent', () => {
             expect(TestBed.inject(UndoService).offer()?.message).toBe(
                 'Legs planned on Friday, and taken off Tuesday'
             );
+        });
+    });
+
+    describe("a workout's menu, from its name", () => {
+        const menuItem = (name: string) =>
+            [...el().querySelectorAll<HTMLButtonElement>('.menu__item')].find((item) =>
+                item.textContent!.includes(name)
+            );
+
+        beforeEach(() => {
+            // Planned last week, so Tuesday's is missed
+            vi.setSystemTime(NOW - 7 * 24 * 60 * 60 * 1000);
+            TestBed.inject(PlanStore).add(1, legs.id);
+            vi.setSystemTime(NOW);
+        });
+
+        it('opens Details, coming back here', async () => {
+            await open();
+            const slide = vi
+                .spyOn(TestBed.inject(PageSlide), 'navigate')
+                .mockImplementation(() => {});
+
+            await click(`#plan-name-1-${legs.id}`);
+            expect(
+                el().querySelector(`#plan-name-1-${legs.id}`)!.getAttribute('aria-expanded')
+            ).toBe('true');
+            menuItem('Details')!.click();
+
+            expect(slide).toHaveBeenCalledWith(`/library/${legs.id}?from=plan`, 'in');
+        });
+
+        it('does a missed one today instead, this week only, with Undo, and puts it back', async () => {
+            await open();
+            expect(days()[1]).toBe('Tuesday: Legs Missed');
+
+            await click(`#plan-name-1-${legs.id}`);
+            menuItem('Do it today instead')!.click();
+            await render();
+
+            expect(days()[1]).toBe('Tuesday: Nothing planned');
+            expect(days()[2]).toBe('Wednesday · today: Legs Due');
+            expect(text(el().querySelector('.row__moved')!)).toBe('From Tuesday, this week');
+            expect(TestBed.inject(UndoService).offer()?.message).toBe('Legs moved to today');
+            // Still on Tuesday every other week
+            expect(TestBed.inject(PlanStore).plan().days[1]).toEqual([legs.id]);
+
+            await click(`#plan-name-2-${legs.id}`);
+            expect(menuItem('Do it today instead')).toBeUndefined();
+            menuItem('Put back on Tuesday')!.click();
+            await render();
+            expect(days()[1]).toBe('Tuesday: Legs Missed');
+            expect(text(el().querySelector('[role="status"]')!)).toBe('Legs back on Tuesday');
+            expect(document.activeElement?.id).toBe(`plan-name-1-${legs.id}`);
+        });
+
+        it('closes with Escape, focus on the name', async () => {
+            await open();
+            await click(`#plan-name-1-${legs.id}`);
+            menuItem('Start')!.dispatchEvent(
+                new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+            );
+            await render();
+
+            expect(el().querySelector('.menu')).toBeNull();
+            expect(document.activeElement?.id).toBe(`plan-name-1-${legs.id}`);
         });
     });
 

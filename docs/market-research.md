@@ -55,17 +55,17 @@ Loop Workouts sits in the gap between the timer and the log. **The best opportun
 
 ## Side by side
 
-|                | Loop Workouts                                             | Interval timers               | Hevy / Strong                          | Fitbod                    |
-| -------------- | --------------------------------------------------------- | ----------------------------- | -------------------------------------- | ------------------------- |
-| Promise        | Runs your workout and remembers it                        | Times your intervals          | Log every set, see progress            | Plans the workout for you |
-| Runs a circuit | Yes: timed, reps, rests, supersets, EMOM-style, AMRAP     | Timed only                    | No, a rest timer only                  | Partly                    |
-| Remembers      | Every set, last time, PBs, suggested next weight          | No                            | Yes, the best of the four              | Yes                       |
-| How-to         | 117 exercises with a 3D demo you can turn                 | None                          | Images or video                        | Video                     |
-| Price          | Free, no limits                                           | Free to about $8, or $12/year | Free with caps, or $24–30/year         | About $80–96/year         |
-| Getting it     | A link: no store, no install, no account                  | App store                     | App store, with an account             | App store, with an account|
-| Phone locked   | iPhone: beeps stop (keeps screen on instead)              | Yes                           | Rest timer notifications               | Yes                       |
-| Accessibility  | Every page passes axe, in both themes                     | Unknown                       | Unknown                                | Unknown                   |
-| Tone           | Plain, honest, from the maker                             | Functional                    | Energetic, social                      | Premium, "smart"          |
+|                | Loop Workouts                                         | Interval timers               | Hevy / Strong                  | Fitbod                     |
+| -------------- | ----------------------------------------------------- | ----------------------------- | ------------------------------ | -------------------------- |
+| Promise        | Runs your workout and remembers it                    | Times your intervals          | Log every set, see progress    | Plans the workout for you  |
+| Runs a circuit | Yes: timed, reps, rests, supersets, EMOM-style, AMRAP | Timed only                    | No, a rest timer only          | Partly                     |
+| Remembers      | Every set, last time, PBs, suggested next weight      | No                            | Yes, the best of the four      | Yes                        |
+| How-to         | 117 exercises with a 3D demo you can turn             | None                          | Images or video                | Video                      |
+| Price          | Free, no limits                                       | Free to about $8, or $12/year | Free with caps, or $24–30/year | About $80–96/year          |
+| Getting it     | A link: no store, no install, no account              | App store                     | App store, with an account     | App store, with an account |
+| Phone locked   | iPhone: beeps stop (keeps screen on instead)          | Yes                           | Rest timer notifications       | Yes                        |
+| Accessibility  | Every page passes axe, in both themes                 | Unknown                       | Unknown                        | Unknown                    |
+| Tone           | Plain, honest, from the maker                         | Functional                    | Energetic, social              | Premium, "smart"           |
 
 ## How to frame it
 

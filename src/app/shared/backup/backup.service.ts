@@ -111,6 +111,8 @@ export class BackupService {
                     onlyMyEquipment: this.settings.onlyMyEquipment(),
                     eachSideFirst: this.settings.eachSideFirst(),
                     switchSidesSeconds: this.settings.switchSidesSeconds(),
+                    includeActiveRest: this.settings.includeActiveRest(),
+                    canTrainOn: this.settings.canTrainOn(),
                     name: this.settings.name(),
                     bodyWeight: this.settings.bodyWeight(),
                 },

@@ -66,39 +66,6 @@
     }
 }
 
-.plan__workout-name {
-    flex: 1;
-    min-width: 0;
-    color: var(--text);
-    overflow-wrap: anywhere;
-}
-
-.plan__status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.2rem;
-    flex-shrink: 0;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-
-    .mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-    }
-}
-
-.plan__workout--done .plan__status,
-.plan__workout--today .plan__status {
-    color: var(--accent);
-}
-
-// Gone by without it, or planned once its day had gone (from next week): the name steps back
-.plan__workout--missed .plan__workout-name,
-.plan__workout--later .plan__workout-name {
-    color: var(--text-muted);
-}
-
 // Just made in Create for this day: pointed out, as Workouts points out a new workout
 .plan__workout--saved {
     margin-inline: -0.5rem;
@@ -106,17 +73,6 @@
     border-radius: 0.5rem;
     background: var(--accent-soft);
     box-shadow: inset 3px 0 0 var(--accent);
-}
-
-.plan__remove {
-    flex-shrink: 0;
-}
-
-// Its handle, at its left: dragged, it takes the workout to another day; pressed, its days
-.plan__move {
-    flex-shrink: 0;
-    color: var(--text-muted);
-    cursor: grab;
 }
 
 // Drag and drop (Angular CDK). The copy following the finger, lifted off the list, as a dragged
@@ -129,11 +85,6 @@
     background: var(--raised);
     scale: 1.03;
     box-shadow: 0 18px 40px var(--shadow);
-
-    .plan__status,
-    .plan__remove {
-        display: none;
-    }
 }
 
 // Where it will land

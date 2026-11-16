@@ -139,6 +139,22 @@ describe('PlanStore', () => {
         expect(store.plan()).toBe(before);
     });
 
+    it('has a workout done on another day this week only, keeping that through other changes', () => {
+        // Wednesday 28 October 2026
+        vi.spyOn(Date, 'now').mockReturnValue(new Date(2026, 9, 28, 10).getTime());
+        const store = createStore();
+        store.add(1, 'push');
+
+        store.moveThisWeek('push', 1, 2);
+        const monday = new Date(2026, 9, 26).getTime();
+        expect(store.plan().moves).toEqual([{ week: monday, workoutId: 'push', from: 1, to: 2 }]);
+        store.add(4, 'legs');
+        expect(store.plan().moves).toHaveLength(1);
+
+        store.moveThisWeek('push', 1, null);
+        expect(store.plan()).not.toHaveProperty('moves');
+    });
+
     it('takes a workout off a day, leaving the others', () => {
         const store = createStore();
         store.add(4, 'push');

@@ -194,6 +194,68 @@ describe('ReadyMadePlansComponent (PLN-6)', () => {
         });
     });
 
+    describe('fitted to the days you can train', () => {
+        const card = (title: string) =>
+            [...el().querySelectorAll<HTMLElement>('app-plan-card')].find((c) =>
+                c.querySelector('.plan-card__title')!.textContent!.includes(title)
+            )!;
+        const daysOf = (title: string, workout: string) =>
+            [...card(title).querySelectorAll('.plan-card__workout')]
+                .find((row) => row.textContent!.includes(workout))!
+                .querySelector('.plan-card__workout-days')!
+                .textContent!.trim();
+        const pick = async (...days: string[]) => {
+            for (const day of days) {
+                el()
+                    .querySelector<HTMLButtonElement>(`.train-on__day[aria-label="${day}"]`)!
+                    .click();
+            }
+            harness.fixture.detectChanges();
+            await harness.fixture.whenStable();
+        };
+
+        it('fits each plan to the days picked, remembering them, and says when one needs more', async () => {
+            await open();
+            await pick('Tuesday', 'Thursday', 'Saturday');
+
+            expect(daysOf('3-day beginner gym', 'Gym full body')).toBe('Tue, Thu, Sat');
+            expect(
+                card('3-day beginner gym').querySelector('.plan-card__fit')!.textContent
+            ).toContain('Fitted to your days: Tue, Thu and Sat.');
+            expect(
+                card('Push, pull, legs').querySelector('.plan-card__fit')!.textContent
+            ).toContain('Trains 4 days a week: pick 1 more of your days to fit it.');
+            expect(TestBed.inject(SettingsStore).canTrainOn()).toEqual([1, 3, 5]);
+
+            // Used as fitted
+            card('3-day beginner gym').querySelector<HTMLButtonElement>('.plan-card__use')!.click();
+            await harness.fixture.whenStable();
+            const planned = TestBed.inject(PlanStore).plan().days;
+            expect(planned[1]).toEqual(['builtin:gym-full-body']);
+            expect(planned[0]).toEqual(['builtin:mobility-flow']);
+        });
+
+        it('goes back to each as it comes with Any day', async () => {
+            TestBed.inject(SettingsStore).update({ canTrainOn: [1, 3, 5] });
+            await open();
+            el().querySelector<HTMLButtonElement>('.train-on__clear')!.click();
+            harness.fixture.detectChanges();
+
+            expect(daysOf('3-day beginner gym', 'Gym full body')).toBe('Mon, Wed, Fri');
+            expect(el().querySelector('.plan-card__fit')).toBeNull();
+        });
+    });
+
+    it('remembers its active rest switched off, for every card', async () => {
+        await open();
+        el().querySelector<HTMLButtonElement>('app-plan-card [role="switch"]')!.click();
+        harness.fixture.detectChanges();
+
+        expect(TestBed.inject(SettingsStore).includeActiveRest()).toBe(false);
+        const switches = [...el().querySelectorAll('app-plan-card [role="switch"]')];
+        expect(switches.every((s) => s.getAttribute('aria-checked') === 'false')).toBe(true);
+    });
+
     it('leaves out its active rest days, with its switch off', async () => {
         await open();
         const card = [...el().querySelectorAll<HTMLElement>('app-plan-card')].find((c) =>

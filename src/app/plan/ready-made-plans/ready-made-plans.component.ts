@@ -8,17 +8,25 @@ import { ReadyMadePlans, weekPlannedText } from '../../shared/state/ready-made-p
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { PlanCardComponent } from '../plan-card/plan-card.component';
+import { CanTrainOnComponent } from './can-train-on.component';
 import { hiddenByEquipmentText } from '../../models/exercise';
 
 /**
  * The ready-made plans (PLN-6): a week of ready-made workouts each, those for your goal
- * first, and with Only what I have on, only those your equipment allows. Using one plans its
+ * first, and with Only what I have on, only those your equipment allows; with the days you
+ * can train picked, each is fitted to them. Using one plans its
  * ready-made workouts as they are, in place of your plan, and goes to Today, with Undo. It slides in
  * over the page it was opened from, Today or the Plan page (`?from=plan`), and back to it.
  */
 @Component({
     selector: 'app-ready-made-plans',
-    imports: [BackLinkComponent, EquipmentFilterComponent, PlanCardComponent, SwipeBackDirective],
+    imports: [
+        BackLinkComponent,
+        CanTrainOnComponent,
+        EquipmentFilterComponent,
+        PlanCardComponent,
+        SwipeBackDirective,
+    ],
     template: `
         <div class="flex justify-center" [appSwipeBack]="back.url">
             <div class="w-full max-w-md p-4">
@@ -30,6 +38,7 @@ import { hiddenByEquipmentText } from '../../models/exercise';
                 </p>
 
                 <app-equipment-filter class="plans__kit" idPrefix="plans" things="Plans" />
+                <app-can-train-on class="plans__days" />
                 @if (hiddenText()) {
                     <p class="plans__hint">{{ hiddenText() }}</p>
                 }

@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { PlannedWorkout, thisWeek, weekdayOf } from '../../models/plan';
+import { PlannedWorkout, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { Workout } from '../../models/workout';
 import { injectStartWorkout } from '../../shared/run/start-workout';
 import { HistoryStore } from '../../shared/state/history-store.service';
@@ -35,6 +35,9 @@ import { WorkoutStore } from '../../shared/state/workout-store.service';
                                 <span class="due__title">{{ name(item.workout) }}</span>
                                 @if (item.activeRest && !onlyRest()) {
                                     <span class="due__kind">Active rest, if you fancy it</span>
+                                }
+                                @if (item.movedFrom) {
+                                    <span class="due__kind">{{ item.movedFrom }}</span>
                                 }
                             </span>
                             <button
@@ -94,6 +97,11 @@ export class DueTodayComponent {
             .map((planned: PlannedWorkout) => ({
                 workout: this.workouts.findAnyWorkout(planned.workoutId)!,
                 activeRest: !!planned.activeRest,
+                // Done today instead, this week only, from the Plan page
+                movedFrom:
+                    planned.movedFrom === undefined
+                        ? ''
+                        : `Moved from ${WEEKDAYS[planned.movedFrom]}`,
             }))
     );
 

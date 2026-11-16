@@ -173,3 +173,50 @@ describe('this week (PLN-3)', () => {
         ]);
     });
 });
+
+describe('done on another day this week only', () => {
+    const monday = new Date(2026, 9, 26).getTime();
+    const week: WeekPlan = {
+        days: [['legs'], ['push'], ['pull'], [], [], [], []],
+        updatedAt: 1,
+        moves: [
+            // Tuesday's push done today, Wednesday, this week
+            { week: monday, workoutId: 'push', from: 1, to: 2 },
+            // Last week's is ignored
+            { week: monday - 7 * 24 * 60 * 60 * 1000, workoutId: 'legs', from: 0, to: 3 },
+        ],
+    };
+
+    it("shows it on the day it's moved to, due there, and not on its own", () => {
+        const days = thisWeek(week, [], wednesday(), () => true);
+        expect(days[0]).toEqual([{ workoutId: 'legs', status: 'missed' }]);
+        expect(days[1]).toEqual([]);
+        expect(days[2]).toEqual([
+            { workoutId: 'pull', status: 'today' },
+            { workoutId: 'push', status: 'today', movedFrom: 1 },
+        ]);
+        // Done today, it counts
+        const done = thisWeek(
+            week,
+            [{ workoutId: 'push', startedAt: wednesday(8) }],
+            wednesday(),
+            () => true
+        );
+        expect(done[2][1].status).toBe('done');
+    });
+
+    it('keeps only usable moves of workouts still on their day, each once', () => {
+        const copied = copyPlan({
+            ...week,
+            days: [[], ['push'], ['pull'], [], [], [], []],
+            moves: [
+                ...week.moves!,
+                { week: monday, workoutId: 'push', from: 1, to: 4 },
+                { week: monday, workoutId: 'push', from: 1, to: 1 },
+                { week: 'soon', workoutId: 'pull', from: 2, to: 3 } as never,
+            ],
+        });
+        expect(copied.moves).toEqual([{ week: monday, workoutId: 'push', from: 1, to: 2 }]);
+        expect(copyPlan(plan([[], [], [], [], [], [], []]))).not.toHaveProperty('moves');
+    });
+});

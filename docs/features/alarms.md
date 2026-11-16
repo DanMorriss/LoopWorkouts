@@ -24,7 +24,7 @@
 - No rest alarm at the end of the last round (that rest is skipped), and no finish alarm for a workout that runs until stopped.
 - **Countdown beeps** (ALM-5, on unless turned off in Settings): a tick 3, 2 and 1 seconds before each timed step or rest of **10 seconds or more** ends. Shorter steps (e.g. Switch sides at 5 seconds) have none, so they aren't all beeps. Rep steps have none, as no one knows when they'll end; the step before one counts down to it. Rest at the end of the last round is skipped, so it has none either.
 - With a **time limit**, its own countdown has the last 10 seconds to itself: no step ticks in them, so the two never play over each other.
-- With a **time limit**, no step alarm at or after the moment it runs out; the finish sounds then, part-way through a step or not. The ticks and the finish are booked even while a rep step is waited on, as the end doesn't move: Done moves the countdown's start on by just the time it adds to the time on rep steps.
+- With a **time limit**, no step alarm at or after the moment it runs out; the finish sounds then, or, when it runs out part-way through a timed exercise, as that exercise ends (RUN-8), after its own countdown ticks if those are on. The ticks and the finish are booked even while a rep step is waited on, as the end doesn't move: Done moves the countdown's start on by just the time it adds to the time on rep steps.
 
 ### Timing
 
@@ -47,10 +47,10 @@
 ## Acceptance criteria
 
 - Given work 0:03, rest 0:02, 2 rounds, then alarms sound: work at 0s, rest at 3s, work at 5s, finish at 8s.
-- Given work 0:30, rest 0:10 and a time limit of 1:40, then alarms sound: work at 0s, 40s and 80s, rest at 30s and 70s, ticks at 90s, 97s, 98s and 99s, and the finish at 100s.
+- Given work 0:30, rest 0:10 and a time limit of 1:40, then alarms sound: work at 0s, 40s and 80s, rest at 30s and 70s, ticks at 90s, 97s, 98s and 99s, and the finish at 110s, as the work time ran out in ends.
 - Given work 0:30, rest 0:10, 2 rounds and countdown beeps on, then ticks sound at 27, 28 and 29s, 37, 38 and 39s, and 67, 68 and 69s, before the rest at 30s, the work at 40s and the finish at 70s.
 - Given work 0:09 and rest 0:05 with countdown beeps on, then there are no ticks.
-- Given work 0:30, rest 0:10, a time limit of 1:40 and countdown beeps on, then the last step ticks are at 77, 78 and 79s, and the time limit's at 90, 97, 98 and 99s.
+- Given work 0:30, rest 0:10, a time limit of 1:40 and countdown beeps on, then the step ticks before time's up end at 77, 78 and 79s, the time limit's are at 90, 97, 98 and 99s, and the last work's at 107, 108 and 109s.
 - Given countdown beeps are turned off mid-workout, then the ticks still to come are silenced, and the other alarms stay.
 - Given rest of 0:00, then there are no rest alarms.
 - Given a rep step, then the work alarm sounds as it starts and nothing is booked after it until Done.

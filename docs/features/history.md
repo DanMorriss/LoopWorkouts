@@ -16,7 +16,7 @@
 - Each entry keeps:
     - the workout's title **as it ran** (renaming or deleting the workout later doesn't change it)
     - when it started, and when it ended
-    - the **time spent**, in whole seconds: pauses don't count, time on rep steps does. A finished workout counts its full length plus rep time, and one whose time limit ran out counts the time limit.
+    - the **time spent**, in whole seconds: pauses don't count, time on rep steps does. A finished workout counts its full length plus rep time, and one whose time limit ran out counts the time limit, plus the time a last timed exercise ran on past it (RUN-8).
     - the full **rounds done**, and the rounds it was set to (or "until stopped"), or its **time limit**, and when that ran out, the steps done of the round it ran out in (RUN-8)
     - finished or stopped
     - an optional note

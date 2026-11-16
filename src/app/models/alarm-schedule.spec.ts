@@ -142,8 +142,9 @@ describe('alarmEvents', () => {
 });
 
 describe('alarmEvents with a time limit', () => {
-    it('stops the steps where time runs out, with a countdown, then the finish', () => {
-        // 30s work, 10s rest, 100s: work at 0, 40 and 80, rest at 30 and 70
+    it('counts down to time running out, and finishes as the timed exercise it ends in ends', () => {
+        // 30s work, 10s rest, 100s: work at 0, 40 and 80, rest at 30 and 70; the last work
+        // runs on to 110s
         const amrap = makeWorkout({ timeLimitSeconds: 100 });
         expect(alarmEvents(amrap, 0)).toEqual([
             { kind: 'work', at: 0 },
@@ -155,7 +156,20 @@ describe('alarmEvents with a time limit', () => {
             { kind: 'countdown', at: 97_000 },
             { kind: 'countdown', at: 98_000 },
             { kind: 'countdown', at: 99_000 },
-            { kind: 'finish', at: 100_000 },
+            { kind: 'finish', at: 110_000 },
+        ]);
+    });
+
+    it('finishes where time runs out in a rest', () => {
+        // 30s work, 10s rest, 75s: part-way through the second rest
+        const amrap = makeWorkout({ timeLimitSeconds: 75 });
+        expect(alarmEvents(amrap, 0, 0, 100, 0, 0, true).slice(-6)).toEqual([
+            { kind: 'rest', at: 70_000 },
+            { kind: 'countdown', at: 65_000 },
+            { kind: 'countdown', at: 72_000 },
+            { kind: 'countdown', at: 73_000 },
+            { kind: 'countdown', at: 74_000 },
+            { kind: 'finish', at: 75_000 },
         ]);
     });
 
@@ -214,7 +228,7 @@ describe('alarmEvents with countdown beeps', () => {
     });
 
     it("leaves a time limit's last 10 seconds to its own countdown", () => {
-        // 30s work, 10s rest, 100s: the last work step would end at 110s
+        // 30s work, 10s rest, 100s: the last work step runs on to 110s, and counts down to it
         const amrap = makeWorkout({ timeLimitSeconds: 100 });
 
         expect(alarmEvents(amrap, 0, 0, 100, 0, 0, true)).toEqual([
@@ -227,8 +241,9 @@ describe('alarmEvents with countdown beeps', () => {
             { kind: 'rest', at: 70_000 },
             ...ticks(77, 78, 79),
             { kind: 'work', at: 80_000 },
+            ...ticks(107, 108, 109),
             ...ticks(90, 97, 98, 99),
-            { kind: 'finish', at: 100_000 },
+            { kind: 'finish', at: 110_000 },
         ]);
     });
 

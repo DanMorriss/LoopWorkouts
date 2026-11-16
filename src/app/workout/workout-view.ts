@@ -91,14 +91,20 @@ export class WorkoutView {
     });
     /** As many rounds as fit in a time limit, rather than a number of them. */
     readonly timeLimited = computed(() => this.workout()?.timeLimitSeconds !== undefined);
-    /** Time left of the time limit, e.g. "12:34", or '' without one. */
+    /**
+     * Time left of the time limit, e.g. "12:34 left", or '' without one. Once it's run out
+     * part-way through a timed exercise, which runs on to its end, "Time's up · finish this
+     * one".
+     */
     readonly timeLeft = computed(() => {
         const ms = this.run.timeLeftMs();
         if (ms === null) {
             return '';
         }
-        const seconds = Math.ceil(ms / 1000);
-        return formatSeconds(seconds);
+        if (ms === 0 && !this.run.isComplete()) {
+            return "Time's up · finish this one";
+        }
+        return `${formatSeconds(Math.ceil(ms / 1000))} left`;
     });
     /** The last 10 seconds of a time limit, as the countdown beeps. */
     readonly timeNearlyUp = computed(() => {
@@ -545,7 +551,7 @@ export class WorkoutView {
         // The round is given as each round starts
         if (state.stepIndex === 0) {
             if (this.timeLimited()) {
-                parts.push(`round ${state.round + 1}, ${this.timeLeft()} left`);
+                parts.push(`round ${state.round + 1}, ${this.timeLeft()}`);
             } else if (this.untilStopped()) {
                 parts.push(`round ${state.round + 1}`);
             } else if (state.roundsLeft === 1 && workout.repeats > 1) {

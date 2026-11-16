@@ -2106,7 +2106,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     torso: 115,
                     arms: both(reach(54, -10, 'cw')),
                     legs: both(angles(-10, -90)),
-                    feet: [-90, -90],
+                    feet: [-70, -70],
                 },
             },
             {
@@ -2118,7 +2118,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     torso: 108,
                     arms: both(reach(97, -10, 'cw')),
                     legs: both(angles(-35, -90)),
-                    feet: [-90, -90],
+                    feet: [-70, -70],
                 },
             },
             {
@@ -2130,7 +2130,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     torso: 100,
                     arms: both(reach(140, -10, 'cw')),
                     legs: both(angles(-60, -90)),
-                    feet: [-90, -90],
+                    feet: [-70, -70],
                 },
             },
             {
@@ -2142,7 +2142,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     torso: 108,
                     arms: both(reach(97, -10, 'cw')),
                     legs: both(angles(-35, -90)),
-                    feet: [-90, -90],
+                    feet: [-70, -70],
                 },
             },
         ],

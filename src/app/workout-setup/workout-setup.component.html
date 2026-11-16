@@ -244,6 +244,10 @@
                 }
             </div>
 
+            <!-- Whether it waits for Start after long rests, or runs as a timer (RUN-14): shown
+                 only when something would wait, so never with a time limit -->
+            <app-setup-carry-on />
+
             @if (setup.noTimeError(); as error) {
                 <mat-error>{{ error.message }}</mat-error>
             }

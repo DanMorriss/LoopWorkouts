@@ -127,6 +127,7 @@ A WORKOUT
 - "blocks": its exercises, in order, each as a group (below), up to ${MAX_STEPS} steps in all, with headings between them where the plan has them
 - "repeats": how many times the whole workout runs, 1–${MAX_REPEATS}; or 0 for until stopped. Nearly always 1; more for a circuit done several times through.
 - "timeLimitSeconds" (optional): for as many rounds of the whole workout as fit in a time, 1–${MAX_TIME_LIMIT_SECONDS} seconds. Only with "repeats": 0.
+- "carryOn" (optional): true for a circuit timed to the second, e.g. Tabata, so a timed exercise after a rest of 30 seconds or more starts as the rest ends, rather than waiting for the user to press Start. Leave it out otherwise.
 A workout needs at least one step that isn't rest.
 
 A GROUP is one exercise and its sets: { "kind": "group", "rounds": 3, "restSeconds": 90, "steps": [one step] }

@@ -28,6 +28,7 @@ import {
     Workout,
     WorkoutFields,
 } from '../models/workout';
+import { nextWait } from '../models/wait-to-start';
 import { PageSlide } from '../shared/navigation/page-slide';
 import { WheelPickerOption } from '../shared/components/wheel-picker/wheel-picker.component';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
@@ -280,6 +281,7 @@ export class WorkoutSetupForm {
                 limitMinutes:
                     limit === undefined ? DEFAULT_TIME_LIMIT_MINUTES : Math.floor(limit / 60),
                 limitSeconds: limit === undefined ? 0 : limit % 60,
+                carryOn: !!workoutToEdit.carryOn,
             });
             // A saved workout opens as a list of summaries, so the whole workout fits on screen
             this.expandedKeys.set(new Set());
@@ -292,6 +294,10 @@ export class WorkoutSetupForm {
 
     setRepeatMode(repeatMode: RepeatMode) {
         this.model.update((setup) => ({ ...setup, repeatMode }));
+    }
+
+    setCarryOn(carryOn: boolean) {
+        this.model.update((setup) => ({ ...setup, carryOn }));
     }
 
     setUntilStopped(on: boolean) {
@@ -699,6 +705,7 @@ export class WorkoutSetupForm {
             repeatMode: 'rounds',
             limitMinutes: DEFAULT_TIME_LIMIT_MINUTES,
             limitSeconds: 0,
+            carryOn: false,
         };
     }
 
@@ -765,7 +772,22 @@ export class WorkoutSetupForm {
         // A time limit runs as many rounds as fit, so its rounds are UNTIL_STOPPED
         return setup.repeatMode === 'time'
             ? { title, blocks, repeats: UNTIL_STOPPED, timeLimitSeconds: timeLimitSeconds(setup) }
-            : { title, blocks, repeats: setup.repeats };
+            : {
+                  title,
+                  blocks,
+                  repeats: setup.repeats,
+                  // A time limit never waits anyway
+                  ...(setup.carryOn ? { carryOn: true as const } : {}),
+              };
+    });
+
+    /**
+     * Whether a timed exercise in it would wait for Start after a long rest (RUN-14), so
+     * whether Carry straight on after rests does anything, and shows.
+     */
+    readonly couldWait = computed(() => {
+        const { carryOn: _carryOn, ...fields } = this.fields();
+        return nextWait({ id: '', updatedAt: 0, ...fields }, -1) !== null;
     });
 
     /** As `fields()`, with the id of the workout being edited, so its runs give your pace. */

@@ -143,6 +143,12 @@ export interface Workout extends Synced {
     repeats: number;
     /** The time limit, in whole seconds, rep steps and rests included. Missing for none. */
     timeLimitSeconds?: number;
+    /**
+     * Runs straight on after every rest, as an interval timer does, e.g. Tabata: a timed
+     * exercise after a long rest never waits for Start (RUN-14, see `nextWait()`). Missing for
+     * waiting, with the setting on.
+     */
+    carryOn?: true;
 }
 
 /** What's set up to make a workout: everything but what the store keeps (its id and dates). */
@@ -193,14 +199,15 @@ export function aToZ<T extends Workout>(workouts: readonly T[]): T[] {
  * A copy isn't a favourite, as favourites are kept apart from their workouts.
  */
 export function copyOf(
-    workout: Pick<Workout, 'title' | 'blocks' | 'repeats' | 'timeLimitSeconds'>
+    workout: Pick<Workout, 'title' | 'blocks' | 'repeats' | 'timeLimitSeconds' | 'carryOn'>
 ): WorkoutFields {
-    const { title, blocks, repeats, timeLimitSeconds } = workout;
+    const { title, blocks, repeats, timeLimitSeconds, carryOn } = workout;
     return {
         title,
         blocks: structuredClone(blocks),
         repeats,
         ...(timeLimitSeconds === undefined ? {} : { timeLimitSeconds }),
+        ...(carryOn ? { carryOn } : {}),
     };
 }
 

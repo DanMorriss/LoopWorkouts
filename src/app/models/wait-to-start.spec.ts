@@ -66,6 +66,12 @@ describe('nextWait', () => {
         expect(nextWait(sidePlank, -1)).toBeNull();
     });
 
+    it('is never in a workout that carries straight on after rests, e.g. Tabata', () => {
+        const workout = makeWorkout({ steps: [work(20), rest(60), work(20)], repeats: 1 });
+
+        expect(nextWait({ ...workout, carryOn: true }, -1)).toBeNull();
+    });
+
     it('is never in a workout with a time limit, which is against the clock', () => {
         const workout = makeWorkout({ steps: [work(20), rest(60)], timeLimitSeconds: 600 });
 

@@ -82,6 +82,8 @@ export interface WorkoutSetupModel {
     /** The time limit, kept while Rounds is picked, so going back to Time limit finds it. */
     limitMinutes: number;
     limitSeconds: number;
+    /** Runs straight on after every rest, never waiting for Start (see `Workout.carryOn`). */
+    carryOn: boolean;
 }
 
 /** A new time limit, until one's picked: a common length for as many rounds as possible. */

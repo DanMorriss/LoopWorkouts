@@ -15,7 +15,13 @@ function shapeOf(workout: Workout): string {
         step.kind === 'reps' ? 0 : step.seconds,
         places[i],
     ]);
-    return JSON.stringify([workout.repeats, workout.timeLimitSeconds ?? null, run]);
+    // Whether it waits for Start too, as a wait holds the clock
+    return JSON.stringify([
+        workout.repeats,
+        workout.timeLimitSeconds ?? null,
+        !!workout.carryOn,
+        run,
+    ]);
 }
 
 /**

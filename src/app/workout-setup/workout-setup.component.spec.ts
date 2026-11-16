@@ -2793,6 +2793,46 @@ describe('WorkoutSetupComponent', () => {
         });
     });
 
+    describe('carrying straight on after rests (RUN-14)', () => {
+        const carryOn = () =>
+            fixture.nativeElement.querySelector(
+                '[role="switch"][aria-labelledby="carry-on-label"]'
+            ) as HTMLButtonElement | null;
+
+        it("is off to begin with, and saves on as the workout's", async () => {
+            // Round 2's squats come after the 0:45 rest, so would wait for Start
+            await setup({ editId: 'workout-1' });
+            store.addWorkout(savedWorkout);
+            await create();
+
+            expect(carryOn()!.getAttribute('aria-checked')).toBe('false');
+            carryOn()!.click();
+            fixture.detectChanges();
+            await submit();
+
+            expect(store.workouts()[0].carryOn).toBe(true);
+        });
+
+        it('opens on for a workout that carries on', async () => {
+            await setup({ editId: 'workout-1' });
+            store.addWorkout({ ...savedWorkout, carryOn: true });
+            await create();
+
+            expect(carryOn()!.getAttribute('aria-checked')).toBe('true');
+        });
+
+        it("isn't there when nothing would wait, e.g. only short rests", async () => {
+            await setup({ editId: 'workout-1' });
+            store.addWorkout({
+                ...savedWorkout,
+                blocks: asOneGroup([work(135, 'Squats'), rest(20)]),
+            });
+            await create();
+
+            expect(carryOn()).toBeNull();
+        });
+    });
+
     describe('editing a workout', () => {
         it('fills the form from the workout in ?editId', async () => {
             await setup({ editId: 'workout-1' });

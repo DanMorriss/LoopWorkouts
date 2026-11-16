@@ -28,14 +28,18 @@ export interface StartWait {
  * exercises, or between rounds, so a long rest can run out without the exercise starting
  * before you're ready. A short rest, as in an interval circuit, runs straight on, as does the
  * second side after Switch sides. A workout with a time limit never waits, as it's against
- * the clock. Null if none is left.
+ * the clock, nor one that carries straight on after rests (`carryOn`), e.g. Tabata, whose
+ * rests are part of it. Null if none is left.
  */
 export function nextWait(workout: RunningWorkout, after: number): StartWait | null {
-    if (workout.timeLimitSeconds !== undefined) {
+    if (workout.timeLimitSeconds !== undefined || workout.carryOn) {
         return null;
     }
     const { steps } = runPlan(workout);
     const count = steps.length;
+    if (count === 0) {
+        return null;
+    }
     const end = endlessRounds(workout) ? Infinity : workout.repeats * count;
     // Whether a step waits depends only on its place in the round (and the first round's first
     // step has no rest before it), so a round and a step past `after` covers them all

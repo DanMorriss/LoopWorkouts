@@ -65,8 +65,11 @@ import { ReadyMadeChange, readReadyMadeChange } from '../../models/ready-made-ch
  *    as the ready-made ones, in place of `favourite: true` on each of yours. A heart on a
  *    workout in an older file is read as a favourite dated as the workout. An older app turns
  *    the file down, and leaves synced records this new alone, rather than losing the hearts.
+ * 18: `carryOn` on workouts, which run straight on after every rest rather than waiting for
+ *    Start (RUN-14). Nothing to convert; an older app turns the file down, and leaves synced
+ *    records this new alone, rather than writing a workout back without it.
  */
-export const BACKUP_VERSION = 17;
+export const BACKUP_VERSION = 18;
 
 /** Far more than years of workouts take (about 1 KB each), so a bigger file isn't a backup. */
 export const MAX_BACKUP_BYTES = 50 * 1024 * 1024;

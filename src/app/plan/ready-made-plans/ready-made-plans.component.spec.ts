@@ -1,4 +1,6 @@
+import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { PageSlide } from '../../shared/navigation/page-slide';
@@ -113,6 +115,83 @@ describe('ReadyMadePlansComponent (PLN-6)', () => {
         expect(TestBed.inject(UndoService).offer()?.message).toBe(
             'Your week is planned: Push, pull, legs'
         );
+    });
+
+    describe('moving its days about the week', () => {
+        const card = () =>
+            [...el().querySelectorAll<HTMLElement>('app-plan-card')].find((c) =>
+                c.textContent!.includes('Push, pull, legs')
+            )!;
+        /** Its day's button, from 0 for Monday, once the week's loaded. */
+        const day = (i: number) =>
+            card().querySelector<HTMLButtonElement>(`#plan-card-push-pull-legs-day-${i}`)!;
+        const daysOf = (title: string) =>
+            [...card().querySelectorAll('.plan-card__workout')]
+                .find((row) => row.textContent!.includes(title))!
+                .querySelector('.plan-card__workout-days')!
+                .textContent!.trim();
+        const press = async (button: HTMLButtonElement) => {
+            button.click();
+            harness.fixture.detectChanges();
+            await harness.fixture.whenStable();
+        };
+
+        beforeEach(async () => {
+            await open();
+            await vi.waitFor(() => expect(day(0)).toBeTruthy());
+        });
+
+        it('moves a day pressed to the next day pressed, the others shifting along', async () => {
+            expect(day(0).getAttribute('aria-label')).toBe('Monday: Gym push');
+            expect(day(3).getAttribute('aria-label')).toBe('Thursday: rest');
+
+            await press(day(0));
+            expect(day(0).getAttribute('aria-pressed')).toBe('true');
+            await press(day(3));
+
+            expect(day(3).getAttribute('aria-label')).toBe('Thursday: Gym push');
+            expect(day(0).getAttribute('aria-label')).toBe('Monday: Mobility flow');
+            expect(day(3).getAttribute('aria-pressed')).toBe('false');
+            expect(daysOf('Gym push')).toBe('Thu');
+            expect(daysOf('Gym pull')).toBe('Tue');
+            expect(card().querySelector('[role="status"]')!.textContent).toBe(
+                'Gym push moved to Thursday'
+            );
+
+            // Used as it shows
+            card().querySelector<HTMLButtonElement>('[aria-label="Use Push, pull, legs"]')!.click();
+            await harness.fixture.whenStable();
+            const planned = TestBed.inject(PlanStore).plan().days;
+            expect(planned[0]).toEqual(['builtin:mobility-flow']);
+            expect(planned[3]).toEqual(['builtin:gym-push']);
+        });
+
+        it('moves a day dragged to where it was let go', async () => {
+            const list = harness.fixture.debugElement
+                .queryAll(By.directive(CdkDropList))
+                .find((found) => card().contains(found.nativeElement))!
+                .injector.get(CdkDropList);
+            list.dropped.emit({ previousIndex: 4, currentIndex: 0 } as CdkDragDrop<unknown>);
+            harness.fixture.detectChanges();
+
+            expect(daysOf('Gym legs')).toBe('Mon');
+            expect(daysOf('Gym push')).toBe('Tue');
+        });
+
+        it('puts them back with Back to its days, focus on Monday', async () => {
+            expect(card().querySelector('.plan-week__reset')).toBeNull();
+            await press(day(0));
+            await press(day(6));
+
+            const reset = [...card().querySelectorAll<HTMLButtonElement>('button')].find((b) =>
+                b.textContent!.includes('Back to its days')
+            )!;
+            await press(reset);
+
+            expect(daysOf('Gym push')).toBe('Mon');
+            expect(card().querySelector('.plan-week__reset')).toBeNull();
+            expect(document.activeElement).toBe(day(0));
+        });
     });
 
     it('leaves out its active rest days, with its switch off', async () => {

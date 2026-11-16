@@ -1,20 +1,9 @@
-import {
-    Component,
-    ComponentRef,
-    computed,
-    effect,
-    inject,
-    input,
-    signal,
-    untracked,
-    viewChild,
-    ViewContainerRef,
-} from '@angular/core';
+import { Component, computed, inject, input, viewChild, ViewContainerRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { inLastSevenDays } from '../../models/history';
 import { muscleBalance, setsByMuscle } from '../../models/muscle-balance';
-import type { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
+import { lazyComponent } from '../../shared/lazy-component';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { ShownHistory } from '../shown-history';
 import { SettingsStore } from '../../shared/state/settings-store.service';
@@ -94,38 +83,21 @@ export class MusclesThisWeekComponent {
         };
     });
 
-    /**
-     * The body map, once its code's loaded, made in `#map`. By hand rather than with @defer or
-     * NgComponentOutlet, which would each bring more of Angular into the first load, for every
-     * page (8 kB and 2 kB).
-     */
-    private readonly bodyMap = signal<typeof BodyMapComponent | null>(null);
+    /** The body map, made in `#map` once there's something to show on it. */
     private readonly mapSlot = viewChild('map', { read: ViewContainerRef });
-    private shownMap: ComponentRef<BodyMapComponent> | null = null;
 
     constructor() {
-        effect(() => {
-            if (this.musclesWorked().hasData && !untracked(this.bodyMap)) {
+        lazyComponent({
+            load: () =>
                 import('../../shared/components/body-map/body-map.component').then(
-                    ({ BodyMapComponent }) => this.bodyMap.set(BodyMapComponent),
-                    // Offline with it not loaded, say: its space stays, the bars still show
-                    () => undefined
-                );
-            }
-        });
-        effect(() => {
-            const slot = this.mapSlot();
-            const bodyMap = this.bodyMap();
-            const { main, supporting } = this.musclesWorked();
-            if (!slot || !bodyMap) {
-                return;
-            }
-            // Made again if the card's gone and come back, which empties its slot
-            if (!this.shownMap || slot.length === 0) {
-                this.shownMap = slot.createComponent(bodyMap);
-            }
-            this.shownMap.setInput('main', main);
-            this.shownMap.setInput('supporting', supporting);
+                    (loaded) => loaded.BodyMapComponent
+                ),
+            slot: this.mapSlot,
+            when: () => this.musclesWorked().hasData,
+            inputs: () => {
+                const { main, supporting } = this.musclesWorked();
+                return { main, supporting };
+            },
         });
     }
 }

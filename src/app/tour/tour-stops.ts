@@ -308,7 +308,7 @@ const PLAN_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'plan-today',
-                text: 'Which workouts you do on which days, the same every week. Tap Add on a day to plan one, of yours or a ready-made one, and × to take it off.',
+                text: 'Which workouts you do on which days, the same every week. Tap Add on a day to plan one, of yours or a ready-made one, × to take it off, and drag its handle to move it to another day.',
             },
         ],
         text: 'Which workouts you do on which days, the same every week. Tap Add on a day to plan one.',

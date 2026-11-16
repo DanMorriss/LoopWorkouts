@@ -1,4 +1,8 @@
-<div class="flex justify-center" [appSwipeBack]="'/home'" [swipeBackDisabled]="addingTo() !== null">
+<div
+    class="flex justify-center"
+    [appSwipeBack]="'/home'"
+    [swipeBackDisabled]="addingTo() !== null || moving() !== null || drag.dragging()"
+>
     <div class="w-full max-w-md p-4">
         <app-back-link url="/home" label="Today" />
         <!-- data-tour: what the tour of the page (PLN-8) lights up -->
@@ -18,71 +22,112 @@
             <p class="plan__so-far">{{ weekSoFar() }}</p>
         }
 
-        @for (day of days(); track day.day) {
-            <section
-                class="plan__day"
-                [class.plan__day--today]="day.day === today"
-                [attr.data-tour]="day.day === today ? 'plan-today' : null"
-                [attr.aria-labelledby]="'plan-day-' + day.day"
-            >
-                <div class="plan__day-head">
-                    <h3 class="plan__day-name" [id]="'plan-day-' + day.day">
-                        {{ day.name }}
-                        @if (day.day === today) {
-                            <span class="plan__today">· today</span>
-                        }
-                    </h3>
-                    @if (canAdd(day.day)) {
-                        <button
-                            type="button"
-                            class="btn-pill plan__add"
-                            [id]="'plan-add-' + day.day"
-                            aria-haspopup="dialog"
-                            [attr.aria-label]="'Add a workout to ' + day.name"
-                            (click)="addingTo.set(day.day)"
-                        >
-                            <mat-icon aria-hidden="true">add</mat-icon>
-                            Add
-                        </button>
-                    }
-                </div>
-                @if (day.workouts.length) {
-                    <ul class="plan__workouts">
-                        @for (planned of day.workouts; track planned.workoutId) {
-                            <li
-                                class="plan__workout"
-                                data-tour="plan-workout"
-                                [class.plan__workout--done]="planned.status === 'done'"
-                                [class.plan__workout--missed]="planned.status === 'missed'"
-                                [class.plan__workout--today]="planned.status === 'today'"
-                                [class.plan__workout--later]="planned.status === 'next week'"
-                                [class.plan__workout--saved]="isSaved(day.day, planned.workoutId)"
+        <!-- A workout's handle drags it to another day, or to another place on its own; pressed,
+             it opens the days to plan it on, for a keyboard or a screen reader -->
+        <div cdkDropListGroup>
+            @for (day of days(); track day.day) {
+                <section
+                    class="plan__day"
+                    [class.plan__day--today]="day.day === today"
+                    [attr.data-tour]="day.day === today ? 'plan-today' : null"
+                    [attr.aria-labelledby]="'plan-day-' + day.day"
+                >
+                    <div class="plan__day-head">
+                        <h3 class="plan__day-name" [id]="'plan-day-' + day.day">
+                            {{ day.name }}
+                            @if (day.day === today) {
+                                <span class="plan__today">· today</span>
+                            }
+                        </h3>
+                        @if (canAdd(day.day)) {
+                            <button
+                                type="button"
+                                class="btn-pill plan__add"
+                                [id]="'plan-add-' + day.day"
+                                aria-haspopup="dialog"
+                                [attr.aria-label]="'Add a workout to ' + day.name"
+                                (click)="addingTo.set(day.day)"
                             >
-                                <span class="plan__workout-name">{{ planned.name }}</span>
-                                @if (planned.label; as status) {
-                                    <span class="plan__status">
-                                        @if (planned.status === 'done') {
-                                            <mat-icon aria-hidden="true">check</mat-icon>
-                                        }
-                                        {{ status }}
-                                    </span>
-                                }
-                                <button
-                                    type="button"
-                                    class="btn-icon plan__remove"
-                                    [attr.aria-label]="'Take ' + planned.name + ' off ' + day.name"
-                                    (click)="remove(day.day, planned.workoutId)"
-                                >
-                                    <mat-icon aria-hidden="true">close</mat-icon>
-                                </button>
-                            </li>
+                                <mat-icon aria-hidden="true">add</mat-icon>
+                                Add
+                            </button>
                         }
-                    </ul>
-                } @else {
-                    <p class="plan__rest">Nothing planned</p>
-                }
-            </section>
-        }
+                    </div>
+                    <div
+                        class="plan__drop"
+                        cdkDropList
+                        [cdkDropListData]="day.day"
+                        [cdkDropListEnterPredicate]="drag.canEnter"
+                        (cdkDropListDropped)="dropped($event)"
+                    >
+                        @if (day.workouts.length) {
+                            <ul class="plan__workouts">
+                                @for (planned of day.workouts; track planned.workoutId) {
+                                    <li
+                                        class="plan__workout"
+                                        data-tour="plan-workout"
+                                        cdkDrag
+                                        [cdkDragData]="{
+                                            day: day.day,
+                                            workoutId: planned.workoutId,
+                                        }"
+                                        (cdkDragStarted)="drag.started()"
+                                        (cdkDragMoved)="drag.drop.moved($event)"
+                                        (cdkDragReleased)="drag.drop.released($event)"
+                                        (cdkDragEnded)="drag.ended()"
+                                        [class.plan__workout--done]="planned.status === 'done'"
+                                        [class.plan__workout--missed]="planned.status === 'missed'"
+                                        [class.plan__workout--today]="planned.status === 'today'"
+                                        [class.plan__workout--later]="
+                                            planned.status === 'next week'
+                                        "
+                                        [class.plan__workout--saved]="
+                                            isSaved(day.day, planned.workoutId)
+                                        "
+                                    >
+                                        <button
+                                            type="button"
+                                            class="btn-icon plan__move"
+                                            cdkDragHandle
+                                            aria-haspopup="dialog"
+                                            title="Drag to another day, or press to pick its days"
+                                            [id]="'plan-move-' + day.day + '-' + planned.workoutId"
+                                            [attr.aria-label]="
+                                                'Move ' + planned.name + ' to other days'
+                                            "
+                                            (click)="pickDays(day.day, planned.workoutId)"
+                                        >
+                                            <mat-icon aria-hidden="true">drag_indicator</mat-icon>
+                                        </button>
+                                        <span class="plan__workout-name">{{ planned.name }}</span>
+                                        @if (planned.label; as status) {
+                                            <span class="plan__status">
+                                                @if (planned.status === 'done') {
+                                                    <mat-icon aria-hidden="true">check</mat-icon>
+                                                }
+                                                {{ status }}
+                                            </span>
+                                        }
+                                        <button
+                                            type="button"
+                                            class="btn-icon plan__remove"
+                                            [attr.aria-label]="
+                                                'Take ' + planned.name + ' off ' + day.name
+                                            "
+                                            (click)="remove(day.day, planned.workoutId)"
+                                        >
+                                            <mat-icon aria-hidden="true">close</mat-icon>
+                                        </button>
+                                    </li>
+                                }
+                            </ul>
+                        } @else {
+                            <p class="plan__rest">Nothing planned</p>
+                        }
+                    </div>
+                </section>
+            }
+        </div>
 
         <!-- What the plan leaves out (LIB-5), and a ready-made workout for it (LIB-7) -->
         <app-plan-muscles />
@@ -97,6 +142,14 @@
                 [choices]="choices()"
                 (closed)="closeAdding()"
                 (picked)="add(addingTo()!, $event)"
+            />
+        }
+        @if (movingWorkout(); as workout) {
+            <app-add-to-plan-dialog
+                animate.leave="dialog-leave"
+                [workout]="workout"
+                (closed)="closeMoving()"
+                (done)="planOn(workout, $event)"
             />
         }
     </div>

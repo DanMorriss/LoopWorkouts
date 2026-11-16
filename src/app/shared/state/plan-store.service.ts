@@ -45,6 +45,36 @@ export class PlanStore {
     }
 
     /**
+     * Moves `workoutId` from `from` to `to` (from 0 for Monday), just before `before` there, or
+     * at its end with null: dragged on the Plan page. On the same day it's put in its new
+     * place, keeping when it was planned; on another, it's planned there now, as Add does,
+     * unless it's there already or that day's full.
+     */
+    move(workoutId: string, from: number, to: number, before: string | null) {
+        const plan = this._plan();
+        const source = plan.days[from];
+        const target = plan.days[to];
+        if (!source?.includes(workoutId) || !target || workoutId === before) {
+            return;
+        }
+        const sameDay = from === to;
+        if (!sameDay && (target.includes(workoutId) || target.length >= MAX_WORKOUTS_A_DAY)) {
+            return;
+        }
+        const ids = target.filter((id) => id !== workoutId);
+        const at = before === null ? -1 : ids.indexOf(before);
+        ids.splice(at < 0 ? ids.length : at, 0, workoutId);
+        const plannedAt = { ...plan.plannedAt };
+        if (!sameDay) {
+            plannedAt[plannedKey(to, workoutId)] = Date.now();
+        }
+        const days = plan.days.map((other, day) =>
+            day === to ? ids : day === from ? other.filter((id) => id !== workoutId) : other
+        );
+        this.save(copyPlan({ days, updatedAt: this.clock.now(plan.updatedAt), plannedAt }));
+    }
+
+    /**
      * Plans `workoutId` on just `days` (from 0 for Monday): at the end of each it isn't on yet,
      * unless that's full, and off the others. One change, dated now.
      */

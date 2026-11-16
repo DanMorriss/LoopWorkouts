@@ -56,9 +56,10 @@ export class Finger {
      * Drags from `from` to `to` over `ms`, in `steps` moves, and lets go. Slow and far is a
      * drag; quick is a flick, which carries on. `settle` holds still there for that long before
      * letting go, so it's let go at rest: the speed the app reads is the last 100ms's, which a
-     * busy machine can make a flick by delivering the last two moves together.
+     * busy machine can make a flick by delivering the last two moves together. `hold` keeps
+     * still that long first, as to pick up something held to drag.
      */
-    async drag(from: Point, to: Point, { ms = 600, steps = 12, settle = 0 } = {}) {
+    async drag(from: Point, to: Point, { ms = 600, steps = 12, settle = 0, hold = 0 } = {}) {
         const start = await this.start();
         await this.touch('touchStart', from, start);
         for (let i = 1; i <= steps; i++) {
@@ -66,9 +67,9 @@ export class Finger {
                 x: from.x + ((to.x - from.x) * i) / steps,
                 y: from.y + ((to.y - from.y) * i) / steps,
             };
-            await this.touch('touchMove', at, start + (ms * i) / steps);
+            await this.touch('touchMove', at, start + hold + (ms * i) / steps);
         }
-        await this.touch('touchEnd', null, start + ms + Math.max(settle, 16));
+        await this.touch('touchEnd', null, start + hold + ms + Math.max(settle, 16));
     }
 
     /** Holds still on `at` for `ms` on the page's clock, then lets go without moving. */

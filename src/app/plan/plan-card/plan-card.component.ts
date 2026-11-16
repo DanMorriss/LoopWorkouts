@@ -1,5 +1,16 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import {
+    Component,
+    ComponentRef,
+    computed,
+    inject,
+    input,
+    linkedSignal,
+    output,
+    signal,
+    viewChild,
+    ViewContainerRef,
+} from '@angular/core';
 import {
     BuiltInPlan,
     builtInPlanEquipment,
@@ -15,6 +26,10 @@ import { ToggleSwitchComponent } from '../../shared/components/toggle-switch/tog
 import { readyMadeSlug } from '../../workout-library/ready-made/ready-made-card';
 import { ShowcaseCountComponent } from '../../shared/components/showcase/showcase-count.component';
 import { ShowcaseKitComponent } from '../../shared/components/showcase/showcase-kit.component';
+import { PlanMarkComponent } from './plan-mark.component';
+import type { PlanWeekComponent } from './plan-week.component';
+import { lazyComponent } from '../../shared/lazy-component';
+import { DayMove, PlanWeekDay } from './plan-week-day';
 
 /**
  * Where a plan's card was when one of its workouts was opened: Today, the Ready-made plans
@@ -30,16 +45,16 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
  * rest out (the card then shows the plan without it), and Use this plan, which gives the plan
  * as the card shows it. On the
  * Ready-made plans page, and Today's This week and Get started (NAV-6). Each of its workouts
- * slides in its own page, to see what's in it, and back to where the card is.
- *
- * The strip is for the eye; the list of workouts under it says the same, so the strip is
- * hidden from screen readers.
+ * slides in its own page, to see what's in it, and back to where the card is. Its days can be
+ * moved about the week, dragged or pressed (`PlanWeekComponent`), and the card, its list and
+ * Use this plan then go by its days as moved.
  */
 @Component({
     selector: 'app-plan-card',
     imports: [
         IconComponent,
         NgTemplateOutlet,
+        PlanMarkComponent,
         ShowcaseCountComponent,
         ShowcaseKitComponent,
         ToggleSwitchComponent,
@@ -70,20 +85,11 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
                 </div>
             </div>
 
-            <ol class="plan-card__week" aria-hidden="true">
-                @for (day of days(); track day.name) {
-                    <li [class]="day.classes">
-                        <span class="plan-card__day-letter">{{ day.letter }}</span>
-                        <span class="plan-card__day-marks">
-                            @for (workout of day.workouts; track $index) {
-                                <span [class]="workout.mark">{{ workout.number }}</span>
-                            } @empty {
-                                <span class="plan-card__rest"></span>
-                            }
-                        </span>
-                    </li>
-                }
-            </ol>
+            <!-- The week, its days moved about by drag and drop, in its own chunk so Today's
+                 first load is no bigger; its space is kept till it comes -->
+            <div class="plan-card__week">
+                <ng-container #week />
+            </div>
 
             <ul class="plan-card__workouts" aria-label="Its workouts">
                 @for (workout of training(); track workout.id) {
@@ -111,7 +117,11 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
                     [href]="workout.url"
                     (click)="slide.follow($event, workout.url, 'in')"
                 >
-                    <span [class]="workout.mark" aria-hidden="true">{{ workout.number }}</span>
+                    <app-plan-mark
+                        aria-hidden="true"
+                        [number]="workout.number"
+                        [colour]="workout.colour"
+                    />
                     <span class="plan-card__workout-name">{{ workout.title }}</span>
                     <span class="sr-only">: </span>
                     <span class="plan-card__workout-days">{{ workout.days }}</span>
@@ -157,17 +167,59 @@ export class PlanCardComponent {
     readonly headingLevel = input<3 | 4>(4);
     /** Where its workouts' pages go back to: Today, or the Ready-made plans page. */
     readonly workoutsFrom = input<PlanWorkoutFrom>('today');
-    /** The plan as the card shows it: without its active rest, if that's switched off. */
+    /** The plan as the card shows it: its days as moved, and without its active rest if that's off. */
     readonly used = output<BuiltInPlan>();
 
     protected readonly slide = inject(PageSlide);
+    /** The week, made in `#week` once its code's loaded. */
+    private readonly weekSlot = viewChild('week', { read: ViewContainerRef });
+
+    constructor() {
+        lazyComponent({
+            load: () => import('./plan-week.component').then((loaded) => loaded.PlanWeekComponent),
+            slot: this.weekSlot,
+            inputs: () => ({
+                days: this.days(),
+                title: this.plan().title,
+                id: this.headingId(),
+                changed: this.moved(),
+            }),
+            made: (week: ComponentRef<PlanWeekComponent>) => {
+                week.instance.moved.subscribe((move) => this.moveDay(move));
+                week.instance.reset.subscribe(() => this.order.set(this.inOrder()));
+            },
+        });
+    }
 
     /** Whether its active rest is kept, as it comes; switched off, its card shows it without. */
     protected readonly includeRest = signal(true);
-    /** The plan as it'll be used: as it comes, or without its active rest. */
-    protected readonly shown = computed(() =>
-        this.includeRest() ? this.plan() : withoutActiveRest(this.plan())
-    );
+    /**
+     * Which of the plan's days is on each day of the week, Monday first: as it comes, until
+     * its days are moved about. Back as it comes with another plan.
+     */
+    protected readonly order = linkedSignal<BuiltInPlan, readonly number[]>({
+        source: this.plan,
+        computation: () => this.inOrder(),
+    });
+    protected readonly moved = computed(() => this.order().some((day, i) => day !== i));
+
+    private inOrder(): readonly number[] {
+        return WEEKDAYS.map((_, day) => day);
+    }
+
+    /** A day dragged, or picked and put, to another place in the week; the others shift along. */
+    private moveDay({ from, to }: DayMove) {
+        // Not the CDK's moveItemInArray, which would bring the drag and drop into Today
+        const order = [...this.order()];
+        order.splice(to, 0, ...order.splice(from, 1));
+        this.order.set(order);
+    }
+
+    /** The plan as it'll be used: its days as moved, and as it comes or without its active rest. */
+    protected readonly shown = computed(() => {
+        const plan = this.includeRest() ? this.plan() : withoutActiveRest(this.plan());
+        return { ...plan, days: this.order().map((day) => plan.days[day]) };
+    });
 
     protected readonly headingId = computed(() => `plan-card-${this.plan().id.split(':')[1]}`);
 
@@ -182,7 +234,7 @@ export class PlanCardComponent {
     /**
      * Its workouts, each once in the order they first come up, with the days they're on: "Mon,
      * Wed, Fri". Training is numbered from 1 and coloured to match (the colours go round again
-     * past four); active rest has neither, as it's optional.
+     * past four); active rest has neither (colour 0), as it's optional.
      */
     private readonly workouts = computed(() => {
         let number = 0;
@@ -191,17 +243,13 @@ export class PlanCardComponent {
             if (!activeRest) {
                 number++;
             }
-            const colour = ((number - 1) % 4) + 1;
             return {
                 id: workout.id,
                 title: workout.title,
                 url: `/ready-made-plans/${readyMadeSlug(workout)}?from=${this.workoutsFrom()}`,
                 activeRest,
                 number: activeRest ? '' : `${number}`,
-                colour,
-                mark: activeRest
-                    ? 'plan-card__mark plan-card__mark--rest'
-                    : `plan-card__mark plan-card--c${colour}`,
+                colour: activeRest ? 0 : ((number - 1) % 4) + 1,
                 days: WEEKDAYS.filter((_, day) => this.shown().days[day].includes(workout.id))
                     .map((name) => name.slice(0, 3))
                     .join(', '),
@@ -213,30 +261,25 @@ export class PlanCardComponent {
     protected readonly activeRest = computed(() => this.workouts().filter((w) => w.activeRest));
 
     /**
-     * Each day, Monday first: its letter, its workouts' marks, and how it looks: a training day
-     * in its first training workout's colour, a day of active rest quieter, a rest day dashed.
+     * Each day, Monday first: its workouts' marks, and how it looks: a training day in its
+     * first training workout's colour, a day of active rest quieter, a rest day dashed.
      */
-    protected readonly days = computed(() => {
+    protected readonly days = computed((): PlanWeekDay[] => {
         const byId = new Map(this.workouts().map((workout) => [workout.id, workout]));
-        return WEEKDAYS.map((name, day) => {
-            const workouts = this.shown().days[day].map((id) => byId.get(id)!);
+        return this.shown().days.map((ids) => {
+            const workouts = ids.map((id) => byId.get(id)!);
             const lead = workouts.find((workout) => !workout.activeRest);
             return {
-                name,
-                letter: name[0],
                 workouts,
-                classes: lead
-                    ? `plan-card__day plan-card--c${lead.colour}`
-                    : workouts.length
-                      ? 'plan-card__day plan-card__day--active-rest'
-                      : 'plan-card__day plan-card__day--rest',
+                kind: lead ? 'training' : workouts.length ? 'active-rest' : 'rest',
+                colour: lead?.colour ?? 0,
             };
         });
     });
 
     /** The days with training on them: not rest days, nor those of only active rest. */
     protected readonly trainingDayCount = computed(
-        () => this.days().filter((day) => day.workouts.some((w) => !w.activeRest)).length
+        () => this.days().filter((day) => day.kind === 'training').length
     );
 
     /** How many days of active rest the plan comes with, to offer leaving them out; 0 if none. */
@@ -247,9 +290,6 @@ export class PlanCardComponent {
 
     /** The days of only active rest. */
     protected readonly restDayCount = computed(
-        () =>
-            this.days().filter(
-                (day) => day.workouts.length > 0 && day.workouts.every((w) => w.activeRest)
-            ).length
+        () => this.days().filter((day) => day.kind === 'active-rest').length
     );
 }

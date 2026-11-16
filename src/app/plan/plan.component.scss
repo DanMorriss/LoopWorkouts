@@ -112,6 +112,57 @@
     flex-shrink: 0;
 }
 
+// Its handle, at its left: dragged, it takes the workout to another day; pressed, its days
+.plan__move {
+    flex-shrink: 0;
+    color: var(--text-muted);
+    cursor: grab;
+}
+
+// Drag and drop (Angular CDK). The copy following the finger, lifted off the list, as a dragged
+// step in Create is; it settles into its place on the app's spring (styles/_drag.scss)
+.plan__workout.cdk-drag-preview {
+    box-sizing: border-box;
+    padding-right: 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.75rem;
+    background: var(--raised);
+    scale: 1.03;
+    box-shadow: 0 18px 40px var(--shadow);
+
+    .plan__status,
+    .plan__remove {
+        display: none;
+    }
+}
+
+// Where it will land
+.plan__workout.cdk-drag-placeholder {
+    border: 2px dashed var(--border-strong);
+    border-radius: 0.75rem;
+    background: var(--accent-soft);
+
+    > * {
+        visibility: hidden;
+    }
+}
+
+// The others slide aside to make room
+.cdk-drop-list-dragging .plan__workout:not(.cdk-drag-placeholder) {
+    transition: transform var(--spring-duration) var(--ease-spring);
+}
+
+// A day with nothing on it, with one dragged over it, makes room for it there
+.cdk-drop-list-dragging .plan__rest {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cdk-drop-list-dragging .plan__workout:not(.cdk-drag-placeholder) {
+        transition: none;
+    }
+}
+
 .plan__rest {
     margin: 0.25rem 0 0;
     color: var(--text-muted);

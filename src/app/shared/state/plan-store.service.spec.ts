@@ -98,6 +98,47 @@ describe('PlanStore', () => {
         expect(store.plan().days[3]).toEqual(['legs']);
     });
 
+    it('moves a workout to another day, planned there now, or to another place on its own', () => {
+        const now = vi.spyOn(Date, 'now').mockReturnValue(1_000);
+        const store = createStore();
+        store.add(0, 'legs');
+        store.add(0, 'push');
+        store.add(3, 'pull');
+
+        now.mockReturnValue(9_000);
+        store.move('push', 0, 0, 'legs');
+        expect(store.plan().days[0]).toEqual(['push', 'legs']);
+        expect(store.plan().plannedAt).toEqual({
+            '0:legs': 1_000,
+            '0:push': 1_000,
+            '3:pull': 1_000,
+        });
+
+        store.move('legs', 0, 3, 'pull');
+        store.move('push', 0, 3, null);
+        expect(store.plan().days).toEqual([[], [], [], ['legs', 'pull', 'push'], [], [], []]);
+        expect(store.plan().plannedAt).toEqual({
+            '3:legs': 9_000,
+            '3:pull': 1_000,
+            '3:push': 9_000,
+        });
+    });
+
+    it("doesn't move a workout to a day it's on already, or that's full", () => {
+        const store = createStore();
+        store.add(0, 'legs');
+        store.add(1, 'legs');
+        for (let i = 0; i < MAX_WORKOUTS_A_DAY; i++) {
+            store.add(2, `w${i}`);
+        }
+        const before = store.plan();
+
+        store.move('legs', 0, 1, null);
+        store.move('legs', 0, 2, null);
+
+        expect(store.plan()).toBe(before);
+    });
+
     it('takes a workout off a day, leaving the others', () => {
         const store = createStore();
         store.add(4, 'push');

@@ -1,4 +1,6 @@
+import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { HistoryEntry } from '../models/history';
@@ -8,7 +10,9 @@ import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { PLAN_TOUR_KEY, TourService } from '../tour/tour.service';
+import { UndoService } from '../shared/undo/undo.service';
 import { PlanComponent } from './plan.component';
+import { PlannedDrag } from './plan-drag';
 
 /** Wednesday 28 October 2026, mid-morning. */
 const NOW = new Date(2026, 9, 28, 10).getTime();
@@ -231,6 +235,84 @@ describe('PlanComponent', () => {
         expect(TestBed.inject(PlanStore).plan().days[5]).toEqual([]);
         expect(days()[5]).toBe('Saturday: Nothing planned');
         expect(text(el().querySelector('[role="status"]')!)).toBe('Legs taken off Saturday');
+    });
+
+    describe('moving a workout by its handle (PLN-1)', () => {
+        /** Lets go of `workoutId`, dragged from `from`, at `index` on `to`, as the CDK says. */
+        const drop = async (workoutId: string, from: number, to: number, index: number) => {
+            const lists = fixture.debugElement
+                .queryAll(By.directive(CdkDropList))
+                .map((list) => list.injector.get(CdkDropList<number>));
+            const fromIndex = TestBed.inject(PlanStore).plan().days[from].indexOf(workoutId);
+            lists[to].dropped.emit({
+                previousIndex: fromIndex,
+                currentIndex: index,
+                container: lists[to],
+                previousContainer: lists[from],
+                item: { data: { day: from, workoutId } },
+            } as unknown as CdkDragDrop<number, number, PlannedDrag>);
+            await render();
+        };
+
+        it('moves one dragged to another day there, and says so', async () => {
+            TestBed.inject(PlanStore).add(1, legs.id);
+            TestBed.inject(PlanStore).add(3, push.id);
+            await open();
+
+            await drop(legs.id, 1, 3, 0);
+
+            expect(days()[1]).toBe('Tuesday: Nothing planned');
+            expect(days()[3]).toBe('Thursday: Legs, Push');
+            expect(text(el().querySelector('[role="status"]')!)).toBe('Legs moved to Thursday');
+            expect(document.activeElement?.id).toBe(`plan-move-3-${legs.id}`);
+        });
+
+        it('moves one dragged on its own day to its new place', async () => {
+            TestBed.inject(PlanStore).add(4, legs.id);
+            TestBed.inject(PlanStore).add(4, push.id);
+            await open();
+
+            await drop(legs.id, 4, 4, 1);
+
+            expect(days()[4]).toBe('Friday: Push, Legs');
+            expect(text(el().querySelector('[role="status"]')!)).toBe(
+                'Legs moved to 2 of 2 on Friday'
+            );
+        });
+
+        it("only lets one onto a day it isn't on yet", async () => {
+            TestBed.inject(PlanStore).add(0, legs.id);
+            TestBed.inject(PlanStore).add(2, legs.id);
+            await open();
+            const lists = fixture.debugElement
+                .queryAll(By.directive(CdkDropList))
+                .map((list) => list.injector.get(CdkDropList<number>));
+            const drag = { data: { day: 0, workoutId: legs.id } } as CdkDrag<PlannedDrag>;
+
+            expect(lists[0].enterPredicate(drag, lists[0])).toBe(true);
+            expect(lists[1].enterPredicate(drag, lists[1])).toBe(true);
+            expect(lists[2].enterPredicate(drag, lists[2])).toBe(false);
+        });
+
+        it('pressed, opens its days, moving it with Undo', async () => {
+            TestBed.inject(PlanStore).add(1, legs.id);
+            await open();
+
+            await click(`#plan-move-1-${legs.id}`);
+            expect(text(el().querySelector('.choice__title')!)).toBe('Plan Legs on…');
+            const choices = el().querySelectorAll<HTMLButtonElement>('.choice__choice');
+            choices[1].click();
+            choices[4].click();
+            await render();
+            el().querySelector<HTMLButtonElement>('.choice__done')!.click();
+            await render();
+
+            expect(days()[1]).toBe('Tuesday: Nothing planned');
+            expect(days()[4]).toBe('Friday: Legs');
+            expect(TestBed.inject(UndoService).offer()?.message).toBe(
+                'Legs planned on Friday, and taken off Tuesday'
+            );
+        });
     });
 
     it('leaves out a workout no longer in the library', async () => {

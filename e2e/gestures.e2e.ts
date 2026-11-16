@@ -268,3 +268,93 @@ test.describe('dragging steps', () => {
         }
     );
 });
+
+test.describe('dragging the plan (PLN-1, PLN-6)', () => {
+    const push = workout('Push', { steps: [reps(10, 'Bench press', { exercise: 'bench-press' })] });
+    test.use({
+        storage: { ...seed.workouts([legs, push]), ...seed.plan({ tue: ['legs'], thu: ['push'] }) },
+    });
+
+    /** Drags with the mouse from the middle of `from` to the middle of `to`, in small moves. */
+    async function drag(
+        page: import('@playwright/test').Page,
+        from: import('@playwright/test').Locator,
+        to: import('@playwright/test').Locator
+    ) {
+        await from.scrollIntoViewIfNeeded();
+        const a = (await from.boundingBox())!;
+        const b = (await to.boundingBox())!;
+        const [x, y] = [a.x + a.width / 2, a.y + a.height / 2];
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        await page.mouse.move(x + 5, y + 5, { steps: 5 });
+        await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 20 });
+        await page.mouse.up();
+    }
+
+    test(
+        'REG-GES-04 dragging a planned workout to another day',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/plan');
+            const handle = page.getByRole('button', { name: 'Move Legs to other days' });
+            const monday = page.getByRole('region', { name: 'Monday', exact: true });
+            await drag(page, handle, monday.getByText('Nothing planned'));
+
+            await expect(monday).toContainText('Legs');
+            await expect(page.getByRole('region', { name: 'Tuesday', exact: true })).toContainText(
+                'Nothing planned'
+            );
+            await expect.poll(() => app.announcements()).toContainEqual('Legs moved to Monday');
+            const plan = await app.stored<{ days: string[][] }>('week-plan');
+            expect(plan?.days[0]).toEqual(['legs']);
+            // Its day had gone by when it was moved there, so it starts next week (PLN-3)
+            await expect(monday).toContainText('From next week');
+            // Still on the Plan page: the drag didn't swipe it back
+            await expect(page).toHaveURL('/plan');
+        }
+    );
+
+    test(
+        "REG-GES-04 dragging a ready-made plan's day to another place in the week",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/ready-made-plans');
+            const card = page.getByRole('article', { name: 'Push, pull, legs' });
+            const week = card.getByRole('list', { name: 'The week of Push, pull, legs' });
+            await drag(
+                page,
+                week.getByRole('button', { name: 'Monday: Gym push' }),
+                week.getByRole('button', { name: 'Thursday: rest' })
+            );
+
+            await expect(week.getByRole('button', { name: 'Thursday: Gym push' })).toBeVisible();
+            await expect(card.getByRole('link', { name: 'Gym push : Thu' })).toBeVisible();
+            await card.getByRole('button', { name: 'Use Push, pull, legs' }).click();
+            await expect(page).toHaveURL('/home');
+            const plan = await app.stored<{ days: string[][] }>('week-plan');
+            expect(plan?.days[3]).toEqual(['builtin:gym-push']);
+        }
+    );
+
+    test(
+        "REG-GES-04 holding and dragging a ready-made plan's day on a phone",
+        { tag: '@p3' },
+        async ({ app, page, isMobile }) => {
+            test.skip(!isMobile, 'touch, on the phone project');
+            const finger = await Finger.on(page);
+            await app.goto('/ready-made-plans');
+            const card = page.getByRole('article', { name: 'Push, pull, legs' });
+            const week = card.getByRole('list', { name: 'The week of Push, pull, legs' });
+            const monday = week.getByRole('button', { name: 'Monday: Gym push' });
+            const from = await Finger.within(monday, 0.5);
+            const to = await Finger.within(week.getByRole('button', { name: /^Thursday/ }), 0.5);
+            // Held still a moment first, then dragged
+            await finger.drag(from, to, { hold: 400, ms: 600, settle: 100 });
+
+            await expect(card.getByRole('link', { name: 'Gym push : Thu' })).toBeVisible();
+            // And the drag didn't swipe the page back
+            await expect(page).toHaveURL('/ready-made-plans');
+        }
+    );
+});

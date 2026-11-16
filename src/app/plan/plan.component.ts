@@ -1,3 +1,10 @@
+import {
+    CdkDrag,
+    CdkDragDrop,
+    CdkDragHandle,
+    CdkDropList,
+    CdkDropListGroup,
+} from '@angular/cdk/drag-drop';
 import { afterNextRender, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,6 +30,10 @@ import { injectFocusAfterRender } from '../shared/focus-after-render';
 import { aToZ, isReadyMade } from '../models/workout';
 import { TourService } from '../tour/tour.service';
 import { PlanMusclesComponent } from './plan-muscles/plan-muscles.component';
+import { AddToPlanDialogComponent } from '../shared/components/add-to-plan-dialog/add-to-plan-dialog.component';
+import { injectPlanOnDays } from '../shared/plan-on-days';
+import { Workout } from '../models/workout';
+import { PlanDrag, PlannedDrag } from './plan-drag';
 
 /**
  * How a planned workout's place this week reads, e.g. "Done". "To come" says nothing, unless
@@ -41,13 +52,19 @@ const STATUS_TEXT: Record<PlannedStatus, string> = {
  * The weekly plan (PLN-1): Monday to Sunday, the workouts planned on each, the same every week,
  * with where each is this week (PLN-3): done, missed, due today or to come. Each day adds a
  * workout, yours or ready-made, or takes one off; the dialog's **Make a new workout** opens
- * Create, whose Save plans it on that day and comes back here (PLN-5). It slides in over Today, from its week (PLN-4),
- * and back off with ‹ Today or a swipe right.
+ * Create, whose Save plans it on that day and comes back here (PLN-5). A workout's handle drags
+ * it to another day, or another place on its own; pressed, it opens the days to plan it on.
+ * It slides in over Today, from its week (PLN-4), and back off with ‹ Today or a swipe right.
  */
 @Component({
     selector: 'app-plan',
     imports: [
+        AddToPlanDialogComponent,
         BackLinkComponent,
+        CdkDrag,
+        CdkDragHandle,
+        CdkDropList,
+        CdkDropListGroup,
         MatIconModule,
         PlanMusclesComponent,
         SwipeBackDirective,
@@ -62,7 +79,9 @@ export class PlanComponent {
     private readonly history = inject(HistoryStore);
     private readonly focusAfterRender = injectFocusAfterRender();
     protected readonly slide = inject(PageSlide);
+    private readonly planOnDays = injectPlanOnDays();
     private readonly now = Date.now();
+    protected readonly drag = new PlanDrag(this.planStore.plan);
 
     constructor() {
         // The first time it opens on this device, a tour of it (PLN-8)
@@ -177,6 +196,73 @@ export class PlanComponent {
         if (day !== null) {
             this.focusAfterRender(`plan-add-${day}`);
         }
+    }
+
+    /**
+     * A workout dragged by its handle and let go: on another day, it's moved there, and on its
+     * own, to its new place.
+     */
+    protected dropped(event: CdkDragDrop<number, number, PlannedDrag>) {
+        const { day: from, workoutId } = event.item.data;
+        const to = event.container.data;
+        if (from === to && event.previousIndex === event.currentIndex) {
+            return;
+        }
+        // Where it's let go among those shown there, without it
+        const shown = this.days()
+            [to].workouts.map((planned) => planned.workoutId)
+            .filter((id) => id !== workoutId);
+        this.planStore.move(workoutId, from, to, shown[event.currentIndex] ?? null);
+        const ids = this.planStore.plan().days[to];
+        if (!ids.includes(workoutId)) {
+            return;
+        }
+        const name = this.names().get(workoutId);
+        this.announcement.set(
+            from === to
+                ? `${name} moved to ${ids.indexOf(workoutId) + 1} of ${ids.length} on ${WEEKDAYS[to]}`
+                : `${name} moved to ${WEEKDAYS[to]}`
+        );
+        this.focusAfterRender(`plan-move-${to}-${workoutId}`);
+    }
+
+    /** The workout whose days are being picked, from its handle, while the dialog's open. */
+    protected readonly moving = signal<string | null>(null);
+    protected readonly movingWorkout = computed(() => {
+        const id = this.moving();
+        return id === null ? null : this.workouts.findAnyWorkout(id);
+    });
+    /** The day its handle was pressed on, for focus to go back to. */
+    private movingFrom = -1;
+
+    protected pickDays(day: number, workoutId: string) {
+        if (this.drag.pressed()) {
+            this.movingFrom = day;
+            this.moving.set(workoutId);
+        }
+    }
+
+    protected closeMoving() {
+        const id = this.moving();
+        this.moving.set(null);
+        if (id !== null) {
+            this.focusAfterRender(`plan-move-${this.movingFrom}-${id}`);
+        }
+    }
+
+    /**
+     * Its days picked: planned on just those, with Undo. Focus goes back to its handle on the
+     * day it was pressed on, or, taken off that, on the first it's on, or that day's Add.
+     */
+    protected planOn(workout: Workout, days: number[]) {
+        const from = this.movingFrom;
+        this.moving.set(null);
+        const on = days.includes(from) ? from : (days[0] ?? -1);
+        this.planOnDays(
+            workout,
+            days,
+            on < 0 ? `plan-add-${from}` : `plan-move-${on}-${workout.id}`
+        );
     }
 
     protected remove(day: number, workoutId: string) {

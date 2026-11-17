@@ -25,6 +25,7 @@ import { bestLines } from '../../exercises/progress-format';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { SummarySetsComponent } from './summary-sets/summary-sets.component';
 import { SummaryCopyComponent } from './summary-copy/summary-copy.component';
+import { SummaryKettlebellComponent } from './summary-kettlebell/summary-kettlebell.component';
 import { SummaryStepUpsComponent } from './summary-step-ups/summary-step-ups.component';
 import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';
 import { SheetDrag } from './sheet-drag';
@@ -48,6 +49,7 @@ import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
         SummaryCopyComponent,
         SummarySetsComponent,
         SummaryStatsComponent,
+        SummaryKettlebellComponent,
         SummaryStepUpsComponent,
         SummarySwapsComponent,
     ],

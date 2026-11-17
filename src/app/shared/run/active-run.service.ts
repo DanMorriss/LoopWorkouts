@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { Exercise } from '../../models/exercise';
 import { HistoryEntry, historyId, isTimedSet, RepSet } from '../../models/history';
+import { kettlebellSteps, withKettlebellWeight } from '../../models/kettlebell';
 import { canTakeEdit, editSwaps } from '../../models/run-edit';
 import { nextWait } from '../../models/wait-to-start';
 import {
@@ -47,6 +48,7 @@ import {
     workoutStateAt,
 } from '../../models/workout-state';
 import { AlarmService } from '../alarms/alarm.service';
+import { ExerciseStore } from '../state/exercise-store.service';
 import { HistoryStore } from '../state/history-store.service';
 import { SettingsStore } from '../state/settings-store.service';
 import { WorkoutStore } from '../state/workout-store.service';
@@ -74,6 +76,7 @@ const VIBRATE_LATE_LIMIT_MS = 1000;
 export class ActiveRunService {
     private readonly store = inject(WorkoutStore);
     private readonly history = inject(HistoryStore);
+    private readonly exercises = inject(ExerciseStore);
     private readonly alarms = inject(AlarmService);
     private readonly settings = inject(SettingsStore);
     private readonly keepAwake = inject(KeepAwakeService);
@@ -505,7 +508,8 @@ export class ActiveRunService {
      * this run and the saved workout, so next time starts there: for this set and the rest of
      * the run, or, on a step whose sets vary (BLD-11), for this set only. Both sides of a set
      * go together. A weight of undefined is none. A step swapped for another exercise (RUN-11)
-     * changes in this run only, unless the swap's been kept for next time.
+     * changes in this run only, unless the swap's been kept for next time. In a kettlebell
+     * workout, a weight goes on its other kettlebell steps too (`shareKettlebell()`).
      */
     changeReps(change: { reps: number } | { weight: number | undefined }) {
         const state = this.state();
@@ -522,6 +526,29 @@ export class ActiveRunService {
             place.step,
             withRepSet(saved, place.set, { reps, ...(weight === undefined ? {} : { weight }) })
         );
+        if ('weight' in change && change.weight !== undefined) {
+            this.shareKettlebell(place.step, step.weight, change.weight);
+        }
+    }
+
+    /**
+     * In a kettlebell workout (PRG-14), done with one kettlebell, a weight put on one of its
+     * kettlebell steps goes on the rest, wherever they're at the old weight or have none: so
+     * it's said once at the start, and once again on getting a heavier one.
+     */
+    private shareKettlebell(changed: number, from: number | undefined, to: number) {
+        const steps = allSteps(this.running()!);
+        const kettlebell = kettlebellSteps(steps, (id) => this.exercises.byId(id));
+        if (!kettlebell.has(changed)) {
+            return;
+        }
+        for (const index of kettlebell) {
+            const step = steps[index];
+            const shared = step.kind === 'reps' ? withKettlebellWeight(step, from, to) : step;
+            if (shared !== step) {
+                this.updateStep(index, shared);
+            }
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ import {
     TIME_INCREASE,
     withLongerTime,
 } from '../../../models/progress';
+import { kettlebellSteps } from '../../../models/kettlebell';
 import { weightToKg } from '../../../models/weight';
 import { allSteps, Step, withEachRepSet } from '../../../models/workout';
 import { ActiveRunService } from '../../../shared/run/active-run.service';
@@ -70,7 +71,8 @@ export class SummaryStepUpsComponent {
     private readonly run = inject(ActiveRunService);
     private readonly store = inject(WorkoutStore);
     private readonly weightUnit = inject(SettingsStore).weightUnit;
-    private readonly exerciseName = ownExerciseName(inject(ExerciseStore));
+    private readonly exercises = inject(ExerciseStore);
+    private readonly exerciseName = ownExerciseName(this.exercises);
     private readonly focusAfterRender = injectFocusAfterRender();
 
     /**
@@ -97,13 +99,14 @@ export class SummaryStepUpsComponent {
         // nothing to step up from, unless it was kept for next time
         const swappedAway = (step: number) =>
             this.run.swappedSteps().has(step) && !this.run.keptSwaps().has(step);
+        const steps = allSteps(this.run.workout() ?? { blocks: [] });
+        // A kettlebell workout's go up in reps (PRG-14)
+        const kettlebell = kettlebellSteps(steps, (id) => this.exercises.byId(id));
         return [
             ...applied.values(),
-            ...progressionSuggestions(
-                sets,
-                allSteps(this.run.workout() ?? { blocks: [] }),
-                unit
-            ).filter(({ step }) => !applied.has(step) && !swappedAway(step)),
+            ...progressionSuggestions(sets, steps, unit, kettlebell).filter(
+                ({ step }) => !applied.has(step) && !swappedAway(step)
+            ),
         ]
             .sort((a, b) => a.step - b.step)
             .map((suggestion) => {

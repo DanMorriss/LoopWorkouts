@@ -313,7 +313,7 @@ describe('ExerciseListComponent', () => {
     });
 });
 
-describe('ExerciseListComponent, opened from the Plan page (PLN-1)', () => {
+describe('ExerciseListComponent, by its address: its search, and from the Plan page (PLN-1)', () => {
     beforeEach(() => {
         localStorage.clear();
         TestBed.configureTestingModule({
@@ -343,6 +343,24 @@ describe('ExerciseListComponent, opened from the Plan page (PLN-1)', () => {
         expect(back.getAttribute('href')).toBe('/plan');
         const card = page.querySelector<HTMLAnchorElement>('app-exercise-card a')!;
         expect(card.getAttribute('href')).toMatch(/\?muscles=triceps&from=plan$/);
+    });
+
+    it('keeps the search in the address and the links to exercises, and opens with it', async () => {
+        const page = await open('/exercises?q=squat&muscles=quads');
+
+        const box = page.querySelector<HTMLInputElement>('#exercise-search')!;
+        expect(box.value).toBe('squat');
+        const card = page.querySelector<HTMLAnchorElement>('app-exercise-card a')!;
+        expect(card.textContent!.toLowerCase()).toContain('squat');
+        expect(card.getAttribute('href')).toMatch(/\?q=squat&muscles=quads$/);
+
+        box.value = 'lunge';
+        box.dispatchEvent(new Event('input'));
+        await vi.waitFor(() => expect(TestBed.inject(Router).url).toContain('q=lunge'));
+        expect(TestBed.inject(Router).url).toBe('/exercises?q=lunge&muscles=quads');
+
+        page.querySelector<HTMLButtonElement>('button[aria-label="Clear search"]')!.click();
+        await vi.waitFor(() => expect(TestBed.inject(Router).url).toBe('/exercises?muscles=quads'));
     });
 
     it.each(['/exercises', '/exercises?from=elsewhere'])(

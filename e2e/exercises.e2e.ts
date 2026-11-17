@@ -34,6 +34,19 @@ test.describe('the list', () => {
             await expect(cards.first()).toHaveAccessibleName(/^Push-up Also called Press-up/);
             await expect(count).toHaveText(/^\s*\d exercises\s*$/);
 
+            // An exercise and back keeps the search, and the list scrolled where it was
+            await search.fill('squat');
+            const deep = cards.last();
+            await deep.scrollIntoViewIfNeeded();
+            const scrolled = await page.evaluate(() => window.scrollY);
+            expect(scrolled).toBeGreaterThan(0);
+            await deep.click();
+            await expect(page).toHaveURL(/\/exercises\/[a-z-]+\?q=squat$/);
+            await app.backLink('Exercises').click();
+            await expect(page).toHaveURL('/exercises?q=squat');
+            await expect(search).toHaveValue('squat');
+            await expect.poll(() => page.evaluate(() => window.scrollY)).toBeCloseTo(scrolled, -1);
+
             // Quads from the chips, Glutes from the body map
             await search.fill('');
             const chips = page.getByRole('group', { name: 'Main muscle' });

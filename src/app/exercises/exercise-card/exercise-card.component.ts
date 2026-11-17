@@ -12,11 +12,19 @@ import {
 } from '../../models/exercise';
 import { PageSlide } from '../../shared/navigation/page-slide';
 
+/** The Exercises list's search, muscles and `from`, as its address keeps them. */
+interface ListQueryParams {
+    q?: string;
+    muscles?: string;
+    from?: string;
+}
+
 /** One exercise in the list, as its card shows it. */
 export interface ExerciseCard {
     exercise: Exercise;
     path: string;
-    queryParams: { muscles?: string };
+    /** The list's search, muscles and `from`, for its page to go back to. */
+    queryParams: ListQueryParams;
     own: boolean;
     mainMuscles: string[];
     /** e.g. "Barbell, rack", or empty when it lists none. */
@@ -41,7 +49,7 @@ export interface CardProgress {
 export function exerciseCard(
     exercise: Exercise,
     otherName?: string,
-    queryParams: { muscles?: string; from?: string } = {}
+    queryParams: ListQueryParams = {}
 ): ExerciseCard {
     return {
         exercise,

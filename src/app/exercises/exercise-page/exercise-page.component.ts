@@ -86,7 +86,7 @@ export class ExercisePageComponent {
      * ready-made plan's workout (/ready-made-plans/<workout>/<exercise>, which keeps where that
      * goes back to); Progress, from a run in its log (`?run=<id>`, which it marks) or its
      * exercises this week (`?from=progress`, back to this one's row); otherwise the list,
-     * e.g. "/exercises?muscles=quads".
+     * e.g. "/exercises?q=squat&muscles=quads".
      */
     private backLink(): { url: string; label: string } {
         const { paramMap, queryParamMap, data } = this.route.snapshot;
@@ -118,12 +118,15 @@ export class ExercisePageComponent {
                 label: this.workouts.findAnyWorkout(workoutId)?.title.trim() || 'Workout',
             };
         }
-        // Back to the list as it was: its muscles, and where it was opened from (`?from=plan`)
+        // Back to the list as it was: its search, muscles, and where it was opened from
+        // (`?from=plan`)
         const from = queryParamMap.get('from');
+        const q = queryParamMap.get('q');
         return {
             url: this.router.serializeUrl(
                 this.router.createUrlTree(['/exercises'], {
                     queryParams: {
+                        ...(q ? { q } : {}),
                         ...(this.musclesQuery ? { muscles: this.musclesQuery } : {}),
                         ...(listBackLink(from) ? { from } : {}),
                     },

@@ -48,7 +48,7 @@ Built: last time on each rep step (PRG-1), personal bests on the workout summary
 
 ### On the exercise page (PRG-4)
 
-Under the body map, a **Progress** section:
+At the end of the page, after How to do it and Tips (since 2026-11-17; it was under the body map), a **Progress** section:
 
 - With no sessions: "Nothing logged yet. Do it in a workout and its bests and progress show up here."
 - **Bests**, as tiles, each with when it was set.

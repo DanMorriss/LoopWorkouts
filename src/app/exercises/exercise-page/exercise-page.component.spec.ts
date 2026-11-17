@@ -195,6 +195,28 @@ describe('ExercisePageComponent', () => {
             expect(details.querySelector('app-body-map')).not.toBeNull();
         });
 
+        it('lists the muscles without the body map figure when it has a demo', async () => {
+            await open('/exercises/back-squat');
+            await exercises.loadMotion();
+            await render();
+
+            expect(all('.body-map__label--main')).toEqual(['Quads', 'Glutes']);
+            expect(el().querySelector('.body-map__figures')).toBeNull();
+        });
+
+        it('shows its progress last, after how to do it and tips', async () => {
+            await open('/exercises/back-squat');
+            await exercises.loadText();
+            await render();
+
+            const details = el().querySelector('app-exercise-details')!;
+            const tips = details.querySelector('.exercise__tips')!;
+            const progress = details.querySelector('app-exercise-progress')!;
+            expect(
+                tips.compareDocumentPosition(progress) & Node.DOCUMENT_POSITION_FOLLOWING
+            ).toBeTruthy();
+        });
+
         it('reads a choice across two needs as one', async () => {
             await open('/exercises/inverted-row');
 

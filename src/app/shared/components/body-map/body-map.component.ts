@@ -20,7 +20,8 @@ let nextId = 0;
  * well, each muscle is a toggle button for keyboards and screen readers too, pressed when
  * it's main: for a filter, where tapping turns a muscle on or off (the Exercises list).
  * `removableLabels` gives each listed muscle a remove button. `figureOnly` leaves the list
- * out, for showing the figure itself (the setup's choice of body). `linksFrom` makes each
+ * out, for showing the figure itself (the setup's choice of body), and `listOnly` the figure,
+ * where something else draws it (an exercise's 3D demo). `linksFrom` makes each
  * listed muscle a link to exercises for it (the Plan page).
  */
 @Component({
@@ -37,6 +38,7 @@ export class BodyMapComponent {
     readonly toggles = input(false);
     readonly removableLabels = input(false);
     readonly figureOnly = input(false);
+    readonly listOnly = input(false);
     /**
      * Each listed muscle a link to the Exercises list cut down to it, which slides in over the
      * page it names (`?from=`, e.g. `plan`), with ‹ back to it. Null for none.

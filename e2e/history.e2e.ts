@@ -1,6 +1,6 @@
 import { expect, rest, run, seed, sets, test, timed, workout } from './fixtures';
 import { HistoryPage } from './history-page';
-import { WorkoutPage } from './workout-page';
+import { setWheel, WorkoutPage } from './workout-page';
 
 // The history, on the Progress tab (history.md): REG-HIS in docs/regression-tests.md. The clock is
 // at NOW, Wednesday 11 November 2026 at 09:00.
@@ -178,6 +178,57 @@ test.describe('deleting', () => {
         const deleted = await app.stored<{ kind: string }[]>('deleted');
         expect(deleted).toContainEqual(expect.objectContaining({ kind: 'history' }));
     });
+});
+
+test.describe('correcting sets', () => {
+    test.use({
+        storage: seed.history([
+            run('legs', '2026-11-10T18:00', {
+                title: 'Legs',
+                sets: sets('back-squat', 'Back squat', [10, 60], [8, 62.5]),
+            }),
+        ]),
+    });
+
+    test(
+        "REG-HIS-05 correct a workout's reps or weight, and Undo",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const history = new HistoryPage(page);
+            await app.goto('/history');
+            const legs = history.entry('Legs');
+            await expect(legs).toContainText('Back squat: 10 @ 60, 8 @ 62.5 kg');
+
+            await history.options(legs).click();
+            await page.getByRole('button', { name: 'Change reps or weight' }).click();
+            const line = legs.getByRole('button', { name: /^Change Back squat/ });
+            await expect(line).toBeFocused();
+            await line.click();
+            const sets = page.getByRole('dialog', { name: 'Back squat' });
+            await setWheel(sets.getByRole('spinbutton', { name: /Set 2 Reps/ }), 10);
+            await sets.getByRole('button', { name: 'Save' }).click();
+            await expect(sets).toBeHidden();
+            await expect(legs).toContainText('Back squat: 10 @ 60, 10 @ 62.5 kg');
+            // As after Delete, the Undo bar takes focus
+            await expect(app.undoBar).toContainText('Changed Back squat');
+            await expect(app.undo).toBeFocused();
+
+            await legs.getByRole('button', { name: 'Done changing' }).click();
+            await expect(history.options(legs)).toBeFocused();
+            await app.reload();
+            await expect(legs).toContainText('Back squat: 10 @ 60, 10 @ 62.5 kg');
+
+            // Undo puts it back
+            await history.options(legs).click();
+            await page.getByRole('button', { name: 'Change reps or weight' }).click();
+            await legs.getByRole('button', { name: /^Change Back squat/ }).click();
+            await setWheel(sets.getByRole('spinbutton', { name: /Set 1 Reps/ }), 12);
+            await sets.getByRole('button', { name: 'Save' }).click();
+            await expect(legs).toContainText('Back squat: 12 @ 60, 10 @ 62.5 kg');
+            await app.undo.click();
+            await expect(legs).toContainText('Back squat: 10 @ 60, 10 @ 62.5 kg');
+        }
+    );
 });
 
 test.describe('a run deleted while it goes on', () => {

@@ -113,6 +113,13 @@
     overflow-wrap: anywhere;
 }
 
+// Done changing, under the lines turned into buttons
+.entry__sets-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
 // The exercise's name goes to its page, with its progress (PRG-4)
 .entry__exercise {
     position: relative;

@@ -9,7 +9,7 @@ import {
     signal,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HistoryEntry, inLastSevenDays } from '../models/history';
+import { HistoryEntry, inLastSevenDays, withSetChanges } from '../models/history';
 import { changeSmoothly } from '../shared/layout-change';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { HistoryStore } from '../shared/state/history-store.service';
@@ -22,6 +22,7 @@ import { MusclesThisWeekComponent } from './muscles-this-week/muscles-this-week.
 import { TimePerWeekComponent } from './time-per-week/time-per-week.component';
 import { entryName, formatDuration } from './history-format';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
+import { SetsChanged } from './set-lines/change-set-lines.component';
 
 interface DayGroup {
     /** e.g. "2026-10-18", for tracking and ids. */
@@ -43,7 +44,7 @@ function dayKey(time: number): string {
 
 /**
  * The Progress tab: the last seven days, the time per week (PRG-12), the muscles worked this week (PRG-6, PRG-8), the
- * exercises done this week with their new bests (PRG-13), then the log, every workout done by day. The workout to do next is on Today and the workout summary,
+ * exercises done this week with their new bests (PRG-13), then the log, every workout done by day, whose sets can be corrected (HIS-6). The workout to do next is on Today and the workout summary,
  * not here. Its address stays /history, as links to a run in it use it. Arriving from the workout summary, `?run=<id>` highlights that run and
  * brings it into view, and `?note=<id>` does the same with its note box open.
  */
@@ -106,6 +107,8 @@ export class HistoryComponent {
     /** Whose menu is open, and whose note is being edited: one of each at most. */
     protected readonly openMenuId = signal<string | null>(null);
     protected readonly editingId = signal<string | null>(null);
+    /** Whose sets are being changed, if anyone's. */
+    protected readonly changingSetsId = signal<string | null>(null);
     /** The run arrived at from the workout summary. */
     protected readonly highlightedId = signal<string | null>(null);
 
@@ -137,7 +140,31 @@ export class HistoryComponent {
 
     protected editNote(id: string) {
         this.openMenuId.set(null);
+        this.changingSetsId.set(null);
         this.editingId.set(id);
+    }
+
+    protected changeSets(id: string) {
+        this.openMenuId.set(null);
+        this.editingId.set(null);
+        this.changingSetsId.set(id);
+    }
+
+    /**
+     * Corrects some of a workout's sets, e.g. the weight typed wrong, and offers to put them
+     * back. Its bests on Progress and its exercises' pages follow, as they're worked out from
+     * the history. The saved workout isn't changed: what's done is done.
+     */
+    protected correctSets(entry: HistoryEntry, { line, changes }: SetsChanged) {
+        const before = entry.sets ?? [];
+        this.history.setSets(entry.id, withSetChanges(before, changes));
+        this.undo.offerUndo({
+            message: `Changed ${line.name}`,
+            undo: () => {
+                this.history.setSets(entry.id, before);
+                this.focusAfterRender(`menu-${entry.id}`);
+            },
+        });
     }
 
     protected closeNote(id: string) {
@@ -150,6 +177,9 @@ export class HistoryComponent {
     protected delete(entry: HistoryEntry) {
         this.openMenuId.set(null);
         this.closeNote(entry.id);
+        if (this.changingSetsId() === entry.id) {
+            this.changingSetsId.set(null);
+        }
         // The entries and days after it close up the gap, and open it again on Undo
         this.smoothChange(() => this.history.delete(entry.id));
         this.undo.offerUndo({

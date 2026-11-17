@@ -4009,7 +4009,7 @@ describe('WorkoutComponent', () => {
 
                 const shown = Array.from(
                     summary()!.querySelectorAll(
-                        '.set-lines__heading, .set-lines__superset-name, .summary__line-change'
+                        '.set-lines__heading, .set-lines__superset-name, .change-line'
                     ),
                     (el) => el.getAttribute('aria-label') ?? el.textContent!.trim()
                 );

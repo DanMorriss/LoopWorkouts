@@ -616,6 +616,127 @@ describe('HistoryComponent', () => {
         });
     });
 
+    describe('changing its sets (HIS-6)', () => {
+        const squats = (reps: number, set: number, weight = 60): LoggedSet => ({
+            round: 0,
+            step: 0,
+            set,
+            name: 'Squats',
+            reps,
+            weight,
+        });
+        const plank: LoggedSet = { round: 0, step: 1, name: 'Plank', seconds: 45 };
+        const lifted = () =>
+            makeEntry({ sets: [squats(10, 0), squats(10, 1), squats(8, 2), plank] });
+        const dialog = () => document.querySelector('app-step-amounts-dialog');
+        const lineButtons = () =>
+            Array.from(
+                fixture.nativeElement.querySelectorAll('.change-line') as NodeListOf<HTMLElement>,
+                (b) => b.getAttribute('aria-label')
+            );
+
+        function openSquats() {
+            choose('Sprints at 11:00 AM', 'Change reps or weight');
+            button('Change Squats, sets of 10, 10, 8 reps at 60 kg').click();
+            fixture.detectChanges();
+        }
+        /** Picks a value on one of the dialog's wheels, in order: set 1's reps, weight, ... */
+        async function pick(wheel: number, value: string) {
+            // A freshly shown wheel jumps to its value a frame later
+            await new Promise(requestAnimationFrame);
+            await new Promise(requestAnimationFrame);
+            const picker = dialog()!.querySelectorAll('app-wheel-picker')[wheel];
+            picker.querySelector<HTMLElement>(`[data-value="${value}"]`)!.click();
+            fixture.detectChanges();
+        }
+        async function save() {
+            button('Save').click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+        }
+
+        it('is offered for a workout with rep sets, not one of only timed sets', () => {
+            create(
+                lifted(),
+                makeEntry({ startedAt: NOW - 2 * HOUR, title: 'Plank', sets: [plank] })
+            );
+
+            button('Options for Plank at 10:00 AM').click();
+            fixture.detectChanges();
+            expect(text('.menu__item')).toEqual(['edit_note Add note', 'delete Delete']);
+
+            button('Options for Sprints at 11:00 AM').click();
+            fixture.detectChanges();
+            expect(text('.menu__item')).toEqual([
+                'edit_note Add note',
+                'tune Change reps or weight',
+                'delete Delete',
+            ]);
+        });
+
+        it('turns its rep lines into buttons, focusing the first, and Done puts them back', async () => {
+            create(lifted());
+            choose('Sprints at 11:00 AM', 'Change reps or weight');
+            await fixture.whenStable();
+
+            // The plank ran as set, so stays as text
+            expect(lineButtons()).toEqual(['Change Squats, sets of 10, 10, 8 reps at 60 kg']);
+            expect(document.activeElement).toBe(
+                button('Change Squats, sets of 10, 10, 8 reps at 60 kg')
+            );
+
+            button('Done changing').click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(lineButtons()).toEqual([]);
+            expect(document.activeElement).toBe(button('Options for Sprints at 11:00 AM'));
+        });
+
+        it('corrects a set, saved to the history, then offers to undo', async () => {
+            create(lifted());
+            openSquats();
+            expect(dialog()!.querySelector('h2')!.textContent).toBe('Squats');
+
+            await pick(4, '10');
+            await pick(5, '62.5');
+            await save();
+
+            expect(history.entries()[0].sets).toEqual([
+                squats(10, 0),
+                squats(10, 1),
+                squats(10, 2, 62.5),
+                plank,
+            ]);
+            expect(text('.change-line')[0]).toContain('Squats: 10 @ 60, 10 @ 60, 10 @ 62.5 kg');
+            expect(document.activeElement).toBe(
+                button('Change Squats, 10 reps at 60 kg, 10 reps at 60 kg, 10 reps at 62.5 kg')
+            );
+
+            const undo = TestBed.inject(UndoService);
+            expect(undo.offer()?.message).toBe('Changed Squats');
+            undo.undo();
+            fixture.detectChanges();
+            expect(history.entries()[0].sets).toEqual(lifted().sets);
+        });
+
+        it('changes nothing, and offers nothing, when closed or saved as it was', async () => {
+            create(lifted());
+            const before = history.entries()[0];
+            openSquats();
+            await pick(0, '12');
+            dialog()!.querySelector<HTMLElement>('app-dialog-back button')!.click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(dialog()).toBeNull();
+
+            openSquats();
+            await save();
+
+            expect(history.entries()[0]).toEqual(before);
+            expect(TestBed.inject(UndoService).offer()).toBeNull();
+        });
+    });
+
     describe('arriving from the workout summary', () => {
         const run = makeEntry({ title: 'Sprints' });
 

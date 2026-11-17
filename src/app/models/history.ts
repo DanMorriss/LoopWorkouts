@@ -1,6 +1,6 @@
 import { Synced } from './sync';
 import { MAX_WEIGHT_KG } from './weight';
-import { MAX_STEP_SECONDS, PlacedHeading, PlacedSuperset, Side } from './workout';
+import { MAX_STEP_SECONDS, PlacedHeading, PlacedSuperset, RepSetAmount, Side } from './workout';
 
 /** One workout in the history: a workout run that finished, or was stopped part-way. */
 export interface HistoryEntry extends Synced {
@@ -115,6 +115,82 @@ export interface TimedSet {
 
 export function isTimedSet(set: LoggedSet): set is TimedSet {
     return 'seconds' in set;
+}
+
+/**
+ * A step's rep sets, to correct them (on the workout summary, or a workout on Progress): where
+ * each is in `sets`, its reps and weight (kg), and its name, in the order done: "Set 2", or
+ * "Set 2, left" for an exercise done each side. Timed sets ran as set, so aren't among them.
+ */
+export function repSetsOfStep(
+    sets: readonly LoggedSet[],
+    step: number
+): { indexes: number[]; amounts: RepSetAmount[]; names: string[] } {
+    const indexes = sets.flatMap((set, index) =>
+        set.step === step && !isTimedSet(set) ? [index] : []
+    );
+    const repSets = indexes.map((index) => sets[index] as RepSet);
+    return {
+        indexes,
+        amounts: repSets.map(({ reps, weight }) => ({
+            reps,
+            ...(weight === undefined ? {} : { weight }),
+        })),
+        names: repSets.map(({ side }, i) => {
+            const number = repSets.slice(0, i).filter((other) => other.side === side).length + 1;
+            return `Set ${number}${side ? `, ${side}` : ''}`;
+        }),
+    };
+}
+
+/** A set corrected: where it is in the sets, and its reps and weight (kg, missing for none). */
+export interface SetChange {
+    index: number;
+    reps: number;
+    weight?: number;
+}
+
+/** The sets at `indexes` whose reps or weight `amounts` change, as changes to make. */
+export function setChanges(
+    sets: readonly LoggedSet[],
+    indexes: readonly number[],
+    amounts: readonly RepSetAmount[]
+): SetChange[] {
+    return indexes.flatMap((index, i) => {
+        const set = sets[index];
+        const amount = amounts[i];
+        if (!set || isTimedSet(set) || !amount) {
+            return [];
+        }
+        return set.reps === amount.reps && set.weight === amount.weight
+            ? []
+            : [
+                  {
+                      index,
+                      reps: amount.reps,
+                      ...(amount.weight === undefined ? {} : { weight: amount.weight }),
+                  },
+              ];
+    });
+}
+
+/** `sets` with the changes made: each changed set's reps and weight, the rest as they were. */
+export function withSetChanges(
+    sets: readonly LoggedSet[],
+    changes: readonly SetChange[]
+): LoggedSet[] {
+    return sets.map((set, index) => {
+        const change = changes.find((c) => c.index === index);
+        if (!change || isTimedSet(set)) {
+            return set;
+        }
+        const { weight: _old, ...rest } = set;
+        return {
+            ...rest,
+            reps: change.reps,
+            ...(change.weight === undefined ? {} : { weight: change.weight }),
+        };
+    });
 }
 
 /**

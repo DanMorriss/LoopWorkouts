@@ -2,7 +2,7 @@
     <section class="summary__section" aria-labelledby="summary-sets">
         <div class="summary__section-head">
             <h3 id="summary-sets">Sets</h3>
-            @if (changeable().size) {
+            @if (repSets().length) {
                 <button
                     type="button"
                     class="btn-pill summary__change"
@@ -18,43 +18,24 @@
 
         <!-- Under the workout's headings, as in the history. While changing, each rep
              exercise's line is a button opening its sets, one exercise at a time -->
-        <app-set-lines id="summary-sets-list" class="summary__lines" [sections]="sections()">
-            <ng-template let-line>
-                @if (changingSets() && changeable().has(line.step)) {
-                    <button
-                        type="button"
-                        class="btn-pill summary__line-change"
-                        [id]="buttonId(line.step)"
-                        aria-haspopup="dialog"
-                        [attr.aria-label]="'Change ' + line.name + ', ' + line.spoken"
-                        (click)="editing.set(line)"
-                    >
-                        <span
-                            ><strong>{{ line.name }}</strong
-                            >: {{ line.text }}</span
-                        >
-                        <app-icon class="summary__pencil">edit</app-icon>
-                    </button>
-                } @else {
+        @if (changingSets()) {
+            <app-change-set-lines
+                id="summary-sets-list"
+                class="summary__lines"
+                [sections]="sections()"
+                [sets]="repSets()"
+                (changed)="save($event)"
+            />
+        } @else {
+            <app-set-lines id="summary-sets-list" class="summary__lines" [sections]="sections()">
+                <ng-template let-line>
                     <span aria-hidden="true"
                         ><strong>{{ line.name }}</strong
                         >: {{ line.text }}</span
                     >
                     <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
-                }
-            </ng-template>
-        </app-set-lines>
-
-        @if (editing(); as line) {
-            <app-step-amounts-dialog
-                animate.leave="dialog-leave"
-                [name]="line.name"
-                [amounts]="editingAmounts()"
-                [rowNames]="editingRowNames()"
-                [hintText]="hint"
-                (closed)="close(line.step)"
-                (saved)="save(line.step, $event)"
-            />
+                </ng-template>
+            </app-set-lines>
         }
 
         <!-- Changing what was done can carry over to the saved workout, if wanted -->

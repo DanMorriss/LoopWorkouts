@@ -1336,6 +1336,66 @@ describe('WorkoutSetupComponent', () => {
         });
     });
 
+    describe('a kettlebell workout (PRG-14)', () => {
+        const form = () => fixture.debugElement.injector.get(WorkoutSetupForm);
+        const weights = () =>
+            form()
+                .model()
+                .steps.map((step) => step.weight);
+        const swing = { name: 'Kettlebell swing', exerciseId: 'builtin:kettlebell-swing' };
+        /** Opens Create on a saved workout of swings, at `weight` if given. */
+        async function editSwings(weight?: number) {
+            const saved = store.addWorkout({
+                title: 'Swings',
+                repeats: 1,
+                blocks: asOneGroup([
+                    { kind: 'reps', reps: 15, ...swing, ...(weight ? { weight } : {}) },
+                ]),
+            });
+            await create({ empty: true });
+            form().load(saved);
+            fixture.detectChanges();
+            await fixture.whenStable();
+        }
+        async function addGobletSquat() {
+            form().addExercise('builtin:goblet-squat');
+            fixture.detectChanges();
+            await fixture.whenStable();
+        }
+
+        beforeEach(async () => {
+            await setup();
+            await TestBed.inject(ExerciseStore).load();
+        });
+
+        it('puts a weight turned to on one kettlebell step on the others, and saves it as yours', async () => {
+            await editSwings();
+            await addGobletSquat();
+            expect(weights()).toEqual([0, 0]);
+
+            form().toggleStep(form().model().steps[0].key);
+            fixture.detectChanges();
+            el(`[id$="-weight"] [data-value="16"]`, steps()[0]).click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(weights()).toEqual([16, 16]);
+
+            await form().saveOnly();
+            expect(TestBed.inject(SettingsStore).kettlebellWeight()).toBe(16);
+        });
+
+        it("starts a kettlebell step added at the workout's weight, or your kettlebell", async () => {
+            await editSwings(16);
+            await addGobletSquat();
+            expect(weights()).toEqual([16, 16]);
+
+            TestBed.inject(SettingsStore).update({ kettlebellWeight: 20 });
+            await editSwings();
+            await addGobletSquat();
+            expect(weights()).toEqual([0, 20]);
+        });
+    });
+
     describe('vary each set (BLD-11)', () => {
         /** Picks a number on one of a step's wheels, by the end of its id, e.g. "sets". */
         function choose(step: number, wheel: string, value: string) {

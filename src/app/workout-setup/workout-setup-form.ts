@@ -7,11 +7,14 @@ import {
     Injectable,
     Injector,
     signal,
+    untracked,
 } from '@angular/core';
 import { applyEach, form, maxLength, submit, validate } from '@angular/forms/signals';
 import { ParamMap, Router } from '@angular/router';
 import { isBuiltIn, MAX_EXERCISE_NAME_LENGTH } from '../models/exercise';
+import { kettlebellSteps, oneKettlebellWeight } from '../models/kettlebell';
 import { weightIn, weightOptions } from '../models/weight';
+import { sharedKettlebell } from './setup-kettlebell';
 import {
     allSteps,
     hasWork,
@@ -87,8 +90,10 @@ export class WorkoutSetupForm {
     private readonly exercises = inject(ExerciseStore);
     private readonly plan = inject(PlanStore);
 
+    private readonly settings = inject(SettingsStore);
+
     /** Weights are shown and picked in this, and saved in kg. */
-    readonly weightUnit = inject(SettingsStore).weightUnit();
+    readonly weightUnit = this.settings.weightUnit();
 
     readonly maxSteps = MAX_STEPS;
     readonly maxHeadings = MAX_HEADINGS;
@@ -190,6 +195,29 @@ export class WorkoutSetupForm {
                 this.lastRounds = repeats;
             }
         });
+        // One kettlebell for a kettlebell workout (PRG-14): an effect, as the weight wheels
+        // change the form's fields directly
+        effect(() => {
+            const steps = this.model().steps;
+            const shared = untracked(() => this.shareKettlebell(steps));
+            this.stepsBefore = shared ?? steps;
+            if (shared) {
+                this.model.update((setup) => ({ ...setup, steps: shared }));
+            }
+        });
+    }
+
+    /** The steps as they were last time the kettlebell was shared, to see what's changed. */
+    private stepsBefore: readonly StepModel[] = [];
+
+    private shareKettlebell(steps: readonly StepModel[]): StepModel[] | null {
+        const kg = this.settings.kettlebellWeight();
+        return sharedKettlebell(
+            this.stepsBefore,
+            steps,
+            (id) => this.exercises.byId(id),
+            kg === null ? null : weightIn(kg, this.weightUnit)
+        );
     }
 
     /** Whether the tooltip by the Steps heading is showing. */
@@ -289,6 +317,8 @@ export class WorkoutSetupForm {
             this.model.set(this.emptySetup());
             this.expandedKeys.set(this.allKeys());
         }
+        // As it's saved, so nothing loaded counts as a weight just turned to
+        this.stepsBefore = this.model().steps;
         this.savedState.set(JSON.stringify(this.model()));
     }
 
@@ -793,9 +823,24 @@ export class WorkoutSetupForm {
     /** As `fields()`, with the id of the workout being edited, so its runs give your pace. */
     readonly estimated = computed(() => ({ id: this.editingWorkoutId() ?? '', ...this.fields() }));
 
-    /** Saves the form to the library, as a new workout or over the one being edited. */
+    /**
+     * Saves the form to the library, as a new workout or over the one being edited. A
+     * kettlebell workout at one weight makes it your kettlebell (PRG-14), as one set
+     * mid-workout does, so starting it doesn't move it back to the one you had.
+     */
     private save(): Workout {
         const workout = this.fields();
+        const steps = allSteps(workout);
+        const kettlebell = kettlebellSteps(steps, (id) => this.exercises.byId(id));
+        const kg = oneKettlebellWeight(
+            [...kettlebell].flatMap((i) => {
+                const step = steps[i];
+                return step.kind === 'reps' ? (step.sets ?? [step]).map((set) => set.weight) : [];
+            })
+        );
+        if (kg) {
+            this.settings.update({ kettlebellWeight: kg });
+        }
 
         const editingId = this.editingWorkoutId();
         if (editingId) {

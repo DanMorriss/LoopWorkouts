@@ -912,7 +912,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Preconditions:** `guest()`; history in the last 7 days: two sets of Back squat and one of Bench press; a Plank 9 days ago.
 - **Steps:** Open Progress. Then You → Profile → Training for **Fitness**, and open Progress again.
 - **Expected:**
-    1. "Muscles worked this week" with the body map and 18 bars, starting Glutes (2 sets, under 10), Quads (2 sets, under 10), Adductors (1 set, under 4).
+    1. "Muscles worked this week" with the body map and 16 bars, starting Glutes (2 sets, under 10), Quads (2 sets, under 10), Adductors (1 set, under 4).
     2. Under Fitness the aims move down (the Profile hint says 6 to 12 sets a week).
 
 ### REG-PRG-02 · An exercise's progress, and its card on the list

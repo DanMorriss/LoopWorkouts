@@ -64,6 +64,8 @@ export interface Skeleton {
      */
     readonly bell: Vec3;
     readonly bellDown: boolean;
+    /** The way from a set-down kettlebell's ball to its handle: up, or along the floor. */
+    readonly bellUp: Vec3;
     /** Which hand the kettlebell is in (`Pose.heldBy`). */
     readonly heldBy: number;
 }
@@ -324,6 +326,7 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
             ? add3(lift(view, [bellAt[0], bellAt[1]]), scale3(right, bellAt[2]))
             : lerp3(arms[0].end, arms[1].end, pose.heldBy ?? 0),
         bellDown: !!bellAt,
+        bellUp: pose.bellOnSide ? lift(view, [1, 0]) : [0, 1, 0],
         heldBy: pose.heldBy ?? 0,
     };
 }

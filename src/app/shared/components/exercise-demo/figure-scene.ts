@@ -844,8 +844,8 @@ export class FigureScene {
             this.carried.push((skeleton) => {
                 bell.position.copy(v(skeleton.bell));
                 if (skeleton.bellDown) {
-                    // Standing on the floor
-                    orient(bell, [0, 1, 0], skeleton.right);
+                    // Standing on the floor, or lying on its side
+                    orient(bell, skeleton.bellUp, skeleton.right);
                     return;
                 }
                 // In one hand, or held in both, between them, hanging straight down

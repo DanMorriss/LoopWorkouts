@@ -325,6 +325,10 @@ describe('skeletonOf, placing the hands in 3D', () => {
         const down = skeletonOf({ ...pose, bellAt: [40, -19, -25] }, motion);
         close(down.bell, [40, 19, -25]);
         expect(down.bellDown).toBe(true);
+        // Standing up, or on its side with the handle the way the head is from the side
+        close(down.bellUp, [0, 1, 0]);
+        const onSide = skeletonOf({ ...pose, bellAt: [40, -8, 0], bellOnSide: true }, motion);
+        close(onSide.bellUp, [1, 0, 0]);
     });
 
     it('carries a barbell held below the hips in front of the legs, not through them', () => {

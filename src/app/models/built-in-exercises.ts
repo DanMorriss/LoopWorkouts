@@ -886,7 +886,7 @@ export const BUILT_IN_EXERCISES: readonly BuiltInExercise[] = [
     {
         id: 'builtin:kettlebell-push-up',
         name: 'Kettlebell push-up',
-        otherNames: ['Kettlebell press-up', 'KB push-up', 'Offset kettlebell push-up'],
+        otherNames: ['Kettlebell press-up', 'KB push-up'],
         equipment: ['kettlebell'],
         measuredBy: 'reps',
         mainMuscles: ['chest'],

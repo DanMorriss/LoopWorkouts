@@ -1169,16 +1169,16 @@ export const BUILT_IN_EXERCISE_TEXT: Readonly<Record<BuiltInExercise['id'], Exer
     },
     'builtin:kettlebell-push-up': {
         description:
-            'A push-up with one hand on the handle of a kettlebell and the other on the floor. One side works harder, so you do both in turn.',
+            'A push-up with both hands on a kettlebell lying on its side under your chest. Hands close together, so your triceps work hard.',
         steps: [
-            'Set a kettlebell upright on the floor and grip its handle. Put your other hand flat on the floor, a little wider than your shoulder.',
-            'Step your feet back into a plank, wrists straight and body in one straight line.',
-            'Lower yourself until your chest is nearly at the floor, elbows angled back a little.',
-            'Push back up until your arms are straight. Do all your reps, then swap hands.',
+            'Lay a kettlebell on its side on the floor, its handle pointing away from you.',
+            'Put both hands on the round part of the bell, wrapped round it, and step your feet back into a plank.',
+            'Keep your body in one straight line, the bell under the middle of your chest.',
+            'Lower yourself until your chest nearly touches the bell, elbows close to your sides, then push back up.',
         ],
         tips: [
-            "Use a bell with a flat base on a floor that grips, so it can't roll.",
-            'Got two? Put a hand on each and you can go lower than on the floor.',
+            "Press down evenly with both hands, so the bell doesn't roll.",
+            'Too hard? Put your knees down, keeping a straight line from them to your head.',
         ],
     },
     'builtin:kettlebell-lunge': {

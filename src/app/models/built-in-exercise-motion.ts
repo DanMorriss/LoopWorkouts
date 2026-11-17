@@ -2321,7 +2321,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     torso: 90,
                     arms: both(angles(30, 100)),
                     legs: both(angles(-90, -90)),
-                    feet: [-160, -160],
+                    feet: [-20, -20],
                 },
             },
             {
@@ -2333,7 +2333,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     torso: 90,
                     arms: both(angles(30, 100)),
                     legs: both(angles(-90, -175)),
-                    feet: [-160, -160],
+                    feet: [-100, -100],
                 },
             },
         ],

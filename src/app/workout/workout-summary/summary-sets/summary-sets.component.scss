@@ -21,18 +21,6 @@
     margin-bottom: 0.5rem;
 }
 
-// A heading of the workout's, e.g. "Warmup", over the lines of its part
-.summary__part {
-    margin: 0.5rem 0 0;
-    color: var(--text-strong);
-    font-size: 0.9rem;
-    font-weight: 600;
-
-    &:first-child {
-        margin-top: 0;
-    }
-}
-
 .summary__lines {
     line-height: 1.6;
 
@@ -42,54 +30,21 @@
     }
 }
 
-// A superset's name, with its lines under it, set in a little and joined by a line
-.summary__superset-name {
+// While changing, a rep exercise's line is a pill opening its sets; long ones wrap
+.summary__line-change {
+    justify-content: space-between;
+    max-width: 100%;
+    margin-block: 0.2rem;
+    padding: 0.3rem 0.6rem 0.3rem 0.9rem;
+    border-radius: 1.4rem;
+    color: var(--text);
+    text-align: left;
+    line-height: 1.4;
+}
+
+.summary__pencil {
     color: var(--text-muted);
-}
-
-// Over its steps' wheels, spaced as a step's name is
-.summary__superset-name--change {
-    margin: 1rem 0 0.25rem;
-}
-
-.summary__superset-lines {
-    margin: 0 0 0 0.2rem;
-    padding-left: 0.6rem;
-    border-left: 2px solid var(--border-strong);
-    list-style: none;
-}
-
-.summary__group + .summary__group {
-    margin-top: 1rem;
-}
-
-.summary__group-name {
-    margin: 0 0 0.25rem;
-    color: var(--text-strong);
-    font-size: 1rem;
-    font-weight: 500;
-}
-
-// "Set 2", then its reps and weight wheels, in columns under their headings
-.summary__set {
-    display: grid;
-    grid-template-columns: 4rem 1fr 1fr;
-    align-items: center;
-    gap: 0.5rem;
-
-    & + & {
-        margin-top: 0.4rem;
-    }
-
-    &--head {
-        color: var(--text-muted);
-        font-size: 0.8rem;
-        text-align: center;
-    }
-}
-
-.summary__set-label {
-    color: var(--text-muted);
+    font-size: 1.1rem;
 }
 
 .summary__next-time {

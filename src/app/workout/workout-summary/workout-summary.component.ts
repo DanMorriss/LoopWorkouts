@@ -1,4 +1,4 @@
-import { Workout } from '../../models/workout';
+import { REP_OPTIONS, Workout } from '../../models/workout';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import {
     Component,
@@ -24,11 +24,7 @@ import { describeScore, entryName } from '../../history/history-format';
 import { SuggestedWorkoutComponent } from '../../history/suggested-workout/suggested-workout.component';
 import { bestLines } from '../../exercises/progress-format';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
-import {
-    ownExerciseName,
-    REP_OPTIONS,
-    SummarySetsComponent,
-} from './summary-sets/summary-sets.component';
+import { ownExerciseName, SummarySetsComponent } from './summary-sets/summary-sets.component';
 import { SummaryCopyComponent } from './summary-copy/summary-copy.component';
 import { SummaryStepUpsComponent } from './summary-step-ups/summary-step-ups.component';
 import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';

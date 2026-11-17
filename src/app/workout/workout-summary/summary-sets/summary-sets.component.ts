@@ -1,32 +1,21 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { describeSets, sectionsOf } from '../../../history/history-format';
+import { describeSets, sectionsOf, SetsSummary } from '../../../history/history-format';
 import { isBuiltIn } from '../../../models/exercise';
-import { RepSet } from '../../../models/history';
-import { weightIn, weightOptions, weightToKg } from '../../../models/weight';
-import { MAX_REPS, placedHeadings, placedSupersets } from '../../../models/workout';
-import { WheelPickerComponent } from '../../../shared/components/wheel-picker/wheel-picker.component';
+import {
+    placedHeadings,
+    placedSupersets,
+    RepSetAmount,
+    TimedSetAmount,
+} from '../../../models/workout';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { StepAmountsDialogComponent } from '../../../shared/components/step-amounts-dialog/step-amounts-dialog.component';
+import { injectFocusAfterRender } from '../../../shared/focus-after-render';
 import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../../shared/state/workout-store.service';
 import { SetLinesComponent } from '../../../history/set-lines/set-lines.component';
-
-/** One rep step's sets, for correcting them one by one. */
-interface SetGroup {
-    name: string;
-    /** Which step of the workout it is, to go under its heading and superset. */
-    step: number;
-    /** Each set, with where it is in the run's list of sets. */
-    sets: { index: number; set: RepSet }[];
-}
-
-/** 1 to MAX_REPS, for the reps wheels. */
-export const REP_OPTIONS = Array.from({ length: MAX_REPS }, (_, i) => ({
-    value: i + 1,
-    label: String(i + 1),
-}));
 
 /**
  * What a set's exercise is called now, if it's your own (it may have been renamed since).
@@ -41,12 +30,14 @@ export function ownExerciseName(exercises: ExerciseStore) {
 
 /**
  * The run's sets on the workout summary, one line per step, e.g. "Squats: 10, 10, 8 @ 60 kg".
- * The rep sets can be corrected (the last one was 8 reps, not 10; timed ones ran as set), and
- * once one is, it asks whether to start from them next time.
+ * The rep sets can be corrected (the last one was 8 reps, not 10; timed ones ran as set):
+ * Change reps or weight makes each rep exercise's line a button, opening its sets' wheels in
+ * a dialog, one exercise at a time. Once one is changed, it asks whether to start from them
+ * next time.
  */
 @Component({
     selector: 'app-summary-sets',
-    imports: [MatIconModule, NgTemplateOutlet, SetLinesComponent, WheelPickerComponent],
+    imports: [IconComponent, MatIconModule, SetLinesComponent, StepAmountsDialogComponent],
     templateUrl: './summary-sets.component.html',
     styleUrl: './summary-sets.component.scss',
 })
@@ -55,11 +46,11 @@ export class SummarySetsComponent {
     private readonly store = inject(WorkoutStore);
     private readonly settings = inject(SettingsStore);
     private readonly exerciseName = ownExerciseName(inject(ExerciseStore));
+    private readonly focusAfterRender = injectFocusAfterRender();
 
-    protected readonly weightUnit = this.settings.weightUnit;
     /** One line per step, e.g. "Squats: 10, 10, 8 @ 60 kg" or "Plank: 3 × 0:45". */
     protected readonly setLines = computed(() =>
-        describeSets(this.run.sets(), this.weightUnit(), this.exerciseName)
+        describeSets(this.run.sets(), this.settings.weightUnit(), this.exerciseName)
     );
 
     /**
@@ -74,65 +65,82 @@ export class SummarySetsComponent {
     });
 
     protected readonly changingSets = signal(false);
-    protected readonly setGroups = computed((): SetGroup[] => {
-        const groups = new Map<number, SetGroup>();
+    /** The steps with rep sets, which can be changed, and where each is in the run's sets. */
+    protected readonly changeable = computed(() => {
+        const steps = new Map<number, number[]>();
         this.store.activeSets().forEach((set, index) => {
-            const group = groups.get(set.step) ?? { name: '', step: set.step, sets: [] };
-            group.sets.push({ index, set });
-            groups.set(set.step, group);
+            steps.set(set.step, [...(steps.get(set.step) ?? []), index]);
         });
-        // Named as its line is
-        return Array.from(groups.values(), (group) => ({
-            ...group,
-            name: describeSets(
-                group.sets.map((item) => item.set),
-                this.weightUnit(),
-                this.exerciseName
-            )[0].name,
-        }));
+        return steps;
     });
-    /** The sets to change, under the workout's headings and with its supersets, as above. */
-    protected readonly groupSections = computed(() => {
-        const workout = this.run.workout();
-        return workout
-            ? sectionsOf(this.setGroups(), placedHeadings(workout), placedSupersets(workout))
-            : sectionsOf(this.setGroups());
+    /** The line whose sets are open in the dialog. */
+    protected readonly editing = signal<SetsSummary | null>(null);
+    protected readonly hint = 'The reps and weight you did in each set.';
+
+    /** The open line's sets as the dialog takes them: reps, and weight in kg. */
+    protected readonly editingAmounts = computed((): RepSetAmount[] => {
+        const sets = this.store.activeSets();
+        return this.editingIndexes().map((index) => {
+            const { reps, weight } = sets[index];
+            return { reps, ...(weight === undefined ? {} : { weight }) };
+        });
     });
+
+    /**
+     * Each of the open line's sets named, in the order done: e.g. "Set 2", or "Set 2, left" for
+     * an exercise done each side.
+     */
+    protected readonly editingRowNames = computed(() => {
+        const sides = this.editingIndexes().map((index) => this.store.activeSets()[index].side);
+        return sides.map((side, i) => {
+            const number = sides.slice(0, i).filter((other) => other === side).length + 1;
+            return `Set ${number}${side ? `, ${side}` : ''}`;
+        });
+    });
+
+    /** Where the open line's sets are in the run's sets. */
+    private readonly editingIndexes = computed(() => {
+        const step = this.editing()?.step;
+        return step === undefined ? [] : (this.changeable().get(step) ?? []);
+    });
+
+    protected buttonId(step: number): string {
+        return `summary-sets-change-${step}`;
+    }
+
     /** Some steps were given a step-up, which "Yes, use next time" leaves as they are. */
     protected readonly steppedUp = computed(() => this.run.steppedUp().size > 0);
-    protected readonly repOptions = REP_OPTIONS;
-    protected readonly weightOptions = computed(() => weightOptions(this.weightUnit()));
-    protected weightValue(set: RepSet): number {
-        return set.weight ? weightIn(set.weight, this.weightUnit()) : 0;
-    }
 
     /** null until a set is changed; then asks whether to start from them next time. */
     protected readonly nextTime = signal<'asking' | 'yes' | 'no' | null>(null);
     /** Of a ready-made workout too, as it keeps your reps and weights (ReadyMadeChanges). */
     private readonly canKeep = computed(() => this.run.workout() !== null);
 
-    /** A set was changed: whether to start from them next time, if that's for the asking. */
-    private changed() {
-        if (this.canKeep()) {
+    /** Corrects the step's sets that changed, then asks about next time if any did. */
+    protected save(step: number, amounts: RepSetAmount[] | TimedSetAmount[]) {
+        const indexes = this.changeable().get(step) ?? [];
+        let changed = false;
+        amounts.forEach((amount, i) => {
+            const set = this.store.activeSets()[indexes[i]];
+            // Only rep sets are open to change, so a timed one is never here
+            if (
+                set &&
+                'reps' in amount &&
+                (set.reps !== amount.reps || set.weight !== amount.weight)
+            ) {
+                this.run.changeSet(indexes[i], { reps: amount.reps, weight: amount.weight });
+                changed = true;
+            }
+        });
+        if (changed && this.canKeep()) {
             this.nextTime.set('asking');
         }
+        this.close(step);
     }
 
-    protected setReps(index: number, reps: number) {
-        if (this.store.activeSets()[index]?.reps === reps) {
-            return;
-        }
-        this.run.changeSet(index, { reps });
-        this.changed();
-    }
-
-    protected setWeight(index: number, value: number) {
-        const weight = value > 0 ? weightToKg(value, this.weightUnit()) : undefined;
-        if (this.store.activeSets()[index]?.weight === weight) {
-            return;
-        }
-        this.run.changeSet(index, { weight });
-        this.changed();
+    protected close(step: number) {
+        this.editing.set(null);
+        this.focusAfterRender(this.buttonId(step));
     }
 
     protected answerNextTime(use: boolean) {

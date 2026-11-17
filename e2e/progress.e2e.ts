@@ -46,7 +46,7 @@ test.describe('muscles worked this week', () => {
         const bars = muscles
             .getByRole('list', { name: 'Sets per muscle this week' })
             .getByRole('listitem');
-        await expect(bars).toHaveCount(18);
+        await expect(bars).toHaveCount(16);
         await expect(bars.nth(0)).toContainText(/^Glutes.*2 sets, under 10$/);
         await expect(bars.nth(1)).toContainText(/^Quads.*2 sets, under 10$/);
         await expect(bars.nth(2)).toContainText(/^Adductors.*1 set, under 4$/);

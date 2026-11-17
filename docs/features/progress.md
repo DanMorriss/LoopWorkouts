@@ -127,7 +127,7 @@ Under the body map, a **Progress** section:
 - Given 80 kg × 5 bench press last time, when I bench 100 kg × 5 and finish, then the summary lists "Personal bests" with "Heaviest: 100 kg × 5".
 - Given 80 kg × 5 bench press last time, when I bench 80 kg × 5 again, or bench for the first time, then the summary has no personal bests.
 - Given a 20:00 time limit run before to "7 rounds + 1", when I get to "7 rounds + 3", then the summary lists "Most rounds: 7 rounds + 3"; given "7 rounds + 1" again, or a first run, then it doesn't.
-- Given two sets of back squats and one of bench press in the last 7 days, and a plank 9 days ago, then the history shows "Muscles worked this week" with 18 bars, starting Glutes (2 sets, under 10), Quads (2 sets, under 10), Adductors (1 set, under 4, as a small muscle).
+- Given two sets of back squats and one of bench press in the last 7 days, and a plank 9 days ago, then the history shows "Muscles worked this week" with 16 bars, starting Glutes (2 sets, under 10), Quads (2 sets, under 10), Adductors (1 set, under 4, as a small muscle).
 - Given Training for is Fitness and 8 sets of chest this week, then Chest is in range (6 to 12); given Muscle, it's under 10.
 - Given saved workouts Legs (back squats) and Push (bench press), and two sets of back squats this week, then the suggested next workout is Push, "It works your Chest, which you haven't trained in the last 7 days.", See your week goes to Progress, and Start starts it.
 - Given saved workouts Grip (dead hang) and Push (bench press), 5 sets for the forearms and 8 for the chest this week, then the suggested next workout is Push: the forearms are in range for a small muscle, the chest under.

@@ -223,6 +223,12 @@ export const MAX_TIME_LIMIT_SECONDS = MAX_STEP_SECONDS;
 /** The most reps a step can have, the most the setup wheel goes up to. */
 export const MAX_REPS = 100;
 
+/** 1 to MAX_REPS, for the reps wheels. */
+export const REP_OPTIONS = Array.from({ length: MAX_REPS }, (_, i) => ({
+    value: i + 1,
+    label: String(i + 1),
+}));
+
 /** The most rounds the setup wheel goes up to, before ∞. */
 export const MAX_REPEATS = 30;
 

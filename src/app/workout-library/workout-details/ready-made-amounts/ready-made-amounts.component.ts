@@ -22,7 +22,7 @@ import { ReadyMadeChanges } from '../../../shared/state/ready-made-changes.servi
 import { SettingsStore } from '../../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../../shared/state/workout-store.service';
 import { UndoService } from '../../../shared/undo/undo.service';
-import { StepAmountsDialogComponent } from './step-amounts-dialog.component';
+import { StepAmountsDialogComponent } from '../../../shared/components/step-amounts-dialog/step-amounts-dialog.component';
 
 /** A rep step or timed exercise of the workout, as this lists it. */
 type AmountsLine = {

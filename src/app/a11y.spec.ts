@@ -1165,7 +1165,11 @@ for (const theme of ['dark', 'light'] as const) {
                 await settle();
                 click('.summary__change');
                 await settle();
-                click('.summary app-wheel-picker [data-value="8"]');
+                click('.summary__line-change');
+                await settle();
+                click('app-step-amounts-dialog app-wheel-picker [data-value="8"]');
+                await settle();
+                click('.amounts__save');
                 await settle();
                 expect(fixture.nativeElement.textContent).toContain(
                     'Use these settings next time?'

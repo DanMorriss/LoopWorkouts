@@ -666,12 +666,12 @@ export class ActiveRunService {
      * Corrects a set already done, from the summary, and updates its history entry. Only
      * this run's record changes; useSetsNextTime() carries it over to the saved workout.
      */
-    changeSet(index: number, change: { reps: number } | { weight: number | undefined }) {
+    changeSet(index: number, change: { reps?: number; weight?: number | undefined }) {
         const set = this.store.activeSets()[index];
         if (!set) {
             return;
         }
-        const reps = 'reps' in change ? change.reps : set.reps;
+        const reps = change.reps ?? set.reps;
         const weight = 'weight' in change ? change.weight : set.weight;
         const { weight: _old, ...rest } = set;
         this.store.updateActiveSet(index, {

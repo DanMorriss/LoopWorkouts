@@ -724,7 +724,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Preconditions:** workout "Push": "Push-ups" 20 reps at 40 kg, rest 0:05, 3 rounds.
 - **Steps:**
     1. Start; Done in round 1; `runFor` into round 2; Pause → End workout.
-    2. Press **Change reps or weight**; set round 1's set to 18.
+    2. Press **Change reps or weight**, then the Push-ups line; set its set to 18 and press Save.
     3. Press **Yes, use next time**.
     4. Type a note "felt strong"; press Done.
 - **Expected:**
@@ -912,7 +912,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Preconditions:** `guest()`; history in the last 7 days: two sets of Back squat and one of Bench press; a Plank 9 days ago.
 - **Steps:** Open Progress. Then You → Profile → Training for **Fitness**, and open Progress again.
 - **Expected:**
-    1. "Muscles worked this week" with the body map and 18 bars, starting Glutes (2 sets, under 10), Quads (2 sets, under 10), Adductors (1 set, under 4).
+    1. "Muscles worked this week" with the body map and 16 bars, starting Glutes (2 sets, under 10), Quads (2 sets, under 10), Adductors (1 set, under 4).
     2. Under Fitness the aims move down (the Profile hint says 6 to 12 sets a week).
 
 ### REG-PRG-02 · An exercise's progress, and its card on the list

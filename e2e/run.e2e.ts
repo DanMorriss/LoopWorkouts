@@ -479,7 +479,11 @@ test.describe('the summary', () => {
                 await expect(run.summary).toContainText('Push-ups: 20 reps @ 40 kg');
 
                 await run.summary.getByRole('button', { name: 'Change reps or weight' }).click();
-                await setWheel(run.summary.getByRole('spinbutton', { name: /Set 1 reps/ }), 18);
+                await run.summary.getByRole('button', { name: /^Change Push-ups/ }).click();
+                const sets = page.getByRole('dialog', { name: 'Push-ups' });
+                await setWheel(sets.getByRole('spinbutton', { name: /Reps/ }), 18);
+                await sets.getByRole('button', { name: 'Save' }).click();
+                await expect(sets).toBeHidden();
                 await expect(run.summary.getByText('Use these settings next time?')).toBeVisible();
 
                 await run.summary.getByRole('button', { name: answer }).click();

@@ -15,7 +15,8 @@ import { growFromClick } from '../../dialog-origin';
  * What every dialog over the page is: the dimmed, blurred page behind, and a card scrolling
  * within itself, with ‹ Back at its top. It grows out of what opened it, and focus is trapped
  * inside, starting on what has `cdkFocusInitial`, or the first thing that takes focus. ‹ Back,
- * Escape or a click outside close it.
+ * Escape or a click outside close it; Escape goes no further, so a dialog opened over another,
+ * such as the workout summary, closes only itself.
  *
  *     <app-dialog labelledBy="thing-title" (closed)="closed.emit()">
  *         <h2 id="thing-title">Thing</h2>
@@ -32,7 +33,7 @@ import { growFromClick } from '../../dialog-origin';
             class="dialog-overlay"
             role="presentation"
             (click)="closed.emit()"
-            (keydown.escape)="closed.emit()"
+            (keydown.escape)="$event.stopPropagation(); closed.emit()"
         >
             <div
                 #card

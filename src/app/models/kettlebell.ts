@@ -62,11 +62,6 @@ export function withKettlebellWeight(step: RepStep, from: number | undefined, to
     );
 }
 
-/** The most reps in any set of a rep step: its own, or the most of its sets where they vary. */
-export function topReps(step: RepStep): number {
-    return Math.max(step.reps, ...(step.sets ?? []).map((set) => set.reps));
-}
-
 function optionsOf(need: EquipmentNeed): readonly string[] {
     return typeof need === 'string' ? [need] : need;
 }

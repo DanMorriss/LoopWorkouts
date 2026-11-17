@@ -1,6 +1,6 @@
 import { EquipmentNeed } from './exercise';
 import { LoggedSet } from './history';
-import { kettlebellSteps, topReps, withKettlebellWeight } from './kettlebell';
+import { kettlebellSteps, withKettlebellWeight } from './kettlebell';
 import { progressionSuggestions, readyForHeavierKettlebell } from './progress';
 import { RepStep, Step } from './workout';
 
@@ -67,10 +67,6 @@ describe('kettlebell workouts (PRG-14)', () => {
         });
     });
 
-    it("tops a step's reps at its most in any set", () => {
-        expect(topReps({ ...rep('swing', 10), sets: [{ reps: 10 }, { reps: 25 }] })).toBe(25);
-    });
-
     describe('next time', () => {
         const kettlebell = new Set([0]);
 
@@ -111,22 +107,18 @@ describe('kettlebell workouts (PRG-14)', () => {
             ).toEqual([]);
         });
 
-        it('goes up a rep on each set where they vary, until any set is at 20', () => {
-            const ladder = (counts: number[]): RepStep => ({
-                ...rep('swing', counts[0], 16),
+        it('leaves a step whose sets vary as it is, e.g. the swing ladder', () => {
+            const counts = [10, 15, 20, 25, 20, 15, 10];
+            const ladder: RepStep = {
+                ...rep('swing', 10, 16),
                 sets: counts.map((reps) => ({ reps, weight: 16 })),
-            });
-            const sets = (counts: number[]) =>
-                counts.map((reps, set) => ({ ...done(0, reps, 16, set), set }));
-            expect(
-                progressionSuggestions(sets([10, 15]), [ladder([10, 15])], 'kg', kettlebell)
-            ).toEqual([{ step: 0, kind: 'reps', from: 10, to: 11, eachSet: true }]);
-            expect(
-                progressionSuggestions(sets([10, 20]), [ladder([10, 20])], 'kg', kettlebell)
-            ).toEqual([]);
-            expect(
-                readyForHeavierKettlebell(sets([10, 20]), [ladder([10, 20])], kettlebell)
-            ).toEqual([0]);
+            };
+            const sets = counts.map((reps, set) => ({ ...done(0, reps, 16, set), set }));
+            expect(progressionSuggestions(sets, [ladder], 'kg', kettlebell)).toEqual([]);
+            expect(readyForHeavierKettlebell(sets, [ladder], kettlebell)).toEqual([]);
+            // A pyramid all short of 20 has no rep step-up either
+            const short = { ...ladder, sets: ladder.sets!.slice(0, 2) };
+            expect(progressionSuggestions(sets.slice(0, 2), [short], 'kg', kettlebell)).toEqual([]);
         });
     });
 });

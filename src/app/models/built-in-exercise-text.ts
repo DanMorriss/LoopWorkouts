@@ -993,16 +993,16 @@ export const BUILT_IN_EXERCISE_TEXT: Readonly<Record<BuiltInExercise['id'], Exer
     // Ninth batch: kettlebells, including kettlebell takes on dumbbell exercises
     'builtin:kettlebell-thruster': {
         description:
-            'A squat that flows straight into pressing a kettlebell overhead. Works your legs and shoulders, and gets your heart going.',
+            'A squat that flows straight into pressing a kettlebell overhead with one arm. Works your legs and shoulders, and gets your heart going.',
         steps: [
-            'Hold a kettlebell at your shoulder, or one at each, the bell resting on the outside of your forearm.',
-            'Stand with your feet a little wider than your shoulders and sit down into a squat, elbows tucked in.',
+            'Hold a kettlebell at one shoulder, the bell resting on the outside of your forearm.',
+            'Stand with your feet a little wider than your shoulders and sit down into a squat, elbow tucked in.',
             'Drive up out of the squat, and use that push to press the kettlebell straight overhead.',
-            'Bring it back to your shoulder as you sit down into the next squat.',
+            'Bring it back to your shoulder as you sit down into the next squat. Do all your reps, then swap sides.',
         ],
         tips: [
             'Make it one smooth movement: the press starts as your legs straighten, not after.',
-            'With one kettlebell, do all your reps on one side, then swap.',
+            'Hold your free arm out in front of you for balance as you squat.',
         ],
     },
     'builtin:kettlebell-clean-and-press': {
@@ -1169,16 +1169,16 @@ export const BUILT_IN_EXERCISE_TEXT: Readonly<Record<BuiltInExercise['id'], Exer
     },
     'builtin:kettlebell-push-up': {
         description:
-            'A push-up with your hands on the handles of two kettlebells. Lets you go lower than you can on the floor.',
+            'A push-up with one hand on the handle of a kettlebell and the other on the floor. One side works harder, so you do both in turn.',
         steps: [
-            'Set two kettlebells upright on the floor, a little wider than your shoulders, and grip their handles.',
+            'Set a kettlebell upright on the floor and grip its handle. Put your other hand flat on the floor, a little wider than your shoulder.',
             'Step your feet back into a plank, wrists straight and body in one straight line.',
-            'Lower yourself until your chest is between the handles, elbows angled back a little.',
-            'Push back up until your arms are straight.',
+            'Lower yourself until your chest is nearly at the floor, elbows angled back a little.',
+            'Push back up until your arms are straight. Do all your reps, then swap hands.',
         ],
         tips: [
-            'Only one kettlebell? Put one hand on it and the other on the floor, and swap each set.',
-            "Use bells with flat bases on a floor that grips, so they can't roll.",
+            "Use a bell with a flat base on a floor that grips, so it can't roll.",
+            'Got two? Put a hand on each and you can go lower than on the floor.',
         ],
     },
     'builtin:kettlebell-lunge': {

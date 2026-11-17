@@ -812,20 +812,13 @@ export class FigureScene {
                 });
             }
         }
-        if (props.has('kettlebell') || props.has('kettlebells')) {
-            const kettlebell = () => {
-                const bell = new Group();
-                const ball = this.mesh(new SphereGeometry(8, 24, 16), this.kitMaterial, bell);
-                ball.position.y = -11;
-                const handle = this.mesh(
-                    new TorusGeometry(4.5, 1.1, 8, 24),
-                    this.metalMaterial,
-                    bell
-                );
-                handle.position.y = -2;
-                this.scene.add(bell);
-                return bell;
-            };
+        if (props.has('kettlebell')) {
+            const bell = new Group();
+            const ball = this.mesh(new SphereGeometry(8, 24, 16), this.kitMaterial, bell);
+            ball.position.y = -11;
+            const handle = this.mesh(new TorusGeometry(4.5, 1.1, 8, 24), this.metalMaterial, bell);
+            handle.position.y = -2;
+            this.scene.add(bell);
             const smooth = (t: number) => {
                 const clamped = Math.min(1, Math.max(0, t));
                 return clamped * clamped * (3 - 2 * clamped);
@@ -848,38 +841,26 @@ export class FigureScene {
                 const up = smooth((along[1] + 0.1) / 0.5);
                 return normalize3(add3(scale3(hang, 1 - up), scale3(rest, up)));
             };
-            if (props.has('kettlebells')) {
-                for (const i of [0, 1]) {
-                    const bell = kettlebell();
-                    this.carried.push((skeleton) => {
-                        const arm = skeleton.arms[i];
-                        bell.position.copy(v(arm.end));
-                        orient(bell, scale3(fromHand(skeleton, arm), -1), skeleton.right);
-                    });
+            this.carried.push((skeleton) => {
+                bell.position.copy(v(skeleton.bell));
+                if (skeleton.bellDown) {
+                    // Standing on the floor
+                    orient(bell, [0, 1, 0], skeleton.right);
+                    return;
                 }
-            } else {
-                const bell = kettlebell();
-                this.carried.push((skeleton) => {
-                    bell.position.copy(v(skeleton.bell));
-                    if (skeleton.bellDown) {
-                        // Standing on the floor
-                        orient(bell, [0, 1, 0], skeleton.right);
-                        return;
-                    }
-                    // In one hand, or held in both, between them, hanging straight down
-                    const [near, far] = skeleton.arms;
-                    const share = skeleton.heldBy;
-                    const oneHand = normalize3(
-                        add3(
-                            scale3(fromHand(skeleton, near), 1 - share),
-                            scale3(fromHand(skeleton, far), share)
-                        )
-                    );
-                    const both = smooth(1 - Math.abs(share - 0.5) / 0.3);
-                    const way = normalize3(add3(scale3(oneHand, 1 - both), [0, -both, 0]));
-                    orient(bell, scale3(way, -1), skeleton.right);
-                });
-            }
+                // In one hand, or held in both, between them, hanging straight down
+                const [near, far] = skeleton.arms;
+                const share = skeleton.heldBy;
+                const oneHand = normalize3(
+                    add3(
+                        scale3(fromHand(skeleton, near), 1 - share),
+                        scale3(fromHand(skeleton, far), share)
+                    )
+                );
+                const both = smooth(1 - Math.abs(share - 0.5) / 0.3);
+                const way = normalize3(add3(scale3(oneHand, 1 - both), [0, -both, 0]));
+                orient(bell, scale3(way, -1), skeleton.right);
+            });
         }
         if (props.has('ab-wheel')) {
             const wheel = new Group();

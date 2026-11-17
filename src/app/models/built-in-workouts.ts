@@ -212,7 +212,7 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
         repeats: UNTIL_STOPPED,
         timeLimitSeconds: 15 * 60,
         blocks: [
-            once(reps('kettlebell-thruster', 8)),
+            once(reps('kettlebell-thruster', 6, { eachSide: true })),
             once(reps('kettlebell-swing', 15)),
             once(reps('chainsaw-row', 8, { eachSide: true })),
             once(reps('plank-pull-through', 10)),

@@ -2684,7 +2684,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
     },
     'builtin:kettlebell-thruster': {
         view: 'side',
-        props: ['kettlebells'],
+        props: ['kettlebell'],
         frames: [
             {
                 label: 'Bottom',
@@ -2694,7 +2694,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                     hips: [-14, -46],
                     torso: 160,
                     head: 165,
-                    arms: both(touch(14, -6, 'cw')),
+                    arms: [touch(14, -6, 'cw'), angles(80, 0)],
                     legs: FEET,
                 },
             },
@@ -2702,7 +2702,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 label: 'Standing, bell overhead',
                 hold: 300,
                 ms: 1100,
-                pose: { ...STANDING, arms: both(touch(2, 54, 'cw')) },
+                pose: { ...STANDING, arms: [touch(2, 54, 'cw'), angles(-4, 0)] },
             },
         ],
     },
@@ -3241,7 +3241,7 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
     },
     'builtin:kettlebell-push-up': {
         view: 'side',
-        props: ['kettlebells'],
+        props: ['kettlebell'],
         frames: [
             {
                 label: 'Top',
@@ -3250,7 +3250,10 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 pose: {
                     hips: [82, -55.5],
                     torso: 115.2,
-                    arms: [reach(125.4, -18, 'cw'), reach(123, -18, 'cw')],
+                    handsApart: 16,
+                    arms: both(reach(125, -15, 'cw')),
+                    bellAt: [136, -8, 0],
+                    bellOnSide: true,
                     legs: both(angles(-64.8, -64.8)),
                     feet: [15, 15],
                 },
@@ -3262,7 +3265,10 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 pose: {
                     hips: [89.1, -33.3],
                     torso: 100,
-                    arms: [reach(125.4, -18, 'cw'), reach(123, -18, 'cw')],
+                    handsApart: 16,
+                    arms: both(reach(125, -15, 'cw')),
+                    bellAt: [136, -8, 0],
+                    bellOnSide: true,
                     legs: both(angles(-80, -80)),
                     feet: [10, 10],
                 },

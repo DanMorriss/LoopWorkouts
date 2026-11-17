@@ -216,8 +216,6 @@ describe('drawFigure', () => {
         expect(props({ ...squat, view: 'front', props: ['barbell'] })).toBe(3);
         // One, in the near hand: the bell and its handle
         expect(props({ ...squat, props: ['kettlebell'] })).toBe(2);
-        // One in each hand
-        expect(props({ ...squat, props: ['kettlebells'] })).toBe(4);
         expect(props({ ...squat, props: ['dumbbell'] })).toBe(1);
     });
 

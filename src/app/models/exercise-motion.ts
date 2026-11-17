@@ -122,12 +122,17 @@ export interface Pose {
      * a motion's positions, if in any.
      */
     readonly bellAt?: readonly [x: number, y: number, right: number];
+    /**
+     * With `bellAt`, that the kettlebell lies on its side, its handle pointing the way the
+     * figure's head is from the side (as for a push-up on it), rather than standing upright.
+     */
+    readonly bellOnSide?: true;
 }
 
 /**
  * Equipment the figure carries, drawn where its hands or feet are: a barbell on the back or
  * in the hands, a dumbbell in each hand or one in the near hand, one kettlebell hanging from
- * the near hand (in 3D, the hand `heldBy` says) or one from each hand, an ab wheel under the
+ * the near hand (in 3D, the hand `heldBy` says), an ab wheel under the
  * hands, a band between them, a loop band round both thighs above the knees, a machine's roller on the front of the shins or behind the
  * ankles, its pad on top of the thighs by the knees, or a leg press's plate under the feet.
  */
@@ -137,7 +142,6 @@ export type Prop =
     | 'dumbbells'
     | 'dumbbell'
     | 'kettlebell'
-    | 'kettlebells'
     | 'ab-wheel'
     | 'band'
     | 'leg-band'
@@ -562,10 +566,11 @@ export function drawFigure(
             into.push(circle(end, 7.5));
         }
         if (props.has('kettlebell') && index === 0 && pose.bellAt) {
-            // Set down: standing on the floor, its handle where it says
+            // Set down: standing on the floor, or lying on its side, its handle where it says
             const handle: Point = [pose.bellAt[0], pose.bellAt[1]];
-            into.push(circle(add(handle, [0, 11]), 8), circle(handle, 3.5, 'bar'));
-        } else if ((props.has('kettlebell') && index === 0) || props.has('kettlebells')) {
+            const ball: Point = pose.bellOnSide ? [-11, 0] : [0, 11];
+            into.push(circle(add(handle, ball), 8), circle(handle, 3.5, 'bar'));
+        } else if (props.has('kettlebell') && index === 0) {
             // Hanging from the hand, swung out a little along the forearm
             const along = dir(angleOf(mid, end));
             const hang = add(scale(along, 0.6), [0, 1]);
@@ -759,6 +764,7 @@ export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
                   ],
               }
             : {}),
+        ...(a.bellOnSide ? { bellOnSide: true } : {}),
     };
 }
 

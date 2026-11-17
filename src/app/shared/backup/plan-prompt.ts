@@ -115,7 +115,7 @@ export function planPrompt(): string {
     return `I use Loop Workouts, a workout app. I'll give you a workout plan below. Please turn it into a JSON file that Loop Workouts can import, following these rules exactly.
 
 THE FILE
-Reply with one JSON object, in a code block, that I can save as a .json file:
+Reply with one JSON object, in a code block, that I can paste into the app:
 - "app": always "Loop Workouts"
 - "version": always ${BACKUP_VERSION}
 - "workouts": a list of workouts

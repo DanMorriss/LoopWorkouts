@@ -129,6 +129,73 @@ describe('YourDataComponent', () => {
             expect(status()).toBe('Prompt copied. Paste it into an AI chat, then add your plan.');
         });
 
+        it('imports a pasted plan, closes the dialog and puts focus back on Paste plan', async () => {
+            create();
+            const importSpy = vi
+                .spyOn(TestBed.inject(BackupService), 'import')
+                .mockResolvedValue({ ...NOTHING, ok: true, workoutsAdded: 3 });
+
+            button('Paste plan').click();
+            fixture.detectChanges();
+            const box = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+            box.value = 'Here it is:\n```json\n{"app":"Loop Workouts"}\n```\nNotes: none';
+            box.dispatchEvent(new Event('input'));
+            button('Import').click();
+            await fixture.whenStable();
+            fixture.detectChanges();
+            await new Promise((done) => requestAnimationFrame(done));
+
+            expect(await (importSpy.mock.calls[0][0] as Blob).text()).toBe(
+                '{"app":"Loop Workouts"}'
+            );
+            expect(status()).toBe('Added 3 workouts.');
+            expect(TestBed.inject(UndoService).offer()).toMatchObject({
+                link: { label: 'View workouts', url: '/library' },
+            });
+            await vi.waitFor(() =>
+                expect(fixture.nativeElement.querySelector('app-paste-plan-dialog')).toBeNull()
+            );
+            expect(document.activeElement).toBe(button('Paste plan'));
+        });
+
+        it('keeps a pasted plan that was turned down, and says why', async () => {
+            create();
+            vi.spyOn(TestBed.inject(BackupService), 'import').mockResolvedValue({
+                ok: false,
+                problem: 'unreadable',
+            });
+
+            button('Paste plan').click();
+            fixture.detectChanges();
+            const box = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+            box.value = 'not json';
+            box.dispatchEvent(new Event('input'));
+            button('Import').click();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const alert = fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement;
+            expect(alert.textContent!.trim()).toBe(
+                "That isn't the JSON the AI wrote. Copy its code block, and paste it here."
+            );
+            expect(box.value).toBe('not json');
+            expect(status()).toBe('');
+        });
+
+        it('asks for a reply before importing an empty box', async () => {
+            create();
+            const importSpy = vi.spyOn(TestBed.inject(BackupService), 'import');
+
+            button('Paste plan').click();
+            fixture.detectChanges();
+            button('Import').click();
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            expect(importSpy).not.toHaveBeenCalled();
+            expect(text()).toContain("Paste the AI's reply first.");
+        });
+
         it("says when the prompt couldn't be copied", async () => {
             create();
             vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('denied'));

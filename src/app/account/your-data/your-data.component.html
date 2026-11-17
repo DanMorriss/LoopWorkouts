@@ -26,14 +26,30 @@
     />
 </div>
 <p class="data__hint data__gap" id="plan-hint">
-    Have a plan from a coach, a book or a spreadsheet? Copy this prompt into an AI chat, add your
-    plan, then bring in the file it writes with Import backup.
+    Have a plan from a coach, a book or a spreadsheet? Copy this prompt into an AI chat and add your
+    plan, then paste what it writes with Paste plan.
 </p>
 <div class="data__actions">
     <button type="button" class="btn-pill" aria-describedby="plan-hint" (click)="copyPlanPrompt()">
         Copy AI prompt
     </button>
+    <button
+        type="button"
+        id="paste-plan"
+        class="btn-pill"
+        aria-describedby="plan-hint"
+        (click)="pasting.set(true)"
+    >
+        Paste plan
+    </button>
 </div>
+@if (pasting()) {
+    <app-paste-plan-dialog
+        animate.leave="dialog-leave"
+        (imported)="pastedPlan($event)"
+        (closed)="closePaste()"
+    />
+}
 <p class="data__hint data__status" role="status">{{ status() }}</p>
 
 <p class="data__hint data__gap">

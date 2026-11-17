@@ -287,3 +287,50 @@ test.describe('a kettlebell workout', () => {
         }
     );
 });
+
+test.describe('my kettlebell, across workouts', () => {
+    const swings = (weight: number) =>
+        reps(15, 'Kettlebell swing', { exercise: 'kettlebell-swing', weight });
+    test.use({
+        storage: {
+            ...seed.settings({ myEquipment: ['kettlebell'], kettlebellWeight: 16 }),
+            ...seed.workouts([
+                workout('Swings', { steps: [swings(16)] }),
+                workout('Kettlebell', {
+                    steps: [
+                        swings(16),
+                        reps(10, 'Goblet squat', { exercise: 'goblet-squat', weight: 16 }),
+                    ],
+                }),
+            ]),
+        },
+    });
+
+    test(
+        'REG-PRG-06 a heavier kettlebell in one workout starts them all at it',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Swings');
+            await setWheel(run.wheel('Weight, kg'), 20, 0.5);
+            await run.endWorkout();
+            await run.summaryDone.click();
+
+            // The other workout starts at it, without being changed
+            await app.goto('/library');
+            await run.startFromLibrary('Kettlebell');
+            await expect(
+                run.face.getByRole('spinbutton', { name: 'Weight, kg', exact: true })
+            ).toHaveAttribute('aria-valuenow', '20');
+            await run.endWorkout();
+            await run.summaryDone.click();
+
+            // And it's on Profile, to see or change
+            await app.goto('/account');
+            await expect(
+                page.getByRole('textbox', { name: 'My kettlebell in kilograms' })
+            ).toHaveValue('20');
+        }
+    );
+});

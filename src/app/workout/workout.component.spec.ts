@@ -5292,7 +5292,44 @@ describe('WorkoutComponent', () => {
 
             run().changeReps({ weight: 20 });
             expect(weights()).toEqual([null, 20, 20]);
+            // Your kettlebell from now on (PRG-14)
+            expect(TestBed.inject(SettingsStore).kettlebellWeight()).toBe(20);
             fixture.destroy();
+        });
+
+        it('starts at your kettlebell, where it has one weight or none', () => {
+            TestBed.inject(SettingsStore).update({ kettlebellWeight: 20 });
+            const workout = (weights: [number?, number?]) =>
+                store.addWorkout({
+                    title: 'Kettlebell',
+                    repeats: 1,
+                    blocks: asOneGroup([
+                        {
+                            kind: 'reps',
+                            reps: 15,
+                            ...swing,
+                            ...(weights[0] ? { weight: weights[0] } : {}),
+                        },
+                        {
+                            kind: 'reps',
+                            reps: 10,
+                            ...goblet,
+                            ...(weights[1] ? { weight: weights[1] } : {}),
+                        },
+                    ]),
+                });
+            const weightsOf = (id: string) =>
+                allSteps(store.findWorkoutById(id)!).map((step) => (step as RepStep).weight);
+
+            const oneKettlebell = workout([16]);
+            run().start(oneKettlebell);
+            expect(weightsOf(oneKettlebell.id)).toEqual([20, 20]);
+            expect((run().state()?.step as RepStep).weight).toBe(20);
+
+            // Two weights, put there on purpose, stay
+            const two = workout([16, 12]);
+            run().start(two);
+            expect(weightsOf(two.id)).toEqual([16, 12]);
         });
 
         it('suggests a rep more next time, not a heavier weight', () => {

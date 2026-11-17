@@ -977,6 +977,16 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Next time says "Goblet squat: try 11 reps, up from 10", and nothing for the swings.
 - **In the pack:** as above.
 
+### REG-PRG-06 · A heavier kettlebell in one workout starts them all at it
+
+- **Stories:** PRG-14 · **Priority:** P2
+- **Preconditions:** `guest()`, with a kettlebell in your equipment and My kettlebell at 16 kg. Two workouts: Swings (15 Kettlebell swings at 16 kg), and Kettlebell (15 swings and 10 Goblet squats, both at 16 kg).
+- **Steps:** Start Swings; set the weight to 20 kg; end it. Start Kettlebell; end it. Open You.
+- **Expected:**
+    1. Kettlebell starts with its swings at 20 kg, without being changed.
+    2. Profile's **My kettlebell** says 20 (kg).
+- **In the pack:** as above.
+
 ---
 
 ## 8. Exercises (`exercises.md`)
@@ -1499,7 +1509,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                                          |
 | Running a workout         | REG-RUN-01 – 17  | RUN-1 – RUN-12, RUN-14, RUN-15, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                          |
-| Progress                  | REG-PRG-01 – 05  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14                                                                                     |
+| Progress                  | REG-PRG-01 – 06  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14                                                                                     |
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                   |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                                            |
 | Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                                               |
@@ -1508,7 +1518,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                                    |
 | Gestures and dragging     | REG-GES-01 – 04  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                                       |
 
-**Count:** 85 tests: 40 P1, 36 P2, 9 P3.
+**Count:** 86 tests: 40 P1, 37 P2, 9 P3.
 
 | Area      | P1     | P2     | P3    | Total  |
 | --------- | ------ | ------ | ----- | ------ |
@@ -1518,14 +1528,14 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | LIB       | 5      | 2      | 1     | 8      |
 | RUN       | 6      | 7      | 2     | 15     |
 | HIS       | 3      | 0      | 1     | 4      |
-| PRG       | 0      | 5      | 0     | 5      |
+| PRG       | 0      | 6      | 0     | 6      |
 | EXR       | 2      | 3      | 0     | 5      |
 | SET       | 2      | 1      | 1     | 4      |
 | DATA      | 4      | 0      | 1     | 5      |
 | ACC       | 5      | 2      | 0     | 7      |
 | A11Y      | 3      | 3      | 0     | 6      |
 | GES       | 0      | 1      | 3     | 4      |
-| **Total** | **40** | **36** | **9** | **85** |
+| **Total** | **40** | **37** | **9** | **86** |
 
 ### In the pack
 
@@ -1539,7 +1549,7 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | LIB  | `e2e/library.e2e.ts`   | 11    | 0                               | 0                                                     |
 | RUN  | `e2e/run.e2e.ts`       | 23    | 0                               | 1 (real sound, manual)                                |
 | HIS  | `e2e/history.e2e.ts`   | 6     | 0                               | 0                                                     |
-| PRG  | `e2e/progress.e2e.ts`  | 6     | 0                               | 0                                                     |
+| PRG  | `e2e/progress.e2e.ts`  | 7     | 0                               | 0                                                     |
 | EXR  | `e2e/exercises.e2e.ts` | 9     | 0                               | 1 (3D figure, manual)                                 |
 | SET  | `e2e/settings.e2e.ts`  | 6     | 0                               | 0                                                     |
 | DATA | `e2e/data.e2e.ts`      | 6     | 0                               | 0                                                     |

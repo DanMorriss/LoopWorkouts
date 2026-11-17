@@ -62,6 +62,25 @@ export function weightOptions(
     ];
 }
 
+/**
+ * A saved kettlebell weight in kg (PRG-14), or null if it isn't one: more than nothing, and no
+ * more than a rep step's weight can be.
+ */
+export function readKettlebellKg(value: unknown): number | null {
+    return typeof value === 'number' && value > 0 && value <= MAX_WEIGHT_KG ? value : null;
+}
+
+/**
+ * A kettlebell's weight typed in `unit` (PRG-14), to the nearest WEIGHT_STEP as a rep step's
+ * is, in kg as it's saved, or null for none: not a number, or out of range.
+ */
+export function kettlebellToKg(value: number, unit: WeightUnit): number | null {
+    if (!Number.isFinite(value)) {
+        return null;
+    }
+    return readKettlebellKg(weightToKg(Math.round(value / WEIGHT_STEP) * WEIGHT_STEP, unit));
+}
+
 /** The lightest and heaviest a body weight can be (CAL-2), in kg: about 44 to 661 lb. */
 export const BODY_WEIGHT_RANGE_KG = { min: 20, max: 300 };
 

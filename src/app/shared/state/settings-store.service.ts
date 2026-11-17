@@ -1,8 +1,14 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, readMyEquipment } from '../../models/exercise';
 import { TRAINING_GOALS, TrainingGoal } from '../../models/muscle-balance';
-import { cleanName, Profile, PROFILE_FIELDS } from '../../models/profile';
-import { BodyWeightRecord, readBodyWeightKg, WEIGHT_UNITS, WeightUnit } from '../../models/weight';
+import { cleanName, kettlebellOf, Profile, PROFILE_FIELDS } from '../../models/profile';
+import {
+    BodyWeightRecord,
+    readBodyWeightKg,
+    readKettlebellKg,
+    WEIGHT_UNITS,
+    WeightUnit,
+} from '../../models/weight';
 import { DEFAULT_RUN_SIDES, MAX_SWITCH_SECONDS, Side } from '../../models/workout';
 import { SyncClock } from './sync-clock.service';
 
@@ -35,6 +41,12 @@ export interface Settings {
     myEquipment: Equipment[];
     /** Show only the exercises you can do with `myEquipment` on the Exercises page. */
     onlyMyEquipment: boolean;
+    /**
+     * Your kettlebell's weight in kg, which every kettlebell workout starts from (PRG-14), or
+     * null if not known yet. Set on Profile, or by the weight last put on a kettlebell step
+     * mid-workout.
+     */
+    kettlebellWeight: number | null;
     /** Which side an exercise done each side starts with (BLD-10). */
     eachSideFirst: Side;
     /** The countdown between a timed step's two sides, in seconds; 0 for none. */
@@ -75,6 +87,7 @@ const DEFAULT_SETTINGS: Settings = {
     trainingGoal: 'muscle',
     myEquipment: [],
     onlyMyEquipment: false,
+    kettlebellWeight: null,
     eachSideFirst: DEFAULT_RUN_SIDES.first,
     switchSidesSeconds: DEFAULT_RUN_SIDES.switchSeconds,
     includeActiveRest: true,
@@ -106,6 +119,7 @@ export class SettingsStore {
     readonly trainingGoal = computed(() => this.settings().trainingGoal);
     readonly myEquipment = computed(() => this.settings().myEquipment);
     readonly onlyMyEquipment = computed(() => this.settings().onlyMyEquipment);
+    readonly kettlebellWeight = computed(() => this.settings().kettlebellWeight);
     readonly eachSideFirst = computed(() => this.settings().eachSideFirst);
     readonly switchSidesSeconds = computed(() => this.settings().switchSidesSeconds);
     readonly includeActiveRest = computed(() => this.settings().includeActiveRest);
@@ -133,6 +147,7 @@ export class SettingsStore {
                 trainingGoal: settings.trainingGoal,
                 weightUnit: settings.weightUnit,
                 myEquipment: settings.myEquipment,
+                ...kettlebellOf(settings.kettlebellWeight),
                 updatedAt: settings.profileUpdatedAt,
             };
         },
@@ -177,6 +192,7 @@ export class SettingsStore {
             ...this.settings(),
             ...fields,
             myEquipment: [...fields.myEquipment],
+            kettlebellWeight: fields.kettlebellWeight ?? null,
             profileUpdatedAt: updatedAt,
         });
         return true;
@@ -267,6 +283,7 @@ function loadSettings(): Settings {
         // Kept in the order it's offered, so it reads the same however it was picked
         myEquipment: readMyEquipment(saved['myEquipment']) ?? DEFAULT_SETTINGS.myEquipment,
         onlyMyEquipment: flag('onlyMyEquipment'),
+        kettlebellWeight: readKettlebellKg(saved['kettlebellWeight']),
         eachSideFirst:
             saved['eachSideFirst'] === 'left' || saved['eachSideFirst'] === 'right'
                 ? saved['eachSideFirst']

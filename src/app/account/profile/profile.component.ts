@@ -3,7 +3,7 @@ import { BodyFigure } from '../../models/exercise';
 import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
 import { MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
-import { BodyWeightFieldComponent } from './body-weight-field.component';
+import { WeightFieldComponent } from './weight-field.component';
 import { ConsentService } from '../consent.service';
 import { BodyWeightConsentComponent } from './body-weight-consent.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
@@ -12,12 +12,13 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
  * Account → Profile: your name, for Home's greeting (SET-7), your sex, for the body map's
  * figure (SET-5), what you train for, for the muscle bars' aims (PRG-8), and the weight unit
  * you lift in (SET-4). They're saved with the settings, and synced with your account when
- * you're signed in, with your equipment, as your profile. Your body weight, for calories
+ * you're signed in, with your equipment and your kettlebell's weight (PRG-14), shown when you
+ * have one, as your profile. Your body weight, for calories
  * (CAL-2), is here too, but syncs only with its own consent (CAL-6).
  */
 @Component({
     selector: 'app-profile',
-    imports: [BodyWeightConsentComponent, BodyWeightFieldComponent],
+    imports: [BodyWeightConsentComponent, WeightFieldComponent],
     template: `
         <!-- Saved as it's left, trimmed -->
         <label class="picker-field profile__field">
@@ -121,10 +122,24 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
             </div>
         </fieldset>
 
+        <!-- What every kettlebell workout starts at (PRG-14), for those with one -->
+        @if (hasKettlebell()) {
+            <app-weight-field
+                class="profile__weight"
+                kind="kettlebell"
+                describedBy="kettlebell-weight-hint"
+            >
+                <span class="profile__name">My kettlebell</span>
+            </app-weight-field>
+            <p class="profile__hint" id="kettlebell-weight-hint">
+                Kettlebell workouts start at this. Setting a weight in one changes it too
+            </p>
+        }
+
         <!-- Health data, so it syncs only with its own consent, given below -->
-        <app-body-weight-field class="profile__weight" describedBy="body-weight-hint">
+        <app-weight-field class="profile__weight" kind="body" describedBy="body-weight-hint">
             <span class="profile__name">Body weight</span>
-        </app-body-weight-field>
+        </app-weight-field>
         <p class="profile__hint" id="body-weight-hint">{{ weightHint() }}</p>
         <app-body-weight-consent />
     `,
@@ -192,6 +207,13 @@ export class ProfileComponent {
         const { large, small } = WEEKLY_AIMS[this.settings.trainingGoal()];
         return `Aim for ${large.low} to ${large.high} sets a week on each muscle, ${small.low} to ${small.high} on small ones`;
     });
+
+    /** A kettlebell among your equipment, or a weight for one already known. */
+    protected readonly hasKettlebell = computed(
+        () =>
+            this.settings.myEquipment().includes('kettlebell') ||
+            this.settings.kettlebellWeight() !== null
+    );
 
     protected readonly weightHint = computed(() =>
         this.consent.weightGiven()

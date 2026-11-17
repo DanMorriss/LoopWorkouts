@@ -30,6 +30,7 @@ describe('SettingsStore', () => {
             trainingGoal: 'muscle',
             myEquipment: [],
             onlyMyEquipment: false,
+            kettlebellWeight: null,
             eachSideFirst: 'left',
             switchSidesSeconds: 5,
             includeActiveRest: true,
@@ -276,6 +277,26 @@ describe('SettingsStore', () => {
             expect(store.mergeProfile({ ...theirs, updatedAt: here + 1 })).toBe(true);
             expect(store.profile()).toEqual({ ...theirs, updatedAt: here + 1 });
             expect(store.weightUnit()).toBe('lb');
+        });
+
+        it("syncs your kettlebell's weight with the profile (PRG-14)", () => {
+            const store = createStore();
+            expect(store.kettlebellWeight()).toBeNull();
+            expect(store.profile()).not.toHaveProperty('kettlebellWeight');
+
+            store.update({ kettlebellWeight: 16 });
+            const here = store.profile().updatedAt;
+            expect(here).toBeGreaterThan(0);
+            expect(store.profile().kettlebellWeight).toBe(16);
+            TestBed.resetTestingModule();
+            expect(createStore().kettlebellWeight()).toBe(16);
+
+            // Another device's, newer, with a heavier one; then one from before it had any
+            const again = createStore();
+            again.mergeProfile({ ...theirs, kettlebellWeight: 20, updatedAt: here + 1 });
+            expect(again.kettlebellWeight()).toBe(20);
+            again.mergeProfile({ ...theirs, updatedAt: here + 2 });
+            expect(again.kettlebellWeight()).toBeNull();
         });
 
         it('forgets the name and the date on leaving the account, keeping the rest', () => {

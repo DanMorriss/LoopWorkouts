@@ -1,6 +1,6 @@
 import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, readMyEquipment } from './exercise';
 import { TRAINING_GOALS, TrainingGoal } from './muscle-balance';
-import { WEIGHT_UNITS, WeightUnit } from './weight';
+import { readKettlebellKg, WEIGHT_UNITS, WeightUnit } from './weight';
 
 /** The longest a name can be: enough for a first name and more, short enough for Home's greeting. */
 export const MAX_NAME_LENGTH = 40;
@@ -17,6 +17,11 @@ export interface Profile {
     trainingGoal: TrainingGoal;
     weightUnit: WeightUnit;
     myEquipment: Equipment[];
+    /**
+     * Your kettlebell's weight in kg (PRG-14), which every kettlebell workout starts from;
+     * missing for none, as from a version of the app before it.
+     */
+    kettlebellWeight?: number;
     /** When it last changed, in ms since the epoch, or 0 if it never has. */
     updatedAt: number;
 }
@@ -28,6 +33,7 @@ export const PROFILE_FIELDS = [
     'trainingGoal',
     'weightUnit',
     'myEquipment',
+    'kettlebellWeight',
 ] as const satisfies readonly (keyof Profile)[];
 
 /** A name as it's kept: trimmed, and cut to the longest a name can be. */
@@ -45,7 +51,8 @@ export function readProfile(value: unknown): Profile | null {
         return null;
     }
     const profile = value as Record<string, unknown>;
-    const { name, bodyFigure, trainingGoal, weightUnit, myEquipment, updatedAt } = profile;
+    const { name, bodyFigure, trainingGoal, weightUnit, myEquipment, kettlebellWeight, updatedAt } =
+        profile;
     if (
         typeof name !== 'string' ||
         !BODY_FIGURE_CHOICES.includes(bodyFigure as BodyFigure) ||
@@ -63,8 +70,15 @@ export function readProfile(value: unknown): Profile | null {
         trainingGoal: trainingGoal as TrainingGoal,
         weightUnit: weightUnit as WeightUnit,
         myEquipment: readMyEquipment(myEquipment) ?? [],
+        ...kettlebellOf(kettlebellWeight),
         updatedAt: updatedAt as number,
     };
+}
+
+/** A profile's kettlebell weight, where it's one, as a field to spread in; none otherwise. */
+export function kettlebellOf(value: unknown): { kettlebellWeight?: number } {
+    const kg = readKettlebellKg(value);
+    return kg === null ? {} : { kettlebellWeight: kg };
 }
 
 /**

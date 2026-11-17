@@ -212,6 +212,8 @@ export interface Settings {
     trainingGoal: 'muscle' | 'fitness';
     myEquipment: string[];
     onlyMyEquipment: boolean;
+    /** Your kettlebell, in kg (PRG-14), part of the profile. */
+    kettlebellWeight: number | null;
     eachSideFirst: 'left' | 'right';
     switchSidesSeconds: number;
     name: string;

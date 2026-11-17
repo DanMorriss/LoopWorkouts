@@ -7,6 +7,7 @@
 - **HIS-3** As a user I want to add a short note to a workout (e.g. "felt strong").
 - **HIS-4** As a user I want to delete a workout from the history, and undo it if I didn't mean to.
 - **HIS-5** As a user I want to see the sets I did in each workout, reps and weight (or time for a timed exercise), so I can see my improvements over time.
+- **HIS-6** As a user I want to correct the reps or weight of a workout I've done, e.g. a weight I got wrong, so my progress and bests are right.
 
 ## Rules
 
@@ -56,9 +57,16 @@
 
 ### Notes
 
-- Each entry's **⋮ menu** offers **Add note** (or **Edit note** and **Remove note** once there is one) and **Delete**. One menu open at a time. It opens above the ⋮ where the tab bar would cover it below, as on the last card (since 2026-11-08).
+- Each entry's **⋮ menu** offers **Add note** (or **Edit note** and **Remove note** once there is one), **Change reps or weight** (with rep sets, see below) and **Delete**. One menu open at a time. It opens above the ⋮ where the tab bar would cover it below, as on the last card (since 2026-11-08).
 - A note is up to **120 characters**, trimmed. Saving an empty note removes it. Cancel keeps the note as it was.
 - The workout summary's **Done** opens Progress with that workout highlighted in the log and in view. (`?note=<id>` does the same with its note box open and focused; nothing links there since the note box moved onto the summary.)
+
+### Changing reps or weight (HIS-6)
+
+- **Change reps or weight** in an entry's ⋮ menu (for one with rep sets) makes each rep exercise's line a button (✎), as on the workout summary, with focus on the first and **Done changing** under them, which puts the lines back with focus on the ⋮. One entry at a time; it closes a note being written, and the card isn't a link meanwhile.
+- Pressing a line opens that exercise's sets in a dialog: "Set 1", "Set 2" ("Set 1, left" for one done each side), each with a Reps and a Weight wheel, and **Save**. Timed lines ran as set, so stay as text.
+- Saving changes only that entry's sets, at once, and the **Undo bar** says "Changed Back squat" with **Undo**, which puts them back. Saved as it was, nothing changes and nothing's offered. ‹ Back, Escape or a click outside change nothing.
+- The saved workout isn't changed: this is what was done, not what to do next time (the workout summary asks that). Bests, volume and progress on Progress and an exercise's page follow, as they're worked out from the history. The change syncs as a note does, the latest winning.
 
 ### Delete and Undo
 
@@ -82,6 +90,7 @@
 - Given a note of 200 characters, then it's cut to 120.
 - Given an entry with a note, when I save it empty, then the note is removed.
 - Given I delete an entry, when I press Undo, then it's back with its note.
+- Given Legs with Back squat 10 @ 60 and 8 @ 62.5 kg, when I correct set 2 to 10 reps from its ⋮, then it shows "Back squat: 10 @ 60, 10 @ 62.5 kg", after a reload too, and the saved workout is as it was; when I press Undo, then it's back to 8. Given a workout of only timed sets, then its ⋮ has no Change reps or weight.
 - Given a run still going whose entry I delete, when the run finishes, then the entry doesn't come back, even after a reload.
 - Given a run I leave by closing the tab, when I open the app again, then it's in the history as stopped.
 - Given a run of Sprints, when I press its card, then Sprints' Details slide in, with its heart and Make a copy; when I press ‹ Progress, then I'm back on the log with that run in view and focused. Given Sprints is deleted since, then its card isn't a link.

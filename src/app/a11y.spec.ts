@@ -1165,7 +1165,7 @@ for (const theme of ['dark', 'light'] as const) {
                 await settle();
                 click('.summary__change');
                 await settle();
-                click('.summary__line-change');
+                click('.change-line');
                 await settle();
                 click('app-step-amounts-dialog app-wheel-picker [data-value="8"]');
                 await settle();

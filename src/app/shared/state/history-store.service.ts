@@ -1,5 +1,5 @@
 import { computed, DestroyRef, inject, Service, signal } from '@angular/core';
-import { HistoryEntry, isLoggedSet, MAX_NOTE_LENGTH } from '../../models/history';
+import { HistoryEntry, isLoggedSet, LoggedSet, MAX_NOTE_LENGTH } from '../../models/history';
 import { MAX_TIME_LIMIT_SECONDS, PlacedHeading, PlacedSuperset } from '../../models/workout';
 import { Deletion, mergeRecords } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
@@ -82,6 +82,26 @@ export class HistoryStore {
         const { note: _old, ...rest } = entry;
         const changed: HistoryEntry = { ...rest, updatedAt: this.clock.now(entry.updatedAt) };
         const updated = trimmed ? { ...changed, note: trimmed } : changed;
+        this._entries.update((entries) =>
+            entries.map((existing) => (existing.id === id ? updated : existing))
+        );
+        this.save([updated]);
+    }
+
+    /**
+     * Replaces a workout's sets, e.g. one corrected on Progress, dated now so the change wins
+     * when synced. Its sets are kept as given: correct them with `withSetChanges()`.
+     */
+    setSets(id: string, sets: readonly LoggedSet[]) {
+        const entry = this._entries().find((existing) => existing.id === id);
+        if (!entry) {
+            return;
+        }
+        const updated: HistoryEntry = {
+            ...entry,
+            sets: [...sets],
+            updatedAt: this.clock.now(entry.updatedAt),
+        };
         this._entries.update((entries) =>
             entries.map((existing) => (existing.id === id ? updated : existing))
         );

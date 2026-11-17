@@ -71,6 +71,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | HIS-3  | Add a note to a workout                                                      | ✅  | —   | [history](history.md)                         |
 | HIS-4  | Delete a workout from the history, with Undo                                 | ✅  | —   | [history](history.md)                         |
 | HIS-5  | See the sets I did: reps and weight for each rep step                        | ✅  | —   | [history](history.md)                         |
+| HIS-6  | Correct the reps or weight of a workout I've done                            | ✅  | —   | [history](history.md)                         |
 | SET-1  | Choose a dark, light or system theme                                         | ✅  | —   | [settings](settings.md)                       |
 | SET-2  | Turn sound, vibration and keeping the screen on, on or off                   | ✅  | —   | [settings](settings.md)                       |
 | SET-3  | Hear each alarm sound before a workout                                       | ✅  | —   | [settings](settings.md)                       |

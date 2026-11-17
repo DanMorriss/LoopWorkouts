@@ -59,6 +59,16 @@
                     <mat-icon aria-hidden="true">edit_note</mat-icon>
                     {{ entry().note ? 'Edit note' : 'Add note' }}
                 </button>
+                @if (hasRepSets()) {
+                    <button
+                        type="button"
+                        class="menu__item entry__change-sets"
+                        (click)="changeSetsRequested.emit()"
+                    >
+                        <mat-icon aria-hidden="true">tune</mat-icon>
+                        Change reps or weight
+                    </button>
+                }
                 @if (entry().note) {
                     <button
                         type="button"
@@ -90,24 +100,41 @@
     />
 }
 
-<!-- Under the workout's headings as they were when it ran, if it had any -->
+<!-- Under the workout's headings as they were when it ran, if it had any. While its sets
+     are being changed, each rep exercise's line opens its sets, one exercise at a time -->
 @if (sections().length) {
-    <app-set-lines class="entry__sets" [sections]="sections()">
-        <ng-template let-line>
-            @if (line.path) {
-                <a
-                    class="entry__exercise"
-                    [routerLink]="line.path"
-                    [queryParams]="{ run: entry().id }"
-                    >{{ line.name }}</a
-                ><span aria-hidden="true">: {{ line.text }}</span>
-                <span class="sr-only">, {{ line.spoken }}</span>
-            } @else {
-                <span aria-hidden="true">{{ line.name }}: {{ line.text }}</span>
-                <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
-            }
-        </ng-template>
-    </app-set-lines>
+    <div class="entry__sets">
+        @if (changingSets()) {
+            <app-change-set-lines
+                [sections]="sections()"
+                [sets]="entry().sets ?? []"
+                (changed)="setsChanged.emit($event)"
+            />
+            <div class="entry__sets-actions">
+                <button type="button" class="btn-pill entry__sets-done" (click)="closeSets()">
+                    <mat-icon aria-hidden="true">check</mat-icon>
+                    Done changing
+                </button>
+            </div>
+        } @else {
+            <app-set-lines [sections]="sections()">
+                <ng-template let-line>
+                    @if (line.path) {
+                        <a
+                            class="entry__exercise"
+                            [routerLink]="line.path"
+                            [queryParams]="{ run: entry().id }"
+                            >{{ line.name }}</a
+                        ><span aria-hidden="true">: {{ line.text }}</span>
+                        <span class="sr-only">, {{ line.spoken }}</span>
+                    } @else {
+                        <span aria-hidden="true">{{ line.name }}: {{ line.text }}</span>
+                        <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
+                    }
+                </ng-template>
+            </app-set-lines>
+        }
+    </div>
 }
 @if (entry().note && !editing()) {
     <p class="entry__note"><span class="sr-only">Note: </span>{{ entry().note }}</p>

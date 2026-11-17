@@ -1,16 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { describeSets, sectionsOf, SetsSummary } from '../../../history/history-format';
+import { describeSets, sectionsOf } from '../../../history/history-format';
 import { isBuiltIn } from '../../../models/exercise';
+import { placedHeadings, placedSupersets } from '../../../models/workout';
 import {
-    placedHeadings,
-    placedSupersets,
-    RepSetAmount,
-    TimedSetAmount,
-} from '../../../models/workout';
-import { IconComponent } from '../../../shared/components/icon/icon.component';
-import { StepAmountsDialogComponent } from '../../../shared/components/step-amounts-dialog/step-amounts-dialog.component';
-import { injectFocusAfterRender } from '../../../shared/focus-after-render';
+    ChangeSetLinesComponent,
+    SetsChanged,
+} from '../../../history/set-lines/change-set-lines.component';
 import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
@@ -37,7 +33,7 @@ export function ownExerciseName(exercises: ExerciseStore) {
  */
 @Component({
     selector: 'app-summary-sets',
-    imports: [IconComponent, MatIconModule, SetLinesComponent, StepAmountsDialogComponent],
+    imports: [ChangeSetLinesComponent, MatIconModule, SetLinesComponent],
     templateUrl: './summary-sets.component.html',
     styleUrl: './summary-sets.component.scss',
 })
@@ -46,7 +42,6 @@ export class SummarySetsComponent {
     private readonly store = inject(WorkoutStore);
     private readonly settings = inject(SettingsStore);
     private readonly exerciseName = ownExerciseName(inject(ExerciseStore));
-    private readonly focusAfterRender = injectFocusAfterRender();
 
     /** One line per step, e.g. "Squats: 10, 10, 8 @ 60 kg" or "Plank: 3 × 0:45". */
     protected readonly setLines = computed(() =>
@@ -65,48 +60,8 @@ export class SummarySetsComponent {
     });
 
     protected readonly changingSets = signal(false);
-    /** The steps with rep sets, which can be changed, and where each is in the run's sets. */
-    protected readonly changeable = computed(() => {
-        const steps = new Map<number, number[]>();
-        this.store.activeSets().forEach((set, index) => {
-            steps.set(set.step, [...(steps.get(set.step) ?? []), index]);
-        });
-        return steps;
-    });
-    /** The line whose sets are open in the dialog. */
-    protected readonly editing = signal<SetsSummary | null>(null);
-    protected readonly hint = 'The reps and weight you did in each set.';
-
-    /** The open line's sets as the dialog takes them: reps, and weight in kg. */
-    protected readonly editingAmounts = computed((): RepSetAmount[] => {
-        const sets = this.store.activeSets();
-        return this.editingIndexes().map((index) => {
-            const { reps, weight } = sets[index];
-            return { reps, ...(weight === undefined ? {} : { weight }) };
-        });
-    });
-
-    /**
-     * Each of the open line's sets named, in the order done: e.g. "Set 2", or "Set 2, left" for
-     * an exercise done each side.
-     */
-    protected readonly editingRowNames = computed(() => {
-        const sides = this.editingIndexes().map((index) => this.store.activeSets()[index].side);
-        return sides.map((side, i) => {
-            const number = sides.slice(0, i).filter((other) => other === side).length + 1;
-            return `Set ${number}${side ? `, ${side}` : ''}`;
-        });
-    });
-
-    /** Where the open line's sets are in the run's sets. */
-    private readonly editingIndexes = computed(() => {
-        const step = this.editing()?.step;
-        return step === undefined ? [] : (this.changeable().get(step) ?? []);
-    });
-
-    protected buttonId(step: number): string {
-        return `summary-sets-change-${step}`;
-    }
+    /** The run's rep sets, which can be corrected. */
+    protected readonly repSets = this.store.activeSets;
 
     /** Some steps were given a step-up, which "Yes, use next time" leaves as they are. */
     protected readonly steppedUp = computed(() => this.run.steppedUp().size > 0);
@@ -116,31 +71,14 @@ export class SummarySetsComponent {
     /** Of a ready-made workout too, as it keeps your reps and weights (ReadyMadeChanges). */
     private readonly canKeep = computed(() => this.run.workout() !== null);
 
-    /** Corrects the step's sets that changed, then asks about next time if any did. */
-    protected save(step: number, amounts: RepSetAmount[] | TimedSetAmount[]) {
-        const indexes = this.changeable().get(step) ?? [];
-        let changed = false;
-        amounts.forEach((amount, i) => {
-            const set = this.store.activeSets()[indexes[i]];
-            // Only rep sets are open to change, so a timed one is never here
-            if (
-                set &&
-                'reps' in amount &&
-                (set.reps !== amount.reps || set.weight !== amount.weight)
-            ) {
-                this.run.changeSet(indexes[i], { reps: amount.reps, weight: amount.weight });
-                changed = true;
-            }
-        });
-        if (changed && this.canKeep()) {
+    /** Corrects the sets that changed, then asks whether to start from them next time. */
+    protected save({ changes }: SetsChanged) {
+        for (const { index, reps, weight } of changes) {
+            this.run.changeSet(index, { reps, weight });
+        }
+        if (this.canKeep()) {
             this.nextTime.set('asking');
         }
-        this.close(step);
-    }
-
-    protected close(step: number) {
-        this.editing.set(null);
-        this.focusAfterRender(this.buttonId(step));
     }
 
     protected answerNextTime(use: boolean) {

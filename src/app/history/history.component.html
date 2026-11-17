@@ -46,12 +46,16 @@
                                 [entry]="entry"
                                 [menuOpen]="openMenuId() === entry.id"
                                 [editing]="editingId() === entry.id"
+                                [changingSets]="changingSetsId() === entry.id"
                                 [highlighted]="highlightedId() === entry.id"
                                 (menuToggled)="toggleMenu(entry.id)"
                                 (menuClosed)="closeMenu(entry.id)"
                                 (editRequested)="editNote(entry.id)"
                                 (editClosed)="closeNote(entry.id)"
                                 (deleteRequested)="delete(entry)"
+                                (changeSetsRequested)="changeSets(entry.id)"
+                                (changeSetsClosed)="changingSetsId.set(null)"
+                                (setsChanged)="correctSets(entry, $event)"
                             ></li>
                         }
                     </ul>

@@ -98,6 +98,19 @@ describe('HistoryStore', () => {
         );
     });
 
+    it('replaces its sets, dated now so the change wins when synced, and saves them', async () => {
+        const store = await createStore();
+        store.record(makeEntry({ updatedAt: 1 }));
+        const sets: LoggedSet[] = [{ round: 0, step: 0, name: 'Squats', reps: 8, weight: 60 }];
+
+        store.setSets(makeEntry().id, sets);
+        store.setSets('not-there', sets);
+
+        expect(store.entries()).toEqual([expect.objectContaining({ sets })]);
+        expect(store.entries()[0].updatedAt).toBeGreaterThan(1);
+        expect(await savedHistory()).toEqual([expect.objectContaining({ sets })]);
+    });
+
     describe('notes', () => {
         it('saves a note, trimmed, with the entry', async () => {
             const store = await createStore();

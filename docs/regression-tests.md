@@ -839,10 +839,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Open `/setup?editId=push`; open step 3; **Swap Diamond push-up**; type "push-up".
     3. Pick Kettlebell push-up; **Save**.
     4. **Back to workout** in the bar.
-- **Expected:**
-    2. Push-up says "Already in this workout".
-    3. The bar says "Saved. The workout that's going has the change from here.", with Back to workout.
-    4. Up next is Kettlebell push-up.
+- **Expected:** 2. Push-up says "Already in this workout". 3. The bar says "Saved. The workout that's going has the change from here.", with Back to workout. 4. Up next is Kettlebell push-up.
 - **Left to Vitest:** a change that would move the clock (saved for next time, the run as it was after a reload), and the sets before the change staying as they were (`workout.component.spec.ts`, `run-edit.spec.ts`, `workout-store.service.spec.ts`).
 
 ---
@@ -893,6 +890,21 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Back in place, with its note.
     3. Still gone after the reload (its deletion is kept in `deleted`).
 - **In the pack:** with a workout going, the last entry's options open above its ⋮, clear of the run bar and tab bar, so Delete can be pressed (B3, fixed by `a866f45` on 2026-11-08); REG-HIS-04 seeds an older run so its entry isn't last.
+
+### REG-HIS-05 · Correct a workout's reps or weight, and Undo
+
+- **Stories:** HIS-6 · **Priority:** P2
+- **Preconditions:** `guest()`, an entry "Legs" with Back squat 10 @ 60 and 8 @ 62.5 kg.
+- **Steps:**
+    1. Legs' ⋮ → **Change reps or weight**.
+    2. Press the Back squat line; set set 2 to 10 reps; Save.
+    3. Done changing; reload.
+    4. Change set 1 to 12 the same way, then Undo.
+- **Expected:**
+    1. The Back squat line is a button, with focus on it.
+    2. The dialog closes and the line says "10 @ 60, 10 @ 62.5 kg"; the Undo bar says "Changed Back squat", with focus on Undo.
+    3. Focus on Legs' ⋮; still 10 and 10 after the reload.
+    4. Back to "10 @ 60, 10 @ 62.5 kg".
 
 ### REG-HIS-04 · A deleted entry doesn't come back when its run finishes
 
@@ -1468,22 +1480,22 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 ## Coverage
 
-| Area                      | Tests            | Stories covered                                                                                                               |
-| ------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                              |
-| Today and planning        | REG-PLAN-01 – 09 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                   |
-| Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                   |
-| Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                          |
+| Area                      | Tests            | Stories covered                                                                                                                               |
+| ------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                                              |
+| Today and planning        | REG-PLAN-01 – 09 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                   |
+| Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                                   |
+| Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                                          |
 | Running a workout         | REG-RUN-01 – 17  | RUN-1 – RUN-12, RUN-14, RUN-15, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
-| History                   | REG-HIS-01 – 04  | HIS-1 – HIS-5, CTL-3                                                                                                          |
-| Progress                  | REG-PRG-01 – 04  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-13                                                                                     |
-| Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                   |
-| Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                            |
-| Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                               |
-| Calories                  | REG-CAL-01 – 03  | CAL-1, CAL-2, CAL-6                                                                                                           |
-| Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                         |
-| Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                    |
-| Gestures and dragging     | REG-GES-01 – 04  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                       |
+| History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                          |
+| Progress                  | REG-PRG-01 – 04  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-13                                                                                                     |
+| Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                   |
+| Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                                            |
+| Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                                               |
+| Calories                  | REG-CAL-01 – 03  | CAL-1, CAL-2, CAL-6                                                                                                                           |
+| Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                                         |
+| Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                                    |
+| Gestures and dragging     | REG-GES-01 – 04  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                                       |
 
 **Count:** 84 tests: 40 P1, 35 P2, 9 P3.
 

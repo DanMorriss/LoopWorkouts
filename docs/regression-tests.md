@@ -740,12 +740,12 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:**
     1. Start A; read; `runFor` 12000; read; `runFor` to 64 s.
     2. Start B; `runFor` 3000; wait on the push-ups past the limit (`runFor` 20000).
-    3. On the summary, set the Reps wheel to 6, press **Add set**.
+    3. On the "How many reps?" card, set the Reps wheel to 6, press **Add set**.
     4. Start C; `runFor` to 61.5 s; read; `runFor` to 63.5 s.
 - **Expected:**
     1. At the start, "round 1" and "01:04 left"; at 12 s, "round 3" and "00:52 left". At 64 s it finishes: "Time's up" and "12 rounds + 1 in 1:04" (check the limit's formatting against the history's "in 20:00" style). The audio stub has ticks at 54, 61, 62 and 63 s and the finish at 64 s.
-    2. "Time's up" with "Time ran out during Push-ups. How many reps did you get?" and a Reps wheel at 10.
-    3. A set of 6 push-ups is logged; the score stays as it was (no "+ 1").
+    2. Before the summary, a card "How many reps?", "Time ran out during Push-ups.", with a Reps wheel at 10 and focus on Add set.
+    3. The card goes and the summary says "Time's up", focus on its heading, with a set of 6 push-ups logged; the score doesn't count it (no "+ 1").
     4. At 61.5 s it's still going, the timed step finishing, with "Time's up · finish this one" in place of the time left. At 63 s it finishes, with the finish alarm then: "12 rounds + 1 in 1:01", the timed step counted.
 - **In the pack:** the summary says "12 rounds + 1 in 1:04", so M10 is settled.
 

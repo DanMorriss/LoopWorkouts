@@ -14,7 +14,7 @@ import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../../shared/state/workout-store.service';
-import { ownExerciseName } from '../summary-sets/summary-sets.component';
+import { ownExerciseName } from '../../own-exercise-name';
 import { injectFocusAfterRender } from '../../../shared/focus-after-render';
 
 /**

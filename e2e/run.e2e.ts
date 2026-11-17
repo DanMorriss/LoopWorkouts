@@ -566,19 +566,19 @@ test.describe('a time limit', () => {
         await run.wait(3500);
         await expect(run.done).toBeVisible();
         await run.wait(20_000);
-        await expect(run.summary).toHaveAccessibleName("Time's up");
-        await expect(
-            run.summary.getByText('Time ran out during Push-ups. How many reps did you get?')
-        ).toBeVisible();
-        const score = await run.stat('Rounds').textContent();
-        const wheel = run.summary.getByRole('spinbutton', {
-            name: 'Time ran out during Push-ups. How many reps did you get?',
-        });
+        // Asked first, on a card of its own, before the summary
+        const asked = page.getByRole('dialog', { name: 'How many reps?' });
+        await expect(asked).toHaveAccessibleDescription('Time ran out during Push-ups.');
+        await expect(run.summary).toBeHidden();
+        await expect(asked.getByRole('button', { name: 'Add set' })).toBeFocused();
+        const wheel = asked.getByRole('spinbutton', { name: 'How many reps?' });
         await expect(wheel).toHaveAttribute('aria-valuenow', '10');
         await setWheel(wheel, 6);
-        await run.summary.getByRole('button', { name: 'Add set' }).click();
+        await asked.getByRole('button', { name: 'Add set' }).click();
+        await expect(asked).toBeHidden();
+        await expect(run.summary).toHaveAccessibleName("Time's up");
+        await expect(run.summary.getByRole('heading', { name: "Time's up" })).toBeFocused();
         await expect(run.summary).toContainText('Push-ups: 6 reps');
-        await expect(run.stat('Rounds')).toHaveText(score!);
     });
 });
 

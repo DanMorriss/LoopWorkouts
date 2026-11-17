@@ -1695,29 +1695,47 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('asks how many reps of the set time ran out in, and logs them', () => {
+        const lastSet = () =>
+            fixture.nativeElement.querySelector('app-last-set-dialog') as HTMLElement | null;
+        const lastSetButton = (name: string) =>
+            Array.from(lastSet()!.querySelectorAll('button')).find((b) =>
+                b.textContent?.includes(name)
+            )!;
+
+        it('asks how many reps of the set time ran out in, before the summary, and logs them', () => {
             start(makeWorkout({ steps: [work(3), reps(10, 'Push-ups')], timeLimitSeconds: 10 }));
             advance(10_000);
 
-            expect(summaryText()).toContain(
-                'Time ran out during Push-ups. How many reps did you get?'
+            expect(summary()).toBeNull();
+            expect(lastSet()!.textContent?.replace(/\s+/g, ' ')).toContain(
+                'How many reps? Time ran out during Push-ups.'
             );
-            (
-                summary()!.querySelector('.summary__last-set [data-value="6"]') as HTMLElement
-            ).click();
+            expect(lastSet()!.querySelector('[role="dialog"]')).not.toBeNull();
+            (lastSet()!.querySelector('[data-value="6"]') as HTMLElement).click();
             fixture.detectChanges();
-            const add = Array.from(summary()!.querySelectorAll('button')).find((b) =>
-                b.textContent?.includes('Add set')
-            )!;
-            add.click();
+            lastSetButton('Add set').click();
             fixture.detectChanges();
 
             expect(entries()[0].sets).toEqual([
                 expect.objectContaining({ round: 0, step: 1, name: 'Push-ups', reps: 6 }),
             ]);
-            expect(summary()!.querySelector('.summary__last-set')).toBeNull();
+            expect(lastSet()).toBeNull();
+            expect(summaryText()).toContain("Time's up");
             // It's still a full round's step short, so the score doesn't count it
             expect(entries()[0].stepsIntoRound).toBe(1);
+            fixture.destroy();
+        });
+
+        it('goes on to the summary without the set on Skip', () => {
+            start(makeWorkout({ steps: [work(3), reps(10, 'Push-ups')], timeLimitSeconds: 10 }));
+            advance(10_000);
+
+            lastSetButton('Skip').click();
+            fixture.detectChanges();
+
+            expect(lastSet()).toBeNull();
+            expect(summaryText()).toContain("Time's up");
+            expect(entries()[0].sets ?? []).toEqual([]);
             fixture.destroy();
         });
 

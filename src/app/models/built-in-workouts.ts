@@ -180,7 +180,7 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
     {
         id: 'builtin:kettlebell-full-body',
         title: 'Kettlebell full body',
-        description: 'Squat, swing, press and row with one kettlebell, then a carry to finish.',
+        description: 'Squat, swing, press, row and floor press, all with one kettlebell.',
         group: 'kettlebell',
         repeats: 1,
         blocks: [
@@ -191,7 +191,7 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
             sets(3, 60, reps('kettlebell-swing', 15)),
             sets(3, 60, reps('kettlebell-press', 8, { eachSide: true })),
             sets(3, 60, reps('chainsaw-row', 10, { eachSide: true })),
-            sets(2, 60, timed('farmers-carry', 45)),
+            sets(3, 60, reps('kettlebell-floor-press', 10, { eachSide: true })),
         ],
     },
     {

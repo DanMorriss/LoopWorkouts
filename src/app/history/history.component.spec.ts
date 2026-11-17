@@ -396,7 +396,7 @@ describe('HistoryComponent', () => {
         // A bar per muscle group, most worked first; the plank is too long ago to count
         const labels = text('.bars__label');
         const rows = text('.bars__row .sr-only');
-        expect(labels).toHaveLength(18);
+        expect(labels).toHaveLength(16);
         expect(labels.slice(0, 3).map((label, i) => `${label}: ${rows[i]}`)).toEqual([
             'Glutes: 2 sets, under 10',
             'Quads: 2 sets, under 10',

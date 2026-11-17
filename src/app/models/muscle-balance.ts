@@ -19,9 +19,7 @@ export const SMALL_MUSCLES: ReadonlySet<MuscleGroup> = new Set<MuscleGroup>([
     'abductors',
     'adductors',
     'forearms',
-    'neck',
     'obliques',
-    'shins',
 ]);
 
 /**

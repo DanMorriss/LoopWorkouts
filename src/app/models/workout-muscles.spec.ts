@@ -73,8 +73,6 @@ describe('musclesMissed', () => {
             'quads',
             'hamstrings',
             'calves',
-            'shins',
-            'neck',
         ]);
     });
 });

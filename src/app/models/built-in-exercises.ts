@@ -452,7 +452,7 @@ export const BUILT_IN_EXERCISES: readonly BuiltInExercise[] = [
         equipment: [['dumbbells', 'barbell']],
         measuredBy: 'reps',
         mainMuscles: ['traps'],
-        supportingMuscles: ['forearms', 'neck'],
+        supportingMuscles: ['forearms'],
     },
     {
         id: 'builtin:preacher-curl',
@@ -952,7 +952,7 @@ export const BUILT_IN_EXERCISES: readonly BuiltInExercise[] = [
         equipment: ['none'],
         measuredBy: 'timed',
         mainMuscles: ['lower-back', 'upper-back'],
-        supportingMuscles: ['abs', 'neck'],
+        supportingMuscles: ['abs'],
     },
     {
         id: 'builtin:cobra-stretch',

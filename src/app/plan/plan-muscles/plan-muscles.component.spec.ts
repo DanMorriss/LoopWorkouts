@@ -89,7 +89,7 @@ describe('PlanMusclesComponent (LIB-5, LIB-7)', () => {
         it('lists the muscle groups no planned workout works, linking to exercises for each', () => {
             expect(el('#plan-muscles-title')?.textContent).toContain('Missing muscle groups');
             expect(muscles(0)).toBe(
-                'Biceps Forearms Abs Obliques Traps Upper back Abductors Calves Shins Neck'
+                'Biceps Forearms Abs Obliques Traps Upper back Abductors Calves'
             );
             expect(el('.plan-muscles__muscle')?.getAttribute('href')).toBe(
                 '/exercises?muscles=biceps&from=plan'

@@ -242,8 +242,6 @@ test.describe('the plan page suggests a workout', () => {
                 'Upper back',
                 'Abductors',
                 'Calves',
-                'Shins',
-                'Neck',
             ]);
             const works = page.getByRole('region', { name: 'What your plan works' });
             await expect(

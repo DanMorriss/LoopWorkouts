@@ -406,6 +406,20 @@ describe('reading saved exercises', () => {
         expect(read?.steps).toEqual([]);
     });
 
+    it('reads the neck, since merged, as the traps, and drops the shins', () => {
+        const read = readOwnExercise({
+            id: 'a',
+            name: 'Neck curl',
+            measuredBy: 'reps',
+            updatedAt: 1,
+            mainMuscles: ['neck', 'traps', 'shins'],
+            supportingMuscles: ['constructor', 'neck'],
+        });
+
+        expect(read?.mainMuscles).toEqual(['traps']);
+        expect(read?.supportingMuscles).toEqual(['traps']);
+    });
+
     it('reads a note only with an id and some text', () => {
         expect(readExerciseNote({ id: 'a', text: 'Hi', updatedAt: 1 })).toEqual({
             id: 'a',

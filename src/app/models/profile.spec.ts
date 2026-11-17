@@ -20,6 +20,18 @@ describe('profile (NAV-4)', () => {
         });
     });
 
+    it("reads your kettlebell's weight (PRG-14), leaving out one that isn't a weight", () => {
+        const read = { ...profile, myEquipment: ['barbell', 'kettlebell'] };
+        expect(readProfile({ ...profile, kettlebellWeight: 16 })).toEqual({
+            ...read,
+            kettlebellWeight: 16,
+        });
+        // As from an older version of the app, or broken: none, the rest still read
+        expect(readProfile(profile)).toEqual(read);
+        expect(readProfile({ ...profile, kettlebellWeight: '16' })).toEqual(read);
+        expect(readProfile({ ...profile, kettlebellWeight: 0 })).toEqual(read);
+    });
+
     it("doesn't read a broken one", () => {
         expect(readProfile(null)).toBeNull();
         expect(readProfile({ ...profile, name: 3 })).toBeNull();

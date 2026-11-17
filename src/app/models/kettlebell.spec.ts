@@ -1,6 +1,6 @@
 import { EquipmentNeed } from './exercise';
 import { LoggedSet } from './history';
-import { kettlebellSteps, withKettlebellWeight } from './kettlebell';
+import { kettlebellSteps, withKettlebellWeight, withMyKettlebell } from './kettlebell';
 import { progressionSuggestions, readyForHeavierKettlebell } from './progress';
 import { RepStep, Step } from './workout';
 
@@ -46,6 +46,30 @@ describe('kettlebell workouts (PRG-14)', () => {
             expect(kettlebellSteps([rep('swing', 15), rep('curl', 10)], equipmentOf).size).toBe(0);
             // A goblet squat alone could be with a dumbbell
             expect(kettlebellSteps([rep('goblet', 10)], equipmentOf).size).toBe(0);
+        });
+    });
+
+    describe('withMyKettlebell', () => {
+        const kettlebell = new Set([0, 1]);
+
+        it('moves a workout at one weight, or none, to your kettlebell', () => {
+            const moved = withMyKettlebell(
+                [rep('swing', 15, 16), rep('goblet', 10)],
+                kettlebell,
+                20
+            );
+            expect([...moved.keys()]).toEqual([0, 1]);
+            expect(moved.get(0)!.weight).toBe(20);
+            expect(moved.get(1)!.weight).toBe(20);
+        });
+
+        it('leaves one already there, or with two weights in it, as it is', () => {
+            expect(
+                withMyKettlebell([rep('swing', 15, 20), rep('goblet', 10, 20)], kettlebell, 20).size
+            ).toBe(0);
+            expect(
+                withMyKettlebell([rep('swing', 15, 16), rep('goblet', 10, 12)], kettlebell, 20).size
+            ).toBe(0);
         });
     });
 

@@ -110,6 +110,7 @@ export class BackupService {
                     trainingGoal: this.settings.trainingGoal(),
                     myEquipment: this.settings.myEquipment(),
                     onlyMyEquipment: this.settings.onlyMyEquipment(),
+                    kettlebellWeight: this.settings.kettlebellWeight(),
                     eachSideFirst: this.settings.eachSideFirst(),
                     switchSidesSeconds: this.settings.switchSidesSeconds(),
                     includeActiveRest: this.settings.includeActiveRest(),

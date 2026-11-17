@@ -120,9 +120,46 @@ describe('ProfileComponent', () => {
         });
     });
 
+    describe('my kettlebell (PRG-14)', () => {
+        const box = () =>
+            fixture.nativeElement.querySelector(
+                'app-weight-field[kind="kettlebell"] input'
+            ) as HTMLInputElement | null;
+
+        it('is only there for someone with a kettlebell, or its weight known', () => {
+            create();
+            expect(box()).toBeNull();
+
+            settings.update({ myEquipment: ['kettlebell'] });
+            fixture.detectChanges();
+            expect(box()!.closest('label')!.textContent).toContain('My kettlebell in kilograms');
+            expect(
+                fixture.nativeElement.querySelector(`#${box()!.getAttribute('aria-describedby')}`)
+                    .textContent
+            ).toContain('Kettlebell workouts start at this');
+        });
+
+        it('saves it in kg, to the nearest half, shown in the unit chosen', () => {
+            settings.update({ myEquipment: ['kettlebell'] });
+            create();
+
+            box()!.value = '16.2';
+            box()!.dispatchEvent(new Event('change'));
+            fixture.detectChanges();
+            expect(settings.kettlebellWeight()).toBe(16);
+            expect(box()!.value).toBe('16');
+
+            settings.update({ weightUnit: 'lb' });
+            fixture.detectChanges();
+            expect(box()!.value).toBe('35.5');
+        });
+    });
+
     describe('body weight (CAL-2)', () => {
         const box = () =>
-            fixture.nativeElement.querySelector('app-body-weight-field input') as HTMLInputElement;
+            fixture.nativeElement.querySelector(
+                'app-weight-field[kind="body"] input'
+            ) as HTMLInputElement;
         const type = (value: string) => {
             box().value = value;
             box().dispatchEvent(new Event('change'));

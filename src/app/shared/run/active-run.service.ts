@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { Exercise } from '../../models/exercise';
 import { HistoryEntry, historyId, isTimedSet, RepSet } from '../../models/history';
-import { kettlebellSteps, withKettlebellWeight } from '../../models/kettlebell';
+import { kettlebellSteps, withKettlebellWeight, withMyKettlebell } from '../../models/kettlebell';
 import { canTakeEdit, editSwaps } from '../../models/run-edit';
 import { nextWait } from '../../models/wait-to-start';
 import {
@@ -383,7 +383,26 @@ export class ActiveRunService {
         this.lastSetPassed.set(false);
         this._steppedUp.set(new Set());
         this._keptSwaps.set(new Set());
+        this.useMyKettlebell();
         this.sync();
+    }
+
+    /**
+     * A kettlebell workout starts at your kettlebell's weight (PRG-14), in this run and the
+     * saved workout, where it's at one weight or none: so a heavier kettlebell set in one
+     * workout moves them all.
+     */
+    private useMyKettlebell() {
+        const kg = this.settings.kettlebellWeight();
+        const workout = this.workout();
+        if (kg === null || !workout) {
+            return;
+        }
+        const steps = allSteps(workout);
+        const kettlebell = kettlebellSteps(steps, (id) => this.exercises.byId(id));
+        for (const [index, step] of withMyKettlebell(steps, kettlebell, kg)) {
+            this.store.updateActiveStep(index, step);
+        }
     }
 
     /** Whether hold() paused the run, so release() resumes it; one already paused stays so. */
@@ -534,7 +553,8 @@ export class ActiveRunService {
     /**
      * In a kettlebell workout (PRG-14), done with one kettlebell, a weight put on one of its
      * kettlebell steps goes on the rest, wherever they're at the old weight or have none: so
-     * it's said once at the start, and once again on getting a heavier one.
+     * it's said once at the start, and once again on getting a heavier one. It's your
+     * kettlebell from then on, which the next kettlebell workout starts at.
      */
     private shareKettlebell(changed: number, from: number | undefined, to: number) {
         const steps = allSteps(this.running()!);
@@ -542,6 +562,7 @@ export class ActiveRunService {
         if (!kettlebell.has(changed)) {
             return;
         }
+        this.settings.update({ kettlebellWeight: to });
         for (const index of kettlebell) {
             const step = steps[index];
             const shared = step.kind === 'reps' ? withKettlebellWeight(step, from, to) : step;

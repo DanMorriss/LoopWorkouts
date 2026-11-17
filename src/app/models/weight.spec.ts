@@ -2,6 +2,7 @@ import {
     bodyWeightIn,
     bodyWeightToKg,
     formatWeight,
+    kettlebellToKg,
     volumeIn,
     weightIn,
     weightToKg,
@@ -42,6 +43,15 @@ describe('weights', () => {
         expect(volumeIn(1250.4, 'kg')).toBe(1250);
         // 10 reps at 135 lb, saved in kg, comes back as picked
         expect(volumeIn(weightToKg(135, 'lb') * 10, 'lb')).toBe(1350);
+    });
+
+    it("saves a kettlebell's weight (PRG-14) to the nearest half, as a step's is", () => {
+        expect(kettlebellToKg(16, 'kg')).toBe(16);
+        expect(kettlebellToKg(16.2, 'kg')).toBe(16);
+        expect(weightIn(kettlebellToKg(35, 'lb')!, 'lb')).toBe(35);
+        expect(kettlebellToKg(0, 'kg')).toBeNull();
+        expect(kettlebellToKg(301, 'kg')).toBeNull();
+        expect(kettlebellToKg(Number('heavy'), 'kg')).toBeNull();
     });
 
     describe('body weight (CAL-2)', () => {

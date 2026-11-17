@@ -62,6 +62,42 @@ export function withKettlebellWeight(step: RepStep, from: number | undefined, to
     );
 }
 
+/**
+ * A kettlebell workout's steps moved to your kettlebell, `kg` (PRG-14), as it starts: by their
+ * place in `steps`, only those that change. Only where its kettlebell steps are at one weight,
+ * or none yet, as one kettlebell's are; a workout with two weights in it was set so on purpose,
+ * and stays as it is.
+ */
+export function withMyKettlebell(
+    steps: readonly Step[],
+    kettlebell: ReadonlySet<number>,
+    kg: number
+): Map<number, RepStep> {
+    const repSteps = [...kettlebell].flatMap((index) => {
+        const step = steps[index];
+        return step?.kind === 'reps' ? [{ index, step }] : [];
+    });
+    const weights = new Set(
+        repSteps.flatMap(({ step }) =>
+            (step.sets ?? [step]).flatMap((amount) =>
+                amount.weight === undefined ? [] : [amount.weight]
+            )
+        )
+    );
+    if (weights.size > 1) {
+        return new Map();
+    }
+    const [from] = weights;
+    const changed = new Map<number, RepStep>();
+    for (const { index, step } of repSteps) {
+        const moved = withKettlebellWeight(step, from, kg);
+        if (moved !== step) {
+            changed.set(index, moved);
+        }
+    }
+    return changed;
+}
+
 function optionsOf(need: EquipmentNeed): readonly string[] {
     return typeof need === 'string' ? [need] : need;
 }

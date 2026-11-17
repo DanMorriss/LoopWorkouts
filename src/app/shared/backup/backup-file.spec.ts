@@ -17,6 +17,7 @@ const SETTINGS: Omit<Settings, 'profileUpdatedAt' | 'bodyWeightUpdatedAt'> = {
     trainingGoal: 'muscle',
     myEquipment: ['barbell', 'rack'],
     onlyMyEquipment: true,
+    kettlebellWeight: 16,
     eachSideFirst: 'right',
     switchSidesSeconds: 10,
     includeActiveRest: false,

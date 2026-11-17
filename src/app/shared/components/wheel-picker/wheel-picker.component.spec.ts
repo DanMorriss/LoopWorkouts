@@ -140,6 +140,26 @@ describe('WheelPickerComponent', () => {
             expect(valueInMiddle()).toBe(3);
         });
 
+        it('curves its numbers into a drum only while open, as each is a layer to a phone', async () => {
+            await create();
+            // The numbers' own animations, not the panel fading in around them
+            const turning = () =>
+                fixture.nativeElement
+                    .querySelector('app-wheel-picker')
+                    .getAnimations({ subtree: true })
+                    .filter((animation: Animation) =>
+                        (animation.effect as KeyframeEffect).target?.classList.contains(
+                            'wheel-picker__item'
+                        )
+                    ).length;
+
+            // A page of closed wheels, e.g. a weight's 601 numbers per set, went white on an iPhone
+            expect(turning()).toBe(0);
+            await openByPress();
+            expect(isOpen()).toBe(true);
+            expect(turning()).toBe(OPTIONS.length);
+        });
+
         it('draws ∞ at the size of the numbers beside it', async () => {
             await create();
             host.options.set([...OPTIONS, { value: -1, label: '∞', spokenLabel: 'until stopped' }]);

@@ -61,27 +61,6 @@
         @if (entry()) {
             <app-summary-stats [entry]="entry()!" (addWeight)="addWeight.emit()" />
 
-            <!-- Time ran out part-way through a rep step: how much of it was done? -->
-            @if (lastSet(); as last) {
-                <section class="summary__last-set" aria-labelledby="summary-last-set">
-                    <p id="summary-last-set">
-                        Time ran out during {{ last.name }}. How many reps did you get?
-                    </p>
-                    <div class="summary__last-set-row">
-                        <app-wheel-picker
-                            [value]="lastSetReps()"
-                            (valueChange)="lastSetReps.set($event)"
-                            [options]="repOptions"
-                            labelledBy="summary-last-set"
-                        />
-                        <button type="button" class="btn-pill" (click)="logLastSet()">
-                            <mat-icon aria-hidden="true">add</mat-icon>
-                            Add set
-                        </button>
-                    </div>
-                </section>
-            }
-
             @if (personalBests().length) {
                 <div class="summary__bests" aria-live="polite">
                     <h3>Personal bests</h3>

@@ -1,4 +1,4 @@
-import { REP_OPTIONS, Workout } from '../../models/workout';
+import { Workout } from '../../models/workout';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import {
     Component,
@@ -15,7 +15,6 @@ import { MAX_NOTE_LENGTH } from '../../models/history';
 import { isMostRounds, newBests, roundsScore, sessionsByExercise } from '../../models/progress';
 import { musclesInSets } from '../../models/workout-muscles';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
-import { WheelPickerComponent } from '../../shared/components/wheel-picker/wheel-picker.component';
 import { ActiveRunService } from '../../shared/run/active-run.service';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
@@ -24,7 +23,7 @@ import { describeScore, entryName } from '../../history/history-format';
 import { SuggestedWorkoutComponent } from '../../history/suggested-workout/suggested-workout.component';
 import { bestLines } from '../../exercises/progress-format';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
-import { ownExerciseName, SummarySetsComponent } from './summary-sets/summary-sets.component';
+import { SummarySetsComponent } from './summary-sets/summary-sets.component';
 import { SummaryCopyComponent } from './summary-copy/summary-copy.component';
 import { SummaryStepUpsComponent } from './summary-step-ups/summary-step-ups.component';
 import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';
@@ -51,7 +50,6 @@ import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
         SummaryStatsComponent,
         SummaryStepUpsComponent,
         SummarySwapsComponent,
-        WheelPickerComponent,
     ],
     templateUrl: './workout-summary.component.html',
     styleUrl: './workout-summary.component.scss',
@@ -81,18 +79,6 @@ export class WorkoutSummaryComponent {
             ? 'Workout finished'
             : "Time's up";
     });
-    /** The rep step time ran out on, to log how much of it was done; null otherwise. */
-    protected readonly lastSet = computed(() => {
-        const last = this.run.unloggedLastSet();
-        if (!last) {
-            return null;
-        }
-        const { exerciseId, name } = last.step;
-        const current = exerciseId === undefined ? undefined : this.exerciseName(exerciseId);
-        return { name: current || name.trim() || 'the reps', reps: last.step.reps };
-    });
-    /** Starts at the step's reps, as most of a set is likely done by then. */
-    protected readonly lastSetReps = linkedSignal(() => this.lastSet()?.reps ?? 1);
     /** This run in the history; missing when it ended before its first step was done. */
     protected readonly entry = computed(() => {
         const id = this.run.runId();
@@ -104,7 +90,6 @@ export class WorkoutSummaryComponent {
     });
 
     protected readonly weightUnit = this.settings.weightUnit;
-    private readonly exerciseName = ownExerciseName(this.exercises);
     /**
      * The bests this run set (PRG-2), e.g. "Heaviest: 80 kg × 5", and "Most rounds" for a
      * time limit (PRG-7). Equalling a best isn't one, and nor is doing it for the first time.
@@ -138,12 +123,6 @@ export class WorkoutSummaryComponent {
     protected readonly muscles = computed(() =>
         musclesInSets(this.run.sets(), (id) => this.exercises.byId(id))
     );
-
-    protected logLastSet() {
-        this.run.logLastSet(this.lastSetReps());
-    }
-
-    protected readonly repOptions = REP_OPTIONS;
 
     // The note box starts from the saved note
     private readonly noteModel = linkedSignal(() => ({ note: this.entry()?.note ?? '' }));

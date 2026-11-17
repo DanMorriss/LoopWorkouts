@@ -217,8 +217,11 @@
             }
         }
 
-        <!-- How it went: once finished, or ended with End workout -->
-        @if (view.summaryOpen()) {
+        <!-- How it went: once finished, or ended with End workout. When time ran out part-way
+             through a rep step, how many reps were done of it is asked first -->
+        @if (view.summaryOpen() && run.askingLastSet()) {
+            <app-last-set-dialog animate.leave="dialog-leave" />
+        } @else if (view.summaryOpen()) {
             <app-workout-summary
                 (back)="backToWorkout()"
                 (done)="closeSummary()"

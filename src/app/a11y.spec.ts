@@ -1121,7 +1121,9 @@ for (const theme of ['dark', 'light'] as const) {
                 );
                 await open('/workout');
                 await settle(1200);
-                expect(fixture.nativeElement.textContent).toContain('Time ran out during Push-ups');
+                expect(fixture.nativeElement.textContent).toContain(
+                    'Time ran out during Push-ups.'
+                );
                 await expectNoViolations();
             });
 

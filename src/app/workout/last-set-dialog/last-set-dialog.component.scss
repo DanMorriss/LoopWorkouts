@@ -1,0 +1,32 @@
+@use 'type' as *;
+
+.last-set__title {
+    @include dialog-title;
+}
+
+.last-set__question {
+    margin: 0.5rem 0 1rem;
+    color: var(--text-strong);
+    line-height: 1.5;
+}
+
+.last-set__wheel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+}
+
+// Wide enough for 100, as a closed wheel takes its width from where it's put
+.last-set__reps {
+    width: 5.5rem;
+}
+
+.last-set__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}

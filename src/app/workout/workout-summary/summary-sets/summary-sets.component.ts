@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { describeSets, sectionsOf } from '../../../history/history-format';
-import { isBuiltIn } from '../../../models/exercise';
+import { ownExerciseName } from '../../own-exercise-name';
 import { placedHeadings, placedSupersets } from '../../../models/workout';
 import {
     ChangeSetLinesComponent,
@@ -12,17 +12,6 @@ import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../../shared/state/workout-store.service';
 import { SetLinesComponent } from '../../../history/set-lines/set-lines.component';
-
-/**
- * What a set's exercise is called now, if it's your own (it may have been renamed since).
- * Built-in names never change, so a set keeps the name it ran with, e.g. "Squats".
- */
-export function ownExerciseName(exercises: ExerciseStore) {
-    return (id: string): string | undefined => {
-        const exercise = exercises.byId(id);
-        return exercise && !isBuiltIn(exercise) ? exercise.name : undefined;
-    };
-}
 
 /**
  * The run's sets on the workout summary, one line per step, e.g. "Squats: 10, 10, 8 @ 60 kg".

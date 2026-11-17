@@ -30,6 +30,7 @@ import { WorkoutNoteComponent } from './workout-note/workout-note.component';
 import { WorkoutRingComponent } from './workout-ring/workout-ring.component';
 import { WorkoutRoundLineComponent } from './workout-round-line/workout-round-line.component';
 import { WorkoutSummaryComponent } from './workout-summary/workout-summary.component';
+import { LastSetDialogComponent } from './last-set-dialog/last-set-dialog.component';
 import { WorkoutSwap } from './workout-swap';
 import { UpNextCardComponent } from './up-next-card/up-next-card.component';
 import { tourWorkoutPage } from './workout-tour';
@@ -55,6 +56,7 @@ const SPACE_HANDLED_BY =
         MatIconModule,
         HelpLinkComponent,
         WorkoutSummaryComponent,
+        LastSetDialogComponent,
         ExerciseDetailsDialogComponent,
         WorkoutFaceSlideComponent,
         WorkoutNoteComponent,

@@ -50,11 +50,13 @@
         data-tour="exercise-muscles"
     >
         <h3 [id]="id + '-muscles'" class="exercise__heading">Muscles worked</h3>
-        <app-body-map [main]="shown.mainMuscles" [supporting]="shown.supportingMuscles" />
+        <!-- With a demo, its figure shows them shaded, so just the list -->
+        <app-body-map
+            [main]="shown.mainMuscles"
+            [supporting]="shown.supportingMuscles"
+            [listOnly]="hasDemo()"
+        />
     </section>
-
-    <!-- What goes under the body map, e.g. the exercise page's progress -->
-    <ng-content select="[underMuscles]" />
 }
 
 @if (words?.steps?.length) {
@@ -82,4 +84,9 @@
 <!-- Not while a built-in exercise's words are loading -->
 @if (emptyHint() && words && words.steps.length === 0 && words.tips.length === 0) {
     <p class="exercise__empty">{{ emptyHint() }}</p>
+}
+
+<!-- What goes at the end, after how to do it, e.g. the exercise page's progress -->
+@if (!brief()) {
+    <ng-content select="[atEnd]" />
 }

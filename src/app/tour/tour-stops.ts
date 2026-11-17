@@ -402,7 +402,7 @@ const EXERCISE_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'exercise-muscles',
-                text: 'What it works, darker for the main muscles. Once you’ve done it, your bests and a chart show under them.',
+                text: 'What it works, main and supporting. Once you’ve done it, your bests and a chart show at the bottom of the page.',
             },
         ],
         text: 'What it works, and once you’ve done it, your bests and a chart.',

@@ -1,16 +1,15 @@
 import { Component, computed, inject, input, linkedSignal, output } from '@angular/core';
 import { weightIn, weightOptions, weightToKg } from '../../../models/weight';
-import { MAX_REPS, RepSetAmount, TimedSetAmount } from '../../../models/workout';
-import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
-import { WheelPickerComponent } from '../../../shared/components/wheel-picker/wheel-picker.component';
-import { SettingsStore } from '../../../shared/state/settings-store.service';
+import { RepSetAmount, REP_OPTIONS, TimedSetAmount } from '../../../models/workout';
+import { DialogComponent } from '../dialog/dialog.component';
+import { WheelPickerComponent } from '../wheel-picker/wheel-picker.component';
+import { SettingsStore } from '../../state/settings-store.service';
 
 /** `from` to `to` as wheel options, each labelled by `label`. */
 const options = (from: number, to: number, label: (n: number) => string = String) =>
     Array.from({ length: to - from + 1 }, (_, i) => ({ value: from + i, label: label(from + i) }));
 const twoDigits = (n: number) => String(n).padStart(2, '0');
 
-const REP_OPTIONS = options(1, MAX_REPS);
 const MINUTE_OPTIONS = options(0, 99, twoDigits);
 const SECOND_OPTIONS = options(0, 59, twoDigits);
 
@@ -23,11 +22,15 @@ interface Row {
 let nextId = 0;
 
 /**
- * A ready-made workout's exercise's sets, set before running it: for each set (or round, in
- * a superset), a Reps and a Weight wheel for a rep exercise, or Minutes and Seconds for a
- * timed one, and Save. Weights show in your unit and are kept in kg; one left as it was keeps
- * its kg exactly. A time of 0:00 can't be saved. ‹ Back, Escape or a click outside change
- * nothing. Where it's used, it has animate.leave="dialog-leave".
+ * An exercise's sets, one exercise at a time: for each set (or round, in a superset), a Reps
+ * and a Weight wheel for a rep exercise, or Minutes and Seconds for a timed one, and Save.
+ * Weights show in your unit and are kept in kg; one left as it was keeps its kg exactly. A
+ * time of 0:00 can't be saved. ‹ Back, Escape or a click outside change nothing. Where it's
+ * used, it has animate.leave="dialog-leave".
+ *
+ * A ready-made workout's are set with it before running it (LIB-6), and the workout summary's
+ * sets are corrected with it. One exercise at a time, as every wheel draws all its numbers:
+ * a whole workout's at once was too much for a phone, whose page went white.
  */
 @Component({
     selector: 'app-step-amounts-dialog',
@@ -46,9 +49,7 @@ let nextId = 0;
                     @let rowId = id + '-set-' + i;
                     <li class="amounts__set">
                         @if (rows().length > 1) {
-                            <span class="amounts__set-name" [id]="rowId"
-                                >{{ setName() }} {{ i + 1 }}</span
-                            >
+                            <span class="amounts__set-name" [id]="rowId">{{ rowName(i) }}</span>
                         }
                         <div class="picker-row">
                             <div class="picker-field">
@@ -100,6 +101,10 @@ export class StepAmountsDialogComponent {
     /** What a set is called: "Set", or "Round" in a superset. */
     readonly setName = input('Set');
     readonly eachSide = input(false);
+    /** Each set's name, e.g. "Set 1, left", in place of "Set 1", "Set 2" and so on. */
+    readonly rowNames = input<readonly string[]>();
+    /** What it says under its name, in place of what a ready-made workout's says. */
+    readonly hintText = input<string>();
     readonly closed = output<void>();
     /** Each set's amount, as saved: reps and weight (in kg, missing for none), or a time. */
     readonly saved = output<RepSetAmount[] | TimedSetAmount[]>();
@@ -119,6 +124,10 @@ export class StepAmountsDialogComponent {
         this.timed() ? SECOND_OPTIONS : weightOptions(this.unit())
     );
     protected readonly hint = computed(() => {
+        const given = this.hintText();
+        if (given !== undefined) {
+            return given;
+        }
         const what = this.timed() ? 'Your time' : 'Your reps and weight';
         const each = this.rows().length > 1 ? ` for each ${this.setName().toLowerCase()}` : '';
         const side = this.eachSide() ? ', each side' : '';
@@ -143,6 +152,10 @@ export class StepAmountsDialogComponent {
     protected readonly noTime = computed(
         () => this.timed() && this.rows().some((row) => row.first === 0 && row.second === 0)
     );
+
+    protected rowName(set: number): string {
+        return this.rowNames()?.[set] ?? `${this.setName()} ${set + 1}`;
+    }
 
     protected labelled(set: number, wheel: 'first' | 'second'): string {
         const row = this.rows().length > 1 ? `${this.id}-set-${set} ` : '';

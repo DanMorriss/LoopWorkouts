@@ -3552,11 +3552,16 @@ describe('WorkoutComponent', () => {
 
                 // Push-ups' one set corrected to 10 reps
                 pressInSummary('Change reps or weight');
+                summary()!.querySelector<HTMLElement>('[aria-label^="Change Push-ups"]')!.click();
+                fixture.detectChanges();
+                vi.advanceTimersToNextFrame();
+                vi.advanceTimersToNextFrame();
                 const picker = summary()!.querySelector(
-                    'app-wheel-picker:has([aria-labelledby="summary-set-1 summary-reps-1"])'
-                ) as HTMLElement;
+                    'app-step-amounts-dialog app-wheel-picker'
+                )!;
                 (picker.querySelector('[data-value="10"]') as HTMLElement).click();
                 fixture.detectChanges();
+                pressInSummary('Save');
                 pressInSummary('Yes, use next time');
 
                 expect(savedSteps(saved.id)[1]).toEqual(
@@ -3924,22 +3929,34 @@ describe('WorkoutComponent', () => {
         });
 
         describe('changing the sets', () => {
-            function openChanges() {
+            const dialog = () => summary()!.querySelector('app-step-amounts-dialog');
+            const lineButton = (name: string) =>
+                summary()!.querySelector<HTMLButtonElement>(`[aria-label^="Change ${name},"]`);
+            /** Opens an exercise's sets, Push-ups unless said. */
+            function openChanges(name = 'Push-ups') {
                 pressInSummary('Change reps or weight');
+                lineButton(name)!.click();
+                fixture.detectChanges();
             }
-            function choose(set: number, wheel: 'reps' | 'weight', value: string) {
-                const picker = summary()!.querySelector(
-                    `app-wheel-picker:has([aria-labelledby="summary-set-${set} summary-${wheel}-${set}"])`
-                ) as HTMLElement;
+            /** Turns a wheel of the open dialog's set (from 0), then Saves, unless kept open. */
+            function choose(set: number, wheel: 'reps' | 'weight', value: string, save = true) {
+                // A freshly shown wheel jumps to its value a frame later
+                vi.advanceTimersToNextFrame();
+                vi.advanceTimersToNextFrame();
+                const pickers = dialog()!.querySelectorAll('app-wheel-picker');
+                const picker = pickers[set * 2 + (wheel === 'reps' ? 0 : 1)];
                 (picker.querySelector(`[data-value="${value}"]`) as HTMLElement).click();
                 fixture.detectChanges();
+                if (save) {
+                    pressInSummary('Save');
+                }
             }
 
             it('corrects a set in the history, then asks whether to use it next time', () => {
                 const run = endInRound2();
                 openChanges();
 
-                choose(0, 'reps', '18');
+                choose(0, 'reps', '18', false);
                 choose(0, 'weight', '42.5');
 
                 expect(entries().find((entry) => entry.id === run)?.sets).toEqual([
@@ -3988,15 +4005,85 @@ describe('WorkoutComponent', () => {
                     (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
                     fixture.detectChanges();
                 }
-                openChanges();
+                pressInSummary('Change reps or weight');
 
                 const shown = Array.from(
                     summary()!.querySelectorAll(
-                        '.summary__part, .summary__superset-name, .summary__group-name'
+                        '.set-lines__heading, .set-lines__superset-name, .summary__line-change'
                     ),
-                    (el) => `${el.tagName} ${el.textContent!.trim()}`
+                    (el) => el.getAttribute('aria-label') ?? el.textContent!.trim()
                 );
-                expect(shown).toEqual(['H4 Upper', 'P Superset', 'H5 Bench', 'H5 Row', 'H5 Curl']);
+                expect(shown).toEqual([
+                    'Upper',
+                    'Superset',
+                    'Change Bench, 10 reps',
+                    'Change Row, 10 reps',
+                    'Change Curl, 10 reps',
+                ]);
+                fixture.destroy();
+            });
+
+            it("shows one exercise's wheels at a time, not the whole workout's", () => {
+                start({
+                    ...makeWorkout({ repeats: 1 }),
+                    blocks: [
+                        {
+                            kind: 'group',
+                            rounds: 3,
+                            restSeconds: 0,
+                            steps: [reps(10, 'Bench'), reps(10, 'Row')],
+                        },
+                    ],
+                });
+                for (let i = 0; i < 6; i++) {
+                    (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                    fixture.detectChanges();
+                }
+                pressInSummary('Change reps or weight');
+                expect(summary()!.querySelectorAll('app-wheel-picker').length).toBe(0);
+
+                lineButton('Row')!.click();
+                fixture.detectChanges();
+                expect(dialog()!.querySelector('h2')!.textContent).toBe('Row');
+                // Reps and weight for each of its 3 sets
+                expect(dialog()!.querySelectorAll('app-wheel-picker').length).toBe(6);
+                expect(
+                    Array.from(dialog()!.querySelectorAll('.amounts__set-name'), (el) =>
+                        el.textContent!.trim()
+                    )
+                ).toEqual(['Set 1', 'Set 2', 'Set 3']);
+                fixture.destroy();
+            });
+
+            it('closes the dialog alone on Escape, back on its line, changing nothing', async () => {
+                const run = endInRound2();
+                openChanges();
+                choose(0, 'reps', '18', false);
+
+                dialog()!
+                    .querySelector('.dialog-card')!
+                    .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                fixture.detectChanges();
+                await fixture.whenStable();
+
+                expect(dialog()).toBeNull();
+                // Still on the summary, not back at the workout
+                expect(summaryText()).toContain('Done changing');
+                expect(document.activeElement).toBe(lineButton('Push-ups'));
+                expect(entries().find((entry) => entry.id === run)?.sets).toEqual([
+                    expect.objectContaining({ reps: 20, weight: 40 }),
+                ]);
+                expect(summaryText()).not.toContain('Use these settings next time?');
+                fixture.destroy();
+            });
+
+            it('asks nothing when saved as it was', () => {
+                endInRound2();
+                openChanges();
+                pressInSummary('Save');
+
+                expect(dialog()).toBeNull();
+                expect(summaryText()).not.toContain('Use these settings next time?');
                 fixture.destroy();
             });
 

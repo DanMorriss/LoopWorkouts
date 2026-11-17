@@ -114,9 +114,11 @@ export class SheetDrag {
 
     onBodyTouchStart(event: TouchEvent) {
         const finger = event.changedTouches[0];
-        // Not a second finger, or one on the heading or title, which drag the sheet themselves
+        // Not a second finger, or one on the heading or title, which drag the sheet themselves,
+        // or one in a dialog over the sheet, e.g. a set's wheels, which are scrolled
+        const inDialog = (event.target as Element).closest?.('app-dialog');
         this.touch =
-            event.touches.length === 1 && !this.dragging
+            event.touches.length === 1 && !this.dragging && !inDialog
                 ? { id: finger.identifier, x: finger.clientX, y: finger.clientY }
                 : null;
     }

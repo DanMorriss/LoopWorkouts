@@ -724,7 +724,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Preconditions:** workout "Push": "Push-ups" 20 reps at 40 kg, rest 0:05, 3 rounds.
 - **Steps:**
     1. Start; Done in round 1; `runFor` into round 2; Pause → End workout.
-    2. Press **Change reps or weight**; set round 1's set to 18.
+    2. Press **Change reps or weight**, then the Push-ups line; set its set to 18 and press Save.
     3. Press **Yes, use next time**.
     4. Type a note "felt strong"; press Done.
 - **Expected:**

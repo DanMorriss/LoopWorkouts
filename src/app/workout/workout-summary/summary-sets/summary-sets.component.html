@@ -2,7 +2,7 @@
     <section class="summary__section" aria-labelledby="summary-sets">
         <div class="summary__section-head">
             <h3 id="summary-sets">Sets</h3>
-            @if (setGroups().length) {
+            @if (changeable().size) {
                 <button
                     type="button"
                     class="btn-pill summary__change"
@@ -16,53 +16,46 @@
             }
         </div>
 
-        <div id="summary-sets-list">
-            @if (changingSets()) {
-                <!-- Under the workout's headings and with its supersets, as the lines are -->
-                @for (section of groupSections(); track $index) {
-                    @if (section.heading) {
-                        <h4 class="summary__part">{{ section.heading }}</h4>
-                    }
-                    @for (item of section.items; track $index) {
-                        @if (item.superset) {
-                            <p class="summary__superset-name summary__superset-name--change">
-                                {{ item.superset }}
-                            </p>
-                            <div class="summary__superset-lines">
-                                @for (group of item.lines; track group.step) {
-                                    <ng-container
-                                        [ngTemplateOutlet]="setGroup"
-                                        [ngTemplateOutletContext]="{
-                                            $implicit: group,
-                                            underPart: !!section.heading,
-                                        }"
-                                    />
-                                }
-                            </div>
-                        } @else {
-                            <ng-container
-                                [ngTemplateOutlet]="setGroup"
-                                [ngTemplateOutletContext]="{
-                                    $implicit: item.lines[0],
-                                    underPart: !!section.heading,
-                                }"
-                            />
-                        }
-                    }
-                }
-            } @else {
-                <!-- Under the workout's headings, as in the history -->
-                <app-set-lines class="summary__lines" [sections]="sections()">
-                    <ng-template let-line>
-                        <span aria-hidden="true"
+        <!-- Under the workout's headings, as in the history. While changing, each rep
+             exercise's line is a button opening its sets, one exercise at a time -->
+        <app-set-lines id="summary-sets-list" class="summary__lines" [sections]="sections()">
+            <ng-template let-line>
+                @if (changingSets() && changeable().has(line.step)) {
+                    <button
+                        type="button"
+                        class="btn-pill summary__line-change"
+                        [id]="buttonId(line.step)"
+                        aria-haspopup="dialog"
+                        [attr.aria-label]="'Change ' + line.name + ', ' + line.spoken"
+                        (click)="editing.set(line)"
+                    >
+                        <span
                             ><strong>{{ line.name }}</strong
                             >: {{ line.text }}</span
                         >
-                        <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
-                    </ng-template>
-                </app-set-lines>
-            }
-        </div>
+                        <app-icon class="summary__pencil">edit</app-icon>
+                    </button>
+                } @else {
+                    <span aria-hidden="true"
+                        ><strong>{{ line.name }}</strong
+                        >: {{ line.text }}</span
+                    >
+                    <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
+                }
+            </ng-template>
+        </app-set-lines>
+
+        @if (editing(); as line) {
+            <app-step-amounts-dialog
+                animate.leave="dialog-leave"
+                [name]="line.name"
+                [amounts]="editingAmounts()"
+                [rowNames]="editingRowNames()"
+                [hintText]="hint"
+                (closed)="close(line.step)"
+                (saved)="save(line.step, $event)"
+            />
+        }
 
         <!-- Changing what was done can carry over to the saved workout, if wanted -->
         <div class="summary__next-time" aria-live="polite">
@@ -93,42 +86,3 @@
         </div>
     </section>
 }
-
-<!-- One step's sets on their wheels; a level down under one of the workout's headings -->
-<ng-template #setGroup let-group let-underPart="underPart">
-    <div class="summary__group">
-        @if (underPart) {
-            <h5 class="summary__group-name">{{ group.name }}</h5>
-        } @else {
-            <h4 class="summary__group-name">{{ group.name }}</h4>
-        }
-        <div class="summary__set summary__set--head" aria-hidden="true">
-            <span></span>
-            <span>Reps</span>
-            <span>Weight ({{ weightUnit() }})</span>
-        </div>
-        @for (item of group.sets; track item.index; let s = $index) {
-            <div class="summary__set">
-                <span class="summary__set-label" [id]="'summary-set-' + item.index">
-                    <span class="sr-only">{{ group.name }}, </span>Set {{ s + 1 }}
-                </span>
-                <span class="sr-only" [id]="'summary-reps-' + item.index">reps</span>
-                <app-wheel-picker
-                    [value]="item.set.reps"
-                    (valueChange)="setReps(item.index, $event)"
-                    [options]="repOptions"
-                    [labelledBy]="'summary-set-' + item.index + ' summary-reps-' + item.index"
-                />
-                <span class="sr-only" [id]="'summary-weight-' + item.index"
-                    >weight in {{ weightUnit() }}</span
-                >
-                <app-wheel-picker
-                    [value]="weightValue(item.set)"
-                    (valueChange)="setWeight(item.index, $event)"
-                    [options]="weightOptions()"
-                    [labelledBy]="'summary-set-' + item.index + ' summary-weight-' + item.index"
-                />
-            </div>
-        }
-    </div>
-</ng-template>

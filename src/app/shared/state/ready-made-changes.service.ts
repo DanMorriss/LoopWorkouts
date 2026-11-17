@@ -2,19 +2,21 @@ import { computed, inject, Service, signal } from '@angular/core';
 import {
     ReadyMadeChange,
     readReadyMadeChange,
+    RestAmount,
+    restAmount,
     sameAmounts,
     stepAmounts,
     StepAmounts,
 } from '../../models/ready-made-change';
 import { Deletion, mergeRecords } from '../../models/sync';
-import { Step } from '../../models/workout';
+import { soloRest, Step, Workout } from '../../models/workout';
 import { DeletionStore } from './deletion-store.service';
 import { SyncClock } from './sync-clock.service';
 
 export const READY_MADE_CHANGES_KEY = 'ready-made-changes';
 
 /**
- * The reps and weights you've set on ready-made workouts (LIB-6). A ready-made workout isn't
+ * The reps, weights and rests you've set on ready-made workouts (LIB-6, PRG-15). A ready-made workout isn't
  * your data, so each one changed has a record of its own, as a favourite does: there while
  * any step is changed, and deleted, leaving a deletion, when they're all back as they came.
  */
@@ -43,10 +45,34 @@ export class ReadyMadeChanges {
         const steps = sameAmounts(original, amounts)
             ? others
             : [...others, amounts].sort((a, b) => a.step - b.step);
-        if (steps.length === 0) {
+        this.keep(workoutId, steps, was?.rests ?? []);
+    }
+
+    /**
+     * Keeps a step's rest after each set (PRG-15), e.g. the swing ladder's stepped down,
+     * `original` being the workout as it came. Nothing is kept for a step with no rest of its
+     * own, and a rest put back as it came is dropped.
+     */
+    setRest(workoutId: string, index: number, original: Pick<Workout, 'blocks'>, seconds: number) {
+        const rest = restAmount(index, original, seconds);
+        if (!rest) {
+            return;
+        }
+        const was = this.byId().get(workoutId);
+        const others = (was?.rests ?? []).filter((own) => own.step !== index);
+        const rests =
+            seconds === soloRest(original, index)
+                ? others
+                : [...others, rest].sort((a, b) => a.step - b.step);
+        this.keep(workoutId, was?.steps ?? [], rests);
+    }
+
+    /** Keeps what's changed, or with nothing left, puts the workout back as it came. */
+    private keep(workoutId: string, steps: StepAmounts[], rests: RestAmount[]) {
+        if (steps.length === 0 && rests.length === 0) {
             this.reset(workoutId);
         } else {
-            this.put(workoutId, steps);
+            this.put(workoutId, steps, rests);
         }
     }
 
@@ -68,15 +94,15 @@ export class ReadyMadeChanges {
 
     /** Gives a ready-made workout back the reps and weights it had, e.g. with Undo of reset(). */
     restore(change: ReadyMadeChange) {
-        this.put(change.id, change.steps);
+        this.put(change.id, change.steps, change.rests ?? []);
     }
 
-    private put(workoutId: string, steps: StepAmounts[]) {
+    private put(workoutId: string, steps: StepAmounts[], rests: RestAmount[]) {
         const was = this.byId().get(workoutId);
         const updatedAt = this.clock.now(
             was?.updatedAt ?? this.deletions.deletedAt('ready-made-change', workoutId)
         );
-        const change = { id: workoutId, updatedAt, steps };
+        const change = { id: workoutId, updatedAt, steps, ...(rests.length > 0 ? { rests } : {}) };
         this._list.update((list) =>
             was ? list.map((own) => (own.id === workoutId ? change : own)) : [...list, change]
         );

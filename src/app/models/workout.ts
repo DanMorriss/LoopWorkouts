@@ -428,6 +428,33 @@ export function stepRounds(workout: Pick<Workout, 'blocks'>): number[] {
 }
 
 /**
+ * The rest after each set of a step that's alone in its group and done more than once, e.g. a
+ * swing ladder's 45 seconds, by its place in `allSteps()`; null for a step in a superset, one
+ * done once, or with no rest.
+ */
+export function soloRest(workout: Pick<Workout, 'blocks'>, index: number): number | null {
+    const group = soloGroups(workout.blocks)[index];
+    return group && group.restSeconds > 0 ? group.restSeconds : null;
+}
+
+/** The blocks with a solo step's rest (see `soloRest()`) set to `seconds`; as they are if not. */
+export function withSoloRest(blocks: readonly Block[], index: number, seconds: number): Block[] {
+    const group = soloGroups(blocks)[index];
+    return group
+        ? blocks.map((block) => (block === group ? { ...group, restSeconds: seconds } : block))
+        : [...blocks];
+}
+
+/** Each step's group, by its place in `allSteps()`, where it's alone in one of 2 rounds or more. */
+function soloGroups(blocks: readonly Block[]): (StepGroup | null)[] {
+    return blocks.flatMap((block) =>
+        block.kind === 'group'
+            ? block.steps.map(() => (block.steps.length === 1 && block.rounds > 1 ? block : null))
+            : []
+    );
+}
+
+/**
  * The blocks with their steps replaced, in order, by `steps` (one for each of `allSteps()`),
  * e.g. linked to exercises or with one changed.
  */

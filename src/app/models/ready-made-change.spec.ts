@@ -1,5 +1,5 @@
 import { readReadyMadeChange, stepAmounts, withAmounts } from './ready-made-change';
-import { allSteps, asOneGroup, RepStep, Step, TimedStep } from './workout';
+import { allSteps, asOneGroup, RepStep, soloRest, Step, TimedStep } from './workout';
 
 const squat: RepStep = { kind: 'reps', reps: 10, name: 'Squats', exerciseId: 'builtin:squat' };
 const rest: Step = { kind: 'rest', seconds: 30, name: '' };
@@ -71,6 +71,45 @@ describe('ready-made changes (LIB-6)', () => {
                 ])
             )
         ).toEqual([{ ...squat, reps: 5 }]);
+    });
+
+    describe('rests (PRG-15, data version 19)', () => {
+        const ladder = {
+            blocks: [
+                { kind: 'heading' as const, text: 'Main' },
+                { kind: 'group' as const, rounds: 7, restSeconds: 45, steps: [squat] },
+            ],
+        };
+
+        it('puts a rest on its step alone in its group, while it is still that exercise', () => {
+            const rests = [{ step: 0, exerciseId: 'builtin:squat', seconds: 40 }];
+            expect(soloRest(withAmounts(ladder, [], rests), 0)).toBe(40);
+            expect(
+                withAmounts(ladder, [], [{ step: 0, exerciseId: 'builtin:lunge', seconds: 40 }])
+            ).toEqual(ladder);
+            // A superset's rest is shared, so it isn't one step's to change
+            expect(withAmounts(workout, [], rests)).toEqual(workout);
+        });
+
+        it('reads them with the rest, dropping any that aren’t usable', () => {
+            expect(
+                readReadyMadeChange({
+                    id: 'builtin:kettlebell-swing-ladder',
+                    updatedAt: 5,
+                    steps: [],
+                    rests: [
+                        { step: 0, exerciseId: 'builtin:kettlebell-swing', seconds: 40, x: 1 },
+                        { step: 1, exerciseId: 'builtin:kettlebell-swing', seconds: 0 },
+                        { step: 2, exerciseId: '', seconds: 30 },
+                    ],
+                })
+            ).toEqual({
+                id: 'builtin:kettlebell-swing-ladder',
+                updatedAt: 5,
+                steps: [],
+                rests: [{ step: 0, exerciseId: 'builtin:kettlebell-swing', seconds: 40 }],
+            });
+        });
     });
 
     it('reads a saved one, dropping steps that aren’t usable', () => {

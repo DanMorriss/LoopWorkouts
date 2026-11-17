@@ -4,6 +4,7 @@ import { describeSets, spokenDuration } from '../../../history/history-format';
 import {
     progressionSuggestions,
     ProgressionSuggestion,
+    restSuggestions,
     steppedUp,
     TIME_INCREASE,
     withLongerTime,
@@ -22,7 +23,8 @@ import { injectFocusAfterRender } from '../../../shared/focus-after-render';
  * What to step up next time on the workout summary (PRG-10), e.g. "Squats: try 62.5 kg, up
  * from 60 kg", for each rep step where every set got its reps: a weight step up (as PRG-5
  * offers mid-workout), or one more rep with no weight; and for each timed exercise where every
- * set ran its whole time, a few seconds longer. Follows the sets as they're corrected.
+ * set ran its whole time, a few seconds longer; and for a kettlebell ladder done in full, a
+ * shorter rest (PRG-15). Follows the sets as they're corrected.
  * Apply puts a step-up on the saved workout's step, and it stays said as applied; "Yes, use
  * next time" in Sets leaves it there (ActiveRunService.keepStepUp()).
  */
@@ -99,14 +101,16 @@ export class SummaryStepUpsComponent {
         // nothing to step up from, unless it was kept for next time
         const swappedAway = (step: number) =>
             this.run.swappedSteps().has(step) && !this.run.keptSwaps().has(step);
-        const steps = allSteps(this.run.workout() ?? { blocks: [] });
-        // A kettlebell workout's go up in reps (PRG-14)
+        const workout = this.run.workout() ?? { blocks: [] };
+        const steps = allSteps(workout);
+        // A kettlebell workout's go up in reps (PRG-14), or a ladder's rest down (PRG-15)
         const kettlebell = kettlebellSteps(steps, (id) => this.exercises.byId(id));
         return [
             ...applied.values(),
-            ...progressionSuggestions(sets, steps, unit, kettlebell).filter(
-                ({ step }) => !applied.has(step) && !swappedAway(step)
-            ),
+            ...[
+                ...progressionSuggestions(sets, steps, unit, kettlebell),
+                ...restSuggestions(sets, workout, kettlebell),
+            ].filter(({ step }) => !applied.has(step) && !swappedAway(step)),
         ]
             .sort((a, b) => a.step - b.step)
             .map((suggestion) => {
@@ -131,12 +135,19 @@ export class SummaryStepUpsComponent {
     /**
      * Puts the step-up on its step (and its twin's, where it's said once), of the saved
      * workout and of this run, so Back to workout carries on with it, as turning the face's
-     * wheel would; a longer time only on the saved workout. Focus moves to its Applied.
+     * wheel would; a longer time or a shorter rest only on the saved workout. Focus moves to
+     * its Applied.
      */
     protected apply(text: string, step: number) {
         const steps = allSteps(this.run.workout() ?? { blocks: [] });
         const next = new Map(this.applied());
         for (const { suggestion } of this.items().filter((item) => item.text === text)) {
+            // A shorter rest is for next time only, as a longer time is (PRG-15)
+            if (suggestion.kind === 'rest') {
+                this.store.updateSavedRest(suggestion.step, suggestion.to);
+                next.set(suggestion.step, suggestion);
+                continue;
+            }
             const current = steps[suggestion.step];
             const stepped = current && this.steppedUp(current, suggestion);
             if (!stepped) {
@@ -164,7 +175,7 @@ export class SummaryStepUpsComponent {
         if (step.kind === 'work') {
             return suggestion.kind === 'time' ? withLongerTime(step) : null;
         }
-        if (step.kind !== 'reps' || suggestion.kind === 'time') {
+        if (step.kind !== 'reps' || suggestion.kind === 'time' || suggestion.kind === 'rest') {
             return null;
         }
         if (suggestion.eachSet) {
@@ -182,6 +193,9 @@ export class SummaryStepUpsComponent {
 
 /** How a step-up reads after the exercise's name, e.g. "try 62.5 kg, up from 60 kg". */
 function stepUpText({ kind, from, to, eachSet }: ProgressionSuggestion, unit: string): string {
+    if (kind === 'rest') {
+        return `try resting ${spokenDuration(to)} between sets, down from ${spokenDuration(from)}`;
+    }
     if (eachSet) {
         return kind === 'weight'
             ? `try ${to - from} ${unit} more on each set`

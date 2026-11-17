@@ -1,6 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { allSteps, asOneGroup, RepStep, Step, UNTIL_STOPPED, Workout } from '../models/workout';
+import {
+    allSteps,
+    asOneGroup,
+    RepStep,
+    soloRest,
+    Step,
+    UNTIL_STOPPED,
+    Workout,
+} from '../models/workout';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
@@ -5294,6 +5302,31 @@ describe('WorkoutComponent', () => {
             expect(weights()).toEqual([null, 20, 20]);
             // Your kettlebell from now on (PRG-14)
             expect(TestBed.inject(SettingsStore).kettlebellWeight()).toBe(20);
+            fixture.destroy();
+        });
+
+        it("steps down the swing ladder's rest, kept with the ready-made workout (PRG-15)", async () => {
+            await store.loadReadyMade();
+            const id = 'builtin:kettlebell-swing-ladder';
+            start(store.findAnyWorkout(id)!);
+            // 7 sets of swings, resting 45 seconds after each
+            for (let set = 0; set < 7; set++) {
+                (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                fixture.detectChanges();
+                advance(set < 6 ? 45_000 : 0);
+            }
+            run().end();
+            fixture.detectChanges();
+
+            const line =
+                'Kettlebell swing: try resting 40 seconds between sets, down from 45 seconds';
+            expect(summaryText()).toContain(line);
+            expect(summaryText()).not.toContain('Time for a new kettlebell');
+            fixture.nativeElement.querySelector(`button[aria-label="Apply: ${line}"]`).click();
+            fixture.detectChanges();
+
+            expect(soloRest(store.findAnyWorkout(id)!, 0)).toBe(40);
+            expect(summaryText()).toContain('Applied');
             fixture.destroy();
         });
 

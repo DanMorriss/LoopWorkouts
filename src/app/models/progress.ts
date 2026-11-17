@@ -2,17 +2,26 @@ import { HistoryEntry, isTimedSet, LoggedSet, RepSet, TimedSet } from './history
 import { KETTLEBELL_TOP_REPS } from './kettlebell';
 import { MAX_WEIGHT, WEIGHT_INCREASE, WeightUnit, weightIn, weightToKg } from './weight';
 import {
+    allSteps,
     MAX_REPS,
     MAX_STEP_SECONDS,
     RepSetAmount,
     RepStep,
+    soloRest,
     Step,
     TimedSetAmount,
     TimedStep,
+    Workout,
 } from './workout';
 
 /** How much longer a timed exercise goes next time, where every set ran its whole time. */
 export const TIME_INCREASE = 5;
+
+/** How much shorter a rest goes next time, as a kettlebell ladder's step up (PRG-15). */
+export const REST_DECREASE = 5;
+
+/** The shortest a rest is stepped down to (PRG-15). */
+export const MIN_STEPPED_REST = 15;
 
 /** How far a workout got in its time limit: full rounds, then steps done of the next. */
 export interface RoundsScore {
@@ -395,11 +404,14 @@ function atMostWeight(amount: RepSetAmount, unit: WeightUnit): boolean {
 export interface ProgressionSuggestion {
     /** Which step of the round it's for, from 0. */
     step: number;
-    /** A heavier weight, one more rep (with no weight), or longer (a timed exercise). */
-    kind: 'weight' | 'reps' | 'time';
+    /**
+     * A heavier weight, one more rep (with no weight), longer (a timed exercise), or a shorter
+     * rest after each set (a kettlebell step whose sets vary, PRG-15).
+     */
+    kind: 'weight' | 'reps' | 'time' | 'rest';
     /**
      * The weight (in the unit shown), reps or seconds it's from, and the one to try. For a
-     * step whose sets vary, set 1's, and every set goes up by as much.
+     * step whose sets vary, set 1's, and every set goes up by as much. For a rest, its seconds.
      */
     from: number;
     to: number;
@@ -491,6 +503,33 @@ export function readyForHeavierKettlebell(
         })
         .map(([index]) => index)
         .sort((a, b) => a - b);
+}
+
+/**
+ * Next time's shorter rests (PRG-15): for each kettlebell step whose sets vary, e.g. the swing
+ * ladder, where every set got its reps, REST_DECREASE seconds less rest after each set, down
+ * to MIN_STEPPED_REST. Such a step gets no more reps (its shape is the workout) and no heavier
+ * kettlebell, so doing it in less time is how it moves on. Only for a step alone in its group
+ * (see `soloRest()`), as a superset's rest is shared.
+ */
+export function restSuggestions(
+    sets: readonly LoggedSet[],
+    workout: Pick<Workout, 'blocks'>,
+    kettlebell: ReadonlySet<number>
+): ProgressionSuggestion[] {
+    const steps = allSteps(workout);
+    return [...setsByStep(sets).byStep].flatMap(([index, stepSets]) => {
+        const step = steps[index];
+        const rest = soloRest(workout, index);
+        return kettlebell.has(index) &&
+            step?.kind === 'reps' &&
+            step.sets &&
+            rest !== null &&
+            rest - REST_DECREASE >= MIN_STEPPED_REST &&
+            gotEveryRep(step, stepSets)
+            ? [{ step: index, kind: 'rest' as const, from: rest, to: rest - REST_DECREASE }]
+            : [];
+    });
 }
 
 /** A run's rep sets and timed sets, by the step they're of. */

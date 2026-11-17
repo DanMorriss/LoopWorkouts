@@ -5,9 +5,11 @@ import {
     MAX_REPS,
     MAX_STEP_SECONDS,
     RepSetAmount,
+    soloRest,
     Step,
     stepRounds,
     TimedSetAmount,
+    withSoloRest,
     withSteps,
     Workout,
 } from './workout';
@@ -54,11 +56,42 @@ export function isTimedAmounts(amounts: StepAmounts): amounts is TimedStepAmount
 }
 
 /**
- * The reps and weights you've set on a ready-made workout, by its id, e.g. `builtin:gym-legs`.
- * Its exercises, steps and rounds stay as they came: changing those takes a copy.
+ * Your rest after each set of a step of a ready-made workout that's alone in its group (see
+ * `soloRest()`), e.g. the swing ladder's, stepped down on the summary (PRG-15).
+ */
+export interface RestAmount {
+    /** The step's place in `allSteps()`. */
+    step: number;
+    /** The exercise the step is, as for its reps and weight. */
+    exerciseId: string;
+    /** In whole seconds. */
+    seconds: number;
+}
+
+/**
+ * The reps and weights you've set on a ready-made workout, by its id, e.g. `builtin:gym-legs`,
+ * and any rests (since data version 19). Its exercises, steps and rounds stay as they came:
+ * changing those takes a copy.
  */
 export interface ReadyMadeChange extends Synced {
     steps: StepAmounts[];
+    /** Missing for none. */
+    rests?: RestAmount[];
+}
+
+/**
+ * A step's rest changed on `original`, a ready-made workout as it came, to `seconds`, or null
+ * if the step has no rest of its own to change, or no exercise to know it by.
+ */
+export function restAmount(
+    index: number,
+    original: Pick<Workout, 'blocks'>,
+    seconds: number
+): RestAmount | null {
+    const exerciseId = allSteps(original)[index]?.exerciseId;
+    return exerciseId !== undefined && soloRest(original, index) !== null
+        ? { step: index, exerciseId, seconds }
+        : null;
 }
 
 /**
@@ -99,10 +132,28 @@ export function sameAmounts(original: Step, amounts: StepAmounts): boolean {
 }
 
 /**
- * A ready-made workout with your reps and weights on it. Any for a step that's no longer
- * that exercise, or whose sets no longer fit its rounds, is left out.
+ * A ready-made workout with your reps, weights and rests on it. Any for a step that's no
+ * longer that exercise, whose sets no longer fit its rounds, or with no rest of its own any
+ * more, is left out.
  */
 export function withAmounts<T extends Pick<Workout, 'blocks'>>(
+    workout: T,
+    amounts: readonly StepAmounts[],
+    rests: readonly RestAmount[] = []
+): T {
+    const stepped = withStepAmounts(workout, amounts);
+    const steps = allSteps(stepped);
+    const blocks = rests
+        .filter(
+            (rest) =>
+                steps[rest.step]?.exerciseId === rest.exerciseId &&
+                soloRest(stepped, rest.step) !== null
+        )
+        .reduce((to, rest) => withSoloRest(to, rest.step, rest.seconds), stepped.blocks);
+    return rests.length === 0 ? stepped : { ...stepped, blocks };
+}
+
+function withStepAmounts<T extends Pick<Workout, 'blocks'>>(
     workout: T,
     amounts: readonly StepAmounts[]
 ): T {
@@ -171,7 +222,29 @@ export function readReadyMadeChange(value: unknown): ReadyMadeChange | null {
               ]
             : [];
     });
-    return { ...mark, steps: read };
+    const rests = (value as Record<string, unknown>)['rests'];
+    const readRests = Array.isArray(rests) ? rests.filter(isRestAmount).map(copyRest) : [];
+    return { ...mark, steps: read, ...(readRests.length > 0 ? { rests: readRests } : {}) };
+}
+
+function copyRest({ step, exerciseId, seconds }: RestAmount): RestAmount {
+    return { step, exerciseId, seconds };
+}
+
+function isRestAmount(value: unknown): value is RestAmount {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+    const { step, exerciseId, seconds } = value as Record<string, unknown>;
+    return (
+        Number.isInteger(step) &&
+        (step as number) >= 0 &&
+        typeof exerciseId === 'string' &&
+        exerciseId !== '' &&
+        Number.isInteger(seconds) &&
+        (seconds as number) > 0 &&
+        (seconds as number) <= MAX_STEP_SECONDS
+    );
 }
 
 function copyAmount({ reps, weight }: RepSetAmount): RepSetAmount {

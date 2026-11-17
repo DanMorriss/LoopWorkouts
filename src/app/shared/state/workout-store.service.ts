@@ -24,6 +24,7 @@ import {
     UNTIL_STOPPED,
     Workout,
     WorkoutFields,
+    withSoloRest,
     withSteps,
 } from '../../models/workout';
 import type { BuiltInWorkout } from '../../models/built-in-workouts';
@@ -92,7 +93,11 @@ export class WorkoutStore {
     readonly readyMade = computed<ReadyMadeWorkout[]>(() => {
         const changes = this.readyMadeChanges.byId();
         return this._builtIns().map((workout) => ({
-            ...withAmounts(workout, changes.get(workout.id)?.steps ?? []),
+            ...withAmounts(
+                workout,
+                changes.get(workout.id)?.steps ?? [],
+                changes.get(workout.id)?.rests ?? []
+            ),
             updatedAt: 0,
         }));
     });
@@ -663,6 +668,39 @@ export class WorkoutStore {
         };
         this._workouts.update((workouts) =>
             workouts.map((t) => (t.id === workoutId ? updated : t))
+        );
+        this.saveWorkouts();
+    }
+
+    /**
+     * Changes the rest after each set of a step alone in its group (PRG-15) on the running
+     * workout as saved, for next time, not this run, whose clock it would move: e.g. the swing
+     * ladder's rest stepped down on the summary. On a ready-made workout, it's kept with your
+     * reps and weights (ReadyMadeChanges).
+     */
+    updateSavedRest(stepIndex: number, seconds: number) {
+        const workoutId = this._activeWorkout()?.id;
+        if (workoutId === undefined) {
+            return;
+        }
+        const saved = this.findWorkoutById(workoutId);
+        if (!saved) {
+            const original = this._builtIns().find((builtIn) => builtIn.id === workoutId);
+            if (original) {
+                this.readyMadeChanges.setRest(workoutId, stepIndex, original, seconds);
+            }
+            return;
+        }
+        this._workouts.update((workouts) =>
+            workouts.map((t) =>
+                t.id === workoutId
+                    ? {
+                          ...saved,
+                          blocks: withSoloRest(saved.blocks, stepIndex, seconds),
+                          updatedAt: this.clock.now(saved.updatedAt),
+                      }
+                    : t
+            )
         );
         this.saveWorkouts();
     }

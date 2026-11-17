@@ -68,8 +68,11 @@ import { ReadyMadeChange, readReadyMadeChange } from '../../models/ready-made-ch
  * 18: `carryOn` on workouts, which run straight on after every rest rather than waiting for
  *    Start (RUN-14). Nothing to convert; an older app turns the file down, and leaves synced
  *    records this new alone, rather than writing a workout back without it.
+ * 19: `rests` in `readyMadeChanges`, a rest stepped down on a ready-made workout (PRG-15).
+ *    Nothing to convert; an older app turns the file down, and leaves synced records this new
+ *    alone, rather than dropping the rests and writing the record back without them.
  */
-export const BACKUP_VERSION = 18;
+export const BACKUP_VERSION = 19;
 
 /** Far more than years of workouts take (about 1 KB each), so a bigger file isn't a backup. */
 export const MAX_BACKUP_BYTES = 50 * 1024 * 1024;

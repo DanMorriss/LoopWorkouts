@@ -1,7 +1,7 @@
 import { EquipmentNeed } from './exercise';
 import { LoggedSet } from './history';
 import { kettlebellSteps, withKettlebellWeight, withMyKettlebell } from './kettlebell';
-import { progressionSuggestions, readyForHeavierKettlebell } from './progress';
+import { progressionSuggestions, readyForHeavierKettlebell, restSuggestions } from './progress';
 import { RepStep, Step } from './workout';
 
 const equipment: Record<string, EquipmentNeed[]> = {
@@ -128,6 +128,36 @@ describe('kettlebell workouts (PRG-14)', () => {
                     [rep('swing', 20)],
                     kettlebell
                 )
+            ).toEqual([]);
+        });
+
+        it('steps down the rest of a ladder done in full, to 15 seconds at the least (PRG-15)', () => {
+            const counts = [10, 15, 20];
+            const ladder: RepStep = {
+                ...rep('swing', 10, 16),
+                sets: counts.map((reps) => ({ reps, weight: 16 })),
+            };
+            const workout = (restSeconds: number, steps: Step[] = [ladder]) => ({
+                blocks: [{ kind: 'group' as const, rounds: 3, restSeconds, steps }],
+            });
+            const sets = counts.map((reps, set) => ({ ...done(0, reps, 16, set), set }));
+            expect(restSuggestions(sets, workout(45), kettlebell)).toEqual([
+                { step: 0, kind: 'rest', from: 45, to: 40 },
+            ]);
+            expect(restSuggestions(sets, workout(20), kettlebell)).toEqual([
+                { step: 0, kind: 'rest', from: 20, to: 15 },
+            ]);
+            expect(restSuggestions(sets, workout(15), kettlebell)).toEqual([]);
+            // A set short, not a kettlebell workout, or a superset's shared rest: none
+            const short = [...sets.slice(0, 2), { ...done(0, 18, 16, 2), set: 2 }];
+            expect(restSuggestions(short, workout(45), kettlebell)).toEqual([]);
+            expect(restSuggestions(sets, workout(45), new Set())).toEqual([]);
+            expect(
+                restSuggestions(sets, workout(45, [ladder, rep('goblet', 10)]), kettlebell)
+            ).toEqual([]);
+            // Sets alike go up in reps instead
+            expect(
+                restSuggestions([done(0, 15)], workout(45, [rep('swing', 15)]), kettlebell)
             ).toEqual([]);
         });
 

@@ -137,7 +137,7 @@ describe('waiting for Start in the ready-made workouts (RUN-14)', () => {
 
     it('waits before a hold or a carry after a long rest in the others', () => {
         expect(nextWait({ ...byTitle('Gym full body'), updatedAt: 0 }, -1)).not.toBeNull();
-        expect(nextWait({ ...byTitle('Kettlebell full body'), updatedAt: 0 }, -1)).not.toBeNull();
+        expect(nextWait({ ...byTitle('Dumbbell lower'), updatedAt: 0 }, -1)).not.toBeNull();
     });
 });
 

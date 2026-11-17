@@ -20,7 +20,7 @@ export type EquipmentOf = (
  * weight. Empty for any other workout, e.g. one with a barbell, or dumbbells and a swing.
  */
 export function kettlebellSteps(
-    steps: readonly Step[],
+    steps: readonly Pick<Step, 'kind' | 'exerciseId'>[],
     equipmentOf: EquipmentOf
 ): ReadonlySet<number> {
     const exercises = steps.map((step) =>
@@ -77,17 +77,12 @@ export function withMyKettlebell(
         const step = steps[index];
         return step?.kind === 'reps' ? [{ index, step }] : [];
     });
-    const weights = new Set(
-        repSteps.flatMap(({ step }) =>
-            (step.sets ?? [step]).flatMap((amount) =>
-                amount.weight === undefined ? [] : [amount.weight]
-            )
-        )
+    const from = oneKettlebellWeight(
+        repSteps.flatMap(({ step }) => (step.sets ?? [step]).map((amount) => amount.weight))
     );
-    if (weights.size > 1) {
+    if (from === null) {
         return new Map();
     }
-    const [from] = weights;
     const changed = new Map<number, RepStep>();
     for (const { index, step } of repSteps) {
         const moved = withKettlebellWeight(step, from, kg);
@@ -96,6 +91,17 @@ export function withMyKettlebell(
         }
     }
     return changed;
+}
+
+/**
+ * The one weight a kettlebell workout's sets are at (PRG-14), from each set's weight, undefined
+ * or 0 for none: undefined where none has one, and null where they're at more than one.
+ */
+export function oneKettlebellWeight(
+    weights: readonly (number | undefined)[]
+): number | undefined | null {
+    const at = new Set(weights.filter((weight) => weight !== undefined && weight > 0));
+    return at.size > 1 ? null : [...at][0];
 }
 
 function optionsOf(need: EquipmentNeed): readonly string[] {

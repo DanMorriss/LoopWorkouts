@@ -240,6 +240,13 @@ describe('ExercisePageComponent', () => {
             expect(back.getAttribute('href')).toBe('/exercises?muscles=quads');
         });
 
+        it('keeps the search on the back link, with the muscles', async () => {
+            await open('/exercises/back-squat?q=squat&muscles=quads');
+
+            const back = el().querySelector('.back-link') as HTMLAnchorElement;
+            expect(back.getAttribute('href')).toBe('/exercises?q=squat&muscles=quads');
+        });
+
         it('keeps picked muscles on the back link', async () => {
             await open('/exercises/back-squat?muscles=quads,glutes');
 

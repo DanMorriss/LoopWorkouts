@@ -55,16 +55,22 @@ export class ExerciseListComponent {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
 
-    protected readonly query = signal('');
+    /** What's typed in the search, kept in the address (`?q=`) as the muscles are. */
+    protected readonly query = signal(this.route.snapshot.queryParamMap.get('q') ?? '');
     /** Main muscles the list is cut down to, or empty for all. */
     protected readonly selectedMuscles = signal<MuscleGroup[]>([]);
     /** Opened from another page's muscle (`?from=plan`), which ‹ goes back to; else null. */
     private readonly from = this.route.snapshot.queryParamMap.get('from');
     protected readonly back = listBackLink(this.from);
-    /** What an exercise's page keeps, to come back to the list as it is: its muscles and `from`. */
-    protected readonly muscleQueryParams = computed(() => {
+    /**
+     * What an exercise's page keeps, to come back to the list as it is: its search, muscles
+     * and `from`.
+     */
+    protected readonly listQueryParams = computed(() => {
         const muscles = serialiseMusclesParam(this.selectedMuscles());
+        const q = this.query();
         return {
+            ...(q ? { q } : {}),
             ...(muscles ? { muscles } : {}),
             ...(this.back && this.from ? { from: this.from } : {}),
         };
@@ -82,7 +88,7 @@ export class ExerciseListComponent {
 
     /** Best match first while searching, otherwise A to Z. */
     private readonly found = computed(() => {
-        const queryParams = this.muscleQueryParams();
+        const queryParams = this.listQueryParams();
         const unit = this.settings.weightUnit();
         return filterExercises(this.exercises.exercises(), {
             query: this.query(),
@@ -128,11 +134,21 @@ export class ExerciseListComponent {
         this.setMuscles([]);
     }
 
+    protected setQuery(next: string) {
+        this.query.set(next);
+        this.keepInAddress({ q: next || null });
+    }
+
     protected setMuscles(next: MuscleGroup[]) {
         this.selectedMuscles.set(next);
+        this.keepInAddress({ muscles: serialiseMusclesParam(next) });
+    }
+
+    // In place of the list's address, so its page and the browser's Back come back to it as it is
+    private keepInAddress(queryParams: Record<string, string | null>) {
         void this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { muscles: serialiseMusclesParam(next) },
+            queryParams,
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
@@ -143,7 +159,7 @@ export class ExerciseListComponent {
     }
 
     protected clearFilters() {
-        this.query.set('');
+        this.setQuery('');
         this.clearMuscles();
         this.setOnlyMine(false);
     }

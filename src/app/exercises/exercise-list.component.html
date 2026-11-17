@@ -18,7 +18,12 @@
             </button>
         </div>
 
-        <app-search-field class="exercises__search" inputId="exercise-search" [(value)]="query" />
+        <app-search-field
+            class="exercises__search"
+            inputId="exercise-search"
+            [value]="query()"
+            (valueChange)="setQuery($event)"
+        />
 
         <app-equipment-filter class="exercises__kit" idPrefix="exercise-list" things="Exercises" />
 

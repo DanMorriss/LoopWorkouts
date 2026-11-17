@@ -998,19 +998,21 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:**
     1. Open Exercises.
     2. Search "press-up".
-    3. Clear the search; press the **Quads** chip, then Glutes on the body map.
-    4. Open a card; press ‹ Exercises; press the browser's Back and Forward.
-    5. Turn **Only what I have** on with nothing picked; then pick Barbell and Rack.
-    6. Search "zzzz"; press **Clear search and filters**.
-    7. Open `/exercises?muscles=quads,notamuscle`.
+    3. Search "squat"; scroll to the last card and open it; press ‹ Exercises.
+    4. Clear the search; press the **Quads** chip, then Glutes on the body map.
+    5. Open a card; press ‹ Exercises; press the browser's Back and Forward.
+    6. Turn **Only what I have** on with nothing picked; then pick Barbell and Rack.
+    7. Search "zzzz"; press **Clear search and filters**.
+    8. Open `/exercises?muscles=quads,notamuscle`.
 - **Expected:**
     1. "Exercises" with **New**; "117 exercises" (read the number from `BUILT_IN_EXERCISES` rather than hard-coding it), A to Z.
     2. Push-up first, saying "Also called Press-up".
-    3. The address is `/exercises?muscles=quads,glutes`; both chips pressed, both shaded on the map and listed with × buttons; the count drops and is read out.
-    4. The exercise page keeps the muscles for its ‹ link: the list comes back still filtered.
-    5. Only no-equipment exercises; then barbell-and-rack ones too ("My equipment: 2 pieces").
-    6. "No exercises match." then everything back.
-    7. Only Quads picked; the unknown one is ignored.
+    3. The exercise's address keeps `?q=squat`; back, the list is at `/exercises?q=squat`, with "squat" still in the box, scrolled where it was.
+    4. The address is `/exercises?muscles=quads,glutes`; both chips pressed, both shaded on the map and listed with × buttons; the count drops and is read out.
+    5. The exercise page keeps the muscles for its ‹ link: the list comes back still filtered.
+    6. Only no-equipment exercises; then barbell-and-rack ones too ("My equipment: 2 pieces").
+    7. "No exercises match." then everything back.
+    8. Only Quads picked; the unknown one is ignored.
 - **In the pack:** the count is read from the page's status ("117 exercises") rather than hard-coded; the body map's Glutes is pressed by its keys, as a click in the middle of its box lands on the drawing around the shape.
 
 ### REG-EXR-02 · An exercise's page and its demo

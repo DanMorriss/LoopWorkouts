@@ -114,9 +114,9 @@ $rows-around: math.div($open-rows - 1, 2);
     }
 }
 
-// Holds the numbers; keeps them in the viewport's 3D space, so its perspective still curves
-// them into a drum (perspective only reaches an element's own children otherwise)
-.wheel-picker__track {
+// Holds the numbers; open, keeps them in the viewport's 3D space, so its perspective still
+// curves them into a drum (perspective only reaches an element's own children otherwise)
+:host(.wheel-picker--open) .wheel-picker__track {
     transform-style: preserve-3d;
 }
 
@@ -144,10 +144,16 @@ $rows-around: math.div($open-rows - 1, 2);
 }
 
 // The curved drum: each number tilts away as it moves from the middle, driven by its
-// position in the scroller, so it's as smooth as the scrolling itself
+// position in the scroller, so it's as smooth as the scrolling itself. Only while open: each
+// number turning in 3D is a layer of its own to the phone, and closed wheels (a weight's has
+// 601 numbers, 1,321 in lb) added up to more than an iPhone's page could hold, so it went
+// white. Closed, only the selected number shows, so there's nothing to curve.
 @supports (animation-timeline: view()) {
     .wheel-picker__item {
         opacity: 1;
+    }
+
+    :host(.wheel-picker--open) .wheel-picker__item {
         animation: wheel-picker-drum linear both;
         animation-timeline: view();
     }

@@ -3,6 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { describeSets } from '../../history/history-format';
 import { lastRepSets } from '../../history/last-sets';
 import { Exercise } from '../../models/exercise';
+import { kettlebellSteps } from '../../models/kettlebell';
 import { canStepUpEachSet, steppedUp, suggestedWeight } from '../../models/progress';
 import { WEIGHT_INCREASE, weightOptions, weightToKg } from '../../models/weight';
 import { allSteps, MAX_REPS } from '../../models/workout';
@@ -58,11 +59,12 @@ export class WorkoutFaceSlideComponent {
     });
     /**
      * The weight to try (PRG-5), when every set hit the reps last time: one step up from last
-     * time's weight, while the step is still at it. Changed since, it's the user's call.
+     * time's weight, while the step is still at it. Changed since, it's the user's call. None
+     * on a kettlebell step (PRG-14), which goes up in reps.
      */
     protected readonly nextWeight = computed(() => {
         const step = this.view.state()?.step;
-        if (step?.kind !== 'reps' || this.savedStep()?.varies) {
+        if (step?.kind !== 'reps' || this.savedStep()?.varies || this.savedStep()?.kettlebell) {
             return null;
         }
         const suggestion = suggestedWeight(this.lastSets(), step.reps, this.view.weightUnit());
@@ -75,12 +77,14 @@ export class WorkoutFaceSlideComponent {
     /**
      * On set 1 of a step whose sets vary (BLD-11), how much more to try on each set (PRG-5),
      * e.g. 2.5 (kg), where every set got its own reps last time and none has been changed
-     * since; otherwise null. Once, on set 1, as it moves the whole step up.
+     * since; otherwise null. Once, on set 1, as it moves the whole step up. None on a
+     * kettlebell step (PRG-14).
      */
     protected readonly eachSetStepUp = computed(() => {
         const saved = this.savedStep();
         const unit = this.view.weightUnit();
         return saved?.varies &&
+            !saved.kettlebell &&
             saved.set === 0 &&
             saved.step.kind === 'reps' &&
             canStepUpEachSet(this.lastSets(), saved.step, unit)
@@ -89,15 +93,24 @@ export class WorkoutFaceSlideComponent {
     });
     /**
      * The saved step being run (the face's `state.step` being just this set of it), which set
-     * of it this is, and whether its sets vary. Null between steps' sets, e.g. on a rest.
+     * of it this is, whether its sets vary, and whether it's a kettlebell workout's (PRG-14).
+     * Null between steps' sets, e.g. on a rest.
      */
     private readonly savedStep = computed(() => {
         const state = this.view.state();
         const workout = this.view.running();
         const place = state && workout ? placeAt(workout, state.stepIndex) : null;
-        const step = place && workout ? allSteps(workout)[place.step] : undefined;
+        const steps = workout ? allSteps(workout) : [];
+        const step = place ? steps[place.step] : undefined;
         return step && place
-            ? { step, set: place.set, varies: step.kind !== 'rest' && step.sets !== undefined }
+            ? {
+                  step,
+                  set: place.set,
+                  varies: step.kind !== 'rest' && step.sets !== undefined,
+                  kettlebell: kettlebellSteps(steps, (id) => this.exercises.byId(id)).has(
+                      place.step
+                  ),
+              }
             : null;
     });
     /** The rep sets of the rep step's exercise from the most recent workout with any. */

@@ -1,4 +1,5 @@
 import { HistoryEntry, isTimedSet, LoggedSet, RepSet, TimedSet } from './history';
+import { KETTLEBELL_TOP_REPS } from './kettlebell';
 import { MAX_WEIGHT, WEIGHT_INCREASE, WeightUnit, weightIn, weightToKg } from './weight';
 import {
     MAX_REPS,
@@ -411,22 +412,17 @@ export interface ProgressionSuggestion {
  * set got the step's reps, one weight step up (as `suggestedWeight()` does), or one more rep
  * for a step with no weight; where every set of a timed exercise ran its whole time,
  * TIME_INCREASE seconds more. Nothing for a step that missed its reps, had a set skipped
- * part-way, or is at the top.
+ * part-way, or is at the top. A step of `kettlebell` (PRG-14, by `kettlebellSteps()`) goes up
+ * a rep, with a weight or not, up to KETTLEBELL_TOP_REPS, where `readyForHeavierKettlebell()`
+ * takes over; one whose sets vary, e.g. a ladder, has none.
  */
 export function progressionSuggestions(
     sets: readonly LoggedSet[],
     steps: readonly Step[],
-    unit: WeightUnit
+    unit: WeightUnit,
+    kettlebell: ReadonlySet<number> = new Set()
 ): ProgressionSuggestion[] {
-    const byStep = new Map<number, RepSet[]>();
-    const timedByStep = new Map<number, TimedSet[]>();
-    for (const set of sets) {
-        if (isTimedSet(set)) {
-            timedByStep.set(set.step, [...(timedByStep.get(set.step) ?? []), set]);
-        } else {
-            byStep.set(set.step, [...(byStep.get(set.step) ?? []), set]);
-        }
-    }
+    const { byStep, timedByStep } = setsByStep(sets);
     const suggestions: ProgressionSuggestion[] = [];
     for (const [index, stepSets] of timedByStep) {
         const step = steps[index];
@@ -440,8 +436,15 @@ export function progressionSuggestions(
         if (step?.kind !== 'reps') {
             continue;
         }
+        if (kettlebell.has(index)) {
+            const suggestion = kettlebellSuggestion(index, step, stepSets);
+            if (suggestion) {
+                suggestions.push(suggestion);
+            }
+            continue;
+        }
         if (step.sets) {
-            const suggestion = eachSetSuggestion(index, step.sets, stepSets, unit);
+            const suggestion = eachSetSuggestion(index, step, step.sets, stepSets, unit);
             if (suggestion) {
                 suggestions.push(suggestion);
             }
@@ -457,11 +460,74 @@ export function progressionSuggestions(
                     to: weight.next,
                 });
             }
-        } else if (step.reps < MAX_REPS && stepSets.every((set) => set.reps >= step.reps)) {
+        } else if (step.reps < MAX_REPS && gotEveryRep(step, stepSets)) {
             suggestions.push({ step: index, kind: 'reps', from: step.reps, to: step.reps + 1 });
         }
     }
     return suggestions.sort((a, b) => a.step - b.step);
+}
+
+/**
+ * The kettlebell steps (PRG-14) where every set got its reps, at KETTLEBELL_TOP_REPS or more:
+ * time for a heavier kettlebell, said on the summary rather than a step up. Not one whose sets
+ * vary (BLD-11), e.g. the swing ladder's 10 to 25 and back: its shape is the workout, and a
+ * set of 20 in it says nothing about the kettlebell. By their place in `steps`, in order.
+ */
+export function readyForHeavierKettlebell(
+    sets: readonly LoggedSet[],
+    steps: readonly Step[],
+    kettlebell: ReadonlySet<number>
+): number[] {
+    return [...setsByStep(sets).byStep]
+        .filter(([index, stepSets]) => {
+            const step = steps[index];
+            return (
+                kettlebell.has(index) &&
+                step?.kind === 'reps' &&
+                !step.sets &&
+                step.reps >= KETTLEBELL_TOP_REPS &&
+                gotEveryRep(step, stepSets)
+            );
+        })
+        .map(([index]) => index)
+        .sort((a, b) => a - b);
+}
+
+/** A run's rep sets and timed sets, by the step they're of. */
+function setsByStep(sets: readonly LoggedSet[]) {
+    const byStep = new Map<number, RepSet[]>();
+    const timedByStep = new Map<number, TimedSet[]>();
+    for (const set of sets) {
+        if (isTimedSet(set)) {
+            timedByStep.set(set.step, [...(timedByStep.get(set.step) ?? []), set]);
+        } else {
+            byStep.set(set.step, [...(byStep.get(set.step) ?? []), set]);
+        }
+    }
+    return { byStep, timedByStep };
+}
+
+/** Whether every set (both sides) got its reps: the step's, or its own where they vary. */
+function gotEveryRep(step: RepStep, stepSets: readonly RepSet[]): boolean {
+    const amounts = step.sets ?? [{ reps: step.reps }];
+    return stepSets.every((set) => set.reps >= (amounts[set.set ?? 0] ?? amounts[0]).reps);
+}
+
+/**
+ * Next time's step up for a kettlebell step (PRG-14), where every set got its reps: one more
+ * rep, whatever the weight, while it stays within KETTLEBELL_TOP_REPS. Null where any fell
+ * short, or it's there, and for a step whose sets vary, as a rep more on each would change
+ * the shape the workout's built on (a ladder, a pyramid).
+ */
+function kettlebellSuggestion(
+    index: number,
+    step: RepStep,
+    stepSets: readonly RepSet[]
+): ProgressionSuggestion | null {
+    if (step.sets || step.reps >= KETTLEBELL_TOP_REPS || !gotEveryRep(step, stepSets)) {
+        return null;
+    }
+    return { step: index, kind: 'reps', from: step.reps, to: step.reps + 1 };
 }
 
 /**
@@ -497,12 +563,12 @@ function timeSuggestion(
  */
 function eachSetSuggestion(
     index: number,
+    step: RepStep,
     sets: readonly RepSetAmount[],
     stepSets: readonly RepSet[],
     unit: WeightUnit
 ): ProgressionSuggestion | null {
-    const gotReps = stepSets.every((set) => set.reps >= (sets[set.set ?? 0] ?? sets[0]).reps);
-    if (!gotReps) {
+    if (!gotEveryRep(step, stepSets)) {
         return null;
     }
     const [first] = sets;

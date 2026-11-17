@@ -1,5 +1,5 @@
 import { expect, reps, run, seed, test, workout, type LoggedSet } from './fixtures';
-import { WorkoutPage } from './workout-page';
+import { setWheel, WorkoutPage } from './workout-page';
 
 // Progress (progress.md): REG-PRG in docs/regression-tests.md. The clock is at NOW, Wednesday
 // 11 November 2026 at 09:00.
@@ -242,6 +242,48 @@ test.describe("the week's exercises", () => {
             await expect(page).toHaveURL(/\/exercises\/plank\?run=/);
             await page.locator('.back-link', { hasText: 'Progress' }).click();
             await expect(page).toHaveURL(/\/history\?run=/);
+        }
+    );
+});
+
+test.describe('a kettlebell workout', () => {
+    test.use({
+        storage: seed.workouts([
+            workout('Kettlebell', {
+                steps: [
+                    reps(20, 'Kettlebell swing', { exercise: 'kettlebell-swing' }),
+                    reps(10, 'Goblet squat', { exercise: 'goblet-squat' }),
+                ],
+            }),
+        ]),
+    });
+
+    test(
+        'REG-PRG-05 one kettlebell for the workout, and when to get a heavier one',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Kettlebell');
+
+            // The kettlebell's weight, said once, is on every step that uses it
+            await setWheel(run.wheel('Weight, kg'), 16, 0.5);
+            await run.done.click();
+            await expect(run.face).toContainText('Goblet squat');
+            await expect(
+                run.face.getByRole('spinbutton', { name: 'Weight, kg', exact: true })
+            ).toHaveAttribute('aria-valuenow', '16');
+            await run.done.click();
+
+            // 20 swings: time for a heavier kettlebell, not 2.5 kg more
+            const notice = run.summary.getByRole('region', { name: 'Time for a new kettlebell' });
+            await expect(notice).toContainText("Congratulations, you're ready to go up in weight.");
+            await expect(notice).toContainText('Kettlebell swing: 20 reps @ 16 kg');
+            await expect(notice).not.toContainText('Goblet squat');
+            // Short of 20, a rep more
+            const nextTime = run.summary.getByRole('region', { name: 'Next time' });
+            await expect(nextTime).toContainText('Goblet squat: try 11 reps, up from 10');
+            await expect(nextTime).not.toContainText('Kettlebell swing');
         }
     );
 });

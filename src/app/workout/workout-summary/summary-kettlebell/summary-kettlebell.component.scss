@@ -1,0 +1,46 @@
+:host {
+    display: block;
+}
+
+// A card of its own, as it's a moment to mark rather than one more step up
+.kettlebell {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--accent-line);
+    border-radius: 0.9rem;
+    background: var(--accent-soft);
+    color: var(--text-strong);
+
+    h3 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+}
+
+.kettlebell__icon {
+    flex: none;
+    color: var(--accent);
+}
+
+.kettlebell__text {
+    margin: 0.25rem 0 0;
+}
+
+.kettlebell__list {
+    margin: 0.35rem 0 0;
+    padding: 0;
+    font-weight: 600;
+    list-style: none;
+
+    li + li {
+        margin-top: 0.2rem;
+    }
+}
+
+.kettlebell__hint {
+    margin: 0.5rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}

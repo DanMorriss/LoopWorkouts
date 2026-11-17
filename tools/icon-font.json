@@ -10,6 +10,7 @@
         "arrow_upward",
         "backspace",
         "bookmark_add",
+        "celebration",
         "check",
         "chevron_left",
         "chevron_right",
@@ -53,5 +54,5 @@
         "visibility",
         "visibility_off"
     ],
-    "sha256": "3d3e83d37dae236c44b71f45c4884276691b26141f5d8522080bd1b7a50bd8ea"
+    "sha256": "6e6fd7cc491b899c8de2feff297476f0f874ee335dd5350b7f5586e80346444d"
 }

@@ -5240,4 +5240,81 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
     });
+
+    describe('a kettlebell workout (PRG-14)', () => {
+        const swing = { name: 'Kettlebell swing', exerciseId: 'builtin:kettlebell-swing' };
+        const goblet = { name: 'Goblet squat', exerciseId: 'builtin:goblet-squat' };
+        const run = () => TestBed.inject(ActiveRunService);
+        const summaryText = () =>
+            (fixture.nativeElement.querySelector('app-workout-summary')?.textContent ?? '').replace(
+                /\s+/g,
+                ' '
+            );
+
+        beforeEach(async () => {
+            localStorage.clear();
+            await TestBed.inject(ExerciseStore).load();
+        });
+        afterEach(() => localStorage.clear());
+
+        /** Saves swings then goblet squats to the library, and starts it. */
+        function startSaved(swings: number, weight?: number): Workout {
+            const saved = store.addWorkout({
+                title: 'Kettlebell',
+                repeats: 1,
+                blocks: asOneGroup([
+                    work(2),
+                    { kind: 'reps', reps: swings, ...(weight ? { weight } : {}), ...swing },
+                    { kind: 'reps', reps: 10, ...goblet },
+                ]),
+            });
+            start(saved);
+            advance(2000);
+            return saved;
+        }
+
+        function doneAll() {
+            for (let i = 0; i < 2; i++) {
+                (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                fixture.detectChanges();
+            }
+        }
+
+        it('puts one weight on every kettlebell step, and moves them all to a new one', () => {
+            const saved = startSaved(15);
+            const weights = () =>
+                allSteps(store.findWorkoutById(saved.id)!).map((step) =>
+                    step.kind === 'reps' ? step.weight : null
+                );
+
+            run().changeReps({ weight: 16 });
+            expect(weights()).toEqual([null, 16, 16]);
+
+            run().changeReps({ weight: 20 });
+            expect(weights()).toEqual([null, 20, 20]);
+            fixture.destroy();
+        });
+
+        it('suggests a rep more next time, not a heavier weight', () => {
+            startSaved(15, 16);
+            expect(fixture.nativeElement.querySelector('.workout-face__next-weight')).toBeNull();
+            doneAll();
+
+            expect(summaryText()).toContain('Kettlebell swing: try 16 reps, up from 15');
+            expect(summaryText()).not.toContain('18.5 kg');
+            expect(summaryText()).not.toContain('Time for a new kettlebell');
+            fixture.destroy();
+        });
+
+        it('says when it is time for a heavier kettlebell, at 20 reps', () => {
+            startSaved(20, 16);
+            doneAll();
+
+            expect(summaryText()).toContain('Time for a new kettlebell');
+            expect(summaryText()).toContain("Congratulations, you're ready to go up in weight.");
+            expect(summaryText()).toContain('Kettlebell swing: 20 reps @ 16 kg');
+            expect(summaryText()).not.toContain('Kettlebell swing: try');
+            fixture.destroy();
+        });
+    });
 });

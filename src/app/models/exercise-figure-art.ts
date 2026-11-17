@@ -13,7 +13,7 @@ import { MuscleGroup } from './exercise';
  */
 
 export interface ArtPiece {
-    /** The muscle group it is, or null for a part never shaded (head, hands, feet). */
+    /** The muscle group it is, or null for a part never shaded (head, hands, shins, feet). */
     readonly muscle: MuscleGroup | null;
     readonly d: string;
 }
@@ -206,7 +206,7 @@ const SIDE: Record<PartName, PartArt> = {
         ],
         [
             [
-                'neck',
+                'traps',
                 [
                     [-3.5, -1],
                     [3, -1],
@@ -447,7 +447,7 @@ const SIDE: Record<PartName, PartArt> = {
                 ],
             ],
             [
-                'shins',
+                null,
                 [
                     [1, 3],
                     [4.3, 6],
@@ -573,7 +573,7 @@ const FRONT: Record<PartName, PartArt> = {
         ],
         [
             [
-                'neck',
+                'traps',
                 [
                     [-4, -2],
                     [4, -2],
@@ -800,7 +800,7 @@ const FRONT: Record<PartName, PartArt> = {
                 ],
             ],
             [
-                'shins',
+                null,
                 [
                     [-1.5, 3],
                     [1.8, 3],

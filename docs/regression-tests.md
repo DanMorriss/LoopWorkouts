@@ -531,7 +531,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Stories:** LIB-5, LIB-7 · **Priority:** P2
 - **Preconditions:** `guest()`, workouts "Squat day" (Back squat) and "Bench day" (Bench press), planned Monday and Thursday.
 - **Steps:** Open the Plan page; press the Calves link.
-- **Expected:** Missing muscle groups lists Biceps, Forearms, Abs, Obliques, Traps, Upper back, Abductors, Calves, Shins and Neck; What your plan works lists Shoulders, Triceps, Lower back, Adductors and Hamstrings as Supporting; Band full body is suggested, "Adds Shoulders, Biceps, Triceps and 7 more."; Calves opens `/exercises?muscles=calves` (with `&from=plan`) with the Calves chip pressed.
+- **Expected:** Missing muscle groups lists Biceps, Forearms, Abs, Obliques, Traps, Upper back, Abductors and Calves; What your plan works lists Shoulders, Triceps, Lower back, Adductors and Hamstrings as Supporting; Band full body is suggested, "Adds Shoulders, Biceps, Triceps and 7 more."; Calves opens `/exercises?muscles=calves` (with `&from=plan`) with the Calves chip pressed.
 - **In the pack:** moved from Workouts to the Plan page on 2026-11-06, and it counts only planned workouts. Adding the suggestion to days is REG-LIB-09.
 
 ### REG-LIB-07 · Ready-made workouts: filter, look, copy, start as they are

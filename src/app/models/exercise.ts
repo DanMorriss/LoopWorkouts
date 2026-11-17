@@ -3,7 +3,8 @@ import { Synced } from './sync';
 /**
  * The muscle groups the body map can shade, one per shape on its figure (see
  * docs/features/exercises.md). Front, side and rear shoulders, and the lats, aren't apart
- * on the figure, so they aren't here either.
+ * on the figure, so they aren't here either. The neck is shaded as the traps, and the shins
+ * never are, as no exercise mainly works either.
  */
 export type MuscleGroup =
     | 'chest'
@@ -21,9 +22,7 @@ export type MuscleGroup =
     | 'adductors'
     | 'quads'
     | 'hamstrings'
-    | 'calves'
-    | 'shins'
-    | 'neck';
+    | 'calves';
 
 /** How each muscle group is written in the app, e.g. on the body map's labels. */
 export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
@@ -43,8 +42,6 @@ export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
     quads: 'Quads',
     hamstrings: 'Hamstrings',
     calves: 'Calves',
-    shins: 'Shins',
-    neck: 'Neck',
 };
 
 export type Equipment =

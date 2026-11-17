@@ -437,9 +437,17 @@ function loadList<T>(key: string, read: (value: unknown) => T | null): T[] {
 
 const isText = (value: unknown): value is string => typeof value === 'string';
 const textList = (value: unknown): string[] => (Array.isArray(value) ? value.filter(isText) : []);
+/** Muscle groups since merged into another: the neck into the traps, in 2026-11. */
+const MERGED_MUSCLES: ReadonlyMap<string, MuscleGroup> = new Map([['neck', 'traps']]);
 const muscles = (value: unknown): MuscleGroup[] =>
     Array.isArray(value)
-        ? value.filter((m): m is MuscleGroup => isText(m) && m in MUSCLE_LABELS)
+        ? [
+              ...new Set(
+                  value
+                      .map((m: unknown) => (isText(m) ? (MERGED_MUSCLES.get(m) ?? m) : m))
+                      .filter((m): m is MuscleGroup => isText(m) && Object.hasOwn(MUSCLE_LABELS, m))
+              ),
+          ]
         : [];
 const equipment = (value: unknown): EquipmentNeed[] =>
     Array.isArray(value)

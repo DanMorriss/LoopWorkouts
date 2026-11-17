@@ -32,10 +32,10 @@ const MUSCLES = {
     quadriceps: 'quads',
     hamstring: 'hamstrings',
     calves: 'calves',
-    tibialis: 'shins',
-    neck: 'neck',
+    // The upper traps run up the back and sides of the neck
+    neck: 'traps',
 };
-const NOT_MUSCLES = new Set(['head', 'hair', 'hands', 'feet', 'knees', 'ankles']);
+const NOT_MUSCLES = new Set(['head', 'hair', 'hands', 'feet', 'knees', 'ankles', 'tibialis']);
 
 const FIGURES = {
     male: {

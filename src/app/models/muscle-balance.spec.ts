@@ -90,12 +90,12 @@ describe('muscleStatus', () => {
 describe('weeklyAim', () => {
     it('aims for 10 to 20 sets for muscle, and 4 to 10 on small muscles', () => {
         expect(weeklyAim('chest', 'muscle')).toEqual({ low: 10, high: 20 });
-        expect(weeklyAim('neck', 'muscle')).toEqual({ low: 4, high: 10 });
+        expect(weeklyAim('forearms', 'muscle')).toEqual({ low: 4, high: 10 });
     });
 
     it('aims lower for fitness: 6 to 12 sets, and 2 to 6 on small muscles', () => {
         expect(weeklyAim('chest', 'fitness')).toEqual({ low: 6, high: 12 });
-        expect(weeklyAim('shins', 'fitness')).toEqual({ low: 2, high: 6 });
+        expect(weeklyAim('obliques', 'fitness')).toEqual({ low: 2, high: 6 });
     });
 });
 
@@ -124,15 +124,15 @@ describe('muscleBalance', () => {
 
     it('judges each muscle against its own aim, lower for small muscles and for fitness', () => {
         const counts = new Map<MuscleGroup, number>([
-            ['neck', 5],
+            ['forearms', 5],
             ['chest', 8],
         ]);
         const status = (goal: TrainingGoal, name: MuscleGroup) =>
             muscleBalance(counts, goal).find((m) => m.muscle === name)!.status;
 
-        expect(status('muscle', 'neck')).toBe('in-range');
+        expect(status('muscle', 'forearms')).toBe('in-range');
         expect(status('muscle', 'chest')).toBe('under');
-        expect(status('fitness', 'neck')).toBe('in-range');
+        expect(status('fitness', 'forearms')).toBe('in-range');
         expect(status('fitness', 'chest')).toBe('in-range');
     });
 });

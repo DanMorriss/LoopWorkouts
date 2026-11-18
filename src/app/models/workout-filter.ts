@@ -37,9 +37,17 @@ export function filterWorkouts<T extends Filterable>(
             (!filters.favourites || isFavourite(workout.id)) &&
             (words.length === 0 || matches(workout, words, byId)) &&
             (filters.muscles.length === 0 || worksAny(workout, filters.muscles, byId)) &&
-            (!filters.onlyMine ||
-                canDoWith({ equipment: workoutEquipment(workout, byId) }, filters.myEquipment))
+            (!filters.onlyMine || canDoWorkoutWith(workout, filters.myEquipment, byId))
     );
+}
+
+/** Whether every exercise in a workout can be done with only `available` equipment. */
+export function canDoWorkoutWith(
+    workout: Pick<Workout, 'blocks'>,
+    available: readonly Equipment[],
+    byId: (id: string) => Exercise | undefined
+): boolean {
+    return canDoWith({ equipment: workoutEquipment(workout, byId) }, available);
 }
 
 function matches(

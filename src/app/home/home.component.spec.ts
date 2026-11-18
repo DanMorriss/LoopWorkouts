@@ -259,6 +259,29 @@ describe('HomeComponent', () => {
         );
     });
 
+    it('only suggests workouts you have the equipment for', () => {
+        const workouts = TestBed.inject(WorkoutStore);
+        workouts.addWorkout({
+            title: 'Barbell bench',
+            repeats: 3,
+            blocks: asOneGroup([
+                { kind: 'reps', reps: 5, name: 'Bench press', exerciseId: 'builtin:bench-press' },
+            ]),
+        });
+        workouts.addWorkout({
+            title: 'Bodyweight',
+            repeats: 3,
+            blocks: asOneGroup([
+                { kind: 'reps', reps: 10, name: 'Push-up', exerciseId: 'builtin:push-up' },
+            ]),
+        });
+        TestBed.inject(HistoryStore).record(entry);
+        TestBed.inject(SettingsStore).update({ myEquipment: ['none'] });
+        create();
+
+        expect(text('.suggestion__title')).toEqual(['Bodyweight']);
+    });
+
     describe('this week (PLN-4)', () => {
         function addWorkout(title: string) {
             return TestBed.inject(WorkoutStore).addWorkout({

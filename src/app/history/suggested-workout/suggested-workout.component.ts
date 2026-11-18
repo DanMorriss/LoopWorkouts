@@ -7,6 +7,7 @@ import { setsByMuscle, SuggestionAvoid, suggestNextWorkout } from '../../models/
 import { nextPlannedDay, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { musclesWorked } from '../../models/workout-muscles';
 import { Workout } from '../../models/workout';
+import { canDoWorkoutWith } from '../../models/workout-filter';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { injectStartWorkout } from '../../shared/run/start-workout';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
@@ -28,6 +29,9 @@ let nextId = 0;
  * On a rest day in a planned week (`restDay`), it's offered, not pressed: resting is fine too.
  * It steers clear of the workout planned next this week and of most of its main muscles, and
  * says so, e.g. "and leaves your Quads and Glutes fresh for Legs day on Thursday".
+ *
+ * It's only ever a workout you can do with the equipment you've said you have; with none
+ * picked yet, any.
  *
  * It says which muscles in words, not their sets and aims, with a link to the bars on Progress
  * for those.
@@ -128,7 +132,7 @@ export class SuggestedWorkoutComponent {
             }
         }
         const suggested = suggestNextWorkout(
-            this.workouts.allWorkouts(),
+            this.doable(),
             this.weekSets(),
             (id) => this.exercises.byId(id),
             lastDone,
@@ -148,6 +152,17 @@ export class SuggestedWorkoutComponent {
             workout: suggested.workout,
             reason: `It works your ${LIST.format(labels)}, ${which}${this.leavesFresh(suggested.workout)}.`,
         };
+    });
+
+    /** The workouts you can do with your equipment: all of them, with none picked yet. */
+    private readonly doable = computed(() => {
+        const kit = this.settings.myEquipment();
+        const all = this.workouts.allWorkouts();
+        return kit.length === 0
+            ? all
+            : all.filter((workout) =>
+                  canDoWorkoutWith(workout, kit, (id) => this.exercises.byId(id))
+              );
     });
 
     private readonly avoid = computed((): SuggestionAvoid | undefined => {

@@ -16,6 +16,7 @@ import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { BUILT_IN_EXERCISE_TEXT } from '../models/built-in-exercise-text';
 import { AlarmService } from '../shared/alarms/alarm.service';
 import { ActiveRunService } from '../shared/run/active-run.service';
+import { STRETCH_ROUTINE_ID } from '../models/built-in-stretches';
 import { KeepAwakeService } from '../shared/run/keep-awake.service';
 import { UndoService } from '../shared/undo/undo.service';
 import { contrastRatio } from '../shared/testing/contrast';
@@ -3443,6 +3444,39 @@ describe('WorkoutComponent', () => {
             expect(muscles.textContent).toContain('Muscles worked');
             expect(muscles.querySelector('app-body-map')).not.toBeNull();
             expect(muscles.textContent).toContain('Chest');
+            fixture.destroy();
+        });
+
+        it('offers stretches for the muscles worked, and Start stretches runs them in its place', () => {
+            const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
+            start(
+                makeWorkout({
+                    steps: [work(2), { kind: 'reps', reps: 12, ...pushUps } as const],
+                    repeats: 1,
+                })
+            );
+            advance(2000);
+            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            fixture.detectChanges();
+
+            const card = summary()!.querySelector('[aria-labelledby="summary-stretch"]')!;
+            expect(card.textContent).toContain('Stretch what you worked');
+            expect(card.textContent).toContain('Doorway chest stretch');
+
+            pressInSummary('Start stretches');
+            advance(0);
+
+            // The push-ups are logged, finished, and the stretches run in their place
+            expect(entries()[0].outcome).toBe('finished');
+            expect(summary()).toBeNull();
+            expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(STRETCH_ROUTINE_ID);
+            expect(text()).toContain('Doorway chest stretch');
+            expect(document.activeElement?.getAttribute('aria-label')).toBe('Pause');
+
+            // Finishing them offers no stretches for the stretches
+            advance(10 * 60 * 1000);
+            expect(summary()).not.toBeNull();
+            expect(summary()!.querySelector('[aria-labelledby="summary-stretch"]')).toBeNull();
             fixture.destroy();
         });
 

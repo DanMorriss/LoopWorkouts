@@ -18,8 +18,8 @@ test.describe('no workouts of my own', () => {
             await expect(
                 page.getByText('Start any of these, or make your own with New.')
             ).toBeVisible();
-            // The 21 ready-made ones, A to Z, each with its badge
-            await expect(library.cards).toHaveCount(21);
+            // The 23 ready-made ones, A to Z, each with its badge
+            await expect(library.cards).toHaveCount(23);
             const titles = await library.titles();
             expect(titles).toEqual([...titles].sort((a, b) => a.localeCompare(b)));
             await expect(library.card('Gym legs')).toContainText('Ready-made');
@@ -205,7 +205,8 @@ test.describe('the order', () => {
             const library = new LibraryPage(page);
             await app.goto('/library');
             await page.getByRole('radio', { name: 'My own' }).check();
-            expect(await library.titles()).toEqual(['arms', 'Bench', 'Zone 2']);
+            // Polled, as the list can still be filtering just after the choice
+            await expect.poll(() => library.titles()).toEqual(['arms', 'Bench', 'Zone 2']);
             const options = await library.options('Bench');
             await expect(options.getByRole('button')).toHaveCount(4);
             await expect(options.getByRole('button', { name: /^Move/ })).toHaveCount(0);
@@ -323,7 +324,7 @@ test.describe('ready-made workouts', () => {
             await app.goto('/library');
             await page.getByRole('radio', { name: 'Ready-made' }).check();
             await expect(library.card('Legs')).toHaveCount(0);
-            await expect(library.cards).toHaveCount(21);
+            await expect(library.cards).toHaveCount(23);
 
             // Only what I have, with a kettlebell: those needing nothing or a kettlebell
             await page.getByRole('button', { name: 'More filters' }).click();
@@ -482,7 +483,7 @@ test.describe('favourites saved by an older version', () => {
             await app.goto('/library');
             await page.getByRole('button', { name: 'Favourites' }).click();
 
-            expect(await library.titles()).toEqual(['Gym legs', 'Legs']);
+            await expect.poll(() => library.titles()).toEqual(['Gym legs', 'Legs']);
             await expect(page.getByRole('button', { name: 'Favourite Legs' })).toHaveAttribute(
                 'aria-pressed',
                 'true'

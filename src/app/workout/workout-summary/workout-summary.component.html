@@ -105,6 +105,9 @@
                 </label>
             </section>
 
+            <!-- Before the next workout, as it's what to do now -->
+            <app-summary-stretch (start)="startStretches($event)" />
+
             <!-- As the history page suggests it; started from there or the library, not here -->
             <app-suggested-workout class="summary__suggestion" [startable]="false" />
         } @else {

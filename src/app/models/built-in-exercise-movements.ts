@@ -170,4 +170,13 @@ export const BUILT_IN_MOVEMENTS: Readonly<Record<string, Movement>> = {
     'builtin:band-pull-through': 'hinge',
     'builtin:band-lateral-walk': 'hip abduction',
     'builtin:pallof-press': 'core brace',
+    'builtin:doorway-chest-stretch': 'stretch',
+    'builtin:cross-body-shoulder-stretch': 'stretch',
+    'builtin:standing-biceps-stretch': 'stretch',
+    'builtin:overhead-triceps-stretch': 'stretch',
+    'builtin:wrist-flexor-stretch': 'stretch',
+    'builtin:standing-side-stretch': 'stretch',
+    'builtin:upper-trap-stretch': 'stretch',
+    'builtin:standing-it-band-stretch': 'stretch',
+    'builtin:butterfly-stretch': 'stretch',
 };

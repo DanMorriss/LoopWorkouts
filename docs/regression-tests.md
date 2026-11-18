@@ -48,7 +48,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     - `settings({...})`: `settings` as in data.md (theme, sound, weightUnit, bodyFigure, myEquipment, onlyMyEquipment, eachSideFirst, switchSidesSeconds, name, trainingFor).
     - `plan(days)`: `week-plan` with `days` (seven lists of workout ids, Monday first) and no `plannedAt`, so every workout counts this week.
     - `signedIn(email)`: a Supabase session under `sb-cpgacyzlfyskifzhkotu-auth-token`, with `welcomed = "signed-in"`.
-- **Ids** in the steps below are the real ones: built-in exercises are `builtin:<kebab name>` (117 of them today, e.g. `back-squat`, `bench-press`, `push-up`, `goblet-squat`, `plank`, `seated-cable-row`, `dumbbell-shoulder-press`, `leg-press`, `side-plank`, `chainsaw-row`); ready-made workouts `builtin:gym-legs` and so on; plans `builtin-plan:no-equipment-3-day` and so on.
+- **Ids** in the steps below are the real ones: built-in exercises are `builtin:<kebab name>` (126 of them today, e.g. `back-squat`, `bench-press`, `push-up`, `goblet-squat`, `plank`, `seated-cable-row`, `dumbbell-shoulder-press`, `leg-press`, `side-plank`, `chainsaw-row`); ready-made workouts `builtin:gym-legs` and so on; plans `builtin-plan:no-equipment-3-day` and so on.
 
 ### Tags used below
 
@@ -557,7 +557,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. Back on Workouts, press **Start Tabata**.
     4. Open `/ready-made/gym-legs`, `/ready-made` and `/library/builtin:nope`.
 - **Expected:**
-    1. Only the 21 ready-made; then only those needing nothing or a kettlebell (Kettlebell AMRAP, Tabata, not Gym legs).
+    1. Only the 23 ready-made; then only those needing nothing or a kettlebell (Kettlebell AMRAP, Tabata, not Gym legs).
     2. `/library/builtin:gym-legs` with its badge, "Back squat 3 sets: 12, 10, 8, rest 2:30", Muscles it works, and Make a copy where Edit would be; the copy is "Gym legs (copy)", saved and open in Create.
     3. Tabata starts as it is: no copy in your workouts.
     4. The old addresses go to `/library/builtin:gym-legs` and `/library`; the last says "Workout not found".
@@ -853,6 +853,17 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Pick Kettlebell push-up; **Save**.
     4. **Back to workout** in the bar.
 - **Expected:** 2. Push-up says "Already in this workout". 3. The bar says "Saved. The workout that's going has the change from here.", with Back to workout. 4. Up next is Kettlebell push-up.
+
+### REG-RUN-18 · Stretches after a workout
+
+- **Stories:** PRG-16 · **Priority:** P2
+- **Preconditions:** workout "Push": Push-up (`builtin:push-up`) 10, once.
+- **Steps:**
+    1. Start; Done.
+    2. Press **Start stretches** in Stretch what you worked.
+    3. Reload.
+- **Expected:** 1. The summary's Stretch what you worked has the doorway chest stretch. 2. The summary goes and Doorway chest stretch is running, focus on Pause. 3. Still running; Workouts still has only Push.
+- **Left to Vitest:** which stretches are picked, and their order (`stretch-routine.spec.ts`); the push-ups logged as finished, and no stretches on the stretches' own summary (`workout.component.spec.ts`).
 - **Left to Vitest:** a change that would move the clock (saved for next time, the run as it was after a reload), and the sets before the change staying as they were (`workout.component.spec.ts`, `run-edit.spec.ts`, `workout-store.service.spec.ts`).
 
 ---
@@ -1018,7 +1029,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     7. Search "zzzz"; press **Clear search and filters**.
     8. Open `/exercises?muscles=quads,notamuscle`.
 - **Expected:**
-    1. "Exercises" with **New**; "117 exercises" (read the number from `BUILT_IN_EXERCISES` rather than hard-coding it), A to Z.
+    1. "Exercises" with **New**; "126 exercises" (read the number from `BUILT_IN_EXERCISES` rather than hard-coding it), A to Z.
     2. Push-up first, saying "Also called Press-up".
     3. The exercise's address keeps `?q=squat`; back, the list is at `/exercises?q=squat`, with "squat" still in the box, scrolled where it was.
     4. The address is `/exercises?muscles=quads,glutes`; both chips pressed, both shaded on the map and listed with × buttons; the count drops and is read out.
@@ -1026,7 +1037,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     6. Only no-equipment exercises; then barbell-and-rack ones too ("My equipment: 2 pieces").
     7. "No exercises match." then everything back.
     8. Only Quads picked; the unknown one is ignored.
-- **In the pack:** the count is read from the page's status ("117 exercises") rather than hard-coded; the body map's Glutes is pressed by its keys, as a click in the middle of its box lands on the drawing around the shape.
+- **In the pack:** the count is read from the page's status ("126 exercises") rather than hard-coded; the body map's Glutes is pressed by its keys, as a click in the middle of its box lands on the drawing around the shape.
 
 ### REG-EXR-02 · An exercise's page and its demo
 
@@ -1524,7 +1535,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Today and planning        | REG-PLAN-01 – 10 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                   |
 | Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                                   |
 | Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                                          |
-| Running a workout         | REG-RUN-01 – 17  | RUN-1 – RUN-12, RUN-14, RUN-15, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |
+| Running a workout         | REG-RUN-01 – 18  | RUN-1 – RUN-12, RUN-14, RUN-15, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                          |
 | Progress                  | REG-PRG-01 – 06  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14                                                                                     |
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                   |

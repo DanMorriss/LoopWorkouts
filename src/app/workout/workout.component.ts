@@ -1,5 +1,3 @@
-import { editUrl } from '../shared/state/make-copy.service';
-import { Workout } from '../models/workout';
 import {
     afterNextRender,
     AnimationCallbackEvent,
@@ -14,7 +12,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AlarmService } from '../shared/alarms/alarm.service';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
 import { HelpLinkComponent } from '../shared/components/help-link/help-link.component';
@@ -30,6 +28,7 @@ import { WorkoutNoteComponent } from './workout-note/workout-note.component';
 import { WorkoutRingComponent } from './workout-ring/workout-ring.component';
 import { WorkoutRoundLineComponent } from './workout-round-line/workout-round-line.component';
 import { WorkoutSummaryComponent } from './workout-summary/workout-summary.component';
+import { SummaryExits } from './summary-exits';
 import { LastSetDialogComponent } from './last-set-dialog/last-set-dialog.component';
 import { WorkoutSwap } from './workout-swap';
 import { UpNextCardComponent } from './up-next-card/up-next-card.component';
@@ -82,7 +81,6 @@ const SPACE_HANDLED_BY =
     },
 })
 export class WorkoutComponent {
-    private readonly router = inject(Router);
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly injector = inject(Injector);
     protected readonly run = inject(ActiveRunService);
@@ -140,6 +138,11 @@ export class WorkoutComponent {
         return card?.done() ? card.card() : undefined;
     }
     private readonly resumeButton = viewChild<ElementRef<HTMLButtonElement>>('resumeButton');
+    /** Where the summary's buttons go, and focus with them. */
+    protected readonly exits = new SummaryExits({
+        resume: () => this.resumeButton()?.nativeElement,
+        main: () => this.mainButton()?.nativeElement,
+    });
     private readonly ring = viewChild(WorkoutRingComponent);
     private readonly reducedMotion = injectPrefersReducedMotion();
     /** Apple's spring for moving something about: no bounce, a 0.4s response. */
@@ -378,32 +381,5 @@ export class WorkoutComponent {
     /** End workout: the summary opens over the run, which waits, paused, in case of Back. */
     end() {
         this.run.end();
-    }
-
-    /** Back from the summary to the paused run, with focus on Resume. */
-    backToWorkout() {
-        this.run.back();
-        afterNextRender(() => this.resumeButton()?.nativeElement.focus(), {
-            injector: this.injector,
-        });
-    }
-
-    /** The summary's Done: the run is over, on to it in the history (highlighted if logged). */
-    /** A copy made of the ready-made workout just run: the summary closes, and it opens in Create. */
-    async openCopy(copy: Workout) {
-        this.run.stop();
-        await this.router.navigateByUrl(editUrl(copy));
-    }
-
-    /** From the summary: the run is over, on to the Body weight box on You → Profile. */
-    async addWeight() {
-        this.run.stop();
-        await this.router.navigate(['/account'], { queryParams: { focus: 'body-weight' } });
-    }
-
-    async closeSummary() {
-        const run = this.run.runId();
-        this.run.stop();
-        await this.router.navigate(['/history'], run ? { queryParams: { run } } : {});
     }
 }

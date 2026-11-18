@@ -27,6 +27,7 @@ import { SummarySetsComponent } from './summary-sets/summary-sets.component';
 import { SummaryCopyComponent } from './summary-copy/summary-copy.component';
 import { SummaryKettlebellComponent } from './summary-kettlebell/summary-kettlebell.component';
 import { SummaryStepUpsComponent } from './summary-step-ups/summary-step-ups.component';
+import { SummaryStretchComponent } from './summary-stretch/summary-stretch.component';
 import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';
 import { SheetDrag } from './sheet-drag';
 import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
@@ -35,7 +36,8 @@ import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
  * How the workout went, once it's finished or ended with End workout: the time, rounds and
  * sets, which can be corrected, what to step up next time, the muscles worked, a note, and
  * the suggested next workout. A workout ended early (or one that runs until stopped) can be
- * taken up again with Back to workout; the run waits, paused, until then. Focus starts on
+ * taken up again with Back to workout; the run waits, paused, until then. Stretches for the
+ * muscles it worked can be started from here. Focus starts on
  * the heading and is trapped inside while it's open.
  */
 @Component({
@@ -51,6 +53,7 @@ import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
         SummaryStatsComponent,
         SummaryKettlebellComponent,
         SummaryStepUpsComponent,
+        SummaryStretchComponent,
         SummarySwapsComponent,
     ],
     templateUrl: './workout-summary.component.html',
@@ -71,6 +74,8 @@ export class WorkoutSummaryComponent {
     readonly addWeight = output<void>();
     /** Make a copy, of a ready-made workout: the copy, to open in Create. */
     readonly copied = output<Workout>();
+    /** Start stretches: the stretches for this workout, to run in its place. */
+    readonly stretch = output<Workout>();
 
     protected readonly finished = this.run.isComplete;
     protected readonly heading = computed(() => {
@@ -144,6 +149,11 @@ export class WorkoutSummaryComponent {
     protected leave(to: 'back' | 'done') {
         this.saveNote();
         this[to].emit();
+    }
+
+    protected startStretches(routine: Workout) {
+        this.saveNote();
+        this.stretch.emit(routine);
     }
 
     /** Escape goes back to the workout, where there's one to go back to. */

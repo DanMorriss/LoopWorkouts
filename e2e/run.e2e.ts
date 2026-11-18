@@ -955,3 +955,33 @@ test.describe('changing the workout while it runs', () => {
         }
     );
 });
+
+test.describe('stretches after a workout', () => {
+    const push = workout('Push', { steps: [reps(10, 'Push-up', { exercise: 'push-up' })] });
+    test.use({ storage: seed.workouts([push]) });
+
+    test(
+        'REG-RUN-18 the summary offers stretches for the muscles worked, and starts them',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Push');
+            await run.pressDone();
+
+            const stretches = run.summary.getByRole('region', { name: 'Stretch what you worked' });
+            await expect(stretches).toContainText('Doorway chest stretch');
+            await stretches.getByRole('button', { name: /^Start stretches/ }).click();
+
+            await expect(run.summary).toBeHidden();
+            await expect(run.face).toContainText('Doorway chest stretch');
+            await expect(run.pause).toBeFocused();
+
+            // Never saved, it carries on after a reload all the same, and isn't in Workouts
+            await app.reload();
+            await expect(run.face).toContainText('Doorway chest stretch');
+            const workouts = await app.stored<Workout[]>('workouts');
+            expect(workouts!.map((saved) => saved.title)).toEqual(['Push']);
+        }
+    );
+});

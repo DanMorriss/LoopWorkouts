@@ -108,11 +108,14 @@ describe('BUILT_IN_WORKOUTS', () => {
         expect(BUILT_IN_WORKOUTS.filter(isActiveRest).map((w) => w.title)).toEqual([
             'Mobility flow',
             'Full-body stretch',
+            'Upper-body stretch',
+            'Lower-body stretch',
         ]);
     });
 
     it('has mobility workouts of stretches alone, needing nothing (the third batch)', () => {
-        for (const title of ['Mobility flow', 'Full-body stretch']) {
+        const stretches = ['Mobility flow', 'Full-body stretch', 'Upper-body stretch'];
+        for (const title of [...stretches, 'Lower-body stretch']) {
             expect(isActiveRest(byTitle(title)), title).toBe(true);
             expect(builtInWorkoutEquipment(byTitle(title)), title).toEqual(['none']);
         }

@@ -232,6 +232,38 @@ describe('skeletonOf, placing the hands in 3D', () => {
         });
     });
 
+    it('moves a foot in front or behind with feetForward, the leg its own length', () => {
+        // Sitting from the front, the knees out to the sides as drawn
+        const sitting: Pose = {
+            ...standing,
+            hips: [0, -12],
+            legs: [{ angles: [-94, 92] }, { angles: [94, -92] }],
+        };
+        const drawn = skeletonOf(sitting, front(sitting));
+        const out = skeletonOf({ ...sitting, feetForward: [30, 30] }, front(sitting));
+        out.legs.forEach((leg, i) => {
+            expect(leg.end[0]).toBeCloseTo(drawn.legs[i].end[0] + 30, 4);
+            expectLengths(leg, BODY.thigh, BODY.shin);
+        });
+
+        // A straight leg crossed behind stays straight, its foot back
+        const behind = skeletonOf({ ...standing, feetForward: [-14, 0] }, front(standing));
+        expect(behind.legs[0].end[0]).toBeLessThan(-10);
+        expectLengths(behind.legs[0], BODY.thigh, BODY.shin);
+        // From the side a drawing shows it, so it's left as drawn
+        close(
+            skeletonOf({ ...standing, feetForward: [-14, 0] }, side(standing)).legs[0].end,
+            skeletonOf(standing, side(standing)).legs[0].end
+        );
+    });
+
+    it('carries each wrist bend through, none if not given', () => {
+        expect(skeletonOf(standing, side(standing)).wristBend).toEqual([0, 0]);
+        expect(skeletonOf({ ...standing, wristBend: [80, 0] }, side(standing)).wristBend).toEqual([
+            80, 0,
+        ]);
+    });
+
     it('points the elbows down the body with elbowsDown, the hands staying put', () => {
         // Hands in front of the shoulders, from the front, as an Arnold press starts
         const pose: Pose = {

@@ -1148,7 +1148,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:** You → **Export backup**; catch the download.
 - **Expected:** A file `loop-workouts-2026-11-11.json`; "Backup saved as loop-workouts-2026-11-11.json." under the buttons; the JSON has `app`, `version`, both workouts, all 5 history entries (the history is read from IndexedDB, so this proves the wait for it), the deletion, the note, the hidden exercise, the plan and the settings.
 
-### REG-DATA-02 · Import a backup, and the AI prompt
+### REG-DATA-02 · Import a backup, the AI prompt and Paste plan
 
 - **Stories:** SYN-2, SYN-6 · **Priority:** P1
 - **Preconditions:** `guest()`, Dark theme, workout "Legs". Fixture files: (a) a backup with 2 workouts not here and `settings.theme: "light"`; (b) a text file; (c) `{"app":"something-else"}`; (d) a backup with `version` above the app's; (e) a hand-written file with workout "Legs 2" (8 reps "Back squat", 30 s "Sled push"), no ids, no history, and an exercise "Sled push".
@@ -1158,12 +1158,14 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Import (b), (c), (d).
     4. Import (e) twice.
     5. Press **Copy AI prompt**; read the clipboard.
+    6. Press **Paste plan**; paste `{"app": "something-else"}` and press **Import**; then paste a whole reply (words, a code block with workout "Legs 3", "Notes:" after) and press **Import**.
 - **Expected:**
     1. "Added 2 workouts." under the buttons and in the bar at the bottom, with **View workouts**; the theme stays Dark.
     2. Workouts opens, with the two new ones; the bar goes.
     3. (b) "That file couldn't be read. Is it a Loop Workouts backup?"; (c) "That file isn't a Loop Workouts backup."; (d) "That backup is from a newer version of Loop Workouts. Update the app and try again." Nothing changes.
     4. "Legs 2" is added with step 1 linked to `builtin:back-squat` and step 2 to a new own exercise "Sled push"; the second import adds nothing.
     5. "Prompt copied. Paste it into an AI chat, then add your plan."; the clipboard text ends with "MY PLAN" and names built-in exercises.
+    6. The box has focus; the first says "That isn't a plan for Loop Workouts." in the dialog, which stays; the second closes it, "Added 1 workout." shows, focus is on Paste plan and "Legs 3" is saved.
 - **In the pack:** files are picked through the Import backup's file chooser, made in the test.
 
 ### REG-DATA-03 · Clear this device

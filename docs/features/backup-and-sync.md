@@ -1,6 +1,6 @@
 # Backup and sync
 
-Export and import (SYN-1, SYN-2) are built, with a prompt for having an AI turn a plan into a file to import (SYN-6), the history has room for years (SYN-5), and the data is ready for sync: random ids, `updatedAt` and deletion markers (see [data](data.md)). The library's order is a record of its own, so it merges too. Signing in, signing out and deleting an account are built, with Clear this device (SYN-8, SYN-9), and so is sync (SYN-3, SYN-4): signed in, the workouts, history and exercises are the same on every device, merged as an import is. How it works, and the backend picked, are under **Sync** below; and so is signing in with Google (SYN-7); Apple waits on an Apple Developer account. Signing in needs a tick first, giving explicit consent to keeping notes that may mention health with the account (SYN-10), which is recorded with it.
+Export and import (SYN-1, SYN-2) are built, with a prompt for having an AI turn a plan into workouts, and Paste plan to bring in what it writes (SYN-6), the history has room for years (SYN-5), and the data is ready for sync: random ids, `updatedAt` and deletion markers (see [data](data.md)). The library's order is a record of its own, so it merges too. Signing in, signing out and deleting an account are built, with Clear this device (SYN-8, SYN-9), and so is sync (SYN-3, SYN-4): signed in, the workouts, history and exercises are the same on every device, merged as an import is. How it works, and the backend picked, are under **Sync** below; and so is signing in with Google (SYN-7); Apple waits on an Apple Developer account. Signing in needs a tick first, giving explicit consent to keeping notes that may mention health with the account (SYN-10), which is recorded with it.
 
 ## Stories
 
@@ -46,15 +46,20 @@ Export and import (SYN-1, SYN-2) are built, with a prompt for having an AI turn 
 
 ### Bringing in a plan with AI (SYN-6)
 
-- Under the backup buttons: "Have a plan from a coach, a book or a spreadsheet? Copy this prompt into an AI chat, add your plan, then bring in the file it writes with Import backup." and a **Copy AI prompt** button.
+- Under the backup buttons: "Have a plan from a coach, a book or a spreadsheet? Copy this prompt into an AI chat and add your plan, then paste what it writes with Paste plan." and the buttons **Copy AI prompt** and **Paste plan**.
 - It copies the prompt to the clipboard and says "Prompt copied. Paste it into an AI chat, then add your plan." If the browser won't allow it: "The prompt couldn't be copied. Try again, or another browser."
-- The prompt asks for one JSON object, in a code block, in the backup file's shape (see [data](data.md#backup-file)) cut down to what a plan needs: `app`, `version` (the app's current one), `workouts` and `exercises`, **with no ids or dates**. It's made from the app itself, so it keeps up with it:
+- The prompt asks for one JSON object, in a code block to paste into the app, in the backup file's shape (see [data](data.md#backup-file)) cut down to what a plan needs: `app`, `version` (the app's current one), `workouts` and `exercises`, **with no ids or dates**. It's made from the app itself, so it keeps up with it:
     - the workout and step fields, with their limits (steps per workout, rounds or until stopped, a time limit, seconds, reps, a weight in kg, converting lb, a name's length), and each exercise as a group of its sets with the rest between them, done each side where the plan says so, each set's own reps and weight where they differ (e.g. a pyramid), exercises the plan pairs up (a superset, giant set or "A1/A2") as one group of their steps with its rounds and rest, under the plan's own section titles as headings (up to 10, each up to 40 characters)
     - every built-in exercise's name and other names, to name steps by where they match
     - for any other exercise, an entry in `exercises` with how it's measured, the equipment and muscles to choose from, and an optional description, how-to steps and tips
     - an example file, and to pick a sensible value for what doesn't fit (e.g. the low end of 8–12 reps, or a weight given as a percentage of a max) and list what it changed under the JSON as "Notes:"
     - it ends with "MY PLAN", for the plan to be pasted after it.
-- The file it writes goes in with **Import backup**, which is eased for a file written by hand:
+- **Paste plan** (since 2026-11-17; before, the AI's JSON had to be saved as a file and brought in with Import backup) opens a dialog, "Paste plan", with "Paste what the AI wrote: its whole reply, or just the code block.", a box "The AI's reply" that has focus, **Cancel** and **Import**:
+    - The JSON is taken from what's pasted: what's inside the first code block if there is one, then from the first `{` to the last `}`. So the AI's words around it and its "Notes:" after it can be pasted too.
+    - **Import** merges it as Import backup does a file (below). If it goes in, the dialog closes, focus goes back to Paste plan, and what happened is said as for any import, under the buttons and in the bar at the bottom, e.g. "Added 3 workouts and 2 exercises." with View workouts.
+    - If it's turned down, the dialog stays open with what was pasted, and says why under the box (read out): "Paste the AI's reply first." (nothing pasted), "That isn't the JSON the AI wrote. Copy its code block, and paste it here." (not JSON), "That isn't a plan for Loop Workouts. Check the AI was given the prompt from Copy AI prompt." (not a backup, or over 50 MB) or "That's from a newer version of Loop Workouts. Update the app and try again." Nothing changes.
+    - Cancel, ‹ Back, Escape or a click outside close it, with focus back on Paste plan.
+- What's pasted, or a file the AI writes and is brought in with **Import backup**, is eased for being written by hand:
     - `history` can be left out (`exportedAt`, `exerciseNotes`, `hiddenExercises`, `deleted` and `settings` already could).
     - A **workout with no id** is new: it's given a random id, dated now, and matched by what it is (title, steps and rounds), as a version 1 file's are. One the same as a workout here is skipped, so importing the same file twice doesn't add it twice.
     - An **exercise of your own with no id** is given a random id and dated now. One with the name of an exercise here, built-in or your own, is taken to be that one, as above, so it isn't added again.
@@ -171,6 +176,7 @@ Compared on 2026-10-27, for cost, how it fits the device-first design above, sig
 - Given a file that isn't a backup, or is from a newer version, when I import it, then nothing changes and I'm told why.
 - Given a backup with a broken workout and two broken history entries, when I import it, then the rest are added and "3 items in it couldn't be read" is shown.
 - Given I press Copy AI prompt, then the prompt is on the clipboard and I'm told so.
+- Given an AI's whole reply, with words before its code block and notes after, when I press Paste plan, paste it and press Import, then its workouts are added, the dialog closes, focus is back on Paste plan and "Added 1 workout." is shown; given something that isn't a plan, then the dialog stays open with it and says why, and nothing changes.
 - Given a file written by hand with a workout "Legs" of 8 back squats and 30 seconds of "Sled push", no ids and no history, and an exercise "Sled push", when I import it, then "Legs" is added with its first step linked to the built-in Back squat and its second to my new "Sled push"; when I import it again, then nothing new is added.
 - Given 600 workouts in the history, when I open the app again, then all 600 are there.
 - Given a history saved before it moved to IndexedDB, when I open the app, then every entry is still there.

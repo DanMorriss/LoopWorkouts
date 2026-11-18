@@ -4,14 +4,19 @@ import { planPrompt } from '../../shared/backup/plan-prompt';
 import { ClearDeviceComponent } from '../../shared/components/clear-device/clear-device.component';
 import { UndoOffer, UndoService } from '../../shared/undo/undo.service';
 import { counted } from '../../shared/format-count';
+import { injectFocusAfterRender } from '../../shared/focus-after-render';
+import {
+    PastedImport,
+    PastePlanDialogComponent,
+} from './paste-plan-dialog/paste-plan-dialog.component';
 
 /**
- * Account → Your data: Export backup and Import backup (SYN-1, SYN-2), Copy AI prompt for
- * bringing in a plan (SYN-6), and Clear this device (SYN-9).
+ * Account → Your data: Export backup and Import backup (SYN-1, SYN-2), Copy AI prompt and Paste
+ * plan for bringing in a plan (SYN-6), and Clear this device (SYN-9).
  */
 @Component({
     selector: 'app-your-data',
-    imports: [ClearDeviceComponent],
+    imports: [ClearDeviceComponent, PastePlanDialogComponent],
     templateUrl: './your-data.component.html',
     styleUrl: './your-data.component.scss',
 })
@@ -21,9 +26,12 @@ export class YourDataComponent {
 
     private readonly backup = inject(BackupService);
     private readonly undo = inject(UndoService);
+    private readonly focusAfterRender = injectFocusAfterRender();
 
     /** What the last export or import did, read out as it changes. */
     protected readonly status = signal('');
+    /** Paste plan's dialog is open. */
+    protected readonly pasting = signal(false);
 
     protected async exportBackup() {
         this.status.set(`Backup saved as ${await this.backup.export()}.`);
@@ -36,7 +44,22 @@ export class YourDataComponent {
         if (!file) {
             return;
         }
-        const result = await this.backup.import(file);
+        this.showImport(await this.backup.import(file));
+    }
+
+    /** A plan pasted in Paste plan went in: says what came in, as an import of a file does. */
+    protected pastedPlan(result: PastedImport) {
+        this.closePaste();
+        this.showImport(result);
+    }
+
+    /** Closes Paste plan, putting focus back on its button. */
+    protected closePaste() {
+        this.pasting.set(false);
+        this.focusAfterRender('paste-plan');
+    }
+
+    private showImport(result: ImportResult) {
         const message = importMessage(result);
         this.status.set(message);
         // In the bar at the bottom too, where it's seen on a phone; the line above reads it out

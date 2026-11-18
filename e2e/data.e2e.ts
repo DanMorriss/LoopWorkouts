@@ -83,7 +83,7 @@ test.describe('import', () => {
     test.use({ storage: seed.workouts([legs]) });
 
     test(
-        'REG-DATA-02 import a backup, and the AI prompt',
+        'REG-DATA-02 import a backup, and the AI prompt and Paste plan',
         { tag: '@p1' },
         async ({ app, page, context }) => {
             await app.goto('/account');
@@ -169,6 +169,43 @@ test.describe('import', () => {
             const prompt = await page.evaluate(() => navigator.clipboard.readText());
             expect(prompt.trimEnd()).toMatch(/MY PLAN:?$/);
             expect(prompt).toContain('Back squat');
+
+            // What the AI wrote, pasted whole: words, a code block and notes after it
+            const paste = page.getByRole('button', { name: 'Paste plan' });
+            await paste.click();
+            const dialog = page.getByRole('dialog', { name: 'Paste plan' });
+            const reply = dialog.getByRole('textbox', { name: "The AI's reply" });
+            await expect(reply).toBeFocused();
+            await reply.fill('{"app": "something-else"}');
+            await dialog.getByRole('button', { name: 'Import' }).click();
+            await expect(dialog.getByRole('alert')).toContainText(
+                "That isn't a plan for Loop Workouts."
+            );
+            const pasted = backup({
+                workouts: [
+                    {
+                        title: 'Legs 3',
+                        repeats: 1,
+                        blocks: [
+                            {
+                                kind: 'group',
+                                rounds: 1,
+                                restSeconds: 0,
+                                steps: [{ kind: 'reps', reps: 10, name: 'Back squat' }],
+                            },
+                        ],
+                    },
+                ],
+                exercises: [],
+            }).buffer.toString();
+            await reply.fill(`Here's your plan:\n\`\`\`json\n${pasted}\n\`\`\`\nNotes: none.`);
+            await dialog.getByRole('button', { name: 'Import' }).click();
+            await expect(dialog).toBeHidden();
+            await expect(yourData).toContainText('Added 1 workout.');
+            await expect(paste).toBeFocused();
+            expect(
+                (await app.stored<Workout[]>('workouts'))!.some((w) => w.title === 'Legs 3')
+            ).toBe(true);
         }
     );
 });

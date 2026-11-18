@@ -580,6 +580,25 @@ test.describe('a time limit', () => {
         await expect(run.summary.getByRole('heading', { name: "Time's up" })).toBeFocused();
         await expect(run.summary).toContainText('Push-ups: 6 reps');
     });
+
+    test(
+        "REG-RUN-10 Skip on How many reps? isn't asked again after a reload",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('B');
+            await run.wait(23_500);
+            const asked = page.getByRole('dialog', { name: 'How many reps?' });
+            await asked.getByRole('button', { name: 'Skip' }).click();
+            await expect(run.summary).toHaveAccessibleName("Time's up");
+
+            await app.reload();
+            await expect(run.summary).toHaveAccessibleName("Time's up");
+            await expect(asked).toBeHidden();
+            await expect(run.summary).not.toContainText('Push-ups');
+        }
+    );
 });
 
 test.describe('swapping mid-workout', () => {

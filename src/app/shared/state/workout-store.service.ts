@@ -63,6 +63,7 @@ export class WorkoutStore {
     private _activeSkips = signal<StepSkip[]>([]);
     private _activeWaitToStart = signal(false);
     private _activeWaitsPassed = signal(0);
+    private _activeLastSetPassed = signal(false);
 
     /** Your own workouts, which are your data: saved, backed up and synced. */
     readonly workouts = computed(() => this._workouts());
@@ -166,6 +167,11 @@ export class WorkoutStore {
      * `runPosition()` counts) were started, or skipped past.
      */
     readonly activeWaitsPassed = computed(() => this._activeWaitsPassed());
+    /**
+     * Skip was pressed on "How many reps?", for the set time ran out in (RUN-8), so it isn't
+     * asked again, even after a reload.
+     */
+    readonly activeLastSetPassed = computed(() => this._activeLastSetPassed());
 
     constructor() {
         renameActiveRunKeys();
@@ -209,6 +215,7 @@ export class WorkoutStore {
         this._activeSkips.set(readSkips(sessionStorage.getItem('activeSkips')));
         this._activeWaitToStart.set(sessionStorage.getItem('activeWaitToStart') === 'true');
         this._activeWaitsPassed.set(readCount(sessionStorage.getItem('activeWaitsPassed')));
+        this._activeLastSetPassed.set(sessionStorage.getItem('activeLastSetPassed') === 'true');
     }
 
     private loadWorkouts(): Workout[] {
@@ -584,6 +591,15 @@ export class WorkoutStore {
         sessionStorage.setItem('activeWaitsPassed', String(position + 1));
     }
 
+    /** The set time ran out in is left out of the run: see activeLastSetPassed. */
+    passLastSet() {
+        if (!this._activeWorkout()) {
+            return;
+        }
+        this._activeLastSetPassed.set(true);
+        sessionStorage.setItem('activeLastSetPassed', 'true');
+    }
+
     /** Adds a set without moving the workout on, e.g. the one time ran out in. */
     addActiveSet(set: RepSet) {
         if (!this._activeWorkout()) {
@@ -610,7 +626,9 @@ export class WorkoutStore {
         this._activeSets.set([]);
         this._activeSkips.set([]);
         this._activeWaitsPassed.set(0);
+        this._activeLastSetPassed.set(false);
         sessionStorage.removeItem('activeWaitsPassed');
+        sessionStorage.removeItem('activeLastSetPassed');
         sessionStorage.removeItem('activeRepStepsDone');
         sessionStorage.removeItem('activeRepMs');
         sessionStorage.removeItem('activeSets');

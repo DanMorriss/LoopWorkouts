@@ -603,6 +603,31 @@ describe('WorkoutStore', () => {
             expect(reloaded.activeWaitsPassed()).toBe(0);
         });
 
+        it('keeps Skip on "How many reps?" across a reload, until the next run (RUN-8)', () => {
+            const store = createStore();
+            const workout = store.addWorkout(makeWorkout());
+            store.setActiveWorkout(workout);
+            store.passLastSet();
+
+            TestBed.resetTestingModule();
+            const reloaded = createStore();
+            expect(reloaded.activeLastSetPassed()).toBe(true);
+
+            reloaded.setActiveWorkout(workout);
+            expect(reloaded.activeLastSetPassed()).toBe(false);
+            reloaded.passLastSet();
+            reloaded.stop();
+            expect(reloaded.activeLastSetPassed()).toBe(false);
+            TestBed.resetTestingModule();
+            expect(createStore().activeLastSetPassed()).toBe(false);
+        });
+
+        it("doesn't pass a last set with no run", () => {
+            const store = createStore();
+            store.passLastSet();
+            expect(store.activeLastSetPassed()).toBe(false);
+        });
+
         describe('swaps (RUN-11)', () => {
             const original = { kind: 'work' as const, seconds: 30, name: 'Plank' };
             const swap = {

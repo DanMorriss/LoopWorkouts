@@ -134,6 +134,11 @@ export class WorkoutComponent {
         const card = this.upNextCard();
         return card?.done() ? card.button() : undefined;
     }
+    /** The card Done is on, which swells as a rep step comes round. */
+    private doneCard() {
+        const card = this.upNextCard();
+        return card?.done() ? card.card() : undefined;
+    }
     private readonly resumeButton = viewChild<ElementRef<HTMLButtonElement>>('resumeButton');
     private readonly ring = viewChild(WorkoutRingComponent);
     private readonly reducedMotion = injectPrefersReducedMotion();
@@ -150,7 +155,7 @@ export class WorkoutComponent {
             }
             afterNextRender(
                 () =>
-                    this.doneButton()?.nativeElement.animate(
+                    this.doneCard()?.nativeElement.animate(
                         [
                             { transform: 'none' },
                             { transform: 'scale(1.15)' },
@@ -345,7 +350,7 @@ export class WorkoutComponent {
 
     /**
      * Focus back on what opened the details: the exercise's name, on the face or, while
-     * paused, over it, or the Up next card (or Done's (i)). If the workout has moved on meanwhile, so that's
+     * paused, over it, or the Up next card (or the name on Done). If the workout has moved on meanwhile, so that's
      * gone, on Done or Pause (or Resume), so it isn't lost.
      */
     private focusInfo() {

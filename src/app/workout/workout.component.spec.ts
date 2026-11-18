@@ -2501,14 +2501,15 @@ describe('WorkoutComponent', () => {
 
             advance(3000);
             TestBed.tick();
-            expect(doneButton()!.getAnimations().length).toBe(1);
+            // The whole card, Done's button laid over it
+            expect(doneButton()!.parentElement!.getAnimations().length).toBe(1);
             fixture.destroy();
 
             fakeReducedMotion(true);
             start(circuit());
             advance(3000);
             TestBed.tick();
-            expect(doneButton()!.getAnimations().length).toBe(0);
+            expect(doneButton()!.parentElement!.getAnimations().length).toBe(0);
             fixture.destroy();
         });
 
@@ -2722,7 +2723,7 @@ describe('WorkoutComponent', () => {
             expect(upNextCard()).toBe('Done · up next: Rest, 00:02');
             expect(doneButton()!.getAttribute('aria-label')).toBe('Done. Next: Rest · 00:02');
             expect(doneButton()!.getAttribute('aria-keyshortcuts')).toBe('Space');
-            expect(doneButton()!.dataset['next']).toBe('rest');
+            expect(doneButton()!.parentElement!.dataset['next']).toBe('rest');
             expect(mainButton().getAttribute('aria-label')).toBe('Pause');
             expect(mainButton().getAttribute('aria-keyshortcuts')).toBeNull();
 
@@ -4987,8 +4988,8 @@ describe('WorkoutComponent', () => {
                 expect(view().isWorkActive()).toBe(true);
             });
 
-            describe("Done's (i), on a rep step before an exercise", () => {
-                const info = () => el('.up-next__info');
+            describe("the next exercise's name on Done, with its (i)", () => {
+                const info = () => el('.up-next__about');
                 const plank: Step = {
                     kind: 'work',
                     seconds: 30,
@@ -5001,7 +5002,8 @@ describe('WorkoutComponent', () => {
                     start(makeWorkout({ steps: [backSquat, plank], repeats: 1 }));
 
                     expect(el('.up-next--done')).not.toBeNull();
-                    expect(info()!.getAttribute('aria-label')).toBe('About Plank');
+                    expect(info()!.textContent!.replace('info', '').trim()).toBe('Plank');
+                    expect(info()!.querySelector('mat-icon')!.textContent!.trim()).toBe('info');
                     expect(info()!.getAttribute('aria-haspopup')).toBe('dialog');
                     info()!.click();
                     fixture.detectChanges();

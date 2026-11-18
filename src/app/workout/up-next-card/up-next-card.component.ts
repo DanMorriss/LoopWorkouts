@@ -9,8 +9,8 @@ export type UpNext = NonNullable<ReturnType<WorkoutView['upNextCard']>>;
 /**
  * What's next, under the ring: "Up next", its name big, and the set, reps and weight or time
  * under it, in the next step's colour, pulsing with the face as a timed step ends. On a rep
- * step it's Done, on to it, with an (i) of its own when what's next is an exercise, so its details
- * can be read before Done starts its clock. Otherwise, when it's an exercise, the whole card is
+ * step it's Done, on to it, and when what's next is an exercise its name, with an (i) by it, is
+ * a button of its own for its details, to read before Done starts its clock. Otherwise, when it's an exercise, the whole card is
  * a button with an (i) for its details and Swap (RUN-11), to get ready or swap it before it
  * starts.
  */
@@ -20,36 +20,29 @@ export type UpNext = NonNullable<ReturnType<WorkoutView['upNextCard']>>;
     template: `
         @let up = next();
         @if (done()) {
-            <div class="up-next-done">
+            <div
+                #card
+                class="up-next up-next--done-card"
+                data-tour="next"
+                [attr.data-next]="up.kind"
+            >
                 <button
                     #button
                     type="button"
-                    class="up-next up-next--done"
-                    data-tour="next"
+                    class="up-next--done"
                     aria-keyshortcuts="Space"
                     [attr.aria-label]="'Done. Next: ' + said()"
-                    [attr.data-next]="up.kind"
-                    [class.up-next--with-info]="!!up.exercise"
                     (click)="pressed.emit()"
-                >
-                    <ng-container
-                        [ngTemplateOutlet]="body"
-                        [ngTemplateOutletContext]="{ eyebrow: 'Done · up next' }"
-                    />
-                    <mat-icon class="up-next__end" aria-hidden="true">arrow_forward</mat-icon>
-                </button>
-                @if (up.exercise; as exercise) {
-                    <button
-                        #info
-                        type="button"
-                        class="up-next__info"
-                        aria-haspopup="dialog"
-                        [attr.aria-label]="'About ' + up.name"
-                        (click)="details.emit(exercise)"
-                    >
-                        <mat-icon aria-hidden="true">info</mat-icon>
-                    </button>
-                }
+                ></button>
+                <ng-container
+                    [ngTemplateOutlet]="body"
+                    [ngTemplateOutletContext]="{
+                        eyebrow: 'Done · up next',
+                        about: up.exercise,
+                        quiet: true,
+                    }"
+                />
+                <mat-icon class="up-next__end" aria-hidden="true">arrow_forward</mat-icon>
             </div>
         } @else if (up.exercise; as exercise) {
             <button
@@ -85,17 +78,40 @@ export type UpNext = NonNullable<ReturnType<WorkoutView['upNextCard']>>;
                 />
             </p>
         }
-        <ng-template #body let-eyebrow="eyebrow">
+        <ng-template #body let-eyebrow="eyebrow" let-about="about" let-quiet="quiet">
             <span class="up-next__kind" aria-hidden="true">
                 <mat-icon>{{ up.icon }}</mat-icon>
             </span>
+            <!-- On Done, its name says it all, so only the next exercise's button is read out -->
             <span class="up-next__text">
-                <span class="up-next__eyebrow">{{ eyebrow }}<span class="sr-only">: </span></span>
-                <span class="up-next__name"
-                    >{{ up.name }}<span class="sr-only">{{ up.detail ? ', ' : '' }}</span></span
+                <span class="up-next__eyebrow" [attr.aria-hidden]="quiet || null"
+                    >{{ eyebrow }}<span class="sr-only">: </span></span
                 >
+                <span class="up-next__name">
+                    @if (about) {
+                        <button
+                            #info
+                            type="button"
+                            class="up-next__about"
+                            aria-haspopup="dialog"
+                            (click)="details.emit(about)"
+                        >
+                            {{ up.name
+                            }}<mat-icon class="up-next__about-icon" aria-hidden="true"
+                                >info</mat-icon
+                            >
+                        </button>
+                    } @else {
+                        <span [attr.aria-hidden]="quiet || null">{{ up.name }}</span>
+                    }
+                    <span class="sr-only" [attr.aria-hidden]="quiet || null">{{
+                        up.detail ? ', ' : ''
+                    }}</span>
+                </span>
                 @if (up.detail) {
-                    <span class="up-next__detail">{{ up.detail }}</span>
+                    <span class="up-next__detail" [attr.aria-hidden]="quiet || null">{{
+                        up.detail
+                    }}</span>
                 }
             </span>
         </ng-template>
@@ -115,11 +131,13 @@ export class UpNextCardComponent {
     readonly muted = input(false);
     /** Done was pressed. */
     readonly pressed = output();
-    /** The (i) card, or Done's (i), was pressed, for the next exercise's details. */
+    /** The (i) card, or the name on Done, was pressed, for the next exercise's details. */
     readonly details = output<Exercise>();
 
-    /** The card's button, if it's one, for focus and Done's swell. */
+    /** The card's button, if it's one, or Done, for focus. */
     readonly button = viewChild<ElementRef<HTMLButtonElement>>('button');
-    /** Done's (i), when what's next is an exercise, for focus back from its details. */
+    /** On a rep step, the card Done is on, for its swell. */
+    readonly card = viewChild<ElementRef<HTMLElement>>('card');
+    /** On Done, the next exercise's name, for focus back from its details. */
     readonly info = viewChild<ElementRef<HTMLButtonElement>>('info');
 }

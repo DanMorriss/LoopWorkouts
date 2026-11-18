@@ -29,6 +29,7 @@ import {
 } from '../../models/workout';
 import type { BuiltInWorkout } from '../../models/built-in-workouts';
 import { isActiveRest } from '../../models/active-rest';
+import { STRETCH_ROUTINE_ID } from '../../models/built-in-stretches';
 import { MAX_WEIGHT_KG } from '../../models/weight';
 import { isLoggedSet, isTimedSet, RepSet } from '../../models/history';
 import { StepSwap } from '../../models/step-swap';
@@ -243,11 +244,16 @@ export class WorkoutStore {
      * saved one for a run from before copies were kept.
      */
     private asItRan(workout: Workout): Workout {
+        return this.runCopy(workout.id) ?? workout;
+    }
+
+    /** The run's own copy of the workout with id `id` (see `setRunning()`), if it has one. */
+    private runCopy(id: string): Workout | null {
         try {
             const copy = readWorkout(JSON.parse(sessionStorage.getItem('activeWorkout') ?? 'null'));
-            return copy?.id === workout.id ? copy : workout;
+            return copy?.id === id ? copy : null;
         } catch {
-            return workout;
+            return null;
         }
     }
 
@@ -263,6 +269,10 @@ export class WorkoutStore {
         const savedId = sessionStorage.getItem('activeWorkoutId');
         if (!savedId) {
             return null;
+        }
+        // The stretches after a workout are never saved, so they run from the run's own copy
+        if (savedId === STRETCH_ROUTINE_ID) {
+            return this.runCopy(savedId);
         }
         // A run started before workouts had random ids still has its old number
         return (

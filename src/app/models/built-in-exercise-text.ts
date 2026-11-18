@@ -1493,4 +1493,130 @@ export const BUILT_IN_EXERCISE_TEXT: Readonly<Record<BuiltInExercise['id'], Exer
             'Too easy? Step further away from where the band is tied.',
         ],
     },
+    // Twelfth batch: a stretch for every muscle group, for the stretches after a workout
+    'builtin:doorway-chest-stretch': {
+        description:
+            'With your forearms on a door frame, you lean gently through the doorway. Opens up your chest and the fronts of your shoulders.',
+        steps: [
+            'Stand in a doorway and raise your arms out to the sides, elbows bent at a right angle and level with your shoulders.',
+            'Rest your forearms and palms on the door frame either side.',
+            'Step one foot forward and ease your chest through the doorway until you feel a stretch across it.',
+            'Hold, breathing slowly, then step back out of it.',
+        ],
+        tips: [
+            'Keep your shoulders down away from your ears, and ease in: never bounce or push into pain.',
+            'No doorway? Do one arm at a time on a wall corner, turning your body gently away from it.',
+        ],
+    },
+    'builtin:cross-body-shoulder-stretch': {
+        description:
+            'You pull one straight arm across your chest with the other. A simple stretch for the back of your shoulder.',
+        steps: [
+            'Stand or sit tall and bring your right arm straight across your chest at shoulder height.',
+            'Hold it just above the elbow with your left hand.',
+            'Ease the arm closer to your chest until you feel a stretch in the back of your shoulder.',
+            'Hold, then let go and swap arms.',
+        ],
+        tips: [
+            'Keep the shoulder of the stretched arm down, not hunched up towards your ear.',
+            'Pull on the upper arm, not the elbow joint itself.',
+        ],
+    },
+    'builtin:standing-biceps-stretch': {
+        description:
+            'With your hands together behind you, you lift your straight arms back. Stretches your biceps and the front of your chest.',
+        steps: [
+            'Stand tall and link your fingers behind your back, palms facing each other.',
+            'Straighten your arms and turn your palms down if you can.',
+            'Lift your arms slowly away from your back until you feel a stretch down the fronts of your arms.',
+            'Hold, keeping your chest up, then lower your arms.',
+        ],
+        tips: [
+            "Can't link your fingers? Hold a towel between your hands.",
+            "Lift only as far as is comfortable, and don't lean forward to get higher.",
+        ],
+    },
+    'builtin:overhead-triceps-stretch': {
+        description:
+            'With one hand reaching down your back, you ease the elbow back with the other hand. Stretches the back of your upper arm.',
+        steps: [
+            'Stand or sit tall and raise your right arm straight up.',
+            'Bend the elbow so your right hand drops behind your head, towards your upper back.',
+            'Hold the right elbow with your left hand and ease it gently back and in, behind your head.',
+            'Hold, then let go and swap arms.',
+        ],
+        tips: [
+            'Keep your head up and your back straight, rather than letting your head drop forward.',
+        ],
+    },
+    'builtin:wrist-flexor-stretch': {
+        description:
+            'With one arm straight out, you ease the fingers back with your other hand. Stretches the inside of your forearm.',
+        steps: [
+            'Hold your right arm straight out in front of you at shoulder height, palm up.',
+            'Let your fingers drop towards the floor, palm facing forward.',
+            'With your left hand, gently draw your right fingers back towards you until you feel a stretch along your forearm.',
+            'Hold, then let go and swap arms.',
+        ],
+        tips: [
+            'Keep the elbow straight but not locked.',
+            'Turn the palm down and draw the back of the hand in to stretch the top of your forearm too.',
+        ],
+    },
+    'builtin:standing-side-stretch': {
+        description:
+            'Standing with an arm overhead, you lean slowly to the other side. Stretches the sides of your waist and your back.',
+        steps: [
+            'Stand tall with your feet hip-width apart.',
+            'Raise your right arm straight up, your left hand resting on your hip or by your side.',
+            'Reach up and over to the left, bending at the waist, until you feel a stretch down your right side.',
+            'Hold, come back up slowly, then swap sides.',
+        ],
+        tips: [
+            'Lean straight to the side, not forwards or back, and keep both feet flat.',
+            'Reach long rather than low: think of going up and over.',
+        ],
+    },
+    'builtin:upper-trap-stretch': {
+        description:
+            'You tilt your head to one side, letting your hand rest on it. Stretches the side of your neck and the tops of your shoulders.',
+        steps: [
+            'Sit or stand tall with your shoulders relaxed and down.',
+            'Tilt your head slowly to the right, bringing your right ear towards your right shoulder.',
+            'Rest your right hand lightly on the left side of your head, letting its weight add a little more stretch.',
+            'Hold, lift your head back up slowly, then swap sides.',
+        ],
+        tips: [
+            'Let your hand rest there, never pull: the stretch should be gentle.',
+            'Keep the other shoulder down. Reaching that hand towards the floor adds a little more.',
+        ],
+    },
+    'builtin:standing-it-band-stretch': {
+        description:
+            'Standing with one leg crossed behind the other, you lean away from it. Stretches the outside of your hip and thigh.',
+        steps: [
+            'Stand tall, a hand on a wall for balance if you need it.',
+            'Cross your right leg behind your left, both feet flat.',
+            'Push your right hip out to the side and lean your upper body gently to the left.',
+            'Hold when you feel a stretch down the outside of your right hip, then swap legs.',
+        ],
+        tips: [
+            'Keep the back leg straight, and lean to the side rather than forwards.',
+            'Raise your arm on the stretched side overhead to reach a little further.',
+        ],
+    },
+    'builtin:butterfly-stretch': {
+        description:
+            'Sitting with the soles of your feet together, you let your knees drop out to the sides. Stretches your inner thighs.',
+        steps: [
+            'Sit tall on the floor, bend your knees and put the soles of your feet together.',
+            'Hold your feet or ankles and draw your heels in as close as is comfortable.',
+            'Let your knees fall slowly out towards the floor.',
+            'Hold, sitting tall. To go further, lean forward from your hips with a straight back.',
+        ],
+        tips: [
+            "Let gravity lower your knees; don't press or bounce them down.",
+            'Sit on a folded towel if your back rounds.',
+        ],
+    },
 };

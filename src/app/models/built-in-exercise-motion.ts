@@ -3864,4 +3864,186 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
             },
         ],
     },
+    // Twelfth batch: a stretch for every muscle group
+    'builtin:doorway-chest-stretch': {
+        view: 'front',
+        frames: [
+            {
+                label: 'Arms on the frame',
+                hold: 300,
+                ms: 1400,
+                pose: { ...FRONT_STANDING, arms: [angles(-90, 180), angles(90, 180)] },
+            },
+            {
+                label: 'Leaning through',
+                hold: 1500,
+                ms: 1400,
+                pose: {
+                    ...FRONT_STANDING,
+                    arms: [angles(-90, 180), angles(90, 180)],
+                    handsForward: -14,
+                },
+            },
+        ],
+    },
+    'builtin:cross-body-shoulder-stretch': {
+        view: 'front',
+        frames: [
+            {
+                label: 'Hold',
+                ms: 1000,
+                pose: {
+                    ...FRONT_STANDING,
+                    arms: [angles(88, 88), reach(8, -140, 'ccw')],
+                    handsForward: [14, 12],
+                },
+            },
+        ],
+    },
+    'builtin:standing-biceps-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Hands together',
+                hold: 300,
+                ms: 1600,
+                pose: { ...STANDING, arms: both(angles(-12, -12)), handsApart: 4 },
+            },
+            {
+                label: 'Arms lifted',
+                hold: 1500,
+                ms: 1400,
+                pose: { ...STANDING, arms: both(angles(-40, -40)), handsApart: 4 },
+            },
+        ],
+    },
+    'builtin:overhead-triceps-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Hold',
+                ms: 1000,
+                pose: {
+                    ...STANDING,
+                    arms: [angles(172, 330), reach(4, -172, 'ccw')],
+                    handsOut: [0, -28],
+                },
+            },
+        ],
+    },
+    'builtin:wrist-flexor-stretch': {
+        view: 'side',
+        frames: [
+            {
+                label: 'Hold',
+                ms: 1000,
+                pose: {
+                    ...STANDING,
+                    arms: [angles(90, 90), reach(52, -138, 'cw')],
+                    handsApart: 6,
+                },
+            },
+        ],
+    },
+    'builtin:standing-side-stretch': {
+        view: 'front',
+        frames: [
+            {
+                label: 'Arm up',
+                hold: 300,
+                ms: 1600,
+                pose: { ...FRONT_STANDING, arms: [angles(190, 185), angles(4, 3)] },
+            },
+            {
+                label: 'Leaning over',
+                hold: 1500,
+                ms: 1400,
+                pose: {
+                    ...FRONT_STANDING,
+                    // The hips tilt with the lean, so up a little to keep the far foot on the floor
+                    hips: [0, -100.5],
+                    torso: 162,
+                    head: 158,
+                    arms: [angles(150, 135), angles(20, 12)],
+                },
+            },
+        ],
+    },
+    'builtin:upper-trap-stretch': {
+        view: 'front',
+        frames: [
+            {
+                label: 'Hand on the head',
+                hold: 300,
+                ms: 1600,
+                pose: { ...FRONT_STANDING, arms: [reach(4, -184, 'cw'), angles(6, 4)] },
+            },
+            {
+                label: 'Head tilted',
+                hold: 1500,
+                ms: 1400,
+                pose: {
+                    ...FRONT_STANDING,
+                    head: 205,
+                    arms: [reach(-6, -180, 'cw'), angles(10, 8)],
+                },
+            },
+        ],
+    },
+    'builtin:standing-it-band-stretch': {
+        view: 'front',
+        frames: [
+            {
+                label: 'Legs crossed',
+                hold: 300,
+                ms: 1600,
+                pose: {
+                    ...FRONT_STANDING,
+                    arms: [angles(190, 185), angles(4, 3)],
+                    legs: [angles(9, 9), angles(-3, -3)],
+                },
+            },
+            {
+                label: 'Leaning away',
+                hold: 1500,
+                ms: 1400,
+                pose: {
+                    hips: [-7, -101],
+                    torso: 165,
+                    head: 160,
+                    arms: [angles(150, 135), angles(20, 12)],
+                    legs: [angles(13, 13), angles(1, 1)],
+                },
+            },
+        ],
+    },
+    'builtin:butterfly-stretch': {
+        view: 'front',
+        frames: [
+            {
+                label: 'Knees up',
+                hold: 300,
+                ms: 1800,
+                pose: {
+                    hips: [0, -12],
+                    torso: 180,
+                    arms: [reach(-10, -14, 'cw'), reach(10, -14, 'ccw')],
+                    legs: [angles(-120, 57), angles(120, -57)],
+                    feet: [120, -120],
+                },
+            },
+            {
+                label: 'Knees down',
+                hold: 1500,
+                ms: 1600,
+                pose: {
+                    hips: [0, -12],
+                    torso: 180,
+                    arms: [reach(-10, -14, 'cw'), reach(10, -14, 'ccw')],
+                    legs: [angles(-94, 92), angles(94, -92)],
+                    feet: [120, -120],
+                },
+            },
+        ],
+    },
 };

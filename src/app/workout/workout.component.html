@@ -223,10 +223,11 @@
             <app-last-set-dialog animate.leave="dialog-leave" />
         } @else if (view.summaryOpen()) {
             <app-workout-summary
-                (back)="backToWorkout()"
-                (done)="closeSummary()"
-                (addWeight)="addWeight()"
-                (copied)="openCopy($event)"
+                (back)="exits.backToWorkout()"
+                (done)="exits.closeSummary()"
+                (addWeight)="exits.addWeight()"
+                (copied)="exits.openCopy($event)"
+                (stretch)="exits.startStretches($event)"
             />
         }
 

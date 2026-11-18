@@ -84,7 +84,7 @@ and in `built-in-exercise-text.ts`:
 
 ## Backlog
 
-117 written (batches 1–11). The list is complete for now; more can be added at the end of the backlog.
+126 written (batches 1–12). The list is complete for now; more can be added at the end of the backlog.
 
 - [x] **Batch 4, core, carries and variations:** side plank, dead bug, Russian twist, farmer's carry, sumo deadlift, Bulgarian split squat, step-up, hammer curl, skull crusher, glute bridge
 - [x] **Batch 5, chest, shoulders and arms:** dumbbell bench press, incline bench press, close-grip bench press, dumbbell fly, cable crossover, Arnold press, rear delt fly, shrug, preacher curl, overhead triceps extension
@@ -94,3 +94,4 @@ and in `built-in-exercise-text.ts`:
 - [x] **Batch 9, kettlebells (17, asked for by Dan):** kettlebell thruster, kettlebell clean and press, kettlebell snatch, kettlebell pistol squat, kettlebell floor press, Turkish get-up, kettlebell sumo high pull, chainsaw row, kettlebell reverse crunch, plank pull-through, half-kneeling kettlebell press, kettlebell halo, kettlebell around the world, kettlebell push-up, and kettlebell takes on dumbbell exercises: kettlebell lunge, kettlebell curl, kettlebell press
 - [x] **Batch 10, stretches and mobility (asked for by Dan):** downward dog, child's pose, cat-cow, cobra stretch, kneeling hip flexor stretch, standing quad stretch, seated hamstring stretch, pigeon stretch, world's greatest stretch, thread the needle
 - [x] **Batch 11, resistance bands (for a band workout):** band row, band chest press, band overhead press, band face pull, band curl, band triceps pushdown, band squat, band pull-through, band lateral walk, Pallof press (a band or a cable)
+- [x] **Batch 12, a stretch for every muscle group (for the stretches after a workout, PRG-16; 9, as the others had one):** doorway chest stretch, cross-body shoulder stretch, standing biceps stretch, overhead triceps stretch, wrist flexor stretch, standing side stretch, upper trap stretch, standing IT band stretch, butterfly stretch

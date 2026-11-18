@@ -116,6 +116,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | PRG-13 | See each exercise's reps or time this week, and its new bests                | ✅  | —   | [progress](progress.md)                       |
 | PRG-14 | One kettlebell: same weight, up in reps, then a heavier kettlebell           | ✅  | —   | [progress](progress.md)                       |
 | PRG-15 | A shorter rest next time for a kettlebell ladder done in full                | ✅  | —   | [progress](progress.md)                       |
+| PRG-16 | Stretches for the muscles a workout worked, suggested on its summary         | ✅  | —   | [progress](progress.md)                       |
 | SYN-1  | Export all my data to a file                                                 | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
 | SYN-2  | Import a backup without losing what's there                                  | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
 | SYN-3  | Sign in and have the same data on every device                               | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |

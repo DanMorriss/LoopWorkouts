@@ -435,6 +435,42 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
             once(timed('childs-pose', 90)),
         ],
     },
+    // Short ones for after a workout, of the stretches for each muscle group (batch 12)
+    {
+        id: 'builtin:upper-body-stretch',
+        title: 'Upper-body stretch',
+        description:
+            'Standing holds for your chest, shoulders, arms, neck and sides, after an upper-body day.',
+        group: 'bodyweight',
+        repeats: 1,
+        blocks: [
+            once(timed('doorway-chest-stretch', 45)),
+            once(timed('cross-body-shoulder-stretch', 30, { eachSide: true })),
+            once(timed('overhead-triceps-stretch', 30, { eachSide: true })),
+            once(timed('standing-biceps-stretch', 30)),
+            once(timed('wrist-flexor-stretch', 30, { eachSide: true })),
+            once(timed('upper-trap-stretch', 30, { eachSide: true })),
+            once(timed('standing-side-stretch', 30, { eachSide: true })),
+        ],
+    },
+    {
+        id: 'builtin:lower-body-stretch',
+        title: 'Lower-body stretch',
+        description:
+            'Holds for your thighs, hips and calves, standing then on the floor, after a leg day.',
+        group: 'bodyweight',
+        repeats: 1,
+        blocks: [
+            heading('Standing'),
+            once(timed('standing-quad-stretch', 30, { eachSide: true })),
+            once(timed('standing-it-band-stretch', 30, { eachSide: true })),
+            heading('On the floor'),
+            once(timed('seated-hamstring-stretch', 45)),
+            once(timed('butterfly-stretch', 45)),
+            once(timed('pigeon-stretch', 45, { eachSide: true })),
+            once(timed('downward-dog', 45)),
+        ],
+    },
 ];
 
 /**

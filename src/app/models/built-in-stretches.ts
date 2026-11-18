@@ -15,9 +15,25 @@ const BUILT_IN_STRETCHES: ReadonlySet<string> = new Set([
     'builtin:pigeon-stretch',
     'builtin:worlds-greatest-stretch',
     'builtin:thread-the-needle',
+    'builtin:doorway-chest-stretch',
+    'builtin:cross-body-shoulder-stretch',
+    'builtin:standing-biceps-stretch',
+    'builtin:overhead-triceps-stretch',
+    'builtin:wrist-flexor-stretch',
+    'builtin:standing-side-stretch',
+    'builtin:upper-trap-stretch',
+    'builtin:standing-it-band-stretch',
+    'builtin:butterfly-stretch',
 ]);
 
 /** Whether an exercise is a built-in stretch. */
 export function isStretch(exerciseId: string | undefined): boolean {
     return exerciseId !== undefined && BUILT_IN_STRETCHES.has(exerciseId);
 }
+
+/**
+ * The id the stretches after a workout run under (see `stretchRoutine()`). It's never saved,
+ * so a reload takes the run up from its own copy, and the summary has nothing to put a
+ * step-up on.
+ */
+export const STRETCH_ROUTINE_ID = 'stretch-routine';

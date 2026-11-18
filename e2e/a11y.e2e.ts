@@ -352,7 +352,7 @@ test.describe('reduced motion', () => {
                 const run = new WorkoutPage(page);
                 await app.goto('/library');
                 await run.startFromLibrary('Twenty');
-                await run.wait(16_000);
+                await run.wait(18_000);
                 await expect.poll(() => looping(page)).not.toEqual([]);
             }
         );

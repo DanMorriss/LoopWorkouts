@@ -3124,22 +3124,22 @@ describe('WorkoutComponent', () => {
             fixture.nativeElement.querySelector('.workout-status__round') as HTMLElement;
         const face = () => fixture.nativeElement.querySelector('.workout-face') as HTMLElement;
 
-        it('pulses "Next:" in the last 5 seconds of a step, in the next step\'s colour', () => {
+        it('pulses "Next:" in the last 3 seconds of a step, with the countdown beeps, in the next step\'s colour', () => {
             start(makeWorkout({ workSeconds: 20, restSeconds: 30 }));
 
-            advance(14_000);
+            advance(16_000);
             expect(pulsing()).toBe(false);
 
             advance(1000);
             expect(pulsing()).toBe(true);
             expect(next().dataset['next']).toBe('rest');
 
-            // Rest's own last 5 seconds come long after its first, on the Up next card
+            // Rest's own last 3 seconds come long after its first, on the Up next card
             const card = () => fixture.nativeElement.querySelector('.up-next') as HTMLElement;
-            advance(5000);
+            advance(3000);
             expect(card().classList).not.toContain('up-next--soon');
 
-            advance(25_000);
+            advance(27_000);
             expect(card().classList).toContain('up-next--soon');
             expect(card().dataset['next']).toBe('work');
             fixture.destroy();
@@ -3149,7 +3149,7 @@ describe('WorkoutComponent', () => {
             start(makeWorkout({ workSeconds: 20, restSeconds: 30 }));
             const faceAnimation = () => getComputedStyle(face(), '::before').animationName;
 
-            advance(14_000);
+            advance(16_000);
             expect(faceAnimation()).toBe('none');
             expect(getComputedStyle(face(), '::before').opacity).toBe('0.5');
 
@@ -3165,8 +3165,8 @@ describe('WorkoutComponent', () => {
             start(makeWorkout({ workSeconds: 20, restSeconds: 30 }));
             const startedAt = Date.now();
 
-            // A tick 300ms into the step's 16th second: the loop starts 300ms in
-            vi.spyOn(Date, 'now').mockReturnValue(startedAt + 15_300);
+            // A tick 300ms into the step's 18th second: the loop starts 300ms in
+            vi.spyOn(Date, 'now').mockReturnValue(startedAt + 17_300);
             advance(250);
 
             expect(pulsing()).toBe(true);
@@ -3176,10 +3176,10 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('pulses for only the last 3 seconds of a step under 15 seconds', () => {
-            start(makeWorkout({ workSeconds: 10, restSeconds: 10 }));
+        it('pulses for the last 3 seconds of a short step too, with no beeps', () => {
+            start(makeWorkout({ workSeconds: 5, restSeconds: 10 }));
 
-            advance(6000);
+            advance(1000);
             expect(pulsing()).toBe(false);
 
             advance(1000);

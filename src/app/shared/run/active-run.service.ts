@@ -235,13 +235,13 @@ export class ActiveRunService {
         const logged = this.store.activeSets().some((set) => isSetAt(set, state.round, place));
         return logged ? null : { step, round: state.round, place };
     });
-    /** Skip was pressed on the question about the set time ran out in: it isn't logged. */
-    private readonly lastSetPassed = signal(false);
     /**
      * Time ran out part-way through a rep step, so how many reps were done of it is asked
      * before the summary, until it's answered with logLastSet() or passed with passLastSet().
      */
-    readonly askingLastSet = computed(() => !!this.unloggedLastSet() && !this.lastSetPassed());
+    readonly askingLastSet = computed(
+        () => !!this.unloggedLastSet() && !this.store.activeLastSetPassed()
+    );
     /** End workout was pressed: the summary is open over the run, which waits, paused. */
     readonly ending = signal(false);
     /** The summary shows once the run is finished, or ended with End workout. */
@@ -380,7 +380,6 @@ export class ActiveRunService {
         this.resumedAt.set(0);
         this._held.set(false);
         this.ending.set(false);
-        this.lastSetPassed.set(false);
         this._steppedUp.set(new Set());
         this._keptSwaps.set(new Set());
         this.useMyKettlebell();
@@ -762,7 +761,7 @@ export class ActiveRunService {
 
     /** The set time ran out in is left out, as none of it was done: on to the summary. */
     passLastSet() {
-        this.lastSetPassed.set(true);
+        this.store.passLastSet();
     }
 
     private readonly _steppedUp = signal<ReadonlySet<number>>(new Set());
@@ -835,7 +834,6 @@ export class ActiveRunService {
         this.alarms.cancel();
         this._held.set(false);
         this.ending.set(false);
-        this.lastSetPassed.set(false);
     }
 
     /** The run's id in the history, or null with no run. */

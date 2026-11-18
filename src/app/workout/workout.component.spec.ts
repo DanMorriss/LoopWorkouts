@@ -3031,6 +3031,30 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
+        it('shows no weight, nor a weight to try, on a rep stretch', () => {
+            start(
+                makeWorkout({
+                    steps: [
+                        work(3),
+                        {
+                            kind: 'reps',
+                            reps: 5,
+                            name: 'Thread the needle',
+                            exerciseId: 'builtin:thread-the-needle',
+                        },
+                    ],
+                    repeats: 1,
+                })
+            );
+            advance(3000);
+
+            expect(faceWheel('count')).not.toBeNull();
+            expect(faceWheel('weight')).toBeNull();
+            expect(fixture.nativeElement.querySelector('.workout-face__weight-unit')).toBeNull();
+            expect(fixture.nativeElement.querySelector('.workout-face__next-weight')).toBeNull();
+            fixture.destroy();
+        });
+
         it('finishes after Done on the last round, counting the time spent on reps', () => {
             const startedAt = Date.now();
             start(circuit());

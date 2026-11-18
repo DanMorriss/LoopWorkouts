@@ -3,6 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { describeSets } from '../../history/history-format';
 import { lastRepSets } from '../../history/last-sets';
 import { Exercise } from '../../models/exercise';
+import { isStretch } from '../../models/built-in-stretches';
 import { kettlebellSteps } from '../../models/kettlebell';
 import { canStepUpEachSet, steppedUp, suggestedWeight } from '../../models/progress';
 import { WEIGHT_INCREASE, weightOptions, weightToKg } from '../../models/weight';
@@ -37,6 +38,8 @@ export class WorkoutFaceSlideComponent {
     private readonly exercises = inject(ExerciseStore);
     private readonly view = inject(WorkoutView);
     protected readonly weightUnit = this.view.weightUnit;
+    /** Whether the step is a stretch, which has no weight to set or step up. */
+    protected readonly stretch = computed(() => isStretch(this.view.state()?.step?.exerciseId));
 
     /**
      * The sets from the most recent workout with this exercise, in the same format as history
@@ -60,11 +63,16 @@ export class WorkoutFaceSlideComponent {
     /**
      * The weight to try (PRG-5), when every set hit the reps last time: one step up from last
      * time's weight, while the step is still at it. Changed since, it's the user's call. None
-     * on a kettlebell step (PRG-14), which goes up in reps.
+     * on a kettlebell step (PRG-14), which goes up in reps, nor on a stretch.
      */
     protected readonly nextWeight = computed(() => {
         const step = this.view.state()?.step;
-        if (step?.kind !== 'reps' || this.savedStep()?.varies || this.savedStep()?.kettlebell) {
+        if (
+            step?.kind !== 'reps' ||
+            this.stretch() ||
+            this.savedStep()?.varies ||
+            this.savedStep()?.kettlebell
+        ) {
             return null;
         }
         const suggestion = suggestedWeight(this.lastSets(), step.reps, this.view.weightUnit());
@@ -85,6 +93,7 @@ export class WorkoutFaceSlideComponent {
         const unit = this.view.weightUnit();
         return saved?.varies &&
             !saved.kettlebell &&
+            !this.stretch() &&
             saved.set === 0 &&
             saved.step.kind === 'reps' &&
             canStepUpEachSet(this.lastSets(), saved.step, unit)

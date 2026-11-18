@@ -2501,14 +2501,15 @@ describe('WorkoutComponent', () => {
 
             advance(3000);
             TestBed.tick();
-            expect(doneButton()!.getAnimations().length).toBe(1);
+            // The whole card, Done's button laid over it
+            expect(doneButton()!.parentElement!.getAnimations().length).toBe(1);
             fixture.destroy();
 
             fakeReducedMotion(true);
             start(circuit());
             advance(3000);
             TestBed.tick();
-            expect(doneButton()!.getAnimations().length).toBe(0);
+            expect(doneButton()!.parentElement!.getAnimations().length).toBe(0);
             fixture.destroy();
         });
 
@@ -2722,7 +2723,7 @@ describe('WorkoutComponent', () => {
             expect(upNextCard()).toBe('Done · up next: Rest, 00:02');
             expect(doneButton()!.getAttribute('aria-label')).toBe('Done. Next: Rest · 00:02');
             expect(doneButton()!.getAttribute('aria-keyshortcuts')).toBe('Space');
-            expect(doneButton()!.dataset['next']).toBe('rest');
+            expect(doneButton()!.parentElement!.dataset['next']).toBe('rest');
             expect(mainButton().getAttribute('aria-label')).toBe('Pause');
             expect(mainButton().getAttribute('aria-keyshortcuts')).toBeNull();
 
@@ -4985,6 +4986,48 @@ describe('WorkoutComponent', () => {
                 expect(document.activeElement).toBe(card());
                 // Jog carries on
                 expect(view().isWorkActive()).toBe(true);
+            });
+
+            describe("the next exercise's name on Done, with its (i)", () => {
+                const info = () => el('.up-next__about');
+                const plank: Step = {
+                    kind: 'work',
+                    seconds: 30,
+                    name: 'Plank',
+                    exerciseId: 'builtin:plank',
+                };
+
+                it("opens the next timed exercise's details without starting it", async () => {
+                    fixture.destroy();
+                    start(makeWorkout({ steps: [backSquat, plank], repeats: 1 }));
+
+                    expect(el('.up-next--done')).not.toBeNull();
+                    expect(info()!.textContent!.replace('info', '').trim()).toBe('Plank');
+                    expect(info()!.querySelector('mat-icon')!.textContent!.trim()).toBe('info');
+                    expect(info()!.getAttribute('aria-haspopup')).toBe('dialog');
+                    info()!.click();
+                    fixture.detectChanges();
+
+                    expect(
+                        el('app-exercise-details-dialog .details__title')!.textContent!.trim()
+                    ).toBe('Plank');
+                    // Still on the squats, the plank's clock not started
+                    expect(view().isRepsActive()).toBe(true);
+
+                    (el('.dialog-back') as HTMLElement).click();
+                    fixture.detectChanges();
+                    await fixture.whenStable();
+
+                    expect(document.activeElement).toBe(info());
+                });
+
+                it('is not there when what is next is not an exercise', () => {
+                    fixture.destroy();
+                    start(makeWorkout({ steps: [backSquat, rest(10), plank], repeats: 1 }));
+
+                    expect(el('.up-next--done')).not.toBeNull();
+                    expect(info()).toBeNull();
+                });
             });
 
             it('is the (i), not Done, on a rep step while paused', () => {

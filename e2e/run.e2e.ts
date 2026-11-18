@@ -140,7 +140,7 @@ test.describe('rep steps', () => {
         await run.wait(10_500);
         await expect(run.done).toBeVisible();
         await expect(run.summary).toBeHidden();
-        await run.done.click();
+        await run.pressDone();
         await expect(run.summary).toBeVisible();
         await expect(run.summary).toContainText('Push-ups: 10 reps @ 20 kg');
         await expect(run.summary).toContainText('Squats: 5 reps');
@@ -384,16 +384,16 @@ test.describe('sets and sections', () => {
             .poll(() => app.announcements())
             .toContainEqual(expect.stringContaining('Legs, exercise 2 of 3'));
 
-        await run.done.click();
+        await run.pressDone();
         await expect(run.main.getByText(/set 1 of 3/).first()).toBeVisible();
         await expect(run.next).toHaveText('Up next: Leg press, Set 2 of 3 · 10 reps');
 
         await run.wait(60_500);
-        await run.done.click();
+        await run.pressDone();
         await run.wait(60_500);
         await expect(run.main.getByText(/set 3 of 3/).first()).toBeVisible();
         await expect(run.main.getByText('Last round!')).toHaveCount(0);
-        await run.done.click();
+        await run.pressDone();
         await expect(run.main.getByText(/set 3 of 3/).first()).toBeVisible();
         await run.wait(60_500);
         await expect(section).toHaveText(/Legs.*3 of 3/);
@@ -445,7 +445,7 @@ test.describe('changing reps mid-workout', () => {
             .poll(async () => (await savedSteps(app))[0])
             .toMatchObject({ reps: 15, weight: 22.5 });
 
-        await run.done.click();
+        await run.pressDone();
         await run.wait(5500);
         await expect(run.main.getByText('Last round!')).toBeVisible();
         await expect(run.wheel('reps')).toHaveAttribute('aria-valuenow', '15');
@@ -473,7 +473,7 @@ test.describe('the summary', () => {
                 const run = new WorkoutPage(page);
                 await app.goto('/library');
                 await run.startFromLibrary('Push');
-                await run.done.click();
+                await run.pressDone();
                 await run.wait(5500);
                 await run.endWorkout();
                 await expect(run.summary).toContainText('Push-ups: 20 reps @ 40 kg');
@@ -662,10 +662,10 @@ test.describe('swapping mid-workout', () => {
             await app.reload();
             await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
 
-            await run.done.click();
+            await run.pressDone();
             await run.wait(8500);
             await expect(run.face.getByText('Goblet squat', { exact: true })).toBeVisible();
-            await run.done.click();
+            await run.pressDone();
             await expect(run.summary).toContainText('Back squat for Goblet squat');
             await run.summary.getByRole('button', { name: 'No, just this time' }).click();
             await expect(run.summary).toContainText("Next time it's Back squat again.");
@@ -710,7 +710,7 @@ test.describe('swapping while paused in a rest', () => {
             const run = new WorkoutPage(page);
             await app.goto('/library');
             await run.startFromLibrary('Pair');
-            await run.done.click();
+            await run.pressDone();
             await run.pause.click();
             await expect(run.main.getByText('Rest, then Deadlift')).toBeVisible();
             await run.exercise('Rest, then Deadlift').click();
@@ -753,7 +753,7 @@ test.describe('last time and step-ups', () => {
                 .toContain('"weight":62.5');
 
             for (let set = 0; set < 3; set++) {
-                await run.done.click();
+                await run.pressDone();
                 if (set < 2) {
                     await run.wait(5500);
                 }
@@ -932,7 +932,7 @@ test.describe('changing the workout while it runs', () => {
             const create = new CreatePage(page);
             await app.goto('/library');
             await run.startFromLibrary('Push');
-            await run.done.click();
+            await run.pressDone();
 
             await app.goto('/setup?editId=push');
             await create.open(3);

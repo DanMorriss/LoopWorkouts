@@ -17,6 +17,7 @@ import { injectPlanOnDays } from '../shared/plan-on-days';
 import { injectStartWorkout } from '../shared/run/start-workout';
 import { UndoService } from '../shared/undo/undo.service';
 import { Workout } from '../models/workout';
+import { PlanDaySwap, planSwapId } from './plan-day-swap';
 import { PlanDrag, PlannedDrag } from './plan-drag';
 import { PlanPageView, PlanRow } from './plan-page-view';
 import {
@@ -32,7 +33,7 @@ import {
  * Create, whose Save plans it on that day and comes back here (PLN-5). A workout's handle drags
  * it to another day, or another place on its own; pressed, it opens the days to plan it on.
  * Its name opens a menu: Start, Details, and Do it today instead, this week only (or, done so,
- * Put back). What it shows is `PlanPageView`. It slides in over Today, from its week (PLN-4), and back off with ‹ Today or a swipe right.
+ * Put back). A day's ⇄, then another's, swaps the two (`PlanDaySwap`). What it shows is `PlanPageView`. It slides in over Today, from its week (PLN-4), and back off with ‹ Today or a swipe right.
  */
 @Component({
     selector: 'app-plan',
@@ -63,6 +64,15 @@ export class PlanComponent {
     private readonly planOnDays = injectPlanOnDays();
     private readonly start = injectStartWorkout();
     protected readonly drag = new PlanDrag(this.planStore.plan);
+    protected readonly swap = new PlanDaySwap(
+        this.planStore,
+        this.undo,
+        (said) => this.announcement.set(said),
+        (id) => this.focusAfterRender(id)
+    );
+    /** Days are swapped once there's something planned to swap. */
+    protected readonly canSwap = this.planStore.hasPlan;
+    protected readonly swapId = planSwapId;
 
     constructor() {
         // The first time it opens on this device, a tour of it (PLN-8)

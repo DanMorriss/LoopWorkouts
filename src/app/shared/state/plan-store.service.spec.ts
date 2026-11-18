@@ -155,6 +155,83 @@ describe('PlanStore', () => {
         expect(store.plan()).not.toHaveProperty('moves');
     });
 
+    it('swaps two days, each workout planned on its new day now, one on both left as it was', () => {
+        const now = vi.spyOn(Date, 'now').mockReturnValue(1_000);
+        const store = createStore();
+        store.add(0, 'legs');
+        store.add(0, 'core');
+        store.add(2, 'push');
+        store.add(2, 'core');
+        store.add(4, 'pull');
+
+        now.mockReturnValue(9_000);
+        store.swapDays(0, 2);
+
+        expect(store.plan().days).toEqual([
+            ['push', 'core'],
+            [],
+            ['legs', 'core'],
+            [],
+            ['pull'],
+            [],
+            [],
+        ]);
+        expect(store.plan().plannedAt).toEqual({
+            '0:push': 9_000,
+            '0:core': 1_000,
+            '2:legs': 9_000,
+            '2:core': 1_000,
+            '4:pull': 1_000,
+        });
+
+        // With an empty day, it's a move
+        store.swapDays(4, 6);
+        expect(store.plan().days[4]).toEqual([]);
+        expect(store.plan().days[6]).toEqual(['pull']);
+    });
+
+    it("takes the week's one-off moves along with a swap", () => {
+        // Wednesday 28 October 2026
+        vi.spyOn(Date, 'now').mockReturnValue(new Date(2026, 9, 28, 10).getTime());
+        const monday = new Date(2026, 9, 26).getTime();
+        const store = createStore();
+        store.add(0, 'legs');
+        store.add(1, 'push');
+        store.add(4, 'pull');
+        // Legs done today, Wednesday; Push done on Friday
+        store.moveThisWeek('legs', 0, 2);
+        store.moveThisWeek('push', 1, 4);
+
+        // Monday's swapped with Thursday: Legs is planned on Thursday, still done today
+        store.swapDays(0, 3);
+        // Wednesday's swapped with Friday: Push, moved onto Wednesday, goes with it
+        store.swapDays(2, 4);
+
+        expect(store.plan().days).toEqual([[], ['push'], ['pull'], ['legs'], [], [], []]);
+        expect(store.plan().moves).toEqual([
+            { week: monday, workoutId: 'legs', from: 3, to: 4 },
+            { week: monday, workoutId: 'push', from: 1, to: 2 },
+        ]);
+    });
+
+    it("keeps what a day shows this week with a swap, and doesn't swap a day with itself", () => {
+        vi.spyOn(Date, 'now').mockReturnValue(new Date(2026, 9, 28, 10).getTime());
+        const monday = new Date(2026, 9, 26).getTime();
+        const store = createStore();
+        store.add(0, 'legs');
+        // Legs, planned on Monday, shows today, Wednesday
+        store.moveThisWeek('legs', 0, 2);
+        const before = store.plan();
+
+        store.swapDays(2, 2);
+        expect(store.plan()).toBe(before);
+
+        // Planned on Wednesday now, and shows on Monday this week
+        store.swapDays(0, 2);
+        expect(store.plan().days[2]).toEqual(['legs']);
+        expect(store.plan().moves).toEqual([{ week: monday, workoutId: 'legs', from: 2, to: 0 }]);
+    });
+
     it('takes a workout off a day, leaving the others', () => {
         const store = createStore();
         store.add(4, 'push');

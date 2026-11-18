@@ -39,20 +39,42 @@
                                 <span class="plan__today">· today</span>
                             }
                         </h3>
-                        @if (view.canAdd(day.day)) {
-                            <button
-                                type="button"
-                                class="btn-pill plan__add"
-                                [id]="'plan-add-' + day.day"
-                                aria-haspopup="dialog"
-                                [attr.aria-label]="'Add a workout to ' + day.name"
-                                (click)="addingTo.set(day.day)"
-                            >
-                                <mat-icon aria-hidden="true">add</mat-icon>
-                                Add
-                            </button>
-                        }
+                        <div class="plan__day-actions">
+                            @if (view.canAdd(day.day)) {
+                                <button
+                                    type="button"
+                                    class="btn-pill"
+                                    [id]="'plan-add-' + day.day"
+                                    aria-haspopup="dialog"
+                                    [attr.aria-label]="'Add a workout to ' + day.name"
+                                    (click)="addingTo.set(day.day)"
+                                >
+                                    <mat-icon aria-hidden="true">add</mat-icon>
+                                    Add
+                                </button>
+                            }
+                            <!-- ⇄ picks the day, and another's then swaps the two -->
+                            @if (canSwap()) {
+                                <button
+                                    type="button"
+                                    class="btn-icon plan__swap"
+                                    [class.plan__swap--other]="
+                                        swap.picked() !== null && swap.picked() !== day.day
+                                    "
+                                    [id]="swapId(day.day)"
+                                    [attr.aria-pressed]="swap.picked() === day.day"
+                                    [attr.aria-label]="swap.label(day.day)"
+                                    (click)="swap.press(day.day)"
+                                    (keydown.escape)="swap.cancel()"
+                                >
+                                    <mat-icon aria-hidden="true">swap_horiz</mat-icon>
+                                </button>
+                            }
+                        </div>
                     </div>
+                    @if (swap.picked() === day.day) {
+                        <p class="plan__swap-hint">Now press ⇄ on the day to swap it with.</p>
+                    }
                     <div
                         class="plan__drop"
                         cdkDropList

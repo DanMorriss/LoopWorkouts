@@ -286,6 +286,19 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     2. Due today lists Legs, "Moved from Tuesday".
     3. Tuesday's Legs is Missed again.
 
+### REG-PLAN-10 · Swap two days
+
+- **Stories:** PLN-1 · **Priority:** P2
+- **Preconditions:** `guest()`, workouts Legs and Push, Legs planned on Thursday and Push on Saturday, clock Wednesday.
+- **Steps:**
+    1. On the Plan page, press Thursday's ⇄ ("Swap Thursday with another day").
+    2. Press Saturday's ⇄ ("Swap Saturday with Thursday").
+    3. Press **Undo**.
+- **Expected:**
+    1. Thursday's ⇄ is pressed, and under its name: "Now press ⇄ on the day to swap it with."; screen readers hear "Thursday picked. Now pick the day to swap it with."
+    2. Thursday lists Push, Saturday Legs; the Undo bar says "Thursday and Saturday swapped", focus on Undo.
+    3. Thursday lists Legs again, Saturday Push, and focus is on Thursday's ⇄.
+
 ---
 
 ## 3. Building a workout (`build-a-workout.md`, `sets-and-supersets.md`, `exercises.md`)
@@ -1508,7 +1521,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Area                      | Tests            | Stories covered                                                                                                                               |
 | ------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                                              |
-| Today and planning        | REG-PLAN-01 – 09 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                   |
+| Today and planning        | REG-PLAN-01 – 10 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                   |
 | Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                                   |
 | Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                                          |
 | Running a workout         | REG-RUN-01 – 17  | RUN-1 – RUN-12, RUN-14, RUN-15, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, HIS-3, SET-2 |

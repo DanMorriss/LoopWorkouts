@@ -421,3 +421,36 @@ test.describe('a missed workout', () => {
         }
     );
 });
+
+test.describe('swapping two days', () => {
+    test.use({
+        storage: { ...seed.workouts([legs, push]), ...seed.plan({ thu: ['legs'], sat: ['push'] }) },
+    });
+
+    test('REG-PLAN-10 swap two days, then Undo', { tag: '@p2' }, async ({ app, page }) => {
+        await app.goto('/plan');
+        const thursday = day(page, 'Thursday');
+        const saturday = day(page, 'Saturday');
+        const pick = thursday.getByRole('button', { name: 'Swap Thursday with another day' });
+
+        await pick.click();
+        await expect(pick).toHaveAttribute('aria-pressed', 'true');
+        await expect(thursday).toContainText('Now press ⇄ on the day to swap it with.');
+        await expect
+            .poll(() => app.announcements())
+            .toContain('Thursday picked. Now pick the day to swap it with.');
+        await saturday.getByRole('button', { name: 'Swap Saturday with Thursday' }).click();
+
+        await expect(thursday.getByRole('listitem')).toContainText('Push');
+        await expect(saturday.getByRole('listitem')).toContainText('Legs');
+        await expect(app.undoBar).toContainText('Thursday and Saturday swapped');
+        await expect(app.undo).toBeFocused();
+        const plan = await app.stored<{ days: string[][] }>('week-plan');
+        expect(plan?.days[3]).toEqual(['push']);
+
+        await app.undo.click();
+        await expect(thursday.getByRole('listitem')).toContainText('Legs');
+        await expect(saturday.getByRole('listitem')).toContainText('Push');
+        await expect(pick).toBeFocused();
+    });
+});

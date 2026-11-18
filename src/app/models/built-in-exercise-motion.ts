@@ -3951,21 +3951,8 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
         view: 'side',
         frames: [
             {
-                label: 'Arm out',
-                hold: 300,
-                ms: 1400,
-                pose: {
-                    ...STANDING,
-                    arms: [reach(50, -146, 'cw'), reach(42, -134, 'cw')],
-                    handsApart: 20,
-                    handsOut: [0, -14],
-                    elbowsOut: 0.6,
-                },
-            },
-            {
-                label: 'Fingers drawn back',
-                hold: 1500,
-                ms: 1200,
+                label: 'Hold',
+                ms: 1000,
                 pose: {
                     ...STANDING,
                     // The near hand's fingers bent up, palm forwards, the far hand in front of

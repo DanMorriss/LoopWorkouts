@@ -268,12 +268,12 @@ test.describe('a kettlebell workout', () => {
 
             // The kettlebell's weight, said once, is on every step that uses it
             await setWheel(run.wheel('Weight, kg'), 16, 0.5);
-            await run.done.click();
+            await run.pressDone();
             await expect(run.face).toContainText('Goblet squat');
             await expect(
                 run.face.getByRole('spinbutton', { name: 'Weight, kg', exact: true })
             ).toHaveAttribute('aria-valuenow', '16');
-            await run.done.click();
+            await run.pressDone();
 
             // 20 swings: time for a heavier kettlebell, not 2.5 kg more
             const notice = run.summary.getByRole('region', { name: 'Time for a new kettlebell' });

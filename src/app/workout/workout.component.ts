@@ -32,6 +32,8 @@ import { SummaryExits } from './summary-exits';
 import { LastSetDialogComponent } from './last-set-dialog/last-set-dialog.component';
 import { WorkoutSwap } from './workout-swap';
 import { UpNextCardComponent } from './up-next-card/up-next-card.component';
+import { LaterListComponent } from './later-list/later-list.component';
+import { LaterPicks } from './later-picks';
 import { tourWorkoutPage } from './workout-tour';
 import { WorkoutView } from './workout-view';
 import { Exercise } from '../models/exercise';
@@ -63,6 +65,7 @@ const SPACE_HANDLED_BY =
         WorkoutRoundLineComponent,
         SwapExerciseDialogComponent,
         UpNextCardComponent,
+        LaterListComponent,
     ],
     providers: [WorkoutView],
     templateUrl: './workout.component.html',
@@ -87,6 +90,8 @@ export class WorkoutComponent {
     private readonly settings = inject(SettingsStore);
     protected readonly view = inject(WorkoutView);
     protected readonly swap = new WorkoutSwap(() => this.focusInfo());
+    /** Skip puts an exercise aside to do later (RUN-16). */
+    private readonly later = new LaterPicks();
 
     protected readonly alarms = inject(AlarmService);
     /** Sound is on, but the browser is waiting for a tap before it will play any. */
@@ -288,7 +293,7 @@ export class WorkoutComponent {
      * so unlike Done, its ring doesn't fill.
      */
     protected skip() {
-        this.run.skipStep();
+        this.later.skip();
     }
 
     /**
@@ -376,6 +381,13 @@ export class WorkoutComponent {
             },
             { injector: this.injector }
         );
+    }
+
+    /** The last exercise put aside was picked to do next, so its button's gone: on to Done or Pause. */
+    protected focusControls() {
+        (
+            this.doneButton() ?? (this.view.isPaused() ? this.resumeButton() : this.mainButton())
+        )?.nativeElement.focus();
     }
 
     /** End workout: the summary opens over the run, which waits, paused, in case of Back. */

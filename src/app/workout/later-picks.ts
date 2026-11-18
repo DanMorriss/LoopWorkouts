@@ -1,0 +1,63 @@
+import { inject } from '@angular/core';
+import { LaterStep, putAside, sameStep } from '../models/later';
+import { canPutAside, pickNext, unpick } from '../models/later-pick';
+import { ActiveRunService } from '../shared/run/active-run.service';
+import { WorkoutStore } from '../shared/state/workout-store.service';
+
+/**
+ * The workout page's presses for exercises skipped to do later (RUN-16): putting one aside on
+ * Skip, and picking one to do next. Kept beside the page, rather than in ActiveRunService,
+ * which is in every page's first download. Make it in an injection context.
+ */
+export class LaterPicks {
+    private readonly run = inject(ActiveRunService);
+    private readonly store = inject(WorkoutStore);
+
+    /** Skip (RUN-12), with an exercise skipped put aside, to do later if wanted. */
+    skip() {
+        this.run.sync();
+        const workout = this.run.running();
+        const state = this.run.state();
+        if (workout && state && canPutAside(workout, state)) {
+            this.store.setActiveLater(putAside(this.store.activeLater(), state));
+        }
+        this.run.skipStep();
+    }
+
+    /**
+     * `step`, put aside, is done next: straight after the step on now, or after the one done
+     * later that's on now. It runs from its full time, then the workout carries on where it
+     * was. Returns whether it was picked.
+     */
+    doNext(step: LaterStep): boolean {
+        this.run.sync();
+        const state = this.run.state();
+        const elapsedMs = this.run.elapsedMs();
+        const later = this.store.activeLater();
+        if (
+            !state ||
+            elapsedMs === null ||
+            state.phase === 'complete' ||
+            !later.aside.some((other) => sameStep(other, step))
+        ) {
+            return false;
+        }
+        this.store.setActiveLater(
+            pickNext(later, step, state, {
+                elapsedMs,
+                repStepsDone: this.store.activeRepStepsDone(),
+            })
+        );
+        this.run.sync();
+        return true;
+    }
+
+    /** Undoes doNext(), unless the step has started: it's back on the list. */
+    undoNext(step: LaterStep) {
+        const state = this.run.state();
+        if (state?.later && sameStep(state, step)) {
+            return;
+        }
+        this.store.setActiveLater(unpick(this.store.activeLater(), step));
+    }
+}

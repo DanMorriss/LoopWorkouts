@@ -7,6 +7,7 @@ import {
     runPlan,
     runsUntilStopped,
     sideName,
+    Step,
     stepKindName,
     StepKind,
     workoutSeconds,
@@ -53,6 +54,13 @@ export class WorkoutView {
     readonly summaryOpen = this.run.summaryOpen;
     readonly state = this.run.state;
     readonly nextState = this.run.nextState;
+    /**
+     * Where the clock is, for the round line: the step on now, or, during a step skipped
+     * earlier and done later (RUN-16), the place the run carries on from.
+     */
+    private readonly clockState = this.run.clockState;
+    /** The step on now was skipped earlier, and is being done later (RUN-16). */
+    readonly isLater = computed(() => !!this.state()?.later);
 
     readonly isWorkActive = computed(() => this.state()?.phase === 'work');
     readonly isRestActive = computed(() => this.state()?.phase === 'rest');
@@ -138,14 +146,14 @@ export class WorkoutView {
         return formatSeconds(seconds);
     });
     /** The round in progress, counting from 1. */
-    readonly roundNumber = computed(() => (this.state()?.round ?? 0) + 1);
+    readonly roundNumber = computed(() => (this.clockState()?.round ?? 0) + 1);
 
     /**
      * The set in progress of an exercise with more than one, e.g. set 1 (from 0) of 3, or
      * null. The rest after a set is part of that set.
      */
     readonly groupSet = computed(() => {
-        const state = this.state();
+        const state = this.clockState();
         const workout = this.running();
         return state && workout && state.phase !== 'complete'
             ? setOf(workout, state.stepIndex)
@@ -209,7 +217,7 @@ export class WorkoutView {
             return null;
         }
         return {
-            heading: at.heading,
+            heading: state.later ? 'Skipped earlier' : at.heading,
             count: plan.exercises > 1 ? { exercise: at.exercise, of: plan.exercises } : null,
             starts: at.starts,
         };
@@ -268,16 +276,49 @@ export class WorkoutView {
             step.kind !== 'rest' && workout && startsSet(workout, next.stepIndex)
                 ? setOf(workout, next.stepIndex)
                 : null;
-        // A step's second side is the same exercise again, so it's only the side
-        const side = workout && secondSide(workout, next.stepIndex);
+        // A step's second side is the same exercise again, so it's only the side; not one
+        // skipped earlier, which comes after something else
+        const side = !next.later && workout && secondSide(workout, next.stepIndex);
         const name = side ? sideName(side) : step.name || stepKindName(step.kind);
-        const weight = step.kind === 'reps' ? this.weightText(step) : '';
-        const amount =
-            step.kind === 'reps'
-                ? `${step.reps} reps${weight ? ` @ ${weight}` : ''}`
-                : formatSeconds(step.seconds);
+        const amount = this.amountText(step);
         const detail = side || !set ? amount : `${setText(set)} · ${amount}`;
         return { name, detail, kind: step.kind };
+    });
+
+    /** A step's reps and weight, e.g. "10 reps @ 60 kg", or its time, "00:45". */
+    private amountText(step: Step): string {
+        if (step.kind !== 'reps') {
+            return formatSeconds(step.seconds);
+        }
+        const weight = this.weightText(step);
+        return `${step.reps} reps${weight ? ` @ ${weight}` : ''}`;
+    }
+
+    /**
+     * The exercises skipped to do later (RUN-16), for the list at the top: each one's name,
+     * which side and set (with the round, where there's more than one), and its amount.
+     */
+    readonly aside = computed(() => {
+        const workout = this.running();
+        if (!workout || this.isComplete()) {
+            return [];
+        }
+        const rounds = workout.repeats !== 1;
+        return this.run.aside().map((later) => {
+            const place = placeAt(workout, later.stepIndex);
+            const set = setOf(workout, later.stepIndex);
+            const where = [
+                rounds ? `Round ${later.round + 1}` : '',
+                set ? setText(set) : '',
+                place?.side ? sideName(place.side) : '',
+            ].filter(Boolean);
+            return {
+                key: `${later.round}-${later.stepIndex}`,
+                later: { round: later.round, stepIndex: later.stepIndex },
+                name: later.step.name || stepKindName(later.step.kind),
+                detail: [...where, this.amountText(later.step)].join(' · '),
+            };
+        });
     });
 
     /** e.g. "Plank · 00:45", "Squats · 10 reps @ 60 kg", or "finish" when the workout ends after this step. */
@@ -350,8 +391,9 @@ export class WorkoutView {
         const state = this.state();
         return !state || state.phase === 'complete' ? 'complete' : this.keyOf(state);
     });
-    keyOf(state: Pick<WorkoutState, 'round' | 'stepIndex'>) {
-        return `${this.workoutStore.activeRunStartedAt()}-${state.round}-${state.stepIndex}`;
+    keyOf(state: Pick<WorkoutState, 'round' | 'stepIndex' | 'later'>) {
+        const later = state.later ? 'later-' : '';
+        return `${this.workoutStore.activeRunStartedAt()}-${later}${state.round}-${state.stepIndex}`;
     }
     readonly faceSlides = computed(() => {
         const state = this.state();
@@ -402,7 +444,7 @@ export class WorkoutView {
     readonly newRound = computed(() => {
         const state = this.state();
         const workout = this.running();
-        if (!state || !workout || state.phase === 'complete') {
+        if (!state || !workout || state.phase === 'complete' || state.later) {
             return false;
         }
         if (state.stepIndex === 0) {
@@ -416,7 +458,7 @@ export class WorkoutView {
 
     /** Where the set in progress begins in the round, which tells one set from the next. */
     private readonly setStartIndex = computed(() => {
-        const state = this.state();
+        const state = this.clockState();
         const workout = this.running();
         if (!state || !workout) {
             return 0;
@@ -431,7 +473,7 @@ export class WorkoutView {
      * In a workout with sets, a superset's round (BLD-12), with the rest after it.
      */
     readonly stepStrip = computed((): StripStep[] => {
-        const state = this.state();
+        const state = this.clockState();
         const workout = this.running();
         if (!workout || !state || state.phase === 'complete') {
             return [];
@@ -472,7 +514,7 @@ export class WorkoutView {
             }
             const halfMs = (state.phaseSeconds * 1000) / 2;
             return {
-                key: `${this.workoutStore.activeWorkoutStartedAt()}-${state.round}-${state.stepIndex}`,
+                key: `${this.workoutStore.activeWorkoutStartedAt()}-${this.keyOf(state)}`,
                 halfDuration: `${halfMs}ms`,
                 // Negative delays start part-way through, e.g. when resuming after a refresh
                 firstHalfDelay: `${-state.phaseElapsedMs}ms`,
@@ -536,6 +578,9 @@ export class WorkoutView {
                 : '';
             parts.push([section.heading, count].filter(Boolean).join(', '));
         }
+        if (state.later) {
+            parts.push('skipped earlier');
+        }
         parts.push(state.step.name || stepKindName(state.step.kind));
         if (this.sideLabel()) {
             parts.push(this.sideLabel().toLowerCase());
@@ -553,13 +598,13 @@ export class WorkoutView {
         if (this.showStepCount()) {
             parts.push(`step ${state.stepIndex + 1} of ${runPlan(workout).steps.length}`);
         }
-        const set = this.groupSet();
+        const set = setOf(workout, state.stepIndex);
         if (set && state.step.kind !== 'rest') {
             const last = set.group === 'exercise' ? 'last set' : `${set.group}, last round`;
             parts.push(set.set === set.of - 1 ? last : setText(set));
         }
         // The round is given as each round starts
-        if (state.stepIndex === 0) {
+        if (state.stepIndex === 0 && !state.later) {
             if (this.timeLimited()) {
                 parts.push(`round ${state.round + 1}, ${this.timeLeft()}`);
             } else if (this.untilStopped()) {

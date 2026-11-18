@@ -39,7 +39,14 @@ export class WorkoutSwap {
         return running ? allSteps(running).flatMap((step) => step.exerciseId ?? []) : [];
     });
     /** Whether those details are of the next step's exercise, opened during the rest before it. */
-    private detailsOfNext = false;
+    private readonly detailsOfNext = signal(false);
+    /**
+     * Whether the exercise in the details can be swapped: not one skipped earlier and done
+     * later (RUN-16), as a swap is from where the step is in the run.
+     */
+    readonly canSwap = computed(
+        () => !(this.detailsOfNext() ? this.view.nextState() : this.view.state())?.later
+    );
     /**
      * The step's exercise being swapped for another (RUN-11), while its dialog is open; `next`
      * for the step after the rest it was opened in.
@@ -58,7 +65,7 @@ export class WorkoutSwap {
 
     /** `next` for the exercise after a rest, from the Up next card under the ring. */
     showExercise(exercise: Exercise, next = false) {
-        this.detailsOfNext = next;
+        this.detailsOfNext.set(next);
         this.exerciseInDetails.set(exercise);
     }
 
@@ -74,7 +81,7 @@ export class WorkoutSwap {
      */
     startSwap() {
         const exercise = this.exerciseInDetails();
-        const target = exercise && this.swapTarget(exercise, this.detailsOfNext);
+        const target = exercise && this.swapTarget(exercise, this.detailsOfNext());
         this.exerciseInDetails.set(null);
         if (exercise && target) {
             this.swapping.set({

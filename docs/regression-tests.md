@@ -866,6 +866,20 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Left to Vitest:** which stretches are picked, and their order (`stretch-routine.spec.ts`); the push-ups logged as finished, and no stretches on the stretches' own summary (`workout.component.spec.ts`).
 - **Left to Vitest:** a change that would move the clock (saved for next time, the run as it was after a reload), and the sets before the change staying as they were (`workout.component.spec.ts`, `run-edit.spec.ts`, `workout-store.service.spec.ts`).
 
+### REG-RUN-19 · Do a skipped exercise later
+
+- **Stories:** RUN-16, RUN-12 · **Priority:** P2 · **[Clock]**
+- **Preconditions:** workout "Gym", once: Push-up (`builtin:push-up`) 10, rest 0:20, Plank (`builtin:plank`) 0:30, rest 0:20, Squat (`builtin:bodyweight-squat`) 10.
+- **Steps:**
+    1. Start; Skip the push-ups.
+    2. Skip the rest; `runFor` 5000; Skip the plank.
+    3. Press the button at the top; pick Push-up.
+    4. Skip the rest; reload; Done.
+    5. Press the button; **Not now**.
+    6. Press the button; **Do it next**; Done; `runFor` 31000.
+- **Expected:** 1. "Skipped: Push-up" at the top, where there was nothing. 2. "2 skipped exercises", with a 2 on it. 3. Its menu lists Push-up (10 reps) and Plank (00:30); picked, the bar says "Push-up is up next", focus is back on the button ("Skipped: Plank") and Up next is Push-up. 4. The face is Push-up, with "Skipped earlier"; after the reload Up next is Squat, and Done starts the squats. 5. "Do Plank next?"; it closes, focus on the button. 6. The button's gone, Up next is Plank; it runs its 0:30 (not finished at 15 s), then the summary: Workout finished, with Push-up 10 reps, Squat 10 reps and Plank 0:30.
+- **Left to Vitest:** the held clock, its alarms and what's saved (`later.spec.ts`).
+
 ---
 
 ## 6. History, on the Progress tab (`history.md`)
@@ -1529,22 +1543,22 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 ## Coverage
 
-| Area                      | Tests            | Stories covered                                                                                                                               |
-| ------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                                              |
-| Today and planning        | REG-PLAN-01 – 10 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                   |
-| Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                                   |
-| Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                                          |
-| Running a workout         | REG-RUN-01 – 18  | RUN-1 – RUN-12, RUN-14, RUN-15, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
-| History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                          |
-| Progress                  | REG-PRG-01 – 06  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14                                                                                     |
-| Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                   |
-| Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                                            |
-| Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                                               |
-| Calories                  | REG-CAL-01 – 03  | CAL-1, CAL-2, CAL-6                                                                                                                           |
-| Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                                         |
-| Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                                    |
-| Gestures and dragging     | REG-GES-01 – 04  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                                       |
+| Area                      | Tests            | Stories covered                                                                                                                                        |
+| ------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                                                       |
+| Today and planning        | REG-PLAN-01 – 10 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                            |
+| Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                                            |
+| Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                                                   |
+| Running a workout         | REG-RUN-01 – 19  | RUN-1 – RUN-12, RUN-14 – RUN-16, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
+| History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                                   |
+| Progress                  | REG-PRG-01 – 06  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14                                                                                              |
+| Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                            |
+| Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                                                     |
+| Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                                                        |
+| Calories                  | REG-CAL-01 – 03  | CAL-1, CAL-2, CAL-6                                                                                                                                    |
+| Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                                                  |
+| Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                                             |
+| Gestures and dragging     | REG-GES-01 – 04  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                                                |
 
 **Count:** 86 tests: 40 P1, 37 P2, 9 P3.
 

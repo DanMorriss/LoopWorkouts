@@ -1,4 +1,5 @@
 import { LoggedSet, RepSet, TimedSet } from './history';
+import type { DoneLater } from './later';
 import { runPosition, stepAsRunAt, StepSwap } from './step-swap';
 import {
     endlessRounds,
@@ -47,6 +48,11 @@ export interface WorkoutState {
      * it). Missing otherwise.
      */
     cutShort?: true;
+    /**
+     * A step skipped earlier, done later (RUN-16): `round` and `stepIndex` are where it was,
+     * so its set is logged there, while the clock holds where the run is. Missing otherwise.
+     */
+    later?: true;
 }
 
 /**
@@ -267,14 +273,16 @@ export function isSetAt(set: LoggedSet, round: number, place: StepPlace): boolea
  * each work step of an exercise that has run to its end, in the order they were done. A
  * step swapped for another exercise part-way (RUN-11) is named as it was at the time, from
  * `swaps`. One skipped part-way (RUN-12, in `skips`) is the time it ran, in whole seconds,
- * and isn't a set if that's under one.
+ * and isn't a set if that's under one; one done later as well (RUN-16, in `later`), the
+ * longer of the two times it ran.
  */
 export function setsDone(
     workout: Workout,
     state: WorkoutState,
     repSets: readonly RepSet[],
     swaps: readonly StepSwap[] = [],
-    skips: readonly StepSkip[] = []
+    skips: readonly StepSkip[] = [],
+    later: readonly DoneLater[] = []
 ): LoggedSet[] {
     const { steps, places } = runPlan(workout);
     const skipped = new Map(skips.map((skip) => [`${skip.round}/${skip.stepIndex}`, skip]));
@@ -291,7 +299,13 @@ export function setsDone(
             const { name, exerciseId } = asRun ?? step;
             if (step.kind === 'work' && exerciseId !== undefined && place) {
                 const skippedMs = skipped.get(`${round}/${stepIndex}`)?.skippedMs ?? 0;
-                const seconds = Math.floor((step.seconds * 1000 - skippedMs) / 1000);
+                const ranMs = Math.max(
+                    step.seconds * 1000 - skippedMs,
+                    ...later
+                        .filter((done) => done.round === round && done.stepIndex === stepIndex)
+                        .map((done) => done.ranMs)
+                );
+                const seconds = Math.floor(ranMs / 1000);
                 if (seconds < 1) {
                     return;
                 }

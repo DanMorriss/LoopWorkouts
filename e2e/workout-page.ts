@@ -60,6 +60,19 @@ export class WorkoutPage {
         return this.main.getByRole('button', { name: /^Skip (step|rest)$/ });
     }
 
+    /**
+     * The exercises skipped to do later (RUN-16), at the top: "Skipped: Plank", or
+     * "2 skipped exercises".
+     */
+    get later(): Locator {
+        return this.main.getByRole('button', { name: /^(Skipped: |\d+ skipped exercises$)/ });
+    }
+
+    /** The menu the later button opens. */
+    get laterMenu(): Locator {
+        return this.main.getByRole('group', { name: /^(Do .+ next\?|Skipped · do one next)$/ });
+    }
+
     /** A rep step's Done, the Up next card (named "Done. Next: Rest · 00:10"). */
     get done(): Locator {
         return this.main.getByRole('button', { name: /^Done\. Next/ });

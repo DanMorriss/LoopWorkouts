@@ -101,6 +101,18 @@ export interface Pose {
      */
     readonly handsOut?: readonly [near: number, far: number];
     /**
+     * Only for the 3D figure: how far each hand is bent back at the wrist, in degrees, the
+     * fingers turning towards the back of the hand (as a wrist stretch pulls them); negative
+     * bends them towards the palm. From either view.
+     */
+    readonly wristBend?: readonly [near: number, far: number];
+    /**
+     * Only for the 3D figure: how far in front of where it's drawn each foot is, in cm, the knee
+     * bending to reach; negative is behind. From the front only, where a drawing can't show it
+     * (one leg crossed behind the other, or the feet out in front when sitting).
+     */
+    readonly feetForward?: readonly [near: number, far: number];
+    /**
      * Only for the 3D figure: how far apart the feet are, side to side, in cm, wider than the
      * hips for a wide stance (as in a kettlebell swing). From the side only.
      */
@@ -747,6 +759,22 @@ export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
                   handsOut: [
                       lerp(a.handsOut?.[0] ?? 0, b.handsOut?.[0] ?? 0, t),
                       lerp(a.handsOut?.[1] ?? 0, b.handsOut?.[1] ?? 0, t),
+                  ],
+              }
+            : {}),
+        ...(a.wristBend || b.wristBend
+            ? {
+                  wristBend: [
+                      lerp(a.wristBend?.[0] ?? 0, b.wristBend?.[0] ?? 0, t),
+                      lerp(a.wristBend?.[1] ?? 0, b.wristBend?.[1] ?? 0, t),
+                  ],
+              }
+            : {}),
+        ...(a.feetForward || b.feetForward
+            ? {
+                  feetForward: [
+                      lerp(a.feetForward?.[0] ?? 0, b.feetForward?.[0] ?? 0, t),
+                      lerp(a.feetForward?.[1] ?? 0, b.feetForward?.[1] ?? 0, t),
                   ],
               }
             : {}),

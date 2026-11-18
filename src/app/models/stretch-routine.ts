@@ -15,7 +15,7 @@ type StretchPlace = 'standing' | 'floor';
 export const ROUTINE_STRETCHES: Readonly<
     Record<string, { readonly place: StretchPlace; readonly eachSide: boolean }>
 > = {
-    'builtin:doorway-chest-stretch': { place: 'standing', eachSide: false },
+    'builtin:doorway-chest-stretch': { place: 'standing', eachSide: true },
     'builtin:cross-body-shoulder-stretch': { place: 'standing', eachSide: true },
     'builtin:standing-biceps-stretch': { place: 'standing', eachSide: false },
     'builtin:overhead-triceps-stretch': { place: 'standing', eachSide: true },

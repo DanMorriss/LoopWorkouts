@@ -1005,13 +1005,20 @@ export class FigureScene {
             const shoulder = restJoint(model, 'shoulder', arm.side);
             const elbow = restJoint(model, 'elbow', arm.side);
             const hand = restHand(model, arm.side);
-            this.placeLimb(
+            const front = this.placeLimb(
                 [parts.upperArms[i], parts.forearms[i], parts.hands[i]],
                 [shoulder, elbow, hand],
                 arm,
                 [BODY.upperArm, BODY.forearm],
                 { forward, up, right },
                 pivot
+            );
+            this.bendWrist(
+                parts.hands[i],
+                restJoint(model, 'wrist', arm.side),
+                arm,
+                front,
+                skeleton.wristBend[i]
             );
         });
         skeleton.legs.forEach((leg, i) => {
@@ -1042,6 +1049,24 @@ export class FigureScene {
             );
         });
         this.carried.forEach((placeIt) => placeIt(skeleton));
+    }
+
+    /**
+     * Bends a hand, placed with its forearm, back at the wrist by `degrees` (`Pose.wristBend`):
+     * about the wrist, side to side across the forearm, so the fingers turn towards the back
+     * of the hand, the way the forearm's `front` doesn't face.
+     */
+    private bendWrist(hand: Mesh, restWrist: Vec3, arm: Limb3, front: Vec3, degrees: number) {
+        if (!degrees) {
+            return;
+        }
+        const wrist = new Vector3(...restWrist).applyMatrix4(hand.matrix);
+        const across = normalize3(cross3(normalize3(sub3(arm.end, arm.mid)), front));
+        const turn = new Matrix4()
+            .makeTranslation(wrist.x, wrist.y, wrist.z)
+            .multiply(new Matrix4().makeRotationAxis(v(across), (degrees * Math.PI) / 180))
+            .multiply(new Matrix4().makeTranslation(-wrist.x, -wrist.y, -wrist.z));
+        hand.matrix.premultiply(turn);
     }
 
     /**

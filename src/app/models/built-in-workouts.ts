@@ -444,7 +444,7 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
         group: 'bodyweight',
         repeats: 1,
         blocks: [
-            once(timed('doorway-chest-stretch', 45)),
+            once(timed('doorway-chest-stretch', 30, { eachSide: true })),
             once(timed('cross-body-shoulder-stretch', 30, { eachSide: true })),
             once(timed('overhead-triceps-stretch', 30, { eachSide: true })),
             once(timed('standing-biceps-stretch', 30)),

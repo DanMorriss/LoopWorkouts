@@ -1496,16 +1496,16 @@ export const BUILT_IN_EXERCISE_TEXT: Readonly<Record<BuiltInExercise['id'], Exer
     // Twelfth batch: a stretch for every muscle group, for the stretches after a workout
     'builtin:doorway-chest-stretch': {
         description:
-            'With your forearms on a door frame, you lean gently through the doorway. Opens up your chest and the fronts of your shoulders.',
+            'With one forearm against a door frame, you lean gently through the doorway. Opens up your chest and the front of your shoulder.',
         steps: [
-            'Stand in a doorway and raise your arms out to the sides, elbows bent at a right angle and level with your shoulders.',
-            'Rest your forearms and palms on the door frame either side.',
-            'Step one foot forward and ease your chest through the doorway until you feel a stretch across it.',
-            'Hold, breathing slowly, then step back out of it.',
+            'Stand in a doorway and raise your right arm out to the side, elbow bent at a right angle and level with your shoulder.',
+            'Rest your forearm and palm flat against the door frame.',
+            'Step your right foot forward and ease your chest through the doorway, your arm staying put, until you feel a stretch across your chest.',
+            'Hold, breathing slowly, then step back out of it and swap arms.',
         ],
         tips: [
-            'Keep your shoulders down away from your ears, and ease in: never bounce or push into pain.',
-            'No doorway? Do one arm at a time on a wall corner, turning your body gently away from it.',
+            'Keep your shoulder down away from your ear, and ease in: never bounce or push into pain.',
+            'No doorway? A wall corner or an upright post works the same way.',
         ],
     },
     'builtin:cross-body-shoulder-stretch': {

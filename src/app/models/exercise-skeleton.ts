@@ -58,6 +58,8 @@ export interface Skeleton {
     readonly bar: Vec3;
     /** How far the dumbbells are turned palms in (`Pose.palmsIn`). */
     readonly palmsIn: number;
+    /** How far each hand is bent back at the wrist, in degrees (`Pose.wristBend`). */
+    readonly wristBend: readonly [near: number, far: number];
     /**
      * Where a kettlebell's handle is: in the hand `Pose.heldBy` says, between the hands, or
      * set down (`Pose.bellAt`), and whether it's set down, so stands upright.
@@ -241,6 +243,20 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
     });
     const leg = (index: 0 | 1): Limb3 => {
         const placed = limb(solved.legs[index], index, HIP_SPREAD, [BODY.thigh, BODY.shin]);
+        const feetForward = side ? 0 : (pose.feetForward?.[index] ?? 0);
+        if (feetForward) {
+            // The foot in front of where it's drawn (or behind), the knee bending as drawn to
+            // reach it, or forwards for a leg drawn straight
+            const end = within(
+                placed.root,
+                add3(placed.end, scale3(forward, feetForward)),
+                BODY.thigh + BODY.shin
+            );
+            const drawn = sub3(placed.mid, scale3(add3(placed.root, placed.end), 0.5));
+            const towards = length3(drawn) > 1 ? drawn : forward;
+            const mid = bend(placed.root, end, BODY.thigh, BODY.shin, towards);
+            return { ...placed, mid, end };
+        }
         if (!side && pose.kneesForward) {
             // The knee bent forwards rather than as drawn: square to the line from the hip to
             // the ankle
@@ -322,6 +338,7 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         feet: [foot(0), foot(1)],
         bar: raise(turn(lift(view, solved.bar))),
         palmsIn: pose.palmsIn ?? 0,
+        wristBend: [pose.wristBend?.[0] ?? 0, pose.wristBend?.[1] ?? 0],
         bell: bellAt
             ? add3(lift(view, [bellAt[0], bellAt[1]]), scale3(right, bellAt[2]))
             : lerp3(arms[0].end, arms[1].end, pose.heldBy ?? 0),

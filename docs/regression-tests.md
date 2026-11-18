@@ -1388,8 +1388,8 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 - **Stories:** A11Y-1, EXR-13 · **Priority:** P2 · **[Clock]**
 - **Preconditions:** `guest()`, workout timed 0:20, rest 0:10. Contexts with `reducedMotion: 'reduce'` and `'no-preference'`.
-- **Steps:** Start; `runFor` 16 s (into the last 5 s); then into the rest. Read `document.getAnimations()`. Also: switch theme; open an exercise page.
-- **Expected:** With reduce, no animation with infinite iterations runs (no Up next card pulse, no face flare, no breathing in rest), the theme changes without a fade (no view transition), and the exercise page appears without sliding. With no-preference, the Up next card's pulse is running in the last 5 s (a sanity check that the test can see it).
+- **Steps:** Start; `runFor` 18 s (into the last 3 s); then into the rest. Read `document.getAnimations()`. Also: switch theme; open an exercise page.
+- **Expected:** With reduce, no animation with infinite iterations runs (no Up next card pulse, no face flare, no breathing in rest), the theme changes without a fade (no view transition), and the exercise page appears without sliding. With no-preference, the Up next card's pulse is running in the last 3 s (a sanity check that the test can see it).
 
 ### REG-A11Y-05 · What screen readers hear during a run
 

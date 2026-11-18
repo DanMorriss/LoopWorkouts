@@ -93,7 +93,7 @@
     - Otherwise (a rest, a timed step, or any step while paused), when the next step is an exercise, the **whole card is a button** with an **(i)** at its end, opening that exercise's details with **Swap exercise** (RUN-11, below), to get ready for it or swap it before it starts; Skip is there to move on. After they close, focus is back on the card. When the next step isn't an exercise (a rest, or "Jog"), it's just the card. Screen readers hear "Up next: Bench press, Set 2 of 3 · 12 reps @ 60 kg", as a button that opens a dialog when it is one.
     - Paused, it steps back into the muted colour, still pressable.
 - **What it says**: a step with sets says which, e.g. "Leg press", "Set 2 of 3 · 10 reps @ 40 kg", in the rest after the set before too. In a superset, only its first step says the round, as one starts ("Bench", "Superset round 2 of 3 · 10 reps"); the others are in the round already said ("Row", "10 reps"). A step's second side is only its side: "Right side", "10 reps", or "Right side", "00:30" during Switch sides.
-    - In the **last 5 seconds** of a timed step or rest (the last 3 for a step under 15 seconds), the card swells and glows in its colour once a second, to get ready. Each swell, and the face's flare with it, lands on the clock's second, in time with the countdown beeps, even when the pulse starts part-way through a second (on resuming, say). Not on a rep step, where it's Done instead (above), and not while paused.
+    - In the **last 3 seconds** of a timed step or rest, as the countdown beeps tick (ALM-5), the card swells and glows in its colour once a second, to get ready. Each swell, and the face's flare with it, lands on the clock's second, in time with the countdown beeps, even when the pulse starts part-way through a second (on resuming, say). Not on a rep step, where it's Done instead (above), and not while paused.
     - In the same seconds the **face** flares to full colour on each second and eases back to its tint, in time with the card: one "get ready" cue, rather than a flash all step long.
 
 ### Changing reps or weight mid-workout (RUN-6)
@@ -220,11 +220,11 @@
 - Given 20 push-ups at 40 kg in round 1 and the workout ended in round 2, when I change the set to 18 reps on the summary, then the history has 18; on "Yes, use next time" the saved workout starts from 18 at 40 kg, and on "No, just this time" it stays at 20.
 - Given a summary longer than the screen (Next time, Muscles worked and the next workout), then the sheet fits the screen, its content scrolls, and Done is always in reach under it.
 - Given a workout ended early, when I press Back to workout, then it is paused where it was ended, with focus on Resume.
-- Given work 0:20 then rest, then the Up next card pulses in the rest colour from 00:05 left, and stops when paused.
-- Given work 0:10, then the card pulses only from 00:03 left.
+- Given work 0:20 then rest, then the Up next card pulses in the rest colour from 00:03 left, with the first countdown beep, and stops when paused.
+- Given work 0:05, then the card pulses from 00:03 left too, though it has no beeps.
 - Given countdown beeps, then each swell of the card and face flare lands on a beep, including after a resume mid-second.
 - Given a rep step, then the card (Done) never pulses.
-- Given work 0:20, then the face holds a steady pink tint until 00:05 left, then flares once a second with the card.
+- Given work 0:20, then the face holds a steady pink tint until 00:03 left, then flares once a second with the card.
 - Given a new step in the same round, then its text rolls up from below; given round 2 starting, then the text and "round 2 of 3" turn in from the right; given a rest, then it settles in gently from just below.
 - Given work 0:03, rest 0:02 and a time limit of 1:04, then 12s in it says "round 3" and "00:52 left", and screen readers heard "Timed, round 1, 01:04 left" at the start.
 - Given that workout, when 1:04 has gone by, then it finishes with "Time's up" and "12 rounds + 1 in 1:04", logged as finished with 12 rounds and 1 step.

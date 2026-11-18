@@ -17,6 +17,7 @@ import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { StripStep } from './step-strip/step-strip.component';
+import { STEP_COUNTDOWN } from '../models/alarm-schedule';
 import { placeAt, WorkoutState } from '../models/workout-state';
 import { roundDots, secondSide, setDots, setOf, setText, startsSet } from './round-progress';
 
@@ -316,15 +317,16 @@ export class WorkoutView {
     });
 
     /**
-     * A timed step is nearly over, so "Next:" pulses to get ready: its last 5 seconds, or
-     * its last 3 for a step under 15 seconds. Not on a rep step (Done is the cue) or paused.
+     * A timed step is nearly over, so "Next:" pulses to get ready: its last 3 seconds, so
+     * each beat lands with a countdown beep (`STEP_COUNTDOWN`). Not on a rep step (Done is
+     * the cue) or paused.
      */
     readonly nextSoon = computed(() => {
         const state = this.state();
         if (!state || this.isPaused() || (state.phase !== 'work' && state.phase !== 'rest')) {
             return false;
         }
-        return state.remainingSeconds <= (state.phaseSeconds < 15 ? 3 : 5);
+        return state.remainingSeconds <= STEP_COUNTDOWN[0];
     });
     /**
      * Where the pulse starts in its one-second loop, as a negative animation delay, so each

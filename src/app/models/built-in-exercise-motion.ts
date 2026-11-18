@@ -3582,8 +3582,9 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
         ],
     },
     // On the hands and knees, the near arm up as the chest turns towards it, then threaded under
-    // the body to the far side. As in the world's greatest stretch, the far hand is drawn off
-    // the floor and out to the side as the chest turns, so in 3D it stays put. The near hand
+    // the body to the far side as the chest turns away, the near shoulder dropping towards the
+    // floor. As in the world's greatest stretch, the far hand is drawn off the floor (or below
+    // it) and out to the side as the chest turns, so in 3D it stays put. The near hand
     // passes down by the shoulder on the way, as going straight there takes the arm through
     // the chest
     'builtin:thread-the-needle': {
@@ -3611,10 +3612,11 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 ms: 700,
                 pose: {
                     ...ALL_FOURS,
-                    torso: 75,
+                    torso: 72,
                     head: 60,
-                    arms: [reach(32, -5, 'cw'), reach(46, -5, 'cw')],
-                    handsOut: [-46, 0],
+                    twist: 40,
+                    arms: [reach(23.8, 13.9, 'cw'), reach(44.7, -1, 'cw')],
+                    handsOut: [-28, -22.3],
                 },
             },
             { label: 'Hand down', through: true, ms: 800, pose: THREAD_HAND_DOWN },

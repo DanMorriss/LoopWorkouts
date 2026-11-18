@@ -345,7 +345,7 @@ export class WorkoutComponent {
 
     /**
      * Focus back on what opened the details: the exercise's name, on the face or, while
-     * paused, over it, or the Up next card. If the workout has moved on meanwhile, so that's
+     * paused, over it, or the Up next card (or Done's (i)). If the workout has moved on meanwhile, so that's
      * gone, on Done or Pause (or Resume), so it isn't lost.
      */
     private focusInfo() {
@@ -356,8 +356,8 @@ export class WorkoutComponent {
                     : `.workout-face [data-step="${this.view.stepKey()}"] .workout-face__link`;
                 const card = this.upNextCard();
                 const opener =
-                    this.detailsFrom === 'card' && !card?.done()
-                        ? card?.button()?.nativeElement
+                    this.detailsFrom === 'card'
+                        ? (card?.done() ? card.info() : card?.button())?.nativeElement
                         : this.host.nativeElement.querySelector<HTMLElement>(name);
                 (
                     opener ??

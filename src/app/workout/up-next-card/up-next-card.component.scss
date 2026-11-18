@@ -158,6 +158,45 @@ button.up-next {
     color: var(--text-muted);
 }
 
+// Done and its (i), when what's next is an exercise: the (i) sits over the card's end, a
+// button of its own (one can't go inside another), with room kept for it in Done
+.up-next-done {
+    position: relative;
+}
+
+.up-next--with-info {
+    padding-right: calc(0.25rem + 44px);
+}
+
+.up-next__info {
+    position: absolute;
+    top: 50%;
+    right: 0.25rem;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    translate: 0 -50%;
+    -webkit-tap-highlight-color: transparent;
+
+    @include hover {
+        color: var(--text-strong);
+    }
+
+    @include pressed-scale;
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+    }
+}
+
 // Done goes on, so its arrow is in the card's colour
 .up-next--done .up-next__end {
     color: var(--next-color);

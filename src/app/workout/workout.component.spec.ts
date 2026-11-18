@@ -4987,6 +4987,47 @@ describe('WorkoutComponent', () => {
                 expect(view().isWorkActive()).toBe(true);
             });
 
+            describe("Done's (i), on a rep step before an exercise", () => {
+                const info = () => el('.up-next__info');
+                const plank: Step = {
+                    kind: 'work',
+                    seconds: 30,
+                    name: 'Plank',
+                    exerciseId: 'builtin:plank',
+                };
+
+                it("opens the next timed exercise's details without starting it", async () => {
+                    fixture.destroy();
+                    start(makeWorkout({ steps: [backSquat, plank], repeats: 1 }));
+
+                    expect(el('.up-next--done')).not.toBeNull();
+                    expect(info()!.getAttribute('aria-label')).toBe('About Plank');
+                    expect(info()!.getAttribute('aria-haspopup')).toBe('dialog');
+                    info()!.click();
+                    fixture.detectChanges();
+
+                    expect(
+                        el('app-exercise-details-dialog .details__title')!.textContent!.trim()
+                    ).toBe('Plank');
+                    // Still on the squats, the plank's clock not started
+                    expect(view().isRepsActive()).toBe(true);
+
+                    (el('.dialog-back') as HTMLElement).click();
+                    fixture.detectChanges();
+                    await fixture.whenStable();
+
+                    expect(document.activeElement).toBe(info());
+                });
+
+                it('is not there when what is next is not an exercise', () => {
+                    fixture.destroy();
+                    start(makeWorkout({ steps: [backSquat, rest(10), plank], repeats: 1 }));
+
+                    expect(el('.up-next--done')).not.toBeNull();
+                    expect(info()).toBeNull();
+                });
+            });
+
             it('is the (i), not Done, on a rep step while paused', () => {
                 fixture.destroy();
                 start(

@@ -2,6 +2,7 @@ import { BUILT_IN_EXERCISE_MOTION } from './built-in-exercise-motion';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
 import { MUSCLE_LABELS } from './exercise';
 import { FIGURE_ART } from './exercise-figure-art';
+import { flatPose } from './exercise-skeleton';
 import {
     BODY,
     drawFigure,
@@ -357,7 +358,8 @@ describe('BUILT_IN_EXERCISE_MOTION', () => {
         const steps = 40;
         for (let i = 0; i < steps; i++) {
             const pose = poseAt(motion, (loopLength(motion) * i) / steps);
-            const layers = drawFigure(pose, motion);
+            // As the demo draws it: a twisted figure's arms where the twist puts them
+            const layers = drawFigure(pose, motion, flatPose);
             for (const item of [...layers.far, ...layers.body, ...layers.near]) {
                 // A part's lowest point drawn: the points its curves run through and bend to
                 const lowest =

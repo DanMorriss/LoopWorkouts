@@ -1579,16 +1579,16 @@ export const BUILT_IN_EXERCISE_TEXT: Readonly<Record<BuiltInExercise['id'], Exer
     },
     'builtin:upper-trap-stretch': {
         description:
-            'You tilt your head to one side, letting your hand rest on it. Stretches the side of your neck and the tops of your shoulders.',
+            'You tilt your head slowly to one side, arms relaxed. Stretches the side of your neck and the tops of your shoulders.',
         steps: [
-            'Sit or stand tall with your shoulders relaxed and down.',
+            'Sit or stand tall, arms relaxed by your sides and shoulders down.',
             'Tilt your head slowly to the right, bringing your right ear towards your right shoulder.',
-            'Rest your right hand lightly on the left side of your head, letting its weight add a little more stretch.',
-            'Hold, lift your head back up slowly, then swap sides.',
+            'Stop when you feel a gentle stretch down the left side of your neck, and hold, breathing slowly.',
+            'Lift your head back up slowly, then tilt it to the left.',
         ],
         tips: [
-            'Let your hand rest there, never pull: the stretch should be gentle.',
-            'Keep the other shoulder down. Reaching that hand towards the floor adds a little more.',
+            'Move your ear towards your shoulder, not your shoulder up to your ear.',
+            'Keep it gentle: let the weight of your head do the work, never pull on it.',
         ],
     },
     'builtin:standing-it-band-stretch': {

@@ -4007,20 +4007,17 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
         view: 'front',
         frames: [
             {
-                label: 'Hand on the head',
+                label: 'Head up',
                 hold: 300,
                 ms: 1600,
-                pose: { ...FRONT_STANDING, arms: [reach(-2, -188, 'cw'), angles(6, 4)] },
+                pose: { ...FRONT_STANDING, arms: FRONT_ARMS },
             },
             {
                 label: 'Head tilted',
                 hold: 1500,
                 ms: 1400,
-                pose: {
-                    ...FRONT_STANDING,
-                    head: 205,
-                    arms: [reach(-12, -183, 'cw'), angles(10, 8)],
-                },
+                // Only the head moves, the arms relaxed by the sides
+                pose: { ...FRONT_STANDING, head: 210, arms: FRONT_ARMS },
             },
         ],
     },

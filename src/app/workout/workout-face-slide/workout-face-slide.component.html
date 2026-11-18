@@ -45,19 +45,22 @@
                 />
                 <span class="workout-face__reps" [id]="'reps-label-' + face.key">reps</span>
             </div>
-            <div class="workout-face__amount">
-                <app-wheel-picker
-                    class="workout-face__weight"
-                    [class.workout-face__weight--none]="!face.weight"
-                    [value]="face.weightValue"
-                    (valueChange)="setWeight($event)"
-                    [options]="faceWeightOptions()"
-                    [labelledBy]="'weight-label-' + face.key"
-                />
-                <span class="workout-face__weight-unit" [id]="'weight-label-' + face.key"
-                    ><span class="sr-only">Weight, </span>{{ weightUnit() }}</span
-                >
-            </div>
+            <!-- No weight on a stretch, which eases a muscle rather than loading it -->
+            @if (!stretch()) {
+                <div class="workout-face__amount">
+                    <app-wheel-picker
+                        class="workout-face__weight"
+                        [class.workout-face__weight--none]="!face.weight"
+                        [value]="face.weightValue"
+                        (valueChange)="setWeight($event)"
+                        [options]="faceWeightOptions()"
+                        [labelledBy]="'weight-label-' + face.key"
+                    />
+                    <span class="workout-face__weight-unit" [id]="'weight-label-' + face.key"
+                        ><span class="sr-only">Weight, </span>{{ weightUnit() }}</span
+                    >
+                </div>
+            }
         </div>
         @if (lastTime()) {
             <p class="workout-face__last-time">{{ lastTime() }}</p>

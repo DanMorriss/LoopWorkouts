@@ -99,6 +99,37 @@ export class PlanStore {
     }
 
     /**
+     * Swaps everything planned on day `a` with day `b` (from 0 for Monday), in one change. A
+     * workout put on a day it wasn't on is planned there now, as move() does, so put on a day
+     * gone by it's from next week; one on both stays as it was. This week's one-off moves go
+     * with their workouts: one done on another day this week is still done there, and one moved
+     * onto either day moves with that day's workouts.
+     */
+    swapDays(a: number, b: number) {
+        const plan = this._plan();
+        if (a === b || !plan.days[a] || !plan.days[b]) {
+            return;
+        }
+        const now = Date.now();
+        const other = (day: number) => (day === a ? b : day === b ? a : day);
+        const days = plan.days.map((_, day) => [...plan.days[other(day)]]);
+        const plannedAt = { ...plan.plannedAt };
+        days.forEach((ids, day) =>
+            ids
+                .filter((id) => !plan.days[day].includes(id))
+                .forEach((id) => (plannedAt[plannedKey(day, id)] = now))
+        );
+        // A workout on both days isn't moved, so nor is where it's done this week
+        const onBoth = (id: string) => plan.days[a].includes(id) && plan.days[b].includes(id);
+        const moves = movesThisWeek(plan, now).map((move) => ({
+            ...move,
+            from: onBoth(move.workoutId) ? move.from : other(move.from),
+            to: other(move.to),
+        }));
+        this.save(copyPlan({ days, updatedAt: this.clock.now(plan.updatedAt), plannedAt, moves }));
+    }
+
+    /**
      * Plans `workoutId` on just `days` (from 0 for Monday): at the end of each it isn't on yet,
      * unless that's full, and off the others. One change, dated now.
      */

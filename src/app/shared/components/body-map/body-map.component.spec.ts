@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { userEvent } from 'vitest/browser';
 import { MuscleGroup } from '../../../models/exercise';
 import { SettingsStore } from '../../state/settings-store.service';
 import { BodyMapComponent } from './body-map.component';
@@ -193,6 +194,37 @@ describe('BodyMapComponent', () => {
             .filter((shape) => shape.muscle !== null).length;
         expect(el().querySelectorAll('[tabindex="0"]').length).toBe(shapes);
         expect(el().querySelectorAll('path[tabindex]').length).toBe(0);
+    });
+
+    it("isn't a stop for the keyboard unless its muscles are toggles", async () => {
+        create(['quads']);
+        fixture.componentRef.setInput('tappable', true);
+        fixture.detectChanges();
+        const before = document.createElement('button');
+        document.body.prepend(before);
+        before.focus();
+
+        await userEvent.tab();
+        before.remove();
+
+        expect(el().contains(document.activeElement)).toBe(false);
+    });
+
+    it('rings a toggle while it has focus', () => {
+        create([]);
+        fixture.componentRef.setInput('tappable', true);
+        fixture.componentRef.setInput('toggles', true);
+        fixture.detectChanges();
+        const quads = el().querySelector<SVGGElement>('g[aria-label="Quads"]')!;
+        const ringed = () => el().querySelectorAll('.body-map__shape--hovered').length;
+
+        quads.focus();
+        fixture.detectChanges();
+        expect(ringed()).toBe(pathsFor(['quads']));
+
+        quads.blur();
+        fixture.detectChanges();
+        expect(ringed()).toBe(0);
     });
 
     it('toggles a muscle with Enter or Space, with toggles on', () => {

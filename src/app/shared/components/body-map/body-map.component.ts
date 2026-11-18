@@ -127,6 +127,12 @@ export class BodyMapComponent {
         this.hoveredMuscle.set(muscle);
     }
 
+    /** A muscle's toggle focused rings it, as a mouse over it does. */
+    protected focusShape(event: FocusEvent): void {
+        const muscle = (event.target as Element).getAttribute('data-muscle');
+        this.setHover(muscle as MuscleGroup | null);
+    }
+
     /**
      * A mouse over a muscle rings it. Only a mouse: a finger's tap would otherwise leave it
      * ringed until the next tap elsewhere, as a touch screen's :hover sticks.

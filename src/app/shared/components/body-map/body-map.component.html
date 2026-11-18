@@ -1,6 +1,13 @@
 <!-- Unless its shapes are toggles, the labels below say the same in words, so the drawing is hidden from screen readers -->
 @if (!listOnly()) {
-    <div class="body-map__figures" [attr.aria-hidden]="toggles() ? null : 'true'">
+    <!-- Focus is followed here, not on each muscle: Chromium makes an SVG element with a focus
+         listener a Tab stop, so on a muscle that isn't a toggle, it would be an unseen one -->
+    <div
+        class="body-map__figures"
+        [attr.aria-hidden]="toggles() ? null : 'true'"
+        (focusin)="focusShape($event)"
+        (focusout)="setHover(null)"
+    >
         @for (side of sides(); track side.name) {
             <figure class="body-map__figure">
                 <svg class="body-map__svg" [attr.viewBox]="side.viewBox" focusable="false">
@@ -10,6 +17,7 @@
                             [class.body-map__toggle]="toggles() && shape.muscle"
                             [attr.role]="toggles() && shape.muscle ? 'button' : null"
                             [attr.tabindex]="toggles() && shape.muscle ? '0' : null"
+                            [attr.data-muscle]="toggles() && shape.muscle ? shape.muscle : null"
                             [attr.aria-label]="
                                 toggles() && shape.muscle ? muscleLabel(shape.muscle) : null
                             "
@@ -23,8 +31,6 @@
                             (pointerdown)="press($event, shape.muscle)"
                             (pointerup)="pressedMuscle.set(null)"
                             (pointercancel)="pressedMuscle.set(null)"
-                            (focus)="setHover(shape.muscle)"
-                            (blur)="setHover(null)"
                         >
                             @for (d of shape.paths; track $index) {
                                 <path

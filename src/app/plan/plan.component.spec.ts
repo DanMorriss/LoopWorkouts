@@ -315,6 +315,77 @@ describe('PlanComponent', () => {
         });
     });
 
+    describe('swapping two days (PLN-1)', () => {
+        const swapButton = (day: number) =>
+            el().querySelector<HTMLButtonElement>(`#plan-swap-${day}`);
+        const status = () => text(el().querySelector('[role="status"]')!);
+
+        it('has no ⇄ with nothing planned', async () => {
+            await open();
+            expect(swapButton(0)).toBeNull();
+        });
+
+        it('swaps a day with the next one pressed, with Undo', async () => {
+            const plan = TestBed.inject(PlanStore);
+            plan.add(3, legs.id);
+            plan.add(5, push.id);
+            await open();
+            expect(swapButton(3)!.getAttribute('aria-label')).toBe(
+                'Swap Thursday with another day'
+            );
+
+            await click('#plan-swap-3');
+            expect(swapButton(3)!.getAttribute('aria-pressed')).toBe('true');
+            expect(swapButton(5)!.getAttribute('aria-label')).toBe('Swap Saturday with Thursday');
+            expect(text(el().querySelector('.plan__swap-hint')!)).toBe(
+                'Now press ⇄ on the day to swap it with.'
+            );
+            expect(status()).toBe('Thursday picked. Now pick the day to swap it with.');
+
+            await click('#plan-swap-5');
+            expect(days()[3]).toBe('Thursday: Push');
+            expect(days()[5]).toBe('Saturday: Legs');
+            expect(el().querySelector('.plan__swap-hint')).toBeNull();
+            expect(swapButton(3)!.getAttribute('aria-pressed')).toBe('false');
+            const undo = TestBed.inject(UndoService);
+            expect(undo.offer()?.message).toBe('Thursday and Saturday swapped');
+
+            undo.undo();
+            await render();
+            expect(days()[3]).toBe('Thursday: Legs');
+            expect(days()[5]).toBe('Saturday: Push');
+            expect(document.activeElement?.id).toBe('plan-swap-3');
+        });
+
+        it('swaps with a day with nothing on it, moving its workouts there', async () => {
+            TestBed.inject(PlanStore).add(3, legs.id);
+            await open();
+
+            await click('#plan-swap-6');
+            await click('#plan-swap-3');
+
+            expect(days()[3]).toBe('Thursday: Nothing planned');
+            expect(days()[6]).toBe('Sunday: Legs');
+        });
+
+        it('puts the day down pressed again, or with Escape', async () => {
+            TestBed.inject(PlanStore).add(3, legs.id);
+            await open();
+
+            await click('#plan-swap-3');
+            await click('#plan-swap-3');
+            expect(swapButton(3)!.getAttribute('aria-pressed')).toBe('false');
+            expect(status()).toBe('Thursday put down');
+
+            await click('#plan-swap-3');
+            swapButton(3)!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            await render();
+            expect(swapButton(3)!.getAttribute('aria-pressed')).toBe('false');
+            expect(TestBed.inject(UndoService).offer()).toBeNull();
+            expect(days()[3]).toBe('Thursday: Legs');
+        });
+    });
+
     describe("a workout's menu, from its name", () => {
         const menuItem = (name: string) =>
             [...el().querySelectorAll<HTMLButtonElement>('.menu__item')].find((item) =>

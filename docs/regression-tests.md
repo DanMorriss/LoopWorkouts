@@ -167,7 +167,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. Press **Undo**.
 - **Expected:**
     1. No This week card and no logo; **Get started** shows "No equipment, 3 days" with its days ("Mon Bodyweight basics", …), **Use this plan** (the main button), no dots (it's the only plan with no equipment), **All plans** and **Make your own plan** (to `/plan`).
-    2. Workouts now has Bodyweight basics, Cardio intervals, Core in 15 and Tabata; Get started is replaced by This week, with dots on Mon, Wed and Fri and Wednesday outlined as today; Due today lists Cardio intervals with Start; the Undo bar says "Your week is planned: No equipment, 3 days"; focus is on **Edit plan**.
+    2. Workouts now has Bodyweight basics, Cardio intervals, Core in 15 and Tabata; Get started is replaced by This week, its days screen readers hear as tabs ("Monday: Bodyweight basics, from next week", …), with today, Wednesday, picked and Cardio intervals under it with Start; the Undo bar says "Your week is planned: No equipment, 3 days"; focus is on **Edit plan**.
     3. The four workouts are gone, `week-plan` is back to empty, and Get started is back.
 - **In the pack:** Use this plan plans the ready-made workouts **as they are** (nothing is copied into your workouts), and as it's planned on a Wednesday, Monday's says "from next week" (PLN-3) and Friday's "to come". Focus ends on Edit plan, with Undo still in the bar (B1, fixed 2026-11-10).
 
@@ -191,7 +191,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     6. Create opens at `/setup?planOn=3&from=/plan` with ‹ Plan, and nothing has been planned.
 - **In the pack:** the Add dialog starts with ‹ Back, then Make a new workout, your workouts, then the ready-made ones with their badge.
 
-### REG-PLAN-03 · Due today
+### REG-PLAN-03 · Due today, under the week
 
 - **Stories:** PLN-2 · **Priority:** P1
 - **Preconditions:** `guest()`, workouts Push and Legs, both planned on Wednesday (Push first), clock Wednesday.
@@ -200,9 +200,9 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     2. Seed a finished Legs entry today at 08:00 (or run Legs), reload.
     3. Add a finished Push entry today, reload.
 - **Expected:**
-    1. Due today lists Push, then Legs, each with Start; Push's is the page's main button. There's no suggested next workout.
-    2. Only Push is listed, with "Done today: Legs".
-    3. "✓ All done: Push, Legs" in place of the list, and still **no** suggested next workout, as a week is planned (only, with sets logged, the stretches for them, PRG-16) (`hasHistory() && !hasPlan()` in `home.component.html`; see mismatch M4).
+    1. Today, "Wednesday 11 Today", is picked in This week, and lists Push, then Legs, each with Start; Push's is the page's main button. There's no suggested next workout.
+    2. Legs says "✓ Done", and only Push has Start.
+    3. Both say "✓ Done", with no Start, and still **no** suggested next workout, as a week is planned (only, with sets logged, the stretches for them, PRG-16) (`hasHistory() && !hasPlan()` in `home.component.html`; see mismatch M4).
     4. Pressing a Start starts that workout (the workout page opens on its first step).
 
 ### REG-PLAN-04 · How this week is going, on the Plan page and Today
@@ -214,10 +214,10 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     2. Press **Edit plan**.
     3. On the Plan page, add Push to **Monday**.
 - **Expected:**
-    1. The week strip: Mon ✓ on a tinted tile, Tue an empty ring, Wed a dot and outlined as today with a bold letter, Fri a dot, the rest blank; "1 of 4 done this week · Next: Pull on Friday". Screen readers get a list, e.g. "Tuesday: Push, missed", "Wednesday, today: Legs, due today".
+    1. The week: Mon a dumbbell in a ring with a tick, Tue one with an empty ring on it, Wed with its date in the accent colour and picked, Fri a dumbbell, Thu, Sat and Sun a moon; Legs is the same colour on Mon and Wed; "1 of 4 done this week · Next: Pull on Friday". Screen readers get tabs, e.g. "Tuesday: Push, missed", "Wednesday, today: Legs, due today".
     2. Monday's Legs "✓ Done", Tuesday's Push "Missed" and dimmed, Wednesday's Legs "Due", Friday's Pull nothing; "1 of 3 done so far this week".
     3. Monday's Push says "From next week", dimmed, and the count doesn't change.
-- **Variant:** with only Monday's workout planned today (via the UI on a Wednesday), Today says "Your plan starts next week" with its ? link, and the days show free.
+- **Variant:** with only Monday's workout planned today (via the UI on a Wednesday), Today says "Your plan starts next week" with its ? link, and the days show as rest days.
 
 ### REG-PLAN-05 · The ready-made plans page, and a plan's workouts
 
@@ -284,7 +284,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. Back on the Plan page, press Legs (today's), then **Put back on Tuesday**.
 - **Expected:**
     1. Wednesday lists Legs, Due, "From Tuesday, this week"; Tuesday says "Nothing planned"; the Undo bar says "Legs moved to today".
-    2. Due today lists Legs, "Moved from Tuesday".
+    2. Today's week lists Legs today, "Moved from Tuesday".
     3. Tuesday's Legs is Missed again.
 
 ### REG-PLAN-10 · Swap two days
@@ -299,6 +299,21 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     1. Thursday's ⇄ is pressed, and under its name: "Now press ⇄ on the day to swap it with."; screen readers hear "Thursday picked. Now pick the day to swap it with."
     2. Thursday lists Push, Saturday Legs; the Undo bar says "Thursday and Saturday swapped", focus on Undo.
     3. Thursday lists Legs again, Saturday Push, and focus is on Thursday's ⇄.
+
+### REG-PLAN-11 · Pick a day of the week on Today
+
+- **Stories:** PLN-4 · **Priority:** P2
+- **Preconditions:** as REG-PLAN-04.
+- **Steps:**
+    1. Open Today.
+    2. Press Tuesday.
+    3. Press →, then ←.
+    4. Press Push, then ‹ Today.
+- **Expected:**
+    1. Wednesday, today, is picked ("Wednesday, today: Legs, due today").
+    2. Tuesday is picked, and under the days, "Tuesday 10" lists Push, "Missed", with no Start.
+    3. Wednesday is picked and focused, with "Wednesday 11 Today" under the days; then Tuesday again.
+    4. Push's Details slide in at `/library/<id>?from=home` with ‹ Today, which goes back to Today.
 
 ---
 

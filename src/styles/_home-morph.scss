@@ -10,10 +10,6 @@
             view-transition-name: home-week;
         }
 
-        .due {
-            view-transition-name: home-due;
-        }
-
         .suggestion {
             view-transition-name: home-suggestion;
         }
@@ -28,7 +24,6 @@
 // Each card moves and changes size on Apple's spring for moving something about: no bounce,
 // a 0.4s response (set by morphHome; the app's own spring where it isn't)
 ::view-transition-group(home-week),
-::view-transition-group(home-due),
 ::view-transition-group(home-suggestion) {
     animation-duration: var(--home-morph-duration, var(--spring-duration));
     animation-timing-function: var(--home-morph-easing, var(--ease-spring));
@@ -73,15 +68,13 @@
     }
 }
 
-// A card that wasn't there before (Due today, once the week's planned) fades in once the card
+// A card that wasn't there before fades in once the card
 // above has made room, rather than over it while it's still moving out of the way; one that's
 // going fades out at once
-::view-transition-new(home-due):only-child,
 ::view-transition-new(home-suggestion):only-child {
     animation: home-morph-in 0.25s ease-out calc(var(--home-morph-duration, 0.45s) * 0.5) both;
 }
 
-::view-transition-old(home-due):only-child,
 ::view-transition-old(home-suggestion):only-child {
     animation: home-morph-out 0.15s ease-out both;
 }

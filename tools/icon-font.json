@@ -9,6 +9,7 @@
         "arrow_forward",
         "arrow_upward",
         "backspace",
+        "bedtime",
         "bookmark_add",
         "celebration",
         "check",
@@ -54,5 +55,5 @@
         "visibility",
         "visibility_off"
     ],
-    "sha256": "6e6fd7cc491b899c8de2feff297476f0f874ee335dd5350b7f5586e80346444d"
+    "sha256": "c9cd2b4b72b3db955f7d62c06d15649843c1d501276528147e39f70574e033e0"
 }

@@ -207,6 +207,10 @@ export class WorkoutDetailsComponent {
             // From a planned workout's menu on the Plan page (PLN-1)
             return { url: '/plan', label: 'Plan' };
         }
+        if (route.queryParamMap.get('from') === 'home') {
+            // From a day of This week on Today (PLN-4)
+            return { url: '/home', label: 'Today' };
+        }
         return run
             ? { url: `/history?run=${encodeURIComponent(run)}`, label: 'Progress' }
             : { url: `/library?details=${route.paramMap.get('id') ?? ''}`, label: 'Workouts' };

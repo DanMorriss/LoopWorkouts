@@ -9,7 +9,7 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { greetingFor, HomeComponent } from './home.component';
 import { asOneGroup } from '../models/workout';
-import { markFor } from './week-strip/week-strip.component';
+import { markFor } from './week-strip/week-view';
 import { PlannedStatus } from '../models/plan';
 import { STRETCH_ROUTINE_ID } from '../models/built-in-stretches';
 
@@ -73,6 +73,12 @@ describe('HomeComponent', () => {
         Array.from(element().querySelectorAll<HTMLElement>(selector)).map((el) =>
             el.textContent!.replace(/\s+/g, ' ').trim()
         );
+
+    /** A day of This week, by what a screen reader hears before its colon, e.g. "Sunday, today". */
+    const tab = (name: string) =>
+        [...element().querySelectorAll<HTMLButtonElement>('[role="tab"]')].find((day) =>
+            day.textContent!.includes(name + ':')
+        )!;
 
     it('greets you for the time of day, by name once you have given one (NAV-4)', () => {
         create();
@@ -230,7 +236,7 @@ describe('HomeComponent', () => {
                 'Your week is planned: No equipment, 3 days'
             );
             expect(element().querySelector('app-get-started')).toBeNull();
-            expect(element().querySelector('.week__days')).not.toBeNull();
+            expect(element().querySelector('app-week-days')).not.toBeNull();
             // Used on a Sunday, its Mon, Wed and Fri have gone by: it starts next week
             expect(text('.week__so-far')).toEqual(['Your plan starts next week']);
             expect(document.activeElement).toBe(element().querySelector('.week__edit'));
@@ -355,11 +361,17 @@ describe('HomeComponent', () => {
             });
         }
         const days = () =>
-            [...element().querySelectorAll('.week__day')].map((day) => ({
-                letter: day.querySelector('.week__letter')!.textContent!.trim(),
-                mark: [...day.classList]
-                    .filter((name) => name.startsWith('week__day--') && name !== 'week__day--today')
-                    .map((name) => name.replace('week__day--', ''))[0],
+            [...element().querySelectorAll('.week-day')].map((day) => ({
+                name: day.querySelector('.week-day__name')!.textContent!.trim(),
+                date: day.querySelector('.week-day__date')!.textContent!.trim(),
+                kind: [...day.classList]
+                    .filter((name) => name.startsWith('week-day--') && name !== 'week-day--today')
+                    .map((name) => name.replace('week-day--', ''))[0],
+                badge: day.querySelector('.week-day__badge--done')
+                    ? 'done'
+                    : day.querySelector('.week-day__badge--missed')
+                      ? 'missed'
+                      : '',
                 today: day.getAttribute('aria-current') === 'date',
             }));
 
@@ -397,7 +409,7 @@ describe('HomeComponent', () => {
                 ['All plans', '/ready-made-plans', true],
                 ['Make your own plan', '/plan', true],
             ]);
-            expect(element().querySelector('.week__days')).toBeNull();
+            expect(element().querySelector('app-week-days')).toBeNull();
         });
 
         it('uses the ready-made week in one tap, alongside your workouts, with Undo', async () => {
@@ -414,13 +426,13 @@ describe('HomeComponent', () => {
             expect(TestBed.inject(UndoService).offer()?.message).toBe(
                 'Your week is planned: No equipment, 3 days'
             );
-            expect(element().querySelector('.week__days')).not.toBeNull();
+            expect(element().querySelector('app-week-days')).not.toBeNull();
             expect(document.activeElement).toBe(element().querySelector('.week__edit'));
 
             TestBed.inject(UndoService).undo();
             fixture.detectChanges();
             expect(TestBed.inject(WorkoutStore).workouts()).toEqual([legs]);
-            expect(element().querySelector('.week__days')).toBeNull();
+            expect(element().querySelector('app-week-days')).toBeNull();
         });
 
         describe('on a day with nothing planned', () => {
@@ -494,15 +506,15 @@ describe('HomeComponent', () => {
             create();
 
             expect(days()).toEqual([
-                { letter: 'M', mark: 'missed', today: false },
-                { letter: 'T', mark: 'free', today: false },
-                { letter: 'W', mark: 'done', today: false },
-                { letter: 'T', mark: 'free', today: false },
-                { letter: 'F', mark: 'free', today: false },
-                { letter: 'S', mark: 'free', today: false },
-                { letter: 'S', mark: 'planned', today: true },
+                { name: 'Mon', date: '12', kind: 'training', badge: 'missed', today: false },
+                { name: 'Tue', date: '13', kind: 'rest', badge: '', today: false },
+                { name: 'Wed', date: '14', kind: 'training', badge: 'done', today: false },
+                { name: 'Thu', date: '15', kind: 'rest', badge: '', today: false },
+                { name: 'Fri', date: '16', kind: 'rest', badge: '', today: false },
+                { name: 'Sat', date: '17', kind: 'rest', badge: '', today: false },
+                { name: 'Sun', date: '18', kind: 'training', badge: '', today: true },
             ]);
-            expect(text('.week__day .sr-only')).toEqual([
+            expect(text('.week-day .sr-only')).toEqual([
                 'Monday: Legs, missed',
                 'Tuesday: nothing planned',
                 'Wednesday: Push, done',
@@ -525,16 +537,17 @@ describe('HomeComponent', () => {
             plan.add(2, legs.id);
             create();
 
-            expect(days().map((d) => d.mark)).toEqual([
-                'free',
-                'free',
-                'free',
-                'free',
-                'free',
-                'free',
-                'free',
+            // Shown as rest days this week, with no ring
+            expect(days().map((d) => d.kind)).toEqual([
+                'rest',
+                'rest',
+                'rest',
+                'rest',
+                'rest',
+                'rest',
+                'rest',
             ]);
-            expect(text('.week__day .sr-only')[0]).toBe('Monday: Legs, from next week');
+            expect(text('.week-day .sr-only')[0]).toBe('Monday: Legs, from next week');
             expect(text('.week__so-far')).toEqual(['Your plan starts next week']);
             expect(
                 element().querySelector('.week__so-far app-help-link a')!.getAttribute('href')
@@ -582,9 +595,80 @@ describe('HomeComponent', () => {
             expect(markFor([{ status: 'done' }, rest('rested')])).toBe('done');
             expect(markFor([{ status: 'today' }, rest('today')])).toBe('planned');
         });
+
+        const picked = () =>
+            [...element().querySelectorAll('[role="tab"]')]
+                .filter((day) => day.getAttribute('aria-selected') === 'true')
+                .map((day) => day.querySelector('.week-day__name')!.textContent!.trim());
+
+        it('shows today to start with, and the day picked by a tap or the arrow keys', () => {
+            const legs = addWorkout('Legs');
+            const push = addWorkout('Push');
+            const plan = TestBed.inject(PlanStore);
+            // Planned last week, so this week's days count
+            vi.setSystemTime(NOW - 7 * 24 * HOUR);
+            plan.add(0, legs.id);
+            plan.add(6, push.id);
+            vi.setSystemTime(NOW);
+            create();
+
+            // NOW is a Sunday
+            expect(picked()).toEqual(['Sun']);
+            expect(tab('Sunday, today').tabIndex).toBe(0);
+            expect(tab('Monday').tabIndex).toBe(-1);
+            expect(text('.day-panel__title')).toEqual(['Sunday 18 Today']);
+            expect(element().querySelector('[role="tabpanel"]')!.id).toBe('week-panel');
+
+            tab('Monday').click();
+            fixture.detectChanges();
+            expect(picked()).toEqual(['Mon']);
+            expect(text('.day-panel__title')).toEqual(['Monday 12']);
+            expect(text('.day-panel__name')).toEqual(['Legs']);
+            expect(text('.day-panel__status')).toEqual(['Missed']);
+            // Not today, so no Start: it opens its Details, coming back to Today
+            expect(element().querySelector('.day-panel__workout button')).toBeNull();
+            expect(element().querySelector('.day-panel__open')!.getAttribute('href')).toBe(
+                `/library/${legs.id}?from=home`
+            );
+
+            tab('Monday').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+            fixture.detectChanges();
+            expect(picked()).toEqual(['Tue']);
+            expect(text('.day-panel__rest')).toEqual(['bedtime Rest day. Nothing planned.']);
+
+            tab('Tuesday').dispatchEvent(new KeyboardEvent('keydown', { key: 'End' }));
+            fixture.detectChanges();
+            expect(picked()).toEqual(['Sun']);
+            // Round the week from Sunday to Monday
+            tab('Sunday, today').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+            fixture.detectChanges();
+            expect(picked()).toEqual(['Mon']);
+        });
+
+        it("colours each workout as it first comes in the week, a day's ring split between its workouts", () => {
+            const legs = addWorkout('Legs');
+            const push = addWorkout('Push');
+            const plan = TestBed.inject(PlanStore);
+            plan.add(6, legs.id);
+            plan.add(6, push.id);
+            create();
+
+            const sunday = tab('Sunday, today');
+            expect(sunday.style.getPropertyValue('--c')).toBe('var(--plan-1)');
+            const ring = sunday.style.getPropertyValue('--ring');
+            expect(ring).toContain('var(--plan-1) 7deg 173deg');
+            expect(ring).toContain('var(--plan-2) 187deg 353deg');
+            // A rest day has no ring
+            expect(tab('Monday').style.getPropertyValue('--ring')).toBe('');
+            expect(
+                [...element().querySelectorAll<HTMLElement>('.day-panel__workout')].map((row) =>
+                    row.style.getPropertyValue('--c')
+                )
+            ).toEqual(['var(--plan-1)', 'var(--plan-2)']);
+        });
     });
 
-    describe('due today (PLN-2)', () => {
+    describe("today's workouts, under the week (PLN-2)", () => {
         // NOW is a Sunday, the plan's day 6
         function planToday() {
             const workouts = TestBed.inject(WorkoutStore);
@@ -617,9 +701,9 @@ describe('HomeComponent', () => {
             planToday();
             create();
 
-            expect(text('.due__title')).toEqual(['Push', 'Legs']);
+            expect(text('.day-panel__name')).toEqual(['Push', 'Legs']);
             const starts = [
-                ...element().querySelectorAll<HTMLButtonElement>('.due__workout button'),
+                ...element().querySelectorAll<HTMLButtonElement>('.day-panel__workout button'),
             ];
             expect(starts.map((button) => button.getAttribute('aria-label'))).toEqual([
                 'Start Push',
@@ -650,11 +734,11 @@ describe('HomeComponent', () => {
             TestBed.inject(PlanStore).add(6, addStretches().id);
             create();
 
-            expect(text('.due__label')).toEqual(['Active rest today']);
-            expect(text('.due__hint')).toEqual([
+            expect(text('.day-panel__hint')).toEqual([
                 'There if you fancy it: a gentle stretch, or just rest.',
             ]);
-            const start = element().querySelector('.due__workout button')!;
+            expect(text('.day-panel__note')).toEqual(['Active rest']);
+            const start = element().querySelector('.day-panel__workout button')!;
             expect(start.classList).toContain('btn-pill');
             expect(start.classList).not.toContain('btn-main');
         });
@@ -666,8 +750,8 @@ describe('HomeComponent', () => {
             plan.moveThisWeek(legs.id, 0, 6);
             create();
 
-            expect(text('.due__title')).toEqual(['Push', 'Legs']);
-            expect(text('.due__kind')).toEqual(['Moved from Monday']);
+            expect(text('.day-panel__name')).toEqual(['Push', 'Legs']);
+            expect(text('.day-panel__note')).toEqual(['Moved from Monday']);
         });
 
         it("offers a workout on a day whose only one was moved off it this week, and not on the day it's moved to", () => {
@@ -677,7 +761,7 @@ describe('HomeComponent', () => {
             plan.moveThisWeek(push.id, 6, 5);
             create();
 
-            expect(element().querySelector('app-due-today .due')).toBeNull();
+            expect(text('.day-panel__rest')).toEqual(['bedtime Rest day. Nothing planned.']);
             expect(element().textContent).toContain('Fancy a workout today?');
         });
 
@@ -689,11 +773,11 @@ describe('HomeComponent', () => {
             plan.add(6, push.id);
             create();
 
-            expect(text('.due__label')).toEqual(['Due today']);
-            expect(text('.due__title')).toEqual(['Legs', 'Push', 'Stretches']);
-            expect(text('.due__kind')).toEqual(['Active rest, if you fancy it']);
+            expect(text('.day-panel__hint')).toEqual([]);
+            expect(text('.day-panel__name')).toEqual(['Legs', 'Push', 'Stretches']);
+            expect(text('.day-panel__note')).toEqual(['Active rest, if you fancy it']);
             const starts = [
-                ...element().querySelectorAll<HTMLButtonElement>('.due__workout button'),
+                ...element().querySelectorAll<HTMLButtonElement>('.day-panel__workout button'),
             ];
             expect(starts[0].classList).toContain('btn-main');
             expect(starts[2].classList).toContain('btn-pill');
@@ -709,8 +793,9 @@ describe('HomeComponent', () => {
             vi.setSystemTime(NOW);
             create();
 
-            const days = [...element().querySelectorAll('.week__day')];
-            expect(days[1].classList).toContain('week__day--free');
+            const days = [...element().querySelectorAll('.week-day')];
+            expect(days[1].classList).toContain('week-day--active-rest');
+            expect(days[1].querySelector('.week-day__badge')).toBeNull();
             expect(days[1].textContent).toContain('Tuesday: Stretches, active rest, rested');
             // Push and Legs today, and Monday's Legs missed: three, not counting the stretches
             expect(text('.week__so-far')).toEqual(['0 of 3 done this week']);
@@ -721,8 +806,13 @@ describe('HomeComponent', () => {
             TestBed.inject(HistoryStore).record({ ...entry, workoutId: legs.id });
             create();
 
-            expect(text('.due__title')).toEqual(['Push']);
-            expect(text('.due__done')).toEqual(['Done today: Legs']);
+            expect(text('.day-panel__name')).toEqual(['Push', 'Legs']);
+            expect(
+                [...element().querySelectorAll('.day-panel__workout button')].map((button) =>
+                    button.getAttribute('aria-label')
+                )
+            ).toEqual(['Start Push']);
+            expect(text('.day-panel__status')).toEqual(['check Done']);
             expect(element().querySelector('.suggestion')).toBeNull();
         });
 
@@ -733,7 +823,9 @@ describe('HomeComponent', () => {
             history.record({ ...entry, id: 'run-2', workoutId: push.id });
             create();
 
-            expect(text('.due__all-done')).toEqual(['check All done: Push, Legs']);
+            expect(text('.day-panel__status')).toEqual(['check Done', 'check Done']);
+            expect(element().querySelector('.day-panel__workout button')).toBeNull();
+            expect(tab('Sunday, today').querySelector('.week-day__badge--done')).not.toBeNull();
             // With a week planned, the week says what's next, not a suggestion: only the
             // stretches for what was done (PRG-16)
             expect(text('.suggestion__label')).toEqual(["After today's training"]);
@@ -797,11 +889,15 @@ describe('HomeComponent', () => {
             expect(text('.suggestion__title')).toEqual(['Push']);
         });
 
-        it('shows nothing on a day with nothing planned', () => {
-            TestBed.inject(PlanStore).add(0, 'workout-1');
+        it('says today is a rest day with nothing planned on it', () => {
+            const { push, legs } = planToday();
+            const plan = TestBed.inject(PlanStore);
+            plan.remove(6, push.id);
+            plan.remove(6, legs.id);
             create();
 
-            expect(element().querySelector('.due')).toBeNull();
+            expect(text('.day-panel__title')).toEqual(['Sunday 18 Today']);
+            expect(text('.day-panel__rest')).toEqual(['bedtime Rest day. Nothing planned.']);
         });
     });
 });

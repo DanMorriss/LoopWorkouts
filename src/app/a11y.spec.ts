@@ -397,7 +397,7 @@ for (const theme of ['dark', 'light'] as const) {
                     ]),
                 });
                 const now = Date.now();
-                // Push was done today, as planned, so Due today says all done
+                // Push was done today, as planned, so today's are all done
                 TestBed.inject(HistoryStore).record({
                     id: 'run-0',
                     workoutId: push.id,
@@ -544,10 +544,11 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('due today on Home', async () => {
+            it('the week on Home, with what is due today', async () => {
                 planned();
                 await open('/home');
-                expect(fixture.nativeElement.querySelector('.due')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('app-week-days')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('.day-panel__workout')).not.toBeNull();
                 await expectNoViolations();
             });
         });

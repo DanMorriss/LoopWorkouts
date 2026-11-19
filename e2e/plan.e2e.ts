@@ -41,7 +41,7 @@ test.describe('a new guest', () => {
             await expect(week).toBeVisible();
             await expect(getStarted).toHaveCount(0);
             // Planned today, a Wednesday, so Monday's counts from next week (PLN-3)
-            await expect(week.getByRole('listitem')).toContainText([
+            await expect(week.getByRole('tab')).toContainText([
                 'Monday: Bodyweight basics, from next week',
                 'Tuesday: Mobility flow, active rest, from next week',
                 'Wednesday, today: Cardio intervals, due today',
@@ -50,10 +50,12 @@ test.describe('a new guest', () => {
                 'Saturday: Full-body stretch, active rest, to come',
                 'Sunday: nothing planned',
             ]);
+            // Today's picked, with its workout to start
+            await expect(week.getByRole('tab', { selected: true })).toContainText(
+                'Wednesday, today'
+            );
             await expect(
-                page.getByRole('region', { name: 'Due today' }).getByRole('button', {
-                    name: 'Start Cardio intervals',
-                })
+                week.getByRole('button', { name: 'Start Cardio intervals' })
             ).toBeVisible();
             await expect(app.undoBar).toContainText('Your week is planned: No equipment, 3 days');
             // The ready-made workouts are planned as they are, not copied into my own
@@ -197,7 +199,7 @@ test.describe('planning by hand', () => {
     );
 });
 
-test.describe('due today', () => {
+test.describe("today's workouts, under the week", () => {
     const legsToday = run(legs, '2026-11-11T08:00');
     const pushToday = run(push, '2026-11-11T08:20');
     test.use({
@@ -206,7 +208,7 @@ test.describe('due today', () => {
 
     test('REG-PLAN-03 due today', { tag: '@p1' }, async ({ app, page }) => {
         await app.goto('/home');
-        const due = page.getByRole('region', { name: 'Due today' });
+        const due = page.getByRole('tabpanel', { name: 'Wednesday 11 Today' });
         const starts = due.getByRole('button', { name: /^Start / });
         await expect(starts).toHaveCount(2);
         await expect(starts.first()).toHaveAccessibleName('Start Push');
@@ -235,11 +237,11 @@ test.describe('due today', () => {
             { tag: '@p1' },
             async ({ app, page }) => {
                 await app.goto('/home');
-                const due = page.getByRole('region', { name: 'Due today' });
+                const due = page.getByRole('tabpanel', { name: 'Wednesday 11 Today' });
                 await expect(due.getByRole('button', { name: /^Start / })).toHaveAccessibleName(
                     'Start Push'
                 );
-                await expect(due).toContainText('Done today: Legs');
+                await expect(due.getByRole('link', { name: /^Legs/ })).toContainText('Done');
             }
         );
     });
@@ -258,7 +260,9 @@ test.describe('due today', () => {
             { tag: '@p1' },
             async ({ app, page }) => {
                 await app.goto('/home');
-                await expect(page.getByText(/All done: Push, Legs/)).toBeVisible();
+                const due = page.getByRole('tabpanel', { name: 'Wednesday 11 Today' });
+                await expect(due.getByRole('link', { name: /Done$/ })).toHaveCount(2);
+                await expect(due.getByRole('button', { name: /^Start / })).toHaveCount(0);
                 await expect(
                     page.getByRole('region', { name: 'Suggested next workout' })
                 ).toHaveCount(0);
@@ -282,7 +286,7 @@ test.describe('how the week is going', () => {
         async ({ app, page }) => {
             await app.goto('/home');
             const week = page.getByRole('region', { name: 'This week' });
-            await expect(week.getByRole('listitem')).toContainText([
+            await expect(week.getByRole('tab')).toContainText([
                 'Monday: Legs, done',
                 'Tuesday: Push, missed',
                 'Wednesday, today: Legs, due today',
@@ -309,6 +313,36 @@ test.describe('how the week is going', () => {
                 day(page, 'Monday').getByRole('listitem').filter({ hasText: 'Push' })
             ).toContainText('From next week');
             await expect(page.getByText('1 of 3 done so far this week')).toBeVisible();
+        }
+    );
+
+    test(
+        "REG-PLAN-11 a day picked on Today's week shows what's on it, and opens its workout",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/home');
+            const week = page.getByRole('region', { name: 'This week' });
+            await expect(week.getByRole('tab', { selected: true })).toHaveAccessibleName(
+                'Wednesday, today: Legs, due today'
+            );
+
+            const tuesday = week.getByRole('tab', { name: /^Tuesday/ });
+            await tuesday.click();
+            await expect(tuesday).toHaveAttribute('aria-selected', 'true');
+            const panel = week.getByRole('tabpanel', { name: 'Tuesday 10' });
+            await expect(panel.getByRole('link', { name: /^Push/ })).toContainText('Missed');
+            await expect(panel.getByRole('button', { name: /^Start / })).toHaveCount(0);
+
+            // The arrow keys move through the days
+            await page.keyboard.press('ArrowRight');
+            await expect(week.getByRole('tab', { name: /^Wednesday/ })).toBeFocused();
+            await expect(week.getByRole('tabpanel', { name: 'Wednesday 11 Today' })).toBeVisible();
+            await page.keyboard.press('ArrowLeft');
+
+            await panel.getByRole('link', { name: /^Push/ }).click();
+            await expect(page).toHaveURL(/\/library\/.+\?from=home$/);
+            await app.backLink('Today').click();
+            await expect(page).toHaveURL('/home');
         }
     );
 });
@@ -411,7 +445,7 @@ test.describe('a missed workout', () => {
 
             // Today has it due, saying where from
             await app.goto('/home');
-            const due = page.getByRole('region', { name: 'Due today' });
+            const due = page.getByRole('tabpanel', { name: 'Wednesday 11 Today' });
             await expect(due).toContainText('Moved from Tuesday');
 
             await app.goto('/plan');

@@ -1,0 +1,135 @@
+@use 'interaction' as *;
+
+:host {
+    display: block;
+}
+
+.week-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.3rem;
+}
+
+// A day: its name, its date and its ring, as a tall pill. Picked, it's tinted in its colour
+.week-day {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    min-width: 0;
+    padding: 0.45rem 0 0.55rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        scale 0.2s ease-out;
+    @include hover {
+        background: color-mix(in srgb, var(--c, var(--text-muted)) 8%, transparent);
+    }
+    @include pressed-scale;
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+    }
+
+    &[aria-selected='true'] {
+        border-color: color-mix(in srgb, var(--c, var(--text-muted)) 60%, transparent);
+        background: color-mix(in srgb, var(--c, var(--text-muted)) 16%, transparent);
+    }
+}
+
+.week-day__name {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+
+    [aria-selected='true'] > & {
+        color: var(--text-strong);
+    }
+}
+
+.week-day__date {
+    color: var(--text-strong);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+
+    .week-day--today > & {
+        color: var(--accent);
+    }
+}
+
+// The ring round the day's icon: a segment for each workout, in its colour (--ring, from
+// ringFor()); a rest day has none
+.week-day__ring {
+    position: relative;
+    display: grid;
+    width: 1.9rem;
+    height: 1.9rem;
+    padding: 2.5px;
+    border-radius: 50%;
+    background: var(--ring, transparent);
+}
+
+.week-day__icon {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--c, transparent) 14%, var(--raised));
+    color: var(--c, var(--text-muted));
+
+    .icon {
+        width: 17px;
+        height: 17px;
+        font-size: 17px;
+    }
+
+    .week-day--rest & {
+        background: transparent;
+    }
+}
+
+// All done: a tick; something missed: an empty ring
+.week-day__badge {
+    position: absolute;
+    right: -5px;
+    bottom: -3px;
+    display: grid;
+    place-items: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+}
+
+.week-day__badge--done {
+    background: var(--plan-1);
+    color: var(--plan-ink);
+
+    .icon {
+        width: 11px;
+        height: 11px;
+        font-size: 11px;
+    }
+}
+
+.week-day__badge--missed {
+    right: -3px;
+    bottom: -1px;
+    width: 11px;
+    height: 11px;
+    border: 2px solid var(--text-muted);
+    background: var(--raised);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .week-day {
+        transition: none;
+    }
+}

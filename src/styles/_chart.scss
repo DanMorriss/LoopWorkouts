@@ -3,23 +3,23 @@
 
 // What the app's charts share, an exercise's progress and the time per week alike: a chart
 // that takes focus to step through with the arrow keys, a hairline grid with muted labels,
-// and a way to show it as a table. Mixins, so only the pages with a chart carry them.
+// and a table of the same values, swiped to beside it in a carousel (`fitShown`). Mixins, so only the pages with a chart carry them.
 //
 //   @use 'chart' as *;
 //   .thing__chart { @include chart-frame; }
 //   .thing__svg { @include chart-svg; }
 //   .thing__grid { @include chart-grid; }
 //   .thing__axis { @include chart-axis; }
-//   .thing__toggle { @include chart-toggle; }
 //   .thing__table { @include chart-table; }
 
 @mixin chart-frame {
     position: relative;
     border-radius: 0.5rem;
 
+    // Close in, as the carousel's slide it's on would cut off a ring further out
     &:focus-visible {
         outline: 2px solid var(--accent);
-        outline-offset: 4px;
+        outline-offset: 1px;
     }
 }
 
@@ -28,8 +28,8 @@
     width: 100%;
     height: auto;
     overflow: visible;
-    // Up and down scroll the page; a finger moving across picks what's under it
-    touch-action: pan-y;
+    // A finger swiping across goes to the table beside it; a tap picks what's under it
+    touch-action: pan-x pan-y;
 }
 
 // Recessive: hairline grid, muted labels
@@ -42,12 +42,6 @@
     fill: var(--text-muted);
     @include small-type(0.625rem);
     font-variant-numeric: tabular-nums;
-}
-
-// "Show as a table" (or "Show as a chart"), at the right of the chart's title
-@mixin chart-toggle {
-    @include link-button;
-    align-self: center;
 }
 
 // The chart's values, its last column, the figures, at the right

@@ -146,25 +146,28 @@ describe('ExerciseProgressComponent', () => {
         expect(all('.progress__empty')).toEqual(['Not done in the last 4 weeks.']);
     });
 
-    it('swaps the chart for a table and back, keeping focus on its button', async () => {
+    it('has a table of the same workouts beside the chart, a dot for each to go to it', async () => {
         logged(10, [squat(5, 80)]);
         await create();
-        const toggle = button('Show as a table');
-        toggle.focus();
 
-        toggle.click();
+        const slides = [...el().querySelectorAll('.carousel__slide')];
+        expect(slides.map((slide) => slide.getAttribute('aria-label'))).toEqual([
+            'Chart 1 of 2',
+            'Table 2 of 2',
+        ]);
+        expect(slides[0].querySelector('.progress__chart')).not.toBeNull();
+        expect(
+            [...slides[1].querySelectorAll('.progress__table tbody td')]
+                .slice(1)
+                .map((cell) => cell.textContent!.trim())
+        ).toEqual(['Legs', '93.5 kg']);
+
+        const dot = el().querySelector<HTMLButtonElement>(
+            '.carousel__dot[aria-label="Table 2 of 2"]'
+        )!;
+        dot.click();
         await render();
-
-        expect(el().querySelector('.progress__chart')).toBeNull();
-        expect(all('.progress__table tbody td').slice(1)).toEqual(['Legs', '93.5 kg']);
-        expect(toggle.textContent!.trim()).toBe('Show as a chart');
-        expect(document.activeElement).toBe(toggle);
-
-        toggle.click();
-        await render();
-
-        expect(el().querySelector('.progress__table')).toBeNull();
-        expect(el().querySelector('.progress__chart')).not.toBeNull();
+        expect(dot.getAttribute('aria-current')).toBe('true');
     });
 
     it('charts most reps for a bodyweight exercise, and the longest for a timed one', async () => {

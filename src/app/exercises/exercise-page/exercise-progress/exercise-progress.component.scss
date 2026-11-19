@@ -45,17 +45,9 @@
     margin-top: 0.5rem;
 
     .progress__subheading {
+        flex: 1 1 100%;
         margin: 0;
     }
-}
-
-// The chart's title, with the table's toggle at the right, where swapping can't move it
-.progress__chart-title {
-    display: flex;
-    flex: 1 1 100%;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
 }
 
 .progress__ranges {
@@ -112,10 +104,6 @@
 .progress__dot--active {
     fill: var(--text-strong);
     stroke: var(--accent);
-}
-
-.progress__toggle {
-    @include chart-toggle;
 }
 
 .progress__table {

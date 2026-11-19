@@ -1,5 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
+import {
+    CarouselComponent,
+    SlideDirective,
+} from '../../../shared/components/carousel/carousel.component';
 import { formatDuration } from '../../../history/history-format';
 import {
     exerciseBests,
@@ -60,11 +64,18 @@ interface ChartPoint {
  * An exercise's progress (PRG-4): its personal bests, a chart of one value per workout over
  * time, and its recent sessions, each linking to its workout in the history. The chart's
  * values can be read by hovering, by stepping through them with the arrow keys, or in a
- * table shown in its place.
+ * table swiped to beside it.
  */
 @Component({
     selector: 'app-exercise-progress',
-    imports: [DatePipe, ProgressBestsComponent, ProgressTooltipComponent, RecentSessionsComponent],
+    imports: [
+        CarouselComponent,
+        DatePipe,
+        ProgressBestsComponent,
+        ProgressTooltipComponent,
+        RecentSessionsComponent,
+        SlideDirective,
+    ],
     templateUrl: './exercise-progress.component.html',
     styleUrl: './exercise-progress.component.scss',
 })
@@ -190,8 +201,6 @@ export class ExerciseProgressComponent {
         return active === null ? null : (this.points()[active] ?? null);
     });
 
-    /** Whether the table is showing in place of the chart. */
-    protected readonly asTable = signal(false);
     protected readonly measureTitle = computed(() => {
         const measure = this.measure();
         return measure ? MEASURE_TITLES[measure] : '';

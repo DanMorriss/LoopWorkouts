@@ -120,8 +120,8 @@ test.describe("an exercise's progress", () => {
 
             await progress.getByRole('button', { name: '4 weeks' }).click();
             await expect(chart).toContainText('2 workouts');
-            await progress.getByRole('button', { name: 'Show as a table' }).click();
-            await expect(progress.getByRole('table')).toBeVisible();
+            await progress.getByRole('button', { name: 'Table 2 of 2' }).click();
+            await expect(progress.getByRole('table')).toBeInViewport();
             await expect(progress.getByRole('table').getByRole('row')).toHaveCount(3);
 
             const sessions = progress

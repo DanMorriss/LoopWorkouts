@@ -5,7 +5,7 @@ import { allSteps, Workout } from './workout';
 import { WorkoutKind } from './workout-kind';
 import { musclesWorked } from './workout-muscles';
 
-/** A workout of your own or a ready-made one, which has a description: what it's filtered on. */
+/** A workout of your own or a ready-made one (with its description): what it's filtered on. */
 type Filterable = Pick<Workout, 'id' | 'title' | 'blocks'> & { description?: string };
 
 /** What the Workouts page is cut down by. */
@@ -25,9 +25,9 @@ export interface WorkoutFilters {
 /**
  * The workouts that pass `filters`, yours or ready-made ones, in the order given. A search finds
  * its words, in any case, in the title, a ready-made one's description, or a step's name or its
- * exercise's, so "squat" finds "Legs day" with Back squat in it, and "HIIT" finds Tabata. A workout with no step linked
- * to an exercise works no known muscle and needs nothing, so muscles hide it and Only what I
- * have doesn't.
+ * exercise's, so "squat" finds "Legs day" with Back squat in it, and "HIIT" finds Tabata. A
+ * workout with no step linked to an exercise works no known muscle and needs nothing, so
+ * muscles hide it and Only what I have doesn't.
  */
 export function filterWorkouts<T extends Filterable>(
     workouts: readonly T[],

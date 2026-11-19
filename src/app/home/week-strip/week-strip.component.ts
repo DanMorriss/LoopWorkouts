@@ -3,6 +3,7 @@ import { injectThisWeek } from '../../shared/state/this-week';
 import { plansForYou } from '../../models/built-in-plans';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { nextPlannedDay, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
@@ -22,7 +23,13 @@ import { weekDays } from './week-view';
  */
 @Component({
     selector: 'app-week-strip',
-    imports: [DayPanelComponent, HelpLinkComponent, PlansForYouComponent, WeekDaysComponent],
+    imports: [
+        DayPanelComponent,
+        HelpLinkComponent,
+        IconComponent,
+        PlansForYouComponent,
+        WeekDaysComponent,
+    ],
     template: `
         <section class="week" aria-labelledby="week-title">
             <div class="week__head">
@@ -33,8 +40,10 @@ import { weekDays } from './week-view';
                         href="/plan"
                         class="week__edit"
                         (click)="slide.follow($event, '/plan', 'in')"
-                        >Edit plan</a
                     >
+                        <app-icon class="icon-outline">edit</app-icon>
+                        Edit plan
+                    </a>
                 }
             </div>
             @if (planned()) {

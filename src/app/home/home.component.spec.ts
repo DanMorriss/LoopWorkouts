@@ -525,7 +525,9 @@ describe('HomeComponent', () => {
             ]);
             expect(text('.week__so-far')).toEqual(['1 of 4 done this week']);
             const edit = element().querySelector('.week__edit')!;
-            expect(edit.textContent!.trim()).toBe('Edit plan');
+            // Its pencil is hidden, so it's named by its words alone
+            expect(edit.textContent!.replace(/\s+/g, ' ').trim()).toBe('edit Edit plan');
+            expect(edit.querySelector('app-icon')!.getAttribute('aria-hidden')).toBe('true');
             expect(edit.getAttribute('href')).toBe('/plan');
         });
 

@@ -26,10 +26,11 @@
     text-transform: uppercase;
 }
 
-// A text link, tall enough to tap
+// A text link with a pencil before it, tall enough to tap
 .week__edit {
     display: inline-flex;
     align-items: center;
+    gap: 0.3rem;
     min-height: 44px;
     margin: -0.75rem 0;
     color: var(--accent);
@@ -38,6 +39,12 @@
 
     &:hover {
         text-decoration: underline;
+    }
+
+    .icon {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
     }
 }
 

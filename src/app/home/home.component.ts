@@ -1,6 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
 import { injectThisWeek } from '../shared/state/this-week';
-import { DueTodayComponent } from './due-today/due-today.component';
 import { GetStartedComponent } from './get-started/get-started.component';
 import { WeekStripComponent } from './week-strip/week-strip.component';
 import { TourOfferComponent } from './tour-offer/tour-offer.component';
@@ -14,7 +13,7 @@ import { thisWeek, weekdayOf } from '../models/plan';
 
 /**
  * Today, where the app opens, greeting you by name (NAV-4) for the time of day: the week's plan
- * (PLN-4), the way in to changing it; the weekly plan's workouts due today (PLN-2); and the
+ * (PLN-4), the way in to changing it, with the weekly plan's workouts due today (PLN-2); and the
  * workouts to do next (PRG-9) with nothing planned: with a week planned, the plan says what's
  * next; and after training today, stretches for what it worked (PRG-16). How the week's going for each muscle is on Progress.
  * With no workouts yet, a way to add some first (NAV-6), as there's nothing to plan without them;
@@ -23,7 +22,6 @@ import { thisWeek, weekdayOf } from '../models/plan';
 @Component({
     selector: 'app-home',
     imports: [
-        DueTodayComponent,
         GetStartedComponent,
         MusclesThisWeekComponent,
         SuggestedWorkoutComponent,

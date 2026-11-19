@@ -1,7 +1,7 @@
 import { computed, inject, Injectable } from '@angular/core';
 import {
     MAX_WORKOUTS_A_DAY,
-    PlannedStatus,
+    PLANNED_STATUS_TEXT,
     PlannedWorkout,
     thisWeek,
     weekdayOf,
@@ -12,19 +12,6 @@ import { WorkoutChoice } from '../shared/components/workout-choice-dialog/workou
 import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
-
-/**
- * How a planned workout's place this week reads, e.g. "Done". "To come" says nothing, unless
- * it's active rest (see `statusLabel`).
- */
-const STATUS_TEXT: Record<PlannedStatus, string> = {
-    done: 'Done',
-    missed: 'Missed',
-    rested: 'Rested',
-    today: 'Due',
-    'to come': '',
-    'next week': 'From next week',
-};
 
 /** A planned workout as a row of the Plan page shows it. */
 export interface PlanRow extends PlannedWorkout {
@@ -126,5 +113,5 @@ export class PlanPageView {
 function statusLabel(item: PlannedWorkout): string {
     return item.activeRest && (item.status === 'today' || item.status === 'to come')
         ? 'Active rest'
-        : STATUS_TEXT[item.status];
+        : PLANNED_STATUS_TEXT[item.status];
 }

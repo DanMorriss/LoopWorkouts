@@ -1,4 +1,5 @@
 import {
+    planColours,
     copyPlan,
     daysPlannedOn,
     EMPTY_PLAN,
@@ -218,5 +219,27 @@ describe('done on another day this week only', () => {
         });
         expect(copied.moves).toEqual([{ week: monday, workoutId: 'push', from: 1, to: 2 }]);
         expect(copyPlan(plan([[], [], [], [], [], [], []]))).not.toHaveProperty('moves');
+    });
+});
+
+describe("the plan's colours (PLN-4)", () => {
+    it('colours training as it first comes in the week, going round the four, and not active rest', () => {
+        const training = (workoutId: string) => ({ workoutId, status: 'to come' as const });
+        const colours = planColours([
+            [training('legs')],
+            [{ ...training('stretch'), activeRest: true as const }],
+            [training('push'), training('legs')],
+            [training('pull'), training('core')],
+            [training('run')],
+            [],
+            [training('push')],
+        ]);
+        expect([...colours]).toEqual([
+            ['legs', 1],
+            ['push', 2],
+            ['pull', 3],
+            ['core', 4],
+            ['run', 1],
+        ]);
     });
 });

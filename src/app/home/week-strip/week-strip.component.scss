@@ -4,7 +4,7 @@
     display: block;
 }
 
-// A card, as Due today and the suggested workout are
+// A card, as the suggested workout is
 .week {
     @include panel-card;
 }
@@ -26,10 +26,11 @@
     text-transform: uppercase;
 }
 
-// A text link, tall enough to tap
+// A text link with a pencil before it, tall enough to tap
 .week__edit {
     display: inline-flex;
     align-items: center;
+    gap: 0.3rem;
     min-height: 44px;
     margin: -0.75rem 0;
     color: var(--accent);
@@ -39,87 +40,17 @@
     &:hover {
         text-decoration: underline;
     }
-}
-
-.week__days {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0.35rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.week__day {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.15rem;
-    height: 3.4rem;
-    border: 1px solid var(--border-soft);
-    border-radius: 0.7rem;
-    color: var(--text-muted);
-}
-
-.week__letter {
-    font-size: 0.8rem;
-}
-
-.week__mark {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
 
     .icon {
-        width: 20px;
-        height: 20px;
-        font-size: 20px;
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
     }
 }
 
-// A dot for a day with a workout still to do, an empty ring for one that was missed
-.week__day--planned .week__mark::before,
-.week__day--missed .week__mark::before {
-    content: '';
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-}
-
-.week__day--planned .week__mark::before {
-    background: var(--accent);
-}
-
-.week__day--missed .week__mark::before {
-    border: 2px solid var(--text-muted);
-}
-
-// Active rest, there if you fancy it: a dashed day with a faint dot, quieter than training
-.week__day--rest {
-    border-style: dashed;
-}
-
-.week__day--rest .week__mark::before {
-    content: '';
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: color-mix(in srgb, var(--accent) 40%, transparent);
-}
-
-.week__day--done {
-    border-color: var(--accent-line);
-    background: var(--accent-soft);
-    color: var(--accent);
-}
-
-.week__day--today {
-    border: 2px solid var(--accent);
-    color: var(--text-strong);
-    font-weight: 600;
+// The picked day's workouts, under the days
+.week__panel {
+    margin-top: 0.75rem;
 }
 
 .week__so-far,

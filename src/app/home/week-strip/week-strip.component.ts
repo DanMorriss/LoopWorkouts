@@ -1,56 +1,35 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { injectThisWeek } from '../../shared/state/this-week';
 import { plansForYou } from '../../models/built-in-plans';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import {
-    nextPlannedDay,
-    PlannedStatus,
-    PlannedWorkout,
-    weekdayOf,
-    WEEKDAYS,
-} from '../../models/plan';
+import { nextPlannedDay, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { WEEK_EDIT_ID } from '../use-plan-on-today';
 import { PlansForYouComponent } from '../plans-for-you/plans-for-you.component';
+import { DayPanelComponent } from './day-panel.component';
+import { WeekDaysComponent } from './week-days.component';
+import { weekDays } from './week-view';
 
 /**
- * How a day of the strip looks: everything on it done, some missed, still to do, only active
- * rest (not done), or free.
- */
-export type DayMark = 'done' | 'missed' | 'planned' | 'rest' | 'free';
-
-export interface StripDay {
-    day: number;
-    /** "M", "T", … */
-    letter: string;
-    mark: DayMark;
-    today: boolean;
-    /** What a screen reader hears for it, e.g. "Monday: Legs day, done". */
-    spoken: string;
-}
-
-const SPOKEN_STATUS: Record<PlannedStatus, string> = {
-    done: 'done',
-    missed: 'missed',
-    rested: 'rested',
-    today: 'due today',
-    'next week': 'from next week',
-    'to come': 'to come',
-};
-
-/**
- * The week on Today (PLN-4): Monday to Sunday, each day marked done, missed, planned or free,
- * today picked out, how many of the week's planned workouts are done and the next one to come,
- * and **Edit plan**, which slides the weekly plan in. With nothing planned, the ready-made
- * weeks for your goal and equipment, swiped between and used in one tap (PLN-6) as on Get
- * started; or All plans, or Make your own plan (NAV-6).
+ * The week on Today (PLN-4): Monday to Sunday (`WeekDaysComponent`), each day's date, what's on
+ * it and how it's going, with today picked to start with and what's on the picked day under them
+ * (`DayPanelComponent`), Start on today's (PLN-2); how many of the week's planned workouts are
+ * done and the next one to come; and **Edit plan**, which slides the weekly plan in. With
+ * nothing planned, the ready-made weeks for your goal and equipment, swiped between and used in
+ * one tap (PLN-6) as on Get started; or All plans, or Make your own plan (NAV-6).
  */
 @Component({
     selector: 'app-week-strip',
-    imports: [HelpLinkComponent, IconComponent, PlansForYouComponent],
+    imports: [
+        DayPanelComponent,
+        HelpLinkComponent,
+        IconComponent,
+        PlansForYouComponent,
+        WeekDaysComponent,
+    ],
     template: `
         <section class="week" aria-labelledby="week-title">
             <div class="week__head">
@@ -61,29 +40,18 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                         href="/plan"
                         class="week__edit"
                         (click)="slide.follow($event, '/plan', 'in')"
-                        >Edit plan</a
                     >
+                        <app-icon class="icon-outline">edit</app-icon>
+                        Edit plan
+                    </a>
                 }
             </div>
             @if (planned()) {
-                <ol class="week__days">
-                    @for (day of days(); track day.day) {
-                        <li
-                            class="week__day"
-                            [class]="'week__day--' + day.mark"
-                            [class.week__day--today]="day.today"
-                            [attr.aria-current]="day.today ? 'date' : null"
-                        >
-                            <span class="week__letter" aria-hidden="true">{{ day.letter }}</span>
-                            <span class="week__mark" aria-hidden="true">
-                                @if (day.mark === 'done') {
-                                    <app-icon>check</app-icon>
-                                }
-                            </span>
-                            <span class="sr-only">{{ day.spoken }}</span>
-                        </li>
-                    }
-                </ol>
+                <app-week-days [days]="days()" [picked]="picked()" (pick)="pick($event)" />
+                <!-- Made afresh for each day picked, so it slides in from that side -->
+                @for (day of shown(); track day.day) {
+                    <app-day-panel class="week__panel" [day]="day" [animate.enter]="entering()" />
+                }
                 <p class="week__so-far">
                     {{ soFar() }}
                     @if (startsNextWeek()) {
@@ -132,25 +100,24 @@ export class WeekStripComponent {
     /** Whether anything's planned this week, of the workouts still in the library. */
     protected readonly planned = computed(() => this.week().some((day) => day.length > 0));
 
-    protected readonly days = computed((): StripDay[] =>
-        this.week().map((planned, day) => {
-            const name = WEEKDAYS[day];
-            return {
-                day,
-                letter: name[0],
-                mark: markFor(planned),
-                today: day === this.today,
-                spoken: planned.length
-                    ? `${name}${day === this.today ? ', today' : ''}: ${planned
-                          .map(
-                              (item) =>
-                                  `${this.name(item.workoutId)}, ${item.activeRest ? 'active rest, ' : ''}${SPOKEN_STATUS[item.status]}`
-                          )
-                          .join('; ')}`
-                    : `${name}${day === this.today ? ', today' : ''}: nothing planned`,
-            };
-        })
+    protected readonly days = computed(() =>
+        weekDays(this.week(), this.now, (id) => this.name(id))
     );
+
+    /** The day shown under the days: today, until another's picked. */
+    protected readonly picked = signal(this.today);
+    /** The picked day, as a list of one, so its panel is made afresh for each day. */
+    protected readonly shown = computed(() => [this.days()[this.picked()]]);
+    /** How the next day's panel comes in: from the side of the day picked. */
+    protected readonly entering = signal('');
+
+    protected pick(day: number) {
+        if (day === this.picked()) {
+            return;
+        }
+        this.entering.set(day > this.picked() ? 'day-panel--from-right' : 'day-panel--from-left');
+        this.picked.set(day);
+    }
 
     /** Whether everything planned this week is from next week: the plan hasn't started. */
     protected readonly startsNextWeek = computed(() => {
@@ -186,29 +153,4 @@ export class WeekStripComponent {
         const next = this.week()[nextDay].find((item) => !item.activeRest)!;
         return `${tally} · Next: ${this.name(next.workoutId)} on ${WEEKDAYS[nextDay]}`;
     });
-}
-
-/**
- * A day's mark from its workouts: done once they all are, missed if any were, free if none.
- * Those from next week (planned once the day had gone by) don't count for this week. Active
- * rest is optional: a day of it still to come is marked as active rest, once gone by without it
- * it's free, and beside training it's left out.
- */
-export function markFor(all: readonly Pick<PlannedWorkout, 'status' | 'activeRest'>[]): DayMark {
-    const counted = all.filter((item) => item.status !== 'next week');
-    if (counted.length === 0) {
-        return 'free';
-    }
-    if (counted.every((item) => item.status === 'done')) {
-        return 'done';
-    }
-    const training = counted.filter((item) => !item.activeRest).map((item) => item.status);
-    if (training.length === 0) {
-        // Once its day's gone by without it, it was a rest day like any other
-        return counted.every((item) => item.status === 'rested') ? 'free' : 'rest';
-    }
-    if (training.includes('missed')) {
-        return 'missed';
-    }
-    return training.every((status) => status === 'done') ? 'done' : 'planned';
 }

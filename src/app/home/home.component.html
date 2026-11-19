@@ -6,15 +6,14 @@
         <app-tour-offer class="home__card" />
 
         @if (hasWorkouts() || hasPlan()) {
-            <!-- The week's plan (PLN-4), the way in to changing it; with nothing planned, a
-                 nudge to plan it (NAV-6) -->
+            <!-- The week's plan (PLN-4), the way in to changing it, with what's on the day
+                 picked under it, today's to start (PLN-2); with nothing planned, a nudge to
+                 plan it (NAV-6) -->
             <app-week-strip class="home__card" data-tour="week" />
         } @else {
             <!-- New, with none of your own and nothing planned: a week to start with (NAV-6) -->
             <app-get-started class="home__card" data-tour="get-started" />
         }
-        <!-- The weekly plan's workouts for today (PLN-2) -->
-        <app-due-today class="home__card" />
         <!-- With a week planned, the plan says what's next, but a day with nothing planned
              offers a workout that leaves the next one's muscles fresh; with no plan, the
              suggestions are for what's least worked. After training today, stretches for it

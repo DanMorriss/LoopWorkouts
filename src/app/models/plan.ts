@@ -195,6 +195,35 @@ export interface PlannedWorkout {
 }
 
 /**
+ * How a planned workout's place this week reads, e.g. "Done", on the Plan page and in Today's
+ * week. "To come" says nothing.
+ */
+export const PLANNED_STATUS_TEXT: Record<PlannedStatus, string> = {
+    done: 'Done',
+    missed: 'Missed',
+    rested: 'Rested',
+    today: 'Due',
+    'to come': '',
+    'next week': 'From next week',
+};
+
+/**
+ * Each training workout planned this week, by id, with a colour from 1 to 4 (the plan
+ * colours, `--plan-1` to `--plan-4`), in the order they first come in the week, going round
+ * again past four, so a workout has the same colour every day it's on, as a ready-made plan's
+ * card colours them. Active rest has none.
+ */
+export function planColours(week: readonly (readonly PlannedWorkout[])[]): Map<string, number> {
+    const colours = new Map<string, number>();
+    for (const item of week.flat()) {
+        if (!item.activeRest && !colours.has(item.workoutId)) {
+            colours.set(item.workoutId, (colours.size % 4) + 1);
+        }
+    }
+    return colours;
+}
+
+/**
  * This week's plan, day by day from Monday, with where each workout planned is (see
  * `PlannedStatus`). Workouts no longer in the library are left out (`exists`), and those
  * that are active rest (`isActiveRest`) are marked so. One moved to another day this week only

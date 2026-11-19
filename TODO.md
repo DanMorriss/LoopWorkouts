@@ -26,7 +26,7 @@ Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on 
 
 ### Planning your own week
 
-- [ ] **Do it today from Today:** Due today could list this week's missed workouts with Do today, as well as the Plan page's menu.
+- [ ] **Do it today from Today:** a missed workout picked in Today's week could offer Do it today, as the Plan page's menu does.
 
 ### Sync
 

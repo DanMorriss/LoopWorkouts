@@ -1,0 +1,173 @@
+@use 'interaction' as *;
+@use 'type' as *;
+
+:host {
+    display: grid;
+    gap: 0.55rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-soft);
+}
+
+// A day picked comes in from its side (`animate.enter`, set by the week)
+:host(.day-panel--from-right) {
+    --from: 0.9rem;
+    animation: day-panel-in 0.22s ease-out;
+}
+
+:host(.day-panel--from-left) {
+    --from: -0.9rem;
+    animation: day-panel-in 0.22s ease-out;
+}
+
+@keyframes day-panel-in {
+    from {
+        opacity: 0;
+        translate: var(--from) 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :host(.day-panel--from-right),
+    :host(.day-panel--from-left) {
+        animation: none;
+    }
+}
+
+.day-panel__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    margin: 0;
+    color: var(--text-strong);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.day-panel__today {
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+// On a day of only active rest: that it's optional
+.day-panel__hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.day-panel__workouts {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+// A workout, faintly in its colour: the row opens its Details, with Start beside it today
+.day-panel__workout {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 52px;
+    padding-right: 0.4rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.7rem;
+    background: color-mix(in srgb, var(--c) 6%, transparent);
+}
+
+.day-panel__open {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+    min-height: 50px;
+    padding: 0.4rem 0 0.4rem 0.6rem;
+    border-radius: 0.7rem;
+    color: inherit;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+
+    @include hover {
+        .day-panel__name {
+            text-decoration: underline;
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+    }
+}
+
+.day-panel__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--c) 16%, transparent);
+    color: var(--c);
+
+    .icon {
+        width: 17px;
+        height: 17px;
+        font-size: 17px;
+    }
+}
+
+.day-panel__text {
+    display: grid;
+    flex: 1;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.day-panel__name {
+    color: var(--text-strong);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.day-panel__note {
+    color: var(--text-muted);
+    @include small-type(0.78rem);
+}
+
+// How it went: Done, Missed, Rested or From next week
+.day-panel__status {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.15rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+
+    .icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        color: var(--accent);
+    }
+}
+
+.day-panel__chevron {
+    flex: none;
+    color: var(--text-muted);
+}
+
+.day-panel__rest {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 52px;
+    margin: 0;
+    padding: 0 0.75rem;
+    border: 1px dashed var(--border);
+    border-radius: 0.7rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}

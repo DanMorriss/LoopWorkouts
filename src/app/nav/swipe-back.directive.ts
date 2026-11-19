@@ -5,12 +5,14 @@ import { PageSlide } from '../shared/navigation/page-slide';
 import { prefersReducedMotion } from '../shared/reduced-motion';
 
 /**
- * Where a swipe can't start: things a finger moves sideways on for their own sake (the
- * progress chart, which follows a finger across it; anything dragged, by its handle or marked
- * `data-drags`, such as a ready-made plan's days), and anything typed in.
+ * Where a swipe can't start: things a finger moves sideways on for their own sake (a
+ * carousel's slides, swiped between, such as an exercise's progress chart and its table;
+ * anything dragged, by its handle or marked `data-drags`, such as a ready-made plan's days),
+ * and anything typed in. Safari goes on sending a finger's moves while it scrolls a carousel,
+ * so without this a swipe back to its first slide took the page instead.
  */
 const OWN_GESTURES =
-    '.progress__svg, app-exercise-figure-3d, .cdk-drag-handle, [data-drags], input, textarea, select, [contenteditable]';
+    '.carousel__track, app-exercise-figure-3d, .cdk-drag-handle, [data-drags], input, textarea, select, [contenteditable]';
 
 /**
  * Swiping right on a page goes back to `appSwipeBack` (a url), as on a phone: the page

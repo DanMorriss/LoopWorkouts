@@ -17,6 +17,7 @@ import { SwipeBackDirective } from './swipe-back.directive';
         >
             <button type="button" (click)="pressed.set(true)">Edit</button>
             <input aria-label="Search" />
+            <div class="carousel__track">A carousel's slides</div>
         </div>
     `,
 })
@@ -191,7 +192,7 @@ describe('SwipeBackDirective', () => {
         expect(fixture.componentInstance.pressed()).toBe(false);
     });
 
-    it('leaves a mouse drag, a drag in a text box, and a page with a dialog open alone', () => {
+    it('leaves a mouse drag, a drag in a text box or a carousel, and a page with a dialog open alone', () => {
         pointer('pointerdown', 20, 100, { pointerType: 'mouse' });
         pointer('pointermove', 300, 100, { pointerType: 'mouse' });
         pointer('pointerup', 300, 100, { pointerType: 'mouse' });
@@ -199,6 +200,12 @@ describe('SwipeBackDirective', () => {
         pointer('pointerdown', 20, 100, { target: page.querySelector('input')! });
         pointer('pointermove', 300);
         pointer('pointerup', 300);
+
+        // A carousel's, swiped back to its first slide; Safari sends the moves as it scrolls
+        const track = page.querySelector('.carousel__track')!;
+        pointer('pointerdown', 20, 100, { target: track });
+        pointer('pointermove', 300, 100, { target: track });
+        pointer('pointerup', 300, 100, { target: track });
 
         fixture.componentInstance.disabled.set(true);
         fixture.detectChanges();

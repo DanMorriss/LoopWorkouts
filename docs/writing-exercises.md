@@ -77,7 +77,7 @@ and in `built-in-exercise-text.ts`:
 
 1. Branch from the latest `main`: `exercise-list-batch-<n>`. Don't build on an unmerged batch; wait for the last one to merge.
 2. Write the next unticked batch from the backlog below, in its order. If one turns out to be a duplicate of an existing exercise, or too niche, swap in a similar common one and say so in the PR.
-3. Tick the batch off in the backlog, and update the count in `TODO.md` ("Write the built-in exercise list").
+3. Tick the batch off in the backlog below.
 4. Check: `npm run format`, then `npm run format:check`, `npx ng test --watch=false` and `npx ng build` must all pass.
 5. Commit, push, and raise a PR against `main` with `gh pr create`: a summary, a table of each exercise's main and supporting muscles, equipment and measured by, anything swapped or added (e.g. new equipment), and the test results. Watch CI with `gh pr checks <n> --watch`.
 6. Stop there: Dan reviews each batch before the next is written.

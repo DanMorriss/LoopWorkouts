@@ -3,12 +3,12 @@ import { EquipmentFilterComponent } from '../../shared/components/equipment-filt
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { MuscleChipsComponent } from '../../shared/components/muscle-chips/muscle-chips.component';
 import { SearchFieldComponent } from '../../shared/components/search-field/search-field.component';
-import { LIBRARY_SOURCES, LibraryFilters } from '../library-filters.service';
+import { LibraryFilters, WORKOUT_KIND_CHOICES } from '../library-filters.service';
 
 /**
- * Over the Workouts page's cards: the search, which workouts to show (All, My own or
- * Ready-made), then Favourites and More filters, which opens the muscles and Only what I have
- * under them, so the cards still start high on a phone.
+ * Over the Workouts page's cards: the search, which kind of workout to show (All, Training or
+ * Stretches, LIB-10), then Favourites, My own and Filters, which opens the muscles and Only what
+ * I have under them, so the cards still start high on a phone.
  */
 @Component({
     selector: 'app-library-filters',
@@ -19,28 +19,28 @@ import { LIBRARY_SOURCES, LibraryFilters } from '../library-filters.service';
             placeholder="Name or exercise, e.g. squat"
             [(value)]="filters.query"
         />
-        <fieldset class="segmented library-filters__source">
+        <fieldset class="segmented library-filters__kind">
             <legend class="sr-only">Show</legend>
             <div
                 class="segmented__options"
-                [style.--count]="sources.length"
-                [style.--chosen]="chosenSource()"
+                [style.--count]="kinds.length"
+                [style.--chosen]="chosenKind()"
             >
                 <span class="segmented__thumb" aria-hidden="true"></span>
-                @for (source of sources; track source.value; let i = $index) {
+                @for (kind of kinds; track kind.value; let i = $index) {
                     <label
                         class="segmented__option"
-                        [class.segmented__option--chosen]="i === chosenSource()"
+                        [class.segmented__option--chosen]="i === chosenKind()"
                     >
                         <input
                             type="radio"
-                            name="librarySource"
+                            name="libraryKind"
                             class="segmented__input"
-                            [value]="source.value"
-                            [checked]="filters.source() === source.value"
-                            (change)="filters.source.set(source.value)"
+                            [value]="kind.value"
+                            [checked]="filters.kind() === kind.value"
+                            (change)="filters.setKind(kind.value)"
                         />
-                        <span class="segmented__label">{{ source.label }}</span>
+                        <span class="segmented__label">{{ kind.label }}</span>
                     </label>
                 }
             </div>
@@ -63,11 +63,19 @@ import { LIBRARY_SOURCES, LibraryFilters } from '../library-filters.service';
             <button
                 type="button"
                 class="library-filters__chip"
+                [attr.aria-pressed]="filters.mine()"
+                (click)="filters.mine.set(!filters.mine())"
+            >
+                My own
+            </button>
+            <button
+                type="button"
+                class="library-filters__chip"
                 aria-controls="library-more-filters"
                 [attr.aria-expanded]="filters.moreOpen()"
                 (click)="filters.moreOpen.set(!filters.moreOpen())"
             >
-                More filters{{ filters.moreCount() ? ' (' + filters.moreCount() + ')' : '' }}
+                Filters{{ filters.moreCount() ? ' (' + filters.moreCount() + ')' : '' }}
                 <app-icon class="library-filters__chip-icon">{{
                     filters.moreOpen() ? 'expand_less' : 'expand_more'
                 }}</app-icon>
@@ -87,7 +95,7 @@ import { LIBRARY_SOURCES, LibraryFilters } from '../library-filters.service';
             display: block;
         }
 
-        .library-filters__source {
+        .library-filters__kind {
             margin-top: 0.75rem;
         }
 
@@ -116,8 +124,8 @@ import { LIBRARY_SOURCES, LibraryFilters } from '../library-filters.service';
 })
 export class LibraryFiltersComponent {
     protected readonly filters = inject(LibraryFilters);
-    protected readonly sources = LIBRARY_SOURCES;
-    protected readonly chosenSource = computed(() =>
-        this.sources.findIndex((source) => source.value === this.filters.source())
+    protected readonly kinds = WORKOUT_KIND_CHOICES;
+    protected readonly chosenKind = computed(() =>
+        this.kinds.findIndex((kind) => kind.value === this.filters.kind())
     );
 }

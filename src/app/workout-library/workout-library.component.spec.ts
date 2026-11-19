@@ -10,6 +10,7 @@ import { makeWorkout as baseWorkout, SimpleWorkout } from '../shared/testing/mak
 import { PageSlide } from '../shared/navigation/page-slide';
 import { WorkoutLibraryComponent } from './workout-library.component';
 import { ActiveRunService } from '../shared/run/active-run.service';
+import { isActiveRest } from '../models/active-rest';
 import { BUILT_IN_WORKOUTS } from '../models/built-in-workouts';
 import { copyOf } from '../models/workout';
 import { SettingsStore } from '../shared/state/settings-store.service';
@@ -82,9 +83,14 @@ describe('WorkoutLibraryComponent', () => {
             expect(text()).toContain('Start any of these, or make your own with New.');
             const titles = all('.workout-card__title').map((t) => t.textContent!.trim());
             expect(titles).toHaveLength(BUILT_IN_WORKOUTS.length);
-            expect(titles).toEqual(
-                [...titles].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
-            );
+            for (const section of ['training', 'stretches']) {
+                const inIt = all(`[data-section="${section}"] .workout-card__title`).map((t) =>
+                    t.textContent!.trim()
+                );
+                expect(inIt).toEqual(
+                    [...inIt].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+                );
+            }
             expect(all('.workout-card app-ready-made-badge')).toHaveLength(titles.length);
             expect(own()).toHaveLength(0);
         });
@@ -233,9 +239,9 @@ describe('WorkoutLibraryComponent', () => {
                 expect(navigate).not.toHaveBeenCalled();
             });
 
-            it('opens the muscles and Only what I have under More filters', () => {
+            it('opens the muscles and Only what I have under Filters', () => {
                 const more = all('.library-filters__chip').find((chip) =>
-                    chip.textContent?.includes('More filters')
+                    chip.textContent?.includes('Filters')
                 )!;
                 expect(more.getAttribute('aria-expanded')).toBe('false');
                 expect(el('app-muscle-chips')).toBeNull();
@@ -557,20 +563,70 @@ describe('WorkoutLibraryComponent', () => {
             expect(titles()).not.toContain('Tabata');
         });
 
-        it('shows only your own, or only the ready-made ones, when picked', () => {
+        it('shows only your own with My own', () => {
             store.addWorkout(makeWorkout({ title: 'Sprints' }));
             create();
+            const mine = all('.library-filters__chip').find((chip) =>
+                chip.textContent?.includes('My own')
+            )!;
 
-            choose('My own');
+            click(mine);
+            expect(mine.getAttribute('aria-pressed')).toBe('true');
             expect(titles()).toEqual(['Sprints']);
             expect(el('.library__count')?.textContent).toContain('1 of');
 
-            choose('Ready-made');
-            expect(titles()).toHaveLength(BUILT_IN_WORKOUTS.length);
-            expect(own()).toHaveLength(0);
-
             click(el('.library__clear'));
             expect(titles()).toHaveLength(1 + BUILT_IN_WORKOUTS.length);
+        });
+
+        describe('stretches (LIB-10)', () => {
+            const stretchTitles = BUILT_IN_WORKOUTS.filter(isActiveRest).map((w) => w.title);
+            const section = (id: string) =>
+                all(`[data-section="${id}"] .workout-card__title`).map((t) =>
+                    t.textContent!.trim()
+                );
+
+            it('lists the workouts of only stretches after the rest, under Stretches', () => {
+                create();
+
+                expect(el('.library__section')?.textContent?.trim()).toBe('Stretches');
+                expect([...section('stretches')].sort()).toEqual([...stretchTitles].sort());
+                expect(section('training')).not.toContain('Mobility flow');
+                expect(titles().slice(-stretchTitles.length).sort()).toEqual(
+                    [...stretchTitles].sort()
+                );
+            });
+
+            it('shows only stretches, or none, remembering the choice', () => {
+                create();
+
+                choose('Stretches');
+                expect([...titles()].sort()).toEqual([...stretchTitles].sort());
+                // All of them are stretches, so there's no heading to say so
+                expect(el('.library__section')).toBeNull();
+                expect(TestBed.inject(SettingsStore).workoutKind()).toBe('stretches');
+
+                choose('Training');
+                expect(titles()).toHaveLength(BUILT_IN_WORKOUTS.length - stretchTitles.length);
+                expect(titles()).not.toContain('Mobility flow');
+                expect(el('.library__count')?.textContent).toContain(
+                    `of ${BUILT_IN_WORKOUTS.length} workouts`
+                );
+
+                click(el('.library__clear'));
+                expect(titles()).toHaveLength(BUILT_IN_WORKOUTS.length);
+                expect(TestBed.inject(SettingsStore).workoutKind()).toBe('all');
+            });
+
+            it('starts with the kind of workout picked last time', () => {
+                TestBed.inject(SettingsStore).update({ workoutKind: 'training' });
+                create();
+
+                expect(
+                    el<HTMLInputElement>('input[name="libraryKind"][value="training"]')!.checked
+                ).toBe(true);
+                expect(titles()).not.toContain('Full-body stretch');
+            });
         });
     });
 });

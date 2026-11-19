@@ -111,6 +111,7 @@ export class BackupService {
                     weeklySets: this.settings.weeklySets(),
                     myEquipment: this.settings.myEquipment(),
                     onlyMyEquipment: this.settings.onlyMyEquipment(),
+                    workoutKind: this.settings.workoutKind(),
                     kettlebellWeight: this.settings.kettlebellWeight(),
                     eachSideFirst: this.settings.eachSideFirst(),
                     switchSidesSeconds: this.settings.switchSidesSeconds(),

@@ -18,6 +18,7 @@ const SETTINGS: Omit<Settings, 'profileUpdatedAt' | 'bodyWeightUpdatedAt'> = {
     weeklySets: 10,
     myEquipment: ['barbell', 'rack'],
     onlyMyEquipment: true,
+    workoutKind: 'stretches',
     kettlebellWeight: 16,
     eachSideFirst: 'right',
     switchSidesSeconds: 10,

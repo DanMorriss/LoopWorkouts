@@ -23,9 +23,15 @@ const goblet = makeWorkout({
     steps: [linked(reps(10, 'Squats'), 'builtin:goblet-squat')],
 });
 const sprints = makeWorkout({ id: 'sprints', title: 'Sprints', steps: [work(30)] });
-const all = [legs, push, goblet, sprints];
+const stretch = makeWorkout({
+    id: 'stretch',
+    title: 'Wind down',
+    steps: [linked(work(30, "Child's pose"), 'builtin:childs-pose')],
+});
+const all = [legs, push, goblet, sprints, stretch];
 
 const none: WorkoutFilters = {
+    kind: 'all',
     query: '',
     favourites: false,
     muscles: [],
@@ -39,7 +45,13 @@ const ids = (filters: Partial<WorkoutFilters>) =>
 
 describe('filterWorkouts', () => {
     it('keeps them all, in order, with nothing chosen', () => {
-        expect(ids({})).toEqual(['legs', 'push', 'goblet', 'sprints']);
+        expect(ids({})).toEqual(['legs', 'push', 'goblet', 'sprints', 'stretch']);
+    });
+
+    it('keeps only workouts of stretches, or only those with more in them', () => {
+        expect(ids({ kind: 'stretches' })).toEqual(['stretch']);
+        // Sprints is linked to no exercise, so it isn't stretches
+        expect(ids({ kind: 'training' })).toEqual(['legs', 'push', 'goblet', 'sprints']);
     });
 
     it("finds a search in the title, a step's name or its exercise's, in any case", () => {
@@ -65,11 +77,12 @@ describe('filterWorkouts', () => {
     });
 
     it('keeps those doable with your equipment, with Only what I have on', () => {
-        expect(ids({ onlyMine: true })).toEqual(['push', 'sprints']);
+        expect(ids({ onlyMine: true })).toEqual(['push', 'sprints', 'stretch']);
         expect(ids({ onlyMine: true, myEquipment: ['kettlebell'] })).toEqual([
             'push',
             'goblet',
             'sprints',
+            'stretch',
         ]);
     });
 

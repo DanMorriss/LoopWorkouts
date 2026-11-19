@@ -18,10 +18,13 @@ test.describe('no workouts of my own', () => {
             await expect(
                 page.getByText('Start any of these, or make your own with New.')
             ).toBeVisible();
-            // The 23 ready-made ones, A to Z, each with its badge
+            // The 23 ready-made ones, A to Z, each with its badge, the 4 of stretches last
             await expect(library.cards).toHaveCount(23);
             const titles = await library.titles();
-            expect(titles).toEqual([...titles].sort((a, b) => a.localeCompare(b)));
+            for (const part of [titles.slice(0, -4), titles.slice(-4)]) {
+                expect(part).toEqual([...part].sort((a, b) => a.localeCompare(b)));
+            }
+            expect(titles.slice(-4).every((title) => /stretch|Mobility/.test(title))).toBe(true);
             await expect(library.card('Gym legs')).toContainText('Ready-made');
 
             await page.getByRole('button', { name: 'New workout' }).click();
@@ -204,7 +207,7 @@ test.describe('the order', () => {
         async ({ app, page }) => {
             const library = new LibraryPage(page);
             await app.goto('/library');
-            await page.getByRole('radio', { name: 'My own' }).check();
+            await page.getByRole('button', { name: 'My own' }).click();
             // Polled, as the list can still be filtering just after the choice
             await expect.poll(() => library.titles()).toEqual(['arms', 'Bench', 'Zone 2']);
             const options = await library.options('Bench');
@@ -322,12 +325,11 @@ test.describe('ready-made workouts', () => {
         async ({ app, page }) => {
             const library = new LibraryPage(page);
             await app.goto('/library');
-            await page.getByRole('radio', { name: 'Ready-made' }).check();
-            await expect(library.card('Legs')).toHaveCount(0);
-            await expect(library.cards).toHaveCount(23);
+            await expect(library.card('Legs')).toHaveCount(1);
+            await expect(library.cards).toHaveCount(1 + 23);
 
             // Only what I have, with a kettlebell: those needing nothing or a kettlebell
-            await page.getByRole('button', { name: 'More filters' }).click();
+            await page.getByRole('button', { name: /^Filters/ }).click();
             await page.getByRole('switch', { name: 'Only what I have' }).click();
             await page.getByRole('button', { name: /^My equipment/ }).click();
             await page.getByRole('button', { name: 'Kettlebell', exact: true }).click();
@@ -495,6 +497,45 @@ test.describe('favourites saved by an older version', () => {
             const saved = await app.stored<Record<string, unknown>[]>('workouts');
             expect(saved?.map((w) => 'favourite' in w)).toEqual([false, false]);
             expect(await app.stored('ready-made-favourites')).toBeNull();
+        }
+    );
+});
+
+test.describe('stretches', () => {
+    test.use({ storage: seed.workouts([workout('Legs', { steps: [timed(30)] })]) });
+
+    test(
+        'REG-LIB-12 only stretches, or none, kept through a reload',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const library = new LibraryPage(page);
+            const section = page.getByRole('heading', { level: 3, name: 'Stretches' });
+            const stretches = [
+                'Full-body stretch',
+                'Lower-body stretch',
+                'Mobility flow',
+                'Upper-body stretch',
+            ];
+            await app.goto('/library');
+            await expect(section).toBeVisible();
+            await expect.poll(async () => (await library.titles()).slice(-4)).toEqual(stretches);
+
+            await page.getByRole('radio', { name: 'Stretches' }).check();
+            await expect.poll(() => library.titles()).toEqual(stretches);
+            await expect(section).toHaveCount(0);
+
+            await page.getByRole('radio', { name: 'Training' }).check();
+            await expect(library.cards).toHaveCount(1 + 23 - 4);
+            await expect(library.card('Mobility flow')).toHaveCount(0);
+            await expect(page.getByText('20 of 24 workouts')).toBeVisible();
+
+            await app.reload();
+            await expect(page.getByRole('radio', { name: 'Training' })).toBeChecked();
+            await expect(library.cards).toHaveCount(20);
+
+            await page.getByRole('button', { name: 'Clear search and filters' }).click();
+            await expect(page.getByRole('radio', { name: 'All', exact: true })).toBeChecked();
+            await expect(library.cards).toHaveCount(24);
         }
     );
 });

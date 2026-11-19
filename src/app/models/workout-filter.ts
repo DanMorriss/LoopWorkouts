@@ -1,6 +1,8 @@
+import { isActiveRest } from './active-rest';
 import { workoutEquipment } from './built-in-workouts';
 import { canDoWith, Equipment, Exercise, MuscleGroup } from './exercise';
 import { allSteps, Workout } from './workout';
+import { WorkoutKind } from './workout-kind';
 import { musclesWorked } from './workout-muscles';
 
 /** A workout of your own or a ready-made one: what it's filtered on. */
@@ -8,6 +10,7 @@ type Filterable = Pick<Workout, 'id' | 'title' | 'blocks'>;
 
 /** What the Workouts page is cut down by. */
 export interface WorkoutFilters {
+    kind: WorkoutKind;
     /** What's typed in the search box: found in the title or an exercise's name. */
     query: string;
     /** Only favourites (`isFavourite`). */
@@ -34,6 +37,7 @@ export function filterWorkouts<T extends Filterable>(
     const words = filters.query.trim().toLowerCase().split(/\s+/).filter(Boolean);
     return workouts.filter(
         (workout) =>
+            isKind(workout, filters.kind) &&
             (!filters.favourites || isFavourite(workout.id)) &&
             (words.length === 0 || matches(workout, words, byId)) &&
             (filters.muscles.length === 0 || worksAny(workout, filters.muscles, byId)) &&
@@ -48,6 +52,10 @@ export function canDoWorkoutWith(
     byId: (id: string) => Exercise | undefined
 ): boolean {
     return canDoWith({ equipment: workoutEquipment(workout, byId) }, available);
+}
+
+function isKind(workout: Filterable, kind: WorkoutKind): boolean {
+    return kind === 'all' || isActiveRest(workout) === (kind === 'stretches');
 }
 
 function matches(

@@ -47,7 +47,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
  * The week on Today (PLN-4): Monday to Sunday, each day marked done, missed, planned or free,
  * today picked out, how many of the week's planned workouts are done and the next one to come,
  * and **Edit plan**, which slides the weekly plan in. With nothing planned, a ready-made week
- * for your goal and equipment, used in one tap (PLN-6) as on Get started; or More plans, or
+ * for your goal and equipment, used in one tap (PLN-6) as on Get started; or All plans, or
  * Make your own plan (NAV-6).
  */
 @Component({
@@ -105,7 +105,7 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                         href="/ready-made-plans"
                         class="btn-pill week__ready-made"
                         (click)="slide.follow($event, '/ready-made-plans', 'in')"
-                        >More plans</a
+                        >All plans</a
                     >
                     <a
                         href="/plan"

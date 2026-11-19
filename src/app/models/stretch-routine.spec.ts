@@ -1,13 +1,16 @@
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
 import { isStretch, STRETCH_ROUTINE_ID } from './built-in-stretches';
-import { LoggedSet } from './history';
+import { HistoryEntry, LoggedSet } from './history';
 import {
     MAX_ROUTINE_STRETCHES,
     ROUTINE_HOLD_SECONDS,
     ROUTINE_STRETCHES,
     routineStretches,
+    setsToStretchToday,
+    stretchOffer,
     stretchRoutine,
 } from './stretch-routine';
+import { DEFAULT_RUN_SIDES } from './workout';
 import { ALL_MUSCLES } from './workout-muscles';
 
 const byId = (id: string) => BUILT_IN_EXERCISES.find((exercise) => exercise.id === id);
@@ -138,5 +141,62 @@ describe('stretchRoutine', () => {
 
         expect(floor?.blocks.map((block) => block.kind)).toEqual(['group']);
         expect(stretchRoutine([])).toBeNull();
+    });
+});
+
+describe('stretchOffer', () => {
+    it('gives the routine, the muscles it stretches of those mainly worked, and its time', () => {
+        const offer = stretchOffer(sets('push-up', 3), byId, DEFAULT_RUN_SIDES)!;
+
+        expect(offer.workout.id).toBe(STRETCH_ROUTINE_ID);
+        expect(offer.muscles).toContain('Chest');
+        expect(offer.time.text).toMatch(/^About \d+ min$/);
+        expect(offer.time.spoken).toMatch(/^about \d+ minutes?$/);
+    });
+
+    it('is null with nothing to stretch', () => {
+        expect(stretchOffer([], byId, DEFAULT_RUN_SIDES)).toBeNull();
+        expect(stretchOffer(sets('childs-pose', 2), byId, DEFAULT_RUN_SIDES)).toBeNull();
+    });
+});
+
+describe('setsToStretchToday', () => {
+    const NOW = new Date(2026, 10, 18, 18, 0).getTime();
+    const HOUR = 60 * 60 * 1000;
+    function done(at: number, logged: LoggedSet[]): HistoryEntry {
+        return {
+            id: `run-${at}`,
+            workoutId: 'w',
+            title: 'W',
+            startedAt: at,
+            endedAt: at + 600_000,
+            updatedAt: at + 600_000,
+            activeSeconds: 600,
+            roundsCompleted: 1,
+            totalRounds: 1,
+            outcome: 'finished',
+            sets: logged,
+        };
+    }
+    const squats = sets('back-squat', 2);
+    const pushUps = sets('push-up', 2);
+    const stretched = sets('standing-quad-stretch', 1);
+
+    it("is today's sets since the last stretching, newest first as the history is", () => {
+        const history = [
+            done(NOW - 1 * HOUR, pushUps),
+            done(NOW - 2 * HOUR, squats),
+            done(NOW - 3 * HOUR, stretched),
+            done(NOW - 4 * HOUR, sets('bench-press', 1)),
+        ];
+
+        expect(setsToStretchToday(history, NOW)).toEqual([...pushUps, ...squats]);
+    });
+
+    it("leaves out yesterday's, and is empty once stretched", () => {
+        expect(setsToStretchToday([done(NOW - 20 * HOUR, squats)], NOW)).toEqual([]);
+        expect(
+            setsToStretchToday([done(NOW - HOUR, stretched), done(NOW - 2 * HOUR, squats)], NOW)
+        ).toEqual([]);
     });
 });

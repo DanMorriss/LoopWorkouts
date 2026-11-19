@@ -1,0 +1,82 @@
+@use 'interaction' as *;
+
+:host {
+    display: block;
+}
+
+// Side by side, each the track's width, snapping one at a time; no scrollbar, as the dots
+// say where you are
+.carousel__track {
+    position: relative;
+    display: grid;
+    grid-auto-columns: 100%;
+    grid-auto-flow: column;
+    gap: 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+// Room inside for focus rings, which the track would otherwise cut off; what's in it fills
+// it, as tall as the tallest slide
+.carousel__slide {
+    display: grid;
+    min-width: 0;
+    padding: 0.25rem;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+.carousel__dots {
+    display: flex;
+    justify-content: center;
+}
+
+// Each 44px square to press, a small pip to see; the one in view longer and in the accent
+.carousel__dot {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -4px;
+        border-radius: 999px;
+    }
+
+    @include hover {
+        .carousel__pip {
+            background: var(--text);
+        }
+    }
+}
+
+.carousel__pip {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--text-muted);
+    transition:
+        width 0.2s ease,
+        background-color 0.2s ease;
+
+    [aria-current='true'] > & {
+        width: 1.25rem;
+        background: var(--accent);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}

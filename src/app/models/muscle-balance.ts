@@ -147,17 +147,20 @@ export interface SuggestionAvoid {
  */
 const MOST_OVERLAP = 1 / 3;
 
+/** How many workouts are suggested at most, to swipe between. */
+export const MOST_SUGGESTIONS = 4;
+
 /**
- * The saved workout that works the muscles furthest short of their aims: the lowest average
- * of each muscle's share of its aim this week (`shareOfAim`) over the muscles it works, its
- * main muscles counting twice what its supporting ones do. On a tie, the one done longest ago
- * (never done first), then the library's order. Null when no workout has a step linked to an
- * exercise.
+ * The saved workouts that work the muscles furthest short of their aims, best first, up to
+ * `most`: by the lowest average of each muscle's share of its aim this week (`shareOfAim`)
+ * over the muscles it works, its main muscles counting twice what its supporting ones do. On
+ * a tie, the one done longest ago (never done first), then the library's order. Only those
+ * with a step linked to an exercise (not only stretches).
  *
- * With `avoid`, its workouts are left out, and one whose main muscles are mostly those to avoid
- * (more than MOST_OVERLAP of them) is only suggested when every other one is too.
+ * With `avoid`, its workouts are left out, and those whose main muscles are mostly those to
+ * avoid (more than MOST_OVERLAP of them) come after every other one.
  */
-export function suggestNextWorkout(
+export function suggestNextWorkouts(
     workouts: readonly Workout[],
     counts: ReadonlyMap<MuscleGroup, number>,
     byId: (id: string) => Exercise | undefined,
@@ -165,8 +168,9 @@ export function suggestNextWorkout(
     lastDone: ReadonlyMap<string, number>,
     /** The sets a week each muscle aims at (`weeklyAim`). */
     weeklySets: number,
-    avoid?: SuggestionAvoid
-): SuggestedWorkout | null {
+    avoid?: SuggestionAvoid,
+    most = MOST_SUGGESTIONS
+): SuggestedWorkout[] {
     if (avoid) {
         const allowed = workouts.filter((workout) => !avoid.workoutIds.has(workout.id));
         const apart = allowed.filter((workout) => {
@@ -174,14 +178,15 @@ export function suggestNextWorkout(
             const shared = main.filter(([muscle]) => avoid.muscles.has(muscle)).length;
             return main.length > 0 && shared / main.length <= MOST_OVERLAP;
         });
-        return (
-            suggestNextWorkout(apart, counts, byId, lastDone, weeklySets) ??
-            suggestNextWorkout(allowed, counts, byId, lastDone, weeklySets)
-        );
+        const rest = allowed.filter((workout) => !apart.includes(workout));
+        return [
+            ...suggestNextWorkouts(apart, counts, byId, lastDone, weeklySets, undefined, most),
+            ...suggestNextWorkouts(rest, counts, byId, lastDone, weeklySets, undefined, most),
+        ].slice(0, most);
     }
-    let best: { suggestion: SuggestedWorkout; load: number; lastDone: number } | null = null;
     const share = (muscle: MuscleGroup) => shareOfAim(counts.get(muscle) ?? 0, muscle, weeklySets);
 
+    const ranked: { suggestion: SuggestedWorkout; load: number; lastDone: number }[] = [];
     for (const workout of workouts) {
         const weights = muscleWeights(workout, byId);
         if (weights.size === 0) {
@@ -194,22 +199,24 @@ export function suggestNextWorkout(
             weighted += weight * share(muscle);
             total += weight;
         }
-        const load = weighted / total;
-        const done = lastDone.get(workout.id) ?? -Infinity;
-        if (best && (load > best.load || (load === best.load && done >= best.lastDone))) {
-            continue;
-        }
-
         const muscles = [...weights]
             .filter(([, weight]) => weight === 1)
             .map(([muscle]) => muscle)
             .sort(
                 (a, b) => share(a) - share(b) || MUSCLE_LABELS[a].localeCompare(MUSCLE_LABELS[b])
             );
-        best = { suggestion: { workout, muscles }, load, lastDone: done };
+        ranked.push({
+            suggestion: { workout, muscles },
+            load: weighted / total,
+            lastDone: lastDone.get(workout.id) ?? -Infinity,
+        });
     }
 
-    return best?.suggestion ?? null;
+    // A stable sort, so a full tie keeps the library's order
+    return ranked
+        .sort((a, b) => a.load - b.load || a.lastDone - b.lastDone)
+        .slice(0, most)
+        .map(({ suggestion }) => suggestion);
 }
 
 /**

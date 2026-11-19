@@ -166,7 +166,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     2. Press **Use this plan**.
     3. Press **Undo**.
 - **Expected:**
-    1. No This week card and no logo; **Get started** shows "No equipment, 3 days" with its days ("Mon Bodyweight basics", …), **Use this plan** (the main button), **More plans** and **Make your own plan** (to `/plan`).
+    1. No This week card and no logo; **Get started** shows "No equipment, 3 days" with its days ("Mon Bodyweight basics", …), **Use this plan** (the main button), no dots (it's the only plan with no equipment), **All plans** and **Make your own plan** (to `/plan`).
     2. Workouts now has Bodyweight basics, Cardio intervals, Core in 15 and Tabata; Get started is replaced by This week, with dots on Mon, Wed and Fri and Wednesday outlined as today; Due today lists Cardio intervals with Start; the Undo bar says "Your week is planned: No equipment, 3 days"; focus is on **Edit plan**.
     3. The four workouts are gone, `week-plan` is back to empty, and Get started is back.
 - **In the pack:** Use this plan plans the ready-made workouts **as they are** (nothing is copied into your workouts), and as it's planned on a Wednesday, Monday's says "from next week" (PLN-3) and Friday's "to come". Focus ends on Edit plan, with Undo still in the bar (B1, fixed 2026-11-10).
@@ -183,7 +183,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     5. Pick nothing: press ‹ Back. Then press the ✕ named "Take Push off Thursday".
     6. Press Add on Thursday, then **Make a new workout**.
 - **Expected:**
-    1. Today's This week says "Nothing planned yet." with a ready-made plan's **Use this plan** as the main button and **More plans** and **Make your own plan** under it. The Plan page slides in at `/plan` with ‹ Today, the title Plan, and every day saying "Nothing planned"; Today stays current in the tab bar.
+    1. Today's This week says "Nothing planned yet." with a ready-made plan's **Use this plan** as the main button and **All plans** and **Make your own plan** under it. The Plan page slides in at `/plan` with ‹ Today, the title Plan, and every day saying "Nothing planned"; Today stays current in the tab bar.
     2. A dialog "Plan on Thursday" opens with **Make a new workout** first, then Legs and Push; Escape closes it and focus is back on Thursday's Add.
     3. Thursday lists Push; focus is on Thursday's Add; a live region says "Push planned on Thursday".
     4. Push says "Planned" and can't be picked.
@@ -202,7 +202,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Expected:**
     1. Due today lists Push, then Legs, each with Start; Push's is the page's main button. There's no suggested next workout.
     2. Only Push is listed, with "Done today: Legs".
-    3. "✓ All done: Push, Legs" in place of the list, and still **no** suggested next workout, as a week is planned (`hasHistory() && !hasPlan()` in `home.component.html`; see mismatch M4).
+    3. "✓ All done: Push, Legs" in place of the list, and still **no** suggested next workout, as a week is planned (only, with sets logged, the stretches for them, PRG-16) (`hasHistory() && !hasPlan()` in `home.component.html`; see mismatch M4).
     4. Pressing a Start starts that workout (the workout page opens on its first step).
 
 ### REG-PLAN-04 · How this week is going, on the Plan page and Today
@@ -224,7 +224,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Stories:** PLN-6, LIB-6 · **Priority:** P2
 - **Preconditions:** `guest()`, `settings({ trainingFor: 'fitness' })`, one saved workout, nothing planned.
 - **Steps:**
-    1. Today → **More plans**.
+    1. Today → **All plans**.
     2. Turn **Only what I have** on (no equipment picked).
     3. On No equipment, 3 days' card, press the link for Tabata. Then an exercise in its What's in it. Then ‹ back twice.
 - **Expected:**
@@ -1041,6 +1041,14 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Profile's **My kettlebell** says 20 (kg).
 - **In the pack:** as above.
 
+### REG-PRG-07 · After today's training, Today offers its stretches first
+
+- **Stories:** PRG-16, PRG-9 · **Priority:** P2
+- **Preconditions:** `guest()`, workout "Push" (Push-up 10), a finished Push today at 07:00 with two sets of push-ups, nothing planned.
+- **Steps:** Open Today; press **Start stretches** on the card's first slide.
+- **Expected:** The card is headed "After today's training"; its first slide ("Suggestion 1 of …") is Stretch what you worked, then the suggested workouts follow; Start stretches opens `/workout` on Doorway chest stretch.
+- **Left to Vitest:** the stretches gone once done, and none while planned training is left today (`home.component.spec.ts`); which sets count (`setsToStretchToday()` in `stretch-routine.spec.ts`); the summary's bottom-bar Stretch what you worked (`workout.component.spec.ts`).
+
 ---
 
 ## 8. Exercises (`exercises.md`)
@@ -1502,6 +1510,15 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     2. Thursday is Gym push, its link says "Thu"; `week-plan` has Gym push on Thursday.
     3. Gym push says "Thu", and the page didn't swipe back.
 
+### REG-GES-05 · Swipe Get started to the next plan
+
+- **Stories:** NAV-6, PLN-7 · **Priority:** P2 · **[Touch]**
+- **Preconditions:** `guest()`, no workouts, Fitness with a kettlebell, reduced motion (the swipe is the browser's own scrolling either way).
+- **Steps:**
+    1. On Today, swipe Get started's first plan left by its title.
+    2. Press the third dot.
+- **Expected:** Three dots, "Plan 1 of 3" to "Plan 3 of 3", the first marked current. 1. The second is current and Kettlebell, 3 days is in view. 2. The third is current, the track scrolled to No equipment, 3 days; All plans is under the dots.
+
 ---
 
 ## 14. Calories (`calories.md`)
@@ -1567,16 +1584,16 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Workouts and ready-made   | REG-LIB-01 – 12  | LIB-1 – LIB-8, LIB-10, CTL-4                                                                                                                           |
 | Running a workout         | REG-RUN-01 – 19  | RUN-1 – RUN-12, RUN-14 – RUN-16, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                                   |
-| Progress                  | REG-PRG-01 – 06  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14                                                                                              |
+| Progress                  | REG-PRG-01 – 07  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14, PRG-16                                                                                      |
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                            |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                                                     |
 | Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                                                        |
 | Calories                  | REG-CAL-01 – 03  | CAL-1, CAL-2, CAL-6                                                                                                                                    |
 | Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                                                  |
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                                             |
-| Gestures and dragging     | REG-GES-01 – 04  | NAV-1, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                                                |
+| Gestures and dragging     | REG-GES-01 – 05  | NAV-1, NAV-6, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                                         |
 
-**Count:** 86 tests: 40 P1, 37 P2, 9 P3.
+**Count:** 88 tests: 40 P1, 39 P2, 9 P3.
 
 | Area      | P1     | P2     | P3    | Total  |
 | --------- | ------ | ------ | ----- | ------ |
@@ -1586,14 +1603,14 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | LIB       | 5      | 2      | 1     | 8      |
 | RUN       | 6      | 7      | 2     | 15     |
 | HIS       | 3      | 0      | 1     | 4      |
-| PRG       | 0      | 6      | 0     | 6      |
+| PRG       | 0      | 7      | 0     | 7      |
 | EXR       | 2      | 3      | 0     | 5      |
 | SET       | 2      | 1      | 1     | 4      |
 | DATA      | 4      | 0      | 1     | 5      |
 | ACC       | 5      | 2      | 0     | 7      |
 | A11Y      | 3      | 3      | 0     | 6      |
-| GES       | 0      | 1      | 3     | 4      |
-| **Total** | **40** | **37** | **9** | **86** |
+| GES       | 0      | 2      | 3     | 5      |
+| **Total** | **40** | **39** | **9** | **88** |
 
 ### In the pack
 
@@ -1607,13 +1624,13 @@ Tests per project (each runs on `phone` and `desktop`); some ids have more than 
 | LIB  | `e2e/library.e2e.ts`   | 11    | 0                               | 0                                                     |
 | RUN  | `e2e/run.e2e.ts`       | 23    | 0                               | 1 (real sound, manual)                                |
 | HIS  | `e2e/history.e2e.ts`   | 6     | 0                               | 0                                                     |
-| PRG  | `e2e/progress.e2e.ts`  | 7     | 0                               | 0                                                     |
+| PRG  | `e2e/progress.e2e.ts`  | 8     | 0                               | 0                                                     |
 | EXR  | `e2e/exercises.e2e.ts` | 9     | 0                               | 1 (3D figure, manual)                                 |
 | SET  | `e2e/settings.e2e.ts`  | 6     | 0                               | 0                                                     |
 | DATA | `e2e/data.e2e.ts`      | 6     | 0                               | 0                                                     |
 | ACC  | `e2e/account.e2e.ts`   | 17    | 0                               | 1 (real Google, manual)                               |
 | A11Y | `e2e/a11y.e2e.ts`      | 21    | 0                               | 0 (the 4 phone-width tests skip on `desktop`)         |
-| GES  | `e2e/gestures.e2e.ts`  | 10    | 1 (Known issue: superset folds) | 1 (iPhone, manual); the touch tests skip on `desktop` |
+| GES  | `e2e/gestures.e2e.ts`  | 11    | 1 (Known issue: superset folds) | 1 (iPhone, manual); the touch tests skip on `desktop` |
 
 ### Left out on purpose
 

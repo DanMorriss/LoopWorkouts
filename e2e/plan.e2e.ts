@@ -31,7 +31,7 @@ test.describe('a new guest', () => {
             // Three days of training, and two of active rest, which are optional
             await expect(getStarted.getByRole('article')).toContainText('3 days a week');
             await expect(getStarted.getByRole('article')).toContainText('+ 2 active rest');
-            await expect(getStarted.getByRole('link', { name: 'More plans' })).toBeVisible();
+            await expect(getStarted.getByRole('link', { name: 'All plans' })).toBeVisible();
             await expect(
                 getStarted.getByRole('link', { name: 'Make your own plan' })
             ).toBeVisible();
@@ -88,7 +88,7 @@ test.describe('planning by hand', () => {
         const week = page.getByRole('region', { name: 'This week' });
         await expect(week).toContainText('Nothing planned yet.');
         await expect(week.getByRole('button', { name: /^Use / })).toBeVisible();
-        await expect(week.getByRole('link', { name: 'More plans' })).toBeVisible();
+        await expect(week.getByRole('link', { name: 'All plans' })).toBeVisible();
 
         await week.getByRole('link', { name: 'Make your own plan' }).click();
         await expect(page).toHaveURL('/plan');
@@ -323,7 +323,7 @@ test.describe('the ready-made plans', () => {
         { tag: '@p2' },
         async ({ app, page }) => {
             await app.goto('/home');
-            await page.getByRole('link', { name: 'More plans' }).click();
+            await page.getByRole('link', { name: 'All plans' }).click();
             await expect(page).toHaveURL('/ready-made-plans');
             await expect(app.backLink('Today')).toBeVisible();
             await expect(app.tab('Today')).toHaveAttribute('aria-current', 'true');

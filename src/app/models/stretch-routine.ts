@@ -1,8 +1,10 @@
 import { isStretch, STRETCH_ROUTINE_ID } from './built-in-stretches';
-import { Exercise, MuscleGroup } from './exercise';
-import { LoggedSet } from './history';
-import { ALL_MUSCLES } from './workout-muscles';
-import { Block, Workout } from './workout';
+import { Exercise, MUSCLE_LABELS, MuscleGroup } from './exercise';
+import { HistoryEntry, LoggedSet } from './history';
+import { startOfDay } from './plan';
+import { estimateText, estimateWorkout } from './workout-estimate';
+import { ALL_MUSCLES, musclesInSets } from './workout-muscles';
+import { Block, RunSides, Workout } from './workout';
 
 /** Where a stretch is done: standing ones come first, so you get down to the floor once. */
 type StretchPlace = 'standing' | 'floor';
@@ -160,4 +162,64 @@ export function stretchRoutine(stretches: readonly Exercise[]): Workout | null {
         repeats: 1,
         carryOn: true,
     };
+}
+
+/** "Glutes, Quads and Calves". */
+const LIST = new Intl.ListFormat('en-GB');
+
+/** Stretches offered after some training: the routine, and what to say about it. */
+export interface StretchOffer {
+    workout: Workout;
+    /** The muscles it's for, as the app names them: "Chest, Upper back and Quads". */
+    muscles: string;
+    /** How long it takes, "About 4 min", with each side and the switch between them. */
+    time: { text: string; spoken: string };
+}
+
+/**
+ * The stretches for some sets (a workout's on its summary, or today's on Today), with the
+ * muscles they're for, of those the sets mainly worked, and how long they take as `sides`
+ * run them. Null when there's nothing to stretch.
+ */
+export function stretchOffer(
+    sets: readonly LoggedSet[],
+    byId: (id: string) => Exercise | undefined,
+    sides: RunSides
+): StretchOffer | null {
+    const stretches = routineStretches(sets, byId);
+    const workout = stretchRoutine(stretches);
+    if (!workout) {
+        return null;
+    }
+    const stretched = new Set(stretches.flatMap((stretch) => stretch.mainMuscles));
+    const worked = musclesInSets(sets, byId).main;
+    return {
+        workout,
+        muscles: LIST.format(
+            worked.filter((muscle) => stretched.has(muscle)).map((muscle) => MUSCLE_LABELS[muscle])
+        ),
+        // Never null: a routine has neither a time limit nor endless rounds
+        time: estimateText(estimateWorkout({ ...workout, sides }, [])!),
+    };
+}
+
+/**
+ * Today's sets still to stretch, for Today's offer (PRG-16): those of the workouts done today
+ * since the last one of only stretches, such as the stretches themselves. Empty with nothing
+ * done today, or once stretched after it. `entries` are the history's, newest first.
+ */
+export function setsToStretchToday(entries: readonly HistoryEntry[], now: number): LoggedSet[] {
+    const today = startOfDay(now);
+    const sets: LoggedSet[] = [];
+    for (const entry of entries) {
+        const logged = entry.sets ?? [];
+        if (
+            entry.startedAt < today ||
+            (logged.length && logged.every((set) => isStretch(set.exerciseId)))
+        ) {
+            break;
+        }
+        sets.push(...logged);
+    }
+    return sets;
 }

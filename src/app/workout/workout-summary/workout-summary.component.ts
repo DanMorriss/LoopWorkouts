@@ -12,6 +12,8 @@ import {
 import { form, FormField, maxLength } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
 import { MAX_NOTE_LENGTH } from '../../models/history';
+import { isActiveRest } from '../../models/active-rest';
+import { stretchOffer } from '../../models/stretch-routine';
 import { isMostRounds, newBests, roundsScore, sessionsByExercise } from '../../models/progress';
 import { musclesInSets } from '../../models/workout-muscles';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
@@ -37,7 +39,8 @@ import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
  * sets, which can be corrected, what to step up next time, the muscles worked, a note, and
  * the suggested next workout. A workout ended early (or one that runs until stopped) can be
  * taken up again with Back to workout; the run waits, paused, until then. Stretches for the
- * muscles it worked can be started from here. Focus starts on
+ * muscles it worked can be started from here, from its card or the bottom bar, where it's
+ * the main button over Done. Focus starts on
  * the heading and is trapped inside while it's open.
  */
 @Component({
@@ -130,6 +133,20 @@ export class WorkoutSummaryComponent {
     protected readonly muscles = computed(() =>
         musclesInSets(this.run.sets(), (id) => this.exercises.byId(id))
     );
+
+    /**
+     * Stretches for the muscles this workout worked hardest (PRG-16): not after a workout of
+     * only stretches, nor one with nothing logged that works a muscle.
+     */
+    protected readonly stretches = computed(() => {
+        const workout = this.run.workout();
+        return !workout || isActiveRest(workout)
+            ? null
+            : stretchOffer(this.run.sets(), (id) => this.exercises.byId(id), {
+                  first: this.settings.eachSideFirst(),
+                  switchSeconds: this.settings.switchSidesSeconds(),
+              });
+    });
 
     // The note box starts from the saved note
     private readonly noteModel = linkedSignal(() => ({ note: this.entry()?.note ?? '' }));

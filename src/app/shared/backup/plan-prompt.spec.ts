@@ -53,6 +53,12 @@ describe('planPrompt', () => {
         expect(result.skipped).toBe(0);
     });
 
+    it('keeps "each side" off exercises whose sides take turns, such as a dead bug', () => {
+        expect(prompt).toContain('Leave it out for an exercise whose sides take turns');
+        expect(prompt).toContain('a dead bug');
+        expect(prompt).toContain('"10 each side" is 20 reps');
+    });
+
     it('ends ready for the plan to be pasted after it', () => {
         expect(prompt.endsWith('MY PLAN\n')).toBe(true);
     });

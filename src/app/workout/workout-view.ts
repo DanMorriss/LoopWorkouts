@@ -67,7 +67,7 @@ export class WorkoutView {
     readonly isRepsActive = computed(() => this.state()?.phase === 'reps');
     /**
      * A timed exercise after a long rest waiting for Start (see `ActiveRunService.waiting`):
-     * Pause is Start, and Space presses it.
+     * Start is in the face (`WaitStartComponent`), Pause is greyed out, and Space presses Start.
      */
     readonly isWaiting = computed(() => this.run.waiting() && !this.isPaused());
     readonly isComplete = computed(() => this.state()?.phase === 'complete');
@@ -508,8 +508,15 @@ export class WorkoutView {
     private readonly ringSweep = computed(
         () => {
             const state = this.state();
-            // A rep step has no countdown, so its ring is full and still
-            if (!state || state.phase === 'complete' || state.phase === 'reps') {
+            // A rep step has no countdown, so its ring is full and still; a timed exercise
+            // waiting for Start (RUN-14) hasn't begun, so its ring is empty till Start, when
+            // the fill starts afresh (Start moves the start time on, so the key is new)
+            if (
+                !state ||
+                state.phase === 'complete' ||
+                state.phase === 'reps' ||
+                this.run.waiting()
+            ) {
                 return null;
             }
             const halfMs = (state.phaseSeconds * 1000) / 2;

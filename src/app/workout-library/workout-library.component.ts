@@ -24,8 +24,8 @@ import { WorkoutStore } from '../shared/state/workout-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 
 /**
- * Every workout, yours and the ready-made ones (LIB-6), in one list, A to Z. Arriving from
- * Create's Save, `?saved=<id>` highlights that workout and brings it into view (BLD-15). Back
+ * Every workout, yours and the ready-made ones (LIB-6), together, A to Z, with those of only
+ * stretches after the rest (LIB-10). Arriving from Create's Save, `?saved=<id>` highlights that workout and brings it into view (BLD-15). Back
  * from a workout's details, `?details=<id>` puts focus back on its card.
  */
 @Component({

@@ -31,6 +31,7 @@ describe('SettingsStore', () => {
             weeklySets: 10,
             myEquipment: [],
             onlyMyEquipment: false,
+            workoutKind: 'all',
             kettlebellWeight: null,
             eachSideFirst: 'left',
             switchSidesSeconds: 5,
@@ -191,6 +192,18 @@ describe('SettingsStore', () => {
         localStorage.setItem('settings', '{"canTrainOn": "Mon"}');
         expect(createStore().canTrainOn()).toEqual([]);
         expect(createStore().includeActiveRest()).toBe(true);
+    });
+
+    it('remembers which kind of workout the Workouts page lists (LIB-10)', () => {
+        expect(createStore().workoutKind()).toBe('all');
+
+        TestBed.resetTestingModule();
+        localStorage.setItem('settings', '{"workoutKind": "stretches"}');
+        expect(createStore().workoutKind()).toBe('stretches');
+
+        TestBed.resetTestingModule();
+        localStorage.setItem('settings', '{"workoutKind": "yoga"}');
+        expect(createStore().workoutKind()).toBe('all');
     });
 
     it('has no body weight to begin with, keeping only one in range (CAL-2)', () => {

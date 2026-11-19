@@ -64,6 +64,14 @@
     @include link-button;
 }
 
+// Over the workouts of only stretches, after the rest (LIB-10)
+.library__section {
+    margin: 1.75rem 0 0;
+    color: var(--text-strong);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
 .library-list {
     display: grid;
     grid-template-columns: subgrid;

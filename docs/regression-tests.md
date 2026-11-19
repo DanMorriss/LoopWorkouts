@@ -536,7 +536,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 
 - **Stories:** LIB-3 · **Priority:** P2
 - **Preconditions:** `guest()`, workouts "Zone 2", "arms" and "Bench".
-- **Steps:** Open Workouts, pick **My own**; open Bench's ⋮.
+- **Steps:** Open Workouts, press **My own**; open Bench's ⋮.
 - **Expected:** arms, Bench, Zone 2 (A to Z, ignoring case); the options are Edit, Make a copy and Delete, with no Move up or down.
 - **In the pack:** moving workouts went with the one list (2026-11-06); an order from another device still merges (`library-moved-at`), which is Vitest's.
 
@@ -553,12 +553,12 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Stories:** LIB-6, LIB-8 · **Priority:** P1
 - **Preconditions:** `guest()`, one workout of your own.
 - **Steps:**
-    1. On Workouts pick **Ready-made**; under More filters turn **Only what I have** on and pick only Kettlebell.
+    1. On Workouts, under **Filters** turn **Only what I have** on and pick only Kettlebell.
     2. Turn it off; open **Gym legs**; press **Make a copy**.
     3. Back on Workouts, press **Start Tabata**.
     4. Open `/ready-made/gym-legs`, `/ready-made` and `/library/builtin:nope`.
 - **Expected:**
-    1. Only the 23 ready-made; then only those needing nothing or a kettlebell (Kettlebell AMRAP, Tabata, not Gym legs).
+    1. The 23 ready-made and your own; then only those needing nothing or a kettlebell (Kettlebell AMRAP, Tabata, not Gym legs).
     2. `/library/builtin:gym-legs` with its badge, "Back squat 3 sets: 12, 10, 8, rest 2:30", Muscles it works, and Make a copy where Edit would be; the copy is "Gym legs (copy)", saved and open in Create.
     3. Tabata starts as it is: no copy in your workouts.
     4. The old addresses go to `/library/builtin:gym-legs` and `/library`; the last says "Workout not found".
@@ -605,6 +605,20 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Steps:** Open Workouts; press **Favourites**.
 - **Expected:** Only Gym legs and Legs show, Legs's heart pressed. `favourites` holds both, Legs's dated as the workout; the saved workouts have no `favourite`, and `ready-made-favourites` is gone.
 - **In the pack:** since 2026-11-15, when favourites became records of their own. That a heart and an edit made on two devices both survive the sync is a Vitest case (`favourites.service.spec.ts`).
+
+### REG-LIB-12 · Only stretches, or none, kept through a reload
+
+- **Stories:** LIB-10 · **Priority:** P2
+- **Preconditions:** `guest()`, one workout of your own, "Legs".
+- **Steps:**
+    1. Open Workouts.
+    2. Pick **Stretches**, then **Training**.
+    3. Reload; press **Clear search and filters**.
+- **Expected:**
+    1. The last four cards, under a **Stretches** heading, are Full-body stretch, Lower-body stretch, Mobility flow and Upper-body stretch.
+    2. Only those four, with no heading; then the other 20 and "20 of 24 workouts", no Mobility flow.
+    3. Training is still picked, with 20 cards; Clear goes back to All, with all 24.
+- **In the pack:** since 2026-11-19. Which workouts count as stretches (`isActiveRest()`) is Vitest's (`workout-filter.spec.ts`).
 
 ---
 
@@ -1550,7 +1564,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Onboarding and navigation | REG-NAV-01 – 06  | NAV-1, NAV-2, NAV-3, NAV-4, NAV-5, NAV-6, NAV-7, CTL-4, RUN-4, SET-4, SET-5, SET-7, PRG-8, PLN-7                                                       |
 | Today and planning        | REG-PLAN-01 – 10 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                            |
 | Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                                            |
-| Workouts and ready-made   | REG-LIB-01 – 11  | LIB-1 – LIB-7, CTL-4                                                                                                                                   |
+| Workouts and ready-made   | REG-LIB-01 – 12  | LIB-1 – LIB-8, LIB-10, CTL-4                                                                                                                           |
 | Running a workout         | REG-RUN-01 – 19  | RUN-1 – RUN-12, RUN-14 – RUN-16, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                                   |
 | Progress                  | REG-PRG-01 – 06  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14                                                                                              |

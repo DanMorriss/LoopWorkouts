@@ -15,6 +15,7 @@ import {
     WeightUnit,
 } from '../../models/weight';
 import { DEFAULT_RUN_SIDES, MAX_SWITCH_SECONDS, Side } from '../../models/workout';
+import { WORKOUT_KINDS, WorkoutKind } from '../../models/workout-kind';
 import { SyncClock } from './sync-clock.service';
 
 export type Theme = 'dark' | 'light' | 'system';
@@ -51,6 +52,8 @@ export interface Settings {
     myEquipment: Equipment[];
     /** Show only the exercises you can do with `myEquipment` on the Exercises page. */
     onlyMyEquipment: boolean;
+    /** Which kind of workout the Workouts page lists (LIB-10): all, training or stretches. */
+    workoutKind: WorkoutKind;
     /**
      * Your kettlebell's weight in kg, which every kettlebell workout starts from (PRG-14), or
      * null if not known yet. Set on Profile, or by the weight last put on a kettlebell step
@@ -98,6 +101,7 @@ const DEFAULT_SETTINGS: Settings = {
     weeklySets: DEFAULT_WEEKLY_SETS.muscle,
     myEquipment: [],
     onlyMyEquipment: false,
+    workoutKind: 'all',
     kettlebellWeight: null,
     eachSideFirst: DEFAULT_RUN_SIDES.first,
     switchSidesSeconds: DEFAULT_RUN_SIDES.switchSeconds,
@@ -131,6 +135,7 @@ export class SettingsStore {
     readonly weeklySets = computed(() => this.settings().weeklySets);
     readonly myEquipment = computed(() => this.settings().myEquipment);
     readonly onlyMyEquipment = computed(() => this.settings().onlyMyEquipment);
+    readonly workoutKind = computed(() => this.settings().workoutKind);
     readonly kettlebellWeight = computed(() => this.settings().kettlebellWeight);
     readonly eachSideFirst = computed(() => this.settings().eachSideFirst);
     readonly switchSidesSeconds = computed(() => this.settings().switchSidesSeconds);
@@ -301,6 +306,8 @@ function loadSettings(): Settings {
         // Kept in the order it's offered, so it reads the same however it was picked
         myEquipment: readMyEquipment(saved['myEquipment']) ?? DEFAULT_SETTINGS.myEquipment,
         onlyMyEquipment: flag('onlyMyEquipment'),
+        workoutKind:
+            WORKOUT_KINDS.find((k) => k === saved['workoutKind']) ?? DEFAULT_SETTINGS.workoutKind,
         kettlebellWeight: readKettlebellKg(saved['kettlebellWeight']),
         eachSideFirst:
             saved['eachSideFirst'] === 'left' || saved['eachSideFirst'] === 'right'

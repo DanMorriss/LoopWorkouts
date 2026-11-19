@@ -34,26 +34,32 @@
         </div>
     }
 
-    <!-- Yours and the ready-made ones, A to Z. A ready-made one can't be changed or
-         deleted, but copied to make one of your own -->
-    <ul class="library-list">
-        @for (workout of filters.shown(); track workout.id) {
-            <li
-                appWorkoutCard
-                [attr.data-workout]="workout.id"
-                [workout]="workout"
-                [menuOpen]="openWorkoutMenuId() === workout.id"
-                [highlighted]="highlightedId() === workout.id"
-                (started)="startWorkout(workout)"
-                (menuToggled)="toggleWorkoutMenu(workout.id)"
-                (menuClosed)="closeWorkoutMenu(workout.id)"
-                (editRequested)="navigateToEditWorkout(workout)"
-                (copyRequested)="copyWorkout(workout)"
-                (planRequested)="planWorkout(workout)"
-                (deleteRequested)="deleteWorkout(workout)"
-            ></li>
+    <!-- Yours and the ready-made ones, A to Z, then those of only stretches under their own
+         heading (LIB-10). A ready-made one can't be changed or deleted, but copied to make one
+         of your own -->
+    @for (section of filters.sections(); track section.id) {
+        @if (section.heading) {
+            <h3 class="library__section">{{ section.heading }}</h3>
         }
-    </ul>
+        <ul class="library-list" [attr.data-section]="section.id">
+            @for (workout of section.workouts; track workout.id) {
+                <li
+                    appWorkoutCard
+                    [attr.data-workout]="workout.id"
+                    [workout]="workout"
+                    [menuOpen]="openWorkoutMenuId() === workout.id"
+                    [highlighted]="highlightedId() === workout.id"
+                    (started)="startWorkout(workout)"
+                    (menuToggled)="toggleWorkoutMenu(workout.id)"
+                    (menuClosed)="closeWorkoutMenu(workout.id)"
+                    (editRequested)="navigateToEditWorkout(workout)"
+                    (copyRequested)="copyWorkout(workout)"
+                    (planRequested)="planWorkout(workout)"
+                    (deleteRequested)="deleteWorkout(workout)"
+                ></li>
+            }
+        </ul>
+    }
     <div class="sr-only" aria-live="polite">{{ announcement() }}</div>
 
     @if (planning(); as workout) {

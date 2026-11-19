@@ -5233,6 +5233,29 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
+        it('leaves the ring empty while it waits, and fills it from the start on Start', () => {
+            startFromSettings(workout());
+            const sweep = () =>
+                fixture.nativeElement.querySelector('.workout-ring__sweep') as HTMLElement | null;
+
+            advance(50_000 + 10_000);
+            expect(sweep()).toBeNull();
+
+            // Paused mid-wait, it's still waiting, so still empty
+            const run = TestBed.inject(ActiveRunService);
+            run.togglePause();
+            fixture.detectChanges();
+            expect(sweep()).toBeNull();
+            run.togglePause();
+            fixture.detectChanges();
+            expect(sweep()).toBeNull();
+
+            mainButton().click();
+            fixture.detectChanges();
+            expect(sweep()?.style.getPropertyValue('--first-half-delay')).toBe('0ms');
+            fixture.destroy();
+        });
+
         it('starts with Space too, as Space presses Done on a rep step', () => {
             startFromSettings(workout());
             advance(50_000);

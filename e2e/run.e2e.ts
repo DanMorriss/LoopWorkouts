@@ -975,13 +975,18 @@ test.describe('waiting for Start after a long rest', () => {
 
             // Through the plank and the rest, then well past where the plank would have ended
             await run.wait(30_000 + 40_000 + 45_000);
+            // The ring's fill, which mustn't start till Start does
+            const fill = page.locator('.workout-ring__sweep');
             await expect(run.faceTime).toHaveText('00:30');
             await expect(start).toBeVisible();
+            await expect(fill).toHaveCount(0);
 
             await app.reload();
             await expect(run.faceTime).toHaveText('00:30');
+            await expect(fill).toHaveCount(0);
 
             await start.click();
+            await expect(fill).toHaveCount(1);
             await run.wait(5500);
             await expect(run.faceTime).toHaveText(/^00:2[3-5]$/);
             await expect(run.pause).toBeVisible();

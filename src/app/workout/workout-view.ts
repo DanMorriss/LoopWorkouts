@@ -508,8 +508,15 @@ export class WorkoutView {
     private readonly ringSweep = computed(
         () => {
             const state = this.state();
-            // A rep step has no countdown, so its ring is full and still
-            if (!state || state.phase === 'complete' || state.phase === 'reps') {
+            // A rep step has no countdown, so its ring is full and still; a timed exercise
+            // waiting for Start (RUN-14) hasn't begun, so its ring is empty till Start, when
+            // the fill starts afresh (Start moves the start time on, so the key is new)
+            if (
+                !state ||
+                state.phase === 'complete' ||
+                state.phase === 'reps' ||
+                this.run.waiting()
+            ) {
                 return null;
             }
             const halfMs = (state.phaseSeconds * 1000) / 2;

@@ -48,6 +48,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | RUN-13 | A tour of the workout page, before my first workout's clock starts           | ✅  | —   | [run-a-workout](run-a-workout.md)             |
 | RUN-14 | A timed exercise after a long rest waits for Start                           | ✅  | —   | [run-a-workout](run-a-workout.md)             |
 | RUN-15 | A change to the workout I'm doing applies to it straight away                | ✅  | —   | [run-a-workout](run-a-workout.md)             |
+| RUN-16 | Keep an exercise I skip for later, and pick it to do next                    | ✅  | —   | [run-a-workout](run-a-workout.md)             |
 | CTL-1  | Pause and resume                                                             | ✅  | —   | [pause-and-stop](pause-and-stop.md)           |
 | CTL-2  | Stop a workout early                                                         | ✅  | —   | [pause-and-stop](pause-and-stop.md)           |
 | CTL-3  | Pick up where I was if the app is closed or reloaded                         | ✅  | —   | [pause-and-stop](pause-and-stop.md)           |

@@ -12,6 +12,15 @@ import { Exercise } from '../../models/exercise';
 import { HistoryEntry, historyId, isTimedSet, RepSet } from '../../models/history';
 import { kettlebellSteps, withKettlebellWeight, withMyKettlebell } from '../../models/kettlebell';
 import { canTakeEdit, editSwaps } from '../../models/run-edit';
+import {
+    laterAt,
+    laterRunOut,
+    laterState,
+    passFirst,
+    putAside,
+    sameStep,
+    withLaterAlarms,
+} from '../../models/later';
 import { nextWait } from '../../models/wait-to-start';
 import {
     runPosition,
@@ -124,6 +133,26 @@ export class ActiveRunService {
     });
 
     /**
+     * The clock with the steps picked to do next (RUN-16) in it (see `laterAt()`): the
+     * workout's own clock, held where they were picked while they run, and the step done
+     * later that's on now, if any.
+     */
+    private readonly laterClock = computed(() => {
+        const workout = this.running();
+        const clockMs = this.clockMs();
+        return workout && clockMs !== null
+            ? laterAt(
+                  workout,
+                  this.store.activeLater().queue,
+                  clockMs,
+                  this.store.activeRepStepsDone()
+              )
+            : null;
+    });
+    /** How long the workout's own clock has run: the clock less the steps done later. */
+    private readonly runClockMs = computed(() => this.laterClock()?.clockMs ?? null);
+
+    /**
      * The next timed exercise to wait for Start after a long rest (see `nextWait()`), when the
      * run waits, and no rep step comes before it: the clock is held at a rep step first.
      */
@@ -143,8 +172,8 @@ export class ActiveRunService {
      */
     readonly waiting = computed(() => {
         const wait = this.nextWait();
-        const clockMs = this.clockMs();
-        return !!wait && clockMs !== null && clockMs >= wait.atMs;
+        const clockMs = this.runClockMs();
+        return !!wait && clockMs !== null && clockMs >= wait.atMs && !this.laterClock()?.on;
     });
 
     /**
@@ -152,12 +181,16 @@ export class ActiveRunService {
      * a timed exercise waiting for Start.
      */
     readonly elapsedMs = computed(() => {
-        const clockMs = this.clockMs();
+        const clockMs = this.runClockMs();
         const wait = this.nextWait();
         return clockMs !== null && wait ? Math.min(clockMs, wait.atMs) : clockMs;
     });
 
-    readonly state = computed(() => {
+    /**
+     * Where the workout is on its clock: the step on now, unless that's a step done later
+     * (RUN-16), when it's where the clock holds for it. What the sets and the history go by.
+     */
+    readonly clockState = computed(() => {
         const workout = this.running();
         const elapsedMs = this.elapsedMs();
         return workout && elapsedMs !== null
@@ -170,34 +203,76 @@ export class ActiveRunService {
             : null;
     });
 
-    /** What comes after the current step: the state at the moment it ends. */
+    /** The step on now: where the clock is, or a step done later (RUN-16) while it runs. */
+    readonly state = computed(() => {
+        const clock = this.clockState();
+        const on = this.laterClock()?.on;
+        const workout = this.running();
+        return (on && workout && clock && laterState(workout, on.step, on.ms, clock)) || clock;
+    });
+
+    /**
+     * What comes after the current step: the state at the moment it ends, or a step picked to
+     * do next (RUN-16). After a step done later, the next one picked, or where the clock holds.
+     */
     readonly nextState = computed(() => {
         const workout = this.running();
         const state = this.state();
+        const clock = this.clockState();
         const elapsedMs = this.elapsedMs();
-        if (!workout || !state || elapsedMs === null || state.phase === 'complete') {
+        if (!workout || !state || !clock || elapsedMs === null || state.phase === 'complete') {
             return null;
+        }
+        const queue = this.store.activeLater().queue;
+        const on = this.laterClock()?.on;
+        if (on && queue) {
+            const after = queue.steps[queue.steps.findIndex((step) => sameStep(step, on.step)) + 1];
+            return (after && laterState(workout, after, 0, clock)) || clock;
         }
         const stepEndMs = elapsedMs - state.phaseElapsedMs + state.phaseSeconds * 1000;
         // A rep step ends with Done, which adds one to the rep steps done, and its wait to
         // the time on rep steps
         const reps = state.phase === 'reps';
         const repStepsDone = this.store.activeRepStepsDone() + (reps ? 1 : 0);
+        if (queue && stepEndMs >= queue.atMs && repStepsDone >= queue.repStepsDone) {
+            const first = laterState(workout, queue.steps[0], 0, clock);
+            if (first) {
+                return first;
+            }
+        }
         const offClockMs = this.store.activeOffClockMs() + (reps ? state.phaseElapsedMs : 0);
         return workoutStateAt(workout, stepEndMs, repStepsDone, offClockMs);
+    });
+
+    /**
+     * The exercises skipped to do later (RUN-16), each with its step as it runs, in the order
+     * they were skipped; not those picked to do next.
+     */
+    readonly aside = computed(() => {
+        const workout = this.running();
+        if (!workout) {
+            return [];
+        }
+        const { steps } = runPlan(workout);
+        return this.store
+            .activeLater()
+            .aside.flatMap((later) =>
+                steps[later.stepIndex] ? [{ ...later, step: steps[later.stepIndex] }] : []
+            );
     });
 
     /** The sets done so far, rep and timed, in the order they were done. */
     readonly sets = computed(() => {
         const workout = this.running();
-        const state = this.state();
+        const state = this.clockState();
         return workout && state
             ? setsDone(
                   workout,
                   state,
                   this.store.activeSets(),
                   this.store.activeSwaps(),
-                  this.store.activeSkips()
+                  this.store.activeSkips(),
+                  this.store.activeLater().done
               )
             : [];
     });
@@ -223,7 +298,7 @@ export class ActiveRunService {
      */
     readonly unloggedLastSet = computed(() => {
         const workout = this.running();
-        const state = this.state();
+        const state = this.clockState();
         if (!workout || !state?.cutShort) {
             return null;
         }
@@ -253,7 +328,7 @@ export class ActiveRunService {
     // so a workout that runs until stopped is topped up halfway through each batch.
     // Finite workouts (30 rounds at most) fit in the first batch.
     private readonly alarmBatch = computed(() =>
-        Math.floor((this.state()?.round ?? 0) / (ALARM_WINDOW / 2))
+        Math.floor((this.clockState()?.round ?? 0) / (ALARM_WINDOW / 2))
     );
 
     /**
@@ -275,17 +350,28 @@ export class ActiveRunService {
         // Nothing past a timed exercise waiting for Start, as no one knows when that will be
         const wait = this.nextWait();
         const waitAt = startedAt !== null && wait ? startedAt + wait.atMs : Infinity;
-        return workout && startedAt !== null && !this.isPaused()
-            ? alarmEvents(
-                  workout,
-                  startedAt,
-                  fromRound,
-                  ALARM_WINDOW,
-                  this.store.activeRepStepsDone(),
-                  this.store.activeOffClockMs(),
-                  this.settings.countdownBeeps()
-              ).filter((event) => event.at > resumedAt && event.at < waitAt)
-            : [];
+        if (!workout || startedAt === null || this.isPaused()) {
+            return [];
+        }
+        const repStepsDone = this.store.activeRepStepsDone();
+        const events = alarmEvents(
+            workout,
+            startedAt,
+            fromRound,
+            ALARM_WINDOW,
+            repStepsDone,
+            this.store.activeOffClockMs(),
+            this.settings.countdownBeeps()
+        ).filter((event) => event.at < waitAt);
+        // With the steps picked to do next in, and everything after them moved on (RUN-16)
+        return withLaterAlarms(
+            events,
+            workout,
+            this.store.activeLater().queue,
+            startedAt,
+            repStepsDone,
+            this.settings.countdownBeeps()
+        ).filter((event) => event.at > resumedAt);
     });
     private lastAlarmCheck = Date.now() - VIBRATE_LATE_LIMIT_MS;
 
@@ -455,7 +541,7 @@ export class ActiveRunService {
             return;
         }
         const { name, reps, weight, exerciseId } = state.step;
-        this.store.finishRepStep(state.phaseElapsedMs, {
+        const set: RepSet = {
             round: state.round,
             step: place.step,
             ...placeFields(place),
@@ -463,7 +549,14 @@ export class ActiveRunService {
             reps,
             ...(weight === undefined ? {} : { weight }),
             ...(exerciseId === undefined ? {} : { exerciseId }),
-        });
+        };
+        if (state.later) {
+            // Logged where it was skipped, as if done then
+            const later = passFirst(this.store.activeLater());
+            this.store.passLater(state.phaseElapsedMs, later, { set, rep: true, resume: true });
+        } else {
+            this.store.finishRepStep(state.phaseElapsedMs, set);
+        }
         this.sync();
     }
 
@@ -475,6 +568,10 @@ export class ActiveRunService {
      */
     skipStep() {
         this.sync();
+        if (this.state()?.later) {
+            this.skipLater();
+            return;
+        }
         // Skip on a timed exercise waiting for Start skips it from its full time
         this.passWait();
         const state = this.state();
@@ -497,6 +594,26 @@ export class ActiveRunService {
     }
 
     /**
+     * Skip on a step done later (RUN-16): back on the list, to do later still. Of a timed one,
+     * the time it ran is logged, as for any timed exercise skipped part-way.
+     */
+    private skipLater() {
+        const state = this.state();
+        if (!state?.later) {
+            return;
+        }
+        const ran = { round: state.round, stepIndex: state.stepIndex, ranMs: state.phaseElapsedMs };
+        const later = putAside(passFirst(this.store.activeLater()), state);
+        const done =
+            state.phase === 'work' && ran.ranMs >= 1000 ? [...later.done, ran] : later.done;
+        this.store.passLater(state.phaseElapsedMs, { ...later, done }, { resume: true });
+        this.sync();
+        // The next step starts now, and its alarm with it
+        this.resumedAt.set(Date.now() - 1);
+        this.sync();
+    }
+
+    /**
      * Start on a timed exercise waiting for it after a long rest (see `waiting`): its time
      * starts now, and its alarm with it. From a pause too, which it ends.
      */
@@ -512,7 +629,7 @@ export class ActiveRunService {
     /** Lets the run past the timed exercise waiting for Start, if there is one. */
     private passWait(): boolean {
         const wait = this.nextWait();
-        const clockMs = this.clockMs();
+        const clockMs = this.runClockMs();
         if (!this.waiting() || !wait || clockMs === null) {
             return false;
         }
@@ -637,7 +754,8 @@ export class ActiveRunService {
     swapExercise(exercise: Exercise, lastSets: readonly RepSet[], next = false): StepSwap | null {
         const workout = this.running();
         const state = next ? this.nextState() : this.state();
-        const place = workout && state ? placeAt(workout, state.stepIndex) : null;
+        // Not a step done later (RUN-16), whose swap would be from where it was skipped
+        const place = workout && state && !state.later ? placeAt(workout, state.stepIndex) : null;
         const current = workout && place ? allSteps(workout)[place.step] : undefined;
         if (
             !workout ||
@@ -683,7 +801,7 @@ export class ActiveRunService {
         this.sync();
         const workout = this.workout();
         const running = this.running();
-        const state = this.state();
+        const state = this.clockState();
         if (
             !workout ||
             !running ||
@@ -786,7 +904,7 @@ export class ActiveRunService {
      */
     useSetsNextTime() {
         const workout = this.running();
-        const state = this.state();
+        const state = this.clockState();
         if (!workout) {
             return;
         }
@@ -845,6 +963,27 @@ export class ActiveRunService {
 
     sync() {
         this.now.set(Date.now());
+        this.passLaterRunOut();
+    }
+
+    /**
+     * Takes each timed step done later (RUN-16) off the queue once it's run its time, moving
+     * the start time on by it (see `laterRunOut()`). What's shown doesn't change, as
+     * `laterAt()` already takes it out of the clock: only what's saved does.
+     */
+    private passLaterRunOut() {
+        const workout = this.running();
+        const clockMs = this.clockMs();
+        const later = this.store.activeLater();
+        const done =
+            workout &&
+            clockMs !== null &&
+            laterRunOut(workout, later.queue, clockMs, this.store.activeRepStepsDone());
+        if (!done) {
+            return;
+        }
+        this.store.passLater(done.ranMs, { ...passFirst(later), done: [...later.done, done] }, {});
+        this.passLaterRunOut();
     }
 
     /**
@@ -870,7 +1009,7 @@ export class ActiveRunService {
      */
     private recordRun(outcome: HistoryEntry['outcome']) {
         const workout = this.running();
-        const state = this.state();
+        const state = this.clockState();
         const id = this.runId();
         const startedAt = this.store.activeWorkoutStartedAt();
         const elapsedMs = this.elapsedMs();

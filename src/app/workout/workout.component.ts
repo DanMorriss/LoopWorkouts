@@ -32,6 +32,8 @@ import { SummaryExits } from './summary-exits';
 import { LastSetDialogComponent } from './last-set-dialog/last-set-dialog.component';
 import { WorkoutSwap } from './workout-swap';
 import { UpNextCardComponent } from './up-next-card/up-next-card.component';
+import { LaterListComponent } from './later-list/later-list.component';
+import { LaterPicks } from './later-picks';
 import { tourWorkoutPage } from './workout-tour';
 import { WorkoutView } from './workout-view';
 import { Exercise } from '../models/exercise';
@@ -63,6 +65,7 @@ const SPACE_HANDLED_BY =
         WorkoutRoundLineComponent,
         SwapExerciseDialogComponent,
         UpNextCardComponent,
+        LaterListComponent,
     ],
     providers: [WorkoutView],
     templateUrl: './workout.component.html',
@@ -87,6 +90,8 @@ export class WorkoutComponent {
     private readonly settings = inject(SettingsStore);
     protected readonly view = inject(WorkoutView);
     protected readonly swap = new WorkoutSwap(() => this.focusInfo());
+    /** Skip puts an exercise aside to do later (RUN-16). */
+    private readonly later = new LaterPicks();
 
     protected readonly alarms = inject(AlarmService);
     /** Sound is on, but the browser is waiting for a tap before it will play any. */
@@ -132,6 +137,10 @@ export class WorkoutComponent {
         const card = this.upNextCard();
         return card?.done() ? card.button() : undefined;
     }
+    /** The Up next card, which an exercise picked to do later flies down to (RUN-16). */
+    private readonly upNextHost = viewChild(UpNextCardComponent, { read: ElementRef });
+    protected readonly nextCard = (): HTMLElement | undefined =>
+        this.upNextHost()?.nativeElement.querySelector('.up-next') ?? undefined;
     /** The card Done is on, which swells as a rep step comes round. */
     private doneCard() {
         const card = this.upNextCard();
@@ -144,6 +153,8 @@ export class WorkoutComponent {
         main: () => this.mainButton()?.nativeElement,
     });
     private readonly ring = viewChild(WorkoutRingComponent);
+    private readonly stage = viewChild<ElementRef<HTMLElement>>('stage');
+    private readonly laterList = viewChild(LaterListComponent);
     private readonly reducedMotion = injectPrefersReducedMotion();
     /** Apple's spring for moving something about: no bounce, a 0.4s response. */
     private readonly glide = criticallyDampedSpring(0.4);
@@ -285,10 +296,13 @@ export class WorkoutComponent {
 
     /**
      * Skip: on to the next step, from its full time (RUN-12). A skipped rep step isn't logged,
-     * so unlike Done, its ring doesn't fill.
+     * so unlike Done, its ring doesn't fill. An exercise skipped flies up from the ring to the
+     * button for doing it later (RUN-16).
      */
     protected skip() {
-        this.run.skipStep();
+        if (this.later.skip()) {
+            this.laterList()?.flyIn(this.stage()?.nativeElement);
+        }
     }
 
     /**
@@ -376,6 +390,13 @@ export class WorkoutComponent {
             },
             { injector: this.injector }
         );
+    }
+
+    /** The last exercise put aside was picked to do next, so its button's gone: on to Done or Pause. */
+    protected focusControls() {
+        (
+            this.doneButton() ?? (this.view.isPaused() ? this.resumeButton() : this.mainButton())
+        )?.nativeElement.focus();
     }
 
     /** End workout: the summary opens over the run, which waits, paused, in case of Back. */

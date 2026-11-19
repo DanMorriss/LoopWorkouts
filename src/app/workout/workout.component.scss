@@ -63,6 +63,8 @@
 }
 
 .workout-page {
+    // For the exercises skipped to do later, in its top right corner
+    position: relative;
     gap: 0.25rem;
     padding: 0 1rem 2rem;
 }

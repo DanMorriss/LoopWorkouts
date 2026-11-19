@@ -25,6 +25,12 @@ export interface UndoOffer {
      * result, which Your data says in a line of its own.
      */
     quiet?: boolean;
+    /**
+     * Goes as soon as anything else on the page is pressed, rather than staying till it's used
+     * or closed: for an offer that's only of use straight away, e.g. taking back an exercise
+     * picked to do next mid-workout, where the bar would be in the way.
+     */
+    untilNextPress?: boolean;
 }
 
 /**
@@ -32,7 +38,7 @@ export interface UndoOffer {
  * slip is easy to take back, and nobody learns to click through a question. One offer at a
  * time, shown in the Undo bar above the tabs (UndoBarComponent). It stays until it's used,
  * closed, replaced by another, or the page changes, rather than going on a timer someone
- * might not beat.
+ * might not beat; one `untilNextPress` goes with the next press elsewhere too.
  */
 @Service()
 export class UndoService {

@@ -295,6 +295,81 @@ test.describe('skipping', () => {
     });
 });
 
+test.describe('doing a skipped exercise later', () => {
+    const gym = workout('Gym', {
+        steps: [
+            reps(10, 'Push-up', { exercise: 'push-up' }),
+            rest(20),
+            timed(30, 'Plank', 'plank'),
+            rest(20),
+            reps(10, 'Squat', { exercise: 'bodyweight-squat' }),
+        ],
+    });
+    test.use({ storage: seed.workouts([gym]) });
+
+    test('REG-RUN-19 do a skipped exercise later', { tag: '@p2' }, async ({ app, page }) => {
+        const run = new WorkoutPage(page);
+        await app.goto('/library');
+        await run.startFromLibrary('Gym');
+        await expect(run.later).toHaveCount(0);
+
+        // Skipped, the push-ups are put aside at the top
+        await run.skip.click();
+        await expect(run.later).toHaveAccessibleName('Skipped: Push-up');
+        await run.skip.click();
+        await run.wait(5000);
+        await run.skip.click();
+        await expect(run.later).toHaveAccessibleName('2 skipped exercises');
+        await expect(run.later).toContainText('2');
+
+        // Its menu lists both; one picked is up next, after the rest
+        await run.later.click();
+        await expect(run.laterMenu).toBeVisible();
+        await expect(run.laterMenu.getByRole('button')).toHaveText([
+            /Push-up\s*10 reps/,
+            /Plank\s*00:30/,
+        ]);
+        await run.laterMenu.getByRole('button', { name: /^Push-up/ }).click();
+        await expect(app.undoBar).toContainText('Push-up is up next');
+        await expect(run.later).toBeFocused();
+        await expect(run.later).toHaveAccessibleName('Skipped: Plank');
+        await expect(run.next).toContainText('Push-up');
+
+        // It runs as it was, and Undo goes with the next press, then the workout carries on where it was, a reload and all
+        await run.skip.click();
+        await expect(app.undoBar).toHaveCount(0);
+        await expect(run.face.getByText('Push-up', { exact: true })).toBeVisible();
+        await expect(run.main.getByText('Skipped earlier')).toBeVisible();
+        await app.reload();
+        await expect(run.next).toContainText('Squat');
+        await run.pressDone();
+        await expect(run.face.getByText('Squat', { exact: true })).toBeVisible();
+
+        // The one left asks first; Not now leaves it
+        await run.later.click();
+        await expect(run.laterMenu).toHaveAccessibleName('Do Plank next?');
+        await run.laterMenu.getByRole('button', { name: 'Not now' }).click();
+        await expect(run.laterMenu).toHaveCount(0);
+        await expect(run.later).toBeFocused();
+
+        // A timed one picked last runs its time, then the workout finishes
+        await run.later.click();
+        await run.laterMenu.getByRole('button', { name: 'Do it next' }).click();
+        await expect(run.later).toHaveCount(0);
+        await expect(run.next).toContainText('Plank');
+        await run.pressDone();
+        await expect(run.face.getByText('Plank', { exact: true })).toBeVisible();
+        await run.wait(15_000);
+        await expect(run.faceTime).toHaveText(/^00:1[45]$/);
+        await expect(run.summary).toHaveCount(0);
+        await run.wait(16_000);
+        await expect(run.summary).toHaveAccessibleName('Workout finished');
+        await expect(run.summary).toContainText('Push-up: 10 reps');
+        await expect(run.summary).toContainText('Squat: 10 reps');
+        await expect(run.summary).toContainText('Plank: 0:30');
+    });
+});
+
 test.describe('reloading', () => {
     const intervals = workout('Intervals', { steps: [timed(30), rest(10)], repeats: 2 });
     test.use({ storage: seed.workouts([intervals]) });

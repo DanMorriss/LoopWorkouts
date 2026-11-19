@@ -34,6 +34,7 @@ import { MAX_WEIGHT_KG } from '../../models/weight';
 import { isLoggedSet, isTimedSet, RepSet } from '../../models/history';
 import { StepSwap } from '../../models/step-swap';
 import { StepSkip } from '../../models/workout-state';
+import { NO_LATER, readLater, RunLater } from '../../models/later';
 import { Deletion, inOrder, LibraryOrder, mergeRecords, newId } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { ReadyMadeChanges } from './ready-made-changes.service';
@@ -65,6 +66,7 @@ export class WorkoutStore {
     private _activeWaitToStart = signal(false);
     private _activeWaitsPassed = signal(0);
     private _activeLastSetPassed = signal(false);
+    private _activeLater = signal<RunLater>(NO_LATER);
 
     /** Your own workouts, which are your data: saved, backed up and synced. */
     readonly workouts = computed(() => this._workouts());
@@ -139,9 +141,12 @@ export class WorkoutStore {
      */
     readonly activeOffClockMs = computed(
         () =>
-            this._activeRepMs() -
+            this._activeRepMs() +
+            this._activeLater().ms -
             this._activeSkips().reduce((total, skip) => total + skip.skippedMs, 0)
     );
+    /** Exercises skipped in the current run to do later, and those done later (RUN-16). */
+    readonly activeLater = computed(() => this._activeLater());
     /**
      * The sets of rep steps done so far in the current run, in order. Its timed sets are
      * worked out from the clock (see `ActiveRunService.sets`).
@@ -217,6 +222,7 @@ export class WorkoutStore {
         this._activeWaitToStart.set(sessionStorage.getItem('activeWaitToStart') === 'true');
         this._activeWaitsPassed.set(readCount(sessionStorage.getItem('activeWaitsPassed')));
         this._activeLastSetPassed.set(sessionStorage.getItem('activeLastSetPassed') === 'true');
+        this._activeLater.set(readLater(sessionStorage.getItem('activeLater')));
     }
 
     private loadWorkouts(): Workout[] {
@@ -546,24 +552,42 @@ export class WorkoutStore {
      * what was done, logged for the history; none for a rep step skipped (RUN-12).
      */
     finishRepStep(waitedMs: number, set?: RepSet) {
-        const startedAt = this._activeWorkoutStartedAt();
-        if (!this._activeWorkout() || startedAt === null) {
+        // Done straight from a pause carries on running
+        const waited = this.moveStart(Math.max(0, waitedMs));
+        if (waited === null) {
             return;
         }
-        // Done straight from a pause carries on running
-        this.resume();
-        const waited = Math.max(0, Math.round(waitedMs));
-        const movedStart = this._activeWorkoutStartedAt()! + waited;
-        this._activeWorkoutStartedAt.set(movedStart);
         this._activeRepStepsDone.update((done) => done + 1);
-        this._activeRepMs.update((ms) => ms + waited);
-        sessionStorage.setItem('activeWorkoutStartedAt', String(movedStart));
         sessionStorage.setItem('activeRepStepsDone', String(this._activeRepStepsDone()));
-        sessionStorage.setItem('activeRepMs', String(this._activeRepMs()));
+        this.addRepMs(waited);
         if (set) {
-            this._activeSets.update((sets) => [...sets, set]);
-            sessionStorage.setItem('activeSets', JSON.stringify(this._activeSets()));
+            this.addActiveSet(set);
         }
+    }
+
+    /**
+     * Moves the start time on by `ms` (back, for less than 0), as the clock is let past
+     * something it held at, from a pause too, which it ends. Returns how far, in whole ms, or
+     * null with no run. Done, Skip, Start and a step done later all do.
+     */
+    private moveStart(ms: number, resume = true): number | null {
+        const startedAt = this._activeWorkoutStartedAt();
+        if (!this._activeWorkout() || startedAt === null) {
+            return null;
+        }
+        if (resume) {
+            this.resume();
+        }
+        const moved = Math.round(ms);
+        const movedStart = this._activeWorkoutStartedAt()! + moved;
+        this._activeWorkoutStartedAt.set(movedStart);
+        sessionStorage.setItem('activeWorkoutStartedAt', String(movedStart));
+        return moved;
+    }
+
+    private addRepMs(ms: number) {
+        this._activeRepMs.update((total) => total + ms);
+        sessionStorage.setItem('activeRepMs', String(this._activeRepMs()));
     }
 
     /**
@@ -571,14 +595,9 @@ export class WorkoutStore {
      * time moves back by what was left of it, so the clock is at its end.
      */
     skipStep(skip: StepSkip) {
-        const startedAt = this._activeWorkoutStartedAt();
-        if (!this._activeWorkout() || startedAt === null || skip.skippedMs <= 0) {
+        if (skip.skippedMs <= 0 || this.moveStart(-skip.skippedMs) === null) {
             return;
         }
-        this.resume();
-        const movedStart = this._activeWorkoutStartedAt()! - skip.skippedMs;
-        this._activeWorkoutStartedAt.set(movedStart);
-        sessionStorage.setItem('activeWorkoutStartedAt', String(movedStart));
         this._activeSkips.update((skips) => [...skips, skip]);
         sessionStorage.setItem('activeSkips', JSON.stringify(this._activeSkips()));
     }
@@ -589,16 +608,45 @@ export class WorkoutStore {
      * while it waited, as Done does on a rep step. It's behind the run from here, at `position`.
      */
     passWait(position: number, waitedMs: number) {
-        if (!this._activeWorkout() || this._activeWorkoutStartedAt() === null) {
+        // Start straight from a pause carries on running
+        if (this.moveStart(Math.max(0, waitedMs)) === null) {
             return;
         }
-        // Start straight from a pause carries on running
-        this.resume();
-        const movedStart = this._activeWorkoutStartedAt()! + Math.max(0, Math.round(waitedMs));
-        this._activeWorkoutStartedAt.set(movedStart);
-        sessionStorage.setItem('activeWorkoutStartedAt', String(movedStart));
         this._activeWaitsPassed.set(position + 1);
         sessionStorage.setItem('activeWaitsPassed', String(position + 1));
+    }
+
+    /** What's put aside to do later and picked to do next changes (RUN-16). */
+    setActiveLater(later: RunLater) {
+        if (!this._activeWorkout()) {
+            return;
+        }
+        this._activeLater.set(later);
+        sessionStorage.setItem('activeLater', JSON.stringify(later));
+    }
+
+    /**
+     * A step done later has ended (RUN-16), as `later` now has it: the start time moves on by
+     * `ms`, the time it took, as Done does on a rep step, so the clock picks up where it held.
+     * With `rep`, that's time on a rep step, logged as `set`; otherwise it's the later steps'
+     * own. With `resume`, from a pause, it carries on running, as Done and Skip do.
+     */
+    passLater(
+        ms: number,
+        later: RunLater,
+        done: { set?: RepSet; rep?: boolean; resume?: boolean }
+    ) {
+        const waited = this.moveStart(Math.max(0, ms), done.resume);
+        if (waited === null) {
+            return;
+        }
+        if (done.rep) {
+            this.addRepMs(waited);
+        }
+        this.setActiveLater(done.rep ? later : { ...later, ms: later.ms + waited });
+        if (done.set) {
+            this.addActiveSet(done.set);
+        }
     }
 
     /** The set time ran out in is left out of the run: see activeLastSetPassed. */
@@ -637,6 +685,8 @@ export class WorkoutStore {
         this._activeSkips.set([]);
         this._activeWaitsPassed.set(0);
         this._activeLastSetPassed.set(false);
+        this._activeLater.set(NO_LATER);
+        sessionStorage.removeItem('activeLater');
         sessionStorage.removeItem('activeWaitsPassed');
         sessionStorage.removeItem('activeLastSetPassed');
         sessionStorage.removeItem('activeRepStepsDone');

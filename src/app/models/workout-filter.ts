@@ -5,13 +5,13 @@ import { allSteps, Workout } from './workout';
 import { WorkoutKind } from './workout-kind';
 import { musclesWorked } from './workout-muscles';
 
-/** A workout of your own or a ready-made one: what it's filtered on. */
-type Filterable = Pick<Workout, 'id' | 'title' | 'blocks'>;
+/** A workout of your own or a ready-made one, which has a description: what it's filtered on. */
+type Filterable = Pick<Workout, 'id' | 'title' | 'blocks'> & { description?: string };
 
 /** What the Workouts page is cut down by. */
 export interface WorkoutFilters {
     kind: WorkoutKind;
-    /** What's typed in the search box: found in the title or an exercise's name. */
+    /** What's typed in the search box: found in the title, description or an exercise's name. */
     query: string;
     /** Only favourites (`isFavourite`). */
     favourites: boolean;
@@ -23,8 +23,9 @@ export interface WorkoutFilters {
 }
 
 /**
- * The workouts that pass `filters`, yours or ready-made ones, in the order given. A search finds its words, in any case, in the title or in a step's name or its
- * exercise's, so "squat" finds "Legs day" with Back squat in it. A workout with no step linked
+ * The workouts that pass `filters`, yours or ready-made ones, in the order given. A search finds
+ * its words, in any case, in the title, a ready-made one's description, or a step's name or its
+ * exercise's, so "squat" finds "Legs day" with Back squat in it, and "HIIT" finds Tabata. A workout with no step linked
  * to an exercise works no known muscle and needs nothing, so muscles hide it and Only what I
  * have doesn't.
  */
@@ -67,7 +68,7 @@ function matches(
         step.name,
         (step.exerciseId && byId(step.exerciseId)?.name) || '',
     ]);
-    const text = [workout.title, ...names].join('\n').toLowerCase();
+    const text = [workout.title, workout.description ?? '', ...names].join('\n').toLowerCase();
     return words.every((word) => text.includes(word));
 }
 

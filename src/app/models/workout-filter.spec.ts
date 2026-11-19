@@ -1,5 +1,6 @@
 import { makeWorkout, reps, work } from '../shared/testing/make-workout';
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
+import { BUILT_IN_WORKOUTS } from './built-in-workouts';
 import { Step } from './workout';
 import { filterWorkouts, WorkoutFilters } from './workout-filter';
 
@@ -58,6 +59,19 @@ describe('filterWorkouts', () => {
         expect(ids({ query: 'LEGS' })).toEqual(['legs']);
         expect(ids({ query: '  squat ' })).toEqual(['legs', 'goblet']);
         expect(ids({ query: 'goblet' })).toEqual(['goblet']);
+    });
+
+    it("finds a search in a ready-made workout's description, so HIIT finds the interval ones", () => {
+        const found = filterWorkouts(
+            BUILT_IN_WORKOUTS,
+            { ...none, query: 'hiit' },
+            byId,
+            () => false
+        );
+        expect(found.map((workout) => workout.id)).toEqual([
+            'builtin:cardio-intervals',
+            'builtin:tabata',
+        ]);
     });
 
     it('finds every word of a search, anywhere in the workout', () => {

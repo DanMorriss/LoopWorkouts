@@ -124,7 +124,7 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
     {
         id: 'builtin:cardio-intervals',
         title: 'Cardio intervals',
-        description: '40 seconds on, 20 off, four moves, three rounds. About 12 minutes.',
+        description: 'HIIT: 40 seconds on, 20 off, four moves, three rounds. About 12 minutes.',
         group: 'bodyweight',
         repeats: 3,
         // An interval circuit: its rests are timed, not for getting ready
@@ -145,7 +145,7 @@ export const BUILT_IN_WORKOUTS: readonly BuiltInWorkout[] = [
     {
         id: 'builtin:tabata',
         title: 'Tabata',
-        description: 'Four moves, each 8 rounds of 20 seconds hard and 10 easy.',
+        description: 'HIIT: four moves, each 8 rounds of 20 seconds hard and 10 easy.',
         group: 'bodyweight',
         repeats: 1,
         carryOn: true,

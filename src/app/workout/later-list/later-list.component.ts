@@ -6,6 +6,7 @@ import {
     ElementRef,
     inject,
     Injector,
+    input,
     output,
     signal,
     untracked,
@@ -17,7 +18,7 @@ import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { UndoService } from '../../shared/undo/undo.service';
 import { LaterPicks } from '../later-picks';
 import { WorkoutView } from '../workout-view';
-import { flyInto } from './later-fly';
+import { flyInto, flyOnto } from './later-fly';
 
 /**
  * The exercises skipped to do later (RUN-16), at the top of the workout page: a small button
@@ -42,6 +43,8 @@ export class LaterListComponent {
     private readonly view = inject(WorkoutView);
     private readonly reducedMotion = injectPrefersReducedMotion();
     protected readonly items = this.view.aside;
+    /** The Up next card, which one picked flies down to (see `flyOnto()`). */
+    readonly nextCard = input<() => HTMLElement | undefined>(() => undefined);
     /** The last one has been picked, so the button's gone: focus is the page's to place. */
     readonly emptied = output<void>();
 
@@ -75,7 +78,7 @@ export class LaterListComponent {
             () => {
                 const button = this.button()?.nativeElement;
                 if (button && start) {
-                    flyInto(button, start, first, this.reducedMotion());
+                    flyInto(button, this.host, start, first, this.reducedMotion());
                 }
             },
             { injector: this.injector }
@@ -120,9 +123,15 @@ export class LaterListComponent {
         }
     }
 
-    /** `later` is done next, after the step on now, with Undo till it starts. */
+    /**
+     * `later` is done next, after the step on now, with Undo till it starts. It flies down
+     * from the button to the Up next card, so it's clear it's been put next.
+     */
     protected doNext(later: LaterStep, name: string) {
         this.open.set(false);
+        // Measured now, as the button goes once the last one's picked
+        const button = this.button()?.nativeElement;
+        const from = button?.getBoundingClientRect();
         if (!this.picks.doNext(later)) {
             return;
         }
@@ -136,9 +145,13 @@ export class LaterListComponent {
         this.pickOffer = { id: this.undo.offer()?.id, step: this.view.stepKey() };
         afterNextRender(
             () => {
-                const button = this.button()?.nativeElement;
-                if (button) {
-                    button.focus();
+                const card = this.nextCard()();
+                if (button && from && card) {
+                    flyOnto(button, this.host, from, card, this.reducedMotion());
+                }
+                const left = this.button()?.nativeElement;
+                if (left) {
+                    left.focus();
                 } else {
                     this.emptied.emit();
                 }

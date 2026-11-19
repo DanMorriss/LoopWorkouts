@@ -5,7 +5,7 @@
     @if (view.workout()) {
         <!-- Exercises skipped to do later, top right (RUN-16) -->
         @if (view.isComplete() === false && !view.summaryOpen()) {
-            <app-later-list (emptied)="focusControls()" />
+            <app-later-list [nextCard]="nextCard" (emptied)="focusControls()" />
         }
         <!-- On a phone the header shows the title instead, leaving more room for the ring -->
         <p class="workout-title text-center text-4xl text-(--text-strong)">

@@ -137,6 +137,10 @@ export class WorkoutComponent {
         const card = this.upNextCard();
         return card?.done() ? card.button() : undefined;
     }
+    /** The Up next card, which an exercise picked to do later flies down to (RUN-16). */
+    private readonly upNextHost = viewChild(UpNextCardComponent, { read: ElementRef });
+    protected readonly nextCard = (): HTMLElement | undefined =>
+        this.upNextHost()?.nativeElement.querySelector('.up-next') ?? undefined;
     /** The card Done is on, which swells as a rep step comes round. */
     private doneCard() {
         const card = this.upNextCard();

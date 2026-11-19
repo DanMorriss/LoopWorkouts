@@ -28,6 +28,7 @@ describe('SettingsStore', () => {
             weightUnit: 'kg',
             bodyFigure: 'male',
             trainingGoal: 'muscle',
+            weeklySets: 10,
             myEquipment: [],
             onlyMyEquipment: false,
             kettlebellWeight: null,
@@ -91,6 +92,38 @@ describe('SettingsStore', () => {
         TestBed.resetTestingModule();
         localStorage.setItem('settings', '{"trainingGoal": "fitness"}');
         expect(createStore().trainingGoal()).toBe('fitness');
+    });
+
+    it("aims each muscle at its goal's sets a week, unless they've been changed (PRG-8)", () => {
+        expect(createStore().weeklySets()).toBe(10);
+
+        // From before they could be changed, or not usable: the goal's
+        TestBed.resetTestingModule();
+        localStorage.setItem('settings', '{"trainingGoal": "fitness"}');
+        expect(createStore().weeklySets()).toBe(6);
+        for (const saved of ['1', '31', '12.5', '"12"']) {
+            TestBed.resetTestingModule();
+            localStorage.setItem('settings', `{"weeklySets": ${saved}}`);
+            expect(createStore().weeklySets()).toBe(10);
+        }
+
+        TestBed.resetTestingModule();
+        localStorage.setItem('settings', '{"trainingGoal": "fitness", "weeklySets": 14}');
+        expect(createStore().weeklySets()).toBe(14);
+    });
+
+    it("puts the sets a week back to the new goal's when the goal changes", () => {
+        const store = createStore();
+        store.update({ weeklySets: 14 });
+
+        store.update({ trainingGoal: 'muscle' });
+        expect(store.weeklySets()).toBe(14);
+
+        store.update({ trainingGoal: 'fitness' });
+        expect(store.weeklySets()).toBe(6);
+
+        store.update({ trainingGoal: 'muscle', weeklySets: 8 });
+        expect(store.weeklySets()).toBe(8);
     });
 
     it('has no equipment to begin with, and keeps only equipment it knows, in order', () => {
@@ -217,6 +250,7 @@ describe('SettingsStore', () => {
             name: 'Sam',
             bodyFigure: 'female',
             trainingGoal: 'fitness',
+            weeklySets: 8,
             weightUnit: 'lb',
             myEquipment: ['kettlebell'],
         };
@@ -277,6 +311,15 @@ describe('SettingsStore', () => {
             expect(store.mergeProfile({ ...theirs, updatedAt: here + 1 })).toBe(true);
             expect(store.profile()).toEqual({ ...theirs, updatedAt: here + 1 });
             expect(store.weightUnit()).toBe('lb');
+            expect(store.weeklySets()).toBe(8);
+        });
+
+        it('syncs the sets a week with the profile', () => {
+            const store = createStore();
+            store.update({ weeklySets: 12 });
+
+            expect(store.profile().updatedAt).toBeGreaterThan(0);
+            expect(store.profile().weeklySets).toBe(12);
         });
 
         it("syncs your kettlebell's weight with the profile (PRG-14)", () => {

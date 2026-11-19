@@ -72,7 +72,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Expected:**
     1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, "Welcome to Loop Workouts", the sign-in (Continue with Google, Email, Email me a sign-in link) and **Continue as guest**, with no tab bar.
     2. localStorage has `setup = "due"` once the welcome screen is shown.
-    3. After Continue as guest: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 5" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
+    3. After Continue as guest: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 6" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
 - **Variants (same test file):**
     - A device with a saved workout but no `welcomed` key (in use before the welcome screen) opens `/home` straight away, and `welcomed` becomes `"guest"`.
     - A new device opening `/exercises/back-squat` directly gets that page, not the welcome screen.
@@ -84,15 +84,16 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Steps:**
     1. Type "Sam" and press Enter (Enter is Next).
     2. Pick **Fitness**, Next.
-    3. Pick the **Kettlebell** chip, Next.
-    4. Pick **Female**, Next.
-    5. Leave **Kilograms**, press **Done**.
-    6. Reload. Open You.
+    3. Turn Sets a week per muscle up two, to **8**, with the arrow keys, Next.
+    4. Pick the **Kettlebell** chip, Next.
+    5. Pick **Female**, Next.
+    6. Leave **Kilograms**, press **Done**.
+    7. Reload. Open You.
 - **Expected:**
-    1. Each question's heading takes focus as it shows, and "Question N of 5" counts up. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
+    1. Each question's heading takes focus as it shows, and "Question N of 6" counts up. Sets a week per muscle starts at 6, from Fitness. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
     2. After Done, `/home` opens with "Good morning, Sam" and the Undo bar showing "You're all set, Sam. Change any of it on You, under Profile." with no Undo; the `setup` key is gone.
     3. Today shows **Get started** offering a ready-made plan. For Fitness with a kettlebell that's **Fitness, 4 days** (`firstPlan()`), not a single workout: see mismatch M3.
-    4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Weight units kg. The Exercises page has **Only what I have** on with "My equipment: 1 piece".
+    4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Sets a week per muscle 8, Weight units kg. The Exercises page has **Only what I have** on with "My equipment: 1 piece".
 
 ### REG-NAV-03 · Skipping the setup
 
@@ -960,10 +961,11 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 
 - **Stories:** PRG-6, PRG-8 · **Priority:** P2
 - **Preconditions:** `guest()`; history in the last 7 days: two sets of Back squat and one of Bench press; a Plank 9 days ago.
-- **Steps:** Open Progress. Then You → Profile → Training for **Fitness**, and open Progress again.
+- **Steps:** Open Progress. Then You → Profile → Training for **Fitness**, and open Progress again. Then turn Sets a week per muscle to **2** (Home), and open Progress again.
 - **Expected:**
     1. "Muscles worked this week" with the body map and 16 bars, starting Glutes (2 sets, under 10), Quads (2 sets, under 10), Adductors (1 set, under 4).
-    2. Under Fitness the aims move down (the Profile hint says 6 to 12 sets a week).
+    2. Under Fitness the aims move down: Sets a week per muscle is 6, and Glutes is under 6.
+    3. At 2, Glutes reads "2 sets, 2 reached" and Adductors "1 set, 1 reached".
 
 ### REG-PRG-02 · An exercise's progress, and its card on the list
 
@@ -1166,7 +1168,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Female is still chosen; the body map draws the female figure (the 3D demo stays male for now, see TODO).
     3. The weight shows as 135 lb in Create ("Weight (lb)") and on the workout face.
     4. The new step is saved as 61.235 kg; the 20.412 kg step is still exactly 20.412.
-    5. The hint says 6 to 12 sets a week.
+    5. Sets a week per muscle goes from 10 to 6, its hint "Small muscles, like the forearms, aim for 2".
 
 ### REG-SET-04 · About, privacy and terms
 

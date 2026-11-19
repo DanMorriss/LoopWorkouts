@@ -15,7 +15,7 @@ import {
 import { Router } from '@angular/router';
 import { AUTH_STORAGE_KEY } from '../../shared/state/auth-storage-key';
 import { BodyFigure } from '../../models/exercise';
-import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
+import { DEFAULT_WEEKLY_SETS, TrainingGoal } from '../../models/muscle-balance';
 import { likelyWeightUnit, MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
@@ -24,17 +24,18 @@ import { SyncStarter } from '../../sync/sync-starter.service';
 import { SETUP_KEY } from '../welcome-first';
 import { UndoService } from '../../shared/undo/undo.service';
 import { EquipmentChipsComponent } from '../../shared/components/equipment-chips/equipment-chips.component';
+import { WeeklySetsFieldComponent } from '../../shared/components/weekly-sets-field/weekly-sets-field.component';
 
 /** The questions, in the order they're asked. */
-const QUESTIONS = ['name', 'goal', 'equipment', 'body', 'units'] as const;
+const QUESTIONS = ['name', 'goal', 'sets', 'equipment', 'body', 'units'] as const;
 type Step = (typeof QUESTIONS)[number];
 
 /** How long to wait for the account's profile before asking anyway (offline, say). */
 export const PROFILE_WAIT_MS = 8000;
 
 /**
- * The setup (NAV-4), once, after the welcome screen: your name, what you train for, the
- * equipment you have, the body the muscle maps show and the units you lift in, one question
+ * The setup (NAV-4), once, after the welcome screen: your name, what you train for and the
+ * sets a week each muscle aims at, the equipment you have, the body the muscle maps show and the units you lift in, one question
  * at a time, then on to Today, which says it's all set and starts you off with a workout to add
  * (until 2026-11-03, a last screen here offered one to start straight away). Each answer is
  * saved as it's picked, so leaving part way keeps them. Signed in, it first waits for the account's profile: one set
@@ -42,7 +43,7 @@ export const PROFILE_WAIT_MS = 8000;
  */
 @Component({
     selector: 'app-setup',
-    imports: [BodyMapComponent, EquipmentChipsComponent],
+    imports: [BodyMapComponent, EquipmentChipsComponent, WeeklySetsFieldComponent],
     templateUrl: './setup.component.html',
     styleUrl: './setup.component.scss',
 })
@@ -82,6 +83,15 @@ export class SetupComponent {
             hint: `Stay fit and active: ${aimText('fitness')}`,
         },
     ];
+
+    /** The sets a week's question starts from the goal just picked, which it says why. */
+    protected readonly setsHint = computed(() => {
+        const why =
+            this.settings.trainingGoal() === 'muscle'
+                ? `${DEFAULT_WEEKLY_SETS.muscle} is the usual advice for building muscle`
+                : `${DEFAULT_WEEKLY_SETS.fitness} suits staying fit and active`;
+        return `${why}. Start lower if you're new: you can change it any time on You, under Profile.`;
+    });
 
     protected readonly bodies: { value: BodyFigure; label: string }[] = [
         { value: 'male', label: 'Male' },
@@ -184,6 +194,5 @@ export class SetupComponent {
 }
 
 function aimText(goal: TrainingGoal): string {
-    const { large } = WEEKLY_AIMS[goal];
-    return `${large.low} to ${large.high} sets a week on each muscle.`;
+    return `at least ${DEFAULT_WEEKLY_SETS[goal]} sets a week on each muscle.`;
 }

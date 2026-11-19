@@ -10,71 +10,72 @@ describe('MuscleBarsComponent', () => {
     async function create(balance: MuscleBalance[]) {
         fixture = TestBed.createComponent(MuscleBarsComponent);
         fixture.componentRef.setInput('balance', balance);
-        fixture.componentRef.setInput('goal', 'muscle');
         fixture.detectChanges();
         await fixture.whenStable();
     }
 
-    const aim = { low: 10, high: 20 };
+    const aim = 10;
     const row = (index: number) =>
         fixture.nativeElement.querySelectorAll('.bars__row')[index] as HTMLElement;
-    /** Whether the low and high edges are notches in the fill rather than lines on the track. */
+    /** Whether the aim is a notch in the fill rather than a line on the track. */
     const covered = (index: number) =>
-        Array.from(row(index).querySelectorAll('.bars__edge')).map((edge) =>
-            edge.classList.contains('bars__edge--covered')
-        );
-    /** The edges, in pixels from the track's left, and the fill's right end. */
+        row(index).querySelector('.bars__aim')!.classList.contains('bars__aim--covered');
+    /** The aim's line, in pixels from the track's left, and the fill's right end. */
     const placed = (index: number) => {
         const track = row(index).querySelector('.bars__track')!.getBoundingClientRect();
         const fill = row(index).querySelector('.bars__fill')!.getBoundingClientRect();
-        const edges = Array.from(row(index).querySelectorAll('.bars__edge')).map((edge) => {
-            const box = edge.getBoundingClientRect();
-            return { from: box.left - track.left, to: box.right - track.left };
-        });
-        return { edges, fillEnd: fill.right - track.left };
+        const line = row(index).querySelector('.bars__aim')!.getBoundingClientRect();
+        return {
+            line: { from: line.left - track.left, to: line.right - track.left },
+            fillEnd: fill.right - track.left,
+        };
     };
 
     it('draws the aim over the fill, so a bar past it still shows it', async () => {
         await create([
+            { muscle: 'upper-back', sets: 40, aim, status: 'reached' },
+            { muscle: 'quads', sets: 15, aim, status: 'reached' },
             { muscle: 'chest', sets: 4, aim, status: 'under' },
-            { muscle: 'quads', sets: 15, aim, status: 'in-range' },
-            { muscle: 'upper-back', sets: 22, aim, status: 'over' },
         ]);
 
-        // Under: both edges on the track
-        expect(covered(0)).toEqual([false, false]);
-        // Within: the low edge cut into the fill, the high one on the track past it
-        expect(covered(1)).toEqual([true, false]);
-        // Over: both cut into the fill
-        expect(covered(2)).toEqual([true, true]);
+        expect(covered(0)).toBe(true);
+        expect(covered(1)).toBe(true);
+        expect(covered(2)).toBe(false);
 
-        // The edges sit after the fill, so they're drawn over it
-        const track = row(2).querySelector('.bars__track')!;
-        expect(track.lastElementChild!.classList).toContain('bars__edge');
-        const { edges, fillEnd } = placed(2);
-        expect(edges[1].to).toBeLessThan(fillEnd);
-        expect(edges[0].to - edges[0].from).toBeCloseTo(2, 0);
+        // The line sits after the fill, so it's drawn over it
+        const track = row(1).querySelector('.bars__track')!;
+        expect(track.lastElementChild!.classList).toContain('bars__aim');
+        const { line, fillEnd } = placed(1);
+        expect(line.to).toBeLessThan(fillEnd);
+        expect(line.to - line.from).toBeCloseTo(2, 0);
     });
 
-    it('lies just inside the band, so ending on an edge reads the same as its status', async () => {
+    it('has no most: a bar far past the aim looks like any other that reached it', async () => {
         await create([
-            { muscle: 'chest', sets: 10, aim, status: 'in-range' },
-            { muscle: 'quads', sets: 20, aim, status: 'in-range' },
+            { muscle: 'upper-back', sets: 40, aim, status: 'reached' },
+            { muscle: 'quads', sets: 12, aim, status: 'reached' },
         ]);
 
-        // Ending on the low edge leaves it on the track; on the high edge covers it
-        expect(covered(0)).toEqual([false, false]);
-        expect(covered(1)).toEqual([true, true]);
-        const low = placed(0);
-        expect(low.edges[0].from).toBeGreaterThanOrEqual(low.fillEnd - 0.5);
-        const high = placed(1);
-        expect(high.edges[1].to).toBeLessThanOrEqual(high.fillEnd + 0.5);
+        expect(row(0).className).toBe(row(1).className);
+        expect(row(0).querySelectorAll('.bars__aim')).toHaveLength(1);
     });
 
-    it('keeps the description of each bar as it was', async () => {
-        await create([{ muscle: 'upper-back', sets: 22, aim, status: 'over' }]);
+    it('lies just past the aim, so ending on it leaves it on the track', async () => {
+        await create([{ muscle: 'chest', sets: 10, aim, status: 'reached' }]);
 
-        expect(row(0).querySelector('.sr-only')!.textContent!.trim()).toBe('22 sets, over 20');
+        expect(covered(0)).toBe(false);
+        const { line, fillEnd } = placed(0);
+        expect(line.from).toBeGreaterThanOrEqual(fillEnd - 0.5);
+    });
+
+    it('describes each bar against its aim', async () => {
+        await create([
+            { muscle: 'upper-back', sets: 22, aim, status: 'reached' },
+            { muscle: 'chest', sets: 1, aim, status: 'under' },
+        ]);
+
+        expect(row(0).querySelector('.sr-only')!.textContent!.trim()).toBe('22 sets, 10 reached');
+        expect(row(1).querySelector('.sr-only')!.textContent!.trim()).toBe('1 set, under 10');
         expect(row(0).querySelector('.bars__track')!.getAttribute('aria-hidden')).toBe('true');
     });
 });

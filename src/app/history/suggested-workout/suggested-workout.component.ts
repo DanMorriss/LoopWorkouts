@@ -136,7 +136,7 @@ export class SuggestedWorkoutComponent {
             this.weekSets(),
             (id) => this.exercises.byId(id),
             lastDone,
-            this.settings.trainingGoal(),
+            this.settings.weeklySets(),
             this.avoid()
         );
         if (!suggested) {

@@ -3,21 +3,11 @@
         <li class="bars__row" [class]="'bars__row--' + row.status">
             <span class="bars__label">{{ row.label }}</span>
             <span class="bars__track" aria-hidden="true">
-                <span
-                    class="bars__band"
-                    [style.left.%]="row.band.left"
-                    [style.width.%]="row.band.width"
-                ></span>
                 <span class="bars__fill" [style.width.%]="row.width"></span>
                 <span
-                    class="bars__edge"
-                    [class.bars__edge--covered]="row.band.lowCovered"
-                    [style.left.%]="row.band.left"
-                ></span>
-                <span
-                    class="bars__edge bars__edge--high"
-                    [class.bars__edge--covered]="row.band.highCovered"
-                    [style.left.%]="row.band.right"
+                    class="bars__aim"
+                    [class.bars__aim--covered]="row.aim.covered"
+                    [style.left.%]="row.aim.left"
                 ></span>
             </span>
             <span class="bars__count" aria-hidden="true">{{ row.count }}</span>
@@ -26,8 +16,7 @@
     }
 </ul>
 <p class="bars__key">
-    <span class="bars__key-band" aria-hidden="true"></span>
-    The sets a week to aim for when training for {{ goal() }} (chosen in You → Profile), fewer for
-    small muscles like the forearms. A set counts 1 for the muscles it mainly works, ½ for the ones
-    that help.
+    <span class="bars__key-aim" aria-hidden="true"></span>
+    The sets a week to aim for, set in You → Profile, fewer for small muscles like the forearms. A
+    set counts 1 for the muscles it mainly works, ½ for the ones that help.
 </p>

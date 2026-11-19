@@ -15,6 +15,7 @@ const SETTINGS: Omit<Settings, 'profileUpdatedAt' | 'bodyWeightUpdatedAt'> = {
     weightUnit: 'kg',
     bodyFigure: 'male',
     trainingGoal: 'muscle',
+    weeklySets: 10,
     myEquipment: ['barbell', 'rack'],
     onlyMyEquipment: true,
     kettlebellWeight: 16,

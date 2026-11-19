@@ -210,6 +210,8 @@ export interface Settings {
     weightUnit: 'kg' | 'lb';
     bodyFigure: 'male' | 'female';
     trainingGoal: 'muscle' | 'fitness';
+    /** The sets a week each muscle aims at (PRG-8), 2 to 30, part of the profile. */
+    weeklySets: number;
     myEquipment: string[];
     onlyMyEquipment: boolean;
     /** Your kettlebell, in kg (PRG-14), part of the profile. */

@@ -4,15 +4,12 @@ import { HistoryEntry } from './history';
 import { allSteps, Workout } from './workout';
 import { ALL_MUSCLES } from './workout-muscles';
 
-/** What you train for (PRG-8), chosen on Profile: it sets the sets a week each muscle aims at. */
+/**
+ * What you train for (PRG-8), chosen on Profile: it sets the sets a week each muscle aims at to
+ * start with (`DEFAULT_WEEKLY_SETS`), which can then be changed (`weeklySets` in the settings).
+ */
 export type TrainingGoal = 'muscle' | 'fitness';
 export const TRAINING_GOALS: readonly TrainingGoal[] = ['muscle', 'fitness'];
-
-/** The sets a week a muscle aims at: fewer is under, more is over. */
-export interface WeeklyAim {
-    low: number;
-    high: number;
-}
 
 /** Muscles that are rarely trained on their own and need fewer sets, so they aim lower. */
 export const SMALL_MUSCLES: ReadonlySet<MuscleGroup> = new Set<MuscleGroup>([
@@ -23,25 +20,51 @@ export const SMALL_MUSCLES: ReadonlySet<MuscleGroup> = new Set<MuscleGroup>([
 ]);
 
 /**
- * 10 to 20 sets a week is the usual advice for building muscle; small muscles get about half
- * that, and training for fitness about two thirds of either.
+ * The sets a week each muscle aims at to start with, by what you train for: at least 10 is the
+ * usual advice for building muscle, and training for fitness about two thirds of that. There's
+ * no most: going past the aim is fine.
  */
-export const WEEKLY_AIMS: Record<TrainingGoal, { large: WeeklyAim; small: WeeklyAim }> = {
-    muscle: { large: { low: 10, high: 20 }, small: { low: 4, high: 10 } },
-    fitness: { large: { low: 6, high: 12 }, small: { low: 2, high: 6 } },
-};
+export const DEFAULT_WEEKLY_SETS: Record<TrainingGoal, number> = { muscle: 10, fitness: 6 };
 
-export function weeklyAim(muscle: MuscleGroup, goal: TrainingGoal): WeeklyAim {
-    return WEEKLY_AIMS[goal][SMALL_MUSCLES.has(muscle) ? 'small' : 'large'];
+/** The fewest and most sets a week each muscle can be set to aim at, on Profile. */
+export const MIN_WEEKLY_SETS = 2;
+export const MAX_WEEKLY_SETS = 30;
+
+/** Small muscles aim for about this share of the others' sets, as they need fewer. */
+const SMALL_SHARE = 0.4;
+
+/**
+ * The sets a week a muscle aims at, when each muscle aims at `weeklySets`: small muscles about
+ * two fifths of that (4 of 10, 2 of 6), never under 1. Fewer is under it.
+ */
+export function weeklyAim(muscle: MuscleGroup, weeklySets: number): number {
+    return SMALL_MUSCLES.has(muscle) ? smallAim(weeklySets) : weeklySets;
 }
 
-export type MuscleStatus = 'under' | 'in-range' | 'over';
+/** What the small muscles aim at, when the others aim at `weeklySets`. */
+export function smallAim(weeklySets: number): number {
+    return Math.max(1, Math.round(weeklySets * SMALL_SHARE));
+}
+
+/**
+ * A saved sets a week, if it's a whole number in range, or the goal's default otherwise, as
+ * from a version of the app before it could be set.
+ */
+export function readWeeklySets(value: unknown, goal: TrainingGoal): number {
+    return Number.isInteger(value) &&
+        (value as number) >= MIN_WEEKLY_SETS &&
+        (value as number) <= MAX_WEEKLY_SETS
+        ? (value as number)
+        : DEFAULT_WEEKLY_SETS[goal];
+}
+
+export type MuscleStatus = 'under' | 'reached';
 
 export interface MuscleBalance {
     muscle: MuscleGroup;
     /** Sets this week: 1 for each set where it's a main muscle, ½ where it's supporting. */
     sets: number;
-    aim: WeeklyAim;
+    aim: number;
     status: MuscleStatus;
 }
 
@@ -76,21 +99,18 @@ export function setsByMuscle(
     return counts;
 }
 
-export function muscleStatus(sets: number, { low, high }: WeeklyAim): MuscleStatus {
-    if (sets < low) {
-        return 'under';
-    }
-    return sets > high ? 'over' : 'in-range';
+export function muscleStatus(sets: number, aim: number): MuscleStatus {
+    return sets < aim ? 'under' : 'reached';
 }
 
 /** Every muscle group with its sets, aim and status, most worked first, A to Z on a tie. */
 export function muscleBalance(
     counts: ReadonlyMap<MuscleGroup, number>,
-    goal: TrainingGoal
+    weeklySets: number
 ): MuscleBalance[] {
     return ALL_MUSCLES.map((muscle) => {
         const sets = counts.get(muscle) ?? 0;
-        const aim = weeklyAim(muscle, goal);
+        const aim = weeklyAim(muscle, weeklySets);
         return { muscle, sets, aim, status: muscleStatus(sets, aim) };
     }).sort(
         (a, b) => b.sets - a.sets || MUSCLE_LABELS[a.muscle].localeCompare(MUSCLE_LABELS[b.muscle])
@@ -104,12 +124,11 @@ export interface SuggestedWorkout {
 }
 
 /**
- * How far a muscle has got towards its aim this week: its sets over the low end of its aim,
- * so 1 is just in range. Small muscles and training for fitness aim lower, so they get there
- * sooner.
+ * How far a muscle has got towards its aim this week: its sets over its aim, so 1 is just
+ * reached it. Small muscles aim lower, so they get there sooner.
  */
-export function shareOfAim(sets: number, muscle: MuscleGroup, goal: TrainingGoal): number {
-    return sets / weeklyAim(muscle, goal).low;
+export function shareOfAim(sets: number, muscle: MuscleGroup, weeklySets: number): number {
+    return sets / weeklyAim(muscle, weeklySets);
 }
 
 /**
@@ -144,7 +163,8 @@ export function suggestNextWorkout(
     byId: (id: string) => Exercise | undefined,
     /** When each workout was last started, by its id; missing for never. */
     lastDone: ReadonlyMap<string, number>,
-    goal: TrainingGoal,
+    /** The sets a week each muscle aims at (`weeklyAim`). */
+    weeklySets: number,
     avoid?: SuggestionAvoid
 ): SuggestedWorkout | null {
     if (avoid) {
@@ -155,12 +175,12 @@ export function suggestNextWorkout(
             return main.length > 0 && shared / main.length <= MOST_OVERLAP;
         });
         return (
-            suggestNextWorkout(apart, counts, byId, lastDone, goal) ??
-            suggestNextWorkout(allowed, counts, byId, lastDone, goal)
+            suggestNextWorkout(apart, counts, byId, lastDone, weeklySets) ??
+            suggestNextWorkout(allowed, counts, byId, lastDone, weeklySets)
         );
     }
     let best: { suggestion: SuggestedWorkout; load: number; lastDone: number } | null = null;
-    const share = (muscle: MuscleGroup) => shareOfAim(counts.get(muscle) ?? 0, muscle, goal);
+    const share = (muscle: MuscleGroup) => shareOfAim(counts.get(muscle) ?? 0, muscle, weeklySets);
 
     for (const workout of workouts) {
         const weights = muscleWeights(workout, byId);

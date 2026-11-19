@@ -61,6 +61,14 @@
                     </div>
                 }
 
+                @case ('sets') {
+                    <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
+                        How many sets a week for each muscle?
+                    </h2>
+                    <p class="setup__hint">{{ setsHint() }}</p>
+                    <app-weekly-sets-field />
+                }
+
                 @case ('equipment') {
                     <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
                         What equipment do you have?

@@ -108,6 +108,7 @@ export class BackupService {
                     weightUnit: this.settings.weightUnit(),
                     bodyFigure: this.settings.bodyFigure(),
                     trainingGoal: this.settings.trainingGoal(),
+                    weeklySets: this.settings.weeklySets(),
                     myEquipment: this.settings.myEquipment(),
                     onlyMyEquipment: this.settings.onlyMyEquipment(),
                     kettlebellWeight: this.settings.kettlebellWeight(),

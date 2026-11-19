@@ -42,7 +42,6 @@ let nextId = 0;
                     <app-muscle-bars
                         class="muscles-week__bars"
                         [balance]="musclesWorked().balance"
-                        [goal]="settings.trainingGoal()"
                     />
                 }
             </section>
@@ -56,7 +55,7 @@ export class MusclesThisWeekComponent {
 
     private readonly history = inject(ShownHistory);
     private readonly exercises = inject(ExerciseStore);
-    protected readonly settings = inject(SettingsStore);
+    private readonly settings = inject(SettingsStore);
     private readonly now = Date.now();
     protected readonly id = `muscles-week-title-${nextId++}`;
 
@@ -72,7 +71,7 @@ export class MusclesThisWeekComponent {
      * the bars go most worked first.
      */
     protected readonly musclesWorked = computed(() => {
-        const balance = muscleBalance(this.weekSets(), this.settings.trainingGoal());
+        const balance = muscleBalance(this.weekSets(), this.settings.weeklySets());
         return {
             hasData: this.weekSets().size > 0,
             main: balance.filter(({ sets }) => sets >= 1).map(({ muscle }) => muscle),

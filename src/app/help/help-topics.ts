@@ -319,7 +319,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'muscle-bars',
                 question: 'What do the muscle bars show?',
                 answer: [
-                    'The sets for each muscle group in the last 7 days. The shaded band is the sets a week to aim for, set by Training for in You, under Profile: a grey bar is under it, a cyan one in range, and a pink one over.',
+                    'The sets for each muscle group in the last 7 days. The line across each bar is the sets a week to aim for, set by Sets a week per muscle in You, under Profile: a grey bar is short of it, and a cyan one has reached it.',
                 ],
                 link: { label: 'Go to Progress', url: '/history' },
             },

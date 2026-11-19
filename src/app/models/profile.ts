@@ -1,5 +1,5 @@
 import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, readMyEquipment } from './exercise';
-import { TRAINING_GOALS, TrainingGoal } from './muscle-balance';
+import { readWeeklySets, TRAINING_GOALS, TrainingGoal } from './muscle-balance';
 import { readKettlebellKg, WEIGHT_UNITS, WeightUnit } from './weight';
 
 /** The longest a name can be: enough for a first name and more, short enough for Home's greeting. */
@@ -15,6 +15,11 @@ export interface Profile {
     name: string;
     bodyFigure: BodyFigure;
     trainingGoal: TrainingGoal;
+    /**
+     * The sets a week each muscle aims at (PRG-8): the goal's to start with, and back to it
+     * when the goal changes. From a version of the app before it, the goal's.
+     */
+    weeklySets: number;
     weightUnit: WeightUnit;
     myEquipment: Equipment[];
     /**
@@ -31,6 +36,7 @@ export const PROFILE_FIELDS = [
     'name',
     'bodyFigure',
     'trainingGoal',
+    'weeklySets',
     'weightUnit',
     'myEquipment',
     'kettlebellWeight',
@@ -51,8 +57,16 @@ export function readProfile(value: unknown): Profile | null {
         return null;
     }
     const profile = value as Record<string, unknown>;
-    const { name, bodyFigure, trainingGoal, weightUnit, myEquipment, kettlebellWeight, updatedAt } =
-        profile;
+    const {
+        name,
+        bodyFigure,
+        trainingGoal,
+        weeklySets,
+        weightUnit,
+        myEquipment,
+        kettlebellWeight,
+        updatedAt,
+    } = profile;
     if (
         typeof name !== 'string' ||
         !BODY_FIGURE_CHOICES.includes(bodyFigure as BodyFigure) ||
@@ -68,6 +82,7 @@ export function readProfile(value: unknown): Profile | null {
         name: cleanName(name),
         bodyFigure: bodyFigure as BodyFigure,
         trainingGoal: trainingGoal as TrainingGoal,
+        weeklySets: readWeeklySets(weeklySets, trainingGoal as TrainingGoal),
         weightUnit: weightUnit as WeightUnit,
         myEquipment: readMyEquipment(myEquipment) ?? [],
         ...kettlebellOf(kettlebellWeight),

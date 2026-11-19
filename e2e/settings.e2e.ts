@@ -155,8 +155,13 @@ test.describe('the profile', () => {
 
             await run.close.click();
             await app.tab('You').click();
+            const sets = profile.getByRole('spinbutton', { name: /^Sets a week per muscle/ });
+            await expect(sets).toHaveAttribute('aria-valuenow', '10');
             await profile.getByRole('radio', { name: 'Fitness' }).check();
-            await expect(profile.getByText(/6 to 12 sets a week/)).toBeVisible();
+            await expect(sets).toHaveAttribute('aria-valuenow', '6');
+            await expect(
+                profile.getByText('Small muscles, like the forearms, aim for 2')
+            ).toBeVisible();
         }
     );
 });

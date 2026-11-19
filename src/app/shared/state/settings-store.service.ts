@@ -1,6 +1,11 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import { BODY_FIGURE_CHOICES, BodyFigure, Equipment, readMyEquipment } from '../../models/exercise';
-import { TRAINING_GOALS, TrainingGoal } from '../../models/muscle-balance';
+import {
+    DEFAULT_WEEKLY_SETS,
+    readWeeklySets,
+    TRAINING_GOALS,
+    TrainingGoal,
+} from '../../models/muscle-balance';
 import { cleanName, kettlebellOf, Profile, PROFILE_FIELDS } from '../../models/profile';
 import {
     BodyWeightRecord,
@@ -35,8 +40,13 @@ export interface Settings {
     weightUnit: WeightUnit;
     /** Which figure the body map draws. */
     bodyFigure: BodyFigure;
-    /** What you train for, which sets the sets a week the muscle bars aim at (PRG-8). */
+    /** What you train for, which sets `weeklySets` to start with (PRG-8). */
     trainingGoal: TrainingGoal;
+    /**
+     * The sets a week each muscle aims at on the muscle bars (PRG-8), fewer for small muscles
+     * (`weeklyAim()`). Changing `trainingGoal` puts it back to that goal's default.
+     */
+    weeklySets: number;
     /** The equipment you have, picked on the Exercises page, in the order it's offered. */
     myEquipment: Equipment[];
     /** Show only the exercises you can do with `myEquipment` on the Exercises page. */
@@ -85,6 +95,7 @@ const DEFAULT_SETTINGS: Settings = {
     weightUnit: 'kg',
     bodyFigure: 'male',
     trainingGoal: 'muscle',
+    weeklySets: DEFAULT_WEEKLY_SETS.muscle,
     myEquipment: [],
     onlyMyEquipment: false,
     kettlebellWeight: null,
@@ -117,6 +128,7 @@ export class SettingsStore {
     readonly weightUnit = computed(() => this.settings().weightUnit);
     readonly bodyFigure = computed(() => this.settings().bodyFigure);
     readonly trainingGoal = computed(() => this.settings().trainingGoal);
+    readonly weeklySets = computed(() => this.settings().weeklySets);
     readonly myEquipment = computed(() => this.settings().myEquipment);
     readonly onlyMyEquipment = computed(() => this.settings().onlyMyEquipment);
     readonly kettlebellWeight = computed(() => this.settings().kettlebellWeight);
@@ -145,6 +157,7 @@ export class SettingsStore {
                 name: settings.name,
                 bodyFigure: settings.bodyFigure,
                 trainingGoal: settings.trainingGoal,
+                weeklySets: settings.weeklySets,
                 weightUnit: settings.weightUnit,
                 myEquipment: settings.myEquipment,
                 ...kettlebellOf(settings.kettlebellWeight),
@@ -162,6 +175,10 @@ export class SettingsStore {
         const next = { ...settings, ...changes };
         if (changes.name !== undefined) {
             next.name = cleanName(changes.name);
+        }
+        // A new goal starts its own sets a week, unless they're changed with it
+        if (next.trainingGoal !== settings.trainingGoal && changes.weeklySets === undefined) {
+            next.weeklySets = DEFAULT_WEEKLY_SETS[next.trainingGoal];
         }
         if (PROFILE_FIELDS.some((field) => !sameValue(next[field], settings[field]))) {
             next.profileUpdatedAt = this.clock.now(settings.profileUpdatedAt);
@@ -266,6 +283,8 @@ function loadSettings(): Settings {
     const theme = THEMES.find((t) => t === saved['theme']) ?? DEFAULT_SETTINGS.theme;
     const weightUnit =
         WEIGHT_UNITS.find((u) => u === saved['weightUnit']) ?? DEFAULT_SETTINGS.weightUnit;
+    const trainingGoal =
+        TRAINING_GOALS.find((g) => g === saved['trainingGoal']) ?? DEFAULT_SETTINGS.trainingGoal;
     return {
         theme,
         sound: flag('sound'),
@@ -277,9 +296,8 @@ function loadSettings(): Settings {
         bodyFigure:
             BODY_FIGURE_CHOICES.find((f) => f === saved['bodyFigure']) ??
             DEFAULT_SETTINGS.bodyFigure,
-        trainingGoal:
-            TRAINING_GOALS.find((g) => g === saved['trainingGoal']) ??
-            DEFAULT_SETTINGS.trainingGoal,
+        trainingGoal,
+        weeklySets: readWeeklySets(saved['weeklySets'], trainingGoal),
         // Kept in the order it's offered, so it reads the same however it was picked
         myEquipment: readMyEquipment(saved['myEquipment']) ?? DEFAULT_SETTINGS.myEquipment,
         onlyMyEquipment: flag('onlyMyEquipment'),

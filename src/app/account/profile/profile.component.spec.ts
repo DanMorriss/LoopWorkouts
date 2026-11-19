@@ -72,6 +72,13 @@ describe('ProfileComponent', () => {
     });
 
     describe('training for', () => {
+        const wheel = () =>
+            fixture.nativeElement.querySelector(
+                'app-weekly-sets-field [role="spinbutton"]'
+            ) as HTMLElement;
+        const setsHint = () =>
+            fixture.nativeElement.querySelector('#weekly-sets-hint').textContent.trim();
+
         it('offers Muscle and Fitness in a labelled group, with Muscle chosen to begin with', () => {
             create();
 
@@ -82,19 +89,47 @@ describe('ProfileComponent', () => {
             expect(
                 fixture.nativeElement.querySelector(`#${group.getAttribute('aria-describedby')}`)
                     .textContent
-            ).toBe('Aim for at least 10 sets a week on each muscle, 4 on small ones');
+            ).toBe(
+                'Choosing one sets the sets a week below to suit it: 10 for Muscle, 6 for Fitness'
+            );
         });
 
-        it('saves Fitness when picked, and says its lower aim', () => {
+        it('aims each muscle at 10 sets a week to begin with, 4 on small ones', () => {
             create();
+
+            expect(wheel().getAttribute('aria-valuenow')).toBe('10');
+            expect(wheel().getAttribute('aria-labelledby')).toBe(
+                'weekly-sets-label weekly-sets-hint'
+            );
+            expect(setsHint()).toBe('Small muscles, like the forearms, aim for 4');
+        });
+
+        it('saves the sets a week picked, with the small muscles following', () => {
+            create();
+
+            (
+                fixture.nativeElement.querySelector(
+                    'app-weekly-sets-field [data-value="14"]'
+                ) as HTMLElement
+            ).click();
+            fixture.detectChanges();
+
+            expect(settings.weeklySets()).toBe(14);
+            expect(wheel().getAttribute('aria-valuenow')).toBe('14');
+            expect(setsHint()).toBe('Small muscles, like the forearms, aim for 6');
+        });
+
+        it("puts the sets a week to Fitness's when it's picked", () => {
+            create();
+            settings.update({ weeklySets: 14 });
 
             radios('trainingGoal')[1].click();
             fixture.detectChanges();
 
             expect(settings.trainingGoal()).toBe('fitness');
-            expect(fixture.nativeElement.querySelector('#goal-hint').textContent).toBe(
-                'Aim for at least 6 sets a week on each muscle, 2 on small ones'
-            );
+            expect(settings.weeklySets()).toBe(6);
+            expect(wheel().getAttribute('aria-valuenow')).toBe('6');
+            expect(setsHint()).toBe('Small muscles, like the forearms, aim for 2');
         });
     });
 

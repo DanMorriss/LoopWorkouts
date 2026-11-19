@@ -66,7 +66,7 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 
 ## Acceptance criteria
 
-- Given a first visit, then the setup doesn't ask for a weight (5 questions).
+- Given a first visit, then the setup doesn't ask for a weight (6 questions).
 - Given no body weight, when a workout finishes, then the summary has no Calories, and has Add your weight to see calories; when I press it, then the run ends and You opens with focus in Body weight; and the history shows no calories.
 - Given I type 72.5 in Body weight, then it's saved, and the summary shows Calories, not Add your weight.
 - Given I type 160 in lb, then 72.6 kg is saved, and choosing Kilograms shows 72.6.

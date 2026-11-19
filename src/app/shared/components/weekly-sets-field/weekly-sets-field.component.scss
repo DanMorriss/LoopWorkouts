@@ -1,0 +1,23 @@
+@use 'switch-row' as *;
+
+// A row like Settings' wheels: the name and hint at the left, the wheel at the right
+:host {
+    @include switch-row;
+}
+
+.weekly-sets__text {
+    @include switch-row-text;
+}
+
+.weekly-sets__name {
+    @include switch-row-name;
+}
+
+.weekly-sets__hint {
+    @include switch-row-hint;
+}
+
+.weekly-sets__wheel {
+    flex: none;
+    width: 6.5rem;
+}

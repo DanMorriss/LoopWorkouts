@@ -111,7 +111,7 @@ for (const theme of ['dark', 'light'] as const) {
                 await app.goto('/welcome');
                 await noViolations(page, 'the welcome screen');
                 await page.getByRole('button', { name: 'Continue as guest' }).click();
-                await expect(page.getByText('Question 1 of 5')).toBeVisible();
+                await expect(page.getByText('Question 1 of 6')).toBeVisible();
                 await noViolations(page, 'a setup question');
                 await page.getByRole('button', { name: 'Skip for now' }).click();
                 await expect(page.getByRole('region', { name: 'Get started' })).toBeVisible();

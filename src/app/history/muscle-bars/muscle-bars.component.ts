@@ -1,11 +1,11 @@
 import { Component, computed, input } from '@angular/core';
 import { MUSCLE_LABELS } from '../../models/exercise';
-import { MuscleBalance, TrainingGoal } from '../../models/muscle-balance';
+import { MuscleBalance } from '../../models/muscle-balance';
 
 /**
  * A bar per muscle group for this week's sets, against the sets a week it aims for, marked by
  * a line across its track: short of it is under, at it or past it is reached, however far.
- * Small muscles aim lower, and every muscle lower when training for fitness. The line is drawn
+ * Small muscles aim lower (`weeklyAim()`), and every muscle's aim is set on Profile. The line is drawn
  * over the fill, so the aim still shows once the bar has passed it: a line on the track, or a
  * notch cut in the fill where the fill covers it.
  */
@@ -16,7 +16,6 @@ import { MuscleBalance, TrainingGoal } from '../../models/muscle-balance';
 })
 export class MuscleBarsComponent {
     readonly balance = input.required<readonly MuscleBalance[]>();
-    readonly goal = input.required<TrainingGoal>();
 
     /** The sets at the right end of the tracks: twice the highest aim, or the most done. */
     private readonly scale = computed(() =>

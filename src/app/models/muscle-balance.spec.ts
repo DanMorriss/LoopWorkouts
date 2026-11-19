@@ -3,11 +3,13 @@ import { BUILT_IN_EXERCISES } from './built-in-exercises';
 import { MuscleGroup } from './exercise';
 import { HistoryEntry, LoggedSet } from './history';
 import {
+    DEFAULT_WEEKLY_SETS,
     muscleBalance,
     muscleStatus,
+    readWeeklySets,
     setsByMuscle,
+    smallAim,
     suggestNextWorkout,
-    TrainingGoal,
     weeklyAim,
 } from './muscle-balance';
 import { Step } from './workout';
@@ -92,14 +94,28 @@ describe('muscleStatus', () => {
 });
 
 describe('weeklyAim', () => {
-    it('aims for 10 sets for muscle, and 4 on small muscles', () => {
-        expect(weeklyAim('chest', 'muscle')).toBe(10);
-        expect(weeklyAim('forearms', 'muscle')).toBe(4);
+    it('starts at 10 sets for muscle and 6 for fitness', () => {
+        expect(DEFAULT_WEEKLY_SETS).toEqual({ muscle: 10, fitness: 6 });
     });
 
-    it('aims lower for fitness: 6 sets, and 2 on small muscles', () => {
-        expect(weeklyAim('chest', 'fitness')).toBe(6);
-        expect(weeklyAim('obliques', 'fitness')).toBe(2);
+    it('aims each muscle at the sets a week, and small muscles at about two fifths, never 0', () => {
+        expect(weeklyAim('chest', 10)).toBe(10);
+        expect(weeklyAim('forearms', 10)).toBe(4);
+        expect(weeklyAim('obliques', 6)).toBe(2);
+        expect(weeklyAim('quads', 14)).toBe(14);
+        expect(weeklyAim('adductors', 14)).toBe(6);
+        expect([2, 3, 30].map(smallAim)).toEqual([1, 1, 12]);
+    });
+
+    it("reads saved sets a week from 2 to 30, or the goal's otherwise", () => {
+        expect(readWeeklySets(14, 'muscle')).toBe(14);
+        expect(readWeeklySets(2, 'muscle')).toBe(2);
+        expect(readWeeklySets(30, 'fitness')).toBe(30);
+        expect(readWeeklySets(undefined, 'muscle')).toBe(10);
+        expect(readWeeklySets(1, 'fitness')).toBe(6);
+        expect(readWeeklySets(31, 'muscle')).toBe(10);
+        expect(readWeeklySets(12.5, 'muscle')).toBe(10);
+        expect(readWeeklySets('12', 'muscle')).toBe(10);
     });
 });
 
@@ -114,7 +130,7 @@ describe('muscleBalance', () => {
                 ['chest', 22],
                 ['glutes', 12],
             ]),
-            'muscle'
+            10
         );
 
         expect(balance).toHaveLength(ALL_MUSCLES.length);
@@ -126,18 +142,20 @@ describe('muscleBalance', () => {
         ]);
     });
 
-    it('judges each muscle against its own aim, lower for small muscles and for fitness', () => {
+    it('judges each muscle against its own aim, lower for small muscles and fewer sets', () => {
         const counts = new Map<MuscleGroup, number>([
             ['forearms', 5],
             ['chest', 8],
         ]);
-        const status = (goal: TrainingGoal, name: MuscleGroup) =>
-            muscleBalance(counts, goal).find((m) => m.muscle === name)!.status;
+        const status = (weeklySets: number, name: MuscleGroup) =>
+            muscleBalance(counts, weeklySets).find((m) => m.muscle === name)!.status;
 
-        expect(status('muscle', 'forearms')).toBe('reached');
-        expect(status('muscle', 'chest')).toBe('under');
-        expect(status('fitness', 'forearms')).toBe('reached');
-        expect(status('fitness', 'chest')).toBe('reached');
+        expect(status(10, 'forearms')).toBe('reached');
+        expect(status(10, 'chest')).toBe('under');
+        expect(status(6, 'forearms')).toBe('reached');
+        expect(status(6, 'chest')).toBe('reached');
+        // Raised, the small muscles' aim goes up too
+        expect(status(14, 'forearms')).toBe('under');
     });
 });
 
@@ -177,7 +195,7 @@ describe('suggestNextWorkout', () => {
                 new Map(),
                 byId,
                 new Map(),
-                'muscle',
+                10,
                 avoid
             );
 
@@ -191,12 +209,9 @@ describe('suggestNextWorkout', () => {
             };
 
             expect(
-                suggestNextWorkout([legs, goblet], new Map(), byId, new Map(), 'muscle', avoid)
-                    ?.workout
+                suggestNextWorkout([legs, goblet], new Map(), byId, new Map(), 10, avoid)?.workout
             ).toBe(goblet);
-            expect(
-                suggestNextWorkout([legs], new Map(), byId, new Map(), 'muscle', avoid)
-            ).toBeNull();
+            expect(suggestNextWorkout([legs], new Map(), byId, new Map(), 10, avoid)).toBeNull();
         });
     });
 
@@ -208,7 +223,7 @@ describe('suggestNextWorkout', () => {
             ['triceps', 6],
         ] as const);
 
-        expect(suggestNextWorkout([legs, push], counts, byId, new Map(), 'muscle')).toEqual({
+        expect(suggestNextWorkout([legs, push], counts, byId, new Map(), 10)).toEqual({
             workout: push,
             muscles: ['chest'],
         });
@@ -229,9 +244,7 @@ describe('suggestNextWorkout', () => {
             ['triceps', 8],
         ]);
 
-        expect(suggestNextWorkout([grip, push], counts, byId, new Map(), 'muscle')?.workout).toBe(
-            push
-        );
+        expect(suggestNextWorkout([grip, push], counts, byId, new Map(), 10)?.workout).toBe(push);
     });
 
     it('on a tie, picks the one done longest ago, and one never done before that', () => {
@@ -240,18 +253,14 @@ describe('suggestNextWorkout', () => {
             ['push', 100],
         ]);
 
-        expect(suggestNextWorkout([legs, push], new Map(), byId, lastDone, 'muscle')?.workout).toBe(
-            push
-        );
+        expect(suggestNextWorkout([legs, push], new Map(), byId, lastDone, 10)?.workout).toBe(push);
         expect(
-            suggestNextWorkout([legs, push, calves], new Map(), byId, lastDone, 'muscle')?.workout
+            suggestNextWorkout([legs, push, calves], new Map(), byId, lastDone, 10)?.workout
         ).toBe(calves);
     });
 
     it('is null when no workout has a step linked to an exercise', () => {
-        expect(
-            suggestNextWorkout([makeWorkout()], new Map(), byId, new Map(), 'muscle')
-        ).toBeNull();
+        expect(suggestNextWorkout([makeWorkout()], new Map(), byId, new Map(), 10)).toBeNull();
     });
 
     it('never suggests a workout of only stretches, as it trains nothing', () => {
@@ -263,9 +272,9 @@ describe('suggestNextWorkout', () => {
         // However far past their aims the legs workout's muscles are
         const counts = new Map<MuscleGroup, number>(ALL_MUSCLES.map((muscle) => [muscle, 30]));
 
-        expect(suggestNextWorkout([stretches], new Map(), byId, new Map(), 'muscle')).toBeNull();
-        expect(
-            suggestNextWorkout([legs, stretches], counts, byId, new Map(), 'muscle')?.workout
-        ).toBe(legs);
+        expect(suggestNextWorkout([stretches], new Map(), byId, new Map(), 10)).toBeNull();
+        expect(suggestNextWorkout([legs, stretches], counts, byId, new Map(), 10)?.workout).toBe(
+            legs
+        );
     });
 });

@@ -34,6 +34,7 @@ function profile(updatedAt: number): Profile {
         name: 'Sam',
         bodyFigure: 'female',
         trainingGoal: 'fitness',
+        weeklySets: 6,
         weightUnit: 'lb',
         myEquipment: ['dumbbells'],
         updatedAt,

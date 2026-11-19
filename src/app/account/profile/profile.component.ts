@@ -1,16 +1,18 @@
 import { Component, computed, inject } from '@angular/core';
 import { BodyFigure } from '../../models/exercise';
-import { TrainingGoal, WEEKLY_AIMS } from '../../models/muscle-balance';
+import { DEFAULT_WEEKLY_SETS, TrainingGoal } from '../../models/muscle-balance';
 import { MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
 import { WeightFieldComponent } from './weight-field.component';
 import { ConsentService } from '../consent.service';
 import { BodyWeightConsentComponent } from './body-weight-consent.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
+import { WeeklySetsFieldComponent } from '../../shared/components/weekly-sets-field/weekly-sets-field.component';
 
 /**
  * Account → Profile: your name, for Home's greeting (SET-7), your sex, for the body map's
- * figure (SET-5), what you train for, for the muscle bars' aims (PRG-8), and the weight unit
+ * figure (SET-5), what you train for and the sets a week, for the muscle bars' aims (PRG-8),
+ * and the weight unit
  * you lift in (SET-4). They're saved with the settings, and synced with your account when
  * you're signed in, with your equipment and your kettlebell's weight (PRG-14), shown when you
  * have one, as your profile. Your body weight, for calories
@@ -18,7 +20,7 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
  */
 @Component({
     selector: 'app-profile',
-    imports: [BodyWeightConsentComponent, WeightFieldComponent],
+    imports: [BodyWeightConsentComponent, WeeklySetsFieldComponent, WeightFieldComponent],
     template: `
         <!-- Saved as it's left, trimmed -->
         <label class="picker-field profile__field">
@@ -65,7 +67,7 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
             <p class="profile__hint" id="sex-hint">The body the muscle maps show</p>
         </fieldset>
 
-        <!-- Sets the sets a week each muscle bar aims at -->
+        <!-- Sets the sets a week each muscle bar aims at, below, to suit it -->
         <fieldset class="segmented profile__picker" aria-describedby="goal-hint">
             <legend class="profile__name">Training for</legend>
             <div
@@ -91,8 +93,9 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
                     </label>
                 }
             </div>
-            <p class="profile__hint" id="goal-hint">{{ goalHint() }}</p>
+            <p class="profile__hint" id="goal-hint">{{ goalHint }}</p>
         </fieldset>
+        <app-weekly-sets-field class="profile__weekly-sets" />
 
         <!-- Weights are always saved in kg, so switching loses nothing -->
         <fieldset class="segmented profile__picker">
@@ -165,7 +168,8 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
             padding-top: 0.25rem;
         }
 
-        .profile__weight {
+        .profile__weight,
+        .profile__weekly-sets {
             margin-top: 1rem;
         }
 
@@ -203,10 +207,7 @@ export class ProfileComponent {
     protected readonly chosenGoalIndex = computed(() =>
         this.goals.findIndex((option) => option.value === this.settings.trainingGoal())
     );
-    protected readonly goalHint = computed(() => {
-        const { large, small } = WEEKLY_AIMS[this.settings.trainingGoal()];
-        return `Aim for at least ${large} sets a week on each muscle, ${small} on small ones`;
-    });
+    protected readonly goalHint = `Choosing one sets the sets a week below to suit it: ${DEFAULT_WEEKLY_SETS.muscle} for Muscle, ${DEFAULT_WEEKLY_SETS.fitness} for Fitness`;
 
     /** A kettlebell among your equipment, or a weight for one already known. */
     protected readonly hasKettlebell = computed(

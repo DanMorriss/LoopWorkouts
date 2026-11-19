@@ -53,12 +53,20 @@ test.describe('muscles worked this week', () => {
         // The plank 9 days ago doesn't count
         await expect(bars.filter({ hasText: /^Abs/ })).toContainText('0 sets, under 10');
 
-        // Training for Fitness, the aims come down
+        // Training for Fitness, the aims come down; set to 2 sets a week, the glutes reach it
         await app.goto('/account');
         await page.getByRole('radio', { name: 'Fitness' }).check();
-        await expect(page.getByText(/at least 6 sets a week/)).toBeVisible();
+        const sets = page.getByRole('spinbutton', { name: /^Sets a week per muscle/ });
+        await expect(sets).toHaveAttribute('aria-valuenow', '6');
         await app.goto('/history');
         await expect(bars.nth(0)).toContainText(/^Glutes.*2 sets, under 6$/);
+        await app.goto('/account');
+        await sets.focus();
+        await page.keyboard.press('Home');
+        await expect(sets).toHaveAttribute('aria-valuenow', '2');
+        await app.goto('/history');
+        await expect(bars.nth(0)).toContainText(/^Glutes.*2 sets, 2 reached$/);
+        await expect(bars.nth(2)).toContainText(/^Adductors.*1 set, 1 reached$/);
     });
 });
 

@@ -10,7 +10,6 @@ describe('MuscleBarsComponent', () => {
     async function create(balance: MuscleBalance[]) {
         fixture = TestBed.createComponent(MuscleBarsComponent);
         fixture.componentRef.setInput('balance', balance);
-        fixture.componentRef.setInput('goal', 'muscle');
         fixture.detectChanges();
         await fixture.whenStable();
     }

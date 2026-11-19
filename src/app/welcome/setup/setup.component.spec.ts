@@ -94,7 +94,7 @@ describe('SetupComponent (NAV-4)', () => {
 
     it('asks one question at a time, saving each answer, then goes on to Today, all set', async () => {
         await create();
-        expect(element.textContent).toContain('Question 1 of 5');
+        expect(element.textContent).toContain('Question 1 of 6');
         expect(heading()).toBe('What should we call you?');
         expect(document.activeElement).toBe(element.querySelector('h2'));
 
@@ -107,6 +107,16 @@ describe('SetupComponent (NAV-4)', () => {
         expect(heading()).toBe('What do you train for?');
         await choose('Fitness');
         expect(settings().trainingGoal()).toBe('fitness');
+        await press('Next');
+
+        // Starting from the goal's, and saved as the wheel turns
+        expect(heading()).toBe('How many sets a week for each muscle?');
+        expect(element.textContent).toContain('6 suits staying fit and active');
+        const wheel = element.querySelector('app-weekly-sets-field [role="spinbutton"]')!;
+        expect(wheel.getAttribute('aria-valuenow')).toBe('6');
+        (element.querySelector('app-weekly-sets-field [data-value="8"]') as HTMLElement).click();
+        await fixture.whenStable();
+        expect(settings().weeklySets()).toBe(8);
         await press('Next');
 
         expect(heading()).toBe('What equipment do you have?');
@@ -169,6 +179,7 @@ describe('SetupComponent (NAV-4)', () => {
             name: 'Sam',
             bodyFigure: 'female',
             trainingGoal: 'muscle',
+            weeklySets: 10,
             weightUnit: 'kg',
             myEquipment: [],
             updatedAt: 5,

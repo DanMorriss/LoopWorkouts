@@ -5,6 +5,7 @@ describe('profile (NAV-4)', () => {
         name: 'Sam',
         bodyFigure: 'female',
         trainingGoal: 'muscle',
+        weeklySets: 12,
         weightUnit: 'kg',
         myEquipment: ['kettlebell', 'barbell'],
         updatedAt: 5,
@@ -30,6 +31,15 @@ describe('profile (NAV-4)', () => {
         expect(readProfile(profile)).toEqual(read);
         expect(readProfile({ ...profile, kettlebellWeight: '16' })).toEqual(read);
         expect(readProfile({ ...profile, kettlebellWeight: 0 })).toEqual(read);
+    });
+
+    it("reads the sets a week (PRG-8), or the goal's where they're missing or not usable", () => {
+        const older: Record<string, unknown> = { ...profile };
+        delete older['weeklySets'];
+        expect(readProfile(older)?.weeklySets).toBe(10);
+        expect(readProfile({ ...older, trainingGoal: 'fitness' })?.weeklySets).toBe(6);
+        expect(readProfile({ ...profile, weeklySets: 40 })?.weeklySets).toBe(10);
+        expect(readProfile(profile)?.weeklySets).toBe(12);
     });
 
     it("doesn't read a broken one", () => {

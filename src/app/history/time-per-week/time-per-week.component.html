@@ -1,18 +1,5 @@
 <section class="weeks" [attr.aria-labelledby]="id + '-title'">
-    <div class="weeks__head">
-        <h3 class="weeks__title" [id]="id + '-title'">Time per week</h3>
-        @if (anyTime()) {
-            <!-- Up here, so it stays put as the table and the bars swap under it -->
-            <button
-                type="button"
-                class="weeks__toggle"
-                [attr.aria-controls]="id + '-view'"
-                (click)="asTable.set(!asTable())"
-            >
-                {{ asTable() ? 'Show as a chart' : 'Show as a table' }}
-            </button>
-        }
-    </div>
+    <h3 class="weeks__title" [id]="id + '-title'">Time per week</h3>
 
     @if (!anyTime()) {
         <p class="weeks__empty">No workouts in the last {{ weekCount }} weeks.</p>
@@ -24,33 +11,9 @@
             <span class="weeks__when">{{ week.label }} · {{ week.count }}</span>
         </p>
 
-        <div class="weeks__view" [id]="id + '-view'">
-            @if (asTable()) {
-                <table class="weeks__table">
-                    <caption class="sr-only">
-                        Time per week,
-                        {{
-                            span()
-                        }}
-                    </caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Week of</th>
-                            <th scope="col">Workouts</th>
-                            <th scope="col">Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (bar of bars(); track bar.start) {
-                            <tr>
-                                <td>{{ bar.start | date: 'd MMM' }}</td>
-                                <td>{{ bar.workouts }}</td>
-                                <td>{{ bar.time }}</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            } @else {
+        <!-- The bars, and swiped to, a table of the same weeks; the chosen week stays over both -->
+        <app-carousel label="Time per week" itemName="View" [fitShown]="true">
+            <ng-template appSlide="Chart">
                 <!-- Arrow keys step through the weeks; the readout says each one -->
                 <div
                     class="weeks__chart"
@@ -121,7 +84,33 @@
                         >{{ week.spokenLabel }}: {{ week.spoken }}</span
                     >
                 </div>
-            }
-        </div>
+            </ng-template>
+            <ng-template appSlide="Table">
+                <table class="weeks__table">
+                    <caption class="sr-only">
+                        Time per week,
+                        {{
+                            span()
+                        }}
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Week of</th>
+                            <th scope="col">Workouts</th>
+                            <th scope="col">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (bar of bars(); track bar.start) {
+                            <tr>
+                                <td>{{ bar.start | date: 'd MMM' }}</td>
+                                <td>{{ bar.workouts }}</td>
+                                <td>{{ bar.time }}</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </ng-template>
+        </app-carousel>
     }
 </section>

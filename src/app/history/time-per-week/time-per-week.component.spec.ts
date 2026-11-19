@@ -147,29 +147,37 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         expect(lit()).toBe(0);
     });
 
-    it('swaps the bars for a table, a row a week, and back, keeping focus on its button', () => {
+    it('has a table of the same weeks beside the bars, a dot for each to go to it', async () => {
         create(entry(day(11, 3), 1800), entry(day(10, 21), 600));
-        const toggle = el().querySelector<HTMLButtonElement>('.weeks__toggle')!;
-        toggle.focus();
 
-        toggle.click();
-        fixture.detectChanges();
-
-        expect(el().querySelector('.weeks__chart')).toBeNull();
-        const rows = el().querySelectorAll('.weeks__table tbody tr');
+        const slides = [...el().querySelectorAll('.carousel__slide')];
+        expect(slides.map((slide) => slide.getAttribute('aria-label'))).toEqual([
+            'Chart 1 of 2',
+            'Table 2 of 2',
+        ]);
+        expect(slides[0].querySelector('.weeks__chart')).not.toBeNull();
+        // As tall as the bars, not the table beside them, which is its own height
+        const track = el().querySelector<HTMLElement>('.carousel__track')!;
+        await vi.waitFor(() =>
+            expect(track.offsetHeight).toBe((slides[0] as HTMLElement).offsetHeight)
+        );
+        expect(track.offsetHeight).not.toBe((slides[1] as HTMLElement).offsetHeight);
+        const rows = slides[1].querySelectorAll('.weeks__table tbody tr');
         expect(rows).toHaveLength(3);
         expect([...rows[2].querySelectorAll('td')].map((cell) => cell.textContent!.trim())).toEqual(
             ['2 Nov', '1', '30:00']
         );
-        expect(toggle.textContent!.trim()).toBe('Show as a chart');
-        expect(document.activeElement).toBe(toggle);
 
-        toggle.click();
+        const dots = [...el().querySelectorAll<HTMLButtonElement>('.carousel__dot')];
+        expect(dots.map((dot) => dot.getAttribute('aria-label'))).toEqual([
+            'Chart 1 of 2',
+            'Table 2 of 2',
+        ]);
+        dots[1].click();
         fixture.detectChanges();
-
-        expect(el().querySelector('.weeks__table')).toBeNull();
-        expect(el().querySelector('.weeks__chart')).not.toBeNull();
-        expect(toggle.textContent!.trim()).toBe('Show as a table');
+        expect(dots[1].getAttribute('aria-current')).toBe('true');
+        // The chosen week stays over the table
+        expect(text('.weeks__when')).toBe('2–8 Nov · 1 workout');
     });
 
     it('starts at the week of the first workout for someone new', () => {
@@ -200,6 +208,6 @@ describe('TimePerWeekComponent (PRG-12)', () => {
 
         expect(text('.weeks__empty')).toBe('No workouts in the last 12 weeks.');
         expect(el().querySelector('.weeks__chart')).toBeNull();
-        expect(el().querySelector('.weeks__toggle')).toBeNull();
+        expect(el().querySelector('app-carousel')).toBeNull();
     });
 });

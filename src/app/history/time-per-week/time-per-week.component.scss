@@ -14,14 +14,6 @@
     @include panel-card;
 }
 
-// The title, with the table's toggle at the right, where swapping can't move it
-.weeks__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-}
-
 .weeks__title {
     margin: 0;
     color: var(--text-strong);
@@ -58,10 +50,17 @@
 .weeks__chart {
     @include chart-frame;
     margin-top: 0.25rem;
+
+    // Inside the carousel's slide, whose edge would cut off a ring further out
+    &:focus-visible {
+        outline-offset: 1px;
+    }
 }
 
+// A finger swiping sideways goes to the table, as the carousel's other slides are swiped to
 .weeks__svg {
     @include chart-svg;
+    touch-action: pan-x pan-y;
 }
 
 .weeks__grid {
@@ -79,10 +78,6 @@
 
 .weeks__bar--shown {
     fill: var(--glow-text);
-}
-
-.weeks__toggle {
-    @include chart-toggle;
 }
 
 .weeks__table {

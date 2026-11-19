@@ -2,6 +2,10 @@ import { DatePipe, formatDate } from '@angular/common';
 import { Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { timePerWeek, WeekTotal } from '../../models/time-per-week';
 import { chartKeyMove } from '../../shared/chart-keys';
+import {
+    CarouselComponent,
+    SlideDirective,
+} from '../../shared/components/carousel/carousel.component';
 import { counted } from '../../shared/format-count';
 import { ShownHistory } from '../shown-history';
 import { formatDuration } from '../history-format';
@@ -43,11 +47,12 @@ interface WeekBar extends WeekTotal {
  * The time spent working out each week, for the last 12 weeks, as bars (PRG-12), from the
  * week of the first workout for someone newer. The chosen week's time and workouts sit over
  * the bars, starting on this week; a tap or the arrow keys choose another, which stays chosen,
- * and hovering shows one for as long as the pointer's over it. A table can stand in for the bars.
+ * and hovering shows one for as long as the pointer's over it. A table of the same weeks is
+ * swiped to beside the bars.
  */
 @Component({
     selector: 'app-time-per-week',
-    imports: [DatePipe],
+    imports: [CarouselComponent, DatePipe, SlideDirective],
     templateUrl: './time-per-week.component.html',
     styleUrl: './time-per-week.component.scss',
 })
@@ -122,13 +127,11 @@ export class TimePerWeekComponent {
     );
     protected readonly shown = computed(() => this.bars()[this.shownIndex()]);
 
-    /** Whether the table is showing in place of the bars. */
-    protected readonly asTable = signal(false);
-
     /**
-     * A press, or a finger or button dragged across, chooses the week under it; a mouse or pen
-     * moving with nothing pressed only hovers. A finger's pointer leaves as it lifts, so leaving
-     * can't be what ends a tap's choice.
+     * A press, or a mouse or pen dragged across, chooses the week under it; a mouse or pen
+     * moving with nothing pressed only hovers. A finger swiping across goes to the table
+     * instead. A finger's pointer leaves as it lifts, so leaving can't be what ends a tap's
+     * choice.
      */
     protected onPointer(event: PointerEvent) {
         const week = this.weekAt(event);

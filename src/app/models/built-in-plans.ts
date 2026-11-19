@@ -170,9 +170,11 @@ export function plansFor(
 }
 
 /**
- * The plan Today offers to start with (NAV-6): the first for your goal that your equipment
- * allows. No-equipment plans suit both goals, so there's always one.
+ * The plans Today offers with nothing planned (NAV-6, PLN-7): those your equipment allows,
+ * the best for your goal first. No-equipment plans need nothing and suit both goals, so
+ * there's always one; the first of all, else.
  */
-export function firstPlan(goal: TrainingGoal, kit: readonly Equipment[]): BuiltInPlan {
-    return plansFor(goal, kit, true)[0] ?? BUILT_IN_PLANS[0];
+export function plansForYou(goal: TrainingGoal, kit: readonly Equipment[]): BuiltInPlan[] {
+    const mine = plansFor(goal, kit, true);
+    return mine.length ? mine : BUILT_IN_PLANS.slice(0, 1);
 }

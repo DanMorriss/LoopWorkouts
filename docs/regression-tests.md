@@ -92,7 +92,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Expected:**
     1. Each question's heading takes focus as it shows, and "Question N of 6" counts up. Sets a week per muscle starts at 6, from Fitness. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
     2. After Done, `/home` opens with "Good morning, Sam" and the Undo bar showing "You're all set, Sam. Change any of it on You, under Profile." with no Undo; the `setup` key is gone.
-    3. Today shows **Get started** offering a ready-made plan. For Fitness with a kettlebell that's **Fitness, 4 days** (`firstPlan()`), not a single workout: see mismatch M3.
+    3. Today shows **Get started** offering a ready-made plan. For Fitness with a kettlebell that's **Fitness, 4 days** (the first of `plansForYou()`), not a single workout: see mismatch M3.
     4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Sets a week per muscle 8, Weight units kg. The Exercises page has **Only what I have** on with "My equipment: 1 piece".
 
 ### REG-NAV-03 · Skipping the setup
@@ -1655,7 +1655,7 @@ Found while checking the docs against the code. None is fixed here.
 
 - **M1. A library card's tap.** _Settled: library.md now says a tap opens the details._ `library.md`'s acceptance criterion "Given a card, when I tap it, then that workout starts and the workout page opens" is out of date: its own rule (and `workout-card.component.html`) say a tap opens the details at `/library/<id>`, and the play button starts it.
 - **M2. New workout ids.** `build-a-workout.md` says "Saving a new workout gives it the next id (one more than the highest saved)". The code uses `crypto.randomUUID()` (`newId()` in `models/sync.ts`), as `data.md` says.
-- **M3. What Today offers after the setup.** `home-and-navigation.md`'s acceptance criterion for the setup ends "offering Kettlebell full body to add". Since 2026-11-03, Get started offers a ready-made plan (`firstPlan()`): for Fitness with a kettlebell, Fitness, 4 days.
+- **M3. What Today offers after the setup.** `home-and-navigation.md`'s acceptance criterion for the setup ends "offering Kettlebell full body to add". Since 2026-11-03, Get started offers a ready-made plan (the first of `plansForYou()`): for Fitness with a kettlebell, Fitness, 4 days.
 - **M4. The suggested workout once today's are done.** `planning.md`'s criterion "when I've run both, then it says All done: Push, Legs and the suggested workout is back" contradicts its own rule and `home.component.html` (`hasHistory() && !hasPlan()`): with a week planned, the suggestion never shows.
 - **M5. A planning criterion that doesn't add up.** `planning.md`: Wednesday, with Push planned Tuesday "run on Wednesday instead" and Push also planned today, gives "1 of 4 done so far this week". A Push run on Wednesday should count for Wednesday's Push, making 2 of 4, unless the run is meant to be before it was planned. REG-PLAN-04 uses an unambiguous seed instead; worth checking which is meant.
 - **M6. The options button's name.** `accessibility.md` names it "Options for …"; the code's is "Open options for <name>".

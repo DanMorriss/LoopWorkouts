@@ -28,7 +28,8 @@ export class SlideDirective {
 
 /**
  * Slides side by side, one shown at a time, swiped between (the browser's own scrolling,
- * snapping to each), with a dot for each under them to go to it. With one slide, it's shown
+ * snapping to each), with a dot for each under them to go to it (or over them, with
+ * `dotsFirst`, for slides too tall for dots under them to be seen). With one slide, it's shown
  * alone, with no dots. Tabbing into a slide off to the side scrolls it into view.
  *
  * Slides are as tall as the tallest, and what's in each is stretched to fill it; or, with
@@ -45,6 +46,9 @@ export class SlideDirective {
             aria-roledescription="carousel"
             [attr.aria-label]="label()"
         >
+            @if (dotsFirst()) {
+                <ng-container *ngTemplateOutlet="dots" />
+            }
             <div
                 #track
                 class="carousel__track"
@@ -64,6 +68,11 @@ export class SlideDirective {
                     </div>
                 }
             </div>
+            @if (!dotsFirst()) {
+                <ng-container *ngTemplateOutlet="dots" />
+            }
+        </div>
+        <ng-template #dots>
             @if (slides().length > 1) {
                 <div class="carousel__dots">
                     @for (slide of slides(); track slide; let i = $index) {
@@ -79,7 +88,7 @@ export class SlideDirective {
                     }
                 </div>
             }
-        </div>
+        </ng-template>
     `,
     styleUrl: './carousel.component.scss',
 })
@@ -90,6 +99,8 @@ export class CarouselComponent {
     readonly itemName = input.required<string>();
     /** Whether the carousel is as tall as the slide in view, rather than the tallest. */
     readonly fitShown = input(false);
+    /** Whether the dots go over the slides, rather than under them. */
+    readonly dotsFirst = input(false);
 
     protected readonly slides = contentChildren(SlideDirective);
     private readonly track = viewChild.required<ElementRef<HTMLElement>>('track');

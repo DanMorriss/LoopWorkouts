@@ -26,7 +26,6 @@ Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on 
 
 ### Planning your own week
 
-- [ ] **Swipe through the plans with nothing planned:** This week with workouts of your own but no plan still offers just the first plan; it could swipe as Get started's does (NAV-6, PLN-7).
 - [ ] **Do it today from Today:** Due today could list this week's missed workouts with Do today, as well as the Plan page's menu.
 
 ### Sync
@@ -75,17 +74,11 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 ### Running a workout
 
 - [ ] **Skipped exercises left at the finish:** anything still put aside when the workout finishes isn't offered. Skipping the last exercise finishes the workout at once (RUN-12), so one skipped there can't be done later. If that's wanted, the finish could ask first ("Do Plank before you finish?").
-- [ ] **For Dan to look at on a phone, mid-workout:** the Up next card's size beside the ring, and whether the dotted line under a step's name says "tap me" enough (RUN-2, RUN-11).
 
 ### Code health
 
 How to keep the codebase from degrading is in `CLAUDE.md`.
 
-- [ ] **Check the swipes on an iPhone,** as they're all touch and the touch tests run only in Chromium:
-    - Swiping a page back, and swiping the run bar away (`RunBarComponent` and `SwipeBackDirective` share `SideSwipe`, `shared/side-swipe.ts`).
-    - The carousels (`shared/components/carousel/`): Today's suggested workouts, the plans on Get started, and the chart and table on Progress's time per week and on an exercise's page. Each should swipe sideways without the page scrolling or swiping back, and its dots should follow.
-    - On an exercise's page, swiping right from the progress table back to the chart: it swiped the page back to the list before 2026-11-19's fix.
-    - A tap on a chart's bar or point still chooses it, rather than swiping.
 - [ ] **`WorkoutSetupForm` is still large** (about 860 lines on 2026-11-19, up from 780): it keeps the form, the steps' rows and opening them, and loading and saving. Turning a saved workout into rows and back (`stepModels()`, `stepModel()`) could go next. `WorkoutView` (636, up from 518 with waiting for Start and doing a skipped exercise later) is signals built on one another, so it'd split only into services handing those back and forth.
 - [ ] **`help-link`, the last of `shared/`'s imports from a feature** (`help/help-topics`): it goes once the tours replace the ? links (see Help). `PageSlide` and the helpers it uses moved to `shared/navigation/`, and `AUTH_STORAGE_KEY` to `shared/state/auth-storage-key.ts` (2026-11-11). The test fakes in `shared/testing/` import what they fake, which is fine.
 

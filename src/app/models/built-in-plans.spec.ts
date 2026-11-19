@@ -2,7 +2,7 @@ import {
     BUILT_IN_PLANS,
     builtInPlanEquipment,
     canDoPlanWith,
-    firstPlan,
+    plansForYou,
     plansFor,
     planWorkouts,
     withoutActiveRest,
@@ -106,16 +106,26 @@ describe('plansFor', () => {
     });
 });
 
-describe('firstPlan (PLN-7)', () => {
+describe('plansForYou (PLN-7)', () => {
     it('offers the first for your goal your equipment allows', () => {
-        expect(firstPlan('muscle', ['machine', 'dumbbells', 'bench', 'cable']).title).toBe(
+        expect(plansForYou('muscle', ['machine', 'dumbbells', 'bench', 'cable'])[0].title).toBe(
             '3-day beginner gym'
         );
-        expect(firstPlan('muscle', ['dumbbells', 'bench']).title).toBe('Dumbbells at home, 4 days');
-        expect(firstPlan('muscle', ['kettlebell']).title).toBe('Kettlebell, 3 days');
-        expect(firstPlan('muscle', []).title).toBe('No equipment, 3 days');
-        expect(firstPlan('fitness', ['kettlebell']).title).toBe('Fitness, 4 days');
-        expect(firstPlan('fitness', []).title).toBe('No equipment, 3 days');
+        expect(plansForYou('muscle', ['dumbbells', 'bench'])[0].title).toBe(
+            'Dumbbells at home, 4 days'
+        );
+        expect(plansForYou('muscle', ['kettlebell'])[0].title).toBe('Kettlebell, 3 days');
+        expect(plansForYou('muscle', [])[0].title).toBe('No equipment, 3 days');
+        expect(plansForYou('fitness', ['kettlebell'])[0].title).toBe('Fitness, 4 days');
+        expect(plansForYou('fitness', [])[0].title).toBe('No equipment, 3 days');
+    });
+
+    it('offers the plans needing nothing beside those for your equipment', () => {
+        for (const kit of [['kettlebell'], ['band'], ['dumbbells', 'bench']] as const) {
+            expect(plansForYou('muscle', kit).map((plan) => plan.title)).toContain(
+                'No equipment, 3 days'
+            );
+        }
     });
 });
 

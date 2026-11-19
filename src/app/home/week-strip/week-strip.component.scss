@@ -132,19 +132,3 @@
 .week__empty {
     margin: 0 0 0.75rem;
 }
-
-// With nothing planned, the suggested plan's card, then All plans and Make your own plan side by
-// side and centred, as the other pages' buttons are; one over the other, each across the
-// card, where they don't fit side by side
-.week__actions {
-    margin-top: 0.75rem;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 0.6rem;
-
-    > * {
-        flex: 1 1 auto;
-    }
-}

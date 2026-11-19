@@ -1,13 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
-import { PageSlide } from '../../shared/navigation/page-slide';
-import { BUILT_IN_PLANS, BuiltInPlan, plansFor } from '../../models/built-in-plans';
-import {
-    CarouselComponent,
-    SlideDirective,
-} from '../../shared/components/carousel/carousel.component';
-import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
+import { plansForYou } from '../../models/built-in-plans';
 import { SettingsStore } from '../../shared/state/settings-store.service';
-import { injectUsePlanOnToday } from '../use-plan-on-today';
+import { PlansForYouComponent } from '../plans-for-you/plans-for-you.component';
 
 /**
  * Today with no workouts yet (NAV-6): a week to start with, planned for you (PLN-7). The
@@ -18,59 +12,26 @@ import { injectUsePlanOnToday } from '../use-plan-on-today';
  */
 @Component({
     selector: 'app-get-started',
-    imports: [CarouselComponent, PlanCardComponent, SlideDirective],
+    imports: [PlansForYouComponent],
     template: `
         <section class="start" aria-labelledby="get-started-title">
             <h3 class="start__label" id="get-started-title">Get started</h3>
             <p class="start__lead">Start with a week of workouts, planned for you. {{ lead() }}</p>
-            <app-carousel label="Plans for you" itemName="Plan">
-                @for (plan of plans(); track plan.id) {
-                    <ng-template appSlide>
-                        <app-plan-card [plan]="plan" [main]="true" (used)="use($event)" />
-                    </ng-template>
-                }
-            </app-carousel>
-            <!-- The other ways, as on This week once there are workouts: side by side -->
-            <div class="start__actions">
-                <a
-                    href="/ready-made-plans"
-                    class="btn-pill"
-                    (click)="slide.follow($event, '/ready-made-plans', 'in')"
-                    >All plans</a
-                >
-                <a href="/plan" class="btn-pill" (click)="slide.follow($event, '/plan', 'in')"
-                    >Make your own plan</a
-                >
-            </div>
+            <app-plans-for-you [plans]="plans()" />
         </section>
     `,
     styleUrl: './get-started.component.scss',
 })
 export class GetStartedComponent {
-    protected readonly slide = inject(PageSlide);
     private readonly settings = inject(SettingsStore);
-    private readonly usePlan = injectUsePlanOnToday();
 
-    /**
-     * The ready-made plans your equipment allows, those for your goal first. No-equipment
-     * plans need nothing, so there's always one; the first of all, as `firstPlan()` has, else.
-     */
-    protected readonly plans = computed(() => {
-        const mine = plansFor(this.settings.trainingGoal(), this.settings.myEquipment(), true);
-        return mine.length ? mine : BUILT_IN_PLANS.slice(0, 1);
-    });
+    protected readonly plans = computed(() =>
+        plansForYou(this.settings.trainingGoal(), this.settings.myEquipment())
+    );
 
     protected readonly lead = computed(() =>
         this.plans().length > 1
             ? 'Here are some for your goal and equipment, best first:'
             : "Here's one for your goal and equipment:"
     );
-
-    /**
-     * Uses it as its card shows it, with or without its active rest, with Undo. This card then
-     * goes, and the week takes its place, so focus moves there, to Edit plan.
-     */
-    protected use(plan: BuiltInPlan) {
-        this.usePlan(plan);
-    }
 }

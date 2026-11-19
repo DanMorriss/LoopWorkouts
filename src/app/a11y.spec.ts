@@ -455,7 +455,9 @@ for (const theme of ['dark', 'light'] as const) {
                 });
                 await open('/home');
                 expect(fixture.nativeElement.querySelector('.suggestion')).not.toBeNull();
-                expect(fixture.nativeElement.querySelector('.week__ready-made')).not.toBeNull();
+                expect(
+                    fixture.nativeElement.querySelector('app-week-strip app-plans-for-you')
+                ).not.toBeNull();
                 await expectNoViolations();
             });
         });

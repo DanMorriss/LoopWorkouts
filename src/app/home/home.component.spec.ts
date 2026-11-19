@@ -152,11 +152,11 @@ describe('HomeComponent', () => {
             expect(inFirst('.plan-card__rest-count')).toEqual(['+ 2 active rest']);
             expect(inFirst('.plan-card__rest-label')).toEqual(['On rest days']);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
-            for (const link of element().querySelectorAll('.start__actions a')) {
+            for (const link of element().querySelectorAll('.plans__actions a')) {
                 expect(link.classList).toContain('btn-pill');
             }
             expect(
-                [...element().querySelectorAll('.start__actions a')].map((link) => [
+                [...element().querySelectorAll('.plans__actions a')].map((link) => [
                     link.textContent!.trim(),
                     link.getAttribute('href'),
                 ])
@@ -186,8 +186,13 @@ describe('HomeComponent', () => {
             expect(dots().map((dot) => dot.getAttribute('aria-current'))).toEqual(
                 PLANS_FOR_KETTLEBELL.map((_, i) => (i === 0 ? 'true' : null))
             );
-            // Above All plans and Make your own plan
-            const actions = element().querySelector('.start__actions')!;
+            // Over the slides, as they're too tall for dots under them to be seen, and above All
+            // plans and Make your own plan
+            const firstSlide = element().querySelector('app-get-started .carousel__slide')!;
+            expect(
+                dots()[0].compareDocumentPosition(firstSlide) & Node.DOCUMENT_POSITION_FOLLOWING
+            ).toBeTruthy();
+            const actions = element().querySelector('.plans__actions')!;
             expect(
                 dots()[0].compareDocumentPosition(actions) & Node.DOCUMENT_POSITION_FOLLOWING
             ).toBeTruthy();
@@ -364,7 +369,7 @@ describe('HomeComponent', () => {
             expect(element().querySelector('app-week-strip')).toBeNull();
         });
 
-        it('with nothing planned, offers a ready-made week, more plans, or planning your own', () => {
+        it('with nothing planned, offers the ready-made weeks, more plans, or planning your own', () => {
             TestBed.inject(SettingsStore).update({
                 trainingGoal: 'fitness',
                 myEquipment: ['kettlebell'],
@@ -374,12 +379,16 @@ describe('HomeComponent', () => {
 
             expect(text('.week__label')).toEqual(['This week']);
             expect(text('.week__empty')).toEqual([
-                "Nothing planned yet. Here's a week of ready-made workouts for your goal and equipment, or plan your own and Today shows what's due each day.",
+                "Nothing planned yet. Here are some weeks of ready-made workouts for your goal and equipment, best first, or plan your own and Today shows what's due each day.",
             ]);
-            expect(text('app-week-strip .plan-card__title')).toEqual(['Fitness, 4 days']);
+            // Each your kit allows, to swipe between, as on Get started
+            expect(text('app-week-strip .plan-card__title')).toEqual(PLANS_FOR_KETTLEBELL);
+            expect(element().querySelectorAll('app-week-strip .carousel__dot').length).toBe(
+                PLANS_FOR_KETTLEBELL.length
+            );
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
             expect(
-                [...element().querySelectorAll('.week__actions a')].map((link) => [
+                [...element().querySelectorAll('.plans__actions a')].map((link) => [
                     link.textContent!.trim(),
                     link.getAttribute('href'),
                     link.classList.contains('btn-pill'),

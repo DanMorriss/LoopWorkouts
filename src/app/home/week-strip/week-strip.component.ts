@@ -1,8 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { injectThisWeek } from '../../shared/state/this-week';
-import { BuiltInPlan, firstPlan } from '../../models/built-in-plans';
+import { plansForYou } from '../../models/built-in-plans';
 import { PageSlide } from '../../shared/navigation/page-slide';
-import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
 import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import {
@@ -14,7 +13,8 @@ import {
 } from '../../models/plan';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
-import { injectUsePlanOnToday, WEEK_EDIT_ID } from '../use-plan-on-today';
+import { WEEK_EDIT_ID } from '../use-plan-on-today';
+import { PlansForYouComponent } from '../plans-for-you/plans-for-you.component';
 
 /**
  * How a day of the strip looks: everything on it done, some missed, still to do, only active
@@ -44,13 +44,13 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
 /**
  * The week on Today (PLN-4): Monday to Sunday, each day marked done, missed, planned or free,
  * today picked out, how many of the week's planned workouts are done and the next one to come,
- * and **Edit plan**, which slides the weekly plan in. With nothing planned, a ready-made week
- * for your goal and equipment, used in one tap (PLN-6) as on Get started; or All plans, or
- * Make your own plan (NAV-6).
+ * and **Edit plan**, which slides the weekly plan in. With nothing planned, the ready-made
+ * weeks for your goal and equipment, swiped between and used in one tap (PLN-6) as on Get
+ * started; or All plans, or Make your own plan (NAV-6).
  */
 @Component({
     selector: 'app-week-strip',
-    imports: [HelpLinkComponent, IconComponent, PlanCardComponent],
+    imports: [HelpLinkComponent, IconComponent, PlansForYouComponent],
     template: `
         <section class="week" aria-labelledby="week-title">
             <div class="week__head">
@@ -91,27 +91,10 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
                     }
                 </p>
             } @else {
-                <!-- A week ready-made for your goal and equipment (PLN-6), used in one tap,
+                <!-- Weeks ready-made for your goal and equipment (PLN-6), used in one tap,
                      as the main way; or the other plans, or planning your own workouts -->
-                <p class="week__empty">
-                    Nothing planned yet. Here's a week of ready-made workouts for your goal and
-                    equipment, or plan your own and Today shows what's due each day.
-                </p>
-                <app-plan-card [plan]="suggestedPlan()" [main]="true" (used)="use($event)" />
-                <div class="week__actions">
-                    <a
-                        href="/ready-made-plans"
-                        class="btn-pill week__ready-made"
-                        (click)="slide.follow($event, '/ready-made-plans', 'in')"
-                        >All plans</a
-                    >
-                    <a
-                        href="/plan"
-                        class="btn-pill week__plan"
-                        (click)="slide.follow($event, '/plan', 'in')"
-                        >Make your own plan</a
-                    >
-                </div>
+                <p class="week__empty">{{ emptyLead() }}</p>
+                <app-plans-for-you [plans]="suggestedPlans()" />
             }
         </section>
     `,
@@ -122,7 +105,6 @@ export class WeekStripComponent {
     protected readonly slide = inject(PageSlide);
     private readonly settings = inject(SettingsStore);
     private readonly thisWeek = injectThisWeek();
-    private readonly usePlan = injectUsePlanOnToday();
     protected readonly weekEditId = WEEK_EDIT_ID;
     private readonly now = Date.now();
     private readonly today = weekdayOf(this.now);
@@ -133,19 +115,19 @@ export class WeekStripComponent {
 
     private readonly week = computed(() => this.thisWeek(this.now));
 
-    /** With nothing planned, the ready-made plan to suggest, for your goal and equipment. */
-    protected readonly suggestedPlan = computed(() =>
-        firstPlan(this.settings.trainingGoal(), this.settings.myEquipment())
+    /** With nothing planned, the ready-made plans to suggest, for your goal and equipment. */
+    protected readonly suggestedPlans = computed(() =>
+        plansForYou(this.settings.trainingGoal(), this.settings.myEquipment())
     );
 
-    /**
-     * Uses it as its card shows it, with or without its active rest, with Undo: the week
-     * planned with its ready-made workouts, as they are. The week then shows in its place, so
-     * focus moves to Edit plan.
-     */
-    protected use(plan: BuiltInPlan) {
-        this.usePlan(plan);
-    }
+    protected readonly emptyLead = computed(
+        () =>
+            `Nothing planned yet. ${
+                this.suggestedPlans().length > 1
+                    ? 'Here are some weeks of ready-made workouts for your goal and equipment, best first'
+                    : "Here's a week of ready-made workouts for your goal and equipment"
+            }, or plan your own and Today shows what's due each day.`
+    );
 
     /** Whether anything's planned this week, of the workouts still in the library. */
     protected readonly planned = computed(() => this.week().some((day) => day.length > 0));

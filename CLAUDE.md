@@ -73,7 +73,7 @@ Check the diff, not only that it works:
 2. **Leftovers:** anything now unused, including exports only their own test uses. Search the whole repo, not only `src/app` (`src/test-setup.ts` and `tools/` use things too).
 3. **The rules above,** especially colours, one meaning per class, and no build warnings.
 4. **Look at it:** for a visual change, run the app and look, in both themes and at phone width. Tests don't see layout.
-5. **Docs in the same PR:** `TODO.md` (tick what's done; add any limitation to Known issues) and `docs/features/` (the feature's file and its status in the README) if behaviour changed. Search `README.md` and `docs/` for anything now out of date.
+5. **Docs in the same PR:** `TODO.md` (delete what's done, rather than ticking it; add any limitation to Known issues) and `docs/features/` (the feature's file and its status in the README) if behaviour changed. Search `README.md` and `docs/` for anything now out of date.
 
 ## Pull requests
 

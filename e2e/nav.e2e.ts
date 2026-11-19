@@ -1,6 +1,6 @@
 import { at, expect, rest, seed, test, timed, workout } from './fixtures';
 import { HistoryPage } from './history-page';
-import { WorkoutPage } from './workout-page';
+import { setWheel, WorkoutPage } from './workout-page';
 
 // Onboarding and getting about the app (home-and-navigation.md): REG-NAV in
 // docs/regression-tests.md. welcome.e2e.ts has the smoke test of the same first steps.
@@ -80,10 +80,7 @@ test.describe('a device new to the app', () => {
             const sets = page.getByRole('spinbutton', { name: /^Sets a week per muscle/ });
             // From the goal just picked; the arrow keys turn it
             await expect(sets).toHaveAttribute('aria-valuenow', '6');
-            await sets.focus();
-            await page.keyboard.press('ArrowDown');
-            await page.keyboard.press('ArrowDown');
-            await expect(sets).toHaveAttribute('aria-valuenow', '8');
+            await setWheel(sets, 8);
             await next.click();
 
             await expect(page.getByText('Question 4 of 6')).toBeVisible();

@@ -823,12 +823,8 @@ for (const theme of ['dark', 'light'] as const) {
                             : {}),
                     });
                 }
+                // With the time per week's table beside its bars, both on the page
                 await open('/history');
-                await expectNoViolations();
-
-                // The time per week, as a table
-                click('.weeks__toggle');
-                await settle();
                 await expectNoViolations();
 
                 click('.entry__menu-button');

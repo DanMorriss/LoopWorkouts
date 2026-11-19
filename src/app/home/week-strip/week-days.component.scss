@@ -61,8 +61,10 @@
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
 
+    // Today's underlined in the accent colour: the date itself keeps its contrast on the tint
     .week-day--today > & {
-        color: var(--accent);
+        text-decoration: underline 2px var(--accent);
+        text-underline-offset: 3px;
     }
 }
 

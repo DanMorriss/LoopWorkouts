@@ -424,7 +424,7 @@ for (const theme of ['dark', 'light'] as const) {
                 plan.add(weekdayOf(now), push.id);
                 plan.add(6, push.id);
                 await open('/home');
-                expect(fixture.nativeElement.querySelector('.week__days')).not.toBeNull();
+                expect(fixture.nativeElement.querySelector('app-week-days')).not.toBeNull();
                 await expectNoViolations();
             });
 

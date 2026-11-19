@@ -214,7 +214,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     2. Press **Edit plan**.
     3. On the Plan page, add Push to **Monday**.
 - **Expected:**
-    1. The week: Mon a dumbbell in a ring with a tick, Tue one with an empty ring on it, Wed with its date in the accent colour and picked, Fri a dumbbell, Thu, Sat and Sun a moon; Legs is the same colour on Mon and Wed; "1 of 4 done this week · Next: Pull on Friday". Screen readers get tabs, e.g. "Tuesday: Push, missed", "Wednesday, today: Legs, due today".
+    1. The week: Mon a dumbbell in a ring with a tick, Tue one with an empty ring on it, Wed with its date underlined and picked, Fri a dumbbell, Thu, Sat and Sun a moon; Legs is the same colour on Mon and Wed; "1 of 4 done this week · Next: Pull on Friday". Screen readers get tabs, e.g. "Tuesday: Push, missed", "Wednesday, today: Legs, due today".
     2. Monday's Legs "✓ Done", Tuesday's Push "Missed" and dimmed, Wednesday's Legs "Due", Friday's Pull nothing; "1 of 3 done so far this week".
     3. Monday's Push says "From next week", dimmed, and the count doesn't change.
 - **Variant:** with only Monday's workout planned today (via the UI on a Wednesday), Today says "Your plan starts next week" with its ? link, and the days show as rest days.

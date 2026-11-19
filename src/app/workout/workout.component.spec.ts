@@ -5431,7 +5431,7 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('starts at your kettlebell, where it has one weight or none', () => {
+        it('starts at your kettlebell, from any weights it had', () => {
             TestBed.inject(SettingsStore).update({ kettlebellWeight: 20 });
             const workout = (weights: [number?, number?]) =>
                 store.addWorkout({
@@ -5460,10 +5460,10 @@ describe('WorkoutComponent', () => {
             expect(weightsOf(oneKettlebell.id)).toEqual([20, 20]);
             expect((run().state()?.step as RepStep).weight).toBe(20);
 
-            // Two weights, put there on purpose, stay
+            // Two weights, as from before a weight was shared, move too
             const two = workout([16, 12]);
             run().start(two);
-            expect(weightsOf(two.id)).toEqual([16, 12]);
+            expect(weightsOf(two.id)).toEqual([20, 20]);
         });
 
         it('suggests a rep more next time, not a heavier weight', () => {

@@ -64,31 +64,25 @@ export function withKettlebellWeight(step: RepStep, from: number | undefined, to
 
 /**
  * A kettlebell workout's steps moved to your kettlebell, `kg` (PRG-14), as it starts: by their
- * place in `steps`, only those that change. Only where its kettlebell steps are at one weight,
- * or none yet, as one kettlebell's are; a workout with two weights in it was set so on purpose,
- * and stays as it is.
+ * place in `steps`, only those that change. Every set of every kettlebell step takes it, even
+ * where they were at more than one weight (left from before a weight was shared, say): a
+ * kettlebell workout is done with one kettlebell, and My kettlebell is the one you have.
  */
 export function withMyKettlebell(
     steps: readonly Step[],
     kettlebell: ReadonlySet<number>,
     kg: number
 ): Map<number, RepStep> {
-    const repSteps = [...kettlebell].flatMap((index) => {
-        const step = steps[index];
-        return step?.kind === 'reps' ? [{ index, step }] : [];
-    });
-    const from = oneKettlebellWeight(
-        repSteps.flatMap(({ step }) => (step.sets ?? [step]).map((amount) => amount.weight))
-    );
-    if (from === null) {
-        return new Map();
-    }
     const changed = new Map<number, RepStep>();
-    for (const { index, step } of repSteps) {
-        const moved = withKettlebellWeight(step, from, kg);
-        if (moved !== step) {
-            changed.set(index, moved);
+    for (const index of kettlebell) {
+        const step = steps[index];
+        if (step?.kind !== 'reps' || (step.sets ?? [step]).every(({ weight }) => weight === kg)) {
+            continue;
         }
+        changed.set(
+            index,
+            withEachRepSet(step, (amount) => ({ reps: amount.reps, weight: kg }))
+        );
     }
     return changed;
 }

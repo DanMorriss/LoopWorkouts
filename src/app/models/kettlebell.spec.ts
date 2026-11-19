@@ -63,13 +63,30 @@ describe('kettlebell workouts (PRG-14)', () => {
             expect(moved.get(1)!.weight).toBe(20);
         });
 
-        it('leaves one already there, or with two weights in it, as it is', () => {
+        it('leaves one already there as it is', () => {
             expect(
                 withMyKettlebell([rep('swing', 15, 20), rep('goblet', 10, 20)], kettlebell, 20).size
             ).toBe(0);
-            expect(
-                withMyKettlebell([rep('swing', 15, 16), rep('goblet', 10, 12)], kettlebell, 20).size
-            ).toBe(0);
+        });
+
+        it('moves one at more than one weight too, set by set', () => {
+            const moved = withMyKettlebell(
+                [rep('swing', 15, 16), rep('goblet', 10, 12)],
+                kettlebell,
+                20
+            );
+            expect([...moved.values()].map((step) => step.weight)).toEqual([20, 20]);
+
+            // A ladder whose sets were left at two weights
+            const ladder: RepStep = {
+                ...rep('swing', 10, 12),
+                sets: [{ reps: 10, weight: 12 }, { reps: 15 }, { reps: 20, weight: 16 }],
+            };
+            expect(withMyKettlebell([ladder], new Set([0]), 14).get(0)!.sets).toEqual([
+                { reps: 10, weight: 14 },
+                { reps: 15, weight: 14 },
+                { reps: 20, weight: 14 },
+            ]);
         });
     });
 

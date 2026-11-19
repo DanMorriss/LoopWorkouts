@@ -474,8 +474,8 @@ export class ActiveRunService {
 
     /**
      * A kettlebell workout starts at your kettlebell's weight (PRG-14), in this run and the
-     * saved workout, where it's at one weight or none: so a heavier kettlebell set in one
-     * workout moves them all.
+     * saved workout, whatever weights it had: so a heavier kettlebell set in one workout, or
+     * on Profile, moves them all.
      */
     private useMyKettlebell() {
         const kg = this.settings.kettlebellWeight();

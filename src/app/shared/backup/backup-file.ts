@@ -143,21 +143,11 @@ export type ReadBackup =
       }
     | { ok: false; problem: BackupProblem };
 
+/** The records a backup carries, which sync sends too: everything but the settings. */
+export type BackedUpRecords = Omit<BackupFile, 'app' | 'version' | 'exportedAt' | 'settings'>;
+
 export function makeBackup(
-    contents: Pick<
-        BackupFile,
-        | 'workouts'
-        | 'history'
-        | 'exercises'
-        | 'exerciseNotes'
-        | 'hiddenExercises'
-        | 'favourites'
-        | 'readyMadeChanges'
-        | 'libraryOrder'
-        | 'plan'
-        | 'deleted'
-        | 'settings'
-    >,
+    contents: BackedUpRecords & Pick<BackupFile, 'settings'>,
     exportedAt: number
 ): BackupFile {
     return { app: 'Loop Workouts', version: BACKUP_VERSION, exportedAt, ...contents };

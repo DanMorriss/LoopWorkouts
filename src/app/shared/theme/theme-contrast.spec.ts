@@ -22,14 +22,13 @@ const TEXT = [
     '--text-strong',
     '--text-muted',
     '--glow-text',
-    '--focus',
     '--accent',
     '--work',
     '--rest',
     '--reps',
 ];
 // Controls and focus rings need 3:1 (WCAG 1.4.11)
-const NON_TEXT = ['--control-off', '--glow', '--accent', '--focus', '--button-primary'];
+const NON_TEXT = ['--control-off', '--glow', '--accent'];
 
 function token(name: string): string {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();

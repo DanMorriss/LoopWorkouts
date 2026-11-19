@@ -1,0 +1,25 @@
+// A muscle drawn on a figure, the body map's and an exercise's demo alike: shaded by how
+// much the exercise works it, outlined so neighbouring muscles stay apart.
+//
+//   @use 'muscle' as *;
+//   .thing__muscle { @include muscle-shape; }   // with --main, --supporting and --other
+
+@mixin muscle-shape {
+    fill: var(--muscle-idle);
+    stroke: var(--muscle-outline);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+
+    &--main {
+        fill: var(--muscle-main);
+    }
+
+    &--supporting {
+        fill: var(--muscle-supporting);
+    }
+
+    // Head, hands, feet and knees, never shaded
+    &--other {
+        fill: var(--muscle-other);
+    }
+}

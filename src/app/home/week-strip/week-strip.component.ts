@@ -1,4 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
+import { injectThisWeek } from '../../shared/state/this-week';
 import { BuiltInPlan, firstPlan } from '../../models/built-in-plans';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { PlanCardComponent } from '../../plan/plan-card/plan-card.component';
@@ -8,12 +9,9 @@ import {
     nextPlannedDay,
     PlannedStatus,
     PlannedWorkout,
-    thisWeek,
     weekdayOf,
     WEEKDAYS,
 } from '../../models/plan';
-import { HistoryStore } from '../../shared/state/history-store.service';
-import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { injectUsePlanOnToday, WEEK_EDIT_ID } from '../use-plan-on-today';
@@ -120,11 +118,10 @@ const SPOKEN_STATUS: Record<PlannedStatus, string> = {
     styleUrl: './week-strip.component.scss',
 })
 export class WeekStripComponent {
-    private readonly plan = inject(PlanStore);
     private readonly workouts = inject(WorkoutStore);
-    private readonly history = inject(HistoryStore);
     protected readonly slide = inject(PageSlide);
     private readonly settings = inject(SettingsStore);
+    private readonly thisWeek = injectThisWeek();
     private readonly usePlan = injectUsePlanOnToday();
     protected readonly weekEditId = WEEK_EDIT_ID;
     private readonly now = Date.now();
@@ -134,15 +131,7 @@ export class WeekStripComponent {
         return this.workouts.findAnyWorkout(id)?.title.trim() || 'Untitled workout';
     }
 
-    private readonly week = computed(() =>
-        thisWeek(
-            this.plan.plan(),
-            this.history.entries(),
-            this.now,
-            (id) => this.workouts.findAnyWorkout(id) !== null,
-            (id) => this.workouts.isActiveRest(id)
-        )
-    );
+    private readonly week = computed(() => this.thisWeek(this.now));
 
     /** With nothing planned, the ready-made plan to suggest, for your goal and equipment. */
     protected readonly suggestedPlan = computed(() =>

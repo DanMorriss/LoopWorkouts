@@ -1,8 +1,15 @@
 import { Service } from '@angular/core';
-import { Deletion, isDeletion, SyncedKind } from '../../models/sync';
+import { Deletion, isDeletion, mergeRecords, Synced, SyncedKind } from '../../models/sync';
 import { migrateSavedData } from './migrate';
 
 const STORAGE_KEY = 'deleted';
+
+/** What a merge did to one kind of record. */
+export interface MergeCounts {
+    added: number;
+    updated: number;
+    removed: number;
+}
 
 /**
  * Plenty to carry deletions to another copy, without letting storage grow forever: years of
@@ -35,6 +42,32 @@ export class DeletionStore {
             (d) => !(d.kind === deletion.kind && d.id === deletion.id)
         );
         this.save([...others, deletion].slice(-MAX_DELETIONS));
+    }
+
+    /**
+     * Merges another copy's records of one kind into these (`mergeRecords`), keeping here the
+     * other copy's deletions that applied. Calls `keep` with the merged records only if
+     * anything changed, and gives how many were added, updated and removed.
+     */
+    merge<T extends Synced>(
+        kind: SyncedKind,
+        here: readonly T[],
+        there: readonly T[],
+        deletedThere: readonly Deletion[],
+        keep: (records: T[]) => void
+    ): MergeCounts {
+        const { records, deletions, ...counts } = mergeRecords(
+            kind,
+            here,
+            there,
+            (id) => this.deletedAt(kind, id),
+            deletedThere
+        );
+        deletions.forEach((deletion) => this.add(deletion));
+        if (counts.added + counts.updated + counts.removed > 0) {
+            keep(records);
+        }
+        return counts;
     }
 
     /** Forgets a deletion, e.g. on Undo. */

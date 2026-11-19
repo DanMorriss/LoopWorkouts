@@ -8,7 +8,7 @@ import {
     stepAmounts,
     StepAmounts,
 } from '../../models/ready-made-change';
-import { Deletion, mergeRecords } from '../../models/sync';
+import { Deletion } from '../../models/sync';
 import { soloRest, Step, Workout } from '../../models/workout';
 import { DeletionStore } from './deletion-store.service';
 import { SyncClock } from './sync-clock.service';
@@ -112,18 +112,16 @@ export class ReadyMadeChanges {
 
     /** Merges another copy's in, the latest change to each workout winning, as favourites do. */
     merge(changes: readonly ReadyMadeChange[], deletedThere: readonly Deletion[]) {
-        const result = mergeRecords(
+        this.deletions.merge(
             'ready-made-change',
             this._list(),
             changes,
-            (id) => this.deletions.deletedAt('ready-made-change', id),
-            deletedThere
+            deletedThere,
+            (records) => {
+                this._list.set(records);
+                this.save();
+            }
         );
-        result.deletions.forEach((deletion) => this.deletions.add(deletion));
-        if (result.added + result.updated + result.removed > 0) {
-            this._list.set(result.records);
-            this.save();
-        }
     }
 
     private save() {

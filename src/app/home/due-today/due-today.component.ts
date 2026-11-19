@@ -1,10 +1,9 @@
 import { Component, computed, inject } from '@angular/core';
+import { injectThisWeek } from '../../shared/state/this-week';
 import { MatIconModule } from '@angular/material/icon';
-import { PlannedWorkout, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
+import { PlannedWorkout, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { Workout } from '../../models/workout';
 import { injectStartWorkout } from '../../shared/run/start-workout';
-import { HistoryStore } from '../../shared/state/history-store.service';
-import { PlanStore } from '../../shared/state/plan-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 
 /**
@@ -72,22 +71,12 @@ import { WorkoutStore } from '../../shared/state/workout-store.service';
     styleUrl: './due-today.component.scss',
 })
 export class DueTodayComponent {
-    private readonly plan = inject(PlanStore);
     private readonly workouts = inject(WorkoutStore);
-    private readonly history = inject(HistoryStore);
+    private readonly thisWeek = injectThisWeek();
     protected readonly start = injectStartWorkout();
     private readonly now = Date.now();
 
-    private readonly today = computed(
-        () =>
-            thisWeek(
-                this.plan.plan(),
-                this.history.entries(),
-                this.now,
-                (id) => this.workouts.findAnyWorkout(id) !== null,
-                (id) => this.workouts.isActiveRest(id)
-            )[weekdayOf(this.now)]
-    );
+    private readonly today = computed(() => this.thisWeek(this.now)[weekdayOf(this.now)]);
 
     /** Planned today and not run yet: training in the plan's order, then active rest. */
     readonly due = computed(() =>

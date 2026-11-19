@@ -59,8 +59,6 @@ export class WorkoutView {
      * earlier and done later (RUN-16), the place the run carries on from.
      */
     private readonly clockState = this.run.clockState;
-    /** The step on now was skipped earlier, and is being done later (RUN-16). */
-    readonly isLater = computed(() => !!this.state()?.later);
 
     readonly isWorkActive = computed(() => this.state()?.phase === 'work');
     readonly isRestActive = computed(() => this.state()?.phase === 'rest');

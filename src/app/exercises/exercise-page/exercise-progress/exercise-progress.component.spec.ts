@@ -115,9 +115,17 @@ describe('ExerciseProgressComponent', () => {
         expect(readout()).toContain('105 kg');
         expect(readout()).toContain('Legs');
 
+        // The latest, at the right: its tooltip beside it, to its left, so it stays on the chart
+        const tooltip = () => el().querySelector('app-progress-tooltip');
+        expect(tooltip()!.textContent).toContain('105 kg');
+        expect(tooltip()!.classList).toContain('progress-tooltip--left');
+
         await key('Home');
         expect(readout()).toContain('70 kg');
         expect(readout()).toContain('Old legs');
+        expect(tooltip()!.textContent).toContain('Old legs');
+        expect(tooltip()!.classList).not.toContain('progress-tooltip--left');
+        expect(tooltip()!.getAttribute('aria-hidden')).toBe('true');
         await key('ArrowRight');
         expect(readout()).toContain('93.5 kg');
     });

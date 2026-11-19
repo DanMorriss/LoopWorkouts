@@ -19,7 +19,7 @@ import {
 } from '../../models/exercise';
 import { ExerciseFinder, findByName } from '../../models/exercise-links';
 import { ExerciseMotion } from '../../models/exercise-motion';
-import { Deletion, mergeRecords, newId, readMark } from '../../models/sync';
+import { Deletion, newId, readMark } from '../../models/sync';
 import { loadBuiltInExercises, loadedBuiltInExercises } from './built-in-exercises-loader';
 import { DeletionStore } from './deletion-store.service';
 import { SyncClock } from './sync-clock.service';
@@ -320,52 +320,32 @@ export class ExerciseStore {
 
     /** Merges your own exercises from another copy (a backup), as workouts merge. */
     mergeOwn(exercises: readonly OwnExercise[], deletedThere: readonly Deletion[]) {
-        const result = mergeRecords(
-            'exercise',
-            this._own(),
-            exercises,
-            (id) => this.deletions.deletedAt('exercise', id),
-            deletedThere
-        );
-        result.deletions.forEach((deletion) => this.deletions.add(deletion));
-        if (result.added + result.updated + result.removed > 0) {
-            this._own.set(result.records);
+        return this.deletions.merge('exercise', this._own(), exercises, deletedThere, (records) => {
+            this._own.set(records);
             this.saveOwn();
-        }
-        return { added: result.added, updated: result.updated, removed: result.removed };
+        });
     }
 
     /** Merges which exercises are hidden from another copy, as notes merge. */
     mergeHidden(hidden: readonly HiddenExercise[], deletedThere: readonly Deletion[]) {
-        const result = mergeRecords(
-            'hidden-exercise',
-            this._hidden(),
-            hidden,
-            (id) => this.deletions.deletedAt('hidden-exercise', id),
-            deletedThere
-        );
-        result.deletions.forEach((deletion) => this.deletions.add(deletion));
-        if (result.added + result.updated + result.removed > 0) {
-            this._hidden.set(result.records);
-            localStorage.setItem(HIDDEN_EXERCISES_KEY, JSON.stringify(this._hidden()));
-        }
+        this.deletions.merge('hidden-exercise', this._hidden(), hidden, deletedThere, (records) => {
+            this._hidden.set(records);
+            localStorage.setItem(HIDDEN_EXERCISES_KEY, JSON.stringify(records));
+        });
     }
 
     /** Merges notes from another copy, by exercise: the most recent change to each wins. */
     mergeNotes(notes: readonly ExerciseNote[], deletedThere: readonly Deletion[]) {
-        const result = mergeRecords(
+        return this.deletions.merge(
             'exercise-note',
             this._notes(),
             notes,
-            (id) => this.deletions.deletedAt('exercise-note', id),
-            deletedThere
+            deletedThere,
+            (records) => {
+                this._notes.set(records);
+                this.saveNotes();
+            }
         );
-        result.deletions.forEach((deletion) => this.deletions.add(deletion));
-        if (result.added + result.updated + result.removed > 0) {
-            this._notes.set(result.records);
-            this.saveNotes();
-        }
-        return { added: result.added, updated: result.updated, removed: result.removed };
     }
 
     private saveOwn() {

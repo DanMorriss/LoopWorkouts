@@ -1,5 +1,6 @@
 @use 'type' as *;
 @use 'interaction' as *;
+@use 'muscle' as *;
 
 :host {
     display: flex;
@@ -36,22 +37,7 @@
 }
 
 .body-map__shape {
-    fill: var(--muscle-idle);
-    stroke: var(--muscle-outline);
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-
-    &--main {
-        fill: var(--muscle-main);
-    }
-
-    &--supporting {
-        fill: var(--muscle-supporting);
-    }
-
-    &--other {
-        fill: var(--muscle-other);
-    }
+    @include muscle-shape;
 
     &--tappable {
         cursor: pointer;

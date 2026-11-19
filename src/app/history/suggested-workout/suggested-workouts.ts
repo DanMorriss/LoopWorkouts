@@ -1,15 +1,15 @@
 import { computed, inject, Signal } from '@angular/core';
+import { injectThisWeek } from '../../shared/state/this-week';
 import { isStretch } from '../../models/built-in-stretches';
 import { MUSCLE_LABELS } from '../../models/exercise';
 import { inLastSevenDays } from '../../models/history';
 import { setsByMuscle, SuggestionAvoid, suggestNextWorkouts } from '../../models/muscle-balance';
-import { nextPlannedDay, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
+import { nextPlannedDay, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { Workout } from '../../models/workout';
 import { canDoWorkoutWith } from '../../models/workout-filter';
 import { musclesWorked } from '../../models/workout-muscles';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
-import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 
@@ -45,7 +45,7 @@ class SuggestedWorkouts {
     private readonly exercises = inject(ExerciseStore);
     private readonly workouts = inject(WorkoutStore);
     private readonly settings = inject(SettingsStore);
-    private readonly plan = inject(PlanStore);
+    private readonly thisWeek = injectThisWeek();
     constructor(private readonly options: SuggestionOptions) {}
 
     /** Sets per muscle in the last seven days. */
@@ -63,13 +63,7 @@ class SuggestedWorkouts {
         if (!this.options.restDay()) {
             return null;
         }
-        const week = thisWeek(
-            this.plan.plan(),
-            this.history.entries(),
-            this.options.now,
-            (id) => this.workouts.findAnyWorkout(id) !== null,
-            (id) => this.workouts.isActiveRest(id)
-        );
+        const week = this.thisWeek(this.options.now);
         const day = nextPlannedDay(week, weekdayOf(this.options.now));
         if (day < 0) {
             return null;

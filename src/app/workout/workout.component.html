@@ -167,31 +167,31 @@
                  them. -->
                 <div class="workout-controls" data-tour="controls">
                     <div class="workout-control workout-control--main">
-                        <!-- Start, for a timed exercise after a long rest that waits for it
-                             (with the setting on); the same button, so focus stays on it -->
+                        <!-- Greyed out while a timed exercise waits for Start after a long
+                             rest (RUN-14), whose Start is in the face, so it's plain the
+                             exercise hasn't begun; the same button after, where focus goes -->
                         @let waiting = view.isWaiting();
                         <button
                             #mainButton
                             id="workout-pause"
                             type="button"
                             class="btn-main btn-main--round"
-                            [attr.aria-label]="waiting ? 'Start' : 'Pause'"
-                            [attr.aria-keyshortcuts]="view.isRepsActive() ? null : 'Space'"
-                            (click)="waiting ? run.startExercise() : togglePause()"
+                            aria-label="Pause"
+                            [attr.aria-keyshortcuts]="
+                                view.isRepsActive() || waiting ? null : 'Space'
+                            "
+                            [disabled]="waiting"
+                            (click)="togglePause()"
                         >
-                            <mat-icon aria-hidden="true">{{
-                                waiting ? 'play_arrow' : 'pause'
-                            }}</mat-icon>
+                            <mat-icon aria-hidden="true">pause</mat-icon>
                         </button>
-                        <span class="workout-control__caption" aria-hidden="true">{{
-                            waiting ? 'Start' : 'Pause'
-                        }}</span>
+                        <span class="workout-control__caption" aria-hidden="true">Pause</span>
                         <!-- Shown where there's likely a keyboard; screen readers get
-                             aria-keyshortcuts. On a rep step Space is Done, so it's hidden,
-                             keeping its room so Pause doesn't move. -->
+                             aria-keyshortcuts. On a rep step Space is Done, and waiting it's
+                             Start, so it's hidden, keeping its room so Pause doesn't move. -->
                         <kbd
                             class="workout-control__key"
-                            [style.visibility]="view.isRepsActive() ? 'hidden' : null"
+                            [style.visibility]="view.isRepsActive() || waiting ? 'hidden' : null"
                             aria-hidden="true"
                             >Space</kbd
                         >

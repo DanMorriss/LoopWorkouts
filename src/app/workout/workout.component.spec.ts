@@ -5205,6 +5205,11 @@ describe('WorkoutComponent', () => {
         const workout = () => makeWorkout({ steps: [plank, rest(30), plank], repeats: 1 });
         const mainButton = () =>
             fixture.nativeElement.querySelector('#workout-pause') as HTMLButtonElement;
+        /** Start, in the face under the time. */
+        const startButton = () =>
+            fixture.nativeElement.querySelector(
+                '.workout-face app-wait-start button'
+            ) as HTMLButtonElement | null;
 
         /** As start(), as the run starts from a Start button, with the setting as it is. */
         function startFromSettings(workout: Workout) {
@@ -5214,22 +5219,44 @@ describe('WorkoutComponent', () => {
             fixture.detectChanges();
         }
 
-        it("holds a timed exercise at its full time, with Start for Pause, till it's pressed", () => {
+        it("holds a timed exercise at its full time, with Start in the face, till it's pressed", () => {
             startFromSettings(workout());
+            expect(startButton()).toBeNull();
 
             advance(50_000 + 10_000);
 
             expect(view().isWorkActive()).toBe(true);
             expect(text()).toContain('00:20');
-            expect(mainButton().getAttribute('aria-label')).toBe('Start');
-            expect(text()).toContain('Start');
+            expect(startButton()?.textContent).toContain('Start');
+            expect(startButton()?.getAttribute('aria-keyshortcuts')).toBe('Space');
+            // Pause is greyed out under it, as there's nothing yet to pause
+            expect(mainButton().getAttribute('aria-label')).toBe('Pause');
+            expect(mainButton().disabled).toBe(true);
+            expect(mainButton().getAttribute('aria-keyshortcuts')).toBeNull();
             expect(view().announcement()).toContain('press Start when you are ready');
 
-            mainButton().click();
+            startButton()!.click();
             advance(5000);
 
             expect(text()).toContain('00:15');
-            expect(mainButton().getAttribute('aria-label')).toBe('Pause');
+            expect(startButton()).toBeNull();
+            expect(mainButton().disabled).toBe(false);
+            expect(mainButton().getAttribute('aria-keyshortcuts')).toBe('Space');
+            fixture.destroy();
+        });
+
+        it('moves focus from Pause to Start as the wait begins, and back to Pause on Start', async () => {
+            startFromSettings(workout());
+            mainButton().focus();
+
+            advance(50_000);
+            await fixture.whenStable();
+            expect(document.activeElement).toBe(startButton());
+
+            startButton()!.click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+            expect(document.activeElement).toBe(mainButton());
             fixture.destroy();
         });
 
@@ -5250,7 +5277,7 @@ describe('WorkoutComponent', () => {
             fixture.detectChanges();
             expect(sweep()).toBeNull();
 
-            mainButton().click();
+            startButton()!.click();
             fixture.detectChanges();
             expect(sweep()?.style.getPropertyValue('--first-half-delay')).toBe('0ms');
             fixture.destroy();
@@ -5334,7 +5361,7 @@ describe('WorkoutComponent', () => {
             expect(audio.scheduledNotes()).not.toContain('880@50');
 
             advance(60_000);
-            mainButton().click();
+            startButton()!.click();
             fixture.detectChanges();
 
             expect(audio.scheduledNotes()).toContain('880@60');
@@ -5345,7 +5372,7 @@ describe('WorkoutComponent', () => {
             startFromSettings(workout());
             advance(60_000);
 
-            mainButton().click();
+            startButton()!.click();
             advance(20_000);
 
             expect(view().isComplete()).toBe(true);

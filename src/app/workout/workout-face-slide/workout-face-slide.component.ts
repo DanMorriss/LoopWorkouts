@@ -15,6 +15,7 @@ import { HistoryStore } from '../../shared/state/history-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { ClockDigitsComponent } from '../clock-digits/clock-digits.component';
 import { placeAt } from '../../models/workout-state';
+import { WaitStartComponent } from '../wait-start/wait-start.component';
 import { FaceSlide, WorkoutView } from '../workout-view';
 
 /**
@@ -23,7 +24,7 @@ import { FaceSlide, WorkoutView } from '../workout-view';
  */
 @Component({
     selector: 'app-workout-face-slide',
-    imports: [ClockDigitsComponent, MatIconModule, WheelPickerComponent],
+    imports: [ClockDigitsComponent, MatIconModule, WaitStartComponent, WheelPickerComponent],
     templateUrl: './workout-face-slide.component.html',
     styleUrl: './workout-face-slide.component.scss',
 })
@@ -38,6 +39,13 @@ export class WorkoutFaceSlideComponent {
     private readonly exercises = inject(ExerciseStore);
     private readonly view = inject(WorkoutView);
     protected readonly weightUnit = this.view.weightUnit;
+    /**
+     * The step on now is a timed exercise waiting for Start (RUN-14). Not the slide rolling
+     * away as it comes in, which is the rest's.
+     */
+    protected readonly waiting = computed(
+        () => this.view.isWaiting() && this.slide().key === this.view.stepKey()
+    );
     /** Whether the step is a stretch, which has no weight to set or step up. */
     protected readonly stretch = computed(() => isStretch(this.view.state()?.step?.exerciseId));
 

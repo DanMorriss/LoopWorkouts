@@ -25,7 +25,7 @@
 
     - **One question at a time**, each with "Question 2 of 5" and a bar filling up, its heading taking focus as it shows (so it's read out), **Back** and **Next** (**Done** on the last question), and **Skip for now** under them, all fixed to the bottom of the screen, so they're in the same place on every question and it can be tapped through quickly; a long question scrolls under them. Each answer starts at what's saved (the defaults, the first time) and is **saved as it's picked**, so Next all the way through changes nothing, and leaving part way keeps what was answered. There's no moving on by picking, so arrow keys can go through the options.
         1. **What should we call you?** A name box ("Your name"), "Today greets you by it. You can leave it empty." Enter is Next.
-        2. **What do you train for?** Muscle ("Get stronger and build muscle: 10 to 20 sets a week on each muscle.") or Fitness ("Stay fit and active: 6 to 12 …"): Training for (PRG-8).
+        2. **What do you train for?** Muscle ("Get stronger and build muscle: at least 10 sets a week on each muscle.") or Fitness ("Stay fit and active: at least 6 …"): Training for (PRG-8).
         3. **What equipment do you have?** The equipment chips, as on the Exercises page, No equipment first, "Pick all you can use, or No equipment. …". Next turns **Only what I have** on if any are picked, or No equipment (off if none), so the Exercises list and ready-made workouts show what you can do.
         4. **Which body should the muscle maps show?** Male or Female (SET-5), with the body map under them drawing the one chosen.
         5. **Do you lift in kilograms or pounds?** (SET-4) Starting, the first time, from the device's region: pounds in the US, Liberia and Myanmar, kilograms elsewhere.

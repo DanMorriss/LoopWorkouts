@@ -156,7 +156,7 @@ test.describe('the profile', () => {
             await run.close.click();
             await app.tab('You').click();
             await profile.getByRole('radio', { name: 'Fitness' }).check();
-            await expect(profile.getByText(/6 to 12 sets a week/)).toBeVisible();
+            await expect(profile.getByText(/at least 6 sets a week/)).toBeVisible();
         }
     );
 });

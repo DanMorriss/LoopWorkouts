@@ -137,21 +137,18 @@ for (const theme of ['dark', 'light'] as const) {
 
         // The history's bars of sets per muscle, filled on an unworked-muscle track
         it('makes each muscle bar stand out on its track (at least 3:1)', () => {
-            for (const fill of ['under', 'in', 'over']) {
+            for (const fill of ['under', 'in']) {
                 expect(
                     contrastRatio(token(`--balance-${fill}`), token('--muscle-idle'))
                 ).toBeGreaterThanOrEqual(3);
             }
         });
 
-        // The aim's edges: a line on the track, and a notch in the track's colour on a fill,
+        // The aim: a line on the track, and a notch in the track's colour on a fill,
         // so the fills against the track (above) cover the notches
-        it("makes the aim's edges stand out on the track (at least 3:1)", () => {
+        it("makes the aim's line stand out on the track (at least 3:1)", () => {
             expect(
-                contrastRatio(
-                    flatten(['--muscle-idle', '--balance-band-edge']),
-                    token('--muscle-idle')
-                )
+                contrastRatio(flatten(['--muscle-idle', '--balance-aim']), token('--muscle-idle'))
             ).toBeGreaterThanOrEqual(3);
         });
     });

@@ -56,7 +56,7 @@ test.describe('muscles worked this week', () => {
         // Training for Fitness, the aims come down
         await app.goto('/account');
         await page.getByRole('radio', { name: 'Fitness' }).check();
-        await expect(page.getByText(/6 to 12 sets a week/)).toBeVisible();
+        await expect(page.getByText(/at least 6 sets a week/)).toBeVisible();
         await app.goto('/history');
         await expect(bars.nth(0)).toContainText(/^Glutes.*2 sets, under 6$/);
     });

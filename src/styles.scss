@@ -108,13 +108,11 @@
     --muscle-other: #334155; // head, hands, feet and knees, never shaded
     --muscle-outline: rgba(148, 163, 184, 0.5);
 
-    // The history's bars of sets per muscle: short of the aim, within it, and past it, on a
-    // track with the aim shaded as a band
+    // The history's bars of sets per muscle: short of the aim and reached it, on a track with
+    // the aim as a line across it
     --balance-under: #94a3b8;
     --balance-in: #22d3ee;
-    --balance-over: #fb7185;
-    --balance-band: rgba(34, 211, 238, 0.18);
-    --balance-band-edge: rgba(165, 243, 252, 0.7);
+    --balance-aim: rgba(165, 243, 252, 0.7);
 }
 
 // Light:the same roles, chosen for at least 4.5:1 text and 3:1 controls on a pale page
@@ -206,9 +204,7 @@
 
     --balance-under: #64748b;
     --balance-in: #0e7490;
-    --balance-over: #e11d48;
-    --balance-band: rgba(14, 116, 144, 0.16);
-    --balance-band-edge: rgba(14, 116, 144, 0.85);
+    --balance-aim: rgba(14, 116, 144, 0.85);
 }
 
 // Where the system asks for less see-through: the panels and cards solid, in the colour they

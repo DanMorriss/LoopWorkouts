@@ -82,7 +82,7 @@ describe('ProfileComponent', () => {
             expect(
                 fixture.nativeElement.querySelector(`#${group.getAttribute('aria-describedby')}`)
                     .textContent
-            ).toBe('Aim for 10 to 20 sets a week on each muscle, 4 to 10 on small ones');
+            ).toBe('Aim for at least 10 sets a week on each muscle, 4 on small ones');
         });
 
         it('saves Fitness when picked, and says its lower aim', () => {
@@ -93,7 +93,7 @@ describe('ProfileComponent', () => {
 
             expect(settings.trainingGoal()).toBe('fitness');
             expect(fixture.nativeElement.querySelector('#goal-hint').textContent).toBe(
-                'Aim for 6 to 12 sets a week on each muscle, 2 to 6 on small ones'
+                'Aim for at least 6 sets a week on each muscle, 2 on small ones'
             );
         });
     });

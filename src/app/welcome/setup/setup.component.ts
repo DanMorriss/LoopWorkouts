@@ -185,5 +185,5 @@ export class SetupComponent {
 
 function aimText(goal: TrainingGoal): string {
     const { large } = WEEKLY_AIMS[goal];
-    return `${large.low} to ${large.high} sets a week on each muscle.`;
+    return `at least ${large} sets a week on each muscle.`;
 }

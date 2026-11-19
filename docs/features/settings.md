@@ -16,7 +16,7 @@
 - **Profile**, on You between Sync and the Settings row (since 2026-10-28; until then in Settings, as Body figure and Units → Weight), holds four more choices saved with the settings. They're first asked in the setup (NAV-4, see [home-and-navigation](home-and-navigation.md)). With your equipment they're **your profile**, which, unlike the other settings, **syncs** (since 2026-11-02; see [backup-and-sync](backup-and-sync.md)):
     - **Name** (SET-7): a box, with the hint "What Today greets you by". Saved as it's left, trimmed, 40 characters at most; empty is fine. Signing out removes it from the device.
     - **Sex** (SET-5): Male (the default) or Female, with the hint "The body the muscle maps show": the figure the body map draws (see [exercises](exercises.md)). Called Sex, not Gender, as it picks an anatomical drawing.
-    - **Training for** (PRG-8): Muscle (the default) or Fitness, with the hint "Aim for 10 to 20 sets a week on each muscle, 4 to 10 on small ones" (or 6 to 12 and 2 to 6 for Fitness): the sets a week the muscle bars aim at (see [progress](progress.md)).
+    - **Training for** (PRG-8): Muscle (the default) or Fitness, with the hint "Aim for at least 10 sets a week on each muscle, 4 on small ones" (or 6 and 2 for Fitness): the sets a week the muscle bars aim at (see [progress](progress.md)).
     - **Weight units** (SET-4): Kilograms (kg) (the default) or Pounds (lb). Weights are always saved in kg, so switching loses nothing.
 - Under them, for someone with a kettlebell in their equipment (or whose kettlebell's weight is known), **My kettlebell** (PRG-14, since 2026-11-17), a box in the weight unit, with the hint "Kettlebell workouts start at this. Setting a weight in one changes it too". Saved as it's left, to the nearest half (as a step's weight is); empty or out of range is none. It's part of the profile, so it syncs. See [progress](progress.md).
 - Under it, **Body weight** (CAL-2, since 2026-11-14), a box in the weight unit, with the hint "For calories burnt. Kept on this device only". The workout summary offers it too (Add your weight to see calories), but not the setup. It isn't part of the profile, as it's health data: signed in, a tick under it keeps it with the account, with consent (CAL-6). See [calories](calories.md).
@@ -52,7 +52,7 @@
 - Given a first visit, then You → Profile has Male chosen for Sex; given I choose Female and reload, then Female is still chosen.
 - Given a first visit, then You → Profile has an empty Name; given I type " Sam " and leave the box, then it shows Sam, and Today says "Good evening, Sam" in the evening.
 - Given I'm signed in on two devices, when I choose Pounds on one, then the other shows pounds once it's synced; when I change the theme on one, then the other keeps its own.
-- Given a first visit, then You → Profile has Muscle chosen for Training for; given I choose Fitness, then the hint says 6 to 12 sets a week and the muscle bars' bands move down.
+- Given a first visit, then You → Profile has Muscle chosen for Training for; given I choose Fitness, then the hint says at least 6 sets a week and the muscle bars' aims move down.
 
 ## Platform notes
 

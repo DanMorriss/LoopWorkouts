@@ -963,7 +963,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:** Open Progress. Then You → Profile → Training for **Fitness**, and open Progress again.
 - **Expected:**
     1. "Muscles worked this week" with the body map and 16 bars, starting Glutes (2 sets, under 10), Quads (2 sets, under 10), Adductors (1 set, under 4).
-    2. Under Fitness the aims move down (the Profile hint says 6 to 12 sets a week).
+    2. Under Fitness the aims move down (the Profile hint says at least 6 sets a week).
 
 ### REG-PRG-02 · An exercise's progress, and its card on the list
 
@@ -1166,7 +1166,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Female is still chosen; the body map draws the female figure (the 3D demo stays male for now, see TODO).
     3. The weight shows as 135 lb in Create ("Weight (lb)") and on the workout face.
     4. The new step is saved as 61.235 kg; the 20.412 kg step is still exactly 20.412.
-    5. The hint says 6 to 12 sets a week.
+    5. The hint says at least 6 sets a week.
 
 ### REG-SET-04 · About, privacy and terms
 

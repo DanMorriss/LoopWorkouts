@@ -205,7 +205,7 @@ export class ProfileComponent {
     );
     protected readonly goalHint = computed(() => {
         const { large, small } = WEEKLY_AIMS[this.settings.trainingGoal()];
-        return `Aim for ${large.low} to ${large.high} sets a week on each muscle, ${small.low} to ${small.high} on small ones`;
+        return `Aim for at least ${large} sets a week on each muscle, ${small} on small ones`;
     });
 
     /** A kettlebell among your equipment, or a weight for one already known. */

@@ -80,28 +80,32 @@ describe('setsByMuscle', () => {
 });
 
 describe('muscleStatus', () => {
-    it('is under below the aim, in range within it, and over past it', () => {
-        expect(
-            [0, 9.5, 10, 20, 20.5].map((sets) => muscleStatus(sets, { low: 10, high: 20 }))
-        ).toEqual(['under', 'under', 'in-range', 'in-range', 'over']);
+    it('is under below the aim, and reached at it or past it however far', () => {
+        expect([0, 9.5, 10, 20, 40].map((sets) => muscleStatus(sets, 10))).toEqual([
+            'under',
+            'under',
+            'reached',
+            'reached',
+            'reached',
+        ]);
     });
 });
 
 describe('weeklyAim', () => {
-    it('aims for 10 to 20 sets for muscle, and 4 to 10 on small muscles', () => {
-        expect(weeklyAim('chest', 'muscle')).toEqual({ low: 10, high: 20 });
-        expect(weeklyAim('forearms', 'muscle')).toEqual({ low: 4, high: 10 });
+    it('aims for 10 sets for muscle, and 4 on small muscles', () => {
+        expect(weeklyAim('chest', 'muscle')).toBe(10);
+        expect(weeklyAim('forearms', 'muscle')).toBe(4);
     });
 
-    it('aims lower for fitness: 6 to 12 sets, and 2 to 6 on small muscles', () => {
-        expect(weeklyAim('chest', 'fitness')).toEqual({ low: 6, high: 12 });
-        expect(weeklyAim('obliques', 'fitness')).toEqual({ low: 2, high: 6 });
+    it('aims lower for fitness: 6 sets, and 2 on small muscles', () => {
+        expect(weeklyAim('chest', 'fitness')).toBe(6);
+        expect(weeklyAim('obliques', 'fitness')).toBe(2);
     });
 });
 
 describe('muscleBalance', () => {
-    const muscle = { low: 10, high: 20 };
-    const small = { low: 4, high: 10 };
+    const muscle = 10;
+    const small = 4;
 
     it('lists every muscle group, most worked first and A to Z on a tie', () => {
         const balance = muscleBalance(
@@ -115,9 +119,9 @@ describe('muscleBalance', () => {
 
         expect(balance).toHaveLength(ALL_MUSCLES.length);
         expect(balance.slice(0, 4)).toEqual([
-            { muscle: 'chest', sets: 22, aim: muscle, status: 'over' },
-            { muscle: 'glutes', sets: 12, aim: muscle, status: 'in-range' },
-            { muscle: 'quads', sets: 12, aim: muscle, status: 'in-range' },
+            { muscle: 'chest', sets: 22, aim: muscle, status: 'reached' },
+            { muscle: 'glutes', sets: 12, aim: muscle, status: 'reached' },
+            { muscle: 'quads', sets: 12, aim: muscle, status: 'reached' },
             { muscle: 'abductors', sets: 0, aim: small, status: 'under' },
         ]);
     });
@@ -130,10 +134,10 @@ describe('muscleBalance', () => {
         const status = (goal: TrainingGoal, name: MuscleGroup) =>
             muscleBalance(counts, goal).find((m) => m.muscle === name)!.status;
 
-        expect(status('muscle', 'forearms')).toBe('in-range');
+        expect(status('muscle', 'forearms')).toBe('reached');
         expect(status('muscle', 'chest')).toBe('under');
-        expect(status('fitness', 'forearms')).toBe('in-range');
-        expect(status('fitness', 'chest')).toBe('in-range');
+        expect(status('fitness', 'forearms')).toBe('reached');
+        expect(status('fitness', 'chest')).toBe('reached');
     });
 });
 
@@ -216,7 +220,8 @@ describe('suggestNextWorkout', () => {
             title: 'Grip',
             steps: [linked(reps(1), 'builtin:dead-hang')],
         });
-        // Fewer forearm sets than chest, but forearms are in range (4 to 10) and the chest under
+        // Fewer forearm sets than chest, but the forearms have reached their aim (4) and the
+        // chest is short of its (10)
         const counts = new Map<MuscleGroup, number>([
             ['forearms', 5],
             ['chest', 8],

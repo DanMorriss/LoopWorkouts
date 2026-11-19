@@ -106,7 +106,9 @@
             </section>
 
             <!-- Before the next workout, as it's what to do now -->
-            <app-summary-stretch (start)="startStretches($event)" />
+            @if (stretches(); as offer) {
+                <app-summary-stretch [offer]="offer" (start)="startStretches($event)" />
+            }
 
             <!-- As the history page suggests it; started from there or the library, not here -->
             <app-suggested-workout class="summary__suggestion" [startable]="false" />
@@ -116,7 +118,22 @@
     </div>
 
     <div class="summary__actions">
-        <button type="button" class="btn-main summary__done" (click)="leave('done')">
+        <!-- The stretches' Start, where it's seen without scrolling, over Done -->
+        @if (stretches(); as offer) {
+            <button
+                type="button"
+                class="btn-main summary__stretch"
+                [attr.aria-label]="'Stretch what you worked, ' + offer.time.spoken"
+                (click)="startStretches(offer.workout)"
+            >
+                Stretch what you worked
+            </button>
+        }
+        <button
+            type="button"
+            [class]="stretches() ? 'btn-pill summary__done' : 'btn-main summary__done'"
+            (click)="leave('done')"
+        >
             <mat-icon aria-hidden="true">check</mat-icon>
             Done
         </button>

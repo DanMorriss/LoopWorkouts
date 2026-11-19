@@ -14,8 +14,8 @@ import { thisWeek, weekdayOf } from '../models/plan';
 /**
  * Today, where the app opens, greeting you by name (NAV-4) for the time of day: the week's plan
  * (PLN-4), the way in to changing it; the weekly plan's workouts due today (PLN-2); and the
- * workout to do next (PRG-9) with nothing planned: with a week planned, the plan says what's
- * next. How the week's going for each muscle is on Progress.
+ * workouts to do next (PRG-9) with nothing planned: with a week planned, the plan says what's
+ * next; and after training today, stretches for what it worked (PRG-16). How the week's going for each muscle is on Progress.
  * With no workouts yet, a way to add some first (NAV-6), as there's nothing to plan without them;
  * with some but nothing planned, the week asks to be planned.
  */
@@ -63,6 +63,20 @@ export class HomeComponent {
             (id) => this.workouts.findAnyWorkout(id) !== null
         );
         return this.hasPlan() && week[weekdayOf(now)].length === 0;
+    });
+    /**
+     * Whether planned training is still to do today: stretches wait till it's done, rather
+     * than coming between workouts.
+     */
+    protected readonly trainingLeftToday = computed(() => {
+        const now = this.openedAt.getTime();
+        return thisWeek(
+            this.planStore.plan(),
+            this.history.entries(),
+            now,
+            (id) => this.workouts.findAnyWorkout(id) !== null,
+            (id) => this.workouts.isActiveRest(id)
+        )[weekdayOf(now)].some((planned) => planned.status === 'today' && !planned.activeRest);
     });
     protected readonly greeting = computed(() => {
         const name = this.settings.name();

@@ -6,9 +6,13 @@
     display: block;
 }
 
+// A column, filling its place where that's taller than it (a slide on Today, as tall as the
+// tallest), with Use this plan at the foot
 .plan-card {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 0.9rem;
+    height: 100%;
     @include showcase-card;
 
     p {
@@ -126,11 +130,12 @@
 }
 
 .plan-card__use {
-    justify-self: start;
+    align-self: flex-start;
+    margin-top: auto;
 
     // As the page's main button (Today), centred as the other pages' main buttons are
     &.btn-main {
-        justify-self: center;
+        align-self: center;
     }
 }
 

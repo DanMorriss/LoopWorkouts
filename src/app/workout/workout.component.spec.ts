@@ -3473,10 +3473,44 @@ describe('WorkoutComponent', () => {
             expect(text()).toContain('Doorway chest stretch');
             expect(document.activeElement?.getAttribute('aria-label')).toBe('Pause');
 
-            // Finishing them offers no stretches for the stretches
+            // Finishing them offers no stretches for the stretches, and Done is the main button
             advance(10 * 60 * 1000);
             expect(summary()).not.toBeNull();
             expect(summary()!.querySelector('[aria-labelledby="summary-stretch"]')).toBeNull();
+            expect(summary()!.querySelector('.summary__stretch')).toBeNull();
+            expect(summary()!.querySelector('.summary__done')!.classList).toContain('btn-main');
+            fixture.destroy();
+        });
+
+        it('has Stretch what you worked as the main button, over Done, which starts them', () => {
+            const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
+            start(
+                makeWorkout({
+                    steps: [work(2), { kind: 'reps', reps: 12, ...pushUps } as const],
+                    repeats: 1,
+                })
+            );
+            advance(2000);
+            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            fixture.detectChanges();
+
+            const actions = summary()!.querySelector('.summary__actions')!;
+            const buttons = [...actions.querySelectorAll('button')];
+            expect(buttons.map((button) => button.textContent!.trim())).toEqual([
+                'Stretch what you worked',
+                'check Done',
+            ]);
+            expect(buttons[0].classList).toContain('btn-main');
+            expect(buttons[0].getAttribute('aria-label')).toMatch(
+                /^Stretch what you worked, about \d+ minutes?$/
+            );
+            expect(buttons[1].classList).toContain('btn-pill');
+
+            buttons[0].click();
+            advance(0);
+            expect(entries()[0].outcome).toBe('finished');
+            expect(summary()).toBeNull();
+            expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(STRETCH_ROUTINE_ID);
             fixture.destroy();
         });
 

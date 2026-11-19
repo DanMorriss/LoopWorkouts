@@ -9,7 +9,8 @@ import {
     readWeeklySets,
     setsByMuscle,
     smallAim,
-    suggestNextWorkout,
+    MOST_SUGGESTIONS,
+    suggestNextWorkouts,
     weeklyAim,
 } from './muscle-balance';
 import { Step } from './workout';
@@ -159,7 +160,7 @@ describe('muscleBalance', () => {
     });
 });
 
-describe('suggestNextWorkout', () => {
+describe('suggestNextWorkouts', () => {
     const legs = makeWorkout({
         id: 'legs',
         title: 'Legs',
@@ -190,7 +191,7 @@ describe('suggestNextWorkout', () => {
                 muscles: new Set(['quads', 'glutes'] as const),
             };
 
-            const suggested = suggestNextWorkout(
+            const suggested = suggestNextWorkouts(
                 [legs, goblet, push],
                 new Map(),
                 byId,
@@ -199,7 +200,8 @@ describe('suggestNextWorkout', () => {
                 avoid
             );
 
-            expect(suggested?.workout).toBe(push);
+            // Goblet squats after it, as there's no other; legs not at all
+            expect(suggested.map(({ workout }) => workout)).toEqual([push, goblet]);
         });
 
         it('suggests one working those muscles anyway when there is nothing else', () => {
@@ -209,9 +211,10 @@ describe('suggestNextWorkout', () => {
             };
 
             expect(
-                suggestNextWorkout([legs, goblet], new Map(), byId, new Map(), 10, avoid)?.workout
+                suggestNextWorkouts([legs, goblet], new Map(), byId, new Map(), 10, avoid)[0]
+                    ?.workout
             ).toBe(goblet);
-            expect(suggestNextWorkout([legs], new Map(), byId, new Map(), 10, avoid)).toBeNull();
+            expect(suggestNextWorkouts([legs], new Map(), byId, new Map(), 10, avoid)).toEqual([]);
         });
     });
 
@@ -223,10 +226,10 @@ describe('suggestNextWorkout', () => {
             ['triceps', 6],
         ] as const);
 
-        expect(suggestNextWorkout([legs, push], counts, byId, new Map(), 10)).toEqual({
-            workout: push,
-            muscles: ['chest'],
-        });
+        expect(suggestNextWorkouts([legs, push], counts, byId, new Map(), 10)).toEqual([
+            { workout: push, muscles: ['chest'] },
+            { workout: legs, muscles: ['glutes', 'quads'] },
+        ]);
     });
 
     it('goes by how far each muscle is from its aim, which is lower for small muscles', () => {
@@ -244,7 +247,9 @@ describe('suggestNextWorkout', () => {
             ['triceps', 8],
         ]);
 
-        expect(suggestNextWorkout([grip, push], counts, byId, new Map(), 10)?.workout).toBe(push);
+        expect(suggestNextWorkouts([grip, push], counts, byId, new Map(), 10)[0]?.workout).toBe(
+            push
+        );
     });
 
     it('on a tie, picks the one done longest ago, and one never done before that', () => {
@@ -253,14 +258,28 @@ describe('suggestNextWorkout', () => {
             ['push', 100],
         ]);
 
-        expect(suggestNextWorkout([legs, push], new Map(), byId, lastDone, 10)?.workout).toBe(push);
         expect(
-            suggestNextWorkout([legs, push, calves], new Map(), byId, lastDone, 10)?.workout
-        ).toBe(calves);
+            suggestNextWorkouts([legs, push, calves], new Map(), byId, lastDone, 10).map(
+                ({ workout }) => workout
+            )
+        ).toEqual([calves, push, legs]);
     });
 
-    it('is null when no workout has a step linked to an exercise', () => {
-        expect(suggestNextWorkout([makeWorkout()], new Map(), byId, new Map(), 10)).toBeNull();
+    it('is empty when no workout has a step linked to an exercise', () => {
+        expect(suggestNextWorkouts([makeWorkout()], new Map(), byId, new Map(), 10)).toEqual([]);
+    });
+
+    it('suggests at most MOST_SUGGESTIONS, or as many as asked for', () => {
+        const many = Array.from({ length: MOST_SUGGESTIONS + 2 }, (_, i) =>
+            makeWorkout({ id: `w${i}`, steps: [linked(reps(5), 'builtin:back-squat')] })
+        );
+
+        expect(suggestNextWorkouts(many, new Map(), byId, new Map(), 10)).toHaveLength(
+            MOST_SUGGESTIONS
+        );
+        expect(
+            suggestNextWorkouts(many, new Map(), byId, new Map(), 10, undefined, 2)
+        ).toHaveLength(2);
     });
 
     it('never suggests a workout of only stretches, as it trains nothing', () => {
@@ -272,9 +291,11 @@ describe('suggestNextWorkout', () => {
         // However far past their aims the legs workout's muscles are
         const counts = new Map<MuscleGroup, number>(ALL_MUSCLES.map((muscle) => [muscle, 30]));
 
-        expect(suggestNextWorkout([stretches], new Map(), byId, new Map(), 10)).toBeNull();
-        expect(suggestNextWorkout([legs, stretches], counts, byId, new Map(), 10)?.workout).toBe(
-            legs
-        );
+        expect(suggestNextWorkouts([stretches], new Map(), byId, new Map(), 10)).toEqual([]);
+        expect(
+            suggestNextWorkouts([legs, stretches], counts, byId, new Map(), 10).map(
+                ({ workout }) => workout
+            )
+        ).toEqual([legs]);
     });
 });

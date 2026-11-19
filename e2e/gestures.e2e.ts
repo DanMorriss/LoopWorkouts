@@ -358,3 +358,53 @@ test.describe('dragging the plan (PLN-1, PLN-6)', () => {
         }
     );
 });
+
+test.describe('swiping between ready-made plans on Today (NAV-6)', () => {
+    test.use({
+        // The swipe is the browser's own scrolling, motion or not; with reduced motion, a dot
+        // goes straight to its plan rather than gliding there
+        reducedMotion: 'reduce',
+        storage: seed.settings({ trainingGoal: 'fitness', myEquipment: ['kettlebell'] }),
+    });
+    test.beforeEach(({ isMobile }) => {
+        test.skip(!isMobile, 'touch, on the phone project');
+    });
+
+    test('REG-GES-05 swipe Get started to the next plan', { tag: '@p2' }, async ({ app, page }) => {
+        const finger = await Finger.on(page);
+        await app.goto('/home');
+        const getStarted = page.getByRole('region', { name: 'Get started' });
+        const dots = getStarted.getByRole('button', { name: /^Plan \d of 3$/ });
+        await expect(dots).toHaveCount(3);
+        await expect(dots.nth(0)).toHaveAttribute('aria-current', 'true');
+
+        // A swipe left on its title, not its week (whose days are dragged)
+        const card = getStarted.locator('.plan-card__intro').first();
+        await finger.drag(
+            await Finger.within(card, 0.9, 0.5),
+            await Finger.within(card, 0.1, 0.5),
+            {
+                ms: 300,
+            }
+        );
+        await expect(dots.nth(1)).toHaveAttribute('aria-current', 'true');
+        await expect(
+            getStarted.getByRole('heading', { name: 'Kettlebell, 3 days' })
+        ).toBeInViewport();
+
+        // And a dot goes straight to its plan, scrolled across to it
+        await dots.nth(2).click();
+        await expect(dots.nth(2)).toHaveAttribute('aria-current', 'true');
+        const track = getStarted.locator('.carousel__track');
+        await expect
+            .poll(() =>
+                track.evaluate(
+                    (el) =>
+                        el.scrollLeft === (el.children[2] as HTMLElement).offsetLeft &&
+                        el.scrollLeft > 0
+                )
+            )
+            .toBe(true);
+        await expect(getStarted.getByRole('link', { name: 'All plans' })).toBeVisible();
+    });
+});

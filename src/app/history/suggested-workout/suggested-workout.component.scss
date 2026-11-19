@@ -18,9 +18,26 @@
     p {
         margin: 0;
     }
+}
+
+.suggestion__slides {
+    align-self: stretch;
+}
+
+// Its Start at the foot, level with the other slides' however long its reason
+.suggestion__slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+
+    // Room above Start, on the slide with the longest reason too
+    .suggestion__reason {
+        padding-bottom: 0.4rem;
+    }
 
     .btn-main {
-        margin-top: 0.4rem;
+        margin-top: auto;
     }
 }
 

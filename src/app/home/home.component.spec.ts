@@ -11,9 +11,12 @@ import { greetingFor, HomeComponent } from './home.component';
 import { asOneGroup } from '../models/workout';
 import { markFor } from './week-strip/week-strip.component';
 import { PlannedStatus } from '../models/plan';
+import { STRETCH_ROUTINE_ID } from '../models/built-in-stretches';
 
 const NOW = new Date(2026, 9, 18, 12, 0).getTime();
 const HOUR = 60 * 60 * 1000;
+/** The ready-made plans for Fitness with a kettlebell, best first. */
+const PLANS_FOR_KETTLEBELL = ['Fitness, 4 days', 'Kettlebell, 3 days', 'No equipment, 3 days'];
 
 const squat: LoggedSet = {
     round: 0,
@@ -35,6 +38,14 @@ const entry: HistoryEntry = {
     totalRounds: 2,
     outcome: 'finished',
     sets: [squat, { ...squat, round: 1 }],
+};
+
+/** The same, done yesterday: nothing today to offer stretches for. */
+const yesterday: HistoryEntry = {
+    ...entry,
+    startedAt: entry.startedAt - 24 * HOUR,
+    endedAt: entry.endedAt - 24 * HOUR,
+    updatedAt: entry.updatedAt - 24 * HOUR,
 };
 
 describe('HomeComponent', () => {
@@ -112,10 +123,16 @@ describe('HomeComponent', () => {
             expect(element().querySelector('app-loop-logo')).toBeNull();
             expect(text('.start__label')).toEqual(['Get started']);
             expect(text('.start__lead')).toEqual([
-                "Start with a week of workouts, planned for you. Here's one for your goal and equipment:",
+                'Start with a week of workouts, planned for you. Here are some for your goal and equipment, best first:',
             ]);
-            expect(text('.plan-card__title')).toEqual(['Fitness, 4 days']);
-            expect(text('.plan-card__workout-name')).toEqual([
+            // Each your kit allows, to swipe between, the one for your goal first
+            expect(text('.plan-card__title')).toEqual(PLANS_FOR_KETTLEBELL);
+            const first = element().querySelector('app-plan-card')!;
+            const inFirst = (selector: string) =>
+                [...first.querySelectorAll(selector)].map((el) =>
+                    el.textContent!.replace(/\s+/g, ' ').trim()
+                );
+            expect(inFirst('.plan-card__workout-name')).toEqual([
                 'Tabata',
                 'Kettlebell AMRAP',
                 '20-minute AMRAP',
@@ -123,7 +140,7 @@ describe('HomeComponent', () => {
                 'Mobility flow',
                 'Full-body stretch',
             ]);
-            expect(text('.plan-card__workout-days')).toEqual([
+            expect(inFirst('.plan-card__workout-days')).toEqual([
                 'Mon',
                 'Tue',
                 'Thu',
@@ -131,9 +148,9 @@ describe('HomeComponent', () => {
                 'Wed',
                 'Sun',
             ]);
-            expect(text('.plan-card__count')).toEqual(['4 days a week']);
-            expect(text('.plan-card__rest-count')).toEqual(['+ 2 active rest']);
-            expect(text('.plan-card__rest-label')).toEqual(['On rest days']);
+            expect(inFirst('.plan-card__count')).toEqual(['4 days a week']);
+            expect(inFirst('.plan-card__rest-count')).toEqual(['+ 2 active rest']);
+            expect(inFirst('.plan-card__rest-label')).toEqual(['On rest days']);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
             for (const link of element().querySelectorAll('.start__actions a')) {
                 expect(link.classList).toContain('btn-pill');
@@ -144,10 +161,52 @@ describe('HomeComponent', () => {
                     link.getAttribute('href'),
                 ])
             ).toEqual([
-                ['More plans', '/ready-made-plans'],
+                ['All plans', '/ready-made-plans'],
                 ['Make your own plan', '/plan'],
             ]);
             expect(element().querySelector('app-week-strip')).toBeNull();
+        });
+
+        it('has a dot for each plan, which shows it, and marks the one shown', async () => {
+            TestBed.inject(SettingsStore).update({
+                trainingGoal: 'fitness',
+                myEquipment: ['kettlebell'],
+            });
+            create();
+            document.body.appendChild(element());
+
+            const dots = () => [
+                ...element().querySelectorAll<HTMLButtonElement>('app-get-started .carousel__dot'),
+            ];
+            expect(dots().map((dot) => dot.getAttribute('aria-label'))).toEqual(
+                PLANS_FOR_KETTLEBELL.map(
+                    (_, i) => `Plan ${i + 1} of ${PLANS_FOR_KETTLEBELL.length}`
+                )
+            );
+            expect(dots().map((dot) => dot.getAttribute('aria-current'))).toEqual(
+                PLANS_FOR_KETTLEBELL.map((_, i) => (i === 0 ? 'true' : null))
+            );
+            // Above All plans and Make your own plan
+            const actions = element().querySelector('.start__actions')!;
+            expect(
+                dots()[0].compareDocumentPosition(actions) & Node.DOCUMENT_POSITION_FOLLOWING
+            ).toBeTruthy();
+
+            dots()[1].click();
+            fixture.detectChanges();
+            expect(dots()[1].getAttribute('aria-current')).toBe('true');
+            const track = element().querySelector<HTMLElement>('app-get-started .carousel__track')!;
+            const second = element().querySelectorAll<HTMLElement>('.carousel__slide')[1];
+            await vi.waitFor(() => expect(track.scrollLeft).toBe(second.offsetLeft));
+            element().remove();
+        });
+
+        it('only offers plans for your equipment, with none picked those needing none', () => {
+            create();
+
+            expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
+            // One alone: no dots
+            expect(element().querySelector('app-get-started .carousel__dot')).toBeNull();
         });
 
         it('uses it in one tap: the week planned with its workouts, with Undo', async () => {
@@ -222,7 +281,7 @@ describe('HomeComponent', () => {
                 { kind: 'reps', reps: 5, name: 'Bench press', exerciseId: 'builtin:bench-press' },
             ]),
         });
-        TestBed.inject(HistoryStore).record(entry);
+        TestBed.inject(HistoryStore).record(yesterday);
         create();
 
         expect(text('.suggestion__title')).toEqual(['Push']);
@@ -250,7 +309,7 @@ describe('HomeComponent', () => {
                 { kind: 'reps', reps: 5, name: 'Back squat', exerciseId: 'builtin:back-squat' },
             ]),
         });
-        TestBed.inject(HistoryStore).record(entry);
+        TestBed.inject(HistoryStore).record(yesterday);
         create();
 
         expect(text('.suggestion__title')).toEqual(['Squats']);
@@ -275,7 +334,7 @@ describe('HomeComponent', () => {
                 { kind: 'reps', reps: 10, name: 'Push-up', exerciseId: 'builtin:push-up' },
             ]),
         });
-        TestBed.inject(HistoryStore).record(entry);
+        TestBed.inject(HistoryStore).record(yesterday);
         TestBed.inject(SettingsStore).update({ myEquipment: ['none'] });
         create();
 
@@ -326,7 +385,7 @@ describe('HomeComponent', () => {
                     link.classList.contains('btn-pill'),
                 ])
             ).toEqual([
-                ['More plans', '/ready-made-plans', true],
+                ['All plans', '/ready-made-plans', true],
                 ['Make your own plan', '/plan', true],
             ]);
             expect(element().querySelector('.week__days')).toBeNull();
@@ -381,8 +440,18 @@ describe('HomeComponent', () => {
                     "Nothing's planned today, so resting is fine too. If you'd like to train:"
                 );
                 expect(said[1]).toMatch(/fresh for Legs on Thursday\.$/);
-                // Not the one planned next, which back squats are
-                expect(text('.suggestion__title')).not.toEqual(['Legs']);
+                // Not the one planned next, which back squats are, among any to swipe to
+                expect(text('.suggestion__title').length).toBeGreaterThan(1);
+                expect(text('.suggestion__title')).not.toContain('Legs');
+            });
+
+            it('says See your week only with something done for Progress to show', async () => {
+                await restDay();
+                expect(element().querySelector('.suggestion__more')).toBeNull();
+
+                TestBed.inject(HistoryStore).record(yesterday);
+                fixture.detectChanges();
+                expect(text('.suggestion__more')).toEqual(['See your week chevron_right']);
             });
 
             it('offers nothing extra on a day with something planned', async () => {
@@ -391,7 +460,7 @@ describe('HomeComponent', () => {
                 TestBed.inject(PlanStore).add(2, TestBed.inject(WorkoutStore).workouts()[1].id);
                 create();
 
-                expect(element().querySelector('app-suggested-workout')).toBeNull();
+                expect(element().querySelector('.suggestion')).toBeNull();
             });
         });
 
@@ -638,7 +707,7 @@ describe('HomeComponent', () => {
             expect(text('.week__so-far')).toEqual(['0 of 3 done this week']);
         });
 
-        it('leaves out one run today, saying so, and hides the suggestion while any are left', () => {
+        it('leaves out one run today, saying so, and offers no stretches while any are left', () => {
             const { legs } = planToday();
             TestBed.inject(HistoryStore).record({ ...entry, workoutId: legs.id });
             create();
@@ -656,8 +725,67 @@ describe('HomeComponent', () => {
             create();
 
             expect(text('.due__all-done')).toEqual(['check All done: Push, Legs']);
-            // With a week planned, the week says what's next, not the suggestion
-            expect(element().querySelector('.suggestion')).toBeNull();
+            // With a week planned, the week says what's next, not a suggestion: only the
+            // stretches for what was done (PRG-16)
+            expect(text('.suggestion__label')).toEqual(["After today's training"]);
+            expect(text('.suggestion__title')).toEqual(['Stretch what you worked']);
+            expect(element().querySelector('.suggestion__more')).toBeNull();
+        });
+
+        it('offers stretches for today first, starting them, and none once done', () => {
+            TestBed.inject(WorkoutStore).addWorkout({
+                title: 'Push',
+                repeats: 3,
+                blocks: asOneGroup([
+                    {
+                        kind: 'reps',
+                        reps: 5,
+                        name: 'Bench press',
+                        exerciseId: 'builtin:bench-press',
+                    },
+                ]),
+            });
+            const history = TestBed.inject(HistoryStore);
+            history.record(entry);
+            create();
+
+            // The stretches, then the workouts to swipe to
+            expect(text('.suggestion__label')).toEqual(["After today's training"]);
+            expect(text('.suggestion__title')).toEqual(['Stretch what you worked', 'Push']);
+            expect(text('.suggestion__reason')[0]).toMatch(
+                /^About \d+ min for your .*Quads.*, each held 30 seconds\.$/
+            );
+            expect(
+                [...element().querySelectorAll('.carousel__dot')].map((dot) =>
+                    dot.getAttribute('aria-label')
+                )
+            ).toEqual(['Suggestion 1 of 2', 'Suggestion 2 of 2']);
+
+            const router = TestBed.inject(Router);
+            vi.spyOn(router, 'navigate').mockResolvedValue(true);
+            element().querySelector<HTMLButtonElement>('[aria-label^="Start stretches"]')!.click();
+            expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(STRETCH_ROUTINE_ID);
+            expect(router.navigate).toHaveBeenCalledWith(['/workout']);
+
+            // Stretched since: just the workout again
+            history.record({
+                ...entry,
+                id: 'run-2',
+                workoutId: STRETCH_ROUTINE_ID,
+                startedAt: NOW - 10 * 60_000,
+                sets: [
+                    {
+                        round: 0,
+                        step: 0,
+                        name: 'Standing quad stretch',
+                        seconds: 30,
+                        exerciseId: 'builtin:standing-quad-stretch',
+                    },
+                ],
+            });
+            fixture.detectChanges();
+            expect(text('.suggestion__label')).toEqual(['Suggested next workout']);
+            expect(text('.suggestion__title')).toEqual(['Push']);
         });
 
         it('shows nothing on a day with nothing planned', () => {

@@ -1,30 +1,32 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { isStretch } from '../../models/built-in-stretches';
-import { inLastSevenDays } from '../../models/history';
-import { MUSCLE_LABELS } from '../../models/exercise';
-import { setsByMuscle, SuggestionAvoid, suggestNextWorkout } from '../../models/muscle-balance';
-import { nextPlannedDay, thisWeek, weekdayOf, WEEKDAYS } from '../../models/plan';
-import { musclesWorked } from '../../models/workout-muscles';
-import { Workout } from '../../models/workout';
-import { canDoWorkoutWith } from '../../models/workout-filter';
+import { MOST_SUGGESTIONS } from '../../models/muscle-balance';
+import {
+    ROUTINE_HOLD_SECONDS,
+    setsToStretchToday,
+    stretchOffer,
+} from '../../models/stretch-routine';
+import {
+    CarouselComponent,
+    SlideDirective,
+} from '../../shared/components/carousel/carousel.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { injectStartWorkout } from '../../shared/run/start-workout';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
-import { PlanStore } from '../../shared/state/plan-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
-import { WorkoutStore } from '../../shared/state/workout-store.service';
-
-/** "Glutes, Quads and Calves". */
-const LIST = new Intl.ListFormat('en-GB');
+import { injectSuggestedWorkouts } from './suggested-workouts';
 
 let nextId = 0;
 
 /**
- * A card with the workout for the muscles furthest short of their aims in the last seven days
- * (PRG-9), on the history page, the workout summary and Today. Nothing shows with no workout to
- * suggest.
+ * A card with the workouts for the muscles furthest short of their aims in the last seven days
+ * (PRG-9), on the history page, the workout summary and Today: the best first, and the next
+ * few swiped to (MOST_SUGGESTIONS). Nothing shows with no workout to suggest.
+ *
+ * On Today (`stretchToday`), after training today, stretches for what it worked come first
+ * (PRG-16), until they're done; on a planned day, where the plan says what's next
+ * (`suggestWorkouts` off), they're all it shows.
  *
  * On a rest day in a planned week (`restDay`), it's offered, not pressed: resting is fine too.
  * It steers clear of the workout planned next this week and of most of its main muscles, and
@@ -34,37 +36,65 @@ let nextId = 0;
  * picked yet, any.
  *
  * It says which muscles in words, not their sets and aims, with a link to the bars on Progress
- * for those.
+ * for those, once there's anything done for Progress to show.
  */
 @Component({
     selector: 'app-suggested-workout',
-    imports: [IconComponent, RouterLink],
+    imports: [CarouselComponent, IconComponent, RouterLink, SlideDirective],
     template: `
-        @if (suggestion(); as suggested) {
+        @if (slideCount()) {
             <section class="suggestion" [attr.aria-labelledby]="id">
-                <h3 class="suggestion__label" [id]="id">
-                    {{ restDay() ? 'Fancy a workout today?' : 'Suggested next workout' }}
-                </h3>
-                @if (restDay()) {
+                <h3 class="suggestion__label" [id]="id">{{ heading() }}</h3>
+                @if (restDay() && suggestions().length && !stretch()) {
                     <p class="suggestion__reason">
                         Nothing's planned today, so resting is fine too. If you'd like to train:
                     </p>
                 }
-                <p class="suggestion__title">{{ suggested.workout.title }}</p>
-                <p class="suggestion__reason">{{ suggested.reason }}</p>
-                <a class="suggestion__more" routerLink="/history">
-                    See your week
-                    <app-icon>chevron_right</app-icon>
-                </a>
-                @if (startable()) {
-                    <button
-                        type="button"
-                        class="btn-main"
-                        [attr.aria-label]="'Start ' + suggested.workout.title"
-                        (click)="start(suggested.workout)"
-                    >
-                        Start
-                    </button>
+                <app-carousel class="suggestion__slides" label="Suggestions" itemName="Suggestion">
+                    @if (stretch(); as offer) {
+                        <ng-template appSlide>
+                            <div class="suggestion__slide">
+                                <p class="suggestion__title">Stretch what you worked</p>
+                                <p class="suggestion__reason">
+                                    {{ offer.time.text }} for your {{ offer.muscles }}, each held
+                                    {{ holdSeconds }} seconds.
+                                </p>
+                                <button
+                                    type="button"
+                                    class="btn-main"
+                                    [attr.aria-label]="'Start stretches, ' + offer.time.spoken"
+                                    (click)="start(offer.workout)"
+                                >
+                                    Start stretches
+                                </button>
+                            </div>
+                        </ng-template>
+                    }
+                    @for (suggested of suggestions(); track suggested.workout.id) {
+                        <ng-template appSlide>
+                            <div class="suggestion__slide">
+                                <p class="suggestion__title">{{ suggested.workout.title }}</p>
+                                <p class="suggestion__reason">{{ suggested.reason }}</p>
+                                @if (startable()) {
+                                    <button
+                                        type="button"
+                                        class="btn-main"
+                                        [attr.aria-label]="'Start ' + suggested.workout.title"
+                                        (click)="start(suggested.workout)"
+                                    >
+                                        Start
+                                    </button>
+                                }
+                            </div>
+                        </ng-template>
+                    }
+                </app-carousel>
+                <!-- Only with something on Progress to see -->
+                @if (hasHistory() && suggestions().length) {
+                    <a class="suggestion__more" routerLink="/history">
+                        See your week
+                        <app-icon>chevron_right</app-icon>
+                    </a>
                 }
             </section>
         }
@@ -72,122 +102,63 @@ let nextId = 0;
     styleUrl: './suggested-workout.component.scss',
 })
 export class SuggestedWorkoutComponent {
-    /** With a Start button, as the library's Start. */
+    /**
+     * With a Start button, as the library's Start. Without, only the best is shown, as
+     * there's nothing to do with the rest (and nothing in them to tab to).
+     */
     readonly startable = input(true);
     /** On Today, on a day of a planned week with nothing planned (PLN-2). */
     readonly restDay = input(false);
+    /** Whether to suggest workouts: on Today, not on a planned day, as the plan says what's next. */
+    readonly suggestWorkouts = input(true);
+    /** On Today: after training today, stretches for what it worked first (PRG-16). */
+    readonly stretchToday = input(false);
 
     private readonly history = inject(HistoryStore);
     private readonly exercises = inject(ExerciseStore);
-    private readonly workouts = inject(WorkoutStore);
     private readonly settings = inject(SettingsStore);
-    private readonly plan = inject(PlanStore);
     protected readonly start = injectStartWorkout();
     private readonly now = Date.now();
     protected readonly id = `suggestion-title-${nextId++}`;
 
-    /** Sets per muscle in the last seven days. */
-    private readonly weekSets = computed(() =>
-        setsByMuscle(inLastSevenDays(this.history.entries(), this.now), (id) =>
-            this.exercises.byId(id)
-        )
+    private readonly suggested = injectSuggestedWorkouts({
+        restDay: this.restDay,
+        most: computed(() => (this.startable() ? MOST_SUGGESTIONS : 1)),
+        now: this.now,
+    });
+    /** The workouts to suggest, best first, each with why; none where the plan says. */
+    protected readonly suggestions = computed(() =>
+        this.suggestWorkouts() ? this.suggested() : []
     );
 
-    /**
-     * On a rest day, the workouts planned on the next day this week with any, to leave alone,
-     * with their main muscles; null with none to come.
-     */
-    private readonly nextPlanned = computed(() => {
-        if (!this.restDay()) {
-            return null;
+    /** On Today, stretches for what today's training worked, until they're done. */
+    protected readonly stretch = computed(() =>
+        this.stretchToday()
+            ? stretchOffer(
+                  setsToStretchToday(this.history.entries(), this.now),
+                  (id) => this.exercises.byId(id),
+                  {
+                      first: this.settings.eachSideFirst(),
+                      switchSeconds: this.settings.switchSidesSeconds(),
+                  }
+              )
+            : null
+    );
+
+    protected readonly slideCount = computed(
+        () => this.suggestions().length + (this.stretch() ? 1 : 0)
+    );
+
+    protected readonly holdSeconds = ROUTINE_HOLD_SECONDS;
+
+    /** After training today, for the stretches and what follows them. */
+    protected readonly heading = computed(() => {
+        if (this.stretch()) {
+            return "After today's training";
         }
-        const week = thisWeek(
-            this.plan.plan(),
-            this.history.entries(),
-            this.now,
-            (id) => this.workouts.findAnyWorkout(id) !== null,
-            (id) => this.workouts.isActiveRest(id)
-        );
-        const day = nextPlannedDay(week, weekdayOf(this.now));
-        if (day < 0) {
-            return null;
-        }
-        // Its training: active rest on the same day leaves nothing to keep fresh
-        const workouts = week[day]
-            .filter((planned) => !planned.activeRest)
-            .map((planned) => this.workouts.findAnyWorkout(planned.workoutId)!);
-        // Nor does a stretch among its exercises
-        const { main } = musclesWorked(workouts, (id) =>
-            isStretch(id) ? undefined : this.exercises.byId(id)
-        );
-        return { day, workouts, muscles: new Set(main) };
+        return this.restDay() ? 'Fancy a workout today?' : 'Suggested next workout';
     });
 
-    protected readonly suggestion = computed(() => {
-        const lastDone = new Map<string, number>();
-        // Newest first, so the first of each workout is when it was last done
-        for (const entry of this.history.entries()) {
-            if (!lastDone.has(entry.workoutId)) {
-                lastDone.set(entry.workoutId, entry.startedAt);
-            }
-        }
-        const suggested = suggestNextWorkout(
-            this.doable(),
-            this.weekSets(),
-            (id) => this.exercises.byId(id),
-            lastDone,
-            this.settings.weeklySets(),
-            this.avoid()
-        );
-        if (!suggested) {
-            return null;
-        }
-        const muscles = suggested.muscles.slice(0, 3);
-        const untrained = muscles.every((muscle) => !this.weekSets().get(muscle));
-        const labels = muscles.map((muscle) => MUSCLE_LABELS[muscle]);
-        const which = untrained
-            ? `which you haven't trained in the last 7 days`
-            : `which you've trained least in the last 7 days`;
-        return {
-            workout: suggested.workout,
-            reason: `It works your ${LIST.format(labels)}, ${which}${this.leavesFresh(suggested.workout)}.`,
-        };
-    });
-
-    /** The workouts you can do with your equipment: all of them, with none picked yet. */
-    private readonly doable = computed(() => {
-        const kit = this.settings.myEquipment();
-        const all = this.workouts.allWorkouts();
-        return kit.length === 0
-            ? all
-            : all.filter((workout) =>
-                  canDoWorkoutWith(workout, kit, (id) => this.exercises.byId(id))
-              );
-    });
-
-    private readonly avoid = computed((): SuggestionAvoid | undefined => {
-        const next = this.nextPlanned();
-        return next
-            ? { workoutIds: new Set(next.workouts.map((w) => w.id)), muscles: next.muscles }
-            : undefined;
-    });
-
-    /**
-     * ", and leaves your Quads and Glutes fresh for Legs day on Thursday": the main muscles
-     * of the next planned workout that `workout` doesn't work as main ones, up to two. Nothing
-     * when there's none to come, or it works them all.
-     */
-    private leavesFresh(workout: Workout): string {
-        const next = this.nextPlanned();
-        if (!next) {
-            return '';
-        }
-        const { main } = musclesWorked([workout], (id) => this.exercises.byId(id));
-        const fresh = [...next.muscles].filter((muscle) => !main.includes(muscle)).slice(0, 2);
-        if (fresh.length === 0) {
-            return '';
-        }
-        const name = next.workouts[0].title.trim() || 'your next workout';
-        return `, and leaves your ${LIST.format(fresh.map((m) => MUSCLE_LABELS[m]))} fresh for ${name} on ${WEEKDAYS[next.day]}`;
-    }
+    /** Whether anything's been done, for Progress to show: until then, no way there. */
+    protected readonly hasHistory = computed(() => this.history.entries().length > 0);
 }

@@ -1,4 +1,4 @@
-import { expect, reps, run, seed, test, workout, type LoggedSet } from './fixtures';
+import { expect, reps, run, seed, sets, test, workout, type LoggedSet } from './fixtures';
 import { setWheel, WorkoutPage } from './workout-page';
 
 // Progress (progress.md): REG-PRG in docs/regression-tests.md. The clock is at NOW, Wednesday
@@ -339,6 +339,35 @@ test.describe('my kettlebell, across workouts', () => {
             await expect(
                 page.getByRole('textbox', { name: 'My kettlebell in kilograms' })
             ).toHaveValue('20');
+        }
+    );
+});
+
+test.describe('stretches on Today', () => {
+    const push = workout('Push', { steps: [reps(10, 'Push-up', { exercise: 'push-up' })] });
+    test.use({
+        storage: {
+            ...seed.workouts([push]),
+            ...seed.history([
+                run(push, '2026-11-11T07:00', { sets: sets('push-up', 'Push-up', [10], [10]) }),
+            ]),
+        },
+    });
+
+    test(
+        "REG-PRG-07 after today's training, Today offers its stretches first",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/home');
+            const card = page.getByRole('region', { name: "After today's training" });
+            await expect(card.getByRole('group', { name: /^Suggestion 1 of/ })).toContainText(
+                'Stretch what you worked'
+            );
+            // Then the workouts to do next, swiped to
+            await expect(card.getByRole('group', { name: /^Suggestion 2 of/ })).toBeAttached();
+            await card.getByRole('button', { name: /^Start stretches/ }).click();
+            await expect(page).toHaveURL('/workout');
+            await expect(new WorkoutPage(page).face).toContainText('Doorway chest stretch');
         }
     );
 });

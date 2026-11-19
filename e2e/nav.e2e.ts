@@ -113,7 +113,7 @@ test.describe('a device new to the app', () => {
             expect(await app.storageItem('setup')).toBeNull();
             // Get started offers a ready-made plan for the goal and the kit (M3)
             await expect(
-                page.getByRole('region', { name: 'Get started' }).getByRole('article')
+                page.getByRole('region', { name: 'Get started' }).getByRole('article').first()
             ).toHaveAccessibleName('Fitness, 4 days');
 
             await app.reload();

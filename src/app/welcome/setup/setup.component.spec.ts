@@ -114,6 +114,9 @@ describe('SetupComponent (NAV-4)', () => {
         expect(element.textContent).toContain('6 suits staying fit and active');
         const wheel = element.querySelector('app-weekly-sets-field [role="spinbutton"]')!;
         expect(wheel.getAttribute('aria-valuenow')).toBe('6');
+        // A freshly shown wheel jumps to its value a frame later, which would undo a turn before it
+        await new Promise(requestAnimationFrame);
+        await new Promise(requestAnimationFrame);
         (element.querySelector('app-weekly-sets-field [data-value="8"]') as HTMLElement).click();
         await fixture.whenStable();
         expect(settings().weeklySets()).toBe(8);

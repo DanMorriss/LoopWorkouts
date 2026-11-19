@@ -104,8 +104,11 @@ describe('ProfileComponent', () => {
             expect(setsHint()).toBe('Small muscles, like the forearms, aim for 4');
         });
 
-        it('saves the sets a week picked, with the small muscles following', () => {
+        it('saves the sets a week picked, with the small muscles following', async () => {
             create();
+            // A freshly shown wheel jumps to its value a frame later, which would undo a turn
+            await new Promise(requestAnimationFrame);
+            await new Promise(requestAnimationFrame);
 
             (
                 fixture.nativeElement.querySelector(

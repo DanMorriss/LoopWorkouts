@@ -144,7 +144,7 @@ A STEP is one of:
 - Timed: { "kind": "work", "seconds": 1–${MAX_STEP_SECONDS}, "name": "Plank" } — a countdown, e.g. a hold or an interval.
 - Rest: { "kind": "rest", "seconds": 1–${MAX_STEP_SECONDS}, "name": "" }
 For sets that differ (e.g. a pyramid "12, 10, 8 at 40, 45, 50 kg", or warm-up sets), add "sets" to the step: one { "reps": 12, "weight": 40 } (reps steps) or { "seconds": 30 } (timed steps) for each of its group's rounds (a superset's rounds, for a step in one), in order, exactly as many as "rounds", and with the step's own "reps" and "weight" (or "seconds") set to the first set's. Leave it out when every set is the same, and for a group of one round.
-For an exercise done one side at a time (e.g. "10 each leg", "30 seconds each side"), add "eachSide": true to its reps or timed step, with the reps or time for one side: the app runs both sides in each set. Leave it out otherwise, and never put it on a rest.
+For an exercise done one side at a time (e.g. "10 each leg", "30 seconds each side"), add "eachSide": true to its reps or timed step, with the reps or time for one side: the app runs all of one side's reps (or time), then all of the other's, in each set. It's only for exercises done that way, e.g. a step-up, a single-arm row or a side plank. Leave it out for an exercise whose sides take turns, rep by rep, even when the plan says "each side": e.g. a dead bug, a bird dog, a Russian twist, a bicycle crunch or a mountain climber. Count both sides' reps together for those, so "10 each side" is 20 reps, and say so under "Notes:". Leave it out otherwise too, and never put it on a rest.
 Names are up to ${MAX_EXERCISE_NAME_LENGTH} characters. Write durations as whole seconds: 1:30 is 90.
 
 EXERCISE NAMES

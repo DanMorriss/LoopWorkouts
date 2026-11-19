@@ -989,7 +989,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     1. Open Exercises; find Back squat's card.
     2. Open it; read Progress.
     3. Focus the chart; press Home, ArrowRight.
-    4. Pick **4 weeks**; then **Show as a table**.
+    4. Pick **4 weeks**; then swipe to the table (or press its dot, **Table 2 of 2**).
     5. Press **Show all 7**.
     6. Switch to pounds.
 - **Expected:**
@@ -1000,7 +1000,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     5. All seven sessions, each linking to `/history?run=<id>`.
     6. Heaviest reads "220.5 lb × 5".
 - **Not done yet:** an exercise never done says "Nothing logged yet. Do it in a workout and its bests and progress show up here."
-- **In the pack:** the bests read "100 kg × 5", "116.5 kg from 100 kg × 5" and "12 @ 60 kg" (with the date); 4 weeks has two workouts, and Show as a table swaps the chart for a table of them.
+- **In the pack:** the bests read "100 kg × 5", "116.5 kg from 100 kg × 5" and "12 @ 60 kg" (with the date); 4 weeks has two workouts, and the table's dot shows a table of them beside the chart.
 
 ### REG-PRG-03 · The suggested next workout on Today
 

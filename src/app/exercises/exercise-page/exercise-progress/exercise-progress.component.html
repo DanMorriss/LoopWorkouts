@@ -9,20 +9,7 @@
         <app-progress-bests [bests]="bests()" />
 
         <div class="progress__chart-head">
-            <div class="progress__chart-title">
-                <h4 [id]="id + '-chart'" class="progress__subheading">{{ measureTitle() }}</h4>
-                @if (points().length > 0) {
-                    <!-- Up here, so it stays put as the table and the chart swap under it -->
-                    <button
-                        type="button"
-                        class="progress__toggle"
-                        [attr.aria-controls]="id + '-view'"
-                        (click)="asTable.set(!asTable())"
-                    >
-                        {{ asTable() ? 'Show as a chart' : 'Show as a table' }}
-                    </button>
-                }
-            </div>
+            <h4 [id]="id + '-chart'" class="progress__subheading">{{ measureTitle() }}</h4>
             <div class="progress__ranges" role="group" aria-label="Chart range">
                 @for (option of ranges; track option.value) {
                     <button
@@ -39,126 +26,134 @@
 
         @if (points().length === 0) {
             <p class="progress__empty">Not done in {{ rangeSpoken() }}.</p>
-        } @else if (asTable()) {
-            <table class="progress__table" [id]="id + '-view'">
-                <caption class="sr-only">
-                    {{
-                        measureTitle()
-                    }},
-                    {{
-                        rangeSpoken()
-                    }}
-                </caption>
-                <thead>
-                    <tr>
-                        <th scope="col">Date</th>
-                        <th scope="col">Workout</th>
-                        <th scope="col">{{ measureTitle() }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (point of points(); track point.entryId) {
-                        <tr>
-                            <td>{{ point.at | date: dateFormat(point.at) }}</td>
-                            <td>{{ point.title }}</td>
-                            <td>{{ point.text }}</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
         } @else {
-            <!-- Arrow keys step through the workouts; the readout says each one -->
-            <div
-                class="progress__chart"
-                [id]="id + '-view'"
-                tabindex="0"
-                role="group"
-                [attr.aria-labelledby]="id + '-chart'"
-                [attr.aria-describedby]="id + '-chart-help ' + id + '-readout'"
-                (keydown)="onKeydown($event)"
-                (focus)="onFocus()"
-                (blur)="active.set(null)"
-            >
-                <span class="sr-only" [id]="id + '-chart-help'"
-                    >{{ points().length }} {{ points().length === 1 ? 'workout' : 'workouts' }} in
-                    {{ rangeSpoken() }}. Use the left and right arrow keys to hear each one.</span
-                >
-                <svg
-                    class="progress__svg"
-                    [attr.viewBox]="'0 0 ' + width + ' ' + height"
-                    aria-hidden="true"
-                    (pointerdown)="onPointerMove($event)"
-                    (pointermove)="onPointerMove($event)"
-                    (pointerleave)="active.set(null)"
-                >
-                    @for (tick of ticks(); track tick.label) {
-                        <line
-                            class="progress__grid"
-                            [attr.x1]="left"
-                            [attr.x2]="right"
-                            [attr.y1]="tick.y"
-                            [attr.y2]="tick.y"
-                        />
-                        <text
-                            class="progress__axis"
-                            [attr.x]="left - 6"
-                            [attr.y]="tick.y"
-                            dy="0.32em"
-                            text-anchor="end"
+            <!-- The chart, and swiped to, a table of the same workouts -->
+            <app-carousel [label]="measureTitle()" itemName="View" [fitShown]="true">
+                <ng-template appSlide="Chart">
+                    <!-- Arrow keys step through the workouts; the readout says each one -->
+                    <div
+                        class="progress__chart"
+                        tabindex="0"
+                        role="group"
+                        [attr.aria-labelledby]="id + '-chart'"
+                        [attr.aria-describedby]="id + '-chart-help ' + id + '-readout'"
+                        (keydown)="onKeydown($event)"
+                        (focus)="onFocus()"
+                        (blur)="active.set(null)"
+                    >
+                        <span class="sr-only" [id]="id + '-chart-help'"
+                            >{{ points().length }}
+                            {{ points().length === 1 ? 'workout' : 'workouts' }} in
+                            {{ rangeSpoken() }}. Use the left and right arrow keys to hear each
+                            one.</span
                         >
-                            {{ tick.label }}
-                        </text>
-                    }
-                    @if (axisDates(); as dates) {
-                        <text class="progress__axis" [attr.x]="left" [attr.y]="height - 6">
-                            {{ dates.start | date: dates.format }}
-                        </text>
-                        <text
-                            class="progress__axis"
-                            [attr.x]="right"
-                            [attr.y]="height - 6"
-                            text-anchor="end"
+                        <svg
+                            class="progress__svg"
+                            [attr.viewBox]="'0 0 ' + width + ' ' + height"
+                            aria-hidden="true"
+                            (pointerdown)="onPointerMove($event)"
+                            (pointermove)="onPointerMove($event)"
+                            (pointerleave)="active.set(null)"
                         >
-                            {{ dates.end | date: dateFormat(dates.end) }}
-                        </text>
-                    }
-                    @if (activePoint(); as point) {
-                        <line
-                            class="progress__crosshair"
-                            [attr.x1]="point.x"
-                            [attr.x2]="point.x"
-                            [attr.y1]="12"
-                            [attr.y2]="bottom"
-                        />
-                    }
-                    <path class="progress__line" [attr.d]="line()" />
-                    @for (point of points(); track point.entryId; let i = $index) {
-                        <circle
-                            class="progress__dot"
-                            [class.progress__dot--active]="i === active()"
-                            [attr.cx]="point.x"
-                            [attr.cy]="point.y"
-                            [attr.r]="i === active() ? 6 : 4"
-                        />
-                    }
-                </svg>
+                            @for (tick of ticks(); track tick.label) {
+                                <line
+                                    class="progress__grid"
+                                    [attr.x1]="left"
+                                    [attr.x2]="right"
+                                    [attr.y1]="tick.y"
+                                    [attr.y2]="tick.y"
+                                />
+                                <text
+                                    class="progress__axis"
+                                    [attr.x]="left - 6"
+                                    [attr.y]="tick.y"
+                                    dy="0.32em"
+                                    text-anchor="end"
+                                >
+                                    {{ tick.label }}
+                                </text>
+                            }
+                            @if (axisDates(); as dates) {
+                                <text class="progress__axis" [attr.x]="left" [attr.y]="height - 6">
+                                    {{ dates.start | date: dates.format }}
+                                </text>
+                                <text
+                                    class="progress__axis"
+                                    [attr.x]="right"
+                                    [attr.y]="height - 6"
+                                    text-anchor="end"
+                                >
+                                    {{ dates.end | date: dateFormat(dates.end) }}
+                                </text>
+                            }
+                            @if (activePoint(); as point) {
+                                <line
+                                    class="progress__crosshair"
+                                    [attr.x1]="point.x"
+                                    [attr.x2]="point.x"
+                                    [attr.y1]="12"
+                                    [attr.y2]="bottom"
+                                />
+                            }
+                            <path class="progress__line" [attr.d]="line()" />
+                            @for (point of points(); track point.entryId; let i = $index) {
+                                <circle
+                                    class="progress__dot"
+                                    [class.progress__dot--active]="i === active()"
+                                    [attr.cx]="point.x"
+                                    [attr.cy]="point.y"
+                                    [attr.r]="i === active() ? 6 : 4"
+                                />
+                            }
+                        </svg>
 
-                @if (activePoint(); as point) {
-                    <app-progress-tooltip
-                        [text]="point.text"
-                        [at]="point.at"
-                        [dateFormat]="dateFormat(point.at)"
-                        [title]="point.title"
-                        [x]="point.x / width"
-                        [y]="point.y / height"
-                    />
-                }
-                <span class="sr-only" [id]="id + '-readout'" aria-live="polite">
-                    @if (activePoint(); as point) {
-                        {{ point.spoken }}, {{ point.at | date: 'd MMMM y' }}, {{ point.title }}
-                    }
-                </span>
-            </div>
+                        @if (activePoint(); as point) {
+                            <app-progress-tooltip
+                                [text]="point.text"
+                                [at]="point.at"
+                                [dateFormat]="dateFormat(point.at)"
+                                [title]="point.title"
+                                [x]="point.x / width"
+                                [y]="point.y / height"
+                            />
+                        }
+                        <span class="sr-only" [id]="id + '-readout'" aria-live="polite">
+                            @if (activePoint(); as point) {
+                                {{ point.spoken }}, {{ point.at | date: 'd MMMM y' }},
+                                {{ point.title }}
+                            }
+                        </span>
+                    </div>
+                </ng-template>
+                <ng-template appSlide="Table">
+                    <table class="progress__table">
+                        <caption class="sr-only">
+                            {{
+                                measureTitle()
+                            }},
+                            {{
+                                rangeSpoken()
+                            }}
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Workout</th>
+                                <th scope="col">{{ measureTitle() }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (point of points(); track point.entryId) {
+                                <tr>
+                                    <td>{{ point.at | date: dateFormat(point.at) }}</td>
+                                    <td>{{ point.title }}</td>
+                                    <td>{{ point.text }}</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </ng-template>
+            </app-carousel>
         }
 
         <app-recent-sessions [sessions]="sessions()" [id]="id" />

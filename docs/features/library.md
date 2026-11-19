@@ -22,7 +22,7 @@
 - A ready-made workout has a **Ready-made** badge on its card and its Details; yours have none. It's started, planned and favourited as yours are, and keeps your reps and weights (since 2026-11-08), but its exercises can't be changed and it can't be deleted: **Make a copy** makes one of your own to change.
 - **With none of your own yet**: "Start any of these, or make your own with New." over the list.
 - **Search and filters** (LIB-8, since 2026-11-06), between the title and the cards:
-    - A **search** box, "Name or exercise, e.g. squat": a workout shows if every word typed is in its title or in one of its steps' names or their exercises' names, in any case, so "squat" finds a workout with a Goblet squat in it.
+    - A **search** box, "Name or exercise, e.g. squat": a workout shows if every word typed is in its title, a ready-made one's description, or one of its steps' names or their exercises' names, in any case, so "squat" finds a workout with a Goblet squat in it, and "HIIT" finds Tabata and Cardio intervals, whose descriptions start with it.
     - **All**, **Training** or **Stretches**, a switch under it (LIB-10, since 2026-11-19): everything, every workout but those of only stretches, or only those (with no Stretches heading, as they all are). It's a setting, so it's kept through a reload and the next visit; the rest of the search and filters aren't. Until 2026-11-19 the switch was All, My own or Ready-made.
     - **Favourites**, a chip with a heart, shows only favourites, yours and ready-made.
     - **My own**, a chip, shows only yours (since 2026-11-19, in place of the switch's My own; there's no longer a way to show only the ready-made ones).
@@ -126,6 +126,7 @@
 - Given Stretches picked, then only those four show, with no heading; given Training, then every workout but them, and "20 of 24 workouts" with one of my own; when I reload, then Training is still picked; Clear search and filters goes back to All.
 - Given only a kettlebell picked and Only what I have on, then only the ready-made workouts needing nothing or a kettlebell show, and the count says how many of all the workouts show.
 - Given workouts "Legs day" (Back squat) and "At home" (a step "Squats" linked to Goblet squat), when I search "squat", then both show, with the ready-made ones with a squat in them; when I search "goblet", then only At home and the ready-made ones with a goblet squat.
+- When I search "hiit", then Tabata and Cardio intervals show, found by their descriptions.
 - Given no workout matches the search, then "No workouts match" shows, and Clear search and filters shows them all again.
 - Given a card, mine or ready-made, when I press its heart, then it's a favourite (the heart pressed), and with Favourites on only favourites show; pressing the heart doesn't open its details or start it.
 - Given a ready-made favourite on one device, when it syncs, then it's a favourite on my other device too.

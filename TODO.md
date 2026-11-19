@@ -48,7 +48,6 @@ Every built-in exercise has an animated figure, first under its name (see The an
 
 Twenty-three ready-made workouts are listed on Workouts, under your own (see `docs/features/library.md`), written in `src/app/models/built-in-workouts.ts`.
 
-- [ ] **Search the ready-made workouts' descriptions too,** with "HIIT" in Tabata's and Cardio intervals', so a search for HIIT finds them.
 - [ ] **More batches, once there are exercises for them:** rings, which need new built-in exercises first (see `docs/writing-exercises.md`). Each must pass `built-in-workouts.spec.ts`.
 
 ### Help (NAV-7)

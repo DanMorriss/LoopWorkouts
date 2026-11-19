@@ -20,6 +20,7 @@ import {
     MEASURE_TITLES,
 } from '../../progress-format';
 import { ProgressBestsComponent } from './progress-bests/progress-bests.component';
+import { ProgressTooltipComponent } from './progress-tooltip/progress-tooltip.component';
 import { RecentSessionsComponent } from './recent-sessions/recent-sessions.component';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -63,7 +64,7 @@ interface ChartPoint {
  */
 @Component({
     selector: 'app-exercise-progress',
-    imports: [DatePipe, ProgressBestsComponent, RecentSessionsComponent],
+    imports: [DatePipe, ProgressBestsComponent, ProgressTooltipComponent, RecentSessionsComponent],
     templateUrl: './exercise-progress.component.html',
     styleUrl: './exercise-progress.component.scss',
 })

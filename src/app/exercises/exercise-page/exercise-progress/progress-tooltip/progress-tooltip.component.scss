@@ -1,0 +1,41 @@
+@use 'type' as *;
+
+:host {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    // Its own width, not what's left of the chart to its right
+    width: max-content;
+    max-width: 12rem;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--raised);
+    box-shadow: 0 4px 12px var(--shadow);
+    color: var(--text-muted);
+    @include small-type(0.72rem);
+    pointer-events: none;
+    // Above the dot, to its right
+    transform: translate(10px, calc(-100% - 10px));
+}
+
+strong {
+    color: var(--text-strong);
+    font-size: 0.9rem;
+}
+
+// On the right half, to the dot's left, so it stays on the chart
+:host(.progress-tooltip--left) {
+    transform: translate(calc(-100% - 10px), calc(-100% - 10px));
+}
+
+// On the top half, below the dot, so it doesn't cover the range buttons
+:host(.progress-tooltip--below) {
+    transform: translate(10px, 10px);
+}
+
+:host(.progress-tooltip--below.progress-tooltip--left) {
+    transform: translate(calc(-100% - 10px), 10px);
+}

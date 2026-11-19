@@ -4,15 +4,10 @@ import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { AccountClient, ACCOUNT_CLIENT } from '../account/account-client';
 import { ConsentService } from '../account/consent.service';
 import { BackupService } from '../shared/backup/backup.service';
-import { Favourites } from '../shared/state/favourites.service';
-import { ReadyMadeChanges } from '../shared/state/ready-made-changes.service';
-import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
-import { DeletionStore } from '../shared/state/deletion-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { SyncClock } from '../shared/state/sync-clock.service';
-import { WorkoutStore } from '../shared/state/workout-store.service';
 import { changedSince, CopyHere, keyOf, markOf, readPulled, recordsHere } from './sync-records';
 import { LAST_SYNCED_KEY, SyncStarter } from './sync-starter.service';
 
@@ -48,14 +43,9 @@ interface SyncState {
 @Service()
 export class SyncService {
     private readonly makeClient = inject(ACCOUNT_CLIENT);
-    private readonly workouts = inject(WorkoutStore);
     private readonly history = inject(HistoryStore);
     private readonly exercises = inject(ExerciseStore);
-    private readonly deletions = inject(DeletionStore);
     private readonly backup = inject(BackupService);
-    private readonly favourites = inject(Favourites);
-    private readonly readyMadeChanges = inject(ReadyMadeChanges);
-    private readonly plan = inject(PlanStore);
     private readonly settings = inject(SettingsStore);
     private readonly consent = inject(ConsentService);
     private readonly clock = inject(SyncClock);
@@ -75,17 +65,7 @@ export class SyncService {
 
     constructor() {
         effect(() => {
-            this.workouts.workouts();
-            this.workouts.libraryOrder();
-            this.plan.plan();
-            this.settings.profile();
-            this.keptBodyWeight();
-            this.history.entries();
-            this.exercises.own();
-            this.exercises.notes();
-            this.exercises.hidden();
-            this.favourites.list();
-            this.readyMadeChanges.list();
+            this.copyHere();
             untracked(() => this.soon(CHANGE_DELAY_MS));
         });
         const view = this.document.defaultView;
@@ -299,18 +279,9 @@ export class SyncService {
 
     private copyHere(): CopyHere {
         return {
-            workouts: this.workouts.workouts(),
-            history: this.history.entries(),
-            exercises: this.exercises.own(),
-            exerciseNotes: this.exercises.notes(),
-            hiddenExercises: this.exercises.hidden(),
-            favourites: this.favourites.list(),
-            readyMadeChanges: this.readyMadeChanges.list(),
-            libraryOrder: this.workouts.libraryOrder(),
-            plan: this.plan.plan(),
+            ...this.backup.records(),
             profile: this.settings.profile(),
             bodyWeight: this.keptBodyWeight(),
-            deleted: [...this.deletions.all()],
         };
     }
 

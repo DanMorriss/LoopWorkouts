@@ -1,5 +1,5 @@
 /** Converts any CSS colour the browser understands (hex, rgb(), oklch(), ...) to sRGB 0-255. */
-export function toRgb(cssColor: string): [number, number, number] {
+function toRgb(cssColor: string): [number, number, number] {
     const context = document.createElement('canvas').getContext('2d')!;
     context.fillStyle = cssColor;
     context.fillRect(0, 0, 1, 1);

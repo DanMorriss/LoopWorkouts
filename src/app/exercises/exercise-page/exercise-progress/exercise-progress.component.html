@@ -144,18 +144,14 @@
                 </svg>
 
                 @if (activePoint(); as point) {
-                    <div
-                        class="progress__tooltip"
-                        aria-hidden="true"
-                        [class.progress__tooltip--left]="point.x > width / 2"
-                        [class.progress__tooltip--below]="point.y < height / 2"
-                        [style.left.%]="(point.x / width) * 100"
-                        [style.top.%]="(point.y / height) * 100"
-                    >
-                        <strong>{{ point.text }}</strong>
-                        <span>{{ point.at | date: dateFormat(point.at) }}</span>
-                        <span>{{ point.title }}</span>
-                    </div>
+                    <app-progress-tooltip
+                        [text]="point.text"
+                        [at]="point.at"
+                        [dateFormat]="dateFormat(point.at)"
+                        [title]="point.title"
+                        [x]="point.x / width"
+                        [y]="point.y / height"
+                    />
                 }
                 <span class="sr-only" [id]="id + '-readout'" aria-live="polite">
                     @if (activePoint(); as point) {

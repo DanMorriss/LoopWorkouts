@@ -35,7 +35,7 @@ import { isLoggedSet, isTimedSet, RepSet } from '../../models/history';
 import { StepSwap } from '../../models/step-swap';
 import { StepSkip } from '../../models/workout-state';
 import { NO_LATER, readLater, RunLater } from '../../models/later';
-import { Deletion, inOrder, LibraryOrder, mergeRecords, newId } from '../../models/sync';
+import { Deletion, inOrder, LibraryOrder, newId } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { ReadyMadeChanges } from './ready-made-changes.service';
 import { withAmounts } from '../../models/ready-made-change';
@@ -342,19 +342,16 @@ export class WorkoutStore {
      * deleted here doesn't come back unless it changed there after.
      */
     mergeWorkouts(workouts: readonly Workout[], deletedThere: readonly Deletion[]) {
-        const result = mergeRecords(
+        return this.deletions.merge(
             'workout',
             this._workouts(),
             workouts,
-            (id) => this.deletions.deletedAt('workout', id),
-            deletedThere
+            deletedThere,
+            (records) => {
+                this._workouts.set(records);
+                this.saveWorkouts();
+            }
         );
-        result.deletions.forEach((deletion) => this.deletions.add(deletion));
-        if (result.added + result.updated + result.removed > 0) {
-            this._workouts.set(result.records);
-            this.saveWorkouts();
-        }
-        return { added: result.added, updated: result.updated, removed: result.removed };
     }
 
     deleteWorkout(workoutId: string) {

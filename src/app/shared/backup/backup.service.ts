@@ -15,6 +15,7 @@ import { WorkoutStore } from '../state/workout-store.service';
 import {
     BackupProblem,
     backupFileName,
+    BackedUpRecords,
     makeBackup,
     MAX_BACKUP_BYTES,
     readBackup,
@@ -88,16 +89,7 @@ export class BackupService {
         const exportedAt = Date.now();
         const backup = makeBackup(
             {
-                workouts: this.workouts.workouts(),
-                history: this.history.entries(),
-                exercises: this.exercises.own(),
-                exerciseNotes: this.exercises.notes(),
-                hiddenExercises: this.exercises.hidden(),
-                favourites: this.favourites.list(),
-                readyMadeChanges: this.readyMadeChanges.list(),
-                libraryOrder: this.workouts.libraryOrder(),
-                plan: this.plan.plan(),
-                deleted: [...this.deletions.all()],
+                ...this.records(),
                 settings: {
                     theme: this.settings.theme(),
                     sound: this.settings.sound(),
@@ -134,6 +126,25 @@ export class BackupService {
         // Leave the download a moment to start before letting the file go
         setTimeout(() => URL.revokeObjectURL(url), 1000);
         return name;
+    }
+
+    /**
+     * The records on this device, as a backup carries them and sync sends them. The stores'
+     * lists are signals, so an effect that calls this follows a change to any of them.
+     */
+    records(): BackedUpRecords {
+        return {
+            workouts: this.workouts.workouts(),
+            history: this.history.entries(),
+            exercises: this.exercises.own(),
+            exerciseNotes: this.exercises.notes(),
+            hiddenExercises: this.exercises.hidden(),
+            favourites: this.favourites.list(),
+            readyMadeChanges: this.readyMadeChanges.list(),
+            libraryOrder: this.workouts.libraryOrder(),
+            plan: this.plan.plan(),
+            deleted: [...this.deletions.all()],
+        };
     }
 
     /** Merges a backup file in, as `merge()` does. Settings in the file are left out. */

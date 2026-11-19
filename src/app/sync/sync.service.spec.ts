@@ -4,6 +4,8 @@ import { TestBed } from '@angular/core/testing';
 import { HistoryEntry } from '../models/history';
 import { WorkoutFields } from '../models/workout';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
+import { Favourites } from '../shared/state/favourites.service';
+import { PlanStore } from '../shared/state/plan-store.service';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { ConsentService } from '../account/consent.service';
@@ -17,7 +19,7 @@ import {
 } from '../shared/testing/fake-account-client';
 import { FakeSyncServer, fakeSyncServer } from '../shared/testing/fake-sync';
 import { makeWorkout } from '../shared/testing/make-workout';
-import { PULL_PAGE_SIZE, SyncService } from './sync.service';
+import { CHANGE_DELAY_MS, PULL_PAGE_SIZE, SyncService } from './sync.service';
 import { SyncStarter } from './sync-starter.service';
 
 // A new workout to add: the shared test workout without its id and date
@@ -131,6 +133,31 @@ describe('SyncService', () => {
         expect((args as { changes: { id: string }[] }).changes.map((r) => r.id)).toEqual([
             workout.id,
         ]);
+    });
+
+    describe('a change here', () => {
+        afterEach(() => vi.useRealTimers());
+
+        // One of each kind of record the stores keep, beyond the workouts tested above
+        it.each([
+            ['a favourite', () => TestBed.inject(Favourites).set('ready-made-1', true)],
+            ['a hidden exercise', () => exercises().setHidden('push-up', true)],
+            ['a note', () => exercises().setNote('push-up', 'Elbows in')],
+            ['the plan', () => TestBed.inject(PlanStore).add(0, 'workout-1')],
+            ['the profile', () => TestBed.inject(SettingsStore).update({ name: 'Sam' })],
+        ])('sends %s a few seconds after it, on its own', async (_, change) => {
+            await start();
+            vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+            const before = pushes().length;
+
+            change();
+            TestBed.tick();
+            await vi.advanceTimersByTimeAsync(CHANGE_DELAY_MS - 1);
+            expect(pushes()).toHaveLength(before);
+
+            await vi.advanceTimersByTimeAsync(1);
+            await vi.waitFor(() => expect(pushes()).toHaveLength(before + 1));
+        });
     });
 
     describe('the body weight (CAL-6)', () => {

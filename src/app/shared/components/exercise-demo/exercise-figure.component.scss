@@ -1,3 +1,5 @@
+@use 'muscle' as *;
+
 :host {
     display: block;
 }
@@ -32,23 +34,7 @@
 }
 
 .figure__muscle {
-    fill: var(--muscle-idle);
-    stroke: var(--muscle-outline);
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-
-    &--main {
-        fill: var(--muscle-main);
-    }
-
-    &--supporting {
-        fill: var(--muscle-supporting);
-    }
-
-    // Head, hands, feet and knees, never shaded
-    &--other {
-        fill: var(--muscle-other);
-    }
+    @include muscle-shape;
 }
 
 // Kit: plates, bells and cushions solid, bars metal

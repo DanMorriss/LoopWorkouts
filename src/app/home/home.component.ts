@@ -1,4 +1,5 @@
 import { Component, computed, inject } from '@angular/core';
+import { injectThisWeek } from '../shared/state/this-week';
 import { DueTodayComponent } from './due-today/due-today.component';
 import { GetStartedComponent } from './get-started/get-started.component';
 import { WeekStripComponent } from './week-strip/week-strip.component';
@@ -40,6 +41,7 @@ export class HomeComponent {
 
     private readonly workouts = inject(WorkoutStore);
     private readonly planStore = inject(PlanStore);
+    private readonly thisWeek = injectThisWeek();
 
     protected readonly hasHistory = computed(() => this.history.entries().length > 0);
     /** Whether you've workouts of your own; until then, or a plan, Today offers one to start. */
@@ -70,13 +72,9 @@ export class HomeComponent {
      */
     protected readonly trainingLeftToday = computed(() => {
         const now = this.openedAt.getTime();
-        return thisWeek(
-            this.planStore.plan(),
-            this.history.entries(),
-            now,
-            (id) => this.workouts.findAnyWorkout(id) !== null,
-            (id) => this.workouts.isActiveRest(id)
-        )[weekdayOf(now)].some((planned) => planned.status === 'today' && !planned.activeRest);
+        return this.thisWeek(now)[weekdayOf(now)].some(
+            (planned) => planned.status === 'today' && !planned.activeRest
+        );
     });
     protected readonly greeting = computed(() => {
         const name = this.settings.name();

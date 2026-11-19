@@ -1,7 +1,7 @@
 import { computed, DestroyRef, inject, Service, signal } from '@angular/core';
 import { HistoryEntry, isLoggedSet, LoggedSet, MAX_NOTE_LENGTH } from '../../models/history';
 import { MAX_TIME_LIMIT_SECONDS, PlacedHeading, PlacedSuperset } from '../../models/workout';
-import { Deletion, mergeRecords } from '../../models/sync';
+import { Deletion } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { SyncClock } from './sync-clock.service';
 import { openDatabase, readAll, write } from './history-database';
@@ -123,23 +123,20 @@ export class HistoryStore {
      */
     mergeEntries(entries: readonly HistoryEntry[], deletedThere: readonly Deletion[]) {
         const before = new Map(this._entries().map((entry) => [entry.id, entry]));
-        const result = mergeRecords(
+        return this.deletions.merge(
             'history',
             this._entries(),
             entries,
-            (id) => this.deletions.deletedAt('history', id),
-            deletedThere
+            deletedThere,
+            (records) => {
+                const kept = new Set(records.map((entry) => entry.id));
+                this._entries.set(sorted(records));
+                this.save(
+                    records.filter((entry) => before.get(entry.id) !== entry),
+                    [...before.keys()].filter((id) => !kept.has(id))
+                );
+            }
         );
-        result.deletions.forEach((deletion) => this.deletions.add(deletion));
-        if (result.added + result.updated + result.removed > 0) {
-            const kept = new Set(result.records.map((entry) => entry.id));
-            this._entries.set(sorted(result.records));
-            this.save(
-                result.records.filter((entry) => before.get(entry.id) !== entry),
-                [...before.keys()].filter((id) => !kept.has(id))
-            );
-        }
-        return { added: result.added, updated: result.updated, removed: result.removed };
     }
 
     /**

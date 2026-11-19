@@ -1,5 +1,5 @@
 import { computed, inject, Service, signal } from '@angular/core';
-import { Deletion, mergeRecords, readMark, Synced } from '../../models/sync';
+import { Deletion, readMark, Synced } from '../../models/sync';
 import { DeletionStore } from './deletion-store.service';
 import { migrateSavedData } from './migrate';
 import { SyncClock } from './sync-clock.service';
@@ -49,18 +49,16 @@ export class Favourites {
 
     /** Merges another copy's favourites in, as hidden exercises merge. */
     merge(favourites: readonly Favourite[], deletedThere: readonly Deletion[]) {
-        const result = mergeRecords(
+        this.deletions.merge(
             'ready-made-favourite',
             this._list(),
             favourites,
-            (id) => this.deletions.deletedAt('ready-made-favourite', id),
-            deletedThere
+            deletedThere,
+            (records) => {
+                this._list.set(records);
+                this.save();
+            }
         );
-        result.deletions.forEach((deletion) => this.deletions.add(deletion));
-        if (result.added + result.updated + result.removed > 0) {
-            this._list.set(result.records);
-            this.save();
-        }
     }
 
     private save() {

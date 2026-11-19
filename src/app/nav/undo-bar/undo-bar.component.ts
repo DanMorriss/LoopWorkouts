@@ -32,6 +32,7 @@ export class UndoBarComponent {
     protected readonly undo = inject(UndoService);
     private readonly url = injectCurrentUrl();
     private readonly injector = inject(Injector);
+    private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     private readonly undoButton = viewChild<ElementRef<HTMLButtonElement>>('undoButton');
 
     /** The message as a sentence, ending in a full stop unless it ends in one already. */
@@ -47,6 +48,22 @@ export class UndoBarComponent {
             if (offer && offer.url !== url) {
                 this.undo.clear();
             }
+        });
+
+        // An offer `untilNextPress` goes with the next press anywhere but the bar. Listened for
+        // once it's showing, so the press that made it isn't the one that takes it away.
+        effect((onCleanup) => {
+            if (!this.undo.offer()?.untilNextPress) {
+                return;
+            }
+            const document = this.host.ownerDocument;
+            const pressed = (event: Event) => {
+                if (!this.host.contains(event.target as Node)) {
+                    this.undo.dismiss();
+                }
+            };
+            document.addEventListener('click', pressed, { capture: true });
+            onCleanup(() => document.removeEventListener('click', pressed, { capture: true }));
         });
 
         // Each new offer takes focus, so Undo is one key away, unless the page puts it elsewhere

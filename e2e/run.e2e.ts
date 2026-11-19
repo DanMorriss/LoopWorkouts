@@ -335,8 +335,9 @@ test.describe('doing a skipped exercise later', () => {
         await expect(run.later).toHaveAccessibleName('Skipped: Plank');
         await expect(run.next).toContainText('Push-up');
 
-        // It runs as it was, then the workout carries on where it was, a reload and all
+        // It runs as it was, and Undo goes with the next press, then the workout carries on where it was, a reload and all
         await run.skip.click();
+        await expect(app.undoBar).toHaveCount(0);
         await expect(run.face.getByText('Push-up', { exact: true })).toBeVisible();
         await expect(run.main.getByText('Skipped earlier')).toBeVisible();
         await app.reload();

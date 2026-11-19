@@ -64,6 +64,46 @@ describe('UndoBarComponent', () => {
         );
     });
 
+    it('lets an offer that goes with the next press go when anything else is pressed', () => {
+        let undone = 0;
+        const elsewhere = document.createElement('button');
+        document.body.appendChild(elsewhere);
+        undo.offerUndo({
+            message: 'Push-up is up next',
+            undo: () => undone++,
+            keepFocus: true,
+            untilNextPress: true,
+        });
+        fixture.detectChanges();
+        TestBed.tick();
+
+        // Pressing in the bar doesn't, so its Undo still works
+        element.querySelector<HTMLElement>('.undo-bar__message')!.click();
+        TestBed.tick();
+        expect(undo.offer()).not.toBeNull();
+        undoButton()!.click();
+        expect(undone).toBe(1);
+
+        undo.offerUndo({ message: 'Plank is up next', undo: () => {}, untilNextPress: true });
+        fixture.detectChanges();
+        TestBed.tick();
+        elsewhere.click();
+        fixture.detectChanges();
+        expect(undo.offer()).toBeNull();
+        expect(bar()).toBeNull();
+        elsewhere.remove();
+    });
+
+    it('keeps an ordinary offer when something else is pressed', () => {
+        const elsewhere = document.createElement('button');
+        document.body.appendChild(elsewhere);
+        offer();
+        elsewhere.click();
+        TestBed.tick();
+        expect(undo.offer()).not.toBeNull();
+        elsewhere.remove();
+    });
+
     it("leaves focus where the page put it for an offer that's to keep it, still saying it", () => {
         const before = document.activeElement;
 

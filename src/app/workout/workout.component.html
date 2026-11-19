@@ -52,7 +52,7 @@
 
         <!-- The ring, with Resume and End workout over it while paused -->
         <!-- data-tour: what the tour of the page (RUN-13) lights up -->
-        <div class="workout-stage" data-tour="stage">
+        <div #stage class="workout-stage" data-tour="stage">
             <app-workout-ring
                 [phase]="view.ringPhase()"
                 [paused]="view.isPaused()"

@@ -149,6 +149,8 @@ export class WorkoutComponent {
         main: () => this.mainButton()?.nativeElement,
     });
     private readonly ring = viewChild(WorkoutRingComponent);
+    private readonly stage = viewChild<ElementRef<HTMLElement>>('stage');
+    private readonly laterList = viewChild(LaterListComponent);
     private readonly reducedMotion = injectPrefersReducedMotion();
     /** Apple's spring for moving something about: no bounce, a 0.4s response. */
     private readonly glide = criticallyDampedSpring(0.4);
@@ -290,10 +292,13 @@ export class WorkoutComponent {
 
     /**
      * Skip: on to the next step, from its full time (RUN-12). A skipped rep step isn't logged,
-     * so unlike Done, its ring doesn't fill.
+     * so unlike Done, its ring doesn't fill. An exercise skipped flies up from the ring to the
+     * button for doing it later (RUN-16).
      */
     protected skip() {
-        this.later.skip();
+        if (this.later.skip()) {
+            this.laterList()?.flyIn(this.stage()?.nativeElement);
+        }
     }
 
     /**

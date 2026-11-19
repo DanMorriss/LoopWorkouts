@@ -16,6 +16,14 @@
     position: relative;
 }
 
+// The copy that flies in from the ring as an exercise is put aside, over the button
+.later__copy {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
 // A notification-style count on the button's corner, with two or more
 .later__count {
     position: absolute;

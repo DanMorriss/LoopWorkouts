@@ -13,15 +13,20 @@ export class LaterPicks {
     private readonly run = inject(ActiveRunService);
     private readonly store = inject(WorkoutStore);
 
-    /** Skip (RUN-12), with an exercise skipped put aside, to do later if wanted. */
-    skip() {
+    /**
+     * Skip (RUN-12), with an exercise skipped put aside, to do later if wanted. Returns whether
+     * it was: one done later and skipped again goes back on the list too.
+     */
+    skip(): boolean {
         this.run.sync();
         const workout = this.run.running();
         const state = this.run.state();
-        if (workout && state && canPutAside(workout, state)) {
+        const aside = !!workout && !!state && canPutAside(workout, state);
+        if (aside) {
             this.store.setActiveLater(putAside(this.store.activeLater(), state));
         }
         this.run.skipStep();
+        return aside || !!state?.later;
     }
 
     /**

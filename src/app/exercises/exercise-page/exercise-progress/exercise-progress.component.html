@@ -28,7 +28,7 @@
             <p class="progress__empty">Not done in {{ rangeSpoken() }}.</p>
         } @else {
             <!-- The chart, and swiped to, a table of the same workouts -->
-            <app-carousel [label]="measureTitle()" itemName="View" [fitShown]="true">
+            <app-carousel label="Chart and table" itemName="View" [fitShown]="true">
                 <ng-template appSlide="Chart">
                     <!-- Arrow keys step through the workouts; the readout says each one -->
                     <div

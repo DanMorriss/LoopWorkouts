@@ -391,20 +391,26 @@ test.describe('swiping between ready-made plans on Today (NAV-6)', () => {
         await expect(
             getStarted.getByRole('heading', { name: 'Kettlebell, 3 days' })
         ).toBeInViewport();
+        // Settled on it: the dot is current from halfway, and a tap while the swipe still
+        // snaps would be pulled back by it, where a real finger would stop it
+        const track = getStarted.locator('.carousel__track');
+        const scrolledTo = (slide: number) =>
+            expect
+                .poll(() =>
+                    track.evaluate(
+                        (el, i) =>
+                            el.scrollLeft === (el.children[i] as HTMLElement).offsetLeft &&
+                            el.scrollLeft > 0,
+                        slide
+                    )
+                )
+                .toBe(true);
+        await scrolledTo(1);
 
         // And a dot goes straight to its plan, scrolled across to it
         await dots.nth(2).click();
         await expect(dots.nth(2)).toHaveAttribute('aria-current', 'true');
-        const track = getStarted.locator('.carousel__track');
-        await expect
-            .poll(() =>
-                track.evaluate(
-                    (el) =>
-                        el.scrollLeft === (el.children[2] as HTMLElement).offsetLeft &&
-                        el.scrollLeft > 0
-                )
-            )
-            .toBe(true);
+        await scrolledTo(2);
         await expect(getStarted.getByRole('link', { name: 'All plans' })).toBeVisible();
     });
 });

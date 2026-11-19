@@ -4,6 +4,7 @@ import {
     computed,
     contentChildren,
     Directive,
+    effect,
     ElementRef,
     inject,
     input,
@@ -14,10 +15,15 @@ import {
 } from '@angular/core';
 import { injectPrefersReducedMotion } from '../../reduced-motion';
 
-/** One of a carousel's slides: `<ng-template appSlide>…</ng-template>`. */
+/**
+ * One of a carousel's slides: `<ng-template appSlide>…</ng-template>`, or
+ * `<ng-template appSlide="Chart">` to name it, for its dot and screen readers, in place of the
+ * carousel's `itemName`.
+ */
 @Directive({ selector: 'ng-template[appSlide]' })
 export class SlideDirective {
     readonly template = inject(TemplateRef);
+    readonly name = input('', { alias: 'appSlide' });
 }
 
 /**
@@ -25,7 +31,9 @@ export class SlideDirective {
  * snapping to each), with a dot for each under them to go to it. With one slide, it's shown
  * alone, with no dots. Tabbing into a slide off to the side scrolls it into view.
  *
- * Slides are as tall as the tallest, and what's in each is stretched to fill it.
+ * Slides are as tall as the tallest, and what's in each is stretched to fill it; or, with
+ * `fitShown`, each keeps its own height and the carousel is as tall as the one in view, so a
+ * short slide beside a long one doesn't leave a gap over the dots.
  */
 @Component({
     selector: 'app-carousel',
@@ -37,7 +45,13 @@ export class SlideDirective {
             aria-roledescription="carousel"
             [attr.aria-label]="label()"
         >
-            <div #track class="carousel__track" (scroll)="onScroll()">
+            <div
+                #track
+                class="carousel__track"
+                [class.carousel__track--fit]="fitShown()"
+                [style.height.px]="fitShown() ? shownHeight() : null"
+                (scroll)="onScroll()"
+            >
                 @for (slide of slides(); track slide; let i = $index) {
                     <div
                         #slide
@@ -74,6 +88,8 @@ export class CarouselComponent {
     readonly label = input.required<string>();
     /** What each slide is, for its dot and screen readers: "Plan" gives "Plan 2 of 5". */
     readonly itemName = input.required<string>();
+    /** Whether the carousel is as tall as the slide in view, rather than the tallest. */
+    readonly fitShown = input(false);
 
     protected readonly slides = contentChildren(SlideDirective);
     private readonly track = viewChild.required<ElementRef<HTMLElement>>('track');
@@ -84,8 +100,24 @@ export class CarouselComponent {
     /** The slide in view: the last, if slides have gone from after it. */
     readonly shown = computed(() => Math.min(this.current(), this.slides().length - 1));
 
+    /** With `fitShown`, the height of the slide in view, followed as it changes. */
+    protected readonly shownHeight = signal<number | null>(null);
+
+    constructor() {
+        effect((onCleanup) => {
+            const slide = this.slideElements()[this.shown()]?.nativeElement;
+            if (!this.fitShown() || !slide) {
+                return;
+            }
+            const observer = new ResizeObserver(() => this.shownHeight.set(slide.offsetHeight));
+            observer.observe(slide);
+            onCleanup(() => observer.disconnect());
+        });
+    }
+
     protected position(index: number): string {
-        return `${this.itemName()} ${index + 1} of ${this.slides().length}`;
+        const name = this.slides()[index]?.name() || this.itemName();
+        return `${name} ${index + 1} of ${this.slides().length}`;
     }
 
     /** Goes to slide `index`, gliding there unless motion is reduced. */

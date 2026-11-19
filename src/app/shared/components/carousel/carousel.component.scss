@@ -22,6 +22,18 @@
     }
 }
 
+// Each slide its own height, the track the height of the one in view, growing or shrinking to
+// the next as it comes into view; a taller one is cut off while it's swiped past
+.carousel__track--fit {
+    align-items: start;
+    overflow-y: hidden;
+    transition: height 0.25s ease;
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
 // Room inside for focus rings, which the track would otherwise cut off; what's in it fills
 // it, as tall as the tallest slide
 .carousel__slide {

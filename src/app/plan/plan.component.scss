@@ -1,4 +1,5 @@
 @use 'type' as *;
+@use 'interaction' as *;
 
 :host {
     display: block;
@@ -156,7 +157,11 @@
     font-weight: 600;
     text-decoration: none;
 
-    &:hover {
+    @include hover {
+        text-decoration: underline;
+    }
+
+    @include pressed {
         text-decoration: underline;
     }
 }

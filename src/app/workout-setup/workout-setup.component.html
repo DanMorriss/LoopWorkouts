@@ -45,7 +45,8 @@
                     </span>
                 </span>
             </div>
-            @if (setup.stepCount() > 0) {
+            <!-- Collapse all once there's more than one step: one step has its own ⌃ -->
+            @if (setup.stepCount() > 1) {
                 <div class="steps-toolbar">
                     <button
                         type="button"
@@ -58,7 +59,7 @@
                         {{ setup.view.anyExpanded() ? 'Collapse all' : 'Expand all' }}
                     </button>
                 </div>
-            } @else {
+            } @else if (setup.stepCount() === 0) {
                 <p class="setup-hint setup-hint--empty">Add a step to start.</p>
             }
 

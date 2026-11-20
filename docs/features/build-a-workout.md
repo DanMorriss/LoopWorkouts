@@ -105,7 +105,7 @@
 ### Collapsing
 
 - Each step can be **open** (name box and wheels) or **collapsed** to one line: its name (or kind) and time, e.g. "Squats 00:45" or "Push-ups 20 reps".
-- **Expand all / Collapse all** opens or closes every step at once.
+- **Expand all / Collapse all** opens or closes every step at once. It's there once a workout has more than one step, as a single step has its own open and close button.
 - Opening or closing, the steps and everything under them **slide** to their new places on a spring with no bounce, and an opening step's name box and wheels fade in. With reduced motion they move at once, and the fade stays.
 - A step opens as it's added. A saved workout opens with every step collapsed, so the whole workout is in view.
 

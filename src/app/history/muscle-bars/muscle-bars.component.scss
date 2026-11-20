@@ -78,8 +78,14 @@
     border-radius: 999px;
     background: var(--balance-in);
     // Grows in once the list is scrolled to (MuscleBarsComponent.grown), each row a moment
-    // after the one above
-    transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--row) * 40ms);
+    // after the one above: slid in from the left of the track, which cuts it off, rather than
+    // widened, so it moves without laying the page out again each frame, its round end intact
+    translate: -100% 0;
+    transition: translate 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--row) * 40ms);
+
+    .bars--grown & {
+        translate: none;
+    }
 
     @media (prefers-reduced-motion: reduce) {
         transition: none;

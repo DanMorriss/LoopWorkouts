@@ -92,6 +92,15 @@ describe('BodyMapComponent', () => {
         expect(shaded('main') + shaded('supporting')).toBe(0);
     });
 
+    it('says what it is given instead, on a map for picking muscles', () => {
+        create([]);
+        fixture.componentRef.setInput('emptyText', 'Tap a muscle to find exercises for it.');
+        fixture.detectChanges();
+
+        expect(el().textContent).toContain('Tap a muscle to find exercises for it.');
+        expect(el().textContent).not.toContain('No muscles listed.');
+    });
+
     // Upstream has no abductors, so its upper glute, the gluteus medius, stands in for them
     it('shades the abductors on the back, apart from the glutes', () => {
         create(['abductors']);

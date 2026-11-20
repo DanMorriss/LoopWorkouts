@@ -9,7 +9,7 @@
             >
                 <span class="bars__label">{{ row.label }}</span>
                 <span class="bars__track" aria-hidden="true">
-                    <span class="bars__fill" [style.width.%]="grown() ? row.width : 0"></span>
+                    <span class="bars__fill" [style.width.%]="row.width"></span>
                     <span
                         class="bars__aim"
                         [class.bars__aim--covered]="row.aim.covered && grown()"

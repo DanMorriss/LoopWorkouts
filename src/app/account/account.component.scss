@@ -86,9 +86,29 @@
     color: var(--text);
     text-decoration: none;
 
+    // Lit behind, a little past its sides, the moment it's pressed, as a row on a phone is
+    position: relative;
+    isolation: isolate;
+
+    &::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        inset: 0 -0.5rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s ease;
+    }
+
     @include hover {
         .account__link-name {
             text-decoration: underline;
+        }
+    }
+
+    @include pressed {
+        &::before {
+            background: var(--control);
+            transition-duration: 0.08s;
         }
     }
 

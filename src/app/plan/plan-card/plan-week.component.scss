@@ -76,7 +76,11 @@
     color: inherit;
     font: inherit;
     cursor: inherit;
-    -webkit-tap-highlight-color: transparent;
+    transition:
+        scale 0.2s ease-out,
+        translate 0.2s ease-out;
+    // Dips the moment a finger goes down, to pick it or drop one on it
+    @include pressed-scale;
 
     &:focus-visible {
         outline: 2px solid var(--accent);

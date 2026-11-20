@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { MuscleGroup } from '../../../models/exercise';
 import { ExerciseMotion } from '../../../models/exercise-motion';
+import { SettingsStore } from '../../state/settings-store.service';
 import { ThemeService } from '../../theme/theme.service';
 import type { FigureDrawer, MakeFigure } from './figure-drawer';
 import type { FigureColors, FigureLook } from './figure-scene';
@@ -51,6 +52,7 @@ export function injectDemoScene(
 ): DemoScene {
     const host: HTMLElement = inject(ElementRef).nativeElement;
     const theme = inject(ThemeService);
+    const settings = inject(SettingsStore);
     const inWorker = inject(DEMO_IN_WORKER);
     const drawing = signal<'loading' | '3d' | 'flat'>(inject(DEMO_IN_3D) ? 'loading' : 'flat');
     /** What makes a 3D figure, once it's known how they can be drawn here. */
@@ -68,16 +70,16 @@ export function injectDemoScene(
     effect((onCleanup) => {
         const make = makeFigure();
         const shown = motion();
+        // The figure picked in Profile, as the body map draws
+        const figure = settings.bodyFigure();
         if (!make || !shown) {
             return;
         }
-        // The male figure, whichever is picked in Profile: the female one isn't right in 3D
-        // yet (see TODO.md). The body map still draws the one picked
         let cancelled = false;
         let made: FigureDrawer | null = null;
         void make(
             shown,
-            'male',
+            figure,
             () => untracked(look),
             () => cancelled
         ).then((drawer) => {

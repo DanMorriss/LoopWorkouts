@@ -200,6 +200,21 @@ describe('ExerciseDemoComponent', () => {
             }
         );
 
+        it.runIf(hasWebGL)(
+            'draws the figure picked under Sex in Profile, again when it changes',
+            async () => {
+                fakeReducedMotion(true);
+                await create(builtIn('builtin:push-up'), true);
+                await drawn();
+                const male = pixels();
+
+                TestBed.inject(SettingsStore).update({ bodyFigure: 'female' });
+                fixture.detectChanges();
+
+                await changes(male);
+            }
+        );
+
         it.runIf(hasWebGL)('turns the figure round with Turn, as dragging does', async () => {
             fakeReducedMotion(true);
             await create(builtIn('builtin:push-up'), true);

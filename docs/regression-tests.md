@@ -1215,7 +1215,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     5. Pick Training for **Fitness**.
 - **Expected:**
     1. The box shows "Sam"; Today says "Good evening, Sam".
-    2. Female is still chosen; the body map draws the female figure (the 3D demo stays male for now, see TODO).
+    2. Female is still chosen; the body map and the 3D demo draw the female figure.
     3. The weight shows as 135 lb in Create ("Weight (lb)") and on the workout face.
     4. The new step is saved as 61.235 kg; the 20.412 kg step is still exactly 20.412.
     5. Sets a week per muscle goes from 10 to 6, its hint "Small muscles, like the forearms, aim for 2".

@@ -39,25 +39,30 @@ const FRONT = {
         sole: 1350,
     },
     female: {
-        centre: 350,
-        headTop: 130,
-        chin: 280,
-        neckBase: 305,
-        shoulder: [232, 355],
-        armpit: 460,
-        elbow: { at: [185, 515], snap: true },
-        wrist: { at: [120, 680], snap: true },
-        fingertip: [78, 795],
-        hip: [295, 700],
-        crotch: 775,
-        knee: { at: [290, 1030], snap: true },
-        ankle: { at: [300, 1350], snap: true },
-        sole: 1470,
+        centre: 320,
+        // The top of the head under the hair: the drawing's hair stands well up above it
+        headTop: 50,
+        chin: 241,
+        neckBase: 265,
+        shoulder: [198, 322],
+        armpit: 418,
+        elbow: { at: [142, 491], snap: true },
+        wrist: { at: [65, 652], snap: true },
+        fingertip: [23, 764],
+        hip: [258, 660],
+        crotch: 735,
+        knee: { at: [262, 1000], snap: true },
+        ankle: { at: [279, 1332], snap: true },
+        sole: 1432,
+        // Her shoulders round off from the neck to the arms, and her hips and thighs are
+        // measured out to the drawing's edge, where his stop at his shoulders' and hips' width
+        rounded: true,
+        headHalf: 58,
     },
 };
 const BACK = {
     male: { centre: 1087, shoulder: 330, sole: 1350 },
-    female: { centre: 1120, shoulder: 325, sole: 1425 },
+    female: { centre: 1142, shoulder: 330, sole: 1432 },
 };
 /** The figure's height in cm from the soles to the top of the head, as BODY in exercise-motion.ts. */
 const HEIGHT = 178;
@@ -118,11 +123,11 @@ function measure(sex, mask) {
         );
     };
     /** From a point, how far the outline is each way along `[dx, dy]`, up to `limit`. */
-    const extent = ([px, py], [dx, dy], limit) => {
+    const extent = ([px, py], [dx, dy], limit, limitBack = limit) => {
         let a = 0;
         while (a < limit && inside(px + dx * (a + 1), py + dy * (a + 1))) a++;
         let b = 0;
-        while (b < limit && inside(px - dx * (b + 1), py - dy * (b + 1))) b++;
+        while (b < limitBack && inside(px - dx * (b + 1), py - dy * (b + 1))) b++;
         return [a, b];
     };
     const joint = (given) => {
@@ -150,9 +155,10 @@ function measure(sex, mask) {
     /**
      * Across a bone from `from` to `to`, at `steps` places from `t0` to `t1` along it: how far
      * its middle is off the bone (positive to the figure's right) and half its width, in cm.
-     * Where it's joined to the body, it's no wider than `limit` units from the bone either way.
+     * Where it's joined to the body, it's no wider than `limit` units from the bone to the
+     * figure's right, and `limitLeft` to its left.
      */
-    const across = (from, to, t0, t1, steps, limit) => {
+    const across = (from, to, t0, t1, steps, limit, limitLeft = limit) => {
         const [dx, dy] = [to[0] - from[0], to[1] - from[1]];
         const length = Math.hypot(dx, dy);
         // Square to the bone, towards the figure's right, which is the drawing's left (-x)
@@ -161,7 +167,7 @@ function measure(sex, mask) {
         for (let i = 0; i <= steps; i++) {
             const t = t0 + ((t1 - t0) * i) / steps;
             const point = [from[0] + dx * t, from[1] + dy * t];
-            const [toRight, toLeft] = extent(point, square, limit);
+            const [toRight, toLeft] = extent(point, square, limit, limitLeft);
             rows.push([
                 Math.round(t * 100) / 100,
                 round((toRight - toLeft) / 2 / floorUnitsPerCm),
@@ -184,6 +190,47 @@ function measure(sex, mask) {
         return rows;
     };
     const shoulderHalf = at.centre - joints.shoulder[0];
+    /**
+     * The torso, its shoulders rounded: from the neck it follows the drawing's outline out to
+     * the shoulders' width, then narrows to its width under the arms, the arms covering the
+     * shoulders' sides; below the armpits, out to the drawing's edge.
+     */
+    /**
+     * The head, rounded: the drawing's hair fills out the sides of the face, so it's as wide as
+     * the drawing or a skull's rounded outline, whichever is less, the jaw narrowing to the chin.
+     */
+    const roundedHead = () =>
+        level(at.headTop + 2, at.chin, 12, at.headHalf).map(([y, half]) => {
+            const top = (at.sole - at.headTop) / floorUnitsPerCm;
+            const chin = (at.sole - at.chin) / floorUnitsPerCm;
+            // From the widest, a little above the middle, up to the top (1) or down to the chin (-1)
+            const widest = chin + (top - chin) * 0.58;
+            const t = y >= widest ? (y - widest) / (top - widest) : (y - widest) / (widest - chin);
+            const power = t >= 0 ? 2.2 : 1.7;
+            const skull = (at.headHalf / floorUnitsPerCm) * (1 - Math.abs(t) ** power) ** (1 / power);
+            return [y, round(Math.min(half, Math.max(skull, t < 0 ? 4 : 0)))];
+        });
+    const roundedTorso = () => {
+        const halfAt = (y) => {
+            const [a, b] = extent([at.centre, y], [1, 0], 220);
+            return (a + b) / 2;
+        };
+        const underArms = halfAt(at.armpit + 6);
+        const shoulderY = joints.shoulder[1];
+        const smooth = (t) => t * t * (3 - 2 * t);
+        const rows = [];
+        const steps = 32;
+        for (let i = 0; i <= steps; i++) {
+            const y = at.neckBase + ((at.crotch - at.neckBase) * i) / steps;
+            let half = halfAt(y);
+            if (y <= at.armpit) {
+                const down = Math.max(0, (y - shoulderY) / (at.armpit - shoulderY));
+                half = Math.min(half, shoulderHalf + (underArms - shoulderHalf) * smooth(down));
+            }
+            rows.push([round((at.sole - y) / floorUnitsPerCm), round(half / floorUnitsPerCm)]);
+        }
+        return rows;
+    };
     const back = BACK[sex];
     return {
         front: {
@@ -215,13 +262,16 @@ function measure(sex, mask) {
         },
         // The head, neck and torso, level by level, top down
         // No wider than a head, so a ponytail isn't
-        head: level(at.headTop + 2, at.chin, 12, 62),
+        head: at.rounded ? roundedHead() : level(at.headTop + 2, at.chin, 12, 62),
         neck: level(at.chin, at.neckBase + 10, 4, 45),
-        torso: level(at.neckBase, at.crotch, 24, shoulderHalf),
+        torso: at.rounded ? roundedTorso() : level(at.neckBase, at.crotch, 24, shoulderHalf),
         upperArm: across(joints.shoulder, joints.elbow, -0.15, 1.1, 14, 0.42 * shoulderHalf),
         forearm: across(joints.elbow, joints.wrist, -0.1, 1.08, 12, 60),
         hand: across(joints.wrist, joints.fingertip, 0, 1, 6, 45),
-        thigh: across(joints.hip, joints.knee, -0.05, 1.08, 14, at.centre - joints.hip[0]),
+        // Out to the hip's edge; in, as far as the middle line
+        thigh: at.rounded
+            ? across(joints.hip, joints.knee, -0.05, 1.08, 14, 140, at.centre - joints.hip[0])
+            : across(joints.hip, joints.knee, -0.05, 1.08, 14, at.centre - joints.hip[0]),
         shin: across(joints.knee, joints.ankle, -0.06, 1.05, 14, 70),
     };
 }

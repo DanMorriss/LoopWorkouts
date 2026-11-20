@@ -63,17 +63,17 @@ export class SetupSupersets {
         const joined = { ...withSets(next, head.sets), group: head.key };
         const before = rows.slice(0, index);
         const after = rows.slice(end + 1);
-        this.form.smoothChange(() => {
+        this.form.view.smoothChange(() => {
             this.form.updateSteps(() =>
                 row.kind === 'superset'
                     ? [...before, ...rows.slice(index, end), joined, ...after]
                     : [...before, head, { ...row, group: head.key }, joined, ...after]
             );
-            this.form.expandedKeys.update((keys) => new Set([...keys, head.key]));
+            this.form.view.expandedKeys.update((keys) => new Set([...keys, head.key]));
         });
         const at = this.form.model().steps.indexOf(head);
         this.form.stepAnnouncement.set(
-            `${this.form.stepTitle(at)}, ${this.form.amountText(head)}: ${this.form.summaryName(at)}`
+            `${this.form.text.stepTitle(at)}, ${this.form.text.amountText(head)}: ${this.form.text.summaryName(at)}`
         );
         this.focusAfterRender(`step-${head.key}-toggle`);
     }
@@ -91,10 +91,10 @@ export class SetupSupersets {
             return;
         }
         const name = step.name.trim() || stepKindName(step.kind as StepKind).toLowerCase();
-        const supersetName = this.form.supersetName(head).toLowerCase();
+        const supersetName = this.form.text.supersetName(head).toLowerCase();
         const end = partEnd(rows, head);
         const out = ownExercise(step, rows[head]);
-        this.form.smoothChange(() =>
+        this.form.view.smoothChange(() =>
             this.form.updateSteps(() =>
                 lonelyStepsOut(
                     [
@@ -108,7 +108,7 @@ export class SetupSupersets {
             )
         );
         this.form.stepAnnouncement.set(
-            `Took ${name} out of the ${supersetName}, now step ${this.form.stepNumber(this.form.model().steps.findIndex((row) => row.key === step.key))}`
+            `Took ${name} out of the ${supersetName}, now step ${this.form.text.stepNumber(this.form.model().steps.findIndex((row) => row.key === step.key))}`
         );
         this.focusAfterRender(`step-${step.key}-toggle`);
     }
@@ -123,9 +123,9 @@ export class SetupSupersets {
         const end = partEnd(rows, index);
         const step: StepModel = { ...this.form.rows.newStep(), group: head.key, sets: head.sets };
         this.form.updateSteps(() => [...rows.slice(0, end), step, ...rows.slice(end)]);
-        this.form.expandedKeys.set(new Set([head.key, step.key]));
+        this.form.view.expandedKeys.set(new Set([head.key, step.key]));
         this.form.stepAnnouncement.set(
-            `Added a rep step to the ${this.form.supersetName(index).toLowerCase()}, step ${this.form.stepNumber(end)}`
+            `Added a rep step to the ${this.form.text.supersetName(index).toLowerCase()}, step ${this.form.text.stepNumber(end)}`
         );
         this.focusAfterRender(`step-${step.key}-name`);
     }

@@ -73,7 +73,7 @@ export class SetupDrag {
             wellFormed(rows) ||
             (rows[at].group === 0 &&
                 before?.kind === 'superset' &&
-                !this.form.isExpanded(before.key))
+                !this.form.view.isExpanded(before.key))
         );
     };
 
@@ -99,7 +99,7 @@ export class SetupDrag {
     isHidden(step: StepModel): boolean {
         return (
             step.group !== 0 &&
-            (!this.form.isExpanded(step.group) || step.group === this.heldSuperset())
+            (!this.form.view.isExpanded(step.group) || step.group === this.heldSuperset())
         );
     }
 }

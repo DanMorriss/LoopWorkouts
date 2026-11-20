@@ -1375,7 +1375,7 @@ describe('WorkoutSetupComponent', () => {
             await addGobletSquat();
             expect(weights()).toEqual([0, 0]);
 
-            form().toggleStep(form().model().steps[0].key);
+            form().view.toggleStep(form().model().steps[0].key);
             fixture.detectChanges();
             el(`[id$="-weight"] [data-value="16"]`, steps()[0]).click();
             fixture.detectChanges();

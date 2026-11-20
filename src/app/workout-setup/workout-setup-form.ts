@@ -8,16 +8,11 @@ import {
     signal,
     untracked,
 } from '@angular/core';
-import { applyEach, form, maxLength, validate } from '@angular/forms/signals';
+import { form } from '@angular/forms/signals';
 import { ParamMap } from '@angular/router';
-import { isBuiltIn, MAX_EXERCISE_NAME_LENGTH } from '../models/exercise';
+import { isBuiltIn } from '../models/exercise';
 import { weightIn, weightOptions } from '../models/weight';
-import { sharedKettlebell } from './setup-kettlebell';
-import { SetupRows } from './setup-rows';
 import {
-    allSteps,
-    hasWork,
-    MAX_HEADING_LENGTH,
     MAX_HEADINGS,
     MAX_REPEATS,
     MAX_REPS,
@@ -28,39 +23,29 @@ import {
 } from '../models/workout';
 import { nextWait } from '../models/wait-to-start';
 import { WheelPickerOption } from '../shared/components/wheel-picker/wheel-picker.component';
-import { changeSmoothly } from '../shared/layout-change';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
+import { setupChecks, setupErrors } from './setup-checks';
+import { sharedKettlebell } from './setup-kettlebell';
+import { SetupRows } from './setup-rows';
+import { SetupText } from './setup-text';
+import { SetupView } from './setup-view';
 import {
-    hasAmount,
     isStep,
     NAME_EXAMPLES,
     padded,
     pickerOptions,
     RepeatMode,
-    rowHasAmount,
     StepModel,
-    timeLimitSeconds,
-    toBlocks,
-    varies,
     WorkoutSetupModel,
 } from './step-model';
-import {
-    amountText,
-    setRowText,
-    stepNumbers,
-    stepTitle,
-    summaryName,
-    supersetNameAt,
-    supersetSteps,
-    toggleLabel,
-} from './step-text';
+import { supersetSteps } from './step-text';
 
 /**
- * Create's form: the workout being set up, as rows (see StepModel and SetupRows), its checks,
- * and which steps are open. What's done to its steps is SetupSteps, to its supersets
- * SetupSupersets, and saving it SetupSave. One for each Create page, shared with the parts of it.
+ * Create's form: the workout being set up, as rows (see StepModel and SetupRows), checked by
+ * `setupChecks()`, with which steps are open (`view`) and what its rows say (`text`). What's
+ * done to its steps is SetupSteps, to its supersets SetupSupersets, and saving it SetupSave. One for each Create page, shared with the parts of it.
  */
 @Injectable()
 export class WorkoutSetupForm {
@@ -99,50 +84,20 @@ export class WorkoutSetupForm {
     /** Turns a saved workout into the form's rows, and back. */
     readonly rows = new SetupRows(this.weightUnit);
     readonly model = signal<WorkoutSetupModel>(this.rows.empty());
-    /** Keys of the steps showing their name box and wheels; the rest show a one-line summary. */
-    readonly expandedKeys = signal<ReadonlySet<number>>(this.allKeys());
+    /** Which steps are open, and the pop-ups. */
+    readonly view = new SetupView(this.model, this.host, this.injector);
+    /** What its rows say. */
+    readonly text = new SetupText(this.model, this.weightUnit);
 
-    readonly workoutForm = form(this.model, (setup) => {
-        // Long enough for a name (or a heading), short enough to fit on the workout
-        applyEach(setup.steps, (step) =>
-            maxLength(step.name, ({ valueOf }) =>
-                valueOf(step.kind) === 'heading' ? MAX_HEADING_LENGTH : MAX_EXERCISE_NAME_LENGTH
-            )
-        );
-        // The wheels only offer valid times, so the one rule is that there's some work
-        validate(setup, ({ value }) =>
-            hasWork(allSteps({ blocks: toBlocks(value().steps, this.weightUnit) }))
-                ? undefined
-                : { kind: 'noTime', message: 'Workout needs a timed step or some reps' }
-        );
-        // ...that each set of a step whose sets vary has some, if the step's to be kept
-        validate(setup, ({ value }) =>
-            value().steps.some(
-                (step) =>
-                    varies(step) &&
-                    step.setRows.some((row) => !rowHasAmount(step, row)) &&
-                    step.setRows.some((row) => rowHasAmount(step, row))
-            )
-                ? { kind: 'noSetAmount', message: 'Each set needs some reps or time' }
-                : undefined
-        );
-        // ...and that a time limit has some time in it
-        validate(setup, ({ value }) =>
-            value().repeatMode === 'time' && timeLimitSeconds(value()) === 0
-                ? { kind: 'noTimeLimit', message: 'Time limit needs to be longer than 00:00' }
-                : undefined
-        );
-    });
+    readonly workoutForm = form(this.model, setupChecks(this.weightUnit));
+    /** The checks' errors that the page shows. */
+    readonly errors = setupErrors(this.workoutForm, this.model);
 
     /** Steps, which count towards MAX_STEPS; headings and supersets' own rows don't. */
     readonly stepCount = computed(() => this.model().steps.filter(isStep).length);
     readonly headingCount = computed(
         () => this.model().steps.filter((step) => step.kind === 'heading').length
     );
-    readonly anyExpanded = computed(() => {
-        const expanded = this.expandedKeys();
-        return this.model().steps.some((step) => expanded.has(step.key));
-    });
     readonly untilStopped = computed(() => this.model().repeats === UNTIL_STOPPED);
     readonly repeatMode = computed(() => this.model().repeatMode);
     readonly repeatModes: { value: RepeatMode; label: string }[] = [
@@ -189,40 +144,8 @@ export class WorkoutSetupForm {
         );
     }
 
-    /** Whether the tooltip by the Steps heading is showing. */
-    readonly infoOpen = signal(false);
-
-    /** The set row open on its wheels (BLD-11), as `key-set`, if one is: one at a time. */
-    readonly openSetRow = signal<string | null>(null);
-
-    /** The key of the step whose kind menu is open, if one is. */
-    readonly kindMenuFor = signal<number | null>(null);
-
     /** Read out by screen readers after a step is added, moved, changed or deleted. */
     readonly stepAnnouncement = signal('');
-
-    readonly noSetAmountError = computed(() =>
-        this.workoutForm()
-            .errors()
-            .find((error) => error.kind === 'noSetAmount')
-    );
-
-    readonly noTimeLimitError = computed(() =>
-        this.workoutForm()
-            .errors()
-            .find((error) => error.kind === 'noTimeLimit')
-    );
-
-    // Not until something's been put in a step: a new workout opens with an empty one
-    readonly noTimeError = computed(() =>
-        this.model()
-            .steps.filter(isStep)
-            .every((step) => !step.name.trim() && !hasAmount(step))
-            ? undefined
-            : this.workoutForm()
-                  .errors()
-                  .find((error) => error.kind === 'noTime')
-    );
 
     /** The form as it opened or was last saved, to tell if it's been changed since. */
     readonly savedState = signal('');
@@ -231,15 +154,8 @@ export class WorkoutSetupForm {
     /** Fills the form from a saved workout, or empties it for a new one. */
     load(workoutToEdit: Workout | null) {
         this.editingWorkoutId.set(workoutToEdit?.id ?? null);
-        this.kindMenuFor.set(null);
-        if (workoutToEdit) {
-            this.model.set(this.rows.fromWorkout(workoutToEdit));
-            // A saved workout opens as a list of summaries, so the whole workout fits on screen
-            this.expandedKeys.set(new Set());
-        } else {
-            this.model.set(this.rows.empty());
-            this.expandedKeys.set(this.allKeys());
-        }
+        this.model.set(workoutToEdit ? this.rows.fromWorkout(workoutToEdit) : this.rows.empty());
+        this.view.reset(!workoutToEdit);
         // As it's saved, so nothing loaded counts as a weight just turned to
         this.stepsBefore = this.model().steps;
         this.savedState.set(JSON.stringify(this.model()));
@@ -258,47 +174,9 @@ export class WorkoutSetupForm {
         this.model.update((setup) => ({ ...setup, repeats }));
     }
 
-    /** A step's number, counting steps only, as headings aren't steps. */
-    stepNumber(index: number): number {
-        return this.stepNumbers()[index];
-    }
-
-    /** Each row's step number (see `stepNumbers()`). */
-    private readonly stepNumbers = computed(() => stepNumbers(this.model().steps));
-
     /** The steps of the superset whose own row is at `index`, in order. */
     supersetSteps(index: number): StepModel[] {
         return supersetSteps(this.model().steps, index);
-    }
-
-    // What a row says (step-text.ts)
-    supersetName(index: number): string {
-        return supersetNameAt(this.model().steps, index);
-    }
-    stepTitle(index: number): string {
-        return stepTitle(this.model().steps, index, this.stepNumbers());
-    }
-    toggleLabel(index: number): string {
-        return toggleLabel(this.model().steps, index, this.stepNumbers(), this.weightUnit);
-    }
-    summaryName(index: number): string {
-        return summaryName(this.model().steps, index);
-    }
-    amountText(step: StepModel): string {
-        return amountText(step, this.weightUnit);
-    }
-    setRowText(step: StepModel, set: number): string {
-        return setRowText(step, set, this.weightUnit);
-    }
-
-    isSetRowOpen(key: number, set: number): boolean {
-        return this.openSetRow() === `${key}-${set}`;
-    }
-
-    /** Opens a set's row on its wheels, closing any other; or closes it. Rows slide to fit. */
-    toggleSetRow(key: number, set: number) {
-        const id = `${key}-${set}`;
-        this.smoothChange(() => this.openSetRow.update((open) => (open === id ? null : id)));
     }
 
     /** Puts `step` in place of the step with its key, if it's still there. */
@@ -306,62 +184,8 @@ export class WorkoutSetupForm {
         this.updateSteps((steps) => steps.map((each) => (each.key === step.key ? step : each)));
     }
 
-    isExpanded(key: number): boolean {
-        return this.expandedKeys().has(key);
-    }
-
-    /** Opens or closes one step. Its button stays in place, so focus stays on it. */
-    toggleStep(key: number) {
-        this.smoothChange(() =>
-            this.expandedKeys.update((keys) => {
-                const next = new Set(keys);
-                if (!next.delete(key)) {
-                    next.add(key);
-                }
-                return next;
-            })
-        );
-    }
-
-    setAllExpanded(expanded: boolean) {
-        this.smoothChange(() => this.expandedKeys.set(expanded ? this.allKeys() : new Set()));
-    }
-
-    /**
-     * Opens or closes steps with the steps and everything under them sliding to their new
-     * places, rather than the page jumping (and rather than animating a step's height, which
-     * would lay the page out again every frame).
-     */
-    smoothChange(change: () => void) {
-        changeSmoothly(
-            this.host.nativeElement,
-            'form > *, .step, .wheel-row',
-            this.injector,
-            change
-        );
-    }
-
-    toggleKindMenu(key: number) {
-        this.kindMenuFor.update((open) => (open === key ? null : key));
-    }
-
-    /** A click anywhere outside the open kind menu or the tooltip closes it. */
-    closePopups(event: MouseEvent) {
-        const target = event.target instanceof Element ? event.target : null;
-        if (!target?.closest('app-step-kind-menu')) {
-            this.kindMenuFor.set(null);
-        }
-        if (!target?.closest('.info')) {
-            this.infoOpen.set(false);
-        }
-    }
-
     updateSteps(change: (steps: StepModel[]) => StepModel[]) {
         this.model.update((setup) => ({ ...setup, steps: change(setup.steps) }));
-    }
-
-    private allKeys(): Set<number> {
-        return new Set(this.model().steps.map((step) => step.key));
     }
 
     findWorkoutToEdit(params: ParamMap): Workout | null {

@@ -204,6 +204,8 @@ export interface ExerciseWeek {
     exerciseId: string;
     /** Sets done; a left and a right make one. */
     sets: number;
+    /** How many of those were timed sets, held rather than counted in reps. */
+    timedSets: number;
     /** Reps done, on one side of an exercise done each side. 0 with only timed sets. */
     reps: number;
     /** Time held in timed sets, in seconds, on one side of one done each side. */
@@ -240,6 +242,7 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
             const side = tally[set.side ?? 'none'];
             side.sets++;
             if (isTimedSet(set)) {
+                side.timedSets++;
                 side.seconds += set.seconds;
             } else {
                 side.reps += set.reps;
@@ -254,6 +257,7 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
         weeks.push({
             exerciseId,
             sets: sided('sets'),
+            timedSets: sided('timedSets'),
             reps: sided('reps'),
             seconds: sided('seconds'),
             volume,
@@ -266,12 +270,13 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
 
 interface Totals {
     sets: number;
+    timedSets: number;
     reps: number;
     seconds: number;
 }
 
 function totals(): Totals {
-    return { sets: 0, reps: 0, seconds: 0 };
+    return { sets: 0, timedSets: 0, reps: 0, seconds: 0 };
 }
 
 /**

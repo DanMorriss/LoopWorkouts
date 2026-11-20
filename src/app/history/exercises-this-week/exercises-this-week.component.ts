@@ -4,10 +4,12 @@ import { describeWeek, WeekLine } from '../../exercises/progress-format';
 import { exercisePath, exerciseSlug } from '../../models/exercise';
 import { lastSevenDaysFrom } from '../../models/history';
 import { exerciseWeeks } from '../../models/progress';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 import { injectFocusAfterRender } from '../../shared/focus-after-render';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { ShownHistory } from '../shown-history';
+import { NewBestTile, NewBestTilesComponent } from './new-best-tiles/new-best-tiles.component';
 
 /** How many show before Show all. */
 const SHOWN = 6;
@@ -19,17 +21,20 @@ interface WeekRow extends WeekLine {
     slug: string;
     path: string;
     sets: number;
+    /** A pip for each set, in the rep violet or, for a timed set, the rest blue. */
+    pips: ('reps' | 'timed')[];
 }
 
 /**
- * Each exercise done in the last 7 days, on Progress (PRG-13): its reps (or time), sets and volume,
- * and the personal bests it set, those with one first, then most sets, then A to Z. The first
- * few show, and the rest on Show all. Nothing shows with nothing done. Each links to its page,
- * whose ‹ comes back with `?exercise=<slug>`, which brings its row back into view and focuses it.
+ * Each exercise done in the last 7 days, on Progress (PRG-13). Over them, the personal bests
+ * set this week, as tiles swiped between; then each exercise, most sets first, then A to Z,
+ * with a pip for each set and its reps (or time) and volume. The first few show, and the rest
+ * on Show all. Nothing shows with nothing done. Each links to its page, whose ‹ comes back with
+ * `?exercise=<slug>`, which brings its row back into view and focuses it.
  */
 @Component({
     selector: 'app-exercises-this-week',
-    imports: [RouterLink],
+    imports: [RouterLink, IconComponent, NewBestTilesComponent],
     templateUrl: './exercises-this-week.component.html',
     styleUrl: './exercises-this-week.component.scss',
 })
@@ -55,17 +60,23 @@ export class ExercisesThisWeekComponent {
                     slug: exerciseSlug(exercise),
                     path: exercisePath(exercise),
                     sets: week.sets,
+                    pips: [
+                        ...Array<'reps'>(week.sets - week.timedSets).fill('reps'),
+                        ...Array<'timed'>(week.timedSets).fill('timed'),
+                    ],
                     ...describeWeek(week, this.settings.weightUnit(), this.locale),
                 });
             }
         }
-        return rows.sort(
-            (a, b) =>
-                Number(b.bests.length > 0) - Number(a.bests.length > 0) ||
-                b.sets - a.sets ||
-                a.name.localeCompare(b.name)
-        );
+        return rows.sort((a, b) => b.sets - a.sets || a.name.localeCompare(b.name));
     });
+
+    /** Every new best this week, in the order of the exercises they're for. */
+    protected readonly bests = computed((): NewBestTile[] =>
+        this.rows().flatMap((row) =>
+            row.bests.map((best) => ({ ...best, name: row.name, path: row.path }))
+        )
+    );
 
     protected readonly shown = computed(() =>
         this.showAll() ? this.rows() : this.rows().slice(0, SHOWN)

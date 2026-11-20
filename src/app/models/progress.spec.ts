@@ -392,7 +392,13 @@ describe("the week's exercises (PRG-13)", () => {
             entry(from - 1, [squat(50)]),
         ];
         expect(week(history, 'squat')).toEqual(
-            expect.objectContaining({ sets: 3, reps: 30, seconds: 0, eachSide: false })
+            expect.objectContaining({
+                sets: 3,
+                timedSets: 0,
+                reps: 30,
+                seconds: 0,
+                eachSide: false,
+            })
         );
         // Volume from the sets with a weight: 10 × 60 + 8 × 60
         expect(week(history, 'squat')!.volume).toBe(1080);
@@ -407,7 +413,7 @@ describe("the week's exercises (PRG-13)", () => {
     it('totals the time of timed sets', () => {
         const history = [entry(now - DAY, [plank(45), plank(60)])];
         expect(week(history, 'plank')).toEqual(
-            expect.objectContaining({ sets: 2, reps: 0, seconds: 105 })
+            expect.objectContaining({ sets: 2, timedSets: 2, reps: 0, seconds: 105 })
         );
     });
 

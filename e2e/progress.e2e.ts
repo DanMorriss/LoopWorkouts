@@ -256,23 +256,29 @@ test.describe("the week's exercises", () => {
             const week = page.getByRole('region', { name: 'Exercises this week' });
             const rows = week.getByRole('listitem');
             await expect(rows).toHaveCount(3);
-            // Those with a new best first, then most sets
+            // Most sets first, then A to Z
             await expect(rows.nth(0)).toContainText('Back squat');
             await expect(rows.nth(0)).toContainText('20 reps in 2 sets, 1,250 kg lifted');
-            await expect(rows.nth(0)).toContainText('New best, heaviest: 62.5 kg for 10 reps');
-            await expect(rows.nth(1)).toContainText('Plank');
-            await expect(rows.nth(1)).toContainText('1 minute in 1 set');
-            await expect(rows.nth(1)).toContainText('New best, longest: 1 minute');
-            // Each side's reps, a left and a right making a set; a first time sets no best
-            await expect(rows.nth(2)).toContainText('20 reps each side in 2 sets');
-            await expect(rows.nth(2)).not.toContainText('New best');
+            // Each side's reps, a left and a right making a set
+            await expect(rows.nth(1)).toContainText('Dumbbell lunge');
+            await expect(rows.nth(1)).toContainText('20 reps each side in 2 sets');
+            await expect(rows.nth(2)).toContainText('Plank');
+            await expect(rows.nth(2)).toContainText('1 minute in 1 set');
+
+            // The new bests over them, a tile each; a first time sets none
+            const bests = week.getByRole('group', { name: 'New bests' });
+            await expect(bests.getByRole('link')).toHaveText([
+                /New best, heaviest: 62.5 kg for 10 reps, Back squat/,
+                /New best, most reps: 10 reps at 62.5 kg, Back squat/,
+                /New best, longest: 1 minute, Plank/,
+            ]);
 
             // Its page's ‹ comes back to its row, focused
-            await week.getByRole('link', { name: 'Back squat' }).click();
+            await rows.nth(0).getByRole('link').click();
             await expect(page).toHaveURL('/exercises/back-squat?from=progress');
             await page.locator('.back-link', { hasText: 'Progress' }).click();
             await expect(page).toHaveURL('/history?exercise=back-squat');
-            await expect(week.getByRole('link', { name: 'Back squat' })).toBeFocused();
+            await expect(rows.nth(0).getByRole('link')).toBeFocused();
 
             // And from the log, back to the run it was in
             await page.locator('.entry__exercise', { hasText: 'Plank' }).first().click();

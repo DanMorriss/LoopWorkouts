@@ -155,7 +155,7 @@ describe('HomeComponent', () => {
                 'Sun',
             ]);
             expect(inFirst('.plan-card__count')).toEqual(['4 days a week']);
-            expect(inFirst('.plan-card__rest-count')).toEqual(['+ 2 active rest']);
+            expect(inFirst('.plan-card__rest-count')).toEqual(['Plus 2 days of active rest']);
             expect(inFirst('.plan-card__rest-label')).toEqual(['On rest days']);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
             for (const link of element().querySelectorAll('.plans__actions a')) {

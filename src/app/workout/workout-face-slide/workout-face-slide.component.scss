@@ -22,6 +22,8 @@
 // narrower up here.
 .workout-face__label {
     min-width: 0;
+    // The face's size (text-4xl), capped as the rest of the face's text is (see below)
+    font-size: min(2.25rem, 14cqi);
     line-height: 1.1;
     text-wrap: balance;
     overflow-wrap: normal;
@@ -48,7 +50,7 @@
     display: block;
     width: auto;
     height: auto;
-    font-size: 1.75rem;
+    font-size: min(1.75rem, 11cqi);
     line-height: 1;
 }
 
@@ -71,6 +73,16 @@ app-wheel-picker:not(.wheel-picker--open) {
     --wheel-color: currentColor;
 }
 
+// The face is a fixed circle, so the text on it grows with the text size only as far as the
+// circle has room for (cqi: hundredths of the face's width), and never past it. The caps are
+// what fits on the face on a 320px-wide phone at the standard text size, so they only bite
+// past that.
+
+// A timed step's time, at the face's size (text-4xl)
+app-clock-digits {
+    font-size: min(2.25rem, 14cqi);
+}
+
 // The rep count, as big as the face has room for on a narrow phone
 .workout-face__count {
     --wheel-row: min(4.4rem, 15.4vw);
@@ -80,10 +92,10 @@ app-wheel-picker:not(.wheel-picker--open) {
 }
 
 .workout-face__weight {
-    --wheel-row: 2.1rem;
-    --wheel-font: 1.5rem;
+    --wheel-row: min(2.1rem, 13.2cqi);
+    --wheel-font: min(1.5rem, 9.5cqi);
     width: 4.5ch;
-    font-size: 1.5rem;
+    font-size: min(1.5rem, 9.5cqi);
 }
 
 // No weight yet: a "+" to add one, quieter than a weight
@@ -92,18 +104,18 @@ app-wheel-picker:not(.wheel-picker--open) {
 }
 
 .workout-face__weight-unit {
-    font-size: 1.25rem;
+    font-size: min(1.25rem, 8cqi);
 }
 
 // Which side of an exercise done each side, under its name: as plain to see as the name
 .workout-face__side {
-    font-size: 1.25rem;
+    font-size: min(1.25rem, 8cqi);
     font-weight: 600;
     line-height: 1.2;
 }
 
 .workout-face__reps {
-    font-size: 1.5rem;
+    font-size: min(1.5rem, 9.5cqi);
 }
 
 .workout-face__last-time {

@@ -33,11 +33,12 @@ import { WorkoutEstimates } from '../../state/workout-estimates.service';
             flex: none;
         }
 
-        // 100 by 112 units: 44px tall, as an icon button
+        // 100 by 112 units: 44px tall, as an icon button, at the standard text size; larger
+        // with larger text, so the time inside it still fits
         .workout-watch__body {
             position: relative;
             display: block;
-            width: calc(44px * 100 / 112);
+            width: calc(2.75rem * 100 / 112);
             aspect-ratio: 100 / 112;
         }
 

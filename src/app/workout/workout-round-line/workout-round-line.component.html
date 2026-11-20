@@ -3,7 +3,7 @@
     <!-- An exercise's sets, or a superset's rounds, and the whole
                                  workout's round after them when it has more than one -->
     <p class="text-2xl">
-        {{ setText(set) }}
+        {{ setLine(set) }}
         @if (line.timeLimited) {
             · round {{ line.round }}
         } @else if (line.untilStopped) {
@@ -23,7 +23,7 @@
         </p>
     }
 } @else if (line.timeLimited) {
-    <p class="text-2xl">round {{ line.round }}</p>
+    <p class="text-2xl">Round {{ line.round }}</p>
     <p
         class="workout-status__time-left"
         [class.workout-status__time-left--nearly-up]="line.timeNearlyUp"
@@ -32,7 +32,7 @@
     </p>
 } @else if (line.untilStopped) {
     <p class="text-2xl">
-        round {{ line.round }} of
+        Round {{ line.round }} of
         <span class="symbol-infinity" aria-hidden="true">∞</span>
         <span class="sr-only">until stopped</span>
     </p>
@@ -40,7 +40,7 @@
     @if (line.last) {
         <p class="workout-status__last text-2xl">Last round!</p>
     } @else {
-        <p class="text-2xl">round {{ line.round }} of {{ line.totalRounds }}</p>
+        <p class="text-2xl">Round {{ line.round }} of {{ line.totalRounds }}</p>
     }
 }
 <!-- The same count as the round line, as a picture: rounds done, this

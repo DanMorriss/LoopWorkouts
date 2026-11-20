@@ -42,9 +42,11 @@
     font: inherit;
     font-size: 1.0625rem;
     font-weight: 600;
+    text-align: center;
     text-decoration: none;
-    white-space: nowrap;
     cursor: pointer;
+    // On one line, unless it'd be wider than its place (large text): then over two, inside it
+    max-width: 100%;
     transition:
         scale 0.2s ease-out,
         box-shadow 0.2s ease,
@@ -164,6 +166,8 @@
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
+    // Its words wrap, inside it, where it'd be wider than its place (large text)
+    max-width: 100%;
     min-height: 44px;
     padding: 0 1rem;
     border: 1px solid var(--border);

@@ -15,6 +15,7 @@ import { capitalise, equipmentPhrases } from '../../models/exercise';
 import { fitToDays, inDayOrder, inOrder, trainingDays } from '../../models/fit-plan';
 import { WEEKDAYS } from '../../models/plan';
 import { joinAnd } from '../../models/text';
+import { counted } from '../../shared/format-count';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { activeRestDays, cardDays, cardWorkouts } from './plan-card-view';
 import { PageSlide } from '../../shared/navigation/page-slide';
@@ -35,7 +36,7 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
 
 /**
  * A ready-made plan (PLN-6) as a card: its title and what it's for, how many days a week it
- * trains (and, under that, how many are active rest), the week as a strip of days with each
+ * trains (and, under what it's for, how many days of active rest come on top), the week as a strip of days with each
  * training workout numbered and coloured and active rest a quiet ring, those workouts with
  * their days (active rest under "On rest days"), what it needs, a switch to leave its active
  * rest out (the card then shows the plan without it; remembered, for every card), and Use this
@@ -57,7 +58,11 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
         ToggleSwitchComponent,
     ],
     template: `
-        <article class="plan-card" [attr.aria-labelledby]="headingId()">
+        <article
+            class="plan-card"
+            [class.plan-card--flat]="flat()"
+            [attr.aria-labelledby]="headingId()"
+        >
             <div class="plan-card__head">
                 <div class="plan-card__intro">
                     <!-- Its heading's level fits the page it's on -->
@@ -67,19 +72,15 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
                         <h4 class="plan-card__title" [id]="headingId()">{{ plan().title }}</h4>
                     }
                     <p class="plan-card__description">{{ plan().description }}</p>
-                </div>
-                <div class="plan-card__counts">
-                    <app-showcase-count
-                        class="plan-card__count"
-                        [number]="trainingDayCount()"
-                        label="days a week"
-                    />
-                    @if (restDayCount()) {
-                        <span class="plan-card__rest-count"
-                            >+ {{ restDayCount() }} active rest</span
-                        >
+                    @if (restNote(); as note) {
+                        <p class="plan-card__rest-count">{{ note }}</p>
                     }
                 </div>
+                <app-showcase-count
+                    class="plan-card__count"
+                    [number]="trainingDayCount()"
+                    label="days a week"
+                />
             </div>
 
             @if (fitNote()) {
@@ -165,6 +166,11 @@ export class PlanCardComponent {
     readonly plan = input.required<BuiltInPlan>();
     /** Whether its button is the page's main one, as on Today. */
     readonly main = input(false);
+    /**
+     * Inside another card (Today's Get started, or This week with nothing planned): no card of
+     * its own, so the two read as one surface rather than a card in a card.
+     */
+    readonly flat = input(false);
     /** Its title's heading level: 3 on its own page, 4 inside a card (Today's Get started). */
     readonly headingLevel = input<3 | 4>(4);
     /** Where its workouts' pages go back to: Today, or the Ready-made plans page. */
@@ -262,5 +268,9 @@ export class PlanCardComponent {
     /** The days of only active rest. */
     protected readonly restDayCount = computed(
         () => this.days().filter((day) => day.kind === 'active-rest').length
+    );
+    /** Under what it's for: "Plus 2 days of active rest", if it has any. */
+    protected readonly restNote = computed(() =>
+        this.restDayCount() ? `Plus ${counted(this.restDayCount(), 'day')} of active rest` : ''
     );
 }

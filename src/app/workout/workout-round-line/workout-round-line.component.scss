@@ -36,9 +36,12 @@ p {
     letter-spacing: normal;
 }
 
-// The dots and the time left share a row
+// The dots and the time left share a row; the time left goes under them where they don't
+// fit side by side (the largest text sizes)
 .workout-status__progress {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.25rem 0.75rem;
 }

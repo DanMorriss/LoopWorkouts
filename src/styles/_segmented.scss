@@ -20,7 +20,8 @@
     // How many options there are; three for the theme
     --count: 3;
     display: grid;
-    grid-template-columns: repeat(var(--count), 1fr);
+    // Always equal, so the thumb lines up, even where a label is too long for its share
+    grid-template-columns: repeat(var(--count), minmax(0, 1fr));
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--control);
@@ -68,6 +69,11 @@
     color: var(--text-muted);
     font-size: 0.85rem;
     text-align: center;
+    // Cut short with "…" where its share is too narrow (the largest text sizes), as iOS's
+    // segmented controls are; the radio button keeps its whole name for a screen reader
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     pointer-events: none;
     transition: color 0.2s ease;
 

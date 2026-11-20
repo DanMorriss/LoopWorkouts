@@ -13,6 +13,17 @@
     justify-content: space-between;
     gap: 0.75rem;
     margin-bottom: 0.5rem;
+
+    // With large text (rem in a media query is the browser's text size), the name has the
+    // width to itself and the stopwatch and heart go under it, rather than the name breaking
+    // mid-word beside them
+    @media (max-width: 22rem) {
+        flex-wrap: wrap;
+
+        .details__title {
+            flex-basis: 100%;
+        }
+    }
 }
 
 // The workout's name, in the display face, as other pages that slide in have theirs
@@ -21,7 +32,8 @@
     @include display;
     font-size: 1.6rem;
     color: var(--text-strong);
-    overflow-wrap: anywhere;
+    // A word broken only if it's longer than a line on its own
+    overflow-wrap: break-word;
 
     // Given focus only arriving from Save, as a place to start; it's not a control
     &:focus {

@@ -1,6 +1,6 @@
 <div class="flex justify-center" [appSwipeBack]="back.url">
     <div class="w-full max-w-md p-4">
-        <app-back-link [url]="back.url" [label]="back.label" />
+        <app-top-bar [url]="back.url" [label]="back.label" />
 
         @if (card(); as card) {
             @let workout = card.workout;

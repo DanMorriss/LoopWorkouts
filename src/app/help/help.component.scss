@@ -6,10 +6,8 @@
 }
 
 .help__title {
-    margin: 0 0 0.75rem;
-    @include display;
-    font-size: 1.6rem;
-    color: var(--text-strong);
+    @include page-title;
+    margin-bottom: 0.75rem;
 }
 
 .help__search {
@@ -30,10 +28,8 @@
 .help__heading {
     margin: 0 0 0.25rem;
     color: var(--text-muted);
-    font-size: 0.8rem;
+    @include caps(0.8rem);
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
 }
 
 .help__topic {

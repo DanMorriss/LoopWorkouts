@@ -1,3 +1,4 @@
+@use 'type' as *;
 @use 'interaction' as *;
 
 $off-color: var(--control-off); // 3:1 or more against the box, as a control's state must be
@@ -117,9 +118,7 @@ $loop-path: path(
 }
 
 .infinity-switch__state {
-    font-size: 0.85rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    @include caps(0.85rem);
 }
 
 @media (prefers-reduced-motion: reduce) {

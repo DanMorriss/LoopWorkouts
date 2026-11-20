@@ -96,13 +96,17 @@ export type UpNext = NonNullable<ReturnType<WorkoutView['upNextCard']>>;
                             aria-haspopup="dialog"
                             (click)="details.emit(about)"
                         >
-                            {{ up.name
-                            }}<mat-icon class="up-next__about-icon" aria-hidden="true"
-                                >info</mat-icon
-                            >
+                            <span class="up-next__words"
+                                ><ng-container
+                                    *ngTemplateOutlet="words; context: { $implicit: up.name }"
+                            /></span>
+                            <mat-icon class="up-next__about-icon" aria-hidden="true">info</mat-icon>
                         </button>
                     } @else {
-                        <span [attr.aria-hidden]="quiet || null">{{ up.name }}</span>
+                        <span [attr.aria-hidden]="quiet || null"
+                            ><ng-container
+                                *ngTemplateOutlet="words; context: { $implicit: up.name }"
+                        /></span>
                     }
                     <span class="sr-only" [attr.aria-hidden]="quiet || null">{{
                         up.detail ? ', ' : ''
@@ -114,6 +118,13 @@ export type UpNext = NonNullable<ReturnType<WorkoutView['upNextCard']>>;
                     }}</span>
                 }
             </span>
+        </ng-template>
+        <!-- A name, broken only between its words: "Push-up" isn't split at its hyphen unless
+             it's too long for a line on its own -->
+        <ng-template #words let-name>
+            @for (word of wordsOf(name); track $index) {
+                {{ $first ? '' : ' ' }}<span class="up-next__word">{{ word }}</span>
+            }
         </ng-template>
     `,
     styleUrl: './up-next-card.component.scss',
@@ -140,4 +151,9 @@ export class UpNextCardComponent {
     readonly card = viewChild<ElementRef<HTMLElement>>('card');
     /** On Done, the next exercise's name, for focus back from its details. */
     readonly info = viewChild<ElementRef<HTMLButtonElement>>('info');
+
+    /** A name's words, each kept whole on its line (see `#words`). */
+    protected wordsOf(name: string): string[] {
+        return name.split(' ');
+    }
 }

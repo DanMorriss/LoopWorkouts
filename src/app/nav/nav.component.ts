@@ -12,9 +12,11 @@ import { IconComponent } from '../shared/components/icon/icon.component';
 const FALLBACK = '/library';
 
 /**
- * The header: the Loop Workouts title. Getting about is the tab bar's job (TabBarComponent); on
- * the workout page, which has no tab bar, a ⌄ link at the top left goes back to the page you
- * came from, leaving the workout running in the bar above the tabs (RunBarComponent).
+ * The header, on the workout page only: the Loop Workouts title (the workout's on a phone), and
+ * a ⌄ link at the top left back to the page you came from, as that page has no tab bar, leaving
+ * the workout running in the bar above the tabs (RunBarComponent). Other pages have their own
+ * bar at the top (TopBarComponent), with the app's name left only as the heading over the
+ * page's own for a screen reader; getting about is the tab bar's job (TabBarComponent).
  */
 @Component({
     selector: 'app-nav',

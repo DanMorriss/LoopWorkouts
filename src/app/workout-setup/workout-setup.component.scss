@@ -1,18 +1,22 @@
 @use 'interaction' as *;
+@use 'type' as *;
+
+// New workout or Edit workout, at the left as every page's title is
+.setup-title {
+    @include page-title;
+}
 
 // A section's heading (Steps, Repeat): the reading face, semibold, as all headings are
 .setup-heading {
     margin: 1.5rem 0 0.25rem;
     font-size: 1rem;
     color: var(--text-strong);
-    text-align: center;
 }
 
 // The Steps heading, with its info button (styles/_info.scss) just to the right of it
 .steps-title {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 0.25rem;
     margin: 1.5rem 0 0.5rem;
 
@@ -25,7 +29,6 @@
     margin: 0 0 0.75rem;
     font-size: 0.85rem;
     color: var(--text-muted);
-    text-align: center;
 }
 
 // Steps: one card each, edged in the phase colour, like the workout itself

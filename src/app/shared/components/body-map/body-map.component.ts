@@ -40,6 +40,11 @@ export class BodyMapComponent {
     readonly toggles = input(false);
     readonly removableLabels = input(false);
     readonly figureOnly = input(false);
+    /**
+     * What's said under the figure while no muscles are listed: "No muscles listed." for an
+     * exercise's, or a hint for a map that's there to pick muscles on.
+     */
+    readonly emptyText = input('No muscles listed.');
     readonly listOnly = input(false);
     /**
      * Each listed muscle a link to the Exercises list cut down to it, which slides in over the

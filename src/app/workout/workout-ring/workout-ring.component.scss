@@ -30,8 +30,11 @@
 .workout-ring {
     position: relative;
     transition: filter 0.3s ease;
-    // 380px, or the screen width minus the page gutters on narrow phones
-    width: min(380px, calc(100vw - 2rem));
+    // 380px, or the screen width minus the page gutters on narrow phones; or smaller, down to
+    // 240px, where the screen isn't tall enough for it with the rest of the page (about 21rem,
+    // which grows with the text size), so Pause and Skip under it stay in view. svh, the
+    // screen's height with the browser's bars showing, so it doesn't change size on scrolling.
+    width: min(380px, calc(100vw - 2rem), max(240px, calc(100svh - 21rem)));
     aspect-ratio: 1;
     border-radius: 50%;
     display: flex;

@@ -59,7 +59,7 @@
 
 <!-- With figureOnly, just the figure, and no "No muscles listed." -->
 @if (!figureOnly() && groups().length === 0) {
-    <p class="body-map__none">No muscles listed.</p>
+    <p class="body-map__none">{{ emptyText() }}</p>
 }
 @for (group of groups(); track group.kind) {
     <div class="body-map__group">

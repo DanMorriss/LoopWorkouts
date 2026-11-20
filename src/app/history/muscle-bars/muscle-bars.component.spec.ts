@@ -87,7 +87,11 @@ describe('MuscleBarsComponent', () => {
 
     it('grows the bars in once they come into view, unless motion is reduced', async () => {
         const balance: MuscleBalance[] = [{ muscle: 'chest', sets: 10, aim, status: 'reached' }];
-        const fill = () => row(0).querySelector<HTMLElement>('.bars__fill')!.style.width;
+        /** How far the fill shows: its length once grown, nothing while it waits off the track. */
+        const fill = () =>
+            fixture.nativeElement.querySelector('.bars')!.classList.contains('bars--grown')
+                ? row(0).querySelector<HTMLElement>('.bars__fill')!.style.width
+                : '0%';
 
         // Out of view, they wait at nothing
         const spacer = document.body.appendChild(document.createElement('div'));

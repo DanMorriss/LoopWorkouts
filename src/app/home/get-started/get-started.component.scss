@@ -1,3 +1,4 @@
+@use 'type' as *;
 @use 'panel-card' as *;
 
 :host {
@@ -15,10 +16,8 @@
 .start__label {
     margin: 0;
     color: var(--text-muted);
-    font-size: 0.8rem;
+    @include caps(0.8rem);
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
 }
 
 .start__lead {

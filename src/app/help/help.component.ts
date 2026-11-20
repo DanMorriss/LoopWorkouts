@@ -12,7 +12,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { HELP_SECTIONS, searchTopics } from './help-topics';
 import { counted } from '../shared/format-count';
@@ -33,13 +33,7 @@ const PRACTICE_WORKOUT_ID = 'builtin:bodyweight-basics';
  */
 @Component({
     selector: 'app-help',
-    imports: [
-        BackLinkComponent,
-        IconComponent,
-        RouterLink,
-        SearchFieldComponent,
-        SwipeBackDirective,
-    ],
+    imports: [TopBarComponent, IconComponent, RouterLink, SearchFieldComponent, SwipeBackDirective],
     templateUrl: './help.component.html',
     styleUrl: './help.component.scss',
 })

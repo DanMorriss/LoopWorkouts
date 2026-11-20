@@ -23,11 +23,12 @@
 }
 
 // Each slide its own height, the track the height of the one in view, growing or shrinking to
-// the next as it comes into view; a taller one is cut off while it's swiped past
+// the next as it comes into view, on the app's spring; a taller one is cut off while it's
+// swiped past. Its height, rather than a transform, as what's under it moves with it.
 .carousel__track--fit {
     align-items: start;
     overflow-y: hidden;
-    transition: height 0.25s ease;
+    transition: height var(--spring-duration) var(--ease-spring);
 
     @media (prefers-reduced-motion: reduce) {
         transition: none;

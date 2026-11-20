@@ -7,7 +7,9 @@ test('opens on Today', async ({ app, page }) => {
     await app.goto('/');
 
     await expect(page).toHaveURL('/home');
-    await expect(page.getByRole('heading', { level: 1, name: 'Loop Workouts' })).toBeVisible();
+    // The app's name heads the page for a screen reader, over the page's own title
+    await expect(page.getByRole('heading', { level: 1, name: 'Loop Workouts' })).toBeAttached();
+    await expect(app.heading(/^Good (morning|afternoon|evening)/)).toBeVisible();
     await expect(app.tab('Today')).toHaveAttribute('aria-current', 'page');
 });
 

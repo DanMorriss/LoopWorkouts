@@ -147,6 +147,51 @@ test.describe('swiping', () => {
     );
 
     test(
+        'REG-GES-06 drag a dialog sheet back down to close it',
+        { tag: '@p3' },
+        async ({ app, page }) => {
+            const finger = await Finger.on(page);
+            await app.goto('/library');
+            await page.getByRole('link', { name: 'Details of Legs' }).click();
+            const addToPlan = page.getByRole('button', { name: 'Add to plan' });
+            await addToPlan.click();
+            const dialog = page.getByRole('dialog', { name: /^Plan Legs on/ });
+            await expect(dialog).toBeVisible();
+            // A sheet along the bottom of the screen, with a grabber at its top
+            const grabber = dialog.locator('.dialog-grabber');
+            await expect(grabber).toBeVisible();
+            const height = await page.evaluate(() => window.innerHeight);
+            await expect
+                .poll(async () =>
+                    Math.round(
+                        (await dialog.boundingBox())!.y + (await dialog.boundingBox())!.height
+                    )
+                )
+                .toBe(height);
+            const top = (await dialog.boundingBox())!.y;
+
+            // A little way down by its grabber, slowly: it springs back up and stays open
+            const from = await Finger.within(grabber, 0.5);
+            await finger.drag(from, { x: from.x, y: from.y + 80 }, { ms: 600, settle: 200 });
+            await expect(dialog).toBeVisible();
+            await expect
+                .poll(async () => Math.round((await dialog.boundingBox())!.y))
+                .toBe(Math.round(top));
+
+            // Down past halfway from its content, scrolled to the top: it closes, picking no
+            // day, and focus is back on Add to plan
+            const monday = await Finger.within(
+                dialog.getByRole('button', { name: /^Monday/ }),
+                0.5
+            );
+            await finger.drag(monday, { x: monday.x, y: monday.y + 300 }, { ms: 500 });
+            await expect(dialog).toHaveCount(0);
+            await expect(addToPlan).toBeFocused();
+            await expect(app.undoBar).toHaveCount(0);
+        }
+    );
+
+    test(
         'REG-GES-01 a tap and a swipe mid page-slide, and the summary drag, on an iPhone',
         { tag: '@p3' },
         () => {

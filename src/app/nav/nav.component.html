@@ -1,6 +1,6 @@
-<!-- Three columns with equal sides, so the title stays centred with the back link beside it -->
-<div class="nav grid w-full items-center gap-2 p-4">
-    @if (onWorkoutPage()) {
+@if (onWorkoutPage()) {
+    <!-- Three columns with equal sides, so the title stays centred with the back link beside it -->
+    <div class="nav grid w-full items-center gap-2 p-4">
         <!-- Down, as the workout folds away into the bar above the tabs; it keeps running -->
         <a
             class="btn-icon nav__back"
@@ -11,18 +11,20 @@
         >
             <app-icon>expand_more</app-icon>
         </a>
-    } @else {
+        <!-- On a phone, the workout page shows the workout's own title here instead of the app's name -->
+        <h1
+            class="site-title pt-2 text-center text-2xl text-(--text-strong)"
+            [class.site-title--workout]="workoutTitle()"
+        >
+            <span class="site-title__app">Loop Workouts</span>
+            @if (workoutTitle()) {
+                <span class="site-title__workout">{{ workoutTitle() }}</span>
+            }
+        </h1>
         <div aria-hidden="true"></div>
-    }
-    <!-- On a phone, the workout page shows the workout's own title here instead of the app's name -->
-    <h1
-        class="site-title pt-2 text-center text-2xl text-(--text-strong)"
-        [class.site-title--workout]="workoutTitle()"
-    >
-        <span class="site-title__app">Loop Workouts</span>
-        @if (workoutTitle()) {
-            <span class="site-title__workout">{{ workoutTitle() }}</span>
-        }
-    </h1>
-    <div aria-hidden="true"></div>
-</div>
+    </div>
+} @else {
+    <!-- Elsewhere each page's own bar is at the top (TopBarComponent), and the app's name only
+         heads the page for a screen reader, above the page's title -->
+    <h1 class="sr-only">Loop Workouts</h1>
+}

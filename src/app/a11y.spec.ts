@@ -1100,7 +1100,7 @@ for (const theme of ['dark', 'light'] as const) {
             it('running until stopped', async () => {
                 store.setActiveWorkout(store.addWorkout({ ...sprints, repeats: 0 }));
                 await open('/workout');
-                expect(fixture.nativeElement.textContent).toContain('round 1 of ∞');
+                expect(fixture.nativeElement.textContent).toContain('Round 1 of ∞');
                 await expectNoViolations();
             });
 

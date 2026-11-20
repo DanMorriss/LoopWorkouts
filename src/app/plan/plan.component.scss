@@ -1,14 +1,12 @@
 @use 'type' as *;
+@use 'interaction' as *;
 
 :host {
     display: block;
 }
 
 .plan__title {
-    margin: 0 0 0.5rem;
-    @include display;
-    font-size: 1.6rem;
-    color: var(--text-strong);
+    @include page-title;
 }
 
 .plan__hint,
@@ -30,8 +28,11 @@
     border-top: 1px solid var(--border-soft);
 }
 
+// The day's name at the left, its buttons at the right; under it, still at the right, where
+// there isn't room beside it (the largest text sizes)
 .plan__day-head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
@@ -42,6 +43,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin-inline-start: auto;
 }
 
 // Picked to swap: in the accent colour; the other days' ⇄, which swap with it, outlined in it
@@ -156,7 +158,11 @@
     font-weight: 600;
     text-decoration: none;
 
-    &:hover {
+    @include hover {
+        text-decoration: underline;
+    }
+
+    @include pressed {
         text-decoration: underline;
     }
 }

@@ -10,6 +10,7 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { thisWeek, weekdayOf } from '../models/plan';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 
 /**
  * Today, where the app opens, greeting you by name (NAV-4) for the time of day: the week's plan
@@ -22,6 +23,7 @@ import { thisWeek, weekdayOf } from '../models/plan';
 @Component({
     selector: 'app-home',
     imports: [
+        TopBarComponent,
         GetStartedComponent,
         MusclesThisWeekComponent,
         SuggestedWorkoutComponent,

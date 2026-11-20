@@ -70,7 +70,8 @@ There are around 1,260 unit tests, run with [Vitest](https://vitest.dev) in brow
 ```
 src/app/
   home/                Today, where the app opens: getting started, the week's plan, today's planned workouts and the suggested next workout
-  nav/                 The header, and the bars along the bottom: tabs, the workout's bar, Undo
+  nav/                 The bar at the top of a page, the workout page's header, and the bars along
+                       the bottom: tabs, the workout's bar, Undo
   history/             Progress: this week's muscles, then past workouts by day, with delete and undo
   exercises/           The exercises list, and each exercise's page: bests, chart and sessions
   account/             The You tab: signing in, profile (sex, weight units), your data (backups), About, and the way into Settings

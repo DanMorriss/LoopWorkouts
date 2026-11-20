@@ -1,5 +1,6 @@
 @use 'interaction' as *;
 @use 'showcase-card' as *;
+@use 'switch-row' as *;
 @use 'type' as *;
 
 :host {
@@ -25,17 +26,17 @@
     @include showcase-head;
 }
 
-// Days a week, and under it how many are active rest
-.plan-card__counts {
-    display: grid;
-    justify-items: center;
-    gap: 0.3rem;
+// Inside another card: its contents only, as part of that card
+.plan-card--flat {
+    padding: 0;
+    border: 0;
+    background: none;
 }
 
+// How many days of active rest come on top, under what it's for
 .plan-card__rest-count {
     color: var(--text-muted);
-    @include small-type(0.7rem);
-    text-align: center;
+    @include small-type(0.75rem);
 }
 
 // Over the active rest workouts in the list
@@ -139,17 +140,14 @@
     }
 }
 
-// Whether to keep its active rest: what it is at the left, the switch at the right
+// Whether to keep its active rest: what it is at the left, the switch at the right, as in
+// Settings
 .plan-card__rest-choice {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
+    @include switch-row;
 }
 
 .plan-card__rest-text {
-    display: grid;
-    gap: 0.15rem;
+    @include switch-row-text;
 }
 
 .plan-card__rest-hint {

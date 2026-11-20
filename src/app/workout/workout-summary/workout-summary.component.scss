@@ -1,8 +1,9 @@
 @use 'type' as *;
 
 // A sheet over the workout: the whole screen on a phone, a card in the middle on anything
-// wider. It rises in on the app's spring and sinks back out the same way; on a phone it can
-// be dragged down by its grabber to go back to the workout (WorkoutSummaryComponent).
+// wider. It rises in on the app's spring and sinks back out the same way, from wherever it is
+// (SheetDrag.leave); on a phone it can be dragged down by its grabber to go back to the
+// workout (WorkoutSummaryComponent, shared/sheet-drag.ts).
 :host {
     position: fixed;
     inset: 0;
@@ -31,46 +32,8 @@
     }
 }
 
-// Closing: back down the way it came. Taps go straight through to the workout meanwhile.
-// Angular keeps the sheet for as long as its own element animates, so it carries an
-// animation that changes nothing, as long as the sheet's.
-:host(.sheet-leave) {
-    pointer-events: none;
-    animation: sheet-leaving 0.25s;
-
-    &::before {
-        animation: sheet-dim-out 0.25s ease-in forwards;
-    }
-
-    .summary {
-        animation: sheet-out 0.25s ease-in forwards;
-    }
-}
-
-// Dragged away, it's already gone: nothing more to animate
-:host(.sheet-leave.summary--dragged-away) {
-    animation: none;
-
-    &::before,
-    .summary {
-        animation: none;
-    }
-}
-
-@keyframes sheet-leaving {
-    to {
-        visibility: visible;
-    }
-}
-
 @keyframes sheet-dim-in {
     from {
-        opacity: 0;
-    }
-}
-
-@keyframes sheet-dim-out {
-    to {
         opacity: 0;
     }
 }
@@ -83,22 +46,9 @@
     }
 }
 
-@keyframes sheet-out {
-    to {
-        transform: translateY(100%);
-    }
-}
-
 @media (min-width: 640px) {
     @keyframes sheet-in {
         from {
-            transform: translateY(2rem);
-            opacity: 0;
-        }
-    }
-
-    @keyframes sheet-out {
-        to {
             transform: translateY(2rem);
             opacity: 0;
         }
@@ -159,11 +109,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    :host::before,
-    .summary,
-    :host(.sheet-leave),
-    :host(.sheet-leave)::before,
-    :host(.sheet-leave) .summary {
+    // It appears at once, and goes with a quick fade (SheetDrag.leave)
+    .summary {
         animation: none;
     }
 }

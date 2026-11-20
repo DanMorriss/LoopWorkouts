@@ -4,7 +4,7 @@
     [swipeBackDisabled]="editing() || adding()"
 >
     <div class="w-full max-w-md p-4">
-        <app-back-link [url]="backUrl" [label]="backLabel" />
+        <app-top-bar [url]="backUrl" [label]="backLabel" />
 
         @if (exercise(); as exercise) {
             <!-- data-tour: what the tour of the page lights up; focus goes here after it -->

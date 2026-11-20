@@ -1,3 +1,4 @@
+@use 'type' as *;
 @use 'interaction' as *;
 
 :host {
@@ -47,10 +48,8 @@
 .outline__part {
     margin: 0.8rem 0 0.2rem;
     color: var(--glow-text);
-    font-size: 0.8rem;
+    @include caps(0.8rem);
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
 }
 
 // An exercise at the left, its sets at the right, wrapping under it when there's no room

@@ -74,7 +74,7 @@ test.describe('a new workout', () => {
         await expect(page).toHaveURL('/workout');
         await expect(run.face).toContainText('Jog');
         await expect(run.faceTime).toHaveText(/^00:(30|[12]\d)$/);
-        await expect(run.main.getByText('round 1 of 3', { exact: true })).toBeVisible();
+        await expect(run.main.getByText('Round 1 of 3', { exact: true })).toBeVisible();
 
         const sprints = (await saved(app)).find((w) => w.title === 'Sprints')!;
         expect(sprints.id).toMatch(

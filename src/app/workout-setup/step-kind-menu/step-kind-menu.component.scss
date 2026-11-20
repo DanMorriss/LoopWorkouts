@@ -1,3 +1,4 @@
+@use 'type' as *;
 @use 'interaction' as *;
 
 // The pill opens a menu of the kinds, under it
@@ -12,9 +13,7 @@
     border: 1px solid var(--step-color);
     border-radius: 999px;
     color: var(--step-color);
-    font-size: 0.8rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    @include caps(0.8rem);
 }
 
 .step__kind-button {

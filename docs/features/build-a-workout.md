@@ -105,7 +105,7 @@
 ### Collapsing
 
 - Each step can be **open** (name box and wheels) or **collapsed** to one line: its name (or kind) and time, e.g. "Squats 00:45" or "Push-ups 20 reps".
-- **Expand all / Collapse all** opens or closes every step at once.
+- **Expand all / Collapse all** opens or closes every step at once. It's there once a workout has more than one step, as a single step has its own open and close button.
 - Opening or closing, the steps and everything under them **slide** to their new places on a spring with no bounce, and an opening step's name box and wheels fade in. With reduced motion they move at once, and the fade stays.
 - A step opens as it's added. A saved workout opens with every step collapsed, so the whole workout is in view.
 
@@ -140,6 +140,7 @@
 
 ### Saving
 
+- **The page's title** is **New workout**, or **Edit workout** for a workout already saved (since 2026-11-20; until then the page had none), above the Workout Title box.
 - **‹** at the top goes back without saving, sliding the page off, to where it was opened from: **‹ Workouts** from New, a card's Edit or anywhere else, the workout's title from Edit in its details, or **‹ Exercise** from an exercise's Add to workout (since 2026-11-05). Create also slides in now. There's no swipe back here, as its rows are dragged and its wheels turned.
 - **Leaving with unsaved changes** (since 2026-11-05), by ‹, the tab bar, the workout's bar or the browser's back button, asks first: "Discard your changes?", saying "Your changes to Legs haven't been saved." or "This workout hasn't been saved.", with **Keep editing** as the main button, where focus starts, and **Discard changes**. **‹ Back**, Escape or a tap outside keep editing. Changes are anything different from how the form opened: looking around, opening and closing steps, or changing something and changing it back asks nothing, and nor does a new workout left empty. Closing or reloading the tab gets the browser's own question, where the browser offers one.
 - **How long it takes** (LIB-9, since 2026-11-14): above Save, centred, the stopwatch and what that's from beside it, as on a workout's Details (see [library](library.md)), changing as the workout's set up: adding or removing a step, its sets, reps or time, or the rounds. It shows only while the workout can be saved. Editing a workout uses your pace from its runs; a new one, or a copy, has the first guess.

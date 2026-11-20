@@ -1,6 +1,14 @@
 @use 'interaction' as *;
 @use 'type' as *;
 
+// The bar at the top, as wide as the page under it (it's outside the grid, so it sticks for
+// as long as the page scrolls rather than only its row)
+.library__bar {
+    max-width: calc(2 * 420px + 1rem + 2rem);
+    margin: 0 auto 0.25rem;
+    padding-inline: 1rem;
+}
+
 // The title, the cards and the muscles under them share the cards' columns, so the title
 // and New line up with the edges of the cards: one column on a phone, two side by side where
 // they fit, centred as the other pages are. No more than two, so on a wide screen the page
@@ -20,18 +28,13 @@
 }
 
 .library__top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
+    @include title-row;
 }
 
 // The page's title, in the display face, as on Exercises and Progress
 .library__title {
+    @include page-title;
     margin: 0;
-    @include display;
-    font-size: 1.5rem;
-    color: var(--text-strong);
 }
 
 .library__filters {

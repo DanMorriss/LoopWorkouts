@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 
 /** Where the legal pages are linked from, and go back to. */
@@ -12,11 +12,11 @@ const BACK_URL = '/account';
  */
 @Component({
     selector: 'app-legal-page',
-    imports: [BackLinkComponent, SwipeBackDirective],
+    imports: [TopBarComponent, SwipeBackDirective],
     template: `
         <div class="flex justify-center" [appSwipeBack]="backUrl">
             <article class="w-full max-w-md p-4" aria-labelledby="legal-title">
-                <app-back-link [url]="backUrl" label="You" />
+                <app-top-bar [url]="backUrl" label="You" />
                 <h2 class="legal__title" id="legal-title">{{ heading() }}</h2>
                 <p class="legal__updated">Last updated {{ updated() }}</p>
                 <ng-content />

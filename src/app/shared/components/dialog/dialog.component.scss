@@ -1,25 +1,136 @@
+// A card in the middle on a wider screen, growing out of what opened it on the app's spring
+// (growFromClick); a sheet from the bottom on a phone, which drags (SheetDrag). Going, it
+// goes back the way it came, from wherever it is (SheetDrag.leave, from styles/_dialog.scss).
+
 .dialog-overlay {
     position: fixed;
     inset: 0;
     display: grid;
     place-items: center;
-    background: var(--overlay);
-    backdrop-filter: blur(6px);
     padding: 1rem;
     z-index: 40;
 
-    // No blur where the system asks for less see-through; the dimming is darker instead
-    @media (prefers-reduced-transparency: reduce) {
-        backdrop-filter: none;
+    // The page dimmed and blurred behind, on a layer of its own so it can brighten as the
+    // sheet is dragged away (--dim, set while dragging) without fading the card with it. The
+    // blur thickens with the dimming, as the material arriving, rather than being there at
+    // full strength as the colour fades in.
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--overlay);
+        backdrop-filter: blur(6px);
+        opacity: var(--dim, 1);
+        animation: dialog-dim-in 0.2s ease-out;
+
+        // No blur where the system asks for less see-through; the dimming is darker instead
+        @media (prefers-reduced-transparency: reduce) {
+            backdrop-filter: none;
+        }
     }
 }
 
 .dialog-card {
+    position: relative;
     max-height: calc(100dvh - 2rem);
     overflow-y: auto;
+    overscroll-behavior: contain;
     border-radius: 0.9rem;
     border: 1px solid var(--border);
     background: var(--raised);
     box-shadow: 0 18px 40px var(--shadow);
     padding: 1.2rem;
+    animation: dialog-card-in var(--spring-duration) var(--ease-spring);
+}
+
+// Held at the top of the card as the rest scrolls, pulled out over the card's padding (1.2rem
+// in every dialog) so what scrolls under it is covered right to the edges: ‹ Back, and the
+// grabber above it on a phone
+.dialog-top {
+    position: sticky;
+    top: -1.2rem;
+    z-index: 2;
+    margin: -1.2rem -1.2rem 0.25rem;
+    padding: 0.6rem 1.2rem 0;
+    // Twice over, as the dark theme's is a touch see-through, which let a title scrolled
+    // under it show through
+    background: linear-gradient(var(--raised), var(--raised)) var(--raised);
+}
+
+// The handle at the top that drags the sheet down, on a phone only (a card on a wider screen
+// closes with ‹ Back, Escape or a click outside). Pointer only: keyboards and screen readers
+// have those too.
+.dialog-grabber {
+    display: none;
+}
+
+// On a phone: a sheet along the bottom of the screen, its top under the status bar's height
+// clear of it, so the page still shows there and it reads as over it
+@media (max-width: 639px) {
+    .dialog-overlay {
+        --sheet-gap: max(2.5rem, calc(env(safe-area-inset-top) + 0.75rem));
+
+        place-items: end center;
+        padding: var(--sheet-gap) 0 0;
+    }
+
+    .dialog-card {
+        max-height: calc(100dvh - var(--sheet-gap));
+        border-bottom: 0;
+        border-radius: 1rem 1rem 0 0;
+        padding-bottom: calc(1.2rem + env(safe-area-inset-bottom));
+        animation-name: dialog-sheet-in;
+    }
+
+    .dialog-top {
+        padding-top: 0;
+    }
+
+    .dialog-grabber {
+        display: grid;
+        place-items: center;
+        height: 1.5rem;
+        touch-action: none;
+        cursor: grab;
+
+        &::before {
+            content: '';
+            width: 2.5rem;
+            height: 0.3rem;
+            border-radius: 999px;
+            background: var(--border-strong);
+        }
+    }
+}
+
+@keyframes dialog-dim-in {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0);
+    }
+}
+
+@keyframes dialog-card-in {
+    from {
+        transform: scale(0.96);
+    }
+}
+
+@keyframes dialog-sheet-in {
+    from {
+        transform: translateY(100%);
+    }
+}
+
+// With reduced motion it neither grows nor rises: it fades in, as the dimming does
+@media (prefers-reduced-motion: reduce) {
+    .dialog-card {
+        animation: dialog-fade-in 0.2s ease-out;
+    }
+
+    @keyframes dialog-fade-in {
+        from {
+            opacity: 0;
+        }
+    }
 }

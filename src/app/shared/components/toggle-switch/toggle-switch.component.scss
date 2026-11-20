@@ -1,3 +1,4 @@
+@use 'type' as *;
 $off-color: var(--control-off); // 3:1 or more against the box, as a control's state must be
 $on-color: var(--glow);
 
@@ -80,10 +81,8 @@ $on-color: var(--glow);
 // Fixed width, so the switch doesn't shift between On and Off
 .toggle-switch__state {
     min-width: 2.5em;
-    font-size: 0.85rem;
-    letter-spacing: 0.08em;
+    @include caps(0.85rem);
     text-align: left;
-    text-transform: uppercase;
 }
 
 @media (prefers-reduced-motion: reduce) {

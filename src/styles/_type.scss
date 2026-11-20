@@ -12,6 +12,10 @@
 //   Small text     `@include small-type(0.75rem);` for anything 0.75rem or smaller: tracked
 //                  out a touch, more the smaller it gets, as small letters set close blur
 //                  together.
+//   Capitals       `@include caps(0.8rem);` for a label in capitals (a card's "GET STARTED",
+//                  a step's kind, a switch's ON): capitals set close read as a block, so they
+//                  are tracked out more than small text, and more again the smaller they are.
+//                  Its weight is the label's own.
 //
 // Numbers that tick (a countdown, the time left) want `font-variant-numeric: tabular-nums`
 // in the system face, so the digits don't shift. Audiowide has no such digits: the workout's
@@ -59,5 +63,15 @@
         letter-spacing: 0.02em;
     } @else {
         letter-spacing: 0.01em;
+    }
+}
+
+@mixin caps($size) {
+    font-size: $size;
+    text-transform: uppercase;
+    @if $size < 0.75rem {
+        letter-spacing: 0.07em;
+    } @else {
+        letter-spacing: 0.05em;
     }
 }

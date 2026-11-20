@@ -1,4 +1,5 @@
 import {
+    canDoToday,
     planColours,
     PLANNED_STATUS_TEXT,
     PlannedStatus,
@@ -29,6 +30,8 @@ export interface WeekWorkout {
     label: string;
     /** "Moved from Tuesday", for one done today instead this week only; else ''. */
     movedFrom: string;
+    /** Whether it can be done today instead, this week only (`canDoToday`). */
+    canDoToday: boolean;
 }
 
 /** A day of This week on Today (PLN-4). */
@@ -114,6 +117,7 @@ export function weekDays(
                         item.movedFrom === undefined
                             ? ''
                             : `Moved from ${WEEKDAYS[item.movedFrom]}`,
+                    canDoToday: canDoToday(week, day, item, today),
                 })
             );
         // Those from next week don't count this week

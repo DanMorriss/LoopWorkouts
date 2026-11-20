@@ -52,6 +52,7 @@ describe("This week's days (PLN-4)", () => {
                 colour: 2,
                 label: '',
                 movedFrom: 'Moved from Tuesday',
+                canDoToday: false,
             },
             {
                 workoutId: 'stretch',
@@ -61,7 +62,18 @@ describe("This week's days (PLN-4)", () => {
                 colour: 0,
                 label: '',
                 movedFrom: '',
+                canDoToday: false,
             },
+        ]);
+        // Done today instead, this week only: not one done, nor one planned today too
+        expect(days.map((day) => day.workouts.map((item) => item.canDoToday))).toEqual([
+            [false],
+            [false],
+            [],
+            [false, false],
+            [true],
+            [],
+            [],
         ]);
         expect(days[0].workouts[0].label).toBe('Done');
         expect(days[4].workouts[0].label).toBe('From next week');

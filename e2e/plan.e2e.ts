@@ -454,6 +454,29 @@ test.describe('a missed workout', () => {
             await expect(tuesday).toContainText('Missed');
         }
     );
+
+    test(
+        "REG-PLAN-12 do a missed workout today from Today's week, then Undo",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/home');
+            const week = page.getByRole('region', { name: 'This week' });
+            await week.getByRole('tab', { name: /^Tuesday/ }).click();
+            const tuesday = week.getByRole('tabpanel', { name: 'Tuesday 10' });
+            await expect(tuesday.getByRole('link', { name: /^Legs/ })).toContainText('Missed');
+
+            await tuesday.getByRole('button', { name: 'Do it today: Legs' }).click();
+            const today = week.getByRole('tabpanel', { name: 'Wednesday 11 Today' });
+            await expect(today).toContainText('Moved from Tuesday');
+            await expect(today.getByRole('button', { name: 'Start Legs' })).toBeVisible();
+            await expect(app.undoBar).toContainText('Legs moved to today');
+            await expect(app.undo).toBeFocused();
+
+            await app.undo.click();
+            await expect(tuesday.getByRole('link', { name: /^Legs/ })).toContainText('Missed');
+            await expect(tuesday.getByRole('button', { name: 'Do it today: Legs' })).toBeFocused();
+        }
+    );
 });
 
 test.describe('swapping two days', () => {

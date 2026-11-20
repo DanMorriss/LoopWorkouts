@@ -1,5 +1,4 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { MOST_SUGGESTIONS } from '../../models/muscle-balance';
 import {
     ROUTINE_HOLD_SECONDS,
@@ -10,7 +9,6 @@ import {
     CarouselComponent,
     SlideDirective,
 } from '../../shared/components/carousel/carousel.component';
-import { IconComponent } from '../../shared/components/icon/icon.component';
 import { injectStartWorkout } from '../../shared/run/start-workout';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
@@ -35,12 +33,12 @@ let nextId = 0;
  * It's only ever a workout you can do with the equipment you've said you have; with none
  * picked yet, any.
  *
- * It says which muscles in words, not their sets and aims, with a link to the bars on Progress
- * for those, once there's anything done for Progress to show.
+ * It says which muscles in words, not their sets and aims; on Today, the muscles worked this
+ * week under it link to the bars on Progress for those.
  */
 @Component({
     selector: 'app-suggested-workout',
-    imports: [CarouselComponent, IconComponent, RouterLink, SlideDirective],
+    imports: [CarouselComponent, SlideDirective],
     template: `
         @if (slideCount()) {
             <section class="suggestion" [attr.aria-labelledby]="id">
@@ -89,13 +87,6 @@ let nextId = 0;
                         </ng-template>
                     }
                 </app-carousel>
-                <!-- Only with something on Progress to see -->
-                @if (hasHistory() && suggestions().length) {
-                    <a class="suggestion__more" routerLink="/history">
-                        See your week
-                        <app-icon>chevron_right</app-icon>
-                    </a>
-                }
             </section>
         }
     `,
@@ -160,5 +151,4 @@ export class SuggestedWorkoutComponent {
     });
 
     /** Whether anything's been done, for Progress to show: until then, no way there. */
-    protected readonly hasHistory = computed(() => this.history.entries().length > 0);
 }

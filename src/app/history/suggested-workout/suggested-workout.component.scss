@@ -1,5 +1,4 @@
 @use 'type' as *;
-@use 'interaction' as *;
 @use 'panel-card' as *;
 
 :host {
@@ -62,8 +61,3 @@
 }
 
 // The way to the bars on Progress, for each muscle's sets against its aim
-.suggestion__more {
-    @include link-button;
-    font-size: 0.85rem;
-    text-decoration: none;
-}

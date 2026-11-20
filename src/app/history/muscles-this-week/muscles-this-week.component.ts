@@ -38,7 +38,7 @@ const loadBodyMap = () =>
  * group against the sets a week aimed for (PRG-8). Tapping a muscle on the map, the list or a
  * bar picks it in all three, with a way to the exercises for it between the map and the bars.
  * Nothing shows with no sets in the week, so a blank map is never shown. `compact` (Today)
- * leaves the bars out, with a link to them on Progress.
+ * leaves the bars out, with See this week's progress, a button to them on Progress.
  */
 @Component({
     selector: 'app-muscles-this-week',
@@ -82,8 +82,9 @@ const loadBodyMap = () =>
                     }
                 </div>
                 @if (compact()) {
-                    <a class="muscles-week__more" routerLink="/history">
-                        How each muscle's doing against its aim, on Progress
+                    <a class="btn-pill muscles-week__more" routerLink="/history">
+                        <app-icon>insights</app-icon>
+                        See this week's progress
                         <app-icon>chevron_right</app-icon>
                     </a>
                 } @else {

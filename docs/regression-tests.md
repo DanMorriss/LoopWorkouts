@@ -1043,7 +1043,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Stories:** PRG-9 · **Priority:** P2
 - **Preconditions:** `guest()`, workouts Legs (Back squat) and Push (Bench press), nothing planned, two sets of back squats this week.
 - **Steps:** Open Today; press the suggestion's Start.
-- **Expected:** Under the week: Push, "For Chest (0 of 10 sets), the least worked this week."; Start starts Push. With a plan this week the card isn't there (REG-PLAN-03).
+- **Expected:** Under the week: Push, "For Chest (0 of 10 sets), the least worked this week."; Start starts Push, and the card has no link (no See your week, since 2026-11-20); the muscles worked this week under it end with **See this week's progress**, to `/history`. With a plan this week the card isn't there (REG-PLAN-03).
 
 ### REG-PRG-04 · The week's exercises, with their new bests
 

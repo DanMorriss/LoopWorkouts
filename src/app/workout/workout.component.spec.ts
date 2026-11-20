@@ -2359,7 +2359,7 @@ describe('WorkoutComponent', () => {
                 fixture.detectChanges();
 
                 const dialog = el('app-exercise-details-dialog [role="dialog"]')!;
-                expect(dialog.firstElementChild!.tagName).toBe('APP-DIALOG-BACK');
+                expect(dialog.querySelector('.dialog-top > app-dialog-back')).not.toBeNull();
                 const back = dialog.querySelector('.dialog-back') as HTMLButtonElement;
                 expect(back.textContent!.trim()).toMatch(/\bBack$/);
                 back.click();
@@ -3447,7 +3447,7 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('offers stretches for the muscles worked, and Start stretches runs them in its place', () => {
+        it('offers stretches for the muscles worked, and Start stretches runs them in its place', async () => {
             const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
             start(
                 makeWorkout({
@@ -3465,6 +3465,8 @@ describe('WorkoutComponent', () => {
 
             pressInSummary('Start stretches');
             advance(0);
+            // Its sinking away finishes after the next render
+            await fixture.whenStable();
 
             // The push-ups are logged, finished, and the stretches run in their place
             expect(entries()[0].outcome).toBe('finished');
@@ -3482,7 +3484,7 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('has Stretch what you worked as the main button, over Done, which starts them', () => {
+        it('has Stretch what you worked as the main button, over Done, which starts them', async () => {
             const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
             start(
                 makeWorkout({
@@ -3508,6 +3510,7 @@ describe('WorkoutComponent', () => {
 
             buttons[0].click();
             advance(0);
+            await fixture.whenStable();
             expect(entries()[0].outcome).toBe('finished');
             expect(summary()).toBeNull();
             expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(STRETCH_ROUTINE_ID);
@@ -3759,11 +3762,12 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('goes back to the run, still paused, with Back to workout or Escape', () => {
+        it('goes back to the run, still paused, with Back to workout or Escape', async () => {
             endInRound2();
 
             pressInSummary('Back to workout');
             TestBed.tick();
+            await fixture.whenStable();
             expect(summary()).toBeNull();
             expect(view().isPaused()).toBe(true);
             expect(document.activeElement?.getAttribute('aria-label')).toBe('Resume');
@@ -3773,8 +3777,11 @@ describe('WorkoutComponent', () => {
             summary()!
                 .querySelector('[role="dialog"]')!
                 .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-            fixture.detectChanges();
-            expect(summary()).toBeNull();
+            // Its sinking away finishes after a render
+            await vi.waitFor(() => {
+                fixture.detectChanges();
+                expect(summary()).toBeNull();
+            });
             expect(view().isPaused()).toBe(true);
             fixture.destroy();
         });

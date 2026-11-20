@@ -1555,6 +1555,20 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     2. Press the third dot.
 - **Expected:** Three dots, "Plan 1 of 3" to "Plan 3 of 3", the first marked current. 1. The second is current and Kettlebell, 3 days is in view. 2. The third is current, the track scrolled to No equipment, 3 days; All plans is under the dots.
 
+### REG-GES-06 · Drag a dialog sheet back down to close it
+
+- **Stories:** NAV-1 · **Priority:** P3 · **[Gesture]**
+- **Preconditions:** `guest()`, `hasTouch: true`, reduced motion off; a workout Legs.
+- **Steps:**
+    1. On Legs's details, press Add to plan.
+    2. Drag the dialog's grabber a little way down, slowly, and let go.
+    3. Drag down from Monday, past halfway.
+- **Expected:**
+    1. "Plan Legs on…" is a sheet along the bottom of the screen, with a grabber at its top.
+    2. It springs back up to where it was, still open.
+    3. It closes with no day picked (no Undo bar), and focus is back on Add to plan.
+- **Manual (Known issues):** "Try a dialog sheet's drag from its content on an iPhone", as with the summary's.
+
 ---
 
 ## 14. Calories (`calories.md`)
@@ -1627,7 +1641,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Calories                  | REG-CAL-01 – 03  | CAL-1, CAL-2, CAL-6                                                                                                                                    |
 | Account (stubbed)         | REG-ACC-01 – 07  | SYN-3, SYN-4, SYN-7 (Google only), SYN-8, SYN-10, NAV-3, NAV-4, SET-7                                                                                  |
 | Accessibility             | REG-A11Y-01 – 06 | A11Y-1, CTL-1, RUN-1, RUN-3, NAV-5, EXR-13                                                                                                             |
-| Gestures and dragging     | REG-GES-01 – 05  | NAV-1, NAV-6, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                                         |
+| Gestures and dragging     | REG-GES-01 – 06  | NAV-1, NAV-6, CTL-2, LIB-2, LIB-3, BLD-5, BLD-12, PLN-1, PLN-6                                                                                         |
 
 **Count:** 88 tests: 40 P1, 39 P2, 9 P3.
 

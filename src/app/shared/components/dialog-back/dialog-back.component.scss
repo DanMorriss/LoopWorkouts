@@ -1,15 +1,8 @@
 @use 'interaction' as *;
 
-// Held at the top of the dialog's card as the rest scrolls, pulled out over the card's
-// padding (1.2rem in every dialog) so what scrolls under it is covered right to the edges
+// Held at the top of the dialog's card as the rest scrolls, by the card (DialogComponent)
 :host {
-    position: sticky;
-    top: -1.2rem;
-    z-index: 2;
     display: block;
-    margin: -1.2rem -1.2rem 0.25rem;
-    padding: 0.6rem 1.2rem 0;
-    background: var(--raised);
 }
 
 // As the back link at the top of a page (nav/back-link), but a button: it closes the dialog

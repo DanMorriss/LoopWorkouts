@@ -4,7 +4,7 @@ import { IconComponent } from '../icon/icon.component';
 /**
  * ‹ and what it goes back to, at the top of every dialog: the one way to close it, as the
  * back link is at the top of a page that slides in (BackLinkComponent), so a dialog and a page
- * are left the same way. Held at the top of the card while the rest scrolls under it, so it's
+ * are left the same way. The card holds it at its top while the rest scrolls under it, so it's
  * always in reach. Escape and a click outside still close the dialog too.
  *
  * DialogComponent puts it first in its card. With a label, e.g.

@@ -1,5 +1,6 @@
 import { computed, inject, Injectable } from '@angular/core';
 import {
+    canDoToday,
     MAX_WORKOUTS_A_DAY,
     PLANNED_STATUS_TEXT,
     PlannedWorkout,
@@ -20,7 +21,7 @@ export interface PlanRow extends PlannedWorkout {
     name: string;
     /** Where it is this week: "Done", "Missed", or '' for one still to come. */
     label: string;
-    /** Whether it can be done today instead, this week only (see `PlanStore.moveThisWeek`). */
+    /** Whether it can be done today instead, this week only (`canDoToday`). */
     canDoToday: boolean;
 }
 
@@ -51,7 +52,6 @@ export class PlanPageView {
             (id) => this.names().has(id),
             (id) => this.workouts.isActiveRest(id)
         );
-        const onToday = new Set(week[this.today].map((item) => item.workoutId));
         return week.map((planned, day) => ({
             day,
             name: WEEKDAYS[day],
@@ -61,11 +61,7 @@ export class PlanPageView {
                     day,
                     name: this.names().get(item.workoutId)!,
                     label: statusLabel(item),
-                    canDoToday:
-                        day !== this.today &&
-                        item.movedFrom === undefined &&
-                        item.status !== 'done' &&
-                        !onToday.has(item.workoutId),
+                    canDoToday: canDoToday(week, day, item, this.today),
                 })
             ),
         }));

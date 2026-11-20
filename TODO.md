@@ -24,10 +24,6 @@ Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on 
 - [ ] **Stretch what you worked, a setting:** for the hold's length, or to turn the card off, if wanted.
 - [ ] **More charts, if wanted:** e.g. workouts per week (the same chart could switch between time and workouts), or a range to look further back than 12 weeks.
 
-### Planning your own week
-
-- [ ] **Do it today from Today:** a missed workout picked in Today's week could offer Do it today, as the Plan page's menu does.
-
 ### Sync
 
 Accounts and sync are built and working (SYN-3, SYN-4, SYN-7 with Google, SYN-8, SYN-9); how they work is in `docs/features/backup-and-sync.md`. Worth knowing when planning: Supabase's free tier has 50,000 monthly users, a 500 MB database and 5 GB of egress, and pauses after a week unused (Pro is $25 a month, checked 2026-10-28). loopworkouts.com's DNS is at GoDaddy, with Microsoft 365 for Dan's email on the bare domain and Resend's records on the `mail` subdomain.

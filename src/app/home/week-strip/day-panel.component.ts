@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { injectStartWorkout } from '../../shared/run/start-workout';
@@ -11,7 +11,8 @@ import { colourVar, WeekDay, WeekWorkout } from './week-view';
  * workout in its colour, which opens its Details. Today's still to do each have Start, the
  * first training's the page's main button (PLN-2, which was a card of its own, Due today, until
  * 2026-11-19); active rest is offered, not pressed. Those not today say how they went, e.g.
- * Done or Missed. A day with nothing planned is a rest day.
+ * Done or Missed, and one not done, nor planned today, has Do it today, this week only (PLN-3).
+ * A day with nothing planned is a rest day.
  */
 @Component({
     selector: 'app-day-panel',
@@ -51,7 +52,7 @@ import { colourVar, WeekDay, WeekWorkout } from './week-view';
                                     <span class="day-panel__note">{{ note }}</span>
                                 }
                             </span>
-                            @if (item.label) {
+                            @if (item.label && !item.canDoToday) {
                                 <span class="day-panel__status">
                                     @if (item.status === 'done') {
                                         <app-icon>check</app-icon>
@@ -59,13 +60,25 @@ import { colourVar, WeekDay, WeekWorkout } from './week-view';
                                     {{ item.label }}
                                 </span>
                             }
-                            @if (item.status !== 'today') {
+                            @if (item.status !== 'today' && !item.canDoToday) {
                                 <app-icon class="day-panel__chevron">chevron_right</app-icon>
                             }
                         </a>
+                        @if (item.canDoToday) {
+                            <button
+                                type="button"
+                                class="btn-pill"
+                                [id]="doTodayId(item.workoutId)"
+                                [attr.aria-label]="'Do it today: ' + item.name"
+                                (click)="doToday.emit(item)"
+                            >
+                                Do it today
+                            </button>
+                        }
                         @if (item.status === 'today') {
                             <button
                                 type="button"
+                                [id]="startId(item.workoutId)"
                                 [class]="
                                     item.workoutId === mainId()
                                         ? 'btn-main btn-main--small'
@@ -91,12 +104,16 @@ import { colourVar, WeekDay, WeekWorkout } from './week-view';
 })
 export class DayPanelComponent {
     readonly day = input.required<WeekDay>();
+    /** Do it today pressed, for one on another day: the week moves it, this week only. */
+    readonly doToday = output<WeekWorkout>();
 
     protected readonly slide = inject(PageSlide);
     private readonly workouts = inject(WorkoutStore);
     private readonly startWorkout = injectStartWorkout();
     protected readonly panelId = WEEK_PANEL_ID;
     protected readonly colour = colourVar;
+    protected readonly startId = dayStartId;
+    protected readonly doTodayId = dayDoTodayId;
 
     private readonly due = computed(() =>
         this.day().workouts.filter((item) => item.status === 'today')
@@ -112,8 +129,16 @@ export class DayPanelComponent {
         () => this.due().length > 0 && this.due().every((item) => item.activeRest)
     );
 
-    /** Under its name: where it was moved from, or that it's active rest, and optional. */
+    /**
+     * Under its name: where it was moved from, or that it's active rest, and optional. Beside
+     * Do it today, how it went goes here too, to leave its name room.
+     */
     protected note(item: WeekWorkout): string {
+        if (item.canDoToday) {
+            return [item.activeRest ? 'Active rest' : '', item.label]
+                .filter((part) => part)
+                .join(' · ');
+        }
         if (item.movedFrom) {
             return item.movedFrom;
         }
@@ -136,4 +161,14 @@ export class DayPanelComponent {
             this.startWorkout(workout);
         }
     }
+}
+
+/** The id of a workout's Start, today, for focus to go to. */
+export function dayStartId(workoutId: string): string {
+    return `day-start-${workoutId}`;
+}
+
+/** The id of a workout's Do it today, on another day, for focus to go back to. */
+export function dayDoTodayId(workoutId: string): string {
+    return `day-today-${workoutId}`;
 }

@@ -626,9 +626,10 @@ describe('HomeComponent', () => {
             expect(picked()).toEqual(['Mon']);
             expect(text('.day-panel__title')).toEqual(['Monday 12']);
             expect(text('.day-panel__name')).toEqual(['Legs']);
-            expect(text('.day-panel__status')).toEqual(['Missed']);
-            // Not today, so no Start: it opens its Details, coming back to Today
-            expect(element().querySelector('.day-panel__workout button')).toBeNull();
+            // How it went, under its name, beside Do it today
+            expect(text('.day-panel__note')).toEqual(['Missed']);
+            // Not today, so no Start, but Do it today: it opens its Details, coming back to Today
+            expect(text('.day-panel__workout button')).toEqual(['Do it today']);
             expect(element().querySelector('.day-panel__open')!.getAttribute('href')).toBe(
                 `/library/${legs.id}?from=home`
             );
@@ -754,6 +755,55 @@ describe('HomeComponent', () => {
 
             expect(text('.day-panel__name')).toEqual(['Push', 'Legs']);
             expect(text('.day-panel__note')).toEqual(['Moved from Monday']);
+        });
+
+        it('does a missed one today instead, this week only, from its day, with Undo', async () => {
+            const { push, legs } = planToday();
+            const plan = TestBed.inject(PlanStore);
+            plan.remove(6, legs.id);
+            create();
+            document.body.appendChild(element());
+            // Today's has none, nor does one planned today too
+            expect(text('.day-panel__workout .btn-pill')).toEqual([]);
+
+            tab('Monday').click();
+            fixture.detectChanges();
+            const doToday = element().querySelector<HTMLButtonElement>(`#day-today-${legs.id}`)!;
+            expect(doToday.getAttribute('aria-label')).toBe('Do it today: Legs');
+            doToday.click();
+            await fixture.whenStable();
+
+            // Today's picked, with it due, saying where from
+            expect(tab('Sunday, today').getAttribute('aria-selected')).toBe('true');
+            expect(text('.day-panel__name')).toEqual(['Push', 'Legs']);
+            expect(text('.day-panel__note')).toEqual(['Moved from Monday']);
+            expect(element().querySelector(`#day-start-${legs.id}`)).not.toBeNull();
+            const undo = TestBed.inject(UndoService);
+            expect(undo.offer()?.message).toBe('Legs moved to today');
+            // Still on Monday every other week
+            expect(plan.plan().days[0]).toEqual([legs.id]);
+            expect(plan.plan().days[6]).toEqual([push.id]);
+
+            undo.undo();
+            await fixture.whenStable();
+            expect(tab('Monday').getAttribute('aria-selected')).toBe('true');
+            expect(text('.day-panel__name')).toEqual(['Legs']);
+            expect(document.activeElement?.id).toBe(`day-today-${legs.id}`);
+        });
+
+        it('takes focus to its Start, today, once the Undo bar is closed', async () => {
+            const { legs } = planToday();
+            TestBed.inject(PlanStore).remove(6, legs.id);
+            create();
+            document.body.appendChild(element());
+            tab('Monday').click();
+            fixture.detectChanges();
+            element().querySelector<HTMLButtonElement>(`#day-today-${legs.id}`)!.click();
+            await fixture.whenStable();
+
+            TestBed.inject(UndoService).dismiss();
+            await fixture.whenStable();
+            expect(document.activeElement?.id).toBe(`day-start-${legs.id}`);
         });
 
         it("offers a workout on a day whose only one was moved off it this week, and not on the day it's moved to", () => {

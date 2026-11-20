@@ -2,6 +2,9 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { injectThisWeek } from '../../shared/state/this-week';
 import { plansForYou } from '../../models/built-in-plans';
 import { PageSlide } from '../../shared/navigation/page-slide';
+import { injectFocusAfterRender } from '../../shared/focus-after-render';
+import { PlanStore } from '../../shared/state/plan-store.service';
+import { UndoService } from '../../shared/undo/undo.service';
 import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { nextPlannedDay, weekdayOf, WEEKDAYS } from '../../models/plan';
@@ -9,16 +12,16 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { WEEK_EDIT_ID } from '../use-plan-on-today';
 import { PlansForYouComponent } from '../plans-for-you/plans-for-you.component';
-import { DayPanelComponent } from './day-panel.component';
+import { DayPanelComponent, dayDoTodayId, dayStartId } from './day-panel.component';
 import { WeekDaysComponent } from './week-days.component';
-import { weekDays } from './week-view';
+import { WeekWorkout, weekDays } from './week-view';
 
 /**
  * The week on Today (PLN-4): Monday to Sunday (`WeekDaysComponent`), each day's date, what's on
  * it and how it's going, with today picked to start with and what's on the picked day under them
- * (`DayPanelComponent`), Start on today's (PLN-2); how many of the week's planned workouts are
- * done and the next one to come; and **Edit plan**, which slides the weekly plan in. With
- * nothing planned, the ready-made weeks for your goal and equipment, swiped between and used in
+ * (`DayPanelComponent`), Start on today's (PLN-2) and Do it today on another day's, this week
+ * only (PLN-3); how many of the week's planned workouts are done and the next one to come; and
+ * **Edit plan**, which slides the weekly plan in. With nothing planned, the ready-made weeks for your goal and equipment, swiped between and used in
  * one tap (PLN-6) as on Get started; or All plans, or Make your own plan (NAV-6).
  */
 @Component({
@@ -50,7 +53,12 @@ import { weekDays } from './week-view';
                 <app-week-days [days]="days()" [picked]="picked()" (pick)="pick($event)" />
                 <!-- Made afresh for each day picked, so it slides in from that side -->
                 @for (day of shown(); track day.day) {
-                    <app-day-panel class="week__panel" [day]="day" [animate.enter]="entering()" />
+                    <app-day-panel
+                        class="week__panel"
+                        [day]="day"
+                        [animate.enter]="entering()"
+                        (doToday)="doToday(day.day, $event)"
+                    />
                 }
                 <p class="week__so-far">
                     {{ soFar() }}
@@ -72,6 +80,9 @@ export class WeekStripComponent {
     private readonly workouts = inject(WorkoutStore);
     protected readonly slide = inject(PageSlide);
     private readonly settings = inject(SettingsStore);
+    private readonly planStore = inject(PlanStore);
+    private readonly undo = inject(UndoService);
+    private readonly focusAfterRender = injectFocusAfterRender();
     private readonly thisWeek = injectThisWeek();
     protected readonly weekEditId = WEEK_EDIT_ID;
     private readonly now = Date.now();
@@ -117,6 +128,26 @@ export class WeekStripComponent {
         }
         this.entering.set(day > this.picked() ? 'day-panel--from-right' : 'day-panel--from-left');
         this.picked.set(day);
+    }
+
+    /**
+     * Done today instead, this week only (PLN-3), as the Plan page's menu does: today's picked,
+     * with it on, due. With Undo, which picks its day again, focus back on its Do it today;
+     * focus goes to the Undo bar, then its Start, today.
+     */
+    protected doToday(day: number, item: WeekWorkout) {
+        const before = this.planStore.plan();
+        this.planStore.moveThisWeek(item.workoutId, day, this.today);
+        this.pick(this.today);
+        this.undo.offerUndo({
+            message: `${item.name} moved to today`,
+            undo: () => {
+                this.planStore.restore(before);
+                this.pick(day);
+                this.focusAfterRender(dayDoTodayId(item.workoutId));
+            },
+            dismissed: () => this.focusAfterRender(dayStartId(item.workoutId)),
+        });
     }
 
     /** Whether everything planned this week is from next week: the plan hasn't started. */

@@ -314,6 +314,25 @@ export function nextPlannedDay(
     );
 }
 
+/**
+ * Whether a workout on `day` of `week` (from `thisWeek()`) can be done today instead, this week
+ * only (`PlanStore.moveThisWeek`): one not today's, not done, not moved already, and not
+ * planned today too.
+ */
+export function canDoToday(
+    week: readonly (readonly PlannedWorkout[])[],
+    day: number,
+    item: PlannedWorkout,
+    today: number
+): boolean {
+    return (
+        day !== today &&
+        item.movedFrom === undefined &&
+        item.status !== 'done' &&
+        !week[today].some((other) => other.workoutId === item.workoutId)
+    );
+}
+
 /** The start of the day after `monday`'s `day` (from 0), on the device's calendar. */
 function dayAfter(monday: number, day: number): number {
     const date = new Date(monday);

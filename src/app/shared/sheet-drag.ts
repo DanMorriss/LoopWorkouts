@@ -1,12 +1,18 @@
 import { computed, Signal, signal } from '@angular/core';
-import { project, rubberband, VelocityTracker } from '../../shared/gesture';
-import { spring } from '../../shared/spring';
+import { project, rubberband, VelocityTracker } from './gesture';
+import { spring } from './spring';
 
 /** px/s: let go faster than this, the sheet was thrown rather than set down. */
 const THROWN = 300;
 
 /** px a finger moves on the content before it's taken as a drag or a scroll. */
 const TOUCH_SLOP = 8;
+
+/** Apple's response for a sheet (s): its spring in and out, and after a drag. */
+const RESPONSE = 0.3;
+
+/** ms of the cross-fade that stands in for the slide with reduced motion. */
+const FADE = 200;
 
 /** The touch with this id among those that changed, if it's one of them. */
 function touchById(event: TouchEvent, id: number | undefined): Touch | undefined {
@@ -29,24 +35,41 @@ function scrolledWithin(target: Element, container: Element): boolean {
 }
 
 export interface SheetDragOptions {
+    /** What moves: the sheet, whose content scrolls within it or within a part of it. */
     sheet(): HTMLElement;
     /** Showing only on a phone, where the sheet drags. */
     grabber(): HTMLElement | undefined;
-    /** What holds the sheet, whose --dim and ::before dim the page behind. */
-    host: HTMLElement;
-    /** A finished workout has nothing to go back to, so its heading doesn't drag the sheet. */
-    finished: Signal<boolean>;
+    /**
+     * What dims the page behind, with its ::before, and holds the sheet: --dim is set on it
+     * as the sheet is dragged, and the sheet's animations are on it or inside it.
+     */
+    scrim(): HTMLElement;
+    /** Whether it can go away by dragging now (always, unless this says otherwise). */
+    canGoAway?: Signal<boolean>;
+    /**
+     * Whether a touch on `target` is the sheet's to drag, e.g. not one in a dialog over it,
+     * whose wheels are scrolled. Every touch on the content is, unless this says otherwise.
+     */
+    ownsTouch?(target: Element): boolean;
+    /** How it goes away on a wider screen, where it's a card: e.g. shrinking as it fades. */
+    cardAway: Keyframe;
     reducedMotion: Signal<boolean>;
-    /** It was dragged away, so back to the workout. */
-    goBack(): void;
+    /** It was dragged away, so it's to close. */
+    goneAway(): void;
 }
 
 /**
- * Dragging the summary's sheet down, on a phone, to go back to the workout. It follows the
- * finger 1:1 from where it was grabbed, resists being pulled up (rubber-banding), and on
- * letting go the flick decides: projected past halfway, it carries on down at the finger's
- * speed and goes back; otherwise it springs home, also from the finger's speed. It can be
- * grabbed again mid-spring, from wherever it is.
+ * A sheet over the page, on a phone: dragged down to close it. It follows the finger 1:1 from
+ * where it was grabbed, resists being pulled up (rubber-banding), and on letting go the flick
+ * decides: projected past halfway, it carries on down at the finger's speed and goes;
+ * otherwise it springs home, also from the finger's speed. It can be grabbed again mid-spring,
+ * on its way in, back or away, from wherever it is.
+ *
+ * It's dragged by its grabber, and while its content is scrolled to the top by a finger moving
+ * down anywhere on that, as an iOS sheet is (the `onBody…` handlers, on what scrolls).
+ * `leave()` takes it away, from wherever it is, when it closes some other way. On a wider
+ * screen it's a card, with no grabber, and doesn't drag. Used by every dialog
+ * (DialogComponent) and by the workout's summary.
  */
 export class SheetDrag {
     constructor(private readonly options: SheetDragOptions) {}
@@ -61,13 +84,23 @@ export class SheetDrag {
         startOffset: number;
         offset: number;
         tracker: VelocityTracker;
+        /** Caught on the move, where it was going (px down): it goes on there if just held. */
+        goingTo: number | null;
     } | null = null;
+    /** Where it's on its way to (px down): home as it rises in, then wherever a spring takes it. */
+    private goingTo = 0;
+    /** Closing, so it can't be caught: it's going whatever a finger does. */
+    private leaving = false;
     /** Counts grabs, so a spring knows if a new grab caught the sheet mid-way. */
     private grabs = 0;
     /** The sheet's content is scrolled to the top, so its heading can drag it too. */
     private readonly atTop = signal(true);
     /** On a phone, the sheet's heading and title drag it while it's scrolled to the top. */
-    readonly headDraggable = computed(() => !this.options.finished() && this.atTop());
+    readonly headDraggable = computed(() => this.canGoAway() && this.atTop());
+
+    private canGoAway(): boolean {
+        return this.options.canGoAway?.() ?? true;
+    }
 
     onBodyScroll(event: Event) {
         this.atTop.set((event.target as HTMLElement).scrollTop <= 0);
@@ -84,7 +117,7 @@ export class SheetDrag {
     }
 
     grab(event: PointerEvent) {
-        if (event.pointerType === 'mouse' && event.button !== 0) {
+        if (this.leaving || (event.pointerType === 'mouse' && event.button !== 0)) {
             return;
         }
         (event.currentTarget as Element).setPointerCapture(event.pointerId);
@@ -115,12 +148,25 @@ export class SheetDrag {
     onBodyTouchStart(event: TouchEvent) {
         const finger = event.changedTouches[0];
         // Not a second finger, or one on the heading or title, which drag the sheet themselves,
-        // or one in a dialog over the sheet, e.g. a set's wheels, which are scrolled
-        const inDialog = (event.target as Element).closest?.('app-dialog');
-        this.touch =
-            event.touches.length === 1 && !this.dragging && !inDialog
-                ? { id: finger.identifier, x: finger.clientX, y: finger.clientY }
-                : null;
+        // or one the sheet doesn't own, e.g. in a dialog over it
+        const owned = this.options.ownsTouch?.(event.target as Element) ?? true;
+        const one = event.touches.length === 1 && !this.dragging && !this.leaving && owned;
+        this.touch = one ? { id: finger.identifier, x: finger.clientX, y: finger.clientY } : null;
+        // A sheet on the move (on its way in, back or away) is caught where the finger lands,
+        // anywhere on it, and follows it from there either way: there's no scroll to tell it
+        // from, and a quick sheet would be past the grabber before a finger got to it
+        if (one && this.moving() && this.canGoAway() && this.sheetDrags()) {
+            this.touch = null;
+            this.startDrag(finger.identifier, finger.clientY, event.timeStamp, true);
+        }
+    }
+
+    /** Whether the sheet is moving by itself, on a spring or its way in. */
+    private moving(): boolean {
+        return this.options
+            .sheet()
+            .getAnimations()
+            .some((animation) => animation.playState === 'running');
     }
 
     onBodyTouchMove(event: TouchEvent) {
@@ -144,6 +190,7 @@ export class SheetDrag {
         if (
             dy > Math.abs(dx) &&
             event.cancelable &&
+            this.canGoAway() &&
             this.sheetDrags() &&
             body.scrollTop <= 0 &&
             !scrolledWithin(event.target as Element, body)
@@ -165,6 +212,59 @@ export class SheetDrag {
         }
     }
 
+    /**
+     * Takes the sheet away as it closes some other way (‹ Back, Escape, Done), from wherever it
+     * is, mid-way in included: down off the screen on a phone, on the sheet's spring; on a
+     * wider screen, as `cardAway` says. The page behind brightens with it. With reduced motion
+     * both fade. Resolves once it's gone, for Angular's leave animation to wait for.
+     */
+    async leave(): Promise<void> {
+        if (this.draggedAway()) {
+            return;
+        }
+        this.leaving = true;
+        this.dragging = null;
+        const sheet = this.options.sheet();
+        const scrim = this.options.scrim();
+        // Where both are on screen now, caught mid-way, before stopping what's moving them
+        const style = getComputedStyle(sheet);
+        const now = { transform: style.transform, opacity: style.opacity };
+        const dimNow = getComputedStyle(scrim, '::before').opacity;
+        const offset = new DOMMatrix(style.transform).m42;
+        this.stop();
+
+        const reduced = this.options.reducedMotion();
+        const asSheet = this.sheetDrags();
+        const timing: KeyframeAnimationOptions = reduced
+            ? { duration: FADE, easing: 'ease-out', fill: 'forwards' }
+            : { ...spring(RESPONSE), fill: 'forwards' };
+        const away: Keyframe = reduced
+            ? { opacity: 0 }
+            : asSheet
+              ? { transform: `translateY(${Math.max(offset, this.height())}px)` }
+              : this.options.cardAway;
+        scrim.animate([{ opacity: dimNow }, { opacity: 0 }], {
+            ...timing,
+            pseudoElement: '::before',
+        });
+        await sheet.animate([now, away], timing).finished.catch(() => undefined);
+    }
+
+    /**
+     * Stops the sheet and the dimming where they are: their springs, and their CSS animations
+     * in. Not what moves in the content, such as an exercise's demo.
+     */
+    private stop() {
+        const sheet = this.options.sheet();
+        const scrim = this.options.scrim();
+        for (const animation of scrim.getAnimations({ subtree: true })) {
+            const target = (animation.effect as KeyframeEffect | null)?.target;
+            if (target === sheet || target === scrim) {
+                animation.cancel();
+            }
+        }
+    }
+
     /** The touch dragging the sheet, if it's dragged by the content. */
     private touchDragId(): number | undefined {
         return this.dragging?.byTouch ? this.dragging.pointerId : undefined;
@@ -181,13 +281,20 @@ export class SheetDrag {
         const sheet = this.options.sheet();
         // Where it is on screen now, mid-spring included, and stop it there
         const offset = new DOMMatrix(getComputedStyle(sheet).transform).m42;
-        this.options.host
-            .getAnimations({ subtree: true })
-            .forEach((animation) => animation.cancel());
+        const goingTo = this.moving() ? this.goingTo : null;
+        this.stop();
         this.moveTo(offset);
         const tracker = new VelocityTracker();
         tracker.add(offset, time);
-        this.dragging = { pointerId: id, byTouch, startY: y, startOffset: offset, offset, tracker };
+        this.dragging = {
+            pointerId: id,
+            byTouch,
+            startY: y,
+            startOffset: offset,
+            offset,
+            tracker,
+            goingTo,
+        };
     }
 
     private moveDrag(id: number, y: number, time: number) {
@@ -211,8 +318,14 @@ export class SheetDrag {
         this.dragging = null;
         const velocity = dragging.tracker.velocity(time);
         const height = this.height();
-        // Where the flick would come to rest decides, not where the finger let go
-        const away = dragging.offset + project(velocity) > height / 2;
+        // Caught on the move and just held, it carries on where it was going (a touch as it
+        // rises in doesn't close it); otherwise where the flick would come to rest decides,
+        // not where the finger let go
+        const held = Math.abs(dragging.offset - dragging.startOffset) < TOUCH_SLOP;
+        const away =
+            held && dragging.goingTo !== null
+                ? dragging.goingTo > 0
+                : dragging.offset + project(velocity) > height / 2;
         const grab = this.grabs;
         // Flicked back up, it settles home with a little bounce, as something thrown does
         const thrown = !away && velocity < -THROWN;
@@ -220,7 +333,7 @@ export class SheetDrag {
         // Caught again on its way down: it follows the finger instead of going
         if (away && grab === this.grabs) {
             this.draggedAway.set(true);
-            this.options.goBack();
+            this.options.goneAway();
         }
     }
 
@@ -231,7 +344,7 @@ export class SheetDrag {
     /** Puts the sheet `offset` px down, and fades the dimming behind to match. */
     private moveTo(offset: number) {
         this.options.sheet().style.transform = `translateY(${offset}px)`;
-        this.options.host.style.setProperty('--dim', String(this.dim(offset)));
+        this.options.scrim().style.setProperty('--dim', String(this.dim(offset)));
     }
 
     /** How dimmed the page behind is with the sheet `offset` px down: fully at the top, not at all off the bottom. */
@@ -245,18 +358,19 @@ export class SheetDrag {
      */
     private async springTo(to: number, from: number, velocity: number, dampingRatio = 1) {
         const distance = to - from;
+        this.goingTo = to;
         this.moveTo(to);
         if (this.options.reducedMotion() || Math.abs(distance) < 1) {
             return;
         }
         // The spring wants speed as a share of the distance left per second
-        const { easing, duration } = spring(0.3, {
+        const { easing, duration } = spring(RESPONSE, {
             velocity: velocity / distance,
             dampingRatio,
         });
         const timing = { duration, easing };
-        // The dimming behind, on the host's ::before, fades with it
-        this.options.host.animate([{ opacity: this.dim(from) }, { opacity: this.dim(to) }], {
+        // The dimming behind, on the scrim's ::before, fades with it
+        this.options.scrim().animate([{ opacity: this.dim(from) }, { opacity: this.dim(to) }], {
             ...timing,
             pseudoElement: '::before',
         });

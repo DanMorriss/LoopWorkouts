@@ -1,6 +1,7 @@
 import { Workout } from '../../models/workout';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import {
+    AnimationCallbackEvent,
     Component,
     computed,
     ElementRef,
@@ -31,7 +32,7 @@ import { SummaryKettlebellComponent } from './summary-kettlebell/summary-kettleb
 import { SummaryStepUpsComponent } from './summary-step-ups/summary-step-ups.component';
 import { SummaryStretchComponent } from './summary-stretch/summary-stretch.component';
 import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';
-import { SheetDrag } from './sheet-drag';
+import { SheetDrag } from '../../shared/sheet-drag';
 import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
 
 /**
@@ -61,7 +62,8 @@ import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
     ],
     templateUrl: './workout-summary.component.html',
     styleUrl: './workout-summary.component.scss',
-    host: { '[class.summary--dragged-away]': 'sheetDrag.draggedAway()' },
+    // Going, it sinks back down the way it came, from wherever it is (sheetDrag.leave)
+    host: { '(animate.leave)': 'onLeave($event)' },
 })
 export class WorkoutSummaryComponent {
     private readonly run = inject(ActiveRunService);
@@ -183,12 +185,24 @@ export class WorkoutSummaryComponent {
 
     private readonly sheet = viewChild.required<ElementRef<HTMLElement>>('sheet');
     private readonly grabber = viewChild<ElementRef<HTMLElement>>('grabber');
+    private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     protected readonly sheetDrag = new SheetDrag({
         sheet: () => this.sheet().nativeElement,
         grabber: () => this.grabber()?.nativeElement,
-        host: inject<ElementRef<HTMLElement>>(ElementRef).nativeElement,
-        finished: this.finished,
+        scrim: () => this.host,
+        // A finished workout has nothing to go back to, so its heading doesn't drag the sheet
+        canGoAway: computed(() => !this.finished()),
+        // Not a touch in a dialog over the sheet, e.g. a set's wheels, which are scrolled
+        ownsTouch: (target) => !target.closest('app-dialog'),
+        // On a wider screen, a little way down as it fades, as it came
+        cardAway: { transform: 'translateY(2rem)', opacity: 0 },
         reducedMotion: injectPrefersReducedMotion(),
-        goBack: () => this.leave('back'),
+        goneAway: () => this.leave('back'),
     });
+
+    protected onLeave(event: AnimationCallbackEvent) {
+        // Done with as it goes, so taps reach the workout under it straight away
+        this.host.style.pointerEvents = 'none';
+        void this.sheetDrag.leave().finally(event.animationComplete);
+    }
 }

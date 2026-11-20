@@ -1,62 +1,24 @@
-// Dialogs over the page (the exercise editor, an exercise's details): the page dims and its
-// blur thickens behind as the card settles into place from just smaller, on the app's spring,
-// growing out of the button that opened it (growFromClick, src/app/shared/dialog-origin.ts).
-// Closing goes back the way it came: the same path, on the mirror of the curve. DialogComponent
-// (shared/components/dialog) has the overlay and the card, and their look; where a dialog is
-// used, its element has animate.leave="dialog-leave", which keeps it on the page while it goes.
-
-.dialog-overlay {
-    animation: dialog-dim-in 0.2s ease-out;
-}
-
-.dialog-card {
-    animation: dialog-card-in var(--spring-duration) var(--ease-spring);
-}
+// Dialogs over the page (DialogComponent, shared/components/dialog, has their look and
+// motion). Where a dialog is used, its element has animate.leave="dialog-leave", which keeps
+// it on the page while it goes: these are the parts outside the dialog's own styles.
 
 // Angular keeps the dialog for as long as its own element animates, so it carries an
-// animation that changes nothing, as long as the overlay's. The overlay fades itself rather
-// than the dialog's element fading it: an ancestor part-faded would cut its blur off from the
-// page behind it, so the blur would vanish at the start of every close.
+// animation that changes nothing, as long as the card's spring away (SheetDrag.leave)
 .dialog-leave {
-    animation: dialog-leaving 0.2s;
+    animation: dialog-leaving var(--spring-duration);
 }
 
-// On its way out it's done with, so taps go straight through to the page
+// Dragged away, it's already gone: nothing to wait for
+.dialog-leave:has(.dialog--gone) {
+    animation: none;
+}
+
+// Tells the dialog it's going: its overlay starts dialog-leave-start, which DialogComponent
+// hears and takes the card away from wherever it is, caught on its way in included. On its
+// way out it's done with, so taps go straight through to the page.
 .dialog-leave .dialog-overlay {
-    animation: dialog-dim-out 0.2s ease-in forwards;
+    animation: dialog-leave-start 0.01s;
     pointer-events: none;
-}
-
-.dialog-leave .dialog-card {
-    animation: dialog-card-out 0.2s var(--ease-spring-out) forwards;
-}
-
-// The blur is part of the material arriving, so it thickens with the dimming rather than
-// being there at full strength as the colour fades in (and thins again as it goes)
-@keyframes dialog-dim-in {
-    from {
-        opacity: 0;
-        backdrop-filter: blur(0);
-    }
-}
-
-@keyframes dialog-dim-out {
-    to {
-        opacity: 0;
-        backdrop-filter: blur(0);
-    }
-}
-
-@keyframes dialog-card-in {
-    from {
-        transform: scale(0.96);
-    }
-}
-
-@keyframes dialog-card-out {
-    to {
-        transform: scale(0.96);
-    }
 }
 
 @keyframes dialog-leaving {
@@ -65,11 +27,15 @@
     }
 }
 
-// With reduced motion the card doesn't grow or shrink; the dimming still fades, as it helps
-// to see what's happened
+@keyframes dialog-leave-start {
+    to {
+        visibility: visible;
+    }
+}
+
+// With reduced motion it goes with a quick fade
 @media (prefers-reduced-motion: reduce) {
-    .dialog-card,
-    .dialog-leave .dialog-card {
-        animation: none;
+    .dialog-leave {
+        animation-duration: 0.2s;
     }
 }

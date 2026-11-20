@@ -54,7 +54,7 @@ export class SetupSupersets {
             row.kind === 'superset'
                 ? row
                 : {
-                      ...this.form.newStep(),
+                      ...this.form.rows.newStep(),
                       kind: 'superset',
                       sets: row.sets,
                       restMinutes: row.restMinutes,
@@ -121,7 +121,7 @@ export class SetupSupersets {
         const rows = this.form.model().steps;
         const head = rows[index];
         const end = partEnd(rows, index);
-        const step: StepModel = { ...this.form.newStep(), group: head.key, sets: head.sets };
+        const step: StepModel = { ...this.form.rows.newStep(), group: head.key, sets: head.sets };
         this.form.updateSteps(() => [...rows.slice(0, end), step, ...rows.slice(end)]);
         this.form.expandedKeys.set(new Set([head.key, step.key]));
         this.form.stepAnnouncement.set(

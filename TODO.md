@@ -73,7 +73,7 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 
 How to keep the codebase from degrading is in `CLAUDE.md`.
 
-- [ ] **`WorkoutSetupForm` is still large** (about 860 lines on 2026-11-19, up from 780): it keeps the form, the steps' rows and opening them, and loading and saving. Turning a saved workout into rows and back (`stepModels()`, `stepModel()`) could go next. `WorkoutView` (636, up from 518 with waiting for Start and doing a skipped exercise later) is signals built on one another, so it'd split only into services handing those back and forth.
+- [ ] **`WorkoutSetupForm` is still large** (about 750 lines on 2026-11-20, down from 860 once turning a saved workout into rows and back went to `SetupRows`, `setup-rows.ts`): it keeps the form, the steps' rows and opening them, and saving. Saving (`save()`, `saveOnly()`, `saveAndStart()`, `savedForRun()`) could go next. `WorkoutView` (636, up from 518 with waiting for Start and doing a skipped exercise later) is signals built on one another, so it'd split only into services handing those back and forth.
 - [ ] **`help-link`, the last of `shared/`'s imports from a feature** (`help/help-topics`): it goes once the tours replace the ? links (see Help). `PageSlide` and the helpers it uses moved to `shared/navigation/`, and `AUTH_STORAGE_KEY` to `shared/state/auth-storage-key.ts` (2026-11-11). The test fakes in `shared/testing/` import what they fake, which is fine.
 
 ## 2. Known issues

@@ -15,6 +15,7 @@ import { isBuiltIn, MAX_EXERCISE_NAME_LENGTH } from '../models/exercise';
 import { kettlebellSteps, oneKettlebellWeight } from '../models/kettlebell';
 import { weightIn, weightOptions } from '../models/weight';
 import { sharedKettlebell } from './setup-kettlebell';
+import { SetupRows } from './setup-rows';
 import {
     allSteps,
     hasWork,
@@ -23,8 +24,6 @@ import {
     MAX_REPEATS,
     MAX_REPS,
     MAX_STEPS,
-    Step,
-    stepForSet,
     StepKind,
     stepKindName,
     UNTIL_STOPPED,
@@ -43,7 +42,6 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 import {
-    DEFAULT_TIME_LIMIT_MINUTES,
     hasAmount,
     isStep,
     lonelyStepsOut,
@@ -117,8 +115,9 @@ export class WorkoutSetupForm {
         { value: UNTIL_STOPPED, label: '∞', spokenLabel: 'until stopped' },
     ];
 
-    private nextKey = 1;
-    readonly model = signal<WorkoutSetupModel>(this.emptySetup());
+    /** Turns a saved workout into the form's rows, and back. */
+    readonly rows = new SetupRows(this.weightUnit);
+    readonly model = signal<WorkoutSetupModel>(this.rows.empty());
     /** Keys of the steps showing their name box and wheels; the rest show a one-line summary. */
     readonly expandedKeys = signal<ReadonlySet<number>>(this.allKeys());
 
@@ -274,7 +273,7 @@ export class WorkoutSetupForm {
             return;
         }
         const { name, id } = exercise;
-        const step = this.stepModel(
+        const step = this.rows.row(
             exercise.measuredBy === 'timed'
                 ? { kind: 'work', seconds: 30, name, exerciseId: id }
                 : { kind: 'reps', reps: 10, name, exerciseId: id },
@@ -299,22 +298,11 @@ export class WorkoutSetupForm {
         this.editingWorkoutId.set(workoutToEdit?.id ?? null);
         this.kindMenuFor.set(null);
         if (workoutToEdit) {
-            const limit = workoutToEdit.timeLimitSeconds;
-            this.model.set({
-                title: workoutToEdit.title,
-                steps: this.stepModels(workoutToEdit),
-                // A time limit is saved with UNTIL_STOPPED, which Rounds shouldn't start on
-                repeats: limit === undefined ? workoutToEdit.repeats : 1,
-                repeatMode: limit === undefined ? 'rounds' : 'time',
-                limitMinutes:
-                    limit === undefined ? DEFAULT_TIME_LIMIT_MINUTES : Math.floor(limit / 60),
-                limitSeconds: limit === undefined ? 0 : limit % 60,
-                carryOn: !!workoutToEdit.carryOn,
-            });
+            this.model.set(this.rows.fromWorkout(workoutToEdit));
             // A saved workout opens as a list of summaries, so the whole workout fits on screen
             this.expandedKeys.set(new Set());
         } else {
-            this.model.set(this.emptySetup());
+            this.model.set(this.rows.empty());
             this.expandedKeys.set(this.allKeys());
         }
         // As it's saved, so nothing loaded counts as a weight just turned to
@@ -472,7 +460,7 @@ export class WorkoutSetupForm {
         if (this.stepCount() >= MAX_STEPS) {
             return;
         }
-        const step = this.newStep();
+        const step = this.rows.newStep();
         this.updateSteps((steps) => [...steps, step]);
         // Only the new step is opened, keeping the rest of the list short
         this.expandedKeys.set(new Set([step.key]));
@@ -488,7 +476,7 @@ export class WorkoutSetupForm {
         if (this.headingCount() >= MAX_HEADINGS) {
             return;
         }
-        const heading: StepModel = { ...this.newStep(), kind: 'heading' };
+        const heading: StepModel = { ...this.rows.newStep(), kind: 'heading' };
         this.updateSteps((steps) => [...steps, heading]);
         this.expandedKeys.set(new Set([heading.key]));
         this.stepAnnouncement.set('Added a heading');
@@ -655,90 +643,6 @@ export class WorkoutSetupForm {
         return new Set(this.model().steps.map((step) => step.key));
     }
 
-    /**
-     * A saved workout's steps and headings as the form holds them, each step with its group's
-     * sets and rest. A group of one step is an exercise and its sets; one of several is a
-     * superset, a row of its own with its rounds and rest, and then its steps. One of several
-     * that runs once is each of its steps in turn, as workouts from before groups are, so it
-     * opens as them.
-     */
-    private stepModels(workout: Workout): StepModel[] {
-        return workout.blocks.flatMap((block): StepModel[] => {
-            if (block.kind === 'heading') {
-                return [{ ...this.newStep(), kind: 'heading', name: block.text }];
-            }
-            const rest = block.rounds > 1 ? block.restSeconds : 60;
-            const steps = block.steps.map((step) => ({
-                ...this.stepModel(step, block.rounds, rest),
-                ...this.setRowModels(step),
-            }));
-            if (steps.length === 1 || block.rounds === 1) {
-                return steps;
-            }
-            const head: StepModel = {
-                ...this.stepModel({ kind: 'reps', reps: 0, name: '' }, block.rounds, rest),
-                kind: 'superset',
-            };
-            // Even a rest step has the rounds, in case it's changed to another kind
-            return [
-                head,
-                ...steps.map((step) => ({ ...step, sets: block.rounds, group: head.key })),
-            ];
-        });
-    }
-
-    private stepModel(step: Step, sets = 1, rest = 60): StepModel {
-        const seconds = step.kind === 'reps' ? 0 : step.seconds;
-        return {
-            sets: step.kind === 'rest' ? 1 : sets,
-            eachSide: step.kind !== 'rest' && step.eachSide === true,
-            restMinutes: Math.floor(rest / 60),
-            restSeconds: rest % 60,
-            key: this.nextKey++,
-            kind: step.kind,
-            name: step.name,
-            minutes: Math.floor(seconds / 60),
-            seconds: seconds % 60,
-            reps: step.kind === 'reps' ? step.reps : 0,
-            weight:
-                step.kind === 'reps' && step.weight ? weightIn(step.weight, this.weightUnit) : 0,
-            savedWeight: (step.kind === 'reps' && step.weight) || null,
-            exerciseId: step.exerciseId ?? '',
-            vary: false,
-            setRows: [],
-            group: 0,
-        };
-    }
-
-    /** A step's sets as rows, where they vary (BLD-11). */
-    private setRowModels(step: Step): Pick<StepModel, 'vary' | 'setRows'> {
-        if (step.kind === 'rest' || !step.sets) {
-            return { vary: false, setRows: [] };
-        }
-        return {
-            vary: true,
-            setRows: step.sets.map((_, set) => rowOf(this.stepModel(stepForSet(step, set)))),
-        };
-    }
-
-    /** A new rep step's row, ready to fill in. */
-    newStep(): StepModel {
-        return this.stepModel({ kind: 'reps', reps: 0, name: '' });
-    }
-
-    // A new workout starts with one rep step, ready to fill in or change to another kind
-    private emptySetup(): WorkoutSetupModel {
-        return {
-            title: '',
-            steps: [this.newStep()],
-            repeats: 1,
-            repeatMode: 'rounds',
-            limitMinutes: DEFAULT_TIME_LIMIT_MINUTES,
-            limitSeconds: 0,
-            carryOn: false,
-        };
-    }
-
     findWorkoutToEdit(params: ParamMap): Workout | null {
         const editId = params.get('editId');
         return editId ? this.workoutStore.findWorkoutById(editId) : null;
@@ -795,21 +699,7 @@ export class WorkoutSetupForm {
      * The workout as it's set up, as Save saves it: what the page's estimate of how long it
      * takes is worked out from, as it changes (LIB-9).
      */
-    readonly fields = computed((): WorkoutFields => {
-        const setup = this.model();
-        const { title, steps } = setup;
-        const blocks = toBlocks(steps, this.weightUnit);
-        // A time limit runs as many rounds as fit, so its rounds are UNTIL_STOPPED
-        return setup.repeatMode === 'time'
-            ? { title, blocks, repeats: UNTIL_STOPPED, timeLimitSeconds: timeLimitSeconds(setup) }
-            : {
-                  title,
-                  blocks,
-                  repeats: setup.repeats,
-                  // A time limit never waits anyway
-                  ...(setup.carryOn ? { carryOn: true as const } : {}),
-              };
-    });
+    readonly fields = computed((): WorkoutFields => this.rows.toFields(this.model()));
 
     /**
      * Whether a timed exercise in it would wait for Start after a long rest (RUN-14), so

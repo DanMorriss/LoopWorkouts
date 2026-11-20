@@ -16,6 +16,7 @@ import {
 } from './fixtures';
 import { CreatePage } from './create-page';
 import { HistoryPage } from './history-page';
+import { Finger } from './touch';
 import { setWheel, WorkoutPage } from './workout-page';
 
 // Running a workout (run-a-workout.md, pause-and-stop.md, alarms.md): REG-RUN in
@@ -284,11 +285,16 @@ test.describe('skipping', () => {
         await run.skip.click();
         await expect(run.main.getByText('Last round!')).toBeVisible();
 
-        // Skipping the last work finishes it: the rest after it doesn't run
+        // Skipping the last work ends it: the rest after it doesn't run, and once it's asked
+        // about the plank, put aside to do later (RUN-16), it finishes
         await run.close.click();
         await run.startFromLibrary('B');
         await run.wait(20_000);
         await run.skip.click();
+        await page
+            .getByRole('dialog', { name: 'Do Plank before you finish?' })
+            .getByRole('button', { name: 'Finish' })
+            .click();
         await expect(run.summary).toHaveAccessibleName('Workout finished');
         await expect(run.summary).toContainText('Plank: 0:20');
         await expect(run.stat('Time')).toHaveText('0:20');
@@ -368,6 +374,70 @@ test.describe('doing a skipped exercise later', () => {
         await expect(run.summary).toContainText('Squat: 10 reps');
         await expect(run.summary).toContainText('Plank: 0:30');
     });
+
+    test(
+        'REG-RUN-20 asks about skipped exercises at the finish',
+        { tag: '@p2' },
+        async ({ app, page }, info) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Gym');
+            // Push-ups, rest, plank and rest skipped, then the squats done
+            for (let i = 0; i < 4; i++) {
+                await run.skip.click();
+            }
+            await run.pressDone();
+
+            // It asks rather than finishing, a reload and all
+            const ask = page.getByRole('dialog', { name: 'Do them before you finish?' });
+            await expect(ask).toBeVisible();
+            await expect(run.summary).toHaveCount(0);
+            await app.reload();
+            const list = ask.getByRole('list', { name: 'Skipped exercises, in order' });
+            await expect(list.getByRole('listitem')).toHaveText([
+                /Push-up\s*10 reps/,
+                /Plank\s*00:30/,
+            ]);
+            await expect(ask.getByRole('button', { name: 'Do them all' })).toBeFocused();
+
+            // The plank dragged above the push-ups, by finger on a phone; the sheet stays put
+            const handles = list.locator('.later-row__handle');
+            if (info.project.use.hasTouch) {
+                const finger = await Finger.on(page);
+                await finger.drag(
+                    await Finger.within(handles.nth(1), 0.5),
+                    await Finger.within(handles.nth(0), 0.5, 0.1),
+                    { steps: 20, settle: 200 }
+                );
+            } else {
+                await handles.nth(1).hover();
+                await page.mouse.down();
+                const to = (await handles.nth(0).boundingBox())!;
+                await page.mouse.move(to.x + to.width / 2, to.y + 4, { steps: 20 });
+                await page.mouse.up();
+            }
+            await expect(list.getByRole('listitem')).toHaveText([/Plank/, /Push-up/]);
+            await expect(ask).toBeVisible();
+
+            // Do them all: the plank, then the push-ups
+            await ask.getByRole('button', { name: 'Do them all' }).click();
+            await expect(run.face.getByText('Plank', { exact: true })).toBeVisible();
+            await expect(run.pause).toBeFocused();
+            await expect(run.next).toContainText('Push-up');
+            await run.wait(31_000);
+            await expect(run.face.getByText('Push-up', { exact: true })).toBeVisible();
+
+            // Skipped again, it's asked about once more; Finish leaves it undone
+            await run.skip.click();
+            const one = page.getByRole('dialog', { name: 'Do Push-up before you finish?' });
+            await expect(one.getByRole('button', { name: 'Do it now' })).toBeFocused();
+            await one.getByRole('button', { name: 'Finish' }).click();
+            await expect(run.summary).toHaveAccessibleName('Workout finished');
+            await expect(run.summary).toContainText('Plank: 0:30');
+            await expect(run.summary).toContainText('Squat: 10 reps');
+            await expect(run.summary).not.toContainText('Push-up');
+        }
+    );
 });
 
 test.describe('reloading', () => {

@@ -1,6 +1,5 @@
 import {
     afterNextRender,
-    AnimationCallbackEvent,
     Component,
     computed,
     DOCUMENT,
@@ -22,7 +21,7 @@ import { ActiveRunService } from '../shared/run/active-run.service';
 import { criticallyDampedSpring } from '../shared/spring';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { fitName } from './fit-name';
-import { rollIn, rollOut, RollWay } from './step-roll';
+import { WorkoutRolls } from './workout-rolls';
 import { WorkoutFaceSlideComponent } from './workout-face-slide/workout-face-slide.component';
 import { WorkoutNoteComponent } from './workout-note/workout-note.component';
 import { WorkoutRingComponent } from './workout-ring/workout-ring.component';
@@ -33,6 +32,7 @@ import { LastSetDialogComponent } from './last-set-dialog/last-set-dialog.compon
 import { WorkoutSwap } from './workout-swap';
 import { UpNextCardComponent } from './up-next-card/up-next-card.component';
 import { LaterListComponent } from './later-list/later-list.component';
+import { FinishLaterDialogComponent } from './finish-later-dialog/finish-later-dialog.component';
 import { LaterPicks } from './later-picks';
 import { tourWorkoutPage } from './workout-tour';
 import { WorkoutView } from './workout-view';
@@ -66,6 +66,7 @@ const SPACE_HANDLED_BY =
         SwapExerciseDialogComponent,
         UpNextCardComponent,
         LaterListComponent,
+        FinishLaterDialogComponent,
     ],
     providers: [WorkoutView],
     templateUrl: './workout.component.html',
@@ -90,6 +91,8 @@ export class WorkoutComponent {
     private readonly settings = inject(SettingsStore);
     protected readonly view = inject(WorkoutView);
     protected readonly swap = new WorkoutSwap(() => this.focusInfo());
+    /** How the face's text and the round line roll between steps. */
+    protected readonly rolls = new WorkoutRolls();
     /** Skip puts an exercise aside to do later (RUN-16). */
     private readonly later = new LaterPicks();
 
@@ -98,37 +101,6 @@ export class WorkoutComponent {
     protected readonly soundLocked = computed(
         () => this.alarms.supported && this.settings.sound() && !this.alarms.unlocked()
     );
-
-    /**
-     * How the face's text rolls between steps: up, or sideways for a new round, or settling
-     * in for a rest; with reduced motion, a short cross-fade. The round line above the ring
-     * always turns sideways, with a new round.
-     */
-    private faceRoll(): RollWay {
-        if (this.reducedMotion()) {
-            return 'fade';
-        }
-        if (this.view.newRound()) {
-            return 'sideways';
-        }
-        return this.view.isRestActive() ? 'rest' : 'up';
-    }
-
-    protected rollFaceIn(event: AnimationCallbackEvent) {
-        rollIn(event, this.faceRoll());
-    }
-
-    protected rollFaceOut(event: AnimationCallbackEvent) {
-        rollOut(event, this.faceRoll());
-    }
-
-    protected rollRoundIn(event: AnimationCallbackEvent) {
-        rollIn(event, this.reducedMotion() ? 'fade' : 'sideways');
-    }
-
-    protected rollRoundOut(event: AnimationCallbackEvent) {
-        rollOut(event, this.reducedMotion() ? 'fade' : 'sideways');
-    }
 
     private readonly mainButton = viewChild<ElementRef<HTMLButtonElement>>('mainButton');
     private readonly upNextCard = viewChild(UpNextCardComponent);
@@ -397,6 +369,11 @@ export class WorkoutComponent {
         (
             this.doneButton() ?? (this.view.isPaused() ? this.resumeButton() : this.mainButton())
         )?.nativeElement.focus();
+    }
+
+    /** An exercise put aside was picked at the finish, and runs now: focus on its controls. */
+    protected pickedAtFinish() {
+        afterNextRender(() => this.focusControls(), { injector: this.injector });
     }
 
     /** End workout: the summary opens over the run, which waits, paused, in case of Back. */

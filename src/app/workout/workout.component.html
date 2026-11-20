@@ -41,8 +41,8 @@
                 @for (slide of view.roundSlides(); track slide.key) {
                     <div
                         class="workout-status__round"
-                        (animate.enter)="rollRoundIn($event)"
-                        (animate.leave)="rollRoundOut($event)"
+                        (animate.enter)="rolls.roundIn($event)"
+                        (animate.leave)="rolls.roundOut($event)"
                     >
                         <app-workout-round-line [slide]="slide" />
                     </div>
@@ -82,8 +82,8 @@
                             <div
                                 class="workout-face__content"
                                 [attr.data-step]="slide.key"
-                                (animate.enter)="rollFaceIn($event)"
-                                (animate.leave)="rollFaceOut($event)"
+                                (animate.enter)="rolls.faceIn($event)"
+                                (animate.leave)="rolls.faceOut($event)"
                             >
                                 <app-workout-face-slide
                                     [slide]="slide"
@@ -219,6 +219,11 @@
                     <app-help-link topic="no-sound" />
                 </div>
             }
+        }
+
+        <!-- At the end with exercises skipped to do later still put aside: do one first? (RUN-16) -->
+        @if (run.askingFinish()) {
+            <app-finish-later-dialog animate.leave="dialog-leave" (picked)="pickedAtFinish()" />
         }
 
         <!-- How it went: once finished, or ended with End workout. When time ran out part-way

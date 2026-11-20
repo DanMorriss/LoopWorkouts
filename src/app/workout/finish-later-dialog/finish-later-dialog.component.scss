@@ -1,0 +1,26 @@
+@use 'type' as *;
+
+.finish-later__title {
+    @include dialog-title;
+}
+
+.finish-later__hint {
+    margin: 0.5rem 0 1rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+// The skipped exercises, a row each, in a box of their own
+.finish-later__list {
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+    overflow: hidden;
+}
+
+.finish-later__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}

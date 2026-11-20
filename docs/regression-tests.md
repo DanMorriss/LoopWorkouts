@@ -726,11 +726,11 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:**
     1. Start A; `runFor` 5000; press **Skip** (named "Skip step").
     2. Press Skip again (now named "Skip rest").
-    3. Start B; `runFor` 20000; press Skip.
+    3. Start B; `runFor` 20000; press Skip; press **Finish**.
 - **Expected:**
     1. The rest starts from 00:10, and its alarm sounds at once.
     2. Round 2 starts.
-    3. B finishes at once (the rest after the last step is skipped), and the history has "Plank: 0:20" and 0:20 spent.
+    3. B ends at once (the rest after the last step is skipped), asking "Do Plank before you finish?" (REG-RUN-20); Finish finishes it, and the history has "Plank: 0:20" and 0:20 spent.
 
 ### REG-RUN-06 · A reload carries on
 
@@ -923,6 +923,20 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     6. Press the button; **Do it next**; Done; `runFor` 31000.
 - **Expected:** 1. "Skipped: Push-up" at the top, where there was nothing. 2. "2 skipped exercises", with a 2 on it. 3. Its menu lists Push-up (10 reps) and Plank (00:30); picked, the bar says "Push-up is up next", focus is back on the button ("Skipped: Plank") and Up next is Push-up. 4. The bar goes with the Skip; the face is Push-up, with "Skipped earlier"; after the reload Up next is Squat, and Done starts the squats. 5. "Do Plank next?"; it closes, focus on the button. 6. The button's gone, Up next is Plank; it runs its 0:30 (not finished at 15 s), then the summary: Workout finished, with Push-up 10 reps, Squat 10 reps and Plank 0:30.
 - **Left to Vitest:** the held clock, its alarms and what's saved (`later.spec.ts`).
+
+### REG-RUN-20 · Asked about skipped exercises at the finish
+
+- **Stories:** RUN-16 · **Priority:** P2 · **[Clock]** · **[Touch]**
+- **Preconditions:** workout "Gym", as in REG-RUN-19.
+- **Steps:**
+    1. Start; Skip four times (push-ups, rest, plank, rest); Done.
+    2. Reload.
+    3. Drag the plank's handle above the push-ups (by finger on the phone).
+    4. **Do them all**; `runFor` 31000.
+    5. Skip the push-ups.
+    6. **Finish**.
+- **Expected:** 1. "Do them before you finish?", and no summary. 2. Still asking, listing Push-up (10 reps) then Plank (00:30), focus on Do them all. 3. Plank, then Push-up; the sheet stays open. 4. The plank runs, focus on Pause, Up next Push-up; then the push-ups. 5. "Do Push-up before you finish?", focus on Do it now. 6. The summary: Workout finished, with Plank 0:30 and Squat 10 reps, and no push-ups.
+- **Left to Vitest:** the time spent deciding left out, Escape finishing, ↑ and what it says, picking one on its own, and a run ended while it asks logged as finished (`finish-later-dialog.component.spec.ts`, `later-pick.spec.ts`).
 
 ---
 
@@ -1633,7 +1647,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Today and planning        | REG-PLAN-01 – 12 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                            |
 | Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                                            |
 | Workouts and ready-made   | REG-LIB-01 – 12  | LIB-1 – LIB-8, LIB-10, CTL-4                                                                                                                           |
-| Running a workout         | REG-RUN-01 – 19  | RUN-1 – RUN-12, RUN-14 – RUN-16, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
+| Running a workout         | REG-RUN-01 – 20  | RUN-1 – RUN-12, RUN-14 – RUN-16, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                                   |
 | Progress                  | REG-PRG-01 – 08  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14, PRG-16                                                                                      |
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                            |

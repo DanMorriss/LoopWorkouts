@@ -290,7 +290,19 @@ export class ActiveRunService {
         return Math.max(0, limit * 1000 - elapsedMs - this.store.activeOffClockMs());
     });
 
-    readonly isComplete = computed(() => this.state()?.phase === 'complete');
+    /**
+     * The workout's reached its end with exercises still put aside to do later (RUN-16), so it
+     * asks first whether to do one, rather than finishing: it's held there, unlogged and with
+     * no summary, until one's picked (see `leaveFinish()`) or Finish is pressed.
+     */
+    readonly askingFinish = computed(
+        () => this.state()?.phase === 'complete' && this.aside().length > 0
+    );
+
+    /** Finished: at the end, and not asking about anything put aside (see `askingFinish`). */
+    readonly isComplete = computed(
+        () => this.state()?.phase === 'complete' && !this.askingFinish()
+    );
 
     /**
      * The rep step time ran out on, part-way through, while its set hasn't been logged with
@@ -436,7 +448,7 @@ export class ActiveRunService {
         const onVisible = () => this.sync();
         const onPageHide = () => {
             this.sync();
-            this.recordRun(this.isComplete() ? 'finished' : 'stopped');
+            this.recordRun(this.outcome());
         };
         document.addEventListener('visibilitychange', onVisible);
         window.addEventListener('pagehide', onPageHide);
@@ -453,7 +465,7 @@ export class ActiveRunService {
     start(workout: Workout) {
         if (!this.isComplete()) {
             this.sync();
-            this.recordRun('stopped');
+            this.recordRun(this.outcome());
         }
         this.store.setActiveWorkout(
             workout,
@@ -947,11 +959,40 @@ export class ActiveRunService {
      */
     stop() {
         this.sync();
-        this.recordRun(this.isComplete() ? 'finished' : 'stopped');
+        this.recordRun(this.outcome());
         this.store.stop();
         this.alarms.cancel();
         this._held.set(false);
         this.ending.set(false);
+    }
+
+    /**
+     * How the run's logged if it ends now: finished at the end, even while it's asking about
+     * exercises put aside (see `askingFinish`), as everything in the workout has been done.
+     */
+    private outcome(): HistoryEntry['outcome'] {
+        return this.isComplete() || this.askingFinish() ? 'finished' : 'stopped';
+    }
+
+    /**
+     * Lets the run past its end, where it holds while asking about exercises put aside (see
+     * `askingFinish`): the clock goes back to the end, as the time spent deciding isn't the
+     * workout's, and alarms due by now were heard already; with `doingOne`, but for the start
+     * of a step done there now. Returns where the clock is, for a step to be picked to run
+     * from (see `pickAt()`), or null when it isn't asking.
+     */
+    leaveFinish(doingOne: boolean): { atMs: number; repStepsDone: number } | null {
+        this.sync();
+        const workout = this.running();
+        const elapsedMs = this.elapsedMs();
+        if (!this.askingFinish() || !workout || elapsedMs === null) {
+            return null;
+        }
+        const endMs = workoutSeconds(workout) * 1000;
+        const now = this.now();
+        this.store.passHeld(elapsedMs - endMs);
+        this.resumedAt.set(doingOne ? now - 1 : now);
+        return { atMs: endMs, repStepsDone: this.store.activeRepStepsDone() };
     }
 
     /** The run's id in the history, or null with no run. */

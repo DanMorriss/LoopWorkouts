@@ -180,11 +180,11 @@ describe('LaterListComponent', () => {
         expect(page().querySelector('.later__count')!.textContent).toBe('2');
 
         press(button());
-        const items = [...page().querySelectorAll('.later__name')].map((n) => n.textContent);
+        const items = [...page().querySelectorAll('.later-option__name')].map((n) => n.textContent);
         expect(items).toEqual(['Plank', 'Squats']);
-        expect(document.activeElement).toBe(page().querySelector('.later__item'));
+        expect(document.activeElement).toBe(page().querySelector('.menu__item'));
 
-        press(page().querySelectorAll('.later__item')[1]);
+        press(page().querySelectorAll('.menu__item')[1]);
         expect(upNext()).toContain('Squats');
         // One's left, so focus stays on its button
         expect(button()!.getAttribute('aria-label')).toBe('Skipped: Plank');

@@ -63,10 +63,6 @@ The setup after the welcome screen and the synced profile are in `docs/features/
 - [ ] **More goals, once there are more workouts:** Training for is only Muscle or Fitness (Dan, 2026-11-02). A goal such as "Get stronger" or "Lose weight" needs its own weekly aims (`WEEKLY_AIMS`) and its own ready-made plans (`goals` in `models/built-in-plans.ts`).
 - [ ] **Devices from before the setup:** they're never asked, so they have no name to greet by unless it's given on You → Profile. If that's wanted, a card on Today ("Add your name") that can be closed.
 
-### Running a workout
-
-- [ ] **Skipped exercises left at the finish:** anything still put aside when the workout finishes isn't offered. Skipping the last exercise finishes the workout at once (RUN-12), so one skipped there can't be done later. If that's wanted, the finish could ask first ("Do Plank before you finish?").
-
 ### Code health
 
 How to keep the codebase from degrading is in `CLAUDE.md`.

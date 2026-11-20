@@ -40,6 +40,23 @@ export function pickNext(
     }
     const atMs = clock.elapsedMs - state.phaseElapsedMs + state.phaseSeconds * 1000;
     const repStepsDone = clock.repStepsDone + (state.phase === 'reps' ? 1 : 0);
+    return pickAt({ ...later, aside }, step, atMs, repStepsDone);
+}
+
+/**
+ * `later` with `step` picked to run once the clock's at `atMs`, with `repStepsDone` done: e.g.
+ * the end of the step on now, or the finish, while the run asks about what's put aside
+ * (`ActiveRunService.askingFinish`). Steps picked there before and not yet started follow it.
+ * Taken off the list put aside.
+ */
+export function pickAt(
+    later: RunLater,
+    step: LaterStep,
+    atMs: number,
+    repStepsDone: number
+): RunLater {
+    const aside = later.aside.filter((other) => !sameStep(other, step));
+    const picked = { round: step.round, stepIndex: step.stepIndex };
     const queued = later.queue?.atMs === atMs ? later.queue.steps : [];
     // A queue from somewhere else (it can't be, but if) goes back on the list
     const stale = later.queue && later.queue.atMs !== atMs ? later.queue.steps : [];
@@ -48,6 +65,27 @@ export function pickNext(
         aside: [...aside, ...stale],
         queue: { atMs, repStepsDone, steps: [picked, ...queued] },
     };
+}
+
+/**
+ * `later` with every step put aside picked to run once the clock's at `atMs`, with
+ * `repStepsDone` done, one after another in the list's order: e.g. Do them all at the finish.
+ */
+export function pickAllAt(later: RunLater, atMs: number, repStepsDone: number): RunLater {
+    return [...later.aside]
+        .reverse()
+        .reduce((picked, step) => pickAt(picked, step, atMs, repStepsDone), later);
+}
+
+/** `later` with the step put aside at `from` in the list moved to `to`, e.g. dragged there. */
+export function moveAside(later: RunLater, from: number, to: number): RunLater {
+    const aside = [...later.aside];
+    const [moved] = aside.splice(from, 1);
+    if (!moved || to < 0 || to > aside.length) {
+        return later;
+    }
+    aside.splice(to, 0, moved);
+    return { ...later, aside };
 }
 
 /** `later` with `step` taken off the queue, before it's started, and back on the list. */

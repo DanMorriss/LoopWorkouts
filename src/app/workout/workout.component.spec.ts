@@ -5515,6 +5515,45 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
+        it("steps down a bodyweight ladder's rest, rather than a rep more on each set (PRG-15)", () => {
+            const saved = store.addWorkout({
+                title: 'Push-up ladder',
+                repeats: 1,
+                blocks: [
+                    {
+                        kind: 'group',
+                        rounds: 3,
+                        restSeconds: 30,
+                        steps: [
+                            {
+                                kind: 'reps',
+                                reps: 5,
+                                name: 'Push-up',
+                                exerciseId: 'builtin:push-up',
+                                sets: [{ reps: 5 }, { reps: 10 }, { reps: 5 }],
+                            },
+                        ],
+                    },
+                ],
+            });
+            start(saved);
+            for (let set = 0; set < 3; set++) {
+                (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                fixture.detectChanges();
+                advance(set < 2 ? 30_000 : 0);
+            }
+            run().end();
+            fixture.detectChanges();
+
+            const line = 'Push-up: try resting 25 seconds between sets, down from 30 seconds';
+            expect(summaryText()).toContain(line);
+            expect(summaryText()).not.toContain('Push-up: try 6');
+            fixture.nativeElement.querySelector(`button[aria-label="Apply: ${line}"]`).click();
+            fixture.detectChanges();
+            expect(soloRest(store.findWorkoutById(saved.id)!, 0)).toBe(25);
+            fixture.destroy();
+        });
+
         it('starts at your kettlebell, where it has one weight or none', () => {
             TestBed.inject(SettingsStore).update({ kettlebellWeight: 20 });
             const workout = (weights: [number?, number?]) =>

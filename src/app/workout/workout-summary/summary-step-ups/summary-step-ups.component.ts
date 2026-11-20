@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { describeSets, spokenDuration } from '../../../history/history-format';
 import {
+    bodyweightSteps,
     progressionSuggestions,
     ProgressionSuggestion,
     restSuggestions,
@@ -23,8 +24,8 @@ import { injectFocusAfterRender } from '../../../shared/focus-after-render';
  * What to step up next time on the workout summary (PRG-10), e.g. "Squats: try 62.5 kg, up
  * from 60 kg", for each rep step where every set got its reps: a weight step up (as PRG-5
  * offers mid-workout), or one more rep with no weight; and for each timed exercise where every
- * set ran its whole time, a few seconds longer; and for a kettlebell ladder done in full, a
- * shorter rest (PRG-15). Follows the sets as they're corrected.
+ * set ran its whole time, a few seconds longer; and for a kettlebell or bodyweight ladder done
+ * in full, a shorter rest (PRG-15). Follows the sets as they're corrected.
  * Apply puts a step-up on the saved workout's step, and it stays said as applied; "Yes, use
  * next time" in Sets leaves it there (ActiveRunService.keepStepUp()).
  */
@@ -103,13 +104,19 @@ export class SummaryStepUpsComponent {
             this.run.swappedSteps().has(step) && !this.run.keptSwaps().has(step);
         const workout = this.run.workout() ?? { blocks: [] };
         const steps = allSteps(workout);
-        // A kettlebell workout's go up in reps (PRG-14), or a ladder's rest down (PRG-15)
-        const kettlebell = kettlebellSteps(steps, (id) => this.exercises.byId(id));
+        // A kettlebell workout's go up in reps (PRG-14), or a ladder's rest down (PRG-15),
+        // in place of a rep more on each set
+        const exercise = (id: string) => this.exercises.byId(id);
+        const kettlebell = kettlebellSteps(steps, exercise);
+        const rests = restSuggestions(sets, workout, kettlebell, bodyweightSteps(steps, exercise));
+        const resting = new Set(rests.map(({ step }) => step));
         return [
             ...applied.values(),
             ...[
-                ...progressionSuggestions(sets, steps, unit, kettlebell),
-                ...restSuggestions(sets, workout, kettlebell),
+                ...progressionSuggestions(sets, steps, unit, kettlebell).filter(
+                    ({ step }) => !resting.has(step)
+                ),
+                ...rests,
             ].filter(({ step }) => !applied.has(step) && !swappedAway(step)),
         ]
             .sort((a, b) => a.step - b.step)

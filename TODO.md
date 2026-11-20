@@ -20,7 +20,6 @@ Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on 
 
 ### Progress
 
-- [ ] **Less rest as a step-up, beyond kettlebell ladders** (PRG-15): only a kettlebell step whose sets vary gets "try resting 40 seconds between sets" in Next time so far. Other conditioning workouts with sets that vary, or a time limit, could have it too.
 - [ ] **Stretch what you worked, a setting:** for the hold's length, or to turn the card off, if wanted.
 - [ ] **More charts, if wanted:** e.g. workouts per week (the same chart could switch between time and workouts), or a range to look further back than 12 weeks.
 

@@ -1,5 +1,6 @@
 import { HistoryEntry, isTimedSet, LoggedSet, RepSet, TimedSet } from './history';
-import { KETTLEBELL_TOP_REPS } from './kettlebell';
+import { canDoWith, Equipment, EQUIPMENT_CHOICES } from './exercise';
+import { EquipmentOf, KETTLEBELL_TOP_REPS } from './kettlebell';
 import { MAX_WEIGHT, WEIGHT_INCREASE, WeightUnit, weightIn, weightToKg } from './weight';
 import {
     allSteps,
@@ -505,25 +506,59 @@ export function readyForHeavierKettlebell(
         .sort((a, b) => a - b);
 }
 
+/** Equipment that's a load: done with it, an exercise moves on by weight. */
+const LOADS: readonly Equipment[] = [
+    'barbell',
+    'dumbbells',
+    'kettlebell',
+    'smith machine',
+    'cable',
+    'machine',
+    'band',
+];
+
 /**
- * Next time's shorter rests (PRG-15): for each kettlebell step whose sets vary, e.g. the swing
- * ladder, where every set got its reps, REST_DECREASE seconds less rest after each set, down
- * to MIN_STEPPED_REST. Such a step gets no more reps (its shape is the workout) and no heavier
- * kettlebell, so doing it in less time is how it moves on. Only for a step alone in its group
- * (see `soloRest()`), as a superset's rest is shared.
+ * The rep steps of bodyweight exercises (PRG-15), by their place in `steps`: those whose
+ * exercise is known and is done with no load, e.g. push-ups, or pull-ups on a bar. Not one
+ * that needs a barbell, dumbbells or a kettlebell, even with no weight said yet.
+ */
+export function bodyweightSteps(
+    steps: readonly Pick<Step, 'kind' | 'exerciseId'>[],
+    equipmentOf: EquipmentOf
+): ReadonlySet<number> {
+    const noLoad = EQUIPMENT_CHOICES.filter((equipment) => !LOADS.includes(equipment));
+    return new Set(
+        steps.flatMap((step, i) => {
+            const exercise =
+                step.exerciseId === undefined ? undefined : equipmentOf(step.exerciseId);
+            return step.kind === 'reps' && exercise && canDoWith(exercise, noLoad) ? [i] : [];
+        })
+    );
+}
+
+/**
+ * Next time's shorter rests (PRG-15): for each ladder, a kettlebell step (by `kettlebell`) or
+ * a bodyweight one (by `bodyweight`, with no weight on any set) whose sets vary, e.g. the
+ * swing ladder or push-ups 5, 10, 15, 10, 5, where every set got its reps, REST_DECREASE seconds less rest after each
+ * set, down to MIN_STEPPED_REST. Its shape is the workout, so it moves on by being done in
+ * less time, rather than by a rep more on each set: where it has one of these, a bodyweight
+ * ladder's rep step-up (`progressionSuggestions()`) is left out. Only for a step alone in its
+ * group (see `soloRest()`), as a superset's rest is shared.
  */
 export function restSuggestions(
     sets: readonly LoggedSet[],
     workout: Pick<Workout, 'blocks'>,
-    kettlebell: ReadonlySet<number>
+    kettlebell: ReadonlySet<number>,
+    bodyweight: ReadonlySet<number> = new Set()
 ): ProgressionSuggestion[] {
     const steps = allSteps(workout);
     return [...setsByStep(sets).byStep].flatMap(([index, stepSets]) => {
         const step = steps[index];
         const rest = soloRest(workout, index);
-        return kettlebell.has(index) &&
-            step?.kind === 'reps' &&
+        return step?.kind === 'reps' &&
             step.sets &&
+            (kettlebell.has(index) ||
+                (bodyweight.has(index) && step.sets.every((set) => set.weight === undefined))) &&
             rest !== null &&
             rest - REST_DECREASE >= MIN_STEPPED_REST &&
             gotEveryRep(step, stepSets)

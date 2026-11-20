@@ -1,6 +1,8 @@
+import { Equipment } from './exercise';
 import { HistoryEntry, LoggedSet } from './history';
 import { MAX_STEP_SECONDS, RepStep, Step, TimedStep, withEachRepSet, withRepSet } from './workout';
 import {
+    bodyweightSteps,
     canStepUpEachSet,
     compareScores,
     estimatedOneRepMax,
@@ -11,6 +13,7 @@ import {
     isMostRounds,
     progressionSuggestions,
     progressMeasure,
+    restSuggestions,
     sessionsByExercise,
     sessionValue,
     steppedUp,
@@ -367,8 +370,71 @@ describe('a step whose sets vary (BLD-11)', () => {
                 { step: 0, kind: 'reps', from: 12, to: 13, eachSet: true },
             ]);
         });
+
+        describe('a shorter rest for a bodyweight ladder (PRG-15)', () => {
+            const bodyweight = withEachRepSet(pyramid, ({ reps }) => ({ reps }));
+            const done = [pressed(0, 12), pressed(1, 10), pressed(2, 8)];
+            // The leg press taken as done with no load, as a push-up is
+            const bodyweightOnes = new Set([0]);
+            const workout = (step: RepStep, restSeconds: number, steps: Step[] = [step]) => ({
+                blocks: [{ kind: 'group' as const, rounds: 3, restSeconds, steps }],
+            });
+
+            it('steps down its rest where every set got its reps, to 15 seconds at the least', () => {
+                expect(
+                    restSuggestions(done, workout(bodyweight, 45), new Set(), bodyweightOnes)
+                ).toEqual([{ step: 0, kind: 'rest', from: 45, to: 40 }]);
+                expect(
+                    restSuggestions(done, workout(bodyweight, 20), new Set(), bodyweightOnes)
+                ).toEqual([{ step: 0, kind: 'rest', from: 20, to: 15 }]);
+                expect(
+                    restSuggestions(done, workout(bodyweight, 15), new Set(), bodyweightOnes)
+                ).toEqual([]);
+            });
+
+            it('has none where a set fell short, in a superset, or with a weight', () => {
+                const short = [...done.slice(0, 2), pressed(2, 7)];
+                expect(
+                    restSuggestions(short, workout(bodyweight, 45), new Set(), bodyweightOnes)
+                ).toEqual([]);
+                const shared = workout(bodyweight, 45, [bodyweight, squatStep()]);
+                expect(restSuggestions(done, shared, new Set(), bodyweightOnes)).toEqual([]);
+                // A weighted ladder goes up in weight instead, as does one needing a load
+                expect(
+                    restSuggestions(asPlanned, workout(pyramid, 45), new Set(), bodyweightOnes)
+                ).toEqual([]);
+                expect(restSuggestions(done, workout(bodyweight, 45), new Set())).toEqual([]);
+            });
+
+            it('takes an exercise with no load as bodyweight, not one with no weight said yet', () => {
+                const equipment: Record<string, { equipment: Equipment[] }> = {
+                    'push-up': { equipment: ['none'] },
+                    'pull-up': { equipment: ['pull-up bar'] },
+                    'back-squat': { equipment: ['barbell', 'rack'] },
+                };
+                const step = (exerciseId?: string): Step => ({
+                    kind: 'reps',
+                    reps: 10,
+                    name: '',
+                    ...(exerciseId ? { exerciseId } : {}),
+                });
+                const steps = [
+                    step('push-up'),
+                    step('pull-up'),
+                    step('back-squat'),
+                    step('unknown'),
+                    step(),
+                    { kind: 'work' as const, seconds: 30, name: '', exerciseId: 'push-up' },
+                ];
+                expect([...bodyweightSteps(steps, (id) => equipment[id])]).toEqual([0, 1]);
+            });
+        });
     });
 });
+
+function squatStep(): RepStep {
+    return { kind: 'reps', reps: 10, name: 'Squats', exerciseId: 'squat' };
+}
 
 describe("the week's exercises (PRG-13)", () => {
     const DAY = 24 * 60 * 60 * 1000;

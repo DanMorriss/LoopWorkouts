@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { SetupDrag } from '../setup-drag';
 import { StepKindMenuComponent } from '../step-kind-menu/step-kind-menu.component';
 import { StepModel } from '../step-model';
+import { SetupSteps } from '../setup-steps';
 import { WorkoutSetupForm } from '../workout-setup-form';
 
 /** A step's row: its handle, kind, number and summary, what opens it, and its move and delete. */
@@ -21,5 +22,6 @@ export class SetupStepHeaderComponent {
     readonly index = input.required<number>();
 
     protected readonly setup = inject(WorkoutSetupForm);
+    protected readonly steps = inject(SetupSteps);
     protected readonly drag = inject(SetupDrag);
 }

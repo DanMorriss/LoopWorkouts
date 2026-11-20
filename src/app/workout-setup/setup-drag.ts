@@ -2,12 +2,14 @@ import { CdkDrag, CdkDragDrop, CdkDragStart } from '@angular/cdk/drag-drop';
 import { afterNextRender, inject, Injectable, Injector, signal } from '@angular/core';
 import { DropSpring } from '../shared/drop-spring';
 import { movedRow, partEnd, StepModel, wellFormed } from './step-model';
+import { SetupSteps } from './setup-steps';
 import { WorkoutSetupForm } from './workout-setup-form';
 
 /** Dragging Create's rows by their handles. One for each Create page. */
 @Injectable()
 export class SetupDrag {
     private readonly form = inject(WorkoutSetupForm);
+    private readonly steps = inject(SetupSteps);
     private readonly injector = inject(Injector);
 
     /**
@@ -90,7 +92,7 @@ export class SetupDrag {
             rows = rows.filter((row) => !part.includes(row));
             rows.splice(partEnd(rows, at - 1), 0, ...part);
         }
-        this.form.placeRows(rows, key);
+        this.steps.placeRows(rows, key);
     }
 
     /** Whether a row's in a superset that's collapsed, which shows as one line. */

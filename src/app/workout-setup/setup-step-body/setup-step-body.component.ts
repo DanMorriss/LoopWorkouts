@@ -8,6 +8,7 @@ import { SetupSetRowsComponent } from '../setup-set-rows/setup-set-rows.componen
 import { SetupStepExerciseComponent } from '../setup-step-exercise/setup-step-exercise.component';
 import { StepModel } from '../step-model';
 import { SetupSupersets } from '../setup-supersets';
+import { SetupSteps } from '../setup-steps';
 import { WorkoutSetupForm } from '../workout-setup-form';
 
 /** What an open step's for: its name or exercise, its amount, sets and rest, and its superset. */
@@ -32,5 +33,6 @@ export class SetupStepBodyComponent {
     readonly index = input.required<number>();
 
     protected readonly setup = inject(WorkoutSetupForm);
+    protected readonly steps = inject(SetupSteps);
     protected readonly supersets = inject(SetupSupersets);
 }

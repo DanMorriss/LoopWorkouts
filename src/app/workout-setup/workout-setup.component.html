@@ -142,7 +142,7 @@
                     class="btn-add btn-add--reps add-step"
                     [disabled]="setup.stepCount() >= setup.maxSteps"
                     aria-label="Add step"
-                    (click)="setup.addStep()"
+                    (click)="steps.addStep()"
                 >
                     <mat-icon aria-hidden="true">add</mat-icon>
                     Step
@@ -153,7 +153,7 @@
                     class="btn-add btn-add--heading add-heading"
                     [disabled]="setup.headingCount() >= setup.maxHeadings"
                     aria-label="Add heading"
-                    (click)="setup.addHeading()"
+                    (click)="steps.addHeading()"
                 >
                     <mat-icon aria-hidden="true">add</mat-icon>
                     Heading

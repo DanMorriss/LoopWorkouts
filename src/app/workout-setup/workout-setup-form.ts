@@ -1,5 +1,4 @@
 import {
-    afterNextRender,
     computed,
     effect,
     ElementRef,
@@ -24,8 +23,6 @@ import {
     MAX_REPEATS,
     MAX_REPS,
     MAX_STEPS,
-    StepKind,
-    stepKindName,
     UNTIL_STOPPED,
     Workout,
     WorkoutFields,
@@ -33,32 +30,24 @@ import {
 import { nextWait } from '../models/wait-to-start';
 import { PageSlide } from '../shared/navigation/page-slide';
 import { WheelPickerOption } from '../shared/components/wheel-picker/wheel-picker.component';
-import { injectFocusAfterRender } from '../shared/focus-after-render';
 import { changeSmoothly } from '../shared/layout-change';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
-import { UndoService } from '../shared/undo/undo.service';
 import {
     hasAmount,
     isStep,
-    lonelyStepsOut,
-    moved,
     NAME_EXAMPLES,
     padded,
-    partEnd,
     pickerOptions,
     RepeatMode,
     rowHasAmount,
-    rowOf,
     StepModel,
     timeLimitSeconds,
     toBlocks,
     varies,
-    varyOff,
-    withSets,
     WorkoutSetupModel,
 } from './step-model';
 import {
@@ -73,8 +62,9 @@ import {
 } from './step-text';
 
 /**
- * Create's form: the workout being set up, as rows (see StepModel), its checks, and what can be
- * done to its rows. One for each Create page, shared with the parts of it.
+ * Create's form: the workout being set up, as rows (see StepModel and SetupRows), its checks,
+ * which steps are open, and saving. What's done to its steps is SetupSteps, and to its
+ * supersets SetupSupersets. One for each Create page, shared with the parts of it.
  */
 @Injectable()
 export class WorkoutSetupForm {
@@ -83,7 +73,6 @@ export class WorkoutSetupForm {
     private readonly router = inject(Router);
     private readonly slide = inject(PageSlide);
     private readonly injector = inject(Injector);
-    private readonly focusAfterRender = injectFocusAfterRender();
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly exercises = inject(ExerciseStore);
     private readonly plan = inject(PlanStore);
@@ -231,8 +220,6 @@ export class WorkoutSetupForm {
     /** Read out by screen readers after a step is added, moved, changed or deleted. */
     readonly stepAnnouncement = signal('');
 
-    private readonly undo = inject(UndoService);
-
     readonly noSetAmountError = computed(() =>
         this.workoutForm()
             .errors()
@@ -259,39 +246,6 @@ export class WorkoutSetupForm {
     /** The form as it opened or was last saved, to tell if it's been changed since. */
     readonly savedState = signal('');
     readonly hasChanges = computed(() => JSON.stringify(this.model()) !== this.savedState());
-
-    /**
-     * Adds an exercise from its page (EXR-12) at the end of the workout, as the one step open:
-     * 3 sets of 10 reps (or of 0:30, for a timed one) with 1:00 rest, to change before saving.
-     * A new workout's empty first step makes way for it. Nothing happens for an exercise
-     * that isn't there, or a workout already at MAX_STEPS.
-     */
-    addExercise(exerciseId: string) {
-        const exercise = this.exercises.byId(exerciseId);
-        const fresh = this.editingWorkoutId() === null;
-        if (!exercise || (!fresh && this.stepCount() >= MAX_STEPS)) {
-            return;
-        }
-        const { name, id } = exercise;
-        const step = this.rows.row(
-            exercise.measuredBy === 'timed'
-                ? { kind: 'work', seconds: 30, name, exerciseId: id }
-                : { kind: 'reps', reps: 10, name, exerciseId: id },
-            3
-        );
-        this.updateSteps((steps) => (fresh ? [step] : [...steps, step]));
-        this.expandedKeys.set(new Set([step.key]));
-        this.stepAnnouncement.set(`Added ${name}, step ${this.stepCount()}`);
-        // In the middle of the screen, as at the end of a long workout it'd be under the tab bar
-        afterNextRender(
-            () => {
-                const toggle = document.getElementById(`step-${step.key}-toggle`);
-                toggle?.focus({ preventScroll: true });
-                toggle?.closest('.step')?.scrollIntoView({ block: 'center', behavior: 'instant' });
-            },
-            { injector: this.injector }
-        );
-    }
 
     /** Fills the form from a saved workout, or empties it for a new one. */
     load(workoutToEdit: Workout | null) {
@@ -356,51 +310,6 @@ export class WorkoutSetupForm {
         return setRowText(step, set, this.weightUnit);
     }
 
-    /**
-     * The Sets wheel, or a superset's Rounds wheel, which are the sets of each of its steps.
-     * With Vary each set on, a set added copies the last one's row, and one taken away goes
-     * from the end; down to 1 set, there's nothing to vary, so it goes off.
-     */
-    setSets(index: number, sets: number) {
-        const changed = this.model().steps[index];
-        if (changed.sets === sets) {
-            return;
-        }
-        const keys = [changed.key, ...this.supersetSteps(index).map((step) => step.key)];
-        const change = () =>
-            this.updateSteps((steps) =>
-                steps.map((step) => (keys.includes(step.key) ? withSets(step, sets) : step))
-            );
-        const rowsChange = this.model().steps.some(
-            (step) => keys.includes(step.key) && step.vary && sets > 1
-        );
-        if (rowsChange) {
-            this.smoothChange(change);
-        } else {
-            change();
-        }
-    }
-
-    /**
-     * The Vary each set switch: on, every set starts as the step is, a row each; off, every
-     * set goes back to set 1's.
-     */
-    setVary(index: number, on: boolean) {
-        const changed = this.model().steps[index];
-        this.openSetRow.set(null);
-        this.smoothChange(() =>
-            this.updateStep(changed.key, (step) =>
-                on
-                    ? {
-                          ...step,
-                          vary: true,
-                          setRows: Array.from({ length: step.sets }, () => rowOf(step)),
-                      }
-                    : varyOff(step)
-            )
-        );
-    }
-
     isSetRowOpen(key: number, set: number): boolean {
         return this.openSetRow() === `${key}-${set}`;
     }
@@ -409,10 +318,6 @@ export class WorkoutSetupForm {
     toggleSetRow(key: number, set: number) {
         const id = `${key}-${set}`;
         this.smoothChange(() => this.openSetRow.update((open) => (open === id ? null : id)));
-    }
-
-    private updateStep(key: number, change: (step: StepModel) => StepModel) {
-        this.updateSteps((steps) => steps.map((step) => (step.key === key ? change(step) : step)));
     }
 
     /** Puts `step` in place of the step with its key, if it's still there. */
@@ -455,55 +360,8 @@ export class WorkoutSetupForm {
         );
     }
 
-    /** Adds a rep step, the most common kind; its kind pill changes it. */
-    addStep() {
-        if (this.stepCount() >= MAX_STEPS) {
-            return;
-        }
-        const step = this.rows.newStep();
-        this.updateSteps((steps) => [...steps, step]);
-        // Only the new step is opened, keeping the rest of the list short
-        this.expandedKeys.set(new Set([step.key]));
-        this.stepAnnouncement.set(`Added a rep step, step ${this.stepCount()}`);
-        this.focusAfterRender(`step-${step.key}-name`);
-    }
-
-    /**
-     * Adds a heading at the end, e.g. "Warmup", opened with the cursor in its box. Headings
-     * aren't steps, so they have a limit of their own.
-     */
-    addHeading() {
-        if (this.headingCount() >= MAX_HEADINGS) {
-            return;
-        }
-        const heading: StepModel = { ...this.rows.newStep(), kind: 'heading' };
-        this.updateSteps((steps) => [...steps, heading]);
-        this.expandedKeys.set(new Set([heading.key]));
-        this.stepAnnouncement.set('Added a heading');
-        this.focusAfterRender(`step-${heading.key}-name`);
-    }
-
     toggleKindMenu(key: number) {
         this.kindMenuFor.update((open) => (open === key ? null : key));
-    }
-
-    /**
-     * Changes a step's kind. Its name, exercise and numbers stay, so changing it back
-     * finds them again; only those for its new kind are used.
-     */
-    setStepKind(index: number, kind: StepKind) {
-        const changed = this.model().steps[index];
-        this.kindMenuFor.set(null);
-        this.focusAfterRender(`step-${changed.key}-kind`);
-        if (changed.kind === kind) {
-            return;
-        }
-        this.updateSteps((steps) =>
-            steps.map((step) => (step.key === changed.key ? { ...step, kind } : step))
-        );
-        this.stepAnnouncement.set(
-            `Step ${this.stepNumber(index)} is now ${stepKindName(kind).toLowerCase()}`
-        );
     }
 
     /** A click anywhere outside the open kind menu or the tooltip closes it. */
@@ -515,124 +373,6 @@ export class WorkoutSetupForm {
         if (!target?.closest('.info')) {
             this.infoOpen.set(false);
         }
-    }
-
-    /** Whether a row's up or down button can move it: see `moved()`. */
-    canMove(index: number, by: -1 | 1): boolean {
-        return moved(this.model().steps, index, by) !== null;
-    }
-
-    /**
-     * The up and down buttons, for keyboard and screen reader users (and anyone else). A
-     * superset moves with its steps, past the row or superset beside it, and its steps move
-     * within it.
-     */
-    moveStep(index: number, by: -1 | 1) {
-        const rows = moved(this.model().steps, index, by);
-        if (!rows) {
-            return;
-        }
-        const key = this.model().steps[index].key;
-        this.placeRows(rows, key);
-        // Focus follows the step to its new place: the same button, or the other move
-        // button if that one has just been disabled (at the top or bottom)
-        const to = rows.findIndex((row) => row.key === key);
-        const stuck = moved(rows, to, by) === null;
-        const button = by === -1 ? (stuck ? 'down' : 'up') : stuck ? 'up' : 'down';
-        this.focusAfterRender(`step-${key}-${button}`);
-    }
-
-    /** Puts the rows in their new order, and says where the one that moved is now. */
-    placeRows(rows: StepModel[], key: number) {
-        this.updateSteps(() => rows);
-        const to = rows.findIndex((row) => row.key === key);
-        const moved = rows[to];
-        if (moved.kind === 'heading' || moved.kind === 'superset') {
-            // Said by what's after it now, as neither is numbered
-            const end = partEnd(rows, to);
-            const after = rows.slice(end).findIndex(isStep);
-            const place = after === -1 ? 'the end' : `before step ${this.stepNumber(end + after)}`;
-            const title = moved.kind === 'heading' ? this.stepTitle(to) : this.supersetName(to);
-            this.stepAnnouncement.set(`Moved ${title.toLowerCase()} to ${place}`);
-            return;
-        }
-        this.stepAnnouncement.set(
-            `Moved ${moved.name.trim() || stepKindName(moved.kind).toLowerCase()} to step ${this.stepNumber(to)}`
-        );
-    }
-
-    /**
-     * The X button: deletes the step straight away. One with anything in it can be put back:
-     * the Undo bar offers it (UndoService), rather than a question first. A superset goes
-     * with its steps.
-     */
-    deleteStep(index: number) {
-        const before = this.model().steps;
-        const step = before[index];
-        const isSet = hasAmount(step);
-        const title = this.stepTitle(index);
-        if (!step.name.trim() && !isSet && step.kind !== 'superset') {
-            this.removeStep(index);
-            this.focusAfterDelete(index);
-            return;
-        }
-        this.removeStep(index);
-        const time = isSet ? `, ${this.amountText(step)}` : '';
-        this.undo.offerUndo({
-            message: `Deleted ${title}${time}`,
-            undo: () => {
-                // A superset, or a step of one (which may have taken the superset with it), comes
-                // back as the list was
-                this.updateSteps((all) =>
-                    step.kind === 'superset' || step.group
-                        ? before
-                        : [...all.slice(0, index), step, ...all.slice(index)]
-                );
-                this.stepAnnouncement.set(
-                    step.kind === 'heading' || step.kind === 'superset'
-                        ? `${this.stepTitle(index)} is back`
-                        : `Step ${this.stepNumber(index)} is back`
-                );
-                this.focusAfterRender(
-                    `step-${step.key}-${this.isExpanded(step.key) ? 'delete' : 'toggle'}`
-                );
-            },
-            dismissed: () => this.focusAfterDelete(index),
-        });
-    }
-
-    private removeStep(index: number) {
-        const deleted = this.model().steps[index];
-        const said =
-            deleted.kind === 'heading'
-                ? 'Deleted a heading'
-                : deleted.kind === 'superset'
-                  ? `Deleted a ${this.supersetName(index).toLowerCase()}`
-                  : `Deleted step ${this.stepNumber(index)}`;
-        this.updateSteps((all) =>
-            lonelyStepsOut(
-                all.filter((step) => step.key !== deleted.key && step.group !== deleted.key),
-                deleted.group
-            )
-        );
-        this.stepAnnouncement.set(said);
-    }
-
-    /**
-     * After step `index` goes, focus the step that took its place, or the one before if it was
-     * last: its delete button, or its open button if it's collapsed (and so has no delete
-     * button). With none left, the Add button.
-     */
-    private focusAfterDelete(index: number) {
-        const remaining = this.model().steps;
-        const next = remaining[Math.min(index, remaining.length - 1)];
-        if (!next) {
-            this.focusAfterRender('add-step');
-            return;
-        }
-        this.focusAfterRender(
-            `step-${next.key}-${this.isExpanded(next.key) ? 'delete' : 'toggle'}`
-        );
     }
 
     updateSteps(change: (steps: StepModel[]) => StepModel[]) {

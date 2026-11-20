@@ -4,7 +4,7 @@
 <ol class="wheel-rows" [attr.aria-labelledby]="'step-' + key + '-vary-label'">
     @for (row of step.setRows; track $index; let j = $index) {
         @let rowId = 'step-' + key + '-set-' + j;
-        @let rowOpen = setup.isSetRowOpen(key, j);
+        @let rowOpen = setup.view.isSetRowOpen(key, j);
         <li class="wheel-row">
             <span class="sr-only" [id]="rowId + '-name'"
                 >{{ inSuperset() ? 'Round' : 'Set' }} {{ j + 1 }}</span
@@ -15,9 +15,9 @@
                 [id]="rowId"
                 [attr.aria-expanded]="rowOpen"
                 [attr.aria-controls]="rowOpen ? rowId + '-wheels' : null"
-                (click)="setup.toggleSetRow(key, j)"
+                (click)="setup.view.toggleSetRow(key, j)"
             >
-                {{ setup.setRowText(step().value(), j) }}
+                {{ setup.text.setRowText(step().value(), j) }}
                 <mat-icon class="wheel-row__chevron" aria-hidden="true">expand_more</mat-icon>
             </button>
             @if (rowOpen) {

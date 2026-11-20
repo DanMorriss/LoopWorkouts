@@ -23,8 +23,8 @@
             type="button"
             class="btn-icon"
             [id]="'step-' + key + '-browse'"
-            [attr.aria-label]="'Browse exercises for step ' + setup.stepNumber(i)"
-            (click)="exercises.startBrowse(key, setup.stepNumber(i))"
+            [attr.aria-label]="'Browse exercises for step ' + setup.text.stepNumber(i)"
+            (click)="exercises.startBrowse(key, setup.text.stepNumber(i))"
         >
             <mat-icon aria-hidden="true">manage_search</mat-icon>
         </button>

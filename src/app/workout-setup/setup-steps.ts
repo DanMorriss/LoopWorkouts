@@ -50,7 +50,7 @@ export class SetupSteps {
             3
         );
         this.form.updateSteps((steps) => (fresh ? [step] : [...steps, step]));
-        this.form.expandedKeys.set(new Set([step.key]));
+        this.form.view.expandedKeys.set(new Set([step.key]));
         this.form.stepAnnouncement.set(`Added ${name}, step ${this.form.stepCount()}`);
         // In the middle of the screen, as at the end of a long workout it'd be under the tab bar
         afterNextRender(
@@ -82,7 +82,7 @@ export class SetupSteps {
             .model()
             .steps.some((step) => keys.includes(step.key) && step.vary && sets > 1);
         if (rowsChange) {
-            this.form.smoothChange(change);
+            this.form.view.smoothChange(change);
         } else {
             change();
         }
@@ -94,8 +94,8 @@ export class SetupSteps {
      */
     setVary(index: number, on: boolean) {
         const changed = this.form.model().steps[index];
-        this.form.openSetRow.set(null);
-        this.form.smoothChange(() =>
+        this.form.view.openSetRow.set(null);
+        this.form.view.smoothChange(() =>
             this.updateStep(changed.key, (step) =>
                 on
                     ? {
@@ -122,7 +122,7 @@ export class SetupSteps {
         const step = this.form.rows.newStep();
         this.form.updateSteps((steps) => [...steps, step]);
         // Only the new step is opened, keeping the rest of the list short
-        this.form.expandedKeys.set(new Set([step.key]));
+        this.form.view.expandedKeys.set(new Set([step.key]));
         this.form.stepAnnouncement.set(`Added a rep step, step ${this.form.stepCount()}`);
         this.focusAfterRender(`step-${step.key}-name`);
     }
@@ -137,7 +137,7 @@ export class SetupSteps {
         }
         const heading: StepModel = { ...this.form.rows.newStep(), kind: 'heading' };
         this.form.updateSteps((steps) => [...steps, heading]);
-        this.form.expandedKeys.set(new Set([heading.key]));
+        this.form.view.expandedKeys.set(new Set([heading.key]));
         this.form.stepAnnouncement.set('Added a heading');
         this.focusAfterRender(`step-${heading.key}-name`);
     }
@@ -148,7 +148,7 @@ export class SetupSteps {
      */
     setStepKind(index: number, kind: StepKind) {
         const changed = this.form.model().steps[index];
-        this.form.kindMenuFor.set(null);
+        this.form.view.kindMenuFor.set(null);
         this.focusAfterRender(`step-${changed.key}-kind`);
         if (changed.kind === kind) {
             return;
@@ -157,7 +157,7 @@ export class SetupSteps {
             steps.map((step) => (step.key === changed.key ? { ...step, kind } : step))
         );
         this.form.stepAnnouncement.set(
-            `Step ${this.form.stepNumber(index)} is now ${stepKindName(kind).toLowerCase()}`
+            `Step ${this.form.text.stepNumber(index)} is now ${stepKindName(kind).toLowerCase()}`
         );
     }
 
@@ -196,14 +196,16 @@ export class SetupSteps {
             const end = partEnd(rows, to);
             const after = rows.slice(end).findIndex(isStep);
             const place =
-                after === -1 ? 'the end' : `before step ${this.form.stepNumber(end + after)}`;
+                after === -1 ? 'the end' : `before step ${this.form.text.stepNumber(end + after)}`;
             const title =
-                moved.kind === 'heading' ? this.form.stepTitle(to) : this.form.supersetName(to);
+                moved.kind === 'heading'
+                    ? this.form.text.stepTitle(to)
+                    : this.form.text.supersetName(to);
             this.form.stepAnnouncement.set(`Moved ${title.toLowerCase()} to ${place}`);
             return;
         }
         this.form.stepAnnouncement.set(
-            `Moved ${moved.name.trim() || stepKindName(moved.kind).toLowerCase()} to step ${this.form.stepNumber(to)}`
+            `Moved ${moved.name.trim() || stepKindName(moved.kind).toLowerCase()} to step ${this.form.text.stepNumber(to)}`
         );
     }
 
@@ -216,14 +218,14 @@ export class SetupSteps {
         const before = this.form.model().steps;
         const step = before[index];
         const isSet = hasAmount(step);
-        const title = this.form.stepTitle(index);
+        const title = this.form.text.stepTitle(index);
         if (!step.name.trim() && !isSet && step.kind !== 'superset') {
             this.removeStep(index);
             this.focusAfterDelete(index);
             return;
         }
         this.removeStep(index);
-        const time = isSet ? `, ${this.form.amountText(step)}` : '';
+        const time = isSet ? `, ${this.form.text.amountText(step)}` : '';
         this.undo.offerUndo({
             message: `Deleted ${title}${time}`,
             undo: () => {
@@ -236,11 +238,11 @@ export class SetupSteps {
                 );
                 this.form.stepAnnouncement.set(
                     step.kind === 'heading' || step.kind === 'superset'
-                        ? `${this.form.stepTitle(index)} is back`
-                        : `Step ${this.form.stepNumber(index)} is back`
+                        ? `${this.form.text.stepTitle(index)} is back`
+                        : `Step ${this.form.text.stepNumber(index)} is back`
                 );
                 this.focusAfterRender(
-                    `step-${step.key}-${this.form.isExpanded(step.key) ? 'delete' : 'toggle'}`
+                    `step-${step.key}-${this.form.view.isExpanded(step.key) ? 'delete' : 'toggle'}`
                 );
             },
             dismissed: () => this.focusAfterDelete(index),
@@ -253,8 +255,8 @@ export class SetupSteps {
             deleted.kind === 'heading'
                 ? 'Deleted a heading'
                 : deleted.kind === 'superset'
-                  ? `Deleted a ${this.form.supersetName(index).toLowerCase()}`
-                  : `Deleted step ${this.form.stepNumber(index)}`;
+                  ? `Deleted a ${this.form.text.supersetName(index).toLowerCase()}`
+                  : `Deleted step ${this.form.text.stepNumber(index)}`;
         this.form.updateSteps((all) =>
             lonelyStepsOut(
                 all.filter((step) => step.key !== deleted.key && step.group !== deleted.key),
@@ -277,7 +279,7 @@ export class SetupSteps {
             return;
         }
         this.focusAfterRender(
-            `step-${next.key}-${this.form.isExpanded(next.key) ? 'delete' : 'toggle'}`
+            `step-${next.key}-${this.form.view.isExpanded(next.key) ? 'delete' : 'toggle'}`
         );
     }
 }

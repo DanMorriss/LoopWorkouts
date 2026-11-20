@@ -180,7 +180,7 @@
                 class="btn-pill"
                 [id]="'step-' + key + '-add'"
                 [disabled]="setup.stepCount() >= setup.maxSteps"
-                [attr.aria-label]="'Add a step to the ' + setup.supersetName(i).toLowerCase()"
+                [attr.aria-label]="'Add a step to the ' + setup.text.supersetName(i).toLowerCase()"
                 (click)="supersets.addToSuperset(i)"
             >
                 <mat-icon aria-hidden="true">add</mat-icon>
@@ -193,7 +193,7 @@
                 class="btn-pill"
                 [id]="'step-' + key + '-join'"
                 data-tour="join"
-                [attr.aria-label]="'Join ' + setup.stepTitle(i) + ' with the next step'"
+                [attr.aria-label]="'Join ' + setup.text.stepTitle(i) + ' with the next step'"
                 (click)="supersets.joinWithNext(i)"
             >
                 <mat-icon aria-hidden="true">link</mat-icon>
@@ -205,7 +205,7 @@
                 type="button"
                 class="btn-pill"
                 [id]="'step-' + key + '-take-out'"
-                [attr.aria-label]="'Take ' + setup.stepTitle(i) + ' out'"
+                [attr.aria-label]="'Take ' + setup.text.stepTitle(i) + ' out'"
                 (click)="supersets.takeOut(i)"
             >
                 <mat-icon aria-hidden="true">link_off</mat-icon>

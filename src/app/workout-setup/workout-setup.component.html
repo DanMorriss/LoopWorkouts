@@ -18,8 +18,8 @@
                 <!-- Shows on hover or focus, and on a tap for touch screens; Escape hides it -->
                 <span
                     class="info"
-                    (mouseenter)="setup.infoOpen.set(true)"
-                    (mouseleave)="setup.infoOpen.set(false)"
+                    (mouseenter)="setup.view.infoOpen.set(true)"
+                    (mouseleave)="setup.view.infoOpen.set(false)"
                 >
                     <button
                         type="button"
@@ -27,16 +27,16 @@
                         class="info__button"
                         aria-label="About steps"
                         aria-describedby="steps-info-tip"
-                        (focus)="setup.infoOpen.set(true)"
-                        (blur)="setup.infoOpen.set(false)"
-                        (click)="setup.infoOpen.set(true)"
-                        (keydown.escape)="setup.infoOpen.set(false)"
+                        (focus)="setup.view.infoOpen.set(true)"
+                        (blur)="setup.view.infoOpen.set(false)"
+                        (click)="setup.view.infoOpen.set(true)"
+                        (keydown.escape)="setup.view.infoOpen.set(false)"
                     >
                         <mat-icon class="icon-outline" aria-hidden="true">info</mat-icon>
                     </button>
                     <span
                         class="info__tip"
-                        [class.info__tip--open]="setup.infoOpen()"
+                        [class.info__tip--open]="setup.view.infoOpen()"
                         id="steps-info-tip"
                         role="tooltip"
                     >
@@ -50,12 +50,12 @@
                     <button
                         type="button"
                         class="btn-pill steps-toggle-all"
-                        (click)="setup.setAllExpanded(!setup.anyExpanded())"
+                        (click)="setup.view.setAllExpanded(!setup.view.anyExpanded())"
                     >
                         <mat-icon aria-hidden="true">{{
-                            setup.anyExpanded() ? 'unfold_less' : 'unfold_more'
+                            setup.view.anyExpanded() ? 'unfold_less' : 'unfold_more'
                         }}</mat-icon>
-                        {{ setup.anyExpanded() ? 'Collapse all' : 'Expand all' }}
+                        {{ setup.view.anyExpanded() ? 'Collapse all' : 'Expand all' }}
                     </button>
                 </div>
             } @else {
@@ -79,8 +79,8 @@
                 @for (step of setup.workoutForm.steps; track $index; let i = $index) {
                     @let key = step().value().key;
                     @let kind = step().value().kind;
-                    @let time = setup.amountText(step().value());
-                    @let expanded = setup.isExpanded(key);
+                    @let time = setup.text.amountText(step().value());
+                    @let expanded = setup.view.isExpanded(key);
                     @let inSuperset = step().value().group !== 0;
                     <!-- A superset's row heads its steps, which are inside it on screen, and
                          hidden with it when it's collapsed (BLD-12) -->
@@ -104,8 +104,8 @@
                              superset's names its steps, which it takes with it. -->
                         <app-step-drag-preview
                             [kind]="kind"
-                            [badge]="kind === 'superset' ? setup.supersetName(i) : ''"
-                            [name]="setup.summaryName(i)"
+                            [badge]="kind === 'superset' ? setup.text.supersetName(i) : ''"
+                            [name]="setup.text.summaryName(i)"
                             [time]="time"
                             [style.translate]="
                                 -drag.grabbedAt().x + 'px ' + -drag.grabbedAt().y + 'px'
@@ -218,7 +218,7 @@
                         />
                     </div>
                     <p class="setup-hint mb-4">As many rounds as you can before time's up.</p>
-                    @if (setup.noTimeLimitError(); as error) {
+                    @if (setup.errors.noTimeLimit(); as error) {
                         <mat-error>{{ error.message }}</mat-error>
                     }
                 } @else {
@@ -249,10 +249,10 @@
                  only when something would wait, so never with a time limit -->
             <app-setup-carry-on />
 
-            @if (setup.noTimeError(); as error) {
+            @if (setup.errors.noTime(); as error) {
                 <mat-error>{{ error.message }}</mat-error>
             }
-            @if (setup.noSetAmountError(); as error) {
+            @if (setup.errors.noSetAmount(); as error) {
                 <mat-error>{{ error.message }}</mat-error>
             }
             <!-- How long it takes, as it's set up now (LIB-9) -->

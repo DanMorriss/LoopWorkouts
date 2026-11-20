@@ -41,7 +41,7 @@ import { WorkoutSetupForm } from './workout-setup-form';
     providers: [WorkoutSetupForm, SetupSteps, SetupSave, SetupExercises, SetupDrag, SetupSupersets],
     host: {
         '(window:beforeunload)': 'warnBeforeUnload($event)',
-        '(document:click)': 'setup.closePopups($event)',
+        '(document:click)': 'setup.view.closePopups($event)',
     },
     imports: [
         BackLinkComponent,
@@ -117,7 +117,9 @@ export class WorkoutSetupComponent {
         effect(() => {
             const now = this.setup
                 .model()
-                .steps.some((step, i) => this.setup.isExpanded(step.key) && supersets.canJoin(i));
+                .steps.some(
+                    (step, i) => this.setup.view.isExpanded(step.key) && supersets.canJoin(i)
+                );
             if (joinable === false && now) {
                 untracked(() => tour.startOnce('join'));
             }

@@ -128,8 +128,10 @@ test.describe('a new workout', () => {
             await expect(create.header(1)).toBeFocused();
             expect(await app.storageItem('tip-join')).toBe('seen');
 
-            // Once only
+            // Once only. Closed first, and seen to be: open() reads whether it's open, and
+            // straight after the click could still read it open, then not open it
             await create.header(1).click();
+            await expect(create.header(1)).toHaveAttribute('aria-expanded', 'false');
             await create.open(1);
             await expect(page.getByRole('dialog', { name: 'Supersets' })).toHaveCount(0);
         }

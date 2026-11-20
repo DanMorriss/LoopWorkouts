@@ -1,22 +1,59 @@
+@use 'interaction' as *;
+
 :host {
     display: block;
 }
 
 .bars {
     display: grid;
-    gap: 0.4rem;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-// The label, the track, and the count lined up in columns down the list
-.bars__row {
+// The label, the track, and the count lined up in columns down the list, the whole row a
+// toggle for its muscle: 36px drawn, 44px to a finger, the rows touching so they don't overlap
+.bars__pick {
     display: grid;
     grid-template-columns: 6rem 1fr 2.25rem;
     align-items: center;
     gap: 0.6rem;
+    width: 100%;
+    min-height: 2.25rem;
+    padding: 0 0.5rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    font: inherit;
     font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    @include hit-area(4px);
+
+    @include hover {
+        background: var(--control-hover);
+    }
+
+    @include pressed {
+        background: var(--control-hover);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+    }
+
+    // Picked: tinted and outlined in the accent, its name stronger, so it isn't colour alone
+    &[aria-pressed='true'] {
+        background: var(--accent-soft);
+        box-shadow: inset 0 0 0 1px var(--glow-text);
+
+        .bars__label {
+            color: var(--text-strong);
+            font-weight: 600;
+        }
+    }
 }
 
 .bars__label {
@@ -40,6 +77,13 @@
     left: 0;
     border-radius: 999px;
     background: var(--balance-in);
+    // Grows in once the list is scrolled to (MuscleBarsComponent.grown), each row a moment
+    // after the one above
+    transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--row) * 40ms);
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
 
     .bars__row--under & {
         background: var(--balance-under);
@@ -55,6 +99,13 @@
     inset-block: 0;
     width: 2px;
     background: var(--balance-aim);
+
+    // Turns to a notch as the growing bar passes it, rather than before it's there
+    transition: background-color 0.1s linear calc(var(--row) * 40ms + 0.3s);
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
 
     &--covered {
         background: var(--muscle-idle);

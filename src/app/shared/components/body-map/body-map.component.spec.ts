@@ -322,4 +322,33 @@ describe('BodyMapComponent', () => {
             }
         }
     });
+
+    it('rings the selected muscle and presses it in the list, whose muscles are toggles', () => {
+        create(['quads'], ['glutes']);
+        fixture.componentRef.setInput('selectable', true);
+        fixture.componentRef.setInput('selected', 'glutes');
+        fixture.detectChanges();
+        const tapped: MuscleGroup[] = [];
+        fixture.componentInstance.muscleTapped.subscribe((muscle) => tapped.push(muscle));
+
+        expect(el().querySelectorAll('.body-map__shape--selected')).toHaveLength(
+            pathsFor(['glutes'])
+        );
+        const picks = Array.from(el().querySelectorAll<HTMLButtonElement>('.body-map__pick'));
+        expect(picks.map((pick) => [pick.textContent!.trim(), pick.ariaPressed])).toEqual([
+            ['Quads', 'false'],
+            ['Glutes', 'true'],
+        ]);
+        picks[0].click();
+        expect(tapped).toEqual(['quads']);
+    });
+
+    it('leaves the list out with figureOnly', () => {
+        create(['quads'], ['glutes']);
+        fixture.componentRef.setInput('figureOnly', true);
+        fixture.detectChanges();
+
+        expect(el().querySelectorAll('.body-map__label')).toHaveLength(0);
+        expect(el().querySelectorAll('svg')).toHaveLength(2);
+    });
 });

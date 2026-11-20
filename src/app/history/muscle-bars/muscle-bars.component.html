@@ -1,17 +1,24 @@
-<ul class="bars" aria-label="Sets per muscle this week">
-    @for (row of rows(); track row.muscle) {
-        <li class="bars__row" [class]="'bars__row--' + row.status">
-            <span class="bars__label">{{ row.label }}</span>
-            <span class="bars__track" aria-hidden="true">
-                <span class="bars__fill" [style.width.%]="row.width"></span>
-                <span
-                    class="bars__aim"
-                    [class.bars__aim--covered]="row.aim.covered"
-                    [style.left.%]="row.aim.left"
-                ></span>
-            </span>
-            <span class="bars__count" aria-hidden="true">{{ row.count }}</span>
-            <span class="sr-only">{{ row.description }}</span>
+<ul class="bars" aria-label="Sets per muscle this week" [class.bars--grown]="grown()">
+    @for (row of rows(); track row.muscle; let i = $index) {
+        <li class="bars__row" [class]="'bars__row--' + row.status" [style.--row]="i">
+            <button
+                type="button"
+                class="bars__pick"
+                [attr.aria-pressed]="row.muscle === selected()"
+                (click)="muscleTapped.emit(row.muscle)"
+            >
+                <span class="bars__label">{{ row.label }}</span>
+                <span class="bars__track" aria-hidden="true">
+                    <span class="bars__fill" [style.width.%]="grown() ? row.width : 0"></span>
+                    <span
+                        class="bars__aim"
+                        [class.bars__aim--covered]="row.aim.covered && grown()"
+                        [style.left.%]="row.aim.left"
+                    ></span>
+                </span>
+                <span class="bars__count" aria-hidden="true">{{ row.count }}</span>
+                <span class="sr-only">{{ row.description }}</span>
+            </button>
         </li>
     }
 </ul>

@@ -8,10 +8,9 @@ import {
     signal,
     untracked,
 } from '@angular/core';
-import { applyEach, form, maxLength, submit, validate } from '@angular/forms/signals';
-import { ParamMap, Router } from '@angular/router';
+import { applyEach, form, maxLength, validate } from '@angular/forms/signals';
+import { ParamMap } from '@angular/router';
 import { isBuiltIn, MAX_EXERCISE_NAME_LENGTH } from '../models/exercise';
-import { kettlebellSteps, oneKettlebellWeight } from '../models/kettlebell';
 import { weightIn, weightOptions } from '../models/weight';
 import { sharedKettlebell } from './setup-kettlebell';
 import { SetupRows } from './setup-rows';
@@ -28,12 +27,9 @@ import {
     WorkoutFields,
 } from '../models/workout';
 import { nextWait } from '../models/wait-to-start';
-import { PageSlide } from '../shared/navigation/page-slide';
 import { WheelPickerOption } from '../shared/components/wheel-picker/wheel-picker.component';
 import { changeSmoothly } from '../shared/layout-change';
-import { ActiveRunService } from '../shared/run/active-run.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
-import { PlanStore } from '../shared/state/plan-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import {
@@ -63,19 +59,15 @@ import {
 
 /**
  * Create's form: the workout being set up, as rows (see StepModel and SetupRows), its checks,
- * which steps are open, and saving. What's done to its steps is SetupSteps, and to its
- * supersets SetupSupersets. One for each Create page, shared with the parts of it.
+ * and which steps are open. What's done to its steps is SetupSteps, to its supersets
+ * SetupSupersets, and saving it SetupSave. One for each Create page, shared with the parts of it.
  */
 @Injectable()
 export class WorkoutSetupForm {
     private readonly workoutStore = inject(WorkoutStore);
-    private readonly run = inject(ActiveRunService);
-    private readonly router = inject(Router);
-    private readonly slide = inject(PageSlide);
     private readonly injector = inject(Injector);
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly exercises = inject(ExerciseStore);
-    private readonly plan = inject(PlanStore);
 
     private readonly settings = inject(SettingsStore);
 
@@ -110,48 +102,37 @@ export class WorkoutSetupForm {
     /** Keys of the steps showing their name box and wheels; the rest show a one-line summary. */
     readonly expandedKeys = signal<ReadonlySet<number>>(this.allKeys());
 
-    readonly workoutForm = form(
-        this.model,
-        (setup) => {
-            // Long enough for a name (or a heading), short enough to fit on the workout
-            applyEach(setup.steps, (step) =>
-                maxLength(step.name, ({ valueOf }) =>
-                    valueOf(step.kind) === 'heading' ? MAX_HEADING_LENGTH : MAX_EXERCISE_NAME_LENGTH
-                )
-            );
-            // The wheels only offer valid times, so the one rule is that there's some work
-            validate(setup, ({ value }) =>
-                hasWork(allSteps({ blocks: toBlocks(value().steps, this.weightUnit) }))
-                    ? undefined
-                    : { kind: 'noTime', message: 'Workout needs a timed step or some reps' }
-            );
-            // ...that each set of a step whose sets vary has some, if the step's to be kept
-            validate(setup, ({ value }) =>
-                value().steps.some(
-                    (step) =>
-                        varies(step) &&
-                        step.setRows.some((row) => !rowHasAmount(step, row)) &&
-                        step.setRows.some((row) => rowHasAmount(step, row))
-                )
-                    ? { kind: 'noSetAmount', message: 'Each set needs some reps or time' }
-                    : undefined
-            );
-            // ...and that a time limit has some time in it
-            validate(setup, ({ value }) =>
-                value().repeatMode === 'time' && timeLimitSeconds(value()) === 0
-                    ? { kind: 'noTimeLimit', message: 'Time limit needs to be longer than 00:00' }
-                    : undefined
-            );
-        },
-        {
-            submission: {
-                action: async () => {
-                    await this.saveAndStart();
-                    return undefined;
-                },
-            },
-        }
-    );
+    readonly workoutForm = form(this.model, (setup) => {
+        // Long enough for a name (or a heading), short enough to fit on the workout
+        applyEach(setup.steps, (step) =>
+            maxLength(step.name, ({ valueOf }) =>
+                valueOf(step.kind) === 'heading' ? MAX_HEADING_LENGTH : MAX_EXERCISE_NAME_LENGTH
+            )
+        );
+        // The wheels only offer valid times, so the one rule is that there's some work
+        validate(setup, ({ value }) =>
+            hasWork(allSteps({ blocks: toBlocks(value().steps, this.weightUnit) }))
+                ? undefined
+                : { kind: 'noTime', message: 'Workout needs a timed step or some reps' }
+        );
+        // ...that each set of a step whose sets vary has some, if the step's to be kept
+        validate(setup, ({ value }) =>
+            value().steps.some(
+                (step) =>
+                    varies(step) &&
+                    step.setRows.some((row) => !rowHasAmount(step, row)) &&
+                    step.setRows.some((row) => rowHasAmount(step, row))
+            )
+                ? { kind: 'noSetAmount', message: 'Each set needs some reps or time' }
+                : undefined
+        );
+        // ...and that a time limit has some time in it
+        validate(setup, ({ value }) =>
+            value().repeatMode === 'time' && timeLimitSeconds(value()) === 0
+                ? { kind: 'noTimeLimit', message: 'Time limit needs to be longer than 00:00' }
+                : undefined
+        );
+    });
 
     /** Steps, which count towards MAX_STEPS; headings and supersets' own rows don't. */
     readonly stepCount = computed(() => this.model().steps.filter(isStep).length);
@@ -388,53 +369,6 @@ export class WorkoutSetupForm {
         return editId ? this.workoutStore.findWorkoutById(editId) : null;
     }
 
-    /** Start (the form's submit): saves the workout, starts it and opens the workout page. */
-    private async saveAndStart(): Promise<void> {
-        const savedWorkout = this.save();
-        this.load(null);
-        this.run.start(savedWorkout);
-        await this.router.navigate(['/workout']);
-    }
-
-    /**
-     * Save (BLD-15), checked as Start is: saves the workout without starting it, and slides back
-     * out, as ‹ does: an edited one to its details, where the change shows, a new one to
-     * Workouts, with it highlighted, or, made for a day of the plan, to the Plan page, with it
-     * highlighted on that day. All say it was saved.
-     */
-    async saveOnly(): Promise<void> {
-        await submit(this.workoutForm, async () => {
-            const editing = this.editingWorkoutId() !== null;
-            const planned = !editing && this.planOn() !== null;
-            const savedWorkout = this.save();
-            // Kept as it is, so the page slides out showing what was saved; only marked saved,
-            // so leaving doesn't ask about changes
-            this.savedState.set(JSON.stringify(this.model()));
-            this.slide.navigate(
-                editing
-                    ? `/library/${savedWorkout.id}?saved=${this.savedForRun(savedWorkout)}`
-                    : planned
-                      ? `/plan?saved=${savedWorkout.id}`
-                      : `/library?saved=${savedWorkout.id}`,
-                'out'
-            );
-            return undefined;
-        });
-    }
-
-    /**
-     * What a saved edit means for the workout running, for its Details to say: `running` when
-     * it's that workout and has taken the change from where it is, `later` when it carries on
-     * as it was (see `ActiveRunService.takeEdit()`), and `1` when it isn't running.
-     */
-    private savedForRun(saved: Workout): 'running' | 'later' | '1' {
-        const running = this.run.workout();
-        if (running?.id !== saved.id || this.run.summaryOpen()) {
-            return '1';
-        }
-        return this.run.takeEdit(saved) ? 'running' : 'later';
-    }
-
     /**
      * The workout as it's set up, as Save saves it: what the page's estimate of how long it
      * takes is worked out from, as it changes (LIB-9).
@@ -452,39 +386,4 @@ export class WorkoutSetupForm {
 
     /** As `fields()`, with the id of the workout being edited, so its runs give your pace. */
     readonly estimated = computed(() => ({ id: this.editingWorkoutId() ?? '', ...this.fields() }));
-
-    /**
-     * Saves the form to the library, as a new workout or over the one being edited. A
-     * kettlebell workout at one weight makes it your kettlebell (PRG-14), as one set
-     * mid-workout does, so starting it doesn't move it back to the one you had.
-     */
-    private save(): Workout {
-        const workout = this.fields();
-        const steps = allSteps(workout);
-        const kettlebell = kettlebellSteps(steps, (id) => this.exercises.byId(id));
-        const kg = oneKettlebellWeight(
-            [...kettlebell].flatMap((i) => {
-                const step = steps[i];
-                return step.kind === 'reps' ? (step.sets ?? [step]).map((set) => set.weight) : [];
-            })
-        );
-        if (kg) {
-            this.settings.update({ kettlebellWeight: kg });
-        }
-
-        const editingId = this.editingWorkoutId();
-        if (editingId) {
-            return (
-                this.workoutStore.updateWorkout(editingId, workout) ??
-                this.workoutStore.addWorkout(workout)
-            );
-        }
-        const added = this.workoutStore.addWorkout(workout);
-        // Made for a day of the plan: it goes on that day, by Save or Start
-        const day = this.planOn();
-        if (day !== null) {
-            this.plan.add(day, added.id);
-        }
-        return added;
-    }
 }

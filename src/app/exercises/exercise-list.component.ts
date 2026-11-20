@@ -19,7 +19,7 @@ import { blankOwnExercise, ExerciseStore } from '../shared/state/exercise-store.
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { parseMusclesParam, serialiseMusclesParam } from './muscle-filter-query';
 import { listBackLink } from './list-from';
-import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { CardProgress, exerciseCard } from './exercise-card/exercise-card.component';
 import { ExerciseCardsComponent } from './exercise-cards/exercise-cards.component';
@@ -42,7 +42,7 @@ import { SearchFieldComponent } from '../shared/components/search-field/search-f
         ExerciseEditorComponent,
         ExerciseCardsComponent,
         MuscleChipsComponent,
-        BackLinkComponent,
+        TopBarComponent,
         SwipeBackDirective,
     ],
     templateUrl: './exercise-list.component.html',

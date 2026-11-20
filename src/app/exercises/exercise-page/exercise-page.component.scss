@@ -6,10 +6,7 @@
 
 // The exercise's name: the page's title, in the display face
 .exercise__name {
-    margin: 0 0 0.5rem;
-    @include display;
-    font-size: 1.6rem;
-    color: var(--text-strong);
+    @include page-title;
 }
 
 .exercise__actions,

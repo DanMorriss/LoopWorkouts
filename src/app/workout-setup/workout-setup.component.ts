@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WEEKDAYS } from '../models/plan';
-import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 import { WorkoutTimeComponent } from '../shared/components/workout-time/workout-time.component';
 import { LeaveCheck, LeaveQuestion } from '../shared/navigation/leave-check';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
@@ -44,7 +44,7 @@ import { WorkoutSetupForm } from './workout-setup-form';
         '(document:click)': 'setup.view.closePopups($event)',
     },
     imports: [
-        BackLinkComponent,
+        TopBarComponent,
         WorkoutTimeComponent,
         UnsavedChangesDialogComponent,
         CdkDropList,
@@ -78,6 +78,10 @@ export class WorkoutSetupComponent {
     protected readonly save = inject(SetupSave);
 
     protected readonly back = signal({ url: '/library', label: 'Workouts' });
+    /** The page's title: a workout already saved is being changed, else it's a new one. */
+    protected readonly pageTitle = computed(() =>
+        this.setup.editingWorkoutId() === null ? 'New workout' : 'Edit workout'
+    );
     /** The warning about leaving with unsaved changes is open. */
     protected readonly leaveAsked = signal(false);
     private leaving: { answer: Promise<boolean>; give: (leave: boolean) => void } | null = null;

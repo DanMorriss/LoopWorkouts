@@ -6,10 +6,8 @@
 }
 
 .help__title {
-    margin: 0 0 0.75rem;
-    @include display;
-    font-size: 1.6rem;
-    color: var(--text-strong);
+    @include page-title;
+    margin-bottom: 0.75rem;
 }
 
 .help__search {

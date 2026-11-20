@@ -9,7 +9,7 @@ import { exerciseSlug } from '../../models/exercise';
 import { isReadyMade, isReadyMadeId, Workout } from '../../models/workout';
 import { ReadyMadeBadgeComponent } from '../../shared/components/ready-made-badge/ready-made-badge.component';
 import { musclesWorked } from '../../models/workout-muscles';
-import { BackLinkComponent } from '../../nav/back-link/back-link.component';
+import { TopBarComponent } from '../../nav/top-bar/top-bar.component';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
@@ -49,7 +49,7 @@ const PLAN_BUTTON_ID = 'workout-details-plan';
     selector: 'app-workout-details',
     imports: [
         AddToPlanDialogComponent,
-        BackLinkComponent,
+        TopBarComponent,
         BodyMapComponent,
         DatePipe,
         FavouriteButtonComponent,

@@ -1,6 +1,7 @@
 <div class="flex justify-center">
     <div class="w-full max-w-md p-4">
-        <app-back-link [url]="back().url" [label]="back().label" />
+        <app-top-bar [url]="back().url" [label]="back().label" />
+        <h2 class="setup-title">{{ pageTitle() }}</h2>
         <!-- Start is its submit, by its button or Enter in a box: checked, then saved -->
         <form [formRoot]="setup.workoutForm" (submit)="save.saveAndStart()">
             <!-- data-tour: what the tour of Create (BLD-17) lights up -->
@@ -14,7 +15,7 @@
             </label>
 
             <div class="steps-title">
-                <h2 class="setup-heading" id="steps-heading">Steps</h2>
+                <h3 class="setup-heading" id="steps-heading">Steps</h3>
                 <!-- Shows on hover or focus, and on a tap for touch screens; Escape hides it -->
                 <span
                     class="info"
@@ -172,7 +173,7 @@
                 </p>
             }
 
-            <h2 class="setup-heading" id="repeat-heading">Repeat the whole workout</h2>
+            <h3 class="setup-heading" id="repeat-heading">Repeat the whole workout</h3>
 
             <!-- The switch and what it shows under it, as one for the tour of Create to light up -->
             <div data-tour="repeat">

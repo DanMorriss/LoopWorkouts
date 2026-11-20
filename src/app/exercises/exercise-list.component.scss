@@ -16,10 +16,8 @@
 
 // The page's title, in the display face
 .exercises__title {
+    @include page-title;
     margin: 0;
-    @include display;
-    font-size: 1.5rem;
-    color: var(--text-strong);
 }
 
 .exercises__search {

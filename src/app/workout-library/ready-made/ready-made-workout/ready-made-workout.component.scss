@@ -6,10 +6,8 @@
 }
 
 .preview__title {
-    margin: 0 0 0.4rem;
-    @include display;
-    font-size: 1.6rem;
-    color: var(--text-strong);
+    @include page-title;
+    margin-bottom: 0.4rem;
 }
 
 .preview__description {

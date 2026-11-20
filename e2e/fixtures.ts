@@ -119,7 +119,7 @@ export class App {
         return item === null ? null : (JSON.parse(item) as T);
     }
 
-    /** The page's heading, the title under the header (level 2). */
+    /** The page's title (level 2, under the app's name, which only a screen reader hears). */
     heading(name: string | RegExp): Locator {
         return this.page.getByRole('heading', { level: 2, name });
     }
@@ -141,7 +141,7 @@ export class App {
 
     /** The link at the top of a page that slid in, back to where it came from: ‹ Workouts. */
     backLink(name: string | RegExp): Locator {
-        return this.page.locator('app-back-link').getByRole('link', { name });
+        return this.page.locator('app-top-bar').getByRole('link', { name });
     }
 
     /** What's focused, to check focus with `toBeFocused` on a locator, or read its name. */

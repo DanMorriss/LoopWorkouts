@@ -1,5 +1,5 @@
 import { ApplicationRef, Component, computed, DOCUMENT, inject } from '@angular/core';
-import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 import { letInputThrough } from '../shared/navigation/let-input-through';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { AlarmService } from '../shared/alarms/alarm.service';
@@ -29,7 +29,7 @@ const SWITCHING_CLASS = 'theme-switching';
  */
 @Component({
     selector: 'app-settings',
-    imports: [BackLinkComponent, SwipeBackDirective, ToggleSwitchComponent, WheelPickerComponent],
+    imports: [TopBarComponent, SwipeBackDirective, ToggleSwitchComponent, WheelPickerComponent],
     templateUrl: './settings.component.html',
     styleUrl: './settings.component.scss',
 })

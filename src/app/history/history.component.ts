@@ -23,6 +23,7 @@ import { TimePerWeekComponent } from './time-per-week/time-per-week.component';
 import { entryName, formatDuration } from './history-format';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
 import { SetsChanged } from './set-lines/change-set-lines.component';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 
 interface DayGroup {
     /** e.g. "2026-10-18", for tracking and ids. */
@@ -51,6 +52,7 @@ function dayKey(time: number): string {
 @Component({
     selector: 'app-history',
     imports: [
+        TopBarComponent,
         DatePipe,
         ExercisesThisWeekComponent,
         HistoryEntryComponent,

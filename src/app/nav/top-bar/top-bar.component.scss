@@ -1,0 +1,141 @@
+@use 'interaction' as *;
+
+// Stuck to the top of the screen, clear of an iPhone's notch, over the page's 1rem padding
+// (a page that holds it elsewhere sets margin-top: 0). Across the whole of a page laid out in
+// a grid. ‹ at the left, the small title in the middle, centred on the page.
+:host {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(2.75rem, 1fr) minmax(0, max-content) minmax(2.75rem, 1fr);
+    align-items: center;
+    box-sizing: border-box;
+    min-height: calc(3rem + env(safe-area-inset-top));
+    margin-top: -1rem;
+    margin-bottom: 0.25rem;
+    padding-top: env(safe-area-inset-top);
+}
+
+// The material, the width of the screen whatever the page's, behind the bar's contents. Only
+// once the page scrolls under it: over the top of the page, the bar is clear.
+:host::before,
+:host::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 50%;
+    width: 100vw;
+    translate: -50% 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+:host::before {
+    top: 0;
+    bottom: 0;
+    background: var(--chrome);
+    backdrop-filter: blur(20px) saturate(180%);
+}
+
+// Under the bar, the page softens into a blur that fades out going down, rather than running
+// sharp up to its edge: a scroll edge, as at the bottom of the screen under the tabs
+:host::after {
+    top: 100%;
+    height: 1rem;
+    backdrop-filter: blur(8px);
+    mask-image: linear-gradient(to bottom, #000, transparent);
+}
+
+:host(.top-bar--under)::before,
+:host(.top-bar--under)::after {
+    opacity: 1;
+}
+
+.back-link {
+    grid-column: 1;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-height: 44px;
+    margin-left: -0.4rem;
+    padding-right: 0.5rem;
+    color: var(--glow-text);
+    font-size: 0.85rem;
+    text-decoration: none;
+
+    @include hover {
+        text-decoration: underline;
+    }
+
+    // Underlined the moment it's pressed, as the buttons light up
+    @include pressed {
+        text-decoration: underline;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+}
+
+// A long page name is cut short rather than pushing the title off centre
+.back-link__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// The page's title, small, in the reading face, as an iPhone's bar has it
+.top-bar__title {
+    grid-column: 2;
+    overflow: hidden;
+    color: var(--text-strong);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// It fades in as the big title goes up behind the bar, and out as it comes back down
+.top-bar__title--in {
+    animation: top-bar-title-in 0.2s ease-out;
+}
+
+.top-bar__title--out {
+    animation: top-bar-title-out 0.15s ease-in forwards;
+}
+
+@keyframes top-bar-title-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes top-bar-title-out {
+    to {
+        opacity: 0;
+    }
+}
+
+// Solid, where the system asks for less see-through, and no blur under it
+@media (prefers-reduced-transparency: reduce) {
+    :host::before {
+        background: var(--raised);
+        backdrop-filter: none;
+    }
+
+    :host::after {
+        display: none;
+    }
+}
+
+// A defined edge, where the system asks for more contrast
+@media (prefers-contrast: more) {
+    :host::before {
+        border-bottom: 1px solid var(--border-strong);
+    }
+}

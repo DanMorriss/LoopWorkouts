@@ -316,6 +316,11 @@ html:has(.setup__footer) {
     scroll-padding-bottom: 8rem;
 }
 
+// And clear of the bar kept at the top of a page (TopBarComponent)
+html:has(app-top-bar) {
+    scroll-padding-top: calc(3rem + env(safe-area-inset-top));
+}
+
 // The page's glow, painted on a layer fixed to the screen rather than with
 // background-attachment: fixed, which iPhones ignore: there the gradient repeated every
 // screen height and left a visible line part way down a long page

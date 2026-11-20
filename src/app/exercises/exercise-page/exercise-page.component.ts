@@ -10,7 +10,7 @@ import {
     WorkoutChoice,
     WorkoutChoiceDialogComponent,
 } from '../../shared/components/workout-choice-dialog/workout-choice-dialog.component';
-import { BackLinkComponent } from '../../nav/back-link/back-link.component';
+import { TopBarComponent } from '../../nav/top-bar/top-bar.component';
 import { listBackLink } from '../list-from';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { TourService } from '../../tour/tour.service';
@@ -43,7 +43,7 @@ import { counted } from '../../shared/format-count';
     imports: [
         MatIconModule,
         WorkoutChoiceDialogComponent,
-        BackLinkComponent,
+        TopBarComponent,
         ExerciseDetailsComponent,
         ExerciseEditorComponent,
         ExerciseProgressComponent,

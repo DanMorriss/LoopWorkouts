@@ -2,7 +2,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from '@angular/cd
 import { afterNextRender, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { BackLinkComponent } from '../nav/back-link/back-link.component';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 import { PageSlide } from '../shared/navigation/page-slide';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
 import { WEEKDAYS } from '../models/plan';
@@ -39,7 +39,7 @@ import {
     selector: 'app-plan',
     imports: [
         AddToPlanDialogComponent,
-        BackLinkComponent,
+        TopBarComponent,
         CdkDrag,
         CdkDropList,
         CdkDropListGroup,

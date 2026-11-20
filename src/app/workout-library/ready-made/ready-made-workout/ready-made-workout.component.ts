@@ -5,7 +5,7 @@ import { map } from 'rxjs';
 import { BUILT_IN_WORKOUTS } from '../../../models/built-in-workouts';
 import { exerciseSlug } from '../../../models/exercise';
 import { musclesWorked } from '../../../models/workout-muscles';
-import { BackLinkComponent } from '../../../nav/back-link/back-link.component';
+import { TopBarComponent } from '../../../nav/top-bar/top-bar.component';
 import { SwipeBackDirective } from '../../../nav/swipe-back.directive';
 import { BodyMapComponent } from '../../../shared/components/body-map/body-map.component';
 import { WorkoutOutlineComponent } from '../../../shared/components/workout-outline/workout-outline.component';
@@ -24,7 +24,7 @@ import { readyMadeCard } from '../ready-made-card';
 @Component({
     selector: 'app-ready-made-workout',
     imports: [
-        BackLinkComponent,
+        TopBarComponent,
         BodyMapComponent,
         SwipeBackDirective,
         WorkoutOutlineComponent,

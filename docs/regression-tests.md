@@ -117,6 +117,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. The exercise page opens at its top; ‹ Exercises brings the list back scrolled where it was.
     4. Workouts opens at its top.
     5. Each tab is at least 44px wide at 320px viewport width.
+    6. An exercise's page scrolled down keeps ‹ Exercises at the top of the screen, with the exercise's name small beside it once its title has gone up out of sight.
 - **In the pack:** a page under a tab marks it `aria-current="true"` (its own page, `"page"`). `/ready-made` now redirects to `/library`, so it isn't in the list. Coming back to Exercises also puts focus back on the card.
 
 ### REG-NAV-05 · The run bar, and back to the workout

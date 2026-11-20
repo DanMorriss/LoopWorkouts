@@ -6,13 +6,16 @@
     gap: 1.25rem;
 }
 
+// As close over the greeting as on any other page, rather than the cards' gap apart
+.home__bar {
+    margin-bottom: -1rem;
+}
+
 .home__greeting {
+    @include page-title;
     margin: 0;
     // Takes focus from code only, e.g. after the tour
     outline: none;
-    @include display;
-    color: var(--text-strong);
-    font-size: 1.4rem;
 }
 
 // A card that has nothing to show leaves no gap

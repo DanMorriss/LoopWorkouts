@@ -13,6 +13,7 @@ import { ConsentStatusComponent } from './consent-status/consent-status.componen
 import { hasSignInTokens } from './sign-in-landing';
 import { YourDataComponent } from './your-data/your-data.component';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 
 /**
  * The You tab (SYN-3, SYN-7, SYN-8, SYN-9, SYN-10): signing in (SignInComponent), who's
@@ -23,6 +24,7 @@ import { injectFocusAfterRender } from '../shared/focus-after-render';
 @Component({
     selector: 'app-account',
     imports: [
+        TopBarComponent,
         ConsentStatusComponent,
         LoopLogoComponent,
         MatIconModule,

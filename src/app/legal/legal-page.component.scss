@@ -6,10 +6,8 @@
 
 // The page's title, in the display face
 .legal__title {
-    margin: 0;
-    @include display;
-    font-size: 1.5rem;
-    color: var(--text-strong);
+    @include page-title;
+    margin-bottom: 0;
 }
 
 .legal__updated {

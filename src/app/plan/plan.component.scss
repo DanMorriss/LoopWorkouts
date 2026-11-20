@@ -5,10 +5,7 @@
 }
 
 .plan__title {
-    margin: 0 0 0.5rem;
-    @include display;
-    font-size: 1.6rem;
-    color: var(--text-strong);
+    @include page-title;
 }
 
 .plan__hint,

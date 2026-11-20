@@ -22,6 +22,7 @@ import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { editUrl, MakeCopy } from '../shared/state/make-copy.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { UndoService } from '../shared/undo/undo.service';
+import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 
 /**
  * Every workout, yours and the ready-made ones (LIB-6), together, A to Z, with those of only
@@ -33,6 +34,7 @@ import { UndoService } from '../shared/undo/undo.service';
     templateUrl: './workout-library.component.html',
     styleUrl: './workout-library.component.scss',
     imports: [
+        TopBarComponent,
         AddToPlanDialogComponent,
         LibraryFiltersComponent,
         MatIconModule,

@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BUILT_IN_PLANS, BuiltInPlan, plansFor } from '../../models/built-in-plans';
-import { BackLinkComponent } from '../../nav/back-link/back-link.component';
+import { TopBarComponent } from '../../nav/top-bar/top-bar.component';
 import { SwipeBackDirective } from '../../nav/swipe-back.directive';
 import { EquipmentFilterComponent } from '../../shared/components/equipment-filter/equipment-filter.component';
 import { ReadyMadePlans, weekPlannedText } from '../../shared/state/ready-made-plans.service';
@@ -21,7 +21,7 @@ import { hiddenByEquipmentText } from '../../models/exercise';
 @Component({
     selector: 'app-ready-made-plans',
     imports: [
-        BackLinkComponent,
+        TopBarComponent,
         CanTrainOnComponent,
         EquipmentFilterComponent,
         PlanCardComponent,
@@ -30,7 +30,7 @@ import { hiddenByEquipmentText } from '../../models/exercise';
     template: `
         <div class="flex justify-center" [appSwipeBack]="back.url">
             <div class="w-full max-w-md p-4">
-                <app-back-link [url]="back.url" [label]="back.label" />
+                <app-top-bar [url]="back.url" [label]="back.label" />
                 <h2 class="plans__title">Ready-made plans</h2>
                 <p class="plans__hint">
                     A week of ready-made workouts, the same every week. Using one replaces your plan

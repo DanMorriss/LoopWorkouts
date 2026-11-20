@@ -221,6 +221,24 @@ test.describe('getting about', () => {
         }
     );
 
+    test(
+        "REG-NAV-04 a page keeps its ‹ and title at the top as it's scrolled",
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/exercises/back-squat');
+            const small = page.locator('app-top-bar').getByText('Back squat');
+            await expect(small).toHaveCount(0);
+
+            await page.mouse.wheel(0, 1500);
+            await expect(app.heading('Back squat')).not.toBeInViewport();
+            await expect(app.backLink('Exercises')).toBeInViewport();
+            await expect(small).toBeVisible();
+
+            await app.backLink('Exercises').click();
+            await expect(page).toHaveURL('/exercises');
+        }
+    );
+
     test.describe('at 320px wide', () => {
         test.use({ viewport: { width: 320, height: 640 } });
 

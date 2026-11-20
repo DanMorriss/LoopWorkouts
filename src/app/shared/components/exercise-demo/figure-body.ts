@@ -1,8 +1,10 @@
 import { BufferGeometry, Float32BufferAttribute, Vector3 } from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { BODY_MODELS, BodyModel, DrawingPlace } from '../../../models/body-model';
 import { BodyFigure, MuscleGroup } from '../../../models/exercise';
 import { add3, cross3, normalize3, scale3, sub3, Vec3 } from '../../../models/exercise-skeleton';
 import { BODY_FIGURES } from '../body-map/body-shapes';
+import { lookUp, moundsAt, TORSO_DEPTH } from './torso-depth';
 
 /**
  * The 3D demo figure's body (EXR-13), made to look as the body map does: shaped from the body
@@ -115,6 +117,8 @@ interface Ring {
     /** How far it reaches forwards, and backwards if that's different. */
     readonly depth: number;
     readonly depthBack?: number;
+    /** How much further it stands out, in front (`front`) or behind, `across` cm from its middle. */
+    readonly bulge?: (across: number, front: boolean) => number;
 }
 
 /**
@@ -149,15 +153,19 @@ function tube(
                 ),
                 back: add3(ring.centre, scale3(ring.across, reach * back)),
             });
+            const ahead = Math.cos(angle) >= 0;
+            const across = Math.sin(angle) * ring.half;
+            const bulge = ring.bulge?.(across, ahead) ?? 0;
             points.push(
                 add3(
                     ring.centre,
                     add3(
-                        scale3(ring.across, Math.sin(angle) * ring.half),
+                        scale3(ring.across, across),
                         scale3(
                             ring.ahead,
                             Math.cos(angle) *
-                                (Math.cos(angle) >= 0 ? ring.depth : (ring.depthBack ?? ring.depth))
+                                (ahead ? ring.depth : (ring.depthBack ?? ring.depth)) +
+                                (ahead ? bulge : -bulge)
                         )
                     )
                 )
@@ -243,50 +251,6 @@ const DEPTH = {
     thigh: 1.05,
     shin: 1,
 } as const;
-/** A value read off a table of [where, value] pairs, in a straight line between them. */
-function lookUp(table: readonly (readonly [number, number])[], at: number): number {
-    if (at <= table[0][0]) {
-        return table[0][1];
-    }
-    for (let i = 1; i < table.length; i++) {
-        const [x1, y1] = table[i];
-        if (at <= x1) {
-            const [x0, y0] = table[i - 1];
-            return y0 + ((y1 - y0) * (at - x0)) / (x1 - x0);
-        }
-    }
-    return table[table.length - 1][1];
-}
-
-/**
- * How far the torso reaches forwards and backwards from its middle line, in cm on the male
- * figure, from the crotch (0) up to the base of the neck (1): the drawings only show its width.
- * The chest stands out further than the belly, the seat rounds out behind the hips, the lower
- * back curves in, and the traps rise behind the neck.
- */
-const TORSO_FRONT = [
-    [0, 7.5],
-    [0.15, 8.5],
-    [0.35, 9],
-    [0.5, 8.6],
-    [0.62, 9.6],
-    [0.72, 11.2],
-    [0.82, 11.2],
-    [0.92, 8.6],
-    [1, 5.5],
-] as const;
-const TORSO_BACK = [
-    [0, 9.5],
-    [0.1, 11.5],
-    [0.2, 11.5],
-    [0.32, 8.4],
-    [0.5, 8.4],
-    [0.68, 9.4],
-    [0.82, 10],
-    [0.92, 9.6],
-    [1, 7.5],
-] as const;
-
 /** A joint at rest, on the figure's right (1) or left (-1). */
 export const restJoint = (
     model: BodyModel,
@@ -332,14 +296,14 @@ function limbPart(
  * The torso at rest, from the measured rows across it: rounded off below the seat and at the
  * top, where the neck meets the shoulders, rather than ending flat.
  */
-function torsoPart(model: BodyModel) {
+function torsoPart(model: BodyModel, figure: BodyFigure) {
     const { crotch, neckBase } = model.levels;
-    // The female figure is smaller all round
-    const size = model.joints.shoulder[0] / 17.3;
-    const depths = (y: number) => {
-        const h = (y - crotch) / (neckBase - crotch);
-        return [lookUp(TORSO_FRONT, h) * size, lookUp(TORSO_BACK, h) * size] as const;
-    };
+    const shape = TORSO_DEPTH[figure];
+    // The male figure's is scaled to its size; the female's is measured in her own
+    const size = figure === 'male' ? model.joints.shoulder[0] / 17.3 : 1;
+    const up = (y: number) => (y - crotch) / (neckBase - crotch);
+    const depths = (y: number) =>
+        [lookUp(shape.front, up(y)) * size, lookUp(shape.back, up(y)) * size] as const;
     // The measured rows, top down, without the gap between the legs at the bottom
     const rows = model.torso.filter(([, half]) => half > 3);
     const [topY, topHalf] = rows[0];
@@ -353,6 +317,8 @@ function torsoPart(model: BodyModel) {
             half: Math.max(half, 0.6),
             depth: Math.max(front * shrink, 0.6),
             depthBack: Math.max(back * shrink, 0.6),
+            bulge: (across, ahead) =>
+                moundsAt(ahead ? shape.frontMounds : shape.backMounds, up(y), across) * shrink,
         };
     };
     const round = (degrees: number) => (degrees * Math.PI) / 180;
@@ -483,15 +449,67 @@ function dome([y, half]: readonly [number, number]): [number, number][] {
     });
 }
 
+/**
+ * The female figure's ponytail, as the body map draws her with: from the crown, back over the
+ * head and down behind it, by the head's measured height, top down. Each point is how far
+ * behind the head's middle line (cm), how far below its top, and the ponytail's half width there.
+ */
+const PONYTAIL = [
+    [5, 2.5, 2.2],
+    [8.2, 5, 3],
+    [10.6, 9.5, 3.1],
+    [11.6, 15, 2.9],
+    [11.4, 20.5, 2.4],
+    [10.5, 25, 1.7],
+    [9.6, 28, 0.8],
+] as const;
+
+/** Where the drawings' hair is, on both, under the top of the head (in their units). */
+const HAIR_IN_DRAWINGS = 40;
+
+/**
+ * The head, and for the female figure her ponytail with it, painted the colour of the drawings'
+ * hair: the head's rows round off at the top, as the drawings end a head where its hair starts.
+ */
+function headPart(model: BodyModel, figure: BodyFigure) {
+    const head = levelPart(model, [...dome(model.head[0]), ...model.head], () => DEPTH.head);
+    if (figure !== 'female') {
+        return head;
+    }
+    const top = model.levels.headTop;
+    const along = PONYTAIL.map(([back, down]) => [-back, top - down] as const);
+    const hair: Vec3 = [0, (model.front.floor - HAIR_IN_DRAWINGS) / model.front.unitsPerCm, 0];
+    const ponytail = tube(
+        model,
+        PONYTAIL.map(([, , half], i) => {
+            // Square to the ponytail, in the head's middle plane
+            const [x0, y0] = along[Math.max(0, i - 1)];
+            const [x1, y1] = along[Math.min(along.length - 1, i + 1)];
+            return {
+                centre: [along[i][0], along[i][1], 0] as Vec3,
+                across: RIGHT,
+                ahead: normalize3([y1 - y0, x0 - x1, 0]),
+                half,
+                depth: half * 0.85,
+            };
+        }),
+        () => hair
+    );
+    const merged = mergeGeometries([head, ponytail]);
+    head.dispose();
+    ponytail.dispose();
+    return merged;
+}
+
 /** Every part of the body, at rest, for `figure`. Index 0 of a pair is the figure's right. */
 export function buildBody(figure: BodyFigure) {
     const model = BODY_MODELS[figure];
     const sides = [1, -1] as const;
     return {
         model,
-        torso: torsoPart(model),
+        torso: torsoPart(model, figure),
         neck: levelPart(model, model.neck, () => DEPTH.neck),
-        head: levelPart(model, [...dome(model.head[0]), ...model.head], () => DEPTH.head),
+        head: headPart(model, figure),
         upperArms: sides.map((side) =>
             limbPart(
                 model,

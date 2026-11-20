@@ -8,7 +8,7 @@
 //   --big           draws it larger, to look at its shape closely
 //   --stills        every key position side by side, as with reduced motion
 //   --still=2       only that key position (from 1), as large as the moving figure
-//   --figure=female the Sex setting (the 3D figure is always male for now)
+//   --figure=female the Sex setting
 //   --flat          the flat figure, as drawn without WebGL
 import { chromium } from 'playwright';
 

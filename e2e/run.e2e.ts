@@ -284,11 +284,16 @@ test.describe('skipping', () => {
         await run.skip.click();
         await expect(run.main.getByText('Last round!')).toBeVisible();
 
-        // Skipping the last work finishes it: the rest after it doesn't run
+        // Skipping the last work ends it: the rest after it doesn't run, and once it's asked
+        // about the plank, put aside to do later (RUN-16), it finishes
         await run.close.click();
         await run.startFromLibrary('B');
         await run.wait(20_000);
         await run.skip.click();
+        await page
+            .getByRole('dialog', { name: 'Do Plank before you finish?' })
+            .getByRole('button', { name: 'Finish' })
+            .click();
         await expect(run.summary).toHaveAccessibleName('Workout finished');
         await expect(run.summary).toContainText('Plank: 0:20');
         await expect(run.stat('Time')).toHaveText('0:20');

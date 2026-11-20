@@ -190,7 +190,8 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 question: 'What does Skip do?',
                 answer: [
                     "Skip, beside Pause, moves on without finishing the step. A skipped set of reps isn't logged; a timed exercise is logged with the time it ran.",
-                    'With a time limit, the time you save goes to more rounds.',
+                    'A skipped exercise is kept at the top right, to pick and do next when you can, and before the workout finishes it asks whether to do any still there.',
+                    'With a time limit, the time you save goes to more rounds, and nothing is kept for later.',
                 ],
             },
             {

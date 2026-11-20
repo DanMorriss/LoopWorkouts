@@ -57,7 +57,7 @@
 - Screen readers hear "Skip step", or "Skip rest" on a rest.
 - The next step's alarm sounds and the phone vibrates at once, as the step starts; the skipped step's countdown beeps don't.
 - A skipped **rep step** isn't logged: it's Done without its set, so its ring doesn't fill, and the time spent on it still counts, as on any rep step. A skipped **timed exercise** is logged with the time it actually ran, in whole seconds (none if under a second), not its full length. A skipped **rest** isn't logged, as rests never are.
-- What's skipped doesn't count as time spent in the history. With a **time limit**, it doesn't count towards the limit either, so the time saved goes to more rounds. Skipping the last step of the last round finishes the workout.
+- What's skipped doesn't count as time spent in the history. With a **time limit**, it doesn't count towards the limit either, so the time saved goes to more rounds. Skipping the last step of the last round ends the workout; skipping an exercise there puts it aside, so it asks first whether to do it before finishing (RUN-16).
 
 ### Doing a skipped exercise later (RUN-16)
 
@@ -264,7 +264,7 @@
 - Given a swapped step at the summary, when I press Yes, use next time, then the saved workout's step is the new exercise at its weight; when I press No, just this time, then it's unchanged. Either way there's no Next time step-up for it.
 - Given a run with a swap, when the page reloads, then the step is still swapped.
 - Given work 0:30 then rest 0:10, when I press Skip 5s in, then the rest starts from 00:10; Skip there starts round 2.
-- Given a 0:45 plank (the Plank exercise) then rest, once, when I press Skip 20s in, then the workout finishes and the history has the plank for 20 seconds and 20 seconds spent.
+- Given a 0:45 plank (the Plank exercise) then rest, once, when I press Skip 20s in, then it asks "Do Plank before you finish?", and Finish finishes it with the plank for 20 seconds in the history and 20 seconds spent.
 - Given a rest skipped part-way, then no set is logged for it.
 - Given push-ups, rest, a 0:30 plank, rest, then squats, when I skip the push-ups, then "Skipped: Push-up" shows at the top; when I skip the rest and the plank, then it has a 2 on it, and its menu lists both.
 - Given that list, when I pick Push-up in the rest, then the bar says "Push-up is up next", Up next is Push-up, and after the rest the face shows it with "Skipped earlier"; after a reload and Done, the squats start, and the summary has the push-ups' 10 reps.

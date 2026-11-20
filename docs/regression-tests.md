@@ -726,11 +726,11 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:**
     1. Start A; `runFor` 5000; press **Skip** (named "Skip step").
     2. Press Skip again (now named "Skip rest").
-    3. Start B; `runFor` 20000; press Skip.
+    3. Start B; `runFor` 20000; press Skip; press **Finish**.
 - **Expected:**
     1. The rest starts from 00:10, and its alarm sounds at once.
     2. Round 2 starts.
-    3. B finishes at once (the rest after the last step is skipped), and the history has "Plank: 0:20" and 0:20 spent.
+    3. B ends at once (the rest after the last step is skipped), asking "Do Plank before you finish?" (REG-RUN-20); Finish finishes it, and the history has "Plank: 0:20" and 0:20 spent.
 
 ### REG-RUN-06 · A reload carries on
 

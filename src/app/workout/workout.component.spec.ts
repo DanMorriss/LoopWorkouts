@@ -1824,6 +1824,12 @@ describe('WorkoutComponent', () => {
 
             pressSkip(); // 20s of the plank; the rest at the end of the last round is skipped
 
+            // Put aside to do later (RUN-16), so it asks before finishing
+            const finish = [
+                ...fixture.nativeElement.querySelectorAll('app-finish-later-dialog button'),
+            ].find((button: HTMLElement) => button.textContent?.trim() === 'Finish');
+            finish.click();
+            fixture.detectChanges();
             expect(view().isComplete()).toBe(true);
             expect(entries()[0]).toEqual(
                 expect.objectContaining({

@@ -1,0 +1,74 @@
+.later-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+    overflow: hidden;
+}
+
+.later-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding-right: 0.25rem;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--raised);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.later-row__handle {
+    display: inline-grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-left: 0.25rem;
+    color: var(--text-muted);
+    cursor: grab;
+    touch-action: none;
+}
+
+.later-row__pick {
+    flex: 1;
+    min-width: 0;
+}
+
+.later-row__up {
+    flex-shrink: 0;
+}
+
+// Drag and drop (Angular CDK). The copy following the finger, lifted off the list, as a
+// workout on the Plan page is; it settles into its place on the app's spring (styles/_drag.scss)
+.later-row.cdk-drag-preview {
+    box-sizing: border-box;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.65rem;
+    scale: 1.03;
+    box-shadow: 0 18px 40px var(--shadow);
+}
+
+// Where it will land: the row kept in place, its room dashed
+.later-row.cdk-drag-placeholder {
+    outline: 2px dashed var(--border-strong);
+    outline-offset: -2px;
+    background: var(--accent-soft);
+
+    > * {
+        visibility: hidden;
+    }
+}
+
+// The others slide aside to make room
+.cdk-drop-list-dragging .later-row:not(.cdk-drag-placeholder) {
+    transition: transform var(--spring-duration) var(--ease-spring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cdk-drop-list-dragging .later-row:not(.cdk-drag-placeholder) {
+        transition: none;
+    }
+}

@@ -103,8 +103,10 @@ export class DialogComponent {
         sheet: () => this.card().nativeElement,
         grabber: () => this.grabber().nativeElement,
         scrim: () => this.overlay().nativeElement,
-        // Its own content's, not a dialog's opened over it
-        ownsTouch: (target) => target.closest('app-dialog') === this.host,
+        // Its own content's, not a dialog's opened over it, nor a drag handle's, which drags
+        // a row of a list in it
+        ownsTouch: (target) =>
+            target.closest('app-dialog') === this.host && !target.closest('.cdk-drag-handle'),
         // A card shrinks back into what opened it as it fades
         cardAway: { transform: 'scale(0.96)', opacity: 0 },
         reducedMotion: injectPrefersReducedMotion(),

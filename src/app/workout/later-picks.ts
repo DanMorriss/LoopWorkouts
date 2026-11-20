@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { LaterStep, putAside, sameStep } from '../models/later';
-import { canPutAside, pickAt, pickNext, unpick } from '../models/later-pick';
+import { canPutAside, moveAside, pickAllAt, pickAt, pickNext, unpick } from '../models/later-pick';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 
@@ -73,6 +73,25 @@ export class LaterPicks {
         this.store.setActiveLater(pickAt(this.store.activeLater(), step, at.atMs, at.repStepsDone));
         this.run.sync();
         return true;
+    }
+
+    /**
+     * At the finish, as for doBeforeFinish(): every exercise put aside is done now, one after
+     * another in the list's order, then the workout finishes. Returns whether they were picked.
+     */
+    doAllBeforeFinish(): boolean {
+        const at = this.store.activeLater().aside.length > 0 && this.run.leaveFinish(true);
+        if (!at) {
+            return false;
+        }
+        this.store.setActiveLater(pickAllAt(this.store.activeLater(), at.atMs, at.repStepsDone));
+        this.run.sync();
+        return true;
+    }
+
+    /** The exercise put aside at `from` in the list moves to `to`, e.g. dragged there. */
+    move(from: number, to: number) {
+        this.store.setActiveLater(moveAside(this.store.activeLater(), from, to));
     }
 
     /** At the finish, the exercises put aside are left undone, and the workout finishes. */

@@ -157,39 +157,85 @@ describe('FinishLaterDialogComponent', () => {
         expect(run().isComplete()).toBe(true);
     });
 
-    it('lists several to pick one, asking again about the rest after it', () => {
-        start(
-            makeWorkout({
-                steps: [
-                    exercise('Plank', 'builtin:plank'),
-                    { ...reps(10, 'Squats'), exerciseId: 'builtin:bodyweight-squat' },
-                    exercise('Lunges', 'builtin:reverse-lunge'),
-                ],
-                repeats: 1,
-            })
-        );
+    // Plank (10s), squats (10 reps) and lunges (10s), the plank and squats skipped
+    const mixed = makeWorkout({
+        steps: [
+            exercise('Plank', 'builtin:plank'),
+            { ...reps(10, 'Squats'), exerciseId: 'builtin:bodyweight-squat' },
+            exercise('Lunges', 'builtin:reverse-lunge'),
+        ],
+        repeats: 1,
+    });
+    function skipTwo() {
+        start(mixed);
         skip(); // Plank
         skip(); // Squats
         wait(10_000); // Lunges
+    }
+    const names = () =>
+        [...dialog()!.querySelectorAll('.later-option__name')].map((name) => name.textContent);
+    const done = () => press(page().querySelector('button.up-next--done'));
 
-        expect(title()).toBe('Do one before you finish?');
-        const names = [...dialog()!.querySelectorAll('.later-option__name')].map(
-            (name) => name.textContent
-        );
-        expect(names).toEqual(['Plank', 'Squats']);
-        expect(document.activeElement).toBe(dialog()!.querySelector('.menu__item'));
+    it('lists several to pick one, asking again about the rest after it', () => {
+        skipTwo();
+
+        expect(title()).toBe('Do them before you finish?');
+        expect(names()).toEqual(['Plank', 'Squats']);
+        expect(document.activeElement).toBe(buttonNamed('Do them all'));
 
         press(dialog()!.querySelectorAll('.menu__item')[1]);
         expect(view().state()?.step?.name).toBe('Squats');
         expect(view().isRepsActive()).toBe(true);
 
         // Done on the squats, done later
-        press(page().querySelector('button.up-next--done'));
+        done();
         expect(title()).toBe('Do Plank before you finish?');
         expect(entries()).toEqual([]);
 
         press(buttonNamed('Finish'));
         expect(entries()[0].sets?.map((set) => set.name)).toEqual(['Squats', 'Lunges']);
+    });
+
+    it('does them all, in order, then finishes', () => {
+        skipTwo();
+
+        press(buttonNamed('Do them all'));
+        expect(dialog()).toBeNull();
+        expect(view().state()?.step?.name).toBe('Plank');
+        expect(document.activeElement?.getAttribute('aria-label')).toBe('Pause');
+
+        wait(10_000);
+        expect(view().state()?.step?.name).toBe('Squats');
+        done();
+
+        expect(dialog()).toBeNull();
+        expect(run().isComplete()).toBe(true);
+        expect(entries()[0].sets?.map((set) => set.name)).toEqual(['Plank', 'Squats', 'Lunges']);
+    });
+
+    it('moves one up with its ↑, saying where to, focus going with it', () => {
+        skipTwo();
+        const up = (name: string) =>
+            dialog()!.querySelector<HTMLButtonElement>(`[aria-label="Move ${name} up"]`)!;
+        expect(up('Plank').disabled).toBe(true);
+
+        press(up('Squats'));
+
+        expect(names()).toEqual(['Squats', 'Plank']);
+        expect(dialog()!.querySelector('[role="status"]')!.textContent).toBe(
+            'Squats moved to 1 of 2'
+        );
+        // First now, where ↑ is off, so focus is on the exercise itself
+        expect(document.activeElement).toBe(dialog()!.querySelector('.menu__item'));
+        // The menu at the top keeps the new order too
+        expect(
+            view()
+                .aside()
+                .map((item) => item.name)
+        ).toEqual(['Squats', 'Plank']);
+
+        press(buttonNamed('Do them all'));
+        expect(view().state()?.step?.name).toBe('Squats');
     });
 
     it('is logged as finished if the run ends while it asks', () => {

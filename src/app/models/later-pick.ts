@@ -67,6 +67,27 @@ export function pickAt(
     };
 }
 
+/**
+ * `later` with every step put aside picked to run once the clock's at `atMs`, with
+ * `repStepsDone` done, one after another in the list's order: e.g. Do them all at the finish.
+ */
+export function pickAllAt(later: RunLater, atMs: number, repStepsDone: number): RunLater {
+    return [...later.aside]
+        .reverse()
+        .reduce((picked, step) => pickAt(picked, step, atMs, repStepsDone), later);
+}
+
+/** `later` with the step put aside at `from` in the list moved to `to`, e.g. dragged there. */
+export function moveAside(later: RunLater, from: number, to: number): RunLater {
+    const aside = [...later.aside];
+    const [moved] = aside.splice(from, 1);
+    if (!moved || to < 0 || to > aside.length) {
+        return later;
+    }
+    aside.splice(to, 0, moved);
+    return { ...later, aside };
+}
+
 /** `later` with `step` taken off the queue, before it's started, and back on the list. */
 export function unpick(later: RunLater, step: LaterStep): RunLater {
     const steps = later.queue?.steps.filter((other) => !sameStep(other, step)) ?? [];

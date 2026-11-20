@@ -926,15 +926,17 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 
 ### REG-RUN-20 · Asked about skipped exercises at the finish
 
-- **Stories:** RUN-16 · **Priority:** P2 · **[Clock]**
+- **Stories:** RUN-16 · **Priority:** P2 · **[Clock]** · **[Touch]**
 - **Preconditions:** workout "Gym", as in REG-RUN-19.
 - **Steps:**
     1. Start; Skip four times (push-ups, rest, plank, rest); Done.
     2. Reload.
-    3. Pick Plank; `runFor` 31000.
-    4. **Finish**.
-- **Expected:** 1. "Do one before you finish?", and no summary. 2. Still asking, listing Push-up (10 reps) and Plank (00:30), then Finish. 3. The plank runs, focus on Pause; then "Do Push-up before you finish?", focus on Do it now. 4. The summary: Workout finished, with Plank 0:30 and Squat 10 reps, and no push-ups.
-- **Left to Vitest:** the time spent deciding left out, Escape finishing, and a run ended while it asks logged as finished (`finish-later-dialog.component.spec.ts`).
+    3. Drag the plank's handle above the push-ups (by finger on the phone).
+    4. **Do them all**; `runFor` 31000.
+    5. Skip the push-ups.
+    6. **Finish**.
+- **Expected:** 1. "Do them before you finish?", and no summary. 2. Still asking, listing Push-up (10 reps) then Plank (00:30), focus on Do them all. 3. Plank, then Push-up; the sheet stays open. 4. The plank runs, focus on Pause, Up next Push-up; then the push-ups. 5. "Do Push-up before you finish?", focus on Do it now. 6. The summary: Workout finished, with Plank 0:30 and Squat 10 reps, and no push-ups.
+- **Left to Vitest:** the time spent deciding left out, Escape finishing, ↑ and what it says, picking one on its own, and a run ended while it asks logged as finished (`finish-later-dialog.component.spec.ts`, `later-pick.spec.ts`).
 
 ---
 

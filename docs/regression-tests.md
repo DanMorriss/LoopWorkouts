@@ -1064,11 +1064,12 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 
 - **Stories:** PRG-13 · **Priority:** P2
 - **Preconditions:** `guest()`, clock Wed 11 Nov. History on 10 Nov: Back squat 2 × 10 at 62.5 kg, a 1:00 Plank, and Dumbbell lunge 2 × 10 each side; on 2 Nov (9 days before): Back squat 10 at 60 kg and a 0:45 Plank.
-- **Steps:** Open Progress; read Exercises this week; press Back squat, then ‹ Progress; press Plank in the log, then ‹ Progress.
+- **Steps:** Open Progress; read Exercises this week; press Back squat's row, then ‹ Progress; press Plank in the log, then ‹ Progress.
 - **Expected:**
-    1. Three rows, those with a new best first: Back squat, "20 reps in 2 sets, 1,250 kg lifted", "New best, heaviest: 62.5 kg for 10 reps"; Plank, "1 minute in 1 set", "New best, longest: 1 minute"; then Dumbbell lunge, "20 reps each side in 2 sets", with no best, as it's the first time.
-    2. Back squat goes to `/exercises/back-squat?from=progress`; its **‹ Progress** comes back to `/history?exercise=back-squat`, with Back squat's link focused.
-    3. A set's exercise in the log goes to its page with `?run=<id>`, and ‹ Progress comes back to that run (`/history?run=<id>`).
+    1. Over the list, New bests: three tiles, swiped between, heard as "New best, heaviest: 62.5 kg for 10 reps, Back squat", "New best, most reps: 10 reps at 62.5 kg, Back squat" and "New best, longest: 1 minute, Plank"; none for Dumbbell lunge, as it's the first time.
+    2. Three rows, most sets first, then A to Z: Back squat, "20 reps in 2 sets, 1,250 kg lifted" (3 violet pips shown); Dumbbell lunge, "20 reps each side in 2 sets"; Plank, "1 minute in 1 set" (one blue pip).
+    3. Back squat goes to `/exercises/back-squat?from=progress`; its **‹ Progress** comes back to `/history?exercise=back-squat`, with Back squat's row focused.
+    4. A set's exercise in the log goes to its page with `?run=<id>`, and ‹ Progress comes back to that run (`/history?run=<id>`).
 - **In the pack:** as above (the screen reader wording, which says the same as what's shown).
 
 ### REG-PRG-05 · One kettlebell, and when to get a heavier one

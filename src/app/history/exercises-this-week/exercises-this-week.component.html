@@ -1,29 +1,39 @@
 @if (rows().length) {
     <section class="exercises-week" aria-labelledby="exercises-week-title">
         <h3 class="exercises-week__title" id="exercises-week-title">Exercises this week</h3>
+        @if (bests().length) {
+            <app-new-best-tiles class="exercises-week__bests" [bests]="bests()" />
+        }
+        <div class="exercises-week__head" aria-hidden="true">
+            <span>All exercises</span>
+            <span>Sets</span>
+        </div>
         <ul class="exercises-week__list">
             @for (row of shown(); track row.id) {
-                <li class="exercises-week__row">
-                    <span class="exercises-week__line">
-                        <a
-                            class="exercises-week__name"
-                            [id]="'week-' + row.slug"
-                            [routerLink]="row.path"
-                            [queryParams]="{ from: 'progress' }"
-                            >{{ row.name }}</a
+                <li class="exercises-week__item">
+                    <a
+                        class="exercises-week__row"
+                        [id]="'week-' + row.slug"
+                        [routerLink]="row.path"
+                        [queryParams]="{ from: 'progress' }"
+                    >
+                        <span class="exercises-week__name">{{ row.name }}</span>
+                        <span
+                            class="exercises-week__pips"
+                            aria-hidden="true"
+                            [style.--sets]="row.sets"
                         >
-                        <span class="exercises-week__total">
-                            <span aria-hidden="true">{{ row.text }}</span>
-                            <span class="sr-only">{{ row.spoken }}</span>
+                            @for (pip of row.pips; track $index) {
+                                <span
+                                    class="exercises-week__pip"
+                                    [class.exercises-week__pip--timed]="pip === 'timed'"
+                                ></span>
+                            }
                         </span>
-                    </span>
-                    @for (best of row.bests; track best.text) {
-                        <span class="exercises-week__best">
-                            <span class="exercises-week__tag" aria-hidden="true">New best</span>
-                            <span aria-hidden="true">{{ best.text }}</span>
-                            <span class="sr-only">{{ best.spoken }}</span>
-                        </span>
-                    }
+                        <span class="exercises-week__total" aria-hidden="true">{{ row.text }}</span>
+                        <span class="sr-only">, {{ row.spoken }}</span>
+                        <app-icon class="exercises-week__chevron">chevron_right</app-icon>
+                    </a>
                 </li>
             }
         </ul>

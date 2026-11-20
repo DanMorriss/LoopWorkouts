@@ -82,7 +82,7 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
             node.textContent!.replace(/\s+/g, ' ').trim()
         );
 
-    it("lists each exercise's reps or time and sets, new bests first, then most sets", () => {
+    it("lists each exercise's reps or time and a pip a set, most sets first", () => {
         create(
             entry(1, [squat(10, 60), squat(10, 60), squat(8, 60), plank(45), plank(60)]),
             entry(2, [bench(8), bench(8)]),
@@ -90,38 +90,64 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
         );
 
         expect(texts('.exercises-week__name')).toEqual(['Back squat', 'Bench press', 'Plank']);
-        expect(texts('.exercises-week__total [aria-hidden="true"]')).toEqual([
-            '28 reps · 3 sets · 1,680 kg lifted',
-            '16 reps · 2 sets · 960 kg lifted',
-            '1:45 · 2 sets',
+        expect(texts('.exercises-week__total')).toEqual([
+            '28 reps · 1,680 kg',
+            '16 reps · 960 kg',
+            '1:45',
         ]);
-        expect(texts('.exercises-week__total .sr-only')).toEqual([
-            '28 reps in 3 sets, 1,680 kg lifted',
-            '16 reps in 2 sets, 960 kg lifted',
-            '1 minute 45 seconds in 2 sets',
+        expect(texts('.exercises-week__row .sr-only')).toEqual([
+            ', 28 reps in 3 sets, 1,680 kg lifted',
+            ', 16 reps in 2 sets, 960 kg lifted',
+            ', 1 minute 45 seconds in 2 sets',
         ]);
-        // Squats' first weight is its heaviest, but 50 reps 10 days ago stands; bench's 8 beat
-        // its 6, but 70 kg stands. Both set a best, so go first, squats with more sets
-        expect(
-            texts('.exercises-week__best [aria-hidden="true"]:not(.exercises-week__tag)')
-        ).toEqual(['Heaviest 60 kg × 10', 'Most reps 8 @ 60 kg']);
-        expect(texts('.exercises-week__tag')).toEqual(['New best', 'New best']);
-        expect(texts('.exercises-week__best .sr-only')).toEqual([
-            'New best, heaviest: 60 kg for 10 reps',
-            'New best, most reps: 8 reps at 60 kg',
+        const pips = [...el().querySelectorAll('.exercises-week__pips')].map((row) =>
+            [...row.children].map((pip) =>
+                pip.classList.contains('exercises-week__pip--timed') ? 'timed' : 'reps'
+            )
+        );
+        expect(pips).toEqual([
+            ['reps', 'reps', 'reps'],
+            ['reps', 'reps'],
+            ['timed', 'timed'],
         ]);
-        // Its ‹ comes back here
-        expect(el().querySelector('a')!.getAttribute('href')).toBe(
+        // The whole row goes to the exercise, whose ‹ comes back here
+        expect(el().querySelector('.exercises-week__row')!.getAttribute('href')).toBe(
             '/exercises/back-squat?from=progress'
         );
+    });
+
+    it('shows the new bests as tiles over the list, in its order', () => {
+        create(
+            entry(1, [squat(10, 60), squat(10, 60), squat(8, 60)]),
+            entry(2, [bench(8), bench(8)]),
+            entry(10, [bench(6, 70), squat(50)])
+        );
+
+        // Squats' first weight is its heaviest, but 50 reps 10 days ago stands; bench's 8 beat
+        // its 6, but 70 kg stands
+        expect(texts('.bests__label')).toEqual(['Heaviest', 'Most reps']);
+        expect(texts('.bests__value')).toEqual(['60 kg × 10', '8 @ 60 kg']);
+        expect(texts('.bests__name')).toEqual(['Back squat', 'Bench press']);
+        expect(texts('.bests__tile .sr-only')).toEqual([
+            'New best, heaviest: 60 kg for 10 reps, Back squat',
+            'New best, most reps: 8 reps at 60 kg, Bench press',
+        ]);
+        expect(texts('.bests__position')).toEqual(['1 of 2']);
+        expect(el().querySelector('.bests__tile')!.getAttribute('href')).toBe(
+            '/exercises/back-squat?from=progress'
+        );
+    });
+
+    it('has no tiles with no new bests', () => {
+        create(entry(1, [squat(10, 60)]));
+        expect(el().querySelector('app-new-best-tiles')).toBeNull();
+        expect(texts('.exercises-week__name')).toEqual(['Back squat']);
     });
 
     it('shows the volume in pounds when they are chosen', () => {
         TestBed.inject(SettingsStore).update({ weightUnit: 'lb' });
         create(entry(1, [squat(10, weightToKg(135, 'lb')), squat(10, weightToKg(135, 'lb'))]));
-        expect(texts('.exercises-week__total [aria-hidden="true"]')).toEqual([
-            '20 reps · 2 sets · 2,700 lb lifted',
-        ]);
+        expect(texts('.exercises-week__total')).toEqual(['20 reps · 2,700 lb']);
     });
 
     it('shows nothing with nothing done in the last 7 days', () => {
@@ -205,6 +231,8 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
         const page = harness.fixture.nativeElement as HTMLElement;
         expect(page.querySelectorAll('.exercises-week__row')).toHaveLength(7);
         expect(document.activeElement?.id).toBe('week-deadlift');
-        expect(document.activeElement?.textContent?.trim()).toBe('Deadlift');
+        expect(document.activeElement?.querySelector('.exercises-week__name')?.textContent).toBe(
+            'Deadlift'
+        );
     });
 });

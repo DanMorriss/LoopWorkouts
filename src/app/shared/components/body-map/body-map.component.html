@@ -42,6 +42,9 @@
                                         (hoveredMuscle() === shape.muscle ||
                                             pressedMuscle() === shape.muscle)
                                     "
+                                    [class.body-map__shape--selected]="
+                                        !!shape.muscle && selected() === shape.muscle
+                                    "
                                 />
                             }
                         </g>
@@ -55,47 +58,29 @@
 }
 
 <!-- With figureOnly, just the figure, and no "No muscles listed." -->
-@if (!figureOnly() && mainLabels().length === 0 && supportingLabels().length === 0) {
+@if (!figureOnly() && groups().length === 0) {
     <p class="body-map__none">No muscles listed.</p>
 }
-@if (mainLabels().length > 0) {
+@for (group of groups(); track group.kind) {
     <div class="body-map__group">
-        <p class="body-map__heading" [id]="id + '-main'">Main</p>
-        <ul class="body-map__labels" [attr.aria-labelledby]="id + '-main'">
-            @for (muscle of mainList(); track muscle) {
-                <li class="body-map__label body-map__label--main">
-                    @if (linksFrom(); as from) {
-                        <a
-                            class="body-map__link"
-                            [href]="exercisesUrl(muscle, from)"
-                            (click)="slide.follow($event, exercisesUrl(muscle, from), 'in')"
-                            >{{ muscleLabel(muscle) }}</a
-                        >
-                    } @else {
-                        <span>{{ muscleLabel(muscle) }}</span>
-                    }
-                    @if (removableLabels()) {
+        <p class="body-map__heading" [id]="id + '-' + group.kind">{{ group.heading }}</p>
+        <ul class="body-map__labels" [attr.aria-labelledby]="id + '-' + group.kind">
+            @for (muscle of group.muscles; track muscle) {
+                <li
+                    class="body-map__label"
+                    [class]="'body-map__label--' + group.kind"
+                    [class.body-map__label--selected]="muscle === selected()"
+                >
+                    @if (selectable()) {
                         <button
                             type="button"
-                            class="body-map__remove"
-                            [attr.aria-label]="'Remove ' + muscleLabel(muscle)"
-                            (click)="clearMuscle(muscle)"
+                            class="body-map__pick"
+                            [attr.aria-pressed]="muscle === selected()"
+                            (click)="muscleTapped.emit(muscle)"
                         >
-                            <span aria-hidden="true">x</span>
+                            {{ muscleLabel(muscle) }}
                         </button>
-                    }
-                </li>
-            }
-        </ul>
-    </div>
-}
-@if (supportingLabels().length > 0) {
-    <div class="body-map__group">
-        <p class="body-map__heading" [id]="id + '-supporting'">Supporting</p>
-        <ul class="body-map__labels" [attr.aria-labelledby]="id + '-supporting'">
-            @for (muscle of supportingList(); track muscle) {
-                <li class="body-map__label body-map__label--supporting">
-                    @if (linksFrom(); as from) {
+                    } @else if (linksFrom(); as from) {
                         <a
                             class="body-map__link"
                             [href]="exercisesUrl(muscle, from)"

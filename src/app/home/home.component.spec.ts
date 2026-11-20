@@ -909,7 +909,7 @@ describe('HomeComponent', () => {
                 /^About \d+ min for your .*Quads.*, each held 30 seconds\.$/
             );
             expect(
-                [...element().querySelectorAll('.carousel__dot')].map((dot) =>
+                [...element().querySelectorAll('app-suggested-workout .carousel__dot')].map((dot) =>
                     dot.getAttribute('aria-label')
                 )
             ).toEqual(['Suggestion 1 of 2', 'Suggestion 2 of 2']);

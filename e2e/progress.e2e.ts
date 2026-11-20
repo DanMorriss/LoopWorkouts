@@ -68,6 +68,32 @@ test.describe('muscles worked this week', () => {
         await expect(bars.nth(0)).toContainText(/^Glutes.*2 sets, 2 reached$/);
         await expect(bars.nth(2)).toContainText(/^Adductors.*1 set, 1 reached$/);
     });
+
+    test(
+        'REG-PRG-08 a muscle picked on Progress, and its exercises',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/history');
+            const muscles = page.getByRole('region', { name: 'Muscles worked this week' });
+            const quadsBar = muscles.getByRole('button', { name: /^Quads \d/ });
+            const quadsPill = muscles.getByRole('button', { name: 'Quads', exact: true });
+            await expect(muscles.getByText('Tap a muscle to find exercises for it')).toBeVisible();
+
+            // Picked on its bar, it's picked in the list on the second slide too
+            await quadsBar.click();
+            await expect(quadsBar).toHaveAttribute('aria-pressed', 'true');
+            const listDot = muscles.getByRole('button', { name: 'Muscle list 2 of 2' });
+            await listDot.click();
+            await expect(listDot).toHaveAttribute('aria-current', 'true');
+            await expect(quadsPill).toHaveAttribute('aria-pressed', 'true');
+
+            // Its exercises, with ‹ Progress back
+            await muscles.getByRole('link', { name: 'Exercises for Quads' }).click();
+            await expect(page).toHaveURL(/\/exercises\?muscles=quads&from=history$/);
+            await page.getByRole('link', { name: 'Progress' }).first().click();
+            await expect(page).toHaveURL(/\/history$/);
+        }
+    );
 });
 
 test.describe("an exercise's progress", () => {

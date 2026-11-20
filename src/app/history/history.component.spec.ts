@@ -406,6 +406,70 @@ describe('HistoryComponent', () => {
         expect(labels.at(-1)).toBe('Upper back');
     });
 
+    it('picks a muscle in the map, its list and the bars at once, with its exercises', async () => {
+        create(
+            makeEntry({
+                startedAt: NOW - HOUR,
+                sets: [
+                    {
+                        round: 0,
+                        step: 0,
+                        name: 'Back squat',
+                        reps: 5,
+                        exerciseId: 'builtin:back-squat',
+                    },
+                ],
+            })
+        );
+        const card = (): HTMLElement => fixture.nativeElement.querySelector('.muscles-week');
+        await vi.waitFor(() => {
+            fixture.detectChanges();
+            expect(card().querySelectorAll('app-body-map')).toHaveLength(2);
+        });
+        const bar = (name: string) =>
+            Array.from(card().querySelectorAll<HTMLButtonElement>('.bars__pick')).find(
+                (pick) => pick.querySelector('.bars__label')!.textContent!.trim() === name
+            )!;
+        const pill = (name: string) =>
+            Array.from(card().querySelectorAll<HTMLButtonElement>('.body-map__pick')).find(
+                (pick) => pick.textContent!.trim() === name
+            )!;
+        const ringed = () =>
+            card().querySelectorAll('.body-map__shape--selected:not(.body-map__shape--idle)')
+                .length;
+        // The map first, then its list, a slide each
+        expect(
+            Array.from(card().querySelectorAll('.carousel__dot')).map((dot) =>
+                dot.getAttribute('aria-label')
+            )
+        ).toEqual(['Body map 1 of 2', 'Muscle list 2 of 2']);
+        expect(card().querySelector('.muscles-week__hint')!.textContent!.trim()).toBe(
+            'Tap a muscle to find exercises for it'
+        );
+
+        // Picked from a bar: pressed there and in the list, and ringed on the map
+        bar('Quads').click();
+        fixture.detectChanges();
+        expect(bar('Quads').getAttribute('aria-pressed')).toBe('true');
+        expect(pill('Quads').getAttribute('aria-pressed')).toBe('true');
+        expect(pill('Glutes').getAttribute('aria-pressed')).toBe('false');
+        expect(ringed()).toBeGreaterThan(0);
+        const cta = card().querySelector('.muscles-week__exercises')!;
+        expect(cta.textContent!.trim()).toContain('Exercises for Quads');
+        expect(cta.getAttribute('href')).toBe('/exercises?muscles=quads&from=history');
+
+        // Another from the list moves it; tapped again, it's unpicked
+        pill('Glutes').click();
+        fixture.detectChanges();
+        expect(bar('Quads').getAttribute('aria-pressed')).toBe('false');
+        expect(bar('Glutes').getAttribute('aria-pressed')).toBe('true');
+        pill('Glutes').click();
+        fixture.detectChanges();
+        expect(bar('Glutes').getAttribute('aria-pressed')).toBe('false');
+        expect(ringed()).toBe(0);
+        expect(card().querySelector('.muscles-week__exercises')).toBeNull();
+    });
+
     it('shows the muscles worked this week, then the log, and leaves the suggestion to Today', () => {
         TestBed.inject(WorkoutStore).addWorkout({
             title: 'Push',

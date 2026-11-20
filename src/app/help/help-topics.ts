@@ -320,6 +320,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 question: 'What do the muscle bars show?',
                 answer: [
                     'The sets for each muscle group in the last 7 days. The line across each bar is the sets a week to aim for, set by Sets a week per muscle in You, under Profile: a grey bar is short of it, and a cyan one has reached it.',
+                    'Tap a bar, or a muscle on the map, to pick it in both and find exercises for it.',
                 ],
                 link: { label: 'Go to Progress', url: '/history' },
             },

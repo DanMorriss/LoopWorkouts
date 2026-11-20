@@ -1009,6 +1009,14 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Under Fitness the aims move down: Sets a week per muscle is 6, and Glutes is under 6.
     3. At 2, Glutes reads "2 sets, 2 reached" and Adductors "1 set, 1 reached".
 
+### REG-PRG-08 · A muscle picked on Progress, and its exercises
+
+- **Stories:** PRG-6, PRG-8 · **Priority:** P2
+- **Preconditions:** as REG-PRG-01.
+- **Steps:** Open Progress. Press the Quads bar, go to the card's second slide (Muscle list), then press **Exercises for Quads**, then ‹ Progress.
+- **Expected:** Before anything's picked the card says "Tap a muscle to find exercises for it". The Quads bar and the Quads chip on the list are both pressed; Exercises for Quads opens `/exercises?muscles=quads&from=history`, whose ‹ Progress goes back.
+- **Left to Vitest:** the map's ring and unpicking by tapping again (`history.component.spec.ts`); the bars growing in as they're scrolled to (`muscle-bars.component.spec.ts`).
+
 ### REG-PRG-02 · An exercise's progress, and its card on the list
 
 - **Stories:** PRG-3, PRG-4 · **Priority:** P2
@@ -1612,7 +1620,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Workouts and ready-made   | REG-LIB-01 – 12  | LIB-1 – LIB-8, LIB-10, CTL-4                                                                                                                           |
 | Running a workout         | REG-RUN-01 – 19  | RUN-1 – RUN-12, RUN-14 – RUN-16, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                                   |
-| Progress                  | REG-PRG-01 – 07  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14, PRG-16                                                                                      |
+| Progress                  | REG-PRG-01 – 08  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14, PRG-16                                                                                      |
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                            |
 | Settings and profile      | REG-SET-01 – 04  | SET-1 – SET-7, ALM-3, PRG-8, BLD-7                                                                                                                     |
 | Your data and offline     | REG-DATA-01 – 06 | SYN-1, SYN-2, SYN-4, SYN-5, SYN-6, SYN-9, EXR-4                                                                                                        |

@@ -112,8 +112,9 @@
     }
 }
 
-// A listed muscle as a link to exercises for it: the whole chip, 44px to a finger
-.body-map__link {
+// A listed muscle as a link to exercises for it, or a toggle: the whole chip, 44px to a finger
+.body-map__link,
+.body-map__pick {
     color: inherit;
     text-decoration: none;
 
@@ -163,4 +164,26 @@
         outline: 2px solid currentColor;
         outline-offset: 2px;
     }
+}
+
+// The muscle picked elsewhere on the page: a heavy ring in the strongest text colour, as the
+// accent is the shade of a worked muscle and wouldn't stand out on it
+.body-map__shape--selected {
+    stroke: var(--text-strong);
+    stroke-width: 2.5;
+}
+
+// The picked one's chip ringed in the accent too, so it isn't told by colour alone
+.body-map__label--selected {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+// A listed muscle as a toggle, sized and focused as a link is (.body-map__link)
+.body-map__pick {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    cursor: pointer;
 }

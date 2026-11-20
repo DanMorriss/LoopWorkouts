@@ -1,13 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MuscleBalance } from '../../models/muscle-balance';
+import { fakeReducedMotion } from '../../shared/testing/fake-reduced-motion';
 import { MuscleBarsComponent } from './muscle-bars.component';
 
 describe('MuscleBarsComponent', () => {
     let fixture: ComponentFixture<MuscleBarsComponent>;
 
-    afterEach(() => fixture.destroy());
+    afterEach(() => {
+        fixture.destroy();
+        vi.restoreAllMocks();
+    });
 
-    async function create(balance: MuscleBalance[]) {
+    /** With reduced motion, so the bars are at their length straight away. */
+    async function create(balance: MuscleBalance[], reduced = true) {
+        fakeReducedMotion(reduced);
         fixture = TestBed.createComponent(MuscleBarsComponent);
         fixture.componentRef.setInput('balance', balance);
         fixture.detectChanges();
@@ -77,5 +83,47 @@ describe('MuscleBarsComponent', () => {
         expect(row(0).querySelector('.sr-only')!.textContent!.trim()).toBe('22 sets, 10 reached');
         expect(row(1).querySelector('.sr-only')!.textContent!.trim()).toBe('1 set, under 10');
         expect(row(0).querySelector('.bars__track')!.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    it('grows the bars in once they come into view, unless motion is reduced', async () => {
+        const balance: MuscleBalance[] = [{ muscle: 'chest', sets: 10, aim, status: 'reached' }];
+        const fill = () => row(0).querySelector<HTMLElement>('.bars__fill')!.style.width;
+
+        // Out of view, they wait at nothing
+        const spacer = document.body.appendChild(document.createElement('div'));
+        spacer.style.height = '3000px';
+        await create(balance, false);
+        document.body.insertBefore(spacer, fixture.nativeElement);
+        await new Promise((done) => setTimeout(done, 100));
+        fixture.detectChanges();
+        expect(fill()).toBe('0%');
+
+        // Scrolled to, they grow to their length
+        (fixture.nativeElement as HTMLElement).scrollIntoView();
+        await vi.waitFor(() => {
+            fixture.detectChanges();
+            expect(fill()).toBe('50%');
+        });
+        spacer.remove();
+        window.scrollTo(0, 0);
+    });
+
+    it('makes each row a toggle for its muscle, pressed while picked', async () => {
+        await create([
+            { muscle: 'chest', sets: 4, aim, status: 'under' },
+            { muscle: 'quads', sets: 12, aim, status: 'reached' },
+        ]);
+        const tapped: string[] = [];
+        fixture.componentInstance.muscleTapped.subscribe((muscle) => tapped.push(muscle));
+        fixture.componentRef.setInput('selected', 'quads');
+        fixture.detectChanges();
+
+        const picks = Array.from(
+            fixture.nativeElement.querySelectorAll('.bars__pick') as NodeListOf<HTMLElement>
+        );
+        expect(picks.map((pick) => pick.getAttribute('aria-pressed'))).toEqual(['false', 'true']);
+        picks[0].click();
+        expect(tapped).toEqual(['chest']);
+        expect(picks[0].getBoundingClientRect().height).toBeGreaterThanOrEqual(36);
     });
 });

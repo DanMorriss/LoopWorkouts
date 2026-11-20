@@ -22,7 +22,9 @@ let nextId = 0;
  * `removableLabels` gives each listed muscle a remove button. `figureOnly` leaves the list
  * out, for showing the figure itself (the setup's choice of body), and `listOnly` the figure,
  * where something else draws it (an exercise's 3D demo). `linksFrom` makes each
- * listed muscle a link to exercises for it (the Plan page).
+ * listed muscle a link to exercises for it (the Plan page). `selectable` makes each a toggle
+ * instead, and `selected` rings one muscle on the figure and presses it in the list, for
+ * picking a muscle shown in several places at once (the muscles worked this week).
  */
 @Component({
     selector: 'app-body-map',
@@ -44,6 +46,13 @@ export class BodyMapComponent {
      * page it names (`?from=`, e.g. `plan`), with ‹ back to it. Null for none.
      */
     readonly linksFrom = input<string | null>(null);
+    /**
+     * The muscle picked elsewhere on the page, ringed on the figure and pressed in the list
+     * (Progress and Today's muscles this week), or null.
+     */
+    readonly selected = input<MuscleGroup | null>(null);
+    /** Each listed muscle a toggle, pressed while it's `selected`, saying it was tapped. */
+    readonly selectable = input(false);
     protected readonly slide = inject(PageSlide);
 
     /** The Exercises list cut down to `muscle`, opened from `from`. */
@@ -84,15 +93,20 @@ export class BodyMapComponent {
         }));
     });
 
-    protected readonly mainLabels = computed(() => labels(this.main()));
-    protected readonly supportingLabels = computed(() =>
-        labels(this.supporting().filter((muscle) => !this.main().includes(muscle)))
-    );
-
-    protected readonly mainList = computed(() => [...new Set(this.main())]);
-    protected readonly supportingList = computed(() =>
-        [...new Set(this.supporting())].filter((muscle) => !this.main().includes(muscle))
-    );
+    /** The listed muscles, main then supporting, each once; none with `figureOnly`. */
+    protected readonly groups = computed(() => {
+        if (this.figureOnly()) {
+            return [];
+        }
+        const main = [...new Set(this.main())];
+        const supporting = [...new Set(this.supporting())].filter(
+            (muscle) => !main.includes(muscle)
+        );
+        return [
+            { kind: 'main', heading: 'Main', muscles: main },
+            { kind: 'supporting', heading: 'Supporting', muscles: supporting },
+        ].filter(({ muscles }) => muscles.length > 0);
+    });
 
     protected muscleLabel(muscle: MuscleGroup): string {
         return MUSCLE_LABELS[muscle];
@@ -154,8 +168,4 @@ export class BodyMapComponent {
             this.pressedMuscle.set(muscle);
         }
     }
-}
-
-function labels(muscles: readonly MuscleGroup[]): string[] {
-    return [...new Set(muscles)].map((muscle) => MUSCLE_LABELS[muscle]);
 }

@@ -38,4 +38,38 @@ describe('FigureScene', () => {
         expect(disposed.length).toBeGreaterThan(0);
         squat.dispose();
     });
+
+    it("rounds and dips the back by a pose's arch, its ends staying where they are", () => {
+        const catCow = BUILT_IN_EXERCISE_MOTION['builtin:cat-cow']!;
+        const figure = new FigureScene(catCow, 'male');
+        const shared = sharedBody('male');
+        const torso = [...geometries(figure)].find(
+            (part) =>
+                part !== shared.torso &&
+                part.getAttribute('position').count === shared.torso.getAttribute('position').count
+        )!;
+        const canvas = document.createElement('canvas');
+        Object.assign(canvas, { width: 60, height: 60 });
+        const shaped = (arch: number) => {
+            expect(figure.draw({ ...catCow.frames[0].pose, arch }, 0, canvas)).toBe(true);
+            return Array.from(torso.getAttribute('position').array);
+        };
+        const flat = shaped(0);
+        const rounded = shaped(7);
+        // Front to back is x, up the back y, in the torso's own frame
+        const moved = flat.map((_, i) => (i % 3 === 0 ? rounded[i] - flat[i] : 0));
+        const ys = flat.filter((_, i) => i % 3 === 1);
+        const [low, high] = [Math.min(...ys), Math.max(...ys)];
+
+        // Its middle moves back, away from the chest, by the arch
+        expect(Math.min(...moved)).toBeCloseTo(-7, 0);
+        expect(Math.max(...moved)).toBeLessThanOrEqual(1e-6);
+        // Its bottom (the seat) and top (the neck) stay put
+        const atEnds = moved.filter((_, i) => {
+            const y = flat[i + 1];
+            return i % 3 === 0 && (y < low + 2 || y > high - 2);
+        });
+        expect(atEnds.every((change) => Math.abs(change) < 1e-6)).toBe(true);
+        figure.dispose();
+    });
 });

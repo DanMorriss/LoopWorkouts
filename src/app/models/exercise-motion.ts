@@ -62,6 +62,12 @@ export interface Pose {
      */
     readonly twist?: number;
     /**
+     * Only for the 3D figure: how far the middle of the back is pushed out of line, in cm,
+     * the hips and shoulders staying put. Positive rounds it, the middle rising away from the
+     * chest as a cat's back arches; negative dips it, the belly sinking (as in cat-cow).
+     */
+    readonly arch?: number;
+    /**
      * Only for the 3D figure: how far apart the hands are, side to side, when they're held
      * closer than the shoulders (hands together, say). From the side only.
      */
@@ -734,6 +740,7 @@ export function lerpPose(a: Pose, b: Pose, t: number, view: MotionView): Pose {
         feet: [lerp(feetA[0], feetB[0], t), lerp(feetA[1], feetB[1], t)],
         ...(a.shrug || b.shrug ? { shrug: lerp(a.shrug ?? 0, b.shrug ?? 0, t) } : {}),
         ...(a.twist || b.twist ? { twist: lerp(a.twist ?? 0, b.twist ?? 0, t) } : {}),
+        ...(a.arch || b.arch ? { arch: lerp(a.arch ?? 0, b.arch ?? 0, t) } : {}),
         ...(a.handsForward || b.handsForward
             ? { handsForward: lerpEach(a.handsForward ?? 0, b.handsForward ?? 0, t) }
             : {}),

@@ -48,6 +48,8 @@ export interface Skeleton {
     readonly right: Vec3;
     /** How far the shoulders are turned from the hips, in degrees (`Pose.twist`). */
     readonly twist: number;
+    /** How far the middle of the back is pushed out of line, in cm (`Pose.arch`). */
+    readonly arch: number;
     /** The way the head points, from the neck. */
     readonly headUp: Vec3;
     readonly arms: readonly [near: Limb3, far: Limb3];
@@ -332,6 +334,7 @@ export function skeletonOf(pose: Pose, motion: ExerciseMotion): Skeleton {
         forward: turnDir(forward),
         right: turnDir(right),
         twist,
+        arch: pose.arch ?? 0,
         headUp,
         arms,
         legs,

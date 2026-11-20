@@ -3376,8 +3376,9 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
             },
         ],
     },
-    // The back is one piece, so it can't round: the hips and shoulders lift and the head tucks
-    // for the cat, and they sink as the head lifts for the cow
+    // The back rounds up (`arch`) as the head tucks for the cat, and dips as the head lifts for
+    // the cow. The hips and shoulders lift and sink a little too, for the flat figure, whose
+    // back is one piece
     'builtin:cat-cow': {
         view: 'side',
         frames: [
@@ -3385,13 +3386,13 @@ export const BUILT_IN_EXERCISE_MOTION: Readonly<
                 label: 'Back rounded',
                 hold: 400,
                 ms: 1600,
-                pose: { ...ALL_FOURS, hips: [0, -53.5], torso: 104, head: 55 },
+                pose: { ...ALL_FOURS, hips: [0, -53.5], torso: 104, head: 55, arch: 7 },
             },
             {
                 label: 'Back dipped',
                 hold: 400,
                 ms: 1600,
-                pose: { ...ALL_FOURS, hips: [0, -50], torso: 111, head: 140 },
+                pose: { ...ALL_FOURS, hips: [0, -50], torso: 111, head: 140, arch: -8 },
             },
         ],
     },

@@ -2,14 +2,20 @@
 $off-color: var(--control-off); // 3:1 or more against the box, as a control's state must be
 $on-color: var(--glow);
 
+// Not squeezed by a row it's in (that row wraps instead), only by a place too narrow for it
 :host {
     display: inline-block;
+    flex-shrink: 0;
+    max-width: 100%;
 }
 
+// On and Off beside the switch, or under it where there isn't room (the largest text sizes)
 .toggle-switch {
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.2rem 0.6rem;
+    max-width: 100%;
     padding: 0.25rem;
     border: none;
     border-radius: 999px;

@@ -1,17 +1,23 @@
 // A switch with its name and a hint beside it, as Settings lists them: the name and hint on
-// the left, the switch on the right. Mixins, as only some pages have them.
+// the left, the switch on the right. Where there isn't room for both side by side (the largest
+// text sizes), the switch goes under them, still at the right. Mixins, as only some pages
+// have them.
 
 @mixin switch-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    justify-content: flex-end;
+    gap: 0.5rem 1rem;
 }
 
 @mixin switch-row-text {
     display: flex;
+    flex: 1 1 0;
     flex-direction: column;
     gap: 0.2rem;
+    // Less than this beside the switch, and the switch goes under it instead
+    min-width: min(100%, 7rem);
 }
 
 @mixin switch-row-name {

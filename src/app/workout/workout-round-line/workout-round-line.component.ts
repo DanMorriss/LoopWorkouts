@@ -1,6 +1,8 @@
 import { Component, input } from '@angular/core';
 import { RoundDotsComponent } from '../round-dots/round-dots.component';
 import { StepStripComponent } from '../step-strip/step-strip.component';
+import { capitalise } from '../../models/exercise';
+import { GroupSet } from '../../models/workout';
 import { setText } from '../round-progress';
 import { RoundSlide } from '../workout-view';
 
@@ -16,5 +18,8 @@ import { RoundSlide } from '../workout-view';
 })
 export class WorkoutRoundLineComponent {
     readonly slide = input.required<RoundSlide>();
-    protected readonly setText = setText;
+    /** Which set it is, starting the line: "Set 2 of 3", "Superset round 2 of 3". */
+    protected setLine(set: GroupSet): string {
+        return capitalise(setText(set));
+    }
 }

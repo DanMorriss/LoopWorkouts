@@ -21,7 +21,12 @@ import { injectUsePlanOnToday } from '../use-plan-on-today';
         <app-carousel label="Plans for you" itemName="Plan" [dotsFirst]="true">
             @for (plan of plans(); track plan.id) {
                 <ng-template appSlide>
-                    <app-plan-card [plan]="plan" [main]="true" (used)="usePlan($event)" />
+                    <app-plan-card
+                        [plan]="plan"
+                        [main]="true"
+                        [flat]="true"
+                        (used)="usePlan($event)"
+                    />
                 </ng-template>
             }
         </app-carousel>

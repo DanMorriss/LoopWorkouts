@@ -269,14 +269,14 @@ describe('ReadyMadePlansComponent (PLN-6)', () => {
             document.getElementById(toggle.getAttribute('aria-describedby')!)!.textContent!.trim()
         ).toBe('Optional stretching on 2 rest days.');
         expect(toggle.getAttribute('aria-checked')).toBe('true');
-        expect(card.textContent).toContain('+ 2 active rest');
+        expect(card.textContent).toContain('Plus 2 days of active rest');
         expect(card.textContent).toContain('Mobility flow');
 
         toggle.click();
         harness.fixture.detectChanges();
         // The card shows the plan as it'll be used: no active rest, the training as it was
         expect(toggle.getAttribute('aria-checked')).toBe('false');
-        expect(card.textContent).not.toContain('+ 2 active rest');
+        expect(card.textContent).not.toContain('Plus 2 days of active rest');
         expect(card.textContent).not.toContain('Mobility flow');
         expect(card.querySelector('.plan-card__count')!.textContent).toContain('4');
 

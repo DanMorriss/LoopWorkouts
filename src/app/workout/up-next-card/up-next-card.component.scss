@@ -5,6 +5,8 @@
     display: block;
     width: min(100%, 22rem);
     margin-top: 1rem;
+    // What its name and disc are sized against at the largest text sizes
+    container-type: inline-size;
 }
 
 // A card in the next step's colour: its kind's icon in a disc, then "Up next", the name and
@@ -120,8 +122,8 @@ button.up-next {
 .up-next__kind {
     display: grid;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: min(2.5rem, 13cqi);
+    height: min(2.5rem, 13cqi);
     border-radius: 50%;
     background: var(--next-color);
     color: var(--page-bg);
@@ -141,11 +143,25 @@ button.up-next {
     color: var(--text-muted);
 }
 
+// Growing with the text size only as far as the card has room for (cqi: hundredths of its
+// width), so a word such as "Push-up" still fits on a line at the largest sizes
 .up-next__name {
     @include display;
-    font-size: 1.35rem;
+    font-size: min(1.35rem, 8.5cqi);
     line-height: 1.15;
     overflow-wrap: anywhere;
+}
+
+// Each word whole, so a line breaks between words rather than at a hyphen (unless the word is
+// wider than the line), underlined as the name round it is
+.up-next__word {
+    display: inline-block;
+    max-width: 100%;
+    text-decoration: inherit;
+}
+
+.up-next__words {
+    text-decoration: inherit;
 }
 
 .up-next__detail {
@@ -189,13 +205,12 @@ button.up-next {
     }
 }
 
-// Above Done, so it takes its own taps
+// Above Done, so it takes its own taps. Its name and (i) run on as text, so the (i) goes onto
+// the next line where it doesn't fit after the name, rather than squeezing the name.
 .up-next__about {
     position: relative;
     z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
+    display: inline-block;
     max-width: 100%;
     padding: 0;
     border: 0;
@@ -228,7 +243,8 @@ button.up-next {
 }
 
 .up-next__about-icon {
-    flex: none;
+    margin-inline-start: 0.35rem;
+    vertical-align: -0.2em;
     width: 1.25rem;
     height: 1.25rem;
     color: var(--text-muted);

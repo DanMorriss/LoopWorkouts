@@ -30,7 +30,9 @@ test.describe('a new guest', () => {
             ).toBeVisible();
             // Three days of training, and two of active rest, which are optional
             await expect(getStarted.getByRole('article')).toContainText('3 days a week');
-            await expect(getStarted.getByRole('article')).toContainText('+ 2 active rest');
+            await expect(getStarted.getByRole('article')).toContainText(
+                'Plus 2 days of active rest'
+            );
             await expect(getStarted.getByRole('link', { name: 'All plans' })).toBeVisible();
             await expect(
                 getStarted.getByRole('link', { name: 'Make your own plan' })

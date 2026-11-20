@@ -50,7 +50,7 @@ test.describe('a simple workout', () => {
             await expect(run.title).toContainText('Short');
             await expect(run.face.getByText('Squats', { exact: true })).toBeVisible();
             await expect(run.faceTime).toHaveText(/^00:(30|29)$/);
-            await expect(run.main.getByText('round 1 of 2', { exact: true })).toBeVisible();
+            await expect(run.main.getByText('Round 1 of 2', { exact: true })).toBeVisible();
             await expect(run.next).toHaveText('Up next: Rest, 00:20');
             // Only Pause and Skip under the ring
             await expect(run.main.getByRole('button')).toHaveCount(2);
@@ -454,22 +454,22 @@ test.describe('sets and sections', () => {
         await run.wait(10_500);
 
         await expect(section).toHaveText(/Legs.*2 of 3/);
-        await expect(run.main.getByText(/set 1 of 3/).first()).toBeVisible();
+        await expect(run.main.getByText(/set 1 of 3/i).first()).toBeVisible();
         await expect
             .poll(() => app.announcements())
             .toContainEqual(expect.stringContaining('Legs, exercise 2 of 3'));
 
         await run.pressDone();
-        await expect(run.main.getByText(/set 1 of 3/).first()).toBeVisible();
+        await expect(run.main.getByText(/set 1 of 3/i).first()).toBeVisible();
         await expect(run.next).toHaveText('Up next: Leg press, Set 2 of 3 · 10 reps');
 
         await run.wait(60_500);
         await run.pressDone();
         await run.wait(60_500);
-        await expect(run.main.getByText(/set 3 of 3/).first()).toBeVisible();
+        await expect(run.main.getByText(/set 3 of 3/i).first()).toBeVisible();
         await expect(run.main.getByText('Last round!')).toHaveCount(0);
         await run.pressDone();
-        await expect(run.main.getByText(/set 3 of 3/).first()).toBeVisible();
+        await expect(run.main.getByText(/set 3 of 3/i).first()).toBeVisible();
         await run.wait(60_500);
         await expect(section).toHaveText(/Legs.*3 of 3/);
 
@@ -597,11 +597,11 @@ test.describe('a time limit', () => {
         const run = new WorkoutPage(page);
         await app.goto('/library');
         await run.startFromLibrary('A');
-        await expect(run.main.getByText('round 1', { exact: true })).toBeVisible();
+        await expect(run.main.getByText('Round 1', { exact: true })).toBeVisible();
         await expect(run.main.getByText(/^\s*01:0[34] left\s*$/)).toBeVisible();
 
         await run.wait(12_000);
-        await expect(run.main.getByText('round 3', { exact: true })).toBeVisible();
+        await expect(run.main.getByText('Round 3', { exact: true })).toBeVisible();
         await expect(run.main.getByText(/^\s*00:5[0-2] left\s*$/)).toBeVisible();
 
         await run.wait(53_000);

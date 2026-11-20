@@ -269,12 +269,12 @@ describe('WorkoutComponent', () => {
 
         it('says which round it is on, with a dot per round', async () => {
             start(makeWorkout({ workSeconds: 3, restSeconds: 0, repeats: 4 }));
-            expect(text()).toContain('round 1 of 4');
+            expect(text()).toContain('Round 1 of 4');
             expect(dots()).toEqual(['current', 'left', 'left', 'left']);
 
             await advanceAndRoll(3000);
 
-            expect(text()).toContain('round 2 of 4');
+            expect(text()).toContain('Round 2 of 4');
             expect(dots()).toEqual(['done', 'current', 'left', 'left']);
             fixture.destroy();
         });
@@ -294,7 +294,7 @@ describe('WorkoutComponent', () => {
             await advanceAndRoll(5000);
 
             expect(status()).toContain('Last round!');
-            expect(status()).not.toContain('round 2 of 2');
+            expect(status()).not.toContain('Round 2 of 2');
             expect(dots()).toEqual(['done', 'current']);
             fixture.destroy();
         });
@@ -328,7 +328,7 @@ describe('WorkoutComponent', () => {
         it('leaves out the dots when there are too many rounds to fit in a row', () => {
             start(makeWorkout({ repeats: 16 }));
 
-            expect(text()).toContain('round 1 of 16');
+            expect(text()).toContain('Round 1 of 16');
             expect(dots()).toEqual([]);
             fixture.destroy();
         });
@@ -1551,7 +1551,7 @@ describe('WorkoutComponent', () => {
             start(forever());
             advance(5000 * 6);
 
-            expect(text()).toContain('round 7 of ∞');
+            expect(text()).toContain('Round 7 of ∞');
             expect(fixture.nativeElement.querySelectorAll('.round-dot')).toHaveLength(0);
             expect(text()).not.toContain('Last round!');
             fixture.destroy();
@@ -1581,7 +1581,7 @@ describe('WorkoutComponent', () => {
             advance(60 * 60 * 1000);
 
             expect(view().isComplete()).toBe(false);
-            expect(text()).toContain('round 721 of ∞');
+            expect(text()).toContain('Round 721 of ∞');
             expect(
                 fixture.nativeElement.querySelector('.workout-control--main button')
             ).not.toBeNull();
@@ -1622,7 +1622,7 @@ describe('WorkoutComponent', () => {
             start(amrap());
             advance(12_000);
 
-            expect(text()).toContain('round 3');
+            expect(text()).toContain('Round 3');
             expect(text()).not.toContain('of ∞');
             expect(text()).toContain('00:52 left');
             expect(
@@ -3267,7 +3267,7 @@ describe('WorkoutComponent', () => {
 
             expect(face().classList).toContain('workout-face--new-round');
             expect(roundLine()).not.toBe(round1);
-            expect(roundLine().textContent).toContain('round 2 of 3');
+            expect(roundLine().textContent).toContain('Round 2 of 3');
             fixture.destroy();
         });
     });
@@ -4275,7 +4275,7 @@ describe('WorkoutComponent', () => {
         it('says which set it is on, with a dot per set, the last included', async () => {
             start(legDay());
 
-            expect(status()).toBe('set 1 of 3');
+            expect(status()).toBe('Set 1 of 3');
             expect(dots()).toEqual(['current', 'left', 'left']);
             // The round is said as it starts, as for any workout, and the exercise as it does
             expect(said()).toBe('exercise 1 of 2, Leg press, 10 reps, set 1 of 3, round 1 of 1');
@@ -4284,13 +4284,13 @@ describe('WorkoutComponent', () => {
             await roll();
             // Resting after set 1 is part of it
             expect(view().isRestActive()).toBe(true);
-            expect(status()).toBe('set 1 of 3');
+            expect(status()).toBe('Set 1 of 3');
             expect(dots()).toEqual(['current', 'left', 'left']);
             expect(upNextCard()).toBe('Up next: Leg press, Set 2 of 3 · 10 reps');
 
             await advanceAndRoll(5000);
             expect(view().isRepsActive()).toBe(true);
-            expect(status()).toBe('set 2 of 3');
+            expect(status()).toBe('Set 2 of 3');
             expect(dots()).toEqual(['done', 'current', 'left']);
             expect(said()).toBe('Leg press, 10 reps, set 2 of 3');
             pressDone();
@@ -4298,13 +4298,13 @@ describe('WorkoutComponent', () => {
             await advanceAndRoll(5000);
 
             // A set isn't a round of the workout, so no "Last round!" here
-            expect(status()).toBe('set 3 of 3');
+            expect(status()).toBe('Set 3 of 3');
             expect(dots()).toEqual(['done', 'done', 'current']);
             expect(said()).toBe('Leg press, 10 reps, last set');
             pressDone();
             await roll();
             expect(view().isRestActive()).toBe(true);
-            expect(status()).toBe('set 3 of 3');
+            expect(status()).toBe('Set 3 of 3');
             fixture.destroy();
         });
 
@@ -4334,7 +4334,7 @@ describe('WorkoutComponent', () => {
         it("adds the whole workout's round when it repeats", () => {
             start(legDay(2));
 
-            expect(status()).toBe('set 1 of 3 · round 1 of 2');
+            expect(status()).toBe('Set 1 of 3 · round 1 of 2');
             fixture.destroy();
         });
 
@@ -4411,20 +4411,20 @@ describe('WorkoutComponent', () => {
             start(upperBody());
 
             expect(text()).toContain('Bench');
-            expect(status()).toBe('superset round 1 of 3');
+            expect(status()).toBe('Superset round 1 of 3');
             expect(upNextCard()).toBe('Done · up next: Row, 10 reps');
             pressDone();
             await roll();
             expect(text()).toContain('Row');
-            expect(status()).toBe('superset round 1 of 3');
+            expect(status()).toBe('Superset round 1 of 3');
             pressDone();
             await roll();
 
             expect(view().isRestActive()).toBe(true);
-            expect(status()).toBe('superset round 1 of 3');
+            expect(status()).toBe('Superset round 1 of 3');
             expect(upNextCard()).toBe('Up next: Bench, Superset round 2 of 3 · 10 reps');
             await advanceAndRoll(5000);
-            expect(status()).toBe('superset round 2 of 3');
+            expect(status()).toBe('Superset round 2 of 3');
             expect(said()).toBe('Bench, 10 reps, superset round 2 of 3');
             pressDone();
             await roll();
@@ -4432,7 +4432,7 @@ describe('WorkoutComponent', () => {
             await roll();
             await advanceAndRoll(5000);
 
-            expect(status()).toBe('superset round 3 of 3');
+            expect(status()).toBe('Superset round 3 of 3');
             expect(said()).toBe('Bench, 10 reps, superset, last round');
             pressDone();
             await roll();
@@ -4440,7 +4440,7 @@ describe('WorkoutComponent', () => {
             await roll();
             // The rest after the last round, before the plank
             expect(view().isRestActive()).toBe(true);
-            expect(status()).toBe('superset round 3 of 3');
+            expect(status()).toBe('Superset round 3 of 3');
             await advanceAndRoll(5000);
             expect(view().isWorkActive()).toBe(true);
             fixture.destroy();
@@ -4449,7 +4449,7 @@ describe('WorkoutComponent', () => {
         it('is a giant set with three exercises, rests aside', () => {
             start(upperBody([rest(2), reps(8, 'Press')]));
 
-            expect(status()).toBe('giant set round 1 of 3');
+            expect(status()).toBe('Giant set round 1 of 3');
             fixture.destroy();
         });
 

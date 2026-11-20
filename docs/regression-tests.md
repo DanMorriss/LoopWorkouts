@@ -924,6 +924,18 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Expected:** 1. "Skipped: Push-up" at the top, where there was nothing. 2. "2 skipped exercises", with a 2 on it. 3. Its menu lists Push-up (10 reps) and Plank (00:30); picked, the bar says "Push-up is up next", focus is back on the button ("Skipped: Plank") and Up next is Push-up. 4. The bar goes with the Skip; the face is Push-up, with "Skipped earlier"; after the reload Up next is Squat, and Done starts the squats. 5. "Do Plank next?"; it closes, focus on the button. 6. The button's gone, Up next is Plank; it runs its 0:30 (not finished at 15 s), then the summary: Workout finished, with Push-up 10 reps, Squat 10 reps and Plank 0:30.
 - **Left to Vitest:** the held clock, its alarms and what's saved (`later.spec.ts`).
 
+### REG-RUN-20 · Asked about skipped exercises at the finish
+
+- **Stories:** RUN-16 · **Priority:** P2 · **[Clock]**
+- **Preconditions:** workout "Gym", as in REG-RUN-19.
+- **Steps:**
+    1. Start; Skip four times (push-ups, rest, plank, rest); Done.
+    2. Reload.
+    3. Pick Plank; `runFor` 31000.
+    4. **Finish**.
+- **Expected:** 1. "Do one before you finish?", and no summary. 2. Still asking, listing Push-up (10 reps) and Plank (00:30), then Finish. 3. The plank runs, focus on Pause; then "Do Push-up before you finish?", focus on Do it now. 4. The summary: Workout finished, with Plank 0:30 and Squat 10 reps, and no push-ups.
+- **Left to Vitest:** the time spent deciding left out, Escape finishing, and a run ended while it asks logged as finished (`finish-later-dialog.component.spec.ts`).
+
 ---
 
 ## 6. History, on the Progress tab (`history.md`)
@@ -1633,7 +1645,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 | Today and planning        | REG-PLAN-01 – 12 | PLN-1 – PLN-7, NAV-6, LIB-6                                                                                                                            |
 | Building a workout        | REG-BLD-01 – 10  | BLD-1, BLD-3 – BLD-17, EXR-2, EXR-11, LIB-1                                                                                                            |
 | Workouts and ready-made   | REG-LIB-01 – 12  | LIB-1 – LIB-8, LIB-10, CTL-4                                                                                                                           |
-| Running a workout         | REG-RUN-01 – 19  | RUN-1 – RUN-12, RUN-14 – RUN-16, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
+| Running a workout         | REG-RUN-01 – 20  | RUN-1 – RUN-12, RUN-14 – RUN-16, CTL-1 – CTL-4, ALM-1, ALM-3, ALM-5, BLD-8 – BLD-10, BLD-13, PRG-1, PRG-2, PRG-5, PRG-10, PRG-11, PRG-16, HIS-3, SET-2 |
 | History                   | REG-HIS-01 – 05  | HIS-1 – HIS-6, CTL-3                                                                                                                                   |
 | Progress                  | REG-PRG-01 – 08  | PRG-3, PRG-4, PRG-6, PRG-8, PRG-9, PRG-10, PRG-13, PRG-14, PRG-16                                                                                      |
 | Exercises                 | REG-EXR-01 – 06  | EXR-1 (via REG-EXR-04's rename across history and REG-RUN-11), EXR-2, EXR-3, EXR-6 – EXR-10, EXR-12, EXR-13                                            |

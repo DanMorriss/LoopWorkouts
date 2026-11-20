@@ -19,6 +19,7 @@ import { UndoService } from '../../shared/undo/undo.service';
 import { LaterPicks } from '../later-picks';
 import { WorkoutView } from '../workout-view';
 import { flyInto, flyOnto } from './later-fly';
+import { LaterOptionComponent } from '../later-option/later-option.component';
 
 /**
  * The exercises skipped to do later (RUN-16), at the top of the workout page: a small button
@@ -27,7 +28,7 @@ import { flyInto, flyOnto } from './later-fly';
  */
 @Component({
     selector: 'app-later-list',
-    imports: [MatIconModule],
+    imports: [LaterOptionComponent, MatIconModule],
     templateUrl: './later-list.component.html',
     styleUrl: './later-list.component.scss',
     host: {

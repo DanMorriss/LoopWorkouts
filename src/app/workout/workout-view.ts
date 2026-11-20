@@ -298,7 +298,8 @@ export class WorkoutView {
      */
     readonly aside = computed(() => {
         const workout = this.running();
-        if (!workout || this.isComplete()) {
+        // Still there at the end while the run asks about them (see `askingFinish`)
+        if (!workout || this.run.isComplete()) {
             return [];
         }
         const rounds = workout.repeats !== 1;

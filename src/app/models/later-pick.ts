@@ -40,6 +40,23 @@ export function pickNext(
     }
     const atMs = clock.elapsedMs - state.phaseElapsedMs + state.phaseSeconds * 1000;
     const repStepsDone = clock.repStepsDone + (state.phase === 'reps' ? 1 : 0);
+    return pickAt({ ...later, aside }, step, atMs, repStepsDone);
+}
+
+/**
+ * `later` with `step` picked to run once the clock's at `atMs`, with `repStepsDone` done: e.g.
+ * the end of the step on now, or the finish, while the run asks about what's put aside
+ * (`ActiveRunService.askingFinish`). Steps picked there before and not yet started follow it.
+ * Taken off the list put aside.
+ */
+export function pickAt(
+    later: RunLater,
+    step: LaterStep,
+    atMs: number,
+    repStepsDone: number
+): RunLater {
+    const aside = later.aside.filter((other) => !sameStep(other, step));
+    const picked = { round: step.round, stepIndex: step.stepIndex };
     const queued = later.queue?.atMs === atMs ? later.queue.steps : [];
     // A queue from somewhere else (it can't be, but if) goes back on the list
     const stale = later.queue && later.queue.atMs !== atMs ? later.queue.steps : [];

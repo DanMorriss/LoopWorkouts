@@ -613,6 +613,14 @@ export class WorkoutStore {
         sessionStorage.setItem('activeWaitsPassed', String(position + 1));
     }
 
+    /**
+     * The clock let past where it held by `ms`, with nothing done: e.g. at the finish, while
+     * the run asked about exercises put aside (RUN-16).
+     */
+    passHeld(ms: number) {
+        this.moveStart(Math.max(0, ms));
+    }
+
     /** What's put aside to do later and picked to do next changes (RUN-16). */
     setActiveLater(later: RunLater) {
         if (!this._activeWorkout()) {

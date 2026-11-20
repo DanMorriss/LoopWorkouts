@@ -368,6 +368,48 @@ test.describe('doing a skipped exercise later', () => {
         await expect(run.summary).toContainText('Squat: 10 reps');
         await expect(run.summary).toContainText('Plank: 0:30');
     });
+
+    test(
+        'REG-RUN-20 asks about skipped exercises at the finish',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Gym');
+            // Push-ups, rest, plank and rest skipped, then the squats done
+            for (let i = 0; i < 4; i++) {
+                await run.skip.click();
+            }
+            await run.pressDone();
+
+            // It asks rather than finishing, a reload and all
+            const several = page.getByRole('dialog', { name: 'Do one before you finish?' });
+            await expect(several).toBeVisible();
+            await expect(run.summary).toHaveCount(0);
+            await app.reload();
+            await expect(several.getByRole('button')).toHaveText([
+                /Back/,
+                /Push-up\s*10 reps/,
+                /Plank\s*00:30/,
+                'Finish',
+            ]);
+
+            // One picked runs now, then it asks about the other
+            await several.getByRole('button', { name: /^Plank/ }).click();
+            await expect(run.face.getByText('Plank', { exact: true })).toBeVisible();
+            await expect(run.pause).toBeFocused();
+            await run.wait(31_000);
+            const one = page.getByRole('dialog', { name: 'Do Push-up before you finish?' });
+            await expect(one.getByRole('button', { name: 'Do it now' })).toBeFocused();
+
+            // Finish leaves it undone
+            await one.getByRole('button', { name: 'Finish' }).click();
+            await expect(run.summary).toHaveAccessibleName('Workout finished');
+            await expect(run.summary).toContainText('Plank: 0:30');
+            await expect(run.summary).toContainText('Squat: 10 reps');
+            await expect(run.summary).not.toContainText('Push-up');
+        }
+    );
 });
 
 test.describe('reloading', () => {

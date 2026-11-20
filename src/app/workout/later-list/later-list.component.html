@@ -28,7 +28,7 @@
                 @if (items.length === 1) {
                     @let only = items[0];
                     <p id="later-heading" class="later__heading">Do {{ only.name }} next?</p>
-                    <p class="later__detail later__detail--only">{{ only.detail }}</p>
+                    <p class="later__detail">{{ only.detail }}</p>
                     <div class="later__actions">
                         <button type="button" class="btn-pill" (click)="close()">Not now</button>
                         <button
@@ -44,12 +44,11 @@
                     @for (item of items; track item.key) {
                         <button
                             type="button"
-                            class="menu__item later__item"
+                            appLaterOption
+                            [name]="item.name"
+                            [detail]="item.detail"
                             (click)="doNext(item.later, item.name)"
-                        >
-                            <span class="later__name">{{ item.name }}</span>
-                            <span class="later__detail">{{ item.detail }}</span>
-                        </button>
+                        ></button>
                     }
                 }
             </div>

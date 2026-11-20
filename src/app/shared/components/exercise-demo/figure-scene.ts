@@ -974,7 +974,7 @@ export class FigureScene {
             const degrees = (Math.atan2(dot3(thigh, bodyForward), down) * 180) / Math.PI;
             return Math.min(140, Math.max(-40, degrees));
         }) as [number, number];
-        this.shapeTorso(skeleton.twist, bent, restHipY, model.levels.armpit);
+        this.shapeTorso(skeleton, bent, restHipY, shoulderY, model.levels.armpit);
         parts.torso.matrix.copy(
             moveMatrix(
                 [0, restHipY, 0],
@@ -1127,15 +1127,18 @@ export class FigureScene {
      * thigh (`bent`, right and left, in degrees) and flattens behind as the glutes stretch,
      * rather than sticking out behind a body bent over. Above the hips it turns by `twist`
      * degrees about its middle line, none at the hips and all of it from the armpits up, as a
-     * back twists.
+     * back twists. Between the hips and the shoulders, its middle is pushed out of line by
+     * `arch` cm (rounded up, or dipped as the belly sinks), on a smooth bump that's nothing at
+     * either end, so the hips, shoulders and neck stay where the skeleton puts them.
      */
     private shapeTorso(
-        twist: number,
+        { twist, arch }: Pick<Skeleton, 'twist' | 'arch'>,
         bent: readonly [number, number],
         hipY: number,
+        shoulderY: number,
         armpitY: number
     ) {
-        const shapedFor = [twist, ...bent].map((value) => value.toFixed(1)).join();
+        const shapedFor = [twist, arch, ...bent].map((value) => value.toFixed(1)).join();
         if (shapedFor === this.torsoShapedFor) {
             return;
         }
@@ -1171,6 +1174,23 @@ export class FigureScene {
                 // About the line across through the hip joints: positive brings it forwards
                 const [x, down] = [point.x, point.y - hipY];
                 point.set(x * cos - down * sin, hipY + x * sin + down * cos, point.z);
+                facing.set(
+                    facing.x * cos - facing.y * sin,
+                    facing.x * sin + facing.y * cos,
+                    facing.z
+                );
+            }
+
+            // The back: rounding pushes it the other way from the chest (-x), a dip towards it
+            const along = (y - hipY) / (shoulderY - hipY);
+            if (arch && along > 0 && along < 1) {
+                const bump = Math.sin(Math.PI * along);
+                point.x -= arch * bump * bump;
+                // The surface's slope up the back, to turn its normal to match
+                const slope =
+                    (-arch * Math.PI * Math.sin(2 * Math.PI * along)) / (shoulderY - hipY);
+                const angle = -Math.atan(slope);
+                const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
                 facing.set(
                     facing.x * cos - facing.y * sin,
                     facing.x * sin + facing.y * cos,

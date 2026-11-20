@@ -125,6 +125,17 @@ describe('poseAt', () => {
         expect(poseAt(smooth, 1000).hips[1]).toBeCloseTo(-50);
         expect(poseAt(smooth, 1500).hips[1]).toBeCloseTo(-71);
     });
+    it("eases the back's arch from one position to the next, and leaves it out with none", () => {
+        const rounding: ExerciseMotion = {
+            view: 'side',
+            frames: [
+                { label: 'Flat', pose: standing, ms: 500 },
+                { label: 'Rounded', pose: { ...standing, arch: 8 }, ms: 500 },
+            ],
+        };
+        expect(poseAt(rounding, 750).arch).toBeCloseTo(4);
+        expect(poseAt(squat, 700)).not.toHaveProperty('arch');
+    });
 });
 
 describe('muscleTone', () => {

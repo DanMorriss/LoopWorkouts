@@ -136,10 +136,8 @@ button.up-next {
 
 // In the muted text colour: in the step's own, it's too faint this small on the tinted card
 .up-next__eyebrow {
-    font-size: 0.7rem;
+    @include caps(0.7rem);
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--text-muted);
 }
 

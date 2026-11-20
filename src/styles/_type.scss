@@ -21,6 +21,16 @@
 // in the system face, so the digits don't shift. Audiowide has no such digits: the workout's
 // countdown gives each one a fixed-width cell instead (ClockDigitsComponent).
 
+// A page's title with its button at the right (Workouts' and Exercises' + New): the button
+// drops under the title where the two don't fit side by side, as with large text
+@mixin title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 0.75rem;
+}
+
 // A slid-in page's title, and the line or two under it saying what it's for
 @mixin page-title {
     margin: 0 0 0.5rem;

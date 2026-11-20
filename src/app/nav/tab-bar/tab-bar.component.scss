@@ -1,3 +1,4 @@
+@use 'type' as *;
 @use 'interaction' as *;
 
 // A capsule floating over the bottom of the page, in the frosted material the page scrolls
@@ -87,9 +88,8 @@
 
 // Small, so medium weight and a little more spacing between the letters keep it readable
 .tab-bar__label {
-    font-size: 0.7rem;
+    @include small-type(0.7rem);
     font-weight: 500;
-    letter-spacing: 0.01em;
 }
 
 // Where they'd run into each other (large text, or a narrow screen), the icons alone, a little

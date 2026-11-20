@@ -199,10 +199,13 @@ test.describe('the suggested next workout', () => {
             await expect(suggested).toContainText(
                 "It works your Chest, which you haven't trained in the last 7 days."
             );
-            await expect(suggested.getByRole('link', { name: 'See your week' })).toHaveAttribute(
-                'href',
-                /\/history/
-            );
+            // Start is its only way on: Progress is linked from the muscles under it
+            await expect(suggested.getByRole('link')).toHaveCount(0);
+            await expect(
+                page
+                    .getByRole('region', { name: 'Muscles worked this week' })
+                    .getByRole('link', { name: "See this week's progress" })
+            ).toHaveAttribute('href', '/history');
             await suggested.getByRole('button', { name: 'Start Push' }).click();
             await expect(page).toHaveURL('/workout');
             await expect(new WorkoutPage(page).title).toContainText('Push');

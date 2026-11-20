@@ -299,9 +299,6 @@ describe('HomeComponent', () => {
         expect(text('.suggestion__reason')).toEqual([
             "It works your Chest, which you haven't trained in the last 7 days.",
         ]);
-        const more = element().querySelector<HTMLAnchorElement>('.suggestion__more')!;
-        expect(more.textContent).toContain('See your week');
-        expect(more.getAttribute('href')).toBe('/history');
         expect(element().querySelector('app-get-started')).toBeNull();
 
         const router = TestBed.inject(Router);
@@ -464,15 +461,6 @@ describe('HomeComponent', () => {
                 // Not the one planned next, which back squats are, among any to swipe to
                 expect(text('.suggestion__title').length).toBeGreaterThan(1);
                 expect(text('.suggestion__title')).not.toContain('Legs');
-            });
-
-            it('says See your week only with something done for Progress to show', async () => {
-                await restDay();
-                expect(element().querySelector('.suggestion__more')).toBeNull();
-
-                TestBed.inject(HistoryStore).record(yesterday);
-                fixture.detectChanges();
-                expect(text('.suggestion__more')).toEqual(['See your week chevron_right']);
             });
 
             it('offers nothing extra on a day with something planned', async () => {
@@ -882,7 +870,6 @@ describe('HomeComponent', () => {
             // stretches for what was done (PRG-16)
             expect(text('.suggestion__label')).toEqual(["After today's training"]);
             expect(text('.suggestion__title')).toEqual(['Stretch what you worked']);
-            expect(element().querySelector('.suggestion__more')).toBeNull();
         });
 
         it('offers stretches for today first, starting them, and none once done', () => {

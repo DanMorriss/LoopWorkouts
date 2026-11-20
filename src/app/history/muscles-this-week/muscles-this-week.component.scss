@@ -1,4 +1,3 @@
-@use 'interaction' as *;
 @use 'panel-card' as *;
 
 :host {
@@ -65,10 +64,9 @@
     margin-top: 0.75rem;
 }
 
-// On Today, the way to the bars on Progress, under the map
+// On Today, the way to the bars on Progress, the card's last row, centred under the rest
 .muscles-week__more {
-    @include link-button;
-    margin-top: 0.75rem;
-    font-size: 0.85rem;
-    text-decoration: none;
+    display: flex;
+    width: fit-content;
+    margin: 0.75rem auto 0;
 }

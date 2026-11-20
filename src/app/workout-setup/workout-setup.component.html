@@ -1,7 +1,8 @@
 <div class="flex justify-center">
     <div class="w-full max-w-md p-4">
         <app-back-link [url]="back().url" [label]="back().label" />
-        <form [formRoot]="setup.workoutForm">
+        <!-- Start is its submit, by its button or Enter in a box: checked, then saved -->
+        <form [formRoot]="setup.workoutForm" (submit)="save.saveAndStart()">
             <!-- data-tour: what the tour of Create (BLD-17) lights up -->
             <label class="picker-field" for="title" data-tour="workout-title">
                 <span class="picker-field__label">Workout Title</span>
@@ -266,7 +267,7 @@
                     class="btn-pill setup-save"
                     type="button"
                     [disabled]="setup.workoutForm().invalid()"
-                    (click)="setup.saveOnly()"
+                    (click)="save.saveOnly()"
                 >
                     <mat-icon aria-hidden="true">bookmark_add</mat-icon>
                     Save

@@ -37,6 +37,7 @@ import {
     work,
 } from '../shared/testing/make-workout';
 import { WorkoutSetupComponent } from './workout-setup.component';
+import { SetupSave } from './setup-save';
 import { SetupSteps } from './setup-steps';
 import { WorkoutSetupForm } from './workout-setup-form';
 import { LeaveCheck } from '../shared/navigation/leave-check';
@@ -729,7 +730,7 @@ describe('WorkoutSetupComponent', () => {
                 chooseTime(1, 'seconds', '30'); // only rest
 
                 expect(button('Save').disabled).toBe(true);
-                await fixture.debugElement.injector.get(WorkoutSetupForm).saveOnly();
+                await fixture.debugElement.injector.get(SetupSave).saveOnly();
 
                 expect(store.workouts()).toEqual([]);
                 expect(navigate).not.toHaveBeenCalled();
@@ -1381,7 +1382,7 @@ describe('WorkoutSetupComponent', () => {
             await fixture.whenStable();
             expect(weights()).toEqual([16, 16]);
 
-            await form().saveOnly();
+            await fixture.debugElement.injector.get(SetupSave).saveOnly();
             expect(TestBed.inject(SettingsStore).kettlebellWeight()).toBe(16);
         });
 

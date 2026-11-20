@@ -37,6 +37,7 @@ import {
     work,
 } from '../shared/testing/make-workout';
 import { WorkoutSetupComponent } from './workout-setup.component';
+import { SetupSteps } from './setup-steps';
 import { WorkoutSetupForm } from './workout-setup-form';
 import { LeaveCheck } from '../shared/navigation/leave-check';
 import { ActiveRunService } from '../shared/run/active-run.service';
@@ -1358,7 +1359,7 @@ describe('WorkoutSetupComponent', () => {
             await fixture.whenStable();
         }
         async function addGobletSquat() {
-            form().addExercise('builtin:goblet-squat');
+            fixture.debugElement.injector.get(SetupSteps).addExercise('builtin:goblet-squat');
             fixture.detectChanges();
             await fixture.whenStable();
         }

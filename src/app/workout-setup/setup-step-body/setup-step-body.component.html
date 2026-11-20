@@ -89,7 +89,7 @@
                 <app-wheel-picker
                     [id]="'step-' + key + '-sets'"
                     [value]="step().value().sets"
-                    (valueChange)="setup.setSets(i, $event)"
+                    (valueChange)="steps.setSets(i, $event)"
                     [options]="setup.setOptions"
                     [labelledBy]="'step-' + key + '-title step-' + key + '-sets-label'"
                 />
@@ -156,7 +156,7 @@
                 <app-toggle-switch
                     [id]="'step-' + key + '-vary'"
                     [checked]="step().value().vary"
-                    (checkedChange)="setup.setVary(i, $event)"
+                    (checkedChange)="steps.setVary(i, $event)"
                     [labelledBy]="'step-' + key + '-title step-' + key + '-vary-label'"
                 />
             </div>

@@ -19,6 +19,7 @@ import { TourService } from '../tour/tour.service';
 import { BrowseExercisesDialogComponent } from './browse-exercises-dialog/browse-exercises-dialog.component';
 import { SetupDrag } from './setup-drag';
 import { SetupExercises } from './setup-exercises';
+import { SetupSteps } from './setup-steps';
 import { SetupSupersets } from './setup-supersets';
 import { StepDragPreviewComponent } from './step-drag-preview/step-drag-preview.component';
 import { BACK_PAGE } from './step-model';
@@ -36,7 +37,7 @@ import { WorkoutSetupForm } from './workout-setup-form';
     selector: 'app-workout-setup',
     templateUrl: './workout-setup.component.html',
     styleUrls: ['./workout-setup.component.scss', './workout-setup-supersets.scss'],
-    providers: [WorkoutSetupForm, SetupExercises, SetupDrag, SetupSupersets],
+    providers: [WorkoutSetupForm, SetupSteps, SetupExercises, SetupDrag, SetupSupersets],
     host: {
         '(window:beforeunload)': 'warnBeforeUnload($event)',
         '(document:click)': 'setup.closePopups($event)',
@@ -72,6 +73,7 @@ export class WorkoutSetupComponent {
     protected readonly setup = inject(WorkoutSetupForm);
     protected readonly exercises = inject(SetupExercises);
     protected readonly drag = inject(SetupDrag);
+    protected readonly steps = inject(SetupSteps);
 
     protected readonly back = signal({ url: '/library', label: 'Workouts' });
     /** The warning about leaving with unsaved changes is open. */
@@ -137,7 +139,7 @@ export class WorkoutSetupComponent {
             }
             const add = params.get('add');
             if (add !== null) {
-                this.setup.addExercise(add);
+                this.steps.addExercise(add);
                 this.addedExercise = true;
                 // Off the address, so going back to it or reloading doesn't add it again
                 void this.router.navigate([], {

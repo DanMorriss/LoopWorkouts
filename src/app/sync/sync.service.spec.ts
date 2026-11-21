@@ -160,6 +160,83 @@ describe('SyncService', () => {
         });
     });
 
+    describe('notes, which may mention health (SYN-10)', () => {
+        const consent = () => TestBed.inject(ConsentService);
+        const noteOnServer = (id: string) =>
+            (onServer('history', id)!.data as Partial<HistoryEntry>).note;
+
+        beforeEach(() => (server.consent = null));
+
+        it("aren't sent without consent, the entries going without them", async () => {
+            history().record({ ...entry('run-1', 1), note: 'sore knee' });
+            exercises().setNote('own:squat', 'left knee');
+
+            await start();
+
+            expect(onServer('history', 'run-1')).toBeDefined();
+            expect(noteOnServer('run-1')).toBeUndefined();
+            expect(onServer('exercise-note', 'own:squat')).toBeUndefined();
+            // Still here
+            expect(history().entries()[0].note).toBe('sore knee');
+            expect(exercises().notes()).toHaveLength(1);
+        });
+
+        it("keep this device's note on an entry changed on another device", async () => {
+            history().record({ ...entry('run-1', 1), note: 'sore knee' });
+            await start();
+            const there = { ...entry('run-1', 1), title: 'Hill intervals' };
+            server.write({
+                kind: 'history',
+                id: 'run-1',
+                updated_at: Date.now() + 1000,
+                deleted_at: null,
+                data: { ...there, updatedAt: Date.now() + 1000 },
+            });
+
+            await sync.sync();
+
+            expect(history().entries()[0]).toMatchObject({
+                title: 'Hill intervals',
+                note: 'sore knee',
+            });
+        });
+
+        it('are all sent once the account keeps them', async () => {
+            history().record({ ...entry('run-1', 1), note: 'sore knee' });
+            exercises().setNote('own:squat', 'left knee');
+            await start();
+
+            await consent().give(client as unknown as AccountClient);
+            await sync.sync();
+
+            expect(noteOnServer('run-1')).toBe('sore knee');
+            expect(onServer('exercise-note', 'own:squat')!.data).toMatchObject({
+                text: 'left knee',
+            });
+        });
+
+        it("waits to send anything until the account's answer is known", async () => {
+            client.rpc.mockImplementation(async (fn: string, args?: unknown) =>
+                fn === 'my_health_consent'
+                    ? { data: null, error: { message: 'down' } }
+                    : server.rpc(fn, args)
+            );
+            history().record({ ...entry('run-1', 1), note: 'sore knee' });
+
+            await start();
+
+            expect(pushes()).toHaveLength(0);
+            expect(status().problem).toBe('failed');
+        });
+
+        it("say they're not all sent, before signing out", async () => {
+            history().record({ ...entry('run-1', 1), note: 'sore knee' });
+            await start();
+
+            expect(await sync.syncAll()).toBe(false);
+        });
+    });
+
     describe('the body weight (CAL-6)', () => {
         const settings = () => TestBed.inject(SettingsStore);
         /** The account consents to keeping it, as the server says on signing in. */

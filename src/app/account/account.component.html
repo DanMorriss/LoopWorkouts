@@ -20,7 +20,7 @@
                         sign in on. Other settings stay a choice for each device.
                     </p>
                     <p class="account__text account__sync">{{ syncText() }}</p>
-                    <app-consent-status />
+                    <app-notes-consent />
                     @if (confirmingDelete()) {
                         <div
                             class="account__ask"
@@ -53,9 +53,15 @@
                             aria-labelledby="account-sign-out-warning"
                         >
                             <p class="account__warning" id="account-sign-out-warning" tabindex="-1">
-                                Some changes on this device haven't synced, maybe because you're
-                                offline. Signing out removes them from this device, so they'd be
-                                lost.
+                                @if (notesKept()) {
+                                    Some changes on this device haven't synced, maybe because you're
+                                    offline. Signing out removes them from this device, so they'd be
+                                    lost.
+                                } @else {
+                                    Your notes aren't kept with your account, so signing out removes
+                                    them from this device. To keep them, turn on Keep notes with my
+                                    account first.
+                                }
                             </p>
                             <div class="account__actions">
                                 <button

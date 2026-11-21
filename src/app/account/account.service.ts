@@ -126,8 +126,7 @@ export class AccountService {
     }
 
     /**
-     * Once each account's signed in, saves the consent ticked before signing in (SYN-10), or
-     * looks up the account's. Not waited on: Supabase's listener waiting on its own client
+     * Once each account's signed in, looks up its consents (SYN-10, CAL-6). Not waited on: Supabase's listener waiting on its own client
      * would never finish.
      */
     private checkConsent(client: AccountClient, session: Session | null) {
@@ -144,12 +143,13 @@ export class AccountService {
     }
 
     /**
-     * Agreed on the You tab, signed in already, to keeping notes that may mention health
-     * (SYN-10). Gives whether it was saved.
+     * Agreed, signed in, to keeping notes that may mention health with the account (SYN-10),
+     * or withdrawn, which deletes them there. Gives whether it was saved.
      */
-    async agreeToConsent(): Promise<boolean> {
+    async keepNotes(keep: boolean): Promise<boolean> {
         try {
-            return await this.consent.agreeSignedIn(await this.connect());
+            const client = await this.connect();
+            return await (keep ? this.consent.give(client) : this.consent.withdraw(client));
         } catch {
             return false;
         }

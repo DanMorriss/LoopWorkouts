@@ -9,7 +9,8 @@ import { AccountService } from './account.service';
 import { DeviceDataService } from '../shared/state/device-data.service';
 import { ProfileComponent } from './profile/profile.component';
 import { SignInComponent } from './sign-in/sign-in.component';
-import { ConsentStatusComponent } from './consent-status/consent-status.component';
+import { ConsentService } from './consent.service';
+import { NotesConsentComponent } from './notes-consent/notes-consent.component';
 import { hasSignInTokens } from './sign-in-landing';
 import { YourDataComponent } from './your-data/your-data.component';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
@@ -17,7 +18,8 @@ import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 
 /**
  * The You tab (SYN-3, SYN-7, SYN-8, SYN-9, SYN-10): signing in (SignInComponent), who's
- * signed in and how sync is going, consent to keeping notes that may mention health, signing out and deleting the account; then your profile
+ * signed in and how sync is going, keeping notes that may mention health with the account,
+ * signing out and deleting the account; then your profile
  * (sex and weight units), Settings, which slides in over it, your data (backups and Clear
  * this device), and About.
  */
@@ -25,9 +27,9 @@ import { TopBarComponent } from '../nav/top-bar/top-bar.component';
     selector: 'app-account',
     imports: [
         TopBarComponent,
-        ConsentStatusComponent,
         LoopLogoComponent,
         MatIconModule,
+        NotesConsentComponent,
         ProfileComponent,
         SignInComponent,
         YourDataComponent,
@@ -37,6 +39,8 @@ import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 })
 export class AccountComponent {
     protected readonly account = inject(AccountService);
+    /** Whether notes are kept with the account: if not, signing out loses them (SYN-10). */
+    protected readonly notesKept = inject(ConsentService).notesKept;
     /** Into Settings, the Privacy notice and Terms of use. */
     protected readonly slide = inject(PageSlide);
     private readonly focus = injectFocusAfterRender();

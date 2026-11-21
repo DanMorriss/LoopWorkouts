@@ -18,8 +18,8 @@
 
 - **The welcome screen** (NAV-3, `/welcome`) opens instead of Home on a device new to the app: not signed in, not welcomed yet, and with no workouts or history. That's a first visit, and the first open after signing out, deleting the account or Clear this device, which all empty the device. A device already in use as a guest when it came in (on 2026-10-30) has workouts or history, so goes straight Home, and counts as welcomed from then on.
 
-    - Top to bottom: the ∞ logo, "Welcome to Loop Workouts", "The workout timer that remembers what you lifted. It runs your whole workout, reps and rests included, and next time shows you what to beat.", then signing in as on the You tab (Continue with Google, "or", the email link and its code; see [backup-and-sync](backup-and-sync.md)), introduced by "Loop Workouts is free while in beta. Sign in to keep your workouts and history on every device you use.", then, set apart, **Continue as guest**, described by "Everything stays on this device. You can sign in any time from the You tab."
-    - **Continue as guest** goes to Today, and the device isn't asked again (`welcomed` in localStorage; see [data](data.md)). Signing in with the code goes to Today too; Google and email links come back by way of the You tab, which goes on to Today once signed in.
+    - Top to bottom (since 2026-11-21): the ∞ logo, "Loop Workouts" large in the display face (hidden from screen readers, as the page's hidden heading already says it), and "The workout timer that remembers what you lifted."; then a card headed "Keep your workouts on every device" (the page's heading), with signing in as on the You tab (Continue with Google, "or", the Email field and its → button, then the code; see [backup-and-sync](backup-and-sync.md)), with nothing to tick first; then, under the card and quieter, the link-style button **Continue without an account**, described by "Free while in beta. Without an account, everything stays on this device." and a ? to Help on losing workouts.
+    - **Continue without an account** goes to Today, and the device isn't asked again (`welcomed` in localStorage; see [data](data.md)). Signing in with the code goes to Today too; Google and email links come back by way of the You tab, which goes on to Today once signed in.
     - There's no tab bar on it, as there isn't on the workout, so it's one choice. Linking straight to another page (e.g. an exercise) opens that page; the welcome screen waits for Today.
 
 - **The setup** (NAV-4, `/welcome/setup`) follows the welcome screen, signed in or as a guest: Today opens it instead until it's finished or skipped (`setup` in localStorage; see [data](data.md)). A device in use before it came in (2026-11-02) isn't asked; its profile is on You.
@@ -126,7 +126,7 @@ Since 2026-11-06, from an interview with Dan.
 
 ## Acceptance criteria
 
-- Given a device new to the app, when I open it, then the welcome screen opens, with no tab bar; when I press Continue as guest, then Today opens, and opening the app again opens Today.
+- Given a device new to the app, when I open it, then the welcome screen opens, with no tab bar; when I press Continue without an account, then Today opens, and opening the app again opens Today.
 - Given a device with workouts from before the welcome screen and no account, when I open it, then Today opens.
 - Given I'm signed out after signing out, when I open Today, then the welcome screen opens.
 - Given a device new to the app, when I continue as a guest, then the setup opens, on "What should we call you?"; when I type Sam, pick Fitness and Kettlebell and go on to the end, and press Done, then Today opens, saying "You're all set, Sam." in the bar, "Good morning, Sam" (in the morning) at the top, and offering Kettlebell full body to add; opening the app again opens Today.

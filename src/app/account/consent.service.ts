@@ -1,12 +1,9 @@
-import { Service, signal } from '@angular/core';
+import { computed, Service, signal, WritableSignal } from '@angular/core';
 import type { AccountClient } from './account-client';
 import { PRIVACY_NOTICE_DATE } from '../legal/notice-date';
 
-/**
- * Agreed to on this device, ahead of signing in (by Google, or an email link, which may come
- * back in another tab), and not yet saved with the account: in localStorage until it is.
- */
-export const PENDING_CONSENT_KEY = 'health-consent';
+/** The account asked on this device whether to keep its notes, by its email (SYN-10). */
+export const NOTES_ASKED_KEY = 'notes-asked';
 
 /** Consent to keeping notes that may mention health with the account (SYN-10). */
 export interface HealthConsent {
@@ -18,9 +15,9 @@ export interface HealthConsent {
 
 /**
  * Explicit consent to keeping notes, which may mention health (special category data under
- * UK GDPR), with the account (SYN-10): ticked before signing in, then saved with the account
- * once it's signed in, dated by the server with the privacy notice's date, and looked up on
- * each sign-in, so the You tab can say when it was given.
+ * UK GDPR), with the account (SYN-10): asked once just after signing in, or switched on and
+ * off on the You tab, dated by the server with the privacy notice's date, and looked up on
+ * each sign-in. Without it, sync keeps notes on the device.
  */
 @Service()
 export class ConsentService {
@@ -30,6 +27,25 @@ export class ConsentService {
      * yet looked up, or if the server couldn't be reached.
      */
     readonly given = this._given.asReadonly();
+    /** Whether notes are kept with the account: not while it's unknown. */
+    readonly notesKept = computed(() => !!this._given());
+
+    private readonly _notesAskedFor = signal(readNotesAsked());
+    /**
+     * The email of the account that's answered here whether to keep notes, just after signing
+     * in or with the You tab's switch, so it isn't asked again on this device.
+     */
+    readonly notesAskedFor = this._notesAskedFor.asReadonly();
+
+    /** `email`'s account has answered whether to keep notes, so isn't asked again here. */
+    notesAnswered(email: string) {
+        try {
+            localStorage.setItem(NOTES_ASKED_KEY, email);
+        } catch {
+            // Storage blocked: asked again next time the app opens
+        }
+        this._notesAskedFor.set(email);
+    }
 
     private readonly _weightGiven = signal<HealthConsent | null | undefined>(undefined);
     /**
@@ -38,127 +54,110 @@ export class ConsentService {
      */
     readonly weightGiven = this._weightGiven.asReadonly();
 
-    /** Ticked, ahead of signing in: saved with the account once it's signed in. */
-    agree() {
-        try {
-            localStorage.setItem(PENDING_CONSENT_KEY, PRIVACY_NOTICE_DATE);
-        } catch {
-            // Storage blocked: the account is asked once it's signed in instead
-        }
-    }
-
-    /**
-     * Signed in: saves consent given here ahead of signing in, or otherwise looks up the
-     * account's. Leaves it unknown if the server can't be reached.
-     */
+    /** Signed in: looks up the account's answers. Leaves them unknown if it can't. */
     async signedIn(client: AccountClient) {
         await Promise.all([this.checkNotes(client), this.checkWeight(client)]);
     }
 
+    /** Looks up the account's consent to keeping notes again, e.g. as it couldn't be before. */
+    async checkNotes(client: AccountClient) {
+        await check(client, 'my_health_consent', this._given);
+    }
+
+    /** Agreed, signed in, to keeping notes with the account. Gives whether it was saved. */
+    give(client: AccountClient): Promise<boolean> {
+        return give(client, 'give_health_consent', this._given);
+    }
+
+    /**
+     * Switched off: the account stops keeping notes, which the server deletes. Gives whether
+     * it was done.
+     */
+    withdraw(client: AccountClient): Promise<boolean> {
+        return withdraw(client, 'withdraw_health_consent', this._given);
+    }
+
     /** Ticked on Profile, signed in: keeps the body weight with the account. Gives whether. */
-    async giveWeight(client: AccountClient): Promise<boolean> {
-        try {
-            const { data, error } = await client.rpc('give_body_weight_consent', {
-                notice_date: PRIVACY_NOTICE_DATE,
-            });
-            const consent = error ? null : toConsent(data);
-            if (consent) {
-                this._weightGiven.set(consent);
-            }
-            return consent !== null;
-        } catch {
-            return false;
-        }
+    giveWeight(client: AccountClient): Promise<boolean> {
+        return give(client, 'give_body_weight_consent', this._weightGiven);
     }
 
     /**
      * Unticked: the account stops keeping the body weight, which the server deletes. Gives
      * whether it was done.
      */
-    async withdrawWeight(client: AccountClient): Promise<boolean> {
-        try {
-            const { error } = await client.rpc('withdraw_body_weight_consent');
-            if (error) {
-                return false;
-            }
-            this._weightGiven.set(null);
-            return true;
-        } catch {
-            return false;
-        }
-    }
-
-    private async checkNotes(client: AccountClient) {
-        const pending = readPending();
-        if (pending !== null && (await this.give(client, pending))) {
-            return;
-        }
-        const looked = await lookUp(client, 'my_health_consent');
-        if (looked !== undefined) {
-            this._given.set(looked);
-        }
+    withdrawWeight(client: AccountClient): Promise<boolean> {
+        return withdraw(client, 'withdraw_body_weight_consent', this._weightGiven);
     }
 
     private async checkWeight(client: AccountClient) {
-        const looked = await lookUp(client, 'my_body_weight_consent');
-        if (looked !== undefined) {
-            this._weightGiven.set(looked);
-        }
-    }
-
-    /** Agreed on the You tab, signed in already. Gives whether it was saved. */
-    agreeSignedIn(client: AccountClient): Promise<boolean> {
-        return this.give(client, PRIVACY_NOTICE_DATE);
+        await check(client, 'my_body_weight_consent', this._weightGiven);
     }
 
     signedOut() {
         this._given.set(undefined);
         this._weightGiven.set(undefined);
     }
-
-    private async give(client: AccountClient, notice: string): Promise<boolean> {
-        try {
-            const { data, error } = await client.rpc('give_health_consent', {
-                notice_date: notice,
-            });
-            const consent = error ? null : toConsent(data);
-            if (!consent) {
-                return false;
-            }
-            removePending();
-            this._given.set(consent);
-            return true;
-        } catch {
-            return false;
-        }
-    }
 }
 
-/** The account's consent of one kind, null for none, or undefined if it can't be reached. */
-async function lookUp(
-    client: AccountClient,
-    fn: 'my_health_consent' | 'my_body_weight_consent'
-): Promise<HealthConsent | null | undefined> {
-    const { data, error } = await client.rpc(fn).then(
-        (result) => result,
-        () => ({ data: null, error: true })
-    );
-    return error ? undefined : toConsent(data);
-}
-
-function readPending(): string | null {
+function readNotesAsked(): string | null {
     try {
-        return localStorage.getItem(PENDING_CONSENT_KEY);
+        return localStorage.getItem(NOTES_ASKED_KEY);
     } catch {
         return null;
     }
 }
 
-function removePending() {
+type Answer = WritableSignal<HealthConsent | null | undefined>;
+
+/** Looks up the account's consent of one kind into `into`, leaving it if it can't. */
+async function check(
+    client: AccountClient,
+    fn: 'my_health_consent' | 'my_body_weight_consent',
+    into: Answer
+) {
+    const { data, error } = await client.rpc(fn).then(
+        (result) => result,
+        () => ({ data: null, error: true })
+    );
+    if (!error) {
+        into.set(toConsent(data));
+    }
+}
+
+/** Gives consent of one kind under the current notice. Gives whether it was saved. */
+async function give(
+    client: AccountClient,
+    fn: 'give_health_consent' | 'give_body_weight_consent',
+    into: Answer
+): Promise<boolean> {
     try {
-        localStorage.removeItem(PENDING_CONSENT_KEY);
+        const { data, error } = await client.rpc(fn, { notice_date: PRIVACY_NOTICE_DATE });
+        const consent = error ? null : toConsent(data);
+        if (consent) {
+            into.set(consent);
+        }
+        return consent !== null;
     } catch {
-        // Storage blocked: nothing was saved there
+        return false;
+    }
+}
+
+/** Withdraws consent of one kind, which the server deletes. Gives whether it was done. */
+async function withdraw(
+    client: AccountClient,
+    fn: 'withdraw_health_consent' | 'withdraw_body_weight_consent',
+    into: Answer
+): Promise<boolean> {
+    try {
+        const { error } = await client.rpc(fn);
+        if (error) {
+            return false;
+        }
+        into.set(null);
+        return true;
+    } catch {
+        return false;
     }
 }
 

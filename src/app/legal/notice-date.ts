@@ -3,4 +3,4 @@
  * with an account's consent to keeping health details in notes, so what was agreed to can be
  * found. Change it whenever the notice changes.
  */
-export const PRIVACY_NOTICE_DATE = '2026-11-14';
+export const PRIVACY_NOTICE_DATE = '2026-11-21';

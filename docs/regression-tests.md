@@ -68,11 +68,11 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Preconditions:** empty storage (don't use `guest()`).
 - **Steps:**
     1. Open `/`.
-    2. Press **Continue as guest**.
+    2. Press **Continue without an account**.
 - **Expected:**
-    1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, "Welcome to Loop Workouts", the sign-in (Continue with Google, Email, Email me a sign-in link) and **Continue as guest**, with no tab bar.
+    1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, the heading "Keep your workouts on every device" over the sign-in (Continue with Google, Email, Email me a sign-in link) and **Continue without an account**, with no tab bar.
     2. localStorage has `setup = "due"` once the welcome screen is shown.
-    3. After Continue as guest: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 6" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
+    3. After Continue without an account: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 6" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
 - **Variants (same test file):**
     - A device with a saved workout but no `welcomed` key (in use before the welcome screen) opens `/home` straight away, and `welcomed` becomes `"guest"`.
     - A new device opening `/exercises/back-squat` directly gets that page, not the welcome screen.
@@ -1343,12 +1343,12 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 - **Stories:** SYN-3, SYN-10 · **Priority:** P1
 - **Preconditions:** `guest()`, stub as above.
-- **Steps:** 0. Open You. Type "me@example.com" and press **Email me a sign-in link** without ticking the consent box; then tick it.
+- **Steps:** 0. Open You.
     1. Empty the field and press **Email me a sign-in link**.
     2. Type "nope"; press it.
     3. With `otp` answering 429, type "me@example.com"; press it.
     4. With `otp` aborted (offline), press it.
-- **Expected:** 0. "Tick the box to agree before signing in." under the box, focus on it, no request; ticked, the message goes. (Every sign-in below ticks it first; Continue with Google unticked does the same and goes nowhere.)
+- **Expected:** 0. No tick box: keeping notes is asked after signing in (REG-ACC-07).
     1. The signed-out text, **Continue with Google** (no Apple button), "or", Email. "Enter your email address." on the field, focus on it; no request sent.
     2. "That isn't an email address. Check it and try again."; no request.
     3. "Too many sign-in emails for now. Wait a while, then try again."
@@ -1428,20 +1428,18 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     4. "You're offline: it'll sync when you're back online."; back online, a `push_records` call carries the edited workout.
     5. "It couldn't sync just now, and will try again in a minute."
 
-### REG-ACC-07 · Consent to keeping notes that may mention health
+### REG-ACC-07 · Keeping notes that may mention health
 
-- **Stories:** SYN-10 · **Priority:** P1 (asked and agreeing), P2 (shown, and not looked up)
-- **Preconditions:** `signedIn(...)`; `give_health_consent` and `my_health_consent` stubbed, keeping the consent as the server does. Signing in with the tick (REG-ACC-02) saves it with `notice_date` set to the privacy notice's date (2026-11-10), and You then says when.
+- **Stories:** SYN-10 · **Priority:** P1 (asked after signing in), P2 (not asked again; the You tab's switch)
+- **Preconditions:** `signedIn(...)`; `FakeSupabase` keeps the consent as the server does, given on 8 Nov unless the test sets `consent = null`, and answers `withdraw_health_consent`.
 - **Steps:**
-    1. With none on record, open You. Press **Agree** unticked.
-    2. Offline, tick and press Agree.
-    3. Online, press Agree.
-    4. Separately, with consent on record from 9 Nov, open You; then reload with the lookup failing.
+    1. With none on record, open Today. Offline, tick and press **Continue**; then online, press it again; then open You.
+    2. Separately, with none on record, press Continue unticked; reload.
+    3. Separately, with consent on record, open You; offline, turn **Keep notes with my account** off; online, turn it off, then on; reload with the lookup failing.
 - **Expected:**
-    1. "Notes you write may mention your health, which needs your consent to keep them with your account.", the tick and Agree; "Tick the box to agree.", focus on the box.
-    2. "That couldn't be saved. Check your connection and try again."
-    3. "On 11 November 2026 you agreed that notes you write, …", with focus on it; the tick and Agree go.
-    4. "On 9 November 2026 you agreed … (under the privacy notice of 8 November 2026). To withdraw, delete those notes, or your account."; with the lookup failing, nothing about consent, and no Agree.
+    1. The dialog "Keep your notes too?" with the tick unticked and focus on Continue; offline, "That couldn't be saved. Check your connection and try again." and it stays; online, it goes, `give_health_consent` has `notice_date` 2026-11-21, and You's switch is on, "Agreed on 11 November 2026."
+    2. It goes with no `give_health_consent`; after the reload it isn't asked again, and You's switch is off.
+    3. On, "Agreed on 8 November 2026. Notes may mention your health. Turn off to delete them from your account; they stay on this device."; offline, "That couldn't be saved." and it stays on; online, off (a second `withdraw_health_consent`), "Notes may mention your health, so they stay on this device.", no dialog; then on again; with the lookup failing, no switch.
 
 ---
 

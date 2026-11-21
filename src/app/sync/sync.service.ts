@@ -8,7 +8,16 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { SyncClock } from '../shared/state/sync-clock.service';
-import { changedSince, CopyHere, keyOf, markOf, readPulled, recordsHere } from './sync-records';
+import {
+    changedSince,
+    CopyHere,
+    keyOf,
+    markOf,
+    readPulled,
+    recordsHere,
+    withNotesHere,
+    withoutNotes,
+} from './sync-records';
 import { LAST_SYNCED_KEY, SyncStarter } from './sync-starter.service';
 
 /** What's been sent and fetched, for the account signed in, in localStorage. */
@@ -30,6 +39,11 @@ interface SyncState {
     seq: number;
     /** Each record's mark (`markOf()`) when it was last sent or fetched, by key. */
     seen: Record<string, string>;
+    /**
+     * Whether notes went with what was last sent, the account keeping them (SYN-10): once it
+     * does again, they're sent again. Missing (true) in a state saved before notes needed it.
+     */
+    notes: boolean;
 }
 
 /**
@@ -106,13 +120,15 @@ export class SyncService {
 
     /**
      * Syncs, then gives whether everything here has been sent: before signing out, which
-     * removes it from this device.
+     * removes it from this device. Not while there are notes the account doesn't keep (SYN-10).
      */
     async syncAll(): Promise<boolean> {
         await this.sync();
         const state = this.state;
         return (
-            state !== null && changedSince(recordsHere(this.copyHere()), state.seen).length === 0
+            state !== null &&
+            changedSince(recordsHere(this.copyHere()), state.seen).length === 0 &&
+            (this.consent.notesKept() || !hasNotes(this.backup.records()))
         );
     }
 
@@ -235,6 +251,10 @@ export class SyncService {
                 return false;
             }
             const pulled = readPulled(page.records);
+            // Notes the account doesn't keep come back without them: the device's stay
+            if (!this.consent.notesKept()) {
+                pulled.copy.history = withNotesHere(pulled.copy.history, this.history.entries());
+            }
             this.backup.merge(pulled.copy);
             // A record that's here as fetched needn't go back; one changed here since, that
             // won the merge, is sent
@@ -257,8 +277,28 @@ export class SyncService {
         }
     }
 
-    /** Sends what's changed here since it was last sent or fetched. */
+    /**
+     * Sends what's changed here since it was last sent or fetched. Notes go only once the
+     * account's answer on keeping them is known (SYN-10); and once it keeps them, having not,
+     * they're all sent again.
+     */
     private async push(client: AccountClient, state: SyncState) {
+        if (this.consent.given() === undefined) {
+            await this.consent.checkNotes(client);
+            if (this.consent.given() === undefined) {
+                throw new Error('Not known whether the account keeps notes');
+            }
+        }
+        const notes = this.consent.notesKept();
+        if (notes && !state.notes) {
+            this.history.redateNoted();
+            for (const key of Object.keys(state.seen)) {
+                if (key.startsWith('exercise-note:')) {
+                    delete state.seen[key];
+                }
+            }
+        }
+        state.notes = notes;
         const changed = changedSince(recordsHere(this.copyHere()), state.seen);
         for (let i = 0; i < changed.length && state === this.state; i += PUSH_BATCH_SIZE) {
             const batch = changed.slice(i, i + PUSH_BATCH_SIZE);
@@ -277,18 +317,25 @@ export class SyncService {
         }
     }
 
+    /** What syncs from here: notes only while the account keeps them (SYN-10). */
     private copyHere(): CopyHere {
-        return {
+        const copy: CopyHere = {
             ...this.backup.records(),
             profile: this.settings.profile(),
             bodyWeight: this.keptBodyWeight(),
         };
+        return this.consent.notesKept() ? copy : withoutNotes(copy);
     }
 
     /** The body weight, to keep with the account only with its consent (CAL-6). */
     private keptBodyWeight() {
         return this.consent.weightGiven() ? this.settings.bodyWeightRecord() : null;
     }
+}
+
+/** Whether there are notes here: on exercises, or on workouts in the history. */
+function hasNotes({ exerciseNotes, history }: Pick<CopyHere, 'exerciseNotes' | 'history'>) {
+    return exerciseNotes.length > 0 || history.some((entry) => entry.note !== undefined);
 }
 
 /** A page of `pull_records()`. */
@@ -309,12 +356,12 @@ function loadState(user: string): SyncState {
             typeof saved.seen === 'object' &&
             saved.seen !== null
         ) {
-            return { user, seq: saved.seq!, seen: saved.seen };
+            return { user, seq: saved.seq!, seen: saved.seen, notes: saved.notes !== false };
         }
     } catch {
         // Unreadable: start afresh
     }
-    return { user, seq: 0, seen: {} };
+    return { user, seq: 0, seen: {}, notes: false };
 }
 
 function saveState(state: SyncState) {

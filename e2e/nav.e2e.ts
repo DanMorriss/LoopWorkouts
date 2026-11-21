@@ -15,7 +15,7 @@ test.describe('a device new to the app', () => {
             await app.goto('/');
             await expect(page).toHaveURL('/welcome');
             await expect(
-                page.getByRole('heading', { name: 'Welcome to Loop Workouts' })
+                page.getByRole('heading', { name: 'Keep your workouts on every device' })
             ).toBeVisible();
             await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
             await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible();
@@ -25,7 +25,7 @@ test.describe('a device new to the app', () => {
             await expect(app.tabBar).toBeHidden();
             expect(await app.storageItem('setup')).toBe('due');
 
-            await page.getByRole('button', { name: 'Continue as guest' }).click();
+            await page.getByRole('button', { name: 'Continue without an account' }).click();
             await expect(page).toHaveURL('/welcome/setup');
             expect(await app.storageItem('welcomed')).toBe('guest');
             await expect(page.getByText('Question 1 of 6')).toBeVisible();
@@ -54,7 +54,7 @@ test.describe('a device new to the app', () => {
         { tag: '@p1' },
         async ({ app, page }) => {
             await app.goto('/');
-            await page.getByRole('button', { name: 'Continue as guest' }).click();
+            await page.getByRole('button', { name: 'Continue without an account' }).click();
             const next = page.getByRole('button', { name: 'Next' });
             const skip = page.getByRole('button', { name: 'Skip for now' });
             const place = async () => [await next.boundingBox(), await skip.boundingBox()];
@@ -133,7 +133,7 @@ test.describe('a device new to the app', () => {
 
     test('REG-NAV-03 skipping the setup', { tag: '@p2' }, async ({ app, page }) => {
         await app.goto('/');
-        await page.getByRole('button', { name: 'Continue as guest' }).click();
+        await page.getByRole('button', { name: 'Continue without an account' }).click();
         await page.getByRole('button', { name: 'Skip for now' }).click();
 
         await expect(page).toHaveURL('/home');

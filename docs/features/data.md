@@ -226,11 +226,15 @@ Kept by Supabase's client while you're signed in (SYN-3): the sign-in tokens and
 
 ### `sync`: what's been synced
 
-While signed in (SYN-3): the account's user id, the last `seq` fetched from the server, and each record's last change sent or fetched (`"workout:<id>": "<updatedAt>"`, or `"d<deletedAt>"` for a deletion), so only what's changed since is sent. Signing out removes it.
+While signed in (SYN-3): the account's user id, the last `seq` fetched from the server, each record's last change sent or fetched (`"workout:<id>": "<updatedAt>"`, or `"d<deletedAt>"` for a deletion), so only what's changed since is sent, and `notes`, whether notes went with what was last sent (SYN-10): false once something's sent without them, so they're all sent once the account keeps them (missing, from before 2026-11-21, is true). Signing out removes it.
 
 ### `synced-at`: when this device last synced
 
 In ms since the epoch, by the device's clock, for the You tab. Signing out removes it.
+
+### `notes-asked`: whether to keep notes has been answered
+
+The email of the account that's answered, on this device, whether to keep notes that may mention health with it (SYN-10): just after signing in, or with the You tab's switch. While it's missing, or another account's, an account with no consent on record is asked once signed in. Signing out and Clear this device remove it.
 
 ### `welcomed`: the welcome screen's been answered
 

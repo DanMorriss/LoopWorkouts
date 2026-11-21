@@ -11,11 +11,13 @@ test('a new device is welcomed, goes on as a guest and can skip the setup', asyn
     await app.goto('/');
 
     await expect(page).toHaveURL('/welcome');
-    await expect(page.getByRole('heading', { name: 'Welcome to Loop Workouts' })).toBeVisible();
+    await expect(
+        page.getByRole('heading', { name: 'Keep your workouts on every device' })
+    ).toBeVisible();
     // No tab bar on the welcome screen: it's one choice
     await expect(app.tabBar).toBeHidden();
 
-    await page.getByRole('button', { name: 'Continue as guest' }).click();
+    await page.getByRole('button', { name: 'Continue without an account' }).click();
 
     await expect(page).toHaveURL('/welcome/setup');
     await expect(page.getByRole('heading', { name: 'What should we call you?' })).toBeVisible();

@@ -69,10 +69,19 @@ export class FakeSupabase {
     /** GET /user, and refreshing the token: 401 for a session the server's ended. */
     user: Answer = 200;
     authorize: Answer = 'abort';
-    /** give_health_consent and my_health_consent (SYN-10): a status, or 'abort' when offline. */
+    /**
+     * give_health_consent, withdraw_health_consent and my_health_consent (SYN-10): a status, or
+     * 'abort' when offline.
+     */
     consentAnswer: Answer = 200;
-    /** The account's consent to keeping notes, as the server keeps it: null for none on record. */
-    consent: { at: number; notice: string } | null = null;
+    /**
+     * The account's consent to keeping notes, as the server keeps it: given on 8 November 2026
+     * unless a test says otherwise, null for none on record (which asks, once signed in).
+     */
+    consent: { at: number; notice: string } | null = {
+        at: Date.parse('2026-11-08T12:00:00Z'),
+        notice: '2026-11-08',
+    };
     /** And to keeping the body weight (CAL-6), answered as `consentAnswer` says. */
     weightConsent: { at: number; notice: string } | null = null;
 
@@ -167,6 +176,11 @@ export class FakeSupabase {
                 return json(this.consentAnswer, this.consent);
             case '/rest/v1/rpc/my_health_consent':
                 return json(this.consentAnswer, this.consent);
+            case '/rest/v1/rpc/withdraw_health_consent':
+                if (this.consentAnswer === 200) {
+                    this.consent = null;
+                }
+                return json(this.consentAnswer, null);
             case '/rest/v1/rpc/give_body_weight_consent':
                 if (this.consentAnswer === 200) {
                     const { notice_date } = body as { notice_date: string };

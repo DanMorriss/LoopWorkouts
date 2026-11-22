@@ -67,11 +67,16 @@ $$;
 -- a call (the app sends 200), an id of at most 200 characters, a record of at most 64 kB, and
 -- an account of at most 20,000 records and 20 MB. Over any of them, nothing is written and it
 -- says why; far above what anyone's workouts need.
+--
+-- Notes may mention health, so without the account's consent to keeping them (SYN-10, in
+-- public.consents, below) an exercise's note isn't kept and a history entry is kept without
+-- its note.
 create or replace function public.push_records(changes jsonb) returns bigint
 language plpgsql security definer set search_path = '' as $$
 declare
     me uuid := auth.uid();
     server_now bigint := public.now_ms();
+    notes_kept boolean;
     record_count bigint;
     total_bytes bigint;
 begin
@@ -90,6 +95,7 @@ begin
     -- One write at a time for each account, so its rows' seq goes up in the order they're
     -- written, and a device that's fetched up to a seq can't miss one below it
     perform pg_advisory_xact_lock(hashtextextended(me::text, 0));
+    notes_kept := exists (select from public.consents n where n.user_id = me);
     insert into public.records as r (user_id, kind, id, updated_at, deleted_at, data, version)
     select distinct on (c.kind, c.id)
         me,
@@ -97,7 +103,11 @@ begin
         c.id,
         case when c.updated_at > server_now + 60000 then server_now else c.updated_at end,
         case when c.deleted_at > server_now + 60000 then server_now else c.deleted_at end,
-        case when c.deleted_at is null then c.data end,
+        case
+            when c.deleted_at is not null then null
+            when c.kind = 'history' and not notes_kept then c.data - 'note'
+            else c.data
+        end,
         coalesce(c.version, 7)
     from jsonb_to_recordset(changes) as c(
         kind text, id text, updated_at bigint, deleted_at bigint, data jsonb, version integer
@@ -106,6 +116,8 @@ begin
         -- Body weight is health data: kept only while the account consents to it (CAL-6)
         and (c.kind <> 'body-weight'
             or exists (select from public.body_weight_consents w where w.user_id = me))
+        -- So are notes (SYN-10): a deletion of one is still kept
+        and (c.kind <> 'exercise-note' or c.deleted_at is not null or notes_kept)
         and c.id <> ''
         and c.updated_at > 0
         and (c.deleted_at is not null or c.data is not null)
@@ -170,9 +182,10 @@ revoke execute on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
 
 -- Consent to keeping notes, which may mention health (special category data under UK GDPR),
--- with the account (SYN-10): ticked before signing in, or on the You tab. When it was given,
--- by the server's clock, and the date of the privacy notice it was given under. Read and
--- written only through the functions below; deleted with the account.
+-- with the account (SYN-10): asked once just after signing in, or switched on on the You tab.
+-- When it was given, by the server's clock, and the date of the privacy notice it was given
+-- under. Without it, push_records() leaves notes out. Read and written only through the
+-- functions below; deleted with the account.
 create table if not exists public.consents (
     user_id uuid primary key references auth.users (id) on delete cascade,
     health_notes_at timestamptz not null,
@@ -224,6 +237,29 @@ $$;
 
 revoke execute on function public.my_health_consent() from public, anon;
 grant execute on function public.my_health_consent() to authenticated;
+
+-- Withdraws it: the consent goes, and so do the notes kept with the account, at once and for
+-- good: exercises' notes are deleted (not left as deletions) and history entries lose their
+-- note, keeping their date, so other devices keep their own copy of each note.
+create or replace function public.withdraw_health_consent() returns void
+language plpgsql security definer set search_path = '' as $$
+declare
+    me uuid := auth.uid();
+begin
+    if me is null then
+        raise exception 'Not signed in';
+    end if;
+    perform pg_advisory_xact_lock(hashtextextended(me::text, 0));
+    delete from public.consents where user_id = me;
+    delete from public.records
+        where user_id = me and kind = 'exercise-note' and deleted_at is null;
+    update public.records set data = data - 'note'
+        where user_id = me and kind = 'history' and data ? 'note';
+end;
+$$;
+
+revoke execute on function public.withdraw_health_consent() from public, anon;
+grant execute on function public.withdraw_health_consent() to authenticated;
 
 -- Consent to keeping your body weight, which is health data, with the account (CAL-6), apart
 -- from consent to notes, so either can be given or withdrawn alone: ticked on You → Profile.

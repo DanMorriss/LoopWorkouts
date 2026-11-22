@@ -1,5 +1,5 @@
 <!-- Signing in (SYN-3, SYN-7): Google (and Apple, once it's set up), or an email link and its
-     code. On the You tab and the welcome screen -->
+     code. On the You tab and the welcome screen. Keeping notes is asked after (SYN-10) -->
 @if (sentTo(); as address) {
     <p class="sign-in__text" id="account-sent" tabindex="-1">
         We've sent a sign-in link to
@@ -30,12 +30,12 @@
         </div>
     </form>
 } @else {
-    <p class="sign-in__hint" id="account-why">{{ intro() }}</p>
+    @if (intro(); as why) {
+        <p class="sign-in__hint" id="account-why">{{ why }}</p>
+    }
     @if (account.linkProblem(); as problem) {
         <p class="sign-in__error" role="alert">{{ problem }}</p>
     }
-    <!-- Needed before either way of signing in (SYN-10) -->
-    <app-health-consent class="sign-in__consent" [field]="consentForm.agreed" />
     <!-- Google and Apple (SYN-7), in their own colours and with their marks,
          as their guidelines ask -->
     <div class="sign-in__providers">
@@ -96,29 +96,32 @@
     </div>
     <p class="sign-in__or" aria-hidden="true">or</p>
     <form class="sign-in__form" novalidate (submit)="sendLink($event)">
-        <label class="picker-field" for="account-email">
-            <span class="picker-field__label">Email</span>
-            <input
-                class="picker-field__input"
-                id="account-email"
-                type="email"
-                autocomplete="email"
-                spellcheck="false"
-                [formField]="emailForm.email"
-                [attr.aria-invalid]="!!emailError()"
-                [attr.aria-describedby]="
-                    emailError() ? 'account-email-error account-why' : 'account-why'
-                "
-            />
-        </label>
+        <div class="picker-field">
+            <label class="picker-field__label" for="account-email">Email</label>
+            <div class="sign-in__email-row">
+                <input
+                    class="picker-field__input sign-in__email-input"
+                    id="account-email"
+                    type="email"
+                    autocomplete="email"
+                    spellcheck="false"
+                    [formField]="emailForm.email"
+                    [attr.aria-invalid]="!!emailError()"
+                    [attr.aria-describedby]="emailDescribedBy()"
+                />
+                <button
+                    type="submit"
+                    class="btn-icon sign-in__send"
+                    aria-label="Email me a sign-in link"
+                    [disabled]="busy()"
+                >
+                    <app-icon>arrow_forward</app-icon>
+                </button>
+            </div>
+        </div>
         @if (emailError(); as error) {
             <p id="account-email-error" class="sign-in__error">{{ error }}</p>
         }
-        <div class="sign-in__actions">
-            <button type="submit" class="btn-pill" [disabled]="busy()">
-                Email me a sign-in link
-            </button>
-        </div>
     </form>
 }
 

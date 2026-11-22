@@ -9,6 +9,8 @@ import { UndoBarComponent } from './nav/undo-bar/undo-bar.component';
 import { isStaleCode, reloadForNewCode } from './nav/stale-code';
 import { TOUR_LOADER } from './tour/tour-loader';
 import { TourService } from './tour/tour.service';
+import { lazyComponent } from './shared/lazy-component';
+import { SyncStarter } from './sync/sync-starter.service';
 
 @Component({
     selector: 'app-root',
@@ -30,9 +32,19 @@ export class AppComponent {
     private readonly router = inject(Router);
     private readonly window = inject(DOCUMENT).defaultView;
     private readonly tourSlot = viewChild('tour', { read: ViewContainerRef });
+    private readonly notesAskSlot = viewChild('notesAsk', { read: ViewContainerRef });
 
     constructor() {
         openNewPagesAtTop();
+        // Asking whether to keep notes with the account (SYN-10), once signed in
+        const sync = inject(SyncStarter);
+        lazyComponent({
+            load: () =>
+                import('./account/notes-ask/notes-ask.component').then((m) => m.NotesAskComponent),
+            slot: this.notesAskSlot,
+            inputs: () => ({}),
+            when: sync.started,
+        });
         // The tour, loaded the first time it starts, over everything while it's on
         effect(() => {
             const slot = this.tourSlot();

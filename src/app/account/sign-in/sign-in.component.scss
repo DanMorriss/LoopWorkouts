@@ -29,10 +29,6 @@
     margin-top: 1rem;
 }
 
-.sign-in__consent {
-    margin-top: 0.75rem;
-}
-
 .sign-in__actions {
     display: flex;
     flex-wrap: wrap;
@@ -116,4 +112,16 @@
         flex: 1;
         border-top: 1px solid var(--border-soft);
     }
+}
+
+// The email field with its send button beside it, as one step
+.sign-in__email-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sign-in__email-input {
+    flex: 1;
+    min-width: 0;
 }

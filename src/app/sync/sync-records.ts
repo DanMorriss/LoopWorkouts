@@ -1,3 +1,4 @@
+import { HistoryEntry } from '../models/history';
 import { copyPlan, isWeekPlan, WeekPlan } from '../models/plan';
 import { Profile, readProfile } from '../models/profile';
 import { BodyWeightRecord, readBodyWeightKg } from '../models/weight';
@@ -99,6 +100,40 @@ export function recordsHere(copy: CopyHere): ServerRecord[] {
             })
         ),
     ];
+}
+
+/**
+ * Everything here but notes, which may mention health: what the account keeps without
+ * consent to keeping them (SYN-10). Exercises' notes are left out, and history entries go
+ * without theirs, keeping their date.
+ */
+export function withoutNotes(copy: CopyHere): CopyHere {
+    return {
+        ...copy,
+        exerciseNotes: [],
+        history: copy.history.map((entry) => {
+            if (entry.note === undefined) {
+                return entry;
+            }
+            const { note: _note, ...rest } = entry;
+            return rest;
+        }),
+    };
+}
+
+/**
+ * History fetched from an account that doesn't keep notes (SYN-10), with this device's note
+ * put back on each entry that came without one, as the note was only ever kept here.
+ */
+export function withNotesHere(
+    fetched: readonly HistoryEntry[],
+    here: readonly HistoryEntry[]
+): HistoryEntry[] {
+    const notes = new Map(here.map((entry) => [entry.id, entry.note]));
+    return fetched.map((entry) => {
+        const note = notes.get(entry.id);
+        return entry.note === undefined && note !== undefined ? { ...entry, note } : entry;
+    });
 }
 
 /** Which record it is, e.g. "workout:1f0e…". */

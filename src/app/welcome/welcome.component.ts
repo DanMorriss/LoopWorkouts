@@ -7,10 +7,10 @@ import { LoopLogoComponent } from '../shared/components/loop-logo/loop-logo.comp
 import { WELCOMED_KEY } from './welcome-first';
 
 /**
- * The welcome screen (NAV-3), where a device new to the app starts: what the app is, then
- * signing in (as on the You tab), or going on as a guest, with everything kept on this
- * device. Either way it's not asked again here, and Home opens. No tab bar, so it's one
- * choice.
+ * The welcome screen (NAV-3), where a device new to the app starts: the name and what it is
+ * in a line, then signing in (as on the You tab) in a card, or going on without an account,
+ * with everything kept on this device, as a quieter link under it. Either way it's not asked
+ * again here, and Home opens. No tab bar, so it's one choice.
  */
 @Component({
     selector: 'app-welcome',
@@ -19,28 +19,28 @@ import { WELCOMED_KEY } from './welcome-first';
         <div class="flex justify-center">
             <div class="welcome w-full max-w-md p-4">
                 <app-loop-logo class="welcome__logo" />
-                <h2 class="welcome__title">Welcome to Loop Workouts</h2>
-                <p class="welcome__pitch">
-                    The workout timer that remembers what you lifted. It runs your whole workout,
-                    reps and rests included, and next time shows you what to beat.
-                </p>
+                <!-- The name, as the page's hidden h1 already says it to screen readers -->
+                <p class="welcome__title" aria-hidden="true">Loop Workouts</p>
+                <p class="welcome__pitch">The workout timer that remembers what you lifted.</p>
 
-                <app-sign-in
-                    intro="Loop Workouts is free while in beta. Sign in to keep your workouts and history on every device you use."
-                    (signedIn)="goHome('signed-in')"
-                />
+                <section class="welcome__card" aria-labelledby="welcome-sync-title">
+                    <h2 class="welcome__card-title" id="welcome-sync-title">
+                        Keep your workouts on every device
+                    </h2>
+                    <app-sign-in (signedIn)="goHome('signed-in')" />
+                </section>
 
                 <div class="welcome__guest">
                     <button
                         type="button"
-                        class="btn-pill welcome__guest-button"
+                        class="welcome__guest-button"
                         aria-describedby="welcome-guest-hint"
                         (click)="goHome('guest')"
                     >
-                        Continue as guest
+                        Continue without an account
                     </button>
                     <p class="welcome__hint" id="welcome-guest-hint">
-                        Everything stays on this device. You can sign in any time from the You tab.
+                        Free while in beta. Without an account, everything stays on this device.
                         <app-help-link topic="lose-workouts" />
                     </p>
                 </div>

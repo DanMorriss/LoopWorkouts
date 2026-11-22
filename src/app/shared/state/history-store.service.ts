@@ -89,6 +89,25 @@ export class HistoryStore {
     }
 
     /**
+     * Dates every entry with a note as changed now, so sync sends each again with its note:
+     * once the account keeps notes (SYN-10), having had them left out before.
+     */
+    redateNoted() {
+        const noted = this._entries().filter((entry) => entry.note !== undefined);
+        if (noted.length === 0) {
+            return;
+        }
+        const redated = new Map(
+            noted.map((entry) => [
+                entry.id,
+                { ...entry, updatedAt: this.clock.now(entry.updatedAt) },
+            ])
+        );
+        this._entries.update((entries) => entries.map((entry) => redated.get(entry.id) ?? entry));
+        this.save([...redated.values()]);
+    }
+
+    /**
      * Replaces a workout's sets, e.g. one corrected on Progress, dated now so the change wins
      * when synced. Its sets are kept as given: correct them with `withSetChanges()`.
      */

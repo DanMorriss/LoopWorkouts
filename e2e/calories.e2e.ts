@@ -93,7 +93,7 @@ test.describe('signed in, keeping the body weight with the account', () => {
                 page.getByRole('status').filter({ hasText: 'Agreed on 11 November 2026.' })
             ).toBeVisible();
             expect(supabase.callsTo('rpc/give_body_weight_consent')[0].body).toEqual({
-                notice_date: '2026-11-14',
+                notice_date: '2026-11-21',
             });
             // Sent with the rest, as a record of its own
             await expect

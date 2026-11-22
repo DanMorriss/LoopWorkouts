@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import type { AccountClient } from './account-client';
-import { ConsentService, PENDING_CONSENT_KEY } from './consent.service';
+import { ConsentService } from './consent.service';
 
 describe('ConsentService (SYN-10)', () => {
     let consent: ConsentService;
@@ -17,33 +17,40 @@ describe('ConsentService (SYN-10)', () => {
     const given = { data: { at: 1000, notice: '2026-11-14' }, error: null };
 
     beforeEach(() => {
-        localStorage.removeItem(PENDING_CONSENT_KEY);
         rpc.mockClear();
         answers = {};
         consent = TestBed.inject(ConsentService);
     });
-    afterEach(() => localStorage.removeItem(PENDING_CONSENT_KEY));
 
-    it('saves consent ticked before signing in with the account, dated by the server', async () => {
-        consent.agree();
-        answers['give_health_consent'] = given;
+    it("looks up the account's on signing in, keeping notes only with it", async () => {
+        answers['my_health_consent'] = given;
 
         await consent.signedIn(client);
 
-        expect(rpc).toHaveBeenCalledWith('give_health_consent', { notice_date: '2026-11-14' });
         expect(consent.given()).toEqual({ at: 1000, notice: '2026-11-14' });
-        expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBeNull();
+        expect(consent.notesKept()).toBe(true);
     });
 
-    it("keeps it to save next time if it couldn't be, looking up the account's meanwhile", async () => {
-        consent.agree();
-        answers['give_health_consent'] = { data: null, error: { message: 'down' } };
+    it('gives it under the notice, dated by the server, and withdraws it', async () => {
+        answers['give_health_consent'] = given;
 
-        await consent.signedIn(client);
+        expect(await consent.give(client)).toBe(true);
+        expect(rpc).toHaveBeenCalledWith('give_health_consent', { notice_date: '2026-11-21' });
+        expect(consent.notesKept()).toBe(true);
 
-        expect(rpc).toHaveBeenCalledWith('my_health_consent');
+        expect(await consent.withdraw(client)).toBe(true);
+        expect(rpc).toHaveBeenCalledWith('withdraw_health_consent');
         expect(consent.given()).toBeNull();
-        expect(localStorage.getItem(PENDING_CONSENT_KEY)).toBe('2026-11-14');
+        expect(consent.notesKept()).toBe(false);
+    });
+
+    it("doesn't keep notes while it's not known", async () => {
+        answers['my_health_consent'] = new Error('offline');
+
+        await consent.checkNotes(client);
+
+        expect(consent.given()).toBeUndefined();
+        expect(consent.notesKept()).toBe(false);
     });
 
     it("leaves it unknown when the account's can't be looked up, e.g. offline", async () => {
@@ -83,7 +90,7 @@ describe('ConsentService (SYN-10)', () => {
 
             expect(await consent.giveWeight(client)).toBe(true);
             expect(rpc).toHaveBeenCalledWith('give_body_weight_consent', {
-                notice_date: '2026-11-14',
+                notice_date: '2026-11-21',
             });
             expect(consent.weightGiven()).toEqual({ at: 1000, notice: '2026-11-14' });
 

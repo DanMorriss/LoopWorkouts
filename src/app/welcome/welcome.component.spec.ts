@@ -31,13 +31,22 @@ describe('WelcomeComponent (NAV-3)', () => {
     beforeEach(() => localStorage.clear());
     afterEach(() => localStorage.clear());
 
-    it('says what the app is, then offers signing in, or going on as a guest', async () => {
+    it('says what the app is, then offers signing in, or going on without an account', async () => {
         const element = await create();
 
-        expect(element.querySelector('h2')!.textContent).toBe('Welcome to Loop Workouts');
-        expect(element.querySelector('app-sign-in')).not.toBeNull();
-        expect(element.textContent).toContain('Continue with Google');
-        expect(element.textContent).toContain('Everything stays on this device.');
+        expect(element.querySelector('.welcome__title')!.textContent).toBe('Loop Workouts');
+        expect(element.textContent).toContain('The workout timer that remembers what you lifted.');
+        // Signing in in its card, with no tick first: keeping notes is asked after (SYN-10)
+        const card = element.querySelector('section[aria-labelledby="welcome-sync-title"]')!;
+        expect(card.querySelector('h2')!.textContent!.trim()).toBe(
+            'Keep your workouts on every device'
+        );
+        expect(card.querySelector('app-sign-in')).not.toBeNull();
+        expect(card.textContent).toContain('Continue with Google');
+        expect(element.querySelector('#health-consent')).toBeNull();
+        expect(element.querySelector('#welcome-guest-hint')!.textContent).toContain(
+            'Free while in beta. Without an account, everything stays on this device.'
+        );
         // With a ? to Help on what a guest's data means
         const help = element.querySelector('#welcome-guest-hint app-help-link a')!;
         expect(help.getAttribute('href')).toBe('/help?q=lose-workouts');
@@ -48,7 +57,7 @@ describe('WelcomeComponent (NAV-3)', () => {
         const element = await create();
 
         [...element.querySelectorAll('button')]
-            .find((button) => button.textContent!.trim() === 'Continue as guest')!
+            .find((button) => button.textContent!.trim() === 'Continue without an account')!
             .click();
 
         expect(localStorage.getItem('welcomed')).toBe('guest');

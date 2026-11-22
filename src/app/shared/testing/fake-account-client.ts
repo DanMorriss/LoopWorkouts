@@ -69,6 +69,8 @@ export function fakeAccountClient(
         if (fn === 'give_health_consent') {
             const { notice_date } = args as { notice_date: string };
             consent = { at: Date.UTC(2026, 10, 9, 12), notice: notice_date };
+        } else if (fn === 'withdraw_health_consent') {
+            consent = null;
         }
         if (fn === 'give_body_weight_consent') {
             const { notice_date } = args as { notice_date: string };

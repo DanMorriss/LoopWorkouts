@@ -32,6 +32,9 @@ export class SyncStarter {
      */
     leaving = false;
 
+    /** Whether sync has started, so this device has been signed in since the app opened. */
+    readonly started = signal(false);
+
     /** How sync is going. Set by `SyncService`. */
     readonly status = signal<SyncStatus>({
         syncing: false,
@@ -58,6 +61,7 @@ export class SyncStarter {
 
     /** Loads sync's code and starts it, once: from then on, it follows signing in and out. */
     start() {
+        this.started.set(true);
         this.loading ??= import('./sync.service')
             .then(({ SyncService }) => this.injector.get(SyncService))
             .catch(() => {

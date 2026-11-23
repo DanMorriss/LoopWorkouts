@@ -1,4 +1,3 @@
-import { HelpLinkComponent } from '../shared/components/help-link/help-link.component';
 import { Component, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountService } from '../account/account.service';
@@ -14,7 +13,7 @@ import { WELCOMED_KEY } from './welcome-first';
  */
 @Component({
     selector: 'app-welcome',
-    imports: [HelpLinkComponent, LoopLogoComponent, SignInComponent],
+    imports: [LoopLogoComponent, SignInComponent],
     template: `
         <div class="flex justify-center">
             <div class="welcome w-full max-w-md p-4">
@@ -41,7 +40,6 @@ import { WELCOMED_KEY } from './welcome-first';
                     </button>
                     <p class="welcome__hint" id="welcome-guest-hint">
                         Free while in beta. Without an account, everything stays on this device.
-                        <app-help-link topic="lose-workouts" />
                     </p>
                 </div>
             </div>

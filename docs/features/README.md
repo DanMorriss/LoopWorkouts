@@ -87,7 +87,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | NAV-4  | Set up my name, goal, equipment, body and units once, as I start             | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-5  | Tabs named for what I come to them for: Today, Workouts, Progress, You       | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-6  | Land on Today after setting up, shown to add workouts, then plan my week     | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
-| NAV-7  | Find answers in the app, with ? links from the harder parts                  | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
+| NAV-7  | Find answers in the app, with a ? link where sound needs a tap               | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-8  | A short tour of the app, pointing at each tab and its main part              | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-9  | See which page I'm on and get back from it, however far down I've scrolled | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | A11Y-1 | Use every feature with a screen reader, keyboard or reduced motion           | ✅  | —   | [accessibility](accessibility.md)             |

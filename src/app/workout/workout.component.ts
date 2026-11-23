@@ -14,7 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { AlarmService } from '../shared/alarms/alarm.service';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
-import { HelpLinkComponent } from '../shared/components/help-link/help-link.component';
+import { HelpLinkComponent } from '../help/help-link/help-link.component';
 import { SwapExerciseDialogComponent } from '../shared/components/swap-exercise-dialog/swap-exercise-dialog.component';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { ActiveRunService } from '../shared/run/active-run.service';

@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { allTopics } from '../../../help/help-topics';
+import { allTopics } from '../help-topics';
 
 /**
  * A small ? beside a harder part of the app (NAV-7), opening Help on the question about it,

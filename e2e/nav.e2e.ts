@@ -1,4 +1,4 @@
-import { at, expect, rest, seed, test, timed, workout } from './fixtures';
+import { expect, rest, seed, test, timed, workout } from './fixtures';
 import { HistoryPage } from './history-page';
 import { setWheel, WorkoutPage } from './workout-page';
 
@@ -318,44 +318,38 @@ test.describe('the run bar', () => {
 });
 
 test.describe('help', () => {
-    const legs = workout('Legs', { steps: [timed(30)] });
-    test.use({
-        storage: {
-            ...seed.workouts([legs]),
-            // Planned on Monday today, a Wednesday: it counts from next week
-            ...seed.plan({ mon: ['legs'] }, { '0:legs': at('2026-11-11T08:00') }),
-        },
-    });
+    test(
+        'REG-NAV-06 Help, its search, and a link to an answer',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            await app.goto('/account');
+            await page.getByRole('link', { name: /^Help/ }).click();
+            await expect(page).toHaveURL('/help');
+            await expect(app.heading('Help')).toBeVisible();
+            await expect(app.backLink('You')).toBeVisible();
+            await expect(app.tab('You')).toHaveAttribute('aria-current', 'true');
+            const opened = page.locator('details[open]');
+            await expect(opened).toHaveCount(0);
 
-    test('REG-NAV-06 Help, its search, and a ? link', { tag: '@p2' }, async ({ app, page }) => {
-        await app.goto('/account');
-        await page.getByRole('link', { name: /^Help/ }).click();
-        await expect(page).toHaveURL('/help');
-        await expect(app.heading('Help')).toBeVisible();
-        await expect(app.backLink('You')).toBeVisible();
-        await expect(app.tab('You')).toHaveAttribute('aria-current', 'true');
-        const opened = page.locator('details[open]');
-        await expect(opened).toHaveCount(0);
+            const search = page.getByRole('searchbox', { name: 'Search help' });
+            await search.fill('iphone');
+            await expect(page.getByRole('status').filter({ hasText: /answers?$/ })).toHaveText(
+                '2 answers'
+            );
+            await expect(page.getByRole('group')).toHaveCount(2);
+            await expect(opened).toHaveCount(2);
 
-        const search = page.getByRole('searchbox', { name: 'Search help' });
-        await search.fill('iphone');
-        await expect(page.getByRole('status').filter({ hasText: /answers?$/ })).toHaveText(
-            '2 answers'
-        );
-        await expect(page.getByRole('group')).toHaveCount(2);
-        await expect(opened).toHaveCount(2);
+            await search.fill('zzzz');
+            await expect(
+                page.getByText('Nothing matches "zzzz". Try other words, or email us below.')
+            ).toBeVisible();
 
-        await search.fill('zzzz');
-        await expect(
-            page.getByText('Nothing matches "zzzz". Try other words, or email us below.')
-        ).toBeVisible();
-
-        await app.goto('/home');
-        await page.getByRole('link', { name: /^Help: Why does Today say my plan/ }).click();
-        await expect(page).toHaveURL(/\/help/);
-        const question = 'Why does Today say my plan starts next week?';
-        const topic = page.getByRole('group').filter({ hasText: question });
-        await expect(topic).toHaveAttribute('open', '');
-        await expect(topic.getByText(question)).toBeFocused();
-    });
+            // As the workout page's ? links to one
+            await app.goto('/help?q=starts-next-week');
+            const question = 'Why does Today say my plan starts next week?';
+            const topic = page.getByRole('group').filter({ hasText: question });
+            await expect(topic).toHaveAttribute('open', '');
+            await expect(topic.getByText(question)).toBeFocused();
+        }
+    );
 });

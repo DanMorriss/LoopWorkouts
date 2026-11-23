@@ -272,6 +272,9 @@
     --tab-bar-height: 3.75rem;
     --run-bar-height: 3.5rem;
     --undo-bar-height: 3.25rem;
+    // A notice (no Undo, e.g. "Signed in as…") has room round its close button: 44px and
+    // 0.5rem above and below, and its border
+    --undo-notice-height: calc(44px + 1rem + 2px);
     --bars-bottom: max(0.75rem, env(safe-area-inset-bottom));
     --bars-base: env(safe-area-inset-bottom, 0px);
     --tab-bar-space: 0px;
@@ -296,6 +299,10 @@
     &:has(.undo-bar) {
         --undo-bar-space: calc(var(--undo-bar-height) + var(--bar-gap));
     }
+
+    &:has(.undo-bar--notice) {
+        --undo-bar-space: calc(var(--undo-notice-height) + var(--bar-gap));
+    }
 }
 
 html,
@@ -313,7 +320,7 @@ body {
 
 // The setup's buttons stay over the bottom of the screen, so what's focused stays clear of them
 html:has(.setup__footer) {
-    scroll-padding-bottom: 8rem;
+    scroll-padding-bottom: calc(8rem + var(--undo-bar-space));
 }
 
 // And clear of the bar kept at the top of a page (TopBarComponent)

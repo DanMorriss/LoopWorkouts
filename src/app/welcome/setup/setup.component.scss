@@ -13,8 +13,8 @@ $footer-height: 8rem;
 .setup {
     display: flex;
     flex-direction: column;
-    // Room to scroll the last of a question clear of the buttons
-    padding-bottom: $footer-height;
+    // Room to scroll the last of a question clear of the buttons, and the bar under them
+    padding-bottom: calc($footer-height + var(--undo-bar-space));
 }
 
 .setup__checking {
@@ -142,7 +142,9 @@ $footer-height: 8rem;
     margin: 1rem auto 0;
 }
 
-// The page fades out under the buttons, rather than running sharp up to them
+// The page fades out under the buttons, rather than running sharp up to them. A bar at the
+// bottom (e.g. "Signed in as…", from signing in on the welcome screen) lifts them above it,
+// as --bars-height says how much of the screen it covers
 .setup__footer {
     position: fixed;
     z-index: 10;
@@ -151,7 +153,7 @@ $footer-height: 8rem;
     bottom: 0;
     display: flex;
     justify-content: center;
-    padding: 1.5rem max(1rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom))
+    padding: 1.5rem max(1rem, env(safe-area-inset-right)) max(0.5rem, var(--bars-height))
         max(1rem, env(safe-area-inset-left));
     background: linear-gradient(to top, var(--page-bg) calc(100% - 1.5rem), transparent);
 }

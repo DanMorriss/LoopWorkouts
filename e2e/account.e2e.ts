@@ -225,6 +225,15 @@ test.describe('signing in from the welcome screen', () => {
                 } else {
                     await expect(page).toHaveURL('/welcome/setup');
                     await expect(page.getByText('Question 1 of 6')).toBeVisible();
+                    // "Signed in as…" shows under the setup's buttons, not over them
+                    await expect(app.undoBar).toContainText('Signed in as me@example.com');
+                    const bar = await app.undoBar.boundingBox();
+                    const skip = await page
+                        .getByRole('button', { name: 'Skip for now' })
+                        .boundingBox();
+                    expect(skip!.y + skip!.height).toBeLessThanOrEqual(bar!.y);
+                    await page.getByRole('button', { name: 'Next' }).click();
+                    await expect(page.getByText('Question 2 of 6')).toBeVisible();
                 }
             }
         );

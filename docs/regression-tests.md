@@ -1392,7 +1392,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Stories:** NAV-3, NAV-4, SET-7 · **Priority:** P1
 - **Preconditions:** empty storage; stubs for `otp`, `verify`. Case A: pull returns no profile record. Case B: pull returns a `profile` record (name "Sam", Fitness, lb).
 - **Steps:** On the welcome screen, sign in with the code.
-- **Expected:** "Getting your profile…" shows (a status). A: the setup asks its questions from question 1. B: Today opens with "Good morning, Sam", asking nothing, and You → Profile shows Fitness and Pounds. (A slow pull, over 8 s by `page.clock`, makes it ask anyway.)
+- **Expected:** "Getting your profile…" shows (a status). A: the setup asks its questions from question 1, with "Signed in as me@example.com." in the bar under its buttons, not over them (Next and Skip for now can be pressed). B: Today opens with "Good morning, Sam", asking nothing, and You → Profile shows Fitness and Pounds. (A slow pull, over 8 s by `page.clock`, makes it ask anyway.)
 - **In the pack:** the slow pull (over 8 s) isn't in the pack.
 
 ### REG-ACC-05 · Signing out

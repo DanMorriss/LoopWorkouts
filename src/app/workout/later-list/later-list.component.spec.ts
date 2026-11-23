@@ -6,7 +6,7 @@ import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { fakeReducedMotion } from '../../shared/testing/fake-reduced-motion';
 import { FakeAudioContext, provideFakeAudioContext } from '../../shared/testing/fake-audio-context';
-import { makeWorkout, rest, work } from '../../shared/testing/make-workout';
+import { eachAGroup, makeWorkout, rest, work } from '../../shared/testing/make-workout';
 import { WORKOUT_TOUR_KEY } from '../../tour/tour.service';
 import { WorkoutComponent } from '../workout.component';
 import { WorkoutView } from '../workout-view';
@@ -169,6 +169,50 @@ describe('LaterListComponent', () => {
             expect.objectContaining({ name: 'Squats', seconds: 10 }),
             expect.objectContaining({ name: 'Lunges', seconds: 10 }),
         ]);
+    });
+
+    it("counts an exercise's sets as one, on one row, picking its first set", () => {
+        start({
+            ...circuit,
+            blocks: eachAGroup(
+                [
+                    exercise('Plank', 'builtin:plank'),
+                    exercise('Squats', 'builtin:bodyweight-squat'),
+                ],
+                3
+            ),
+        });
+        skip();
+        skip();
+        skip();
+
+        // Three of Plank's sets, but one exercise: no count
+        expect(button()!.getAttribute('aria-label')).toBe('Skipped: Plank');
+        expect(page().querySelector('.later__count')).toBeNull();
+        press(button());
+        expect(page().querySelector('.later__heading')!.textContent).toContain('Do Plank next?');
+        expect(page().querySelector('.later__detail')!.textContent).toBe(
+            '3 sets · next set 1 of 3 · 00:10'
+        );
+        press(buttonNamed('Not now'));
+
+        skip();
+        expect(button()!.getAttribute('aria-label')).toBe('2 skipped exercises');
+        expect(page().querySelector('.later__count')!.textContent).toBe('2');
+        press(button());
+        const rows = [...page().querySelectorAll('.later__menu .menu__item')].map((row) => [
+            row.querySelector('.later-option__name')!.textContent,
+            row.querySelector('.later-option__detail')!.textContent,
+        ]);
+        expect(rows).toEqual([
+            ['Plank', '3 sets · next set 1 of 3 · 00:10'],
+            ['Squats', 'set 1 of 3 · 00:10'],
+        ]);
+
+        press(page().querySelector('.later__menu .menu__item'));
+        expect(upNext()).toContain('Plank');
+        // Its other two sets are still put aside
+        expect(page().querySelector('.later__count')!.textContent).toBe('2');
     });
 
     it('lists more than one, with a count, to pick one', () => {

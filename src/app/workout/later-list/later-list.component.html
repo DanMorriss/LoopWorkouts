@@ -1,4 +1,4 @@
-<!-- Only while there's something skipped to do later (RUN-16) -->
+<!-- Only while there's something skipped to do later (RUN-16), beside Pause on the left -->
 @let items = this.items();
 @if (items.length) {
     <div class="later">
@@ -11,11 +11,13 @@
             [attr.aria-expanded]="open()"
             (click)="toggle()"
         >
-            <mat-icon aria-hidden="true">fitness_center</mat-icon>
+            <mat-icon aria-hidden="true">update</mat-icon>
             @if (items.length > 1) {
                 <span class="later__count" aria-hidden="true">{{ items.length }}</span>
             }
         </button>
+        <!-- As Pause's and Skip's, for sighted users: the button's name says more -->
+        <span class="later__caption" aria-hidden="true">Later</span>
 
         @if (open()) {
             <div

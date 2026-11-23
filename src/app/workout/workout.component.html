@@ -3,10 +3,6 @@
     [class.workout-page--paused]="view.isPaused()"
 >
     @if (view.workout()) {
-        <!-- Exercises skipped to do later, top right (RUN-16) -->
-        @if (view.isComplete() === false && !view.summaryOpen()) {
-            <app-later-list [nextCard]="nextCard" (emptied)="focusControls()" />
-        }
         <!-- On a phone the header shows the title instead, leaving more room for the ring -->
         <p class="workout-title text-center text-4xl text-(--text-strong)">
             {{ view.workout()?.title }}
@@ -171,6 +167,10 @@
                  captions repeat the buttons' names for sighted users, so screen readers skip
                  them. -->
                 <div class="workout-controls" data-tour="controls">
+                    <!-- Exercises skipped to do later, on Pause's left, as Skip's on its right (RUN-16) -->
+                    @if (!view.summaryOpen()) {
+                        <app-later-list [nextCard]="nextCard" (emptied)="focusControls()" />
+                    }
                     <div class="workout-control workout-control--main">
                         <!-- Greyed out while a timed exercise waits for Start after a long
                              rest (RUN-14), whose Start is in the face, so it's plain the

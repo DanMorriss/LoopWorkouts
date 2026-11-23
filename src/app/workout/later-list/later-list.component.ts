@@ -21,10 +21,14 @@ import { WorkoutView } from '../workout-view';
 import { flyInto, flyOnto } from './later-fly';
 import { LaterOptionComponent } from '../later-option/later-option.component';
 
+/** An exercise put aside, with how many of its sets are. */
+type LaterGroup = ReturnType<WorkoutView['aside']>[number] & { sets: number };
+
 /**
- * The exercises skipped to do later (RUN-16), at the top of the workout page: a small button
- * with a count on it when there's more than one, opening a menu under it that asks to do the
- * one next, or lists them to pick one. Picked, it's Up next, with Undo.
+ * The exercises skipped to do later (RUN-16), beside Pause on the left, as Skip, which puts
+ * them here, is on the right: a button, "Later", with a count on it when there's more than one
+ * exercise, opening a menu over it that asks to do the one next, or lists them to pick one.
+ * Picked, it's Up next, with Undo.
  */
 @Component({
     selector: 'app-later-list',
@@ -43,7 +47,26 @@ export class LaterListComponent {
     private readonly undo = inject(UndoService);
     private readonly view = inject(WorkoutView);
     private readonly reducedMotion = injectPrefersReducedMotion();
-    protected readonly items = this.view.aside;
+    /**
+     * What's put aside, by exercise: each set skipped of Leg press is one row, "Leg press ·
+     * 3 sets", in the order first skipped, and picking it does the first of them next. A row a
+     * set made the list long, and the count grow with every set (2026-11-23).
+     */
+    protected readonly items = computed(() => {
+        const groups = new Map<string, LaterGroup>();
+        for (const item of this.view.aside()) {
+            const group = groups.get(item.name);
+            if (group) {
+                group.sets++;
+            } else {
+                groups.set(item.name, { ...item, sets: 1 });
+            }
+        }
+        return [...groups.values()].map((group) => ({
+            ...group,
+            detail: group.sets > 1 ? `${group.sets} sets · next ${group.detail}` : group.detail,
+        }));
+    });
     /** The Up next card, which one picked flies down to (see `flyOnto()`). */
     readonly nextCard = input<() => HTMLElement | undefined>(() => undefined);
     /** The last one has been picked, so the button's gone: focus is the page's to place. */

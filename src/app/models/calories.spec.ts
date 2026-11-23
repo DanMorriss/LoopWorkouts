@@ -1,5 +1,11 @@
 import { BUILT_IN_MOVEMENTS } from './built-in-exercise-movements';
-import { caloriesBurnt, describeCalories, exerciseMet } from './calories';
+import {
+    afterburn,
+    bodyWeightHint,
+    caloriesBurnt,
+    describeCalories,
+    exerciseMet,
+} from './calories';
 import { RepSet, TimedSet } from './history';
 
 const plank = (seconds: number): TimedSet => ({
@@ -86,5 +92,21 @@ describe('calories (CAL-1)', () => {
         });
         expect(describeCalories(1212, 'en-GB')?.kcal).toBe('1,210 kcal');
         expect(describeCalories(2.4, 'en-GB')).toBeNull();
+    });
+
+    it('gives the afterburn as a tenth of what was burnt above resting', () => {
+        // 10 minutes of planks at 75 kg: 47.5 kcal, 12.5 of it resting
+        const planks = { activeSeconds: 600, sets: [plank(600)] };
+        expect(afterburn(planks, 75)).toBeCloseTo(3.5);
+        // Only rests, at 1.5 METs: half a MET above resting
+        expect(afterburn({ activeSeconds: 600, sets: [] }, 75)).toBeCloseTo(
+            (0.1 * 0.5 * 75 * 600) / 3600
+        );
+        expect(afterburn({ activeSeconds: 0 }, 75)).toBe(0);
+    });
+
+    it('says where a body weight is kept', () => {
+        expect(bodyWeightHint(false)).toBe('For calories burnt. Kept on this device only');
+        expect(bodyWeightHint(true)).toBe('For calories burnt. Kept with your account');
     });
 });

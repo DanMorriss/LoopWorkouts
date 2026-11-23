@@ -1606,8 +1606,15 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 - **Stories:** CAL-2 · **Priority:** P2
 - **Preconditions:** as REG-CAL-01, with no body weight.
-- **Steps:** Run Planks to the end. Press **Add your weight to see calories**. Then open Progress.
-- **Expected:** The summary has Time and Rounds only, and Add your weight to see calories. Pressing it opens `/account?focus=body-weight` with focus in Body weight. The log's line has no kcal.
+- **Steps:** Run Planks to the end. Press **Add your weight to see calories**. Type 75 and press Enter. Press Done.
+- **Expected:** The summary has Time and Rounds only, and Add your weight to see calories. Pressing it shows the Body weight box on the summary, focused, with "Kept on this device only". Given 75, the box goes, Calories shows "About 50 kcal" with focus on the stats, and the log's line ends "about 50 kcal".
+
+### REG-CAL-04 · No calories in the history without a body weight
+
+- **Stories:** CAL-1 · **Priority:** P2
+- **Preconditions:** as REG-CAL-02.
+- **Steps:** Run Planks to the end. Press Done.
+- **Expected:** The log's line has no kcal.
 
 ### REG-CAL-03 · Keeping the body weight with the account, and withdrawing it
 

@@ -45,12 +45,6 @@ export class SummaryExits {
         await this.router.navigateByUrl(editUrl(copy));
     }
 
-    /** The run is over, on to the Body weight box on You → Profile. */
-    async addWeight() {
-        this.run.stop();
-        await this.router.navigate(['/account'], { queryParams: { focus: 'body-weight' } });
-    }
-
     /** Done: the run is over, on to it in the history (highlighted if logged). */
     async closeSummary() {
         const run = this.run.runId();

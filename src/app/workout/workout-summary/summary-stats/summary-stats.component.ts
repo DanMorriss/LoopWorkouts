@@ -1,18 +1,38 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import {
+    afterNextRender,
+    Component,
+    computed,
+    DOCUMENT,
+    effect,
+    ElementRef,
+    inject,
+    Injector,
+    input,
+    signal,
+    untracked,
+    viewChild,
+} from '@angular/core';
+import { ConsentService } from '../../../account/consent.service';
 import { describeRounds, formatDuration } from '../../../history/history-format';
+import { bodyWeightHint } from '../../../models/calories';
 import { HistoryEntry } from '../../../models/history';
+import { WeightFieldComponent } from '../../../shared/components/weight-field/weight-field.component';
+import { injectFocusAfterRender } from '../../../shared/focus-after-render';
 import { CaloriesService } from '../../../shared/state/calories.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
 
 /**
  * The summary's figures: the time (pauses left out), the rounds and, with a body weight
- * given, about how many calories it burnt (CAL-1). Without one, a way to add one (CAL-2),
- * which is asked for only here and on Profile, not in the setup.
+ * given, about how many calories it burnt (CAL-1), and about how many more over the next day
+ * as the body recovers. Without one, Add your weight to see calories (CAL-2) opens the Body
+ * weight box here, kept on this device as Profile's is; once it's given, the calories show,
+ * and focus goes to the figures. It's asked for only here and on Profile, not in the setup.
  */
 @Component({
     selector: 'app-summary-stats',
+    imports: [WeightFieldComponent],
     template: `
-        <dl class="summary__stats">
+        <dl #figures class="summary__stats" tabindex="-1">
             <div class="summary__stat">
                 <dt>Time</dt>
                 <dd>{{ duration() }}</dd>
@@ -32,10 +52,26 @@ import { SettingsStore } from '../../../shared/state/settings-store.service';
                 </div>
             }
         </dl>
+        @if (afterburn(); as more) {
+            <p class="summary__afterburn">
+                <span aria-hidden="true">Plus about {{ more.kcal }}</span
+                ><span class="sr-only">Plus {{ more.spoken }}</span> over the next day, as your body
+                recovers
+            </p>
+        }
         @if (askForWeight()) {
-            <button type="button" class="summary__add-weight" (click)="addWeight.emit()">
-                Add your weight to see calories
-            </button>
+            @if (adding()) {
+                <div class="summary__weight">
+                    <app-weight-field kind="body" describedBy="summary-weight-hint">
+                        Body weight
+                    </app-weight-field>
+                    <p class="summary__weight-hint" id="summary-weight-hint">{{ weightHint() }}</p>
+                </div>
+            } @else {
+                <button type="button" class="summary__add-weight" (click)="addWeight()">
+                    Add your weight to see calories
+                </button>
+            }
         }
     `,
     styles: `
@@ -53,6 +89,21 @@ import { SettingsStore } from '../../../shared/state/settings-store.service';
             grid-auto-flow: column;
             gap: 0.75rem;
             margin: 1.25rem 0 0;
+            border-radius: 0.75rem;
+        }
+
+        .summary__afterburn,
+        .summary__weight-hint {
+            @include page-hint;
+            margin: 0.5rem 0 0;
+        }
+
+        .summary__afterburn {
+            text-align: center;
+        }
+
+        .summary__weight {
+            margin-top: 1rem;
         }
 
         .summary__add-weight {
@@ -85,14 +136,47 @@ import { SettingsStore } from '../../../shared/state/settings-store.service';
 export class SummaryStatsComponent {
     private readonly settings = inject(SettingsStore);
     private readonly calories = inject(CaloriesService);
+    private readonly consent = inject(ConsentService);
+    private readonly document = inject(DOCUMENT);
+    private readonly injector = inject(Injector);
+    private readonly focusAfterRender = injectFocusAfterRender();
+    private readonly figures = viewChild.required<ElementRef<HTMLElement>>('figures');
 
     /** The run, as it is in the history. */
     readonly entry = input.required<HistoryEntry>();
-    /** Add your weight to see calories was pressed. */
-    readonly addWeight = output<void>();
 
     protected readonly duration = computed(() => formatDuration(this.entry().activeSeconds));
     protected readonly rounds = computed(() => describeRounds(this.entry()));
     protected readonly burnt = computed(() => this.calories.describe(this.entry()));
+    protected readonly afterburn = computed(() =>
+        this.burnt() ? this.calories.describeAfterburn(this.entry()) : null
+    );
     protected readonly askForWeight = computed(() => this.settings.bodyWeight() === null);
+    /** Add your weight to see calories was pressed: the Body weight box is open. */
+    protected readonly adding = signal(false);
+    protected readonly weightHint = computed(() => bodyWeightHint(!!this.consent.weightGiven()));
+
+    constructor() {
+        // Given in the box, which goes as the calories come: focus goes to the figures, which
+        // now have them, unless it was given by leaving the box for something else
+        effect(() => {
+            if (this.askForWeight() || !untracked(this.adding)) {
+                return;
+            }
+            afterNextRender(
+                () => {
+                    const focused = this.document.activeElement;
+                    if (focused === null || focused === this.document.body) {
+                        this.figures().nativeElement.focus();
+                    }
+                },
+                { injector: this.injector }
+            );
+        });
+    }
+
+    protected addWeight() {
+        this.adding.set(true);
+        this.focusAfterRender('body-weight');
+    }
 }

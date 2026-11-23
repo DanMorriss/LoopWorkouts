@@ -1,5 +1,11 @@
 import { inject, LOCALE_ID, Service } from '@angular/core';
-import { BurningRun, caloriesBurnt, CaloriesText, describeCalories } from '../../models/calories';
+import {
+    afterburn,
+    BurningRun,
+    caloriesBurnt,
+    CaloriesText,
+    describeCalories,
+} from '../../models/calories';
 import { SettingsStore } from './settings-store.service';
 
 /**
@@ -14,5 +20,11 @@ export class CaloriesService {
     describe(run: BurningRun): CaloriesText | null {
         const kg = this.settings.bodyWeight();
         return kg === null ? null : describeCalories(caloriesBurnt(run, kg), this.locale);
+    }
+
+    /** About how many more it burns over the next day, as the body recovers; null as above. */
+    describeAfterburn(run: BurningRun): CaloriesText | null {
+        const kg = this.settings.bodyWeight();
+        return kg === null ? null : describeCalories(afterburn(run, kg), this.locale);
     }
 }

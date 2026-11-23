@@ -5,8 +5,8 @@ import {
     kettlebellToKg,
     weightIn,
     WeightUnit,
-} from '../../models/weight';
-import { SettingsStore } from '../../shared/state/settings-store.service';
+} from '../../../models/weight';
+import { SettingsStore } from '../../state/settings-store.service';
 
 /** What a weight field is for: your body weight (CAL-2), or your kettlebell's (PRG-14). */
 export type WeightFieldKind = 'body' | 'kettlebell';
@@ -36,11 +36,11 @@ const KINDS = {
 >;
 
 /**
- * Profile's box for a weight, in the unit you lift in, which is shown after it: your body
+ * A box for a weight, on Profile and the workout summary, in the unit you lift in, which is shown after it: your body
  * weight (CAL-2) or your kettlebell's (PRG-14). Saved as it's left, or on Enter, as it's kept
  * (a body weight to one decimal place, a kettlebell's to the half), and emptied when it isn't
  * a weight. The label is what's put inside it. Focus it by its id, e.g. `body-weight`, as the
- * workout summary's Add your weight does.
+ * workout summary's Add your weight to see calories does.
  */
 @Component({
     selector: 'app-weight-field',

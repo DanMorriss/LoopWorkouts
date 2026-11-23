@@ -144,6 +144,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | CAL-4  | Say how hard an exercise of my own is, for its calories                      | —   | —   | [calories](calories.md)                       |
 | CAL-5  | Use my heart rate from a watch for calories                                  | —   | —   | [calories](calories.md)                       |
 | CAL-6  | Agree to keeping my body weight with my account                              | ✅  | —   | [calories](calories.md)                       |
+| CAL-7  | See about how much more I'll burn over the next day, as I recover            | ✅  | —   | [calories](calories.md)                       |
 
 What's saved on the device, and in what shape, is in [data](data.md). Where the app is heading, and why the planned stories are in the order they are, is in [direction](../direction.md).
 

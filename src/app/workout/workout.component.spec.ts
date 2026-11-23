@@ -3997,20 +3997,44 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('offers to add a body weight, without one, ending the run on Profile (CAL-2)', async () => {
+        it('says about how many more it burns over the next day, as the body recovers', () => {
+            TestBed.inject(SettingsStore).update({ bodyWeight: 300 });
+            // 20 minutes at 1.5 METs: 150 kcal, 50 of it above resting, a tenth of that after
+            start(makeWorkout({ workSeconds: 1200, restSeconds: 0, repeats: 1 }));
+            advance(1_200_000);
+
+            const after = summary()!.querySelector('.summary__afterburn')!;
+            expect(after.textContent!.replace(/\s+/g, ' ').trim()).toBe(
+                'Plus about 5 kcalPlus about 5 calories over the next day, as your body recovers'
+            );
+            fixture.destroy();
+        });
+
+        it('asks for a body weight in place, without one, then shows the calories (CAL-2)', async () => {
             start(makeWorkout({ workSeconds: 60, restSeconds: 0, repeats: 1 }));
             advance(60_000);
-            const navigate = mockNavigate();
             expect(stats().map((stat) => stat.split(':')[0])).toEqual(['Time', 'Rounds']);
+            expect(summary()!.querySelector('.summary__afterburn')).toBeNull();
 
             pressInSummary('Add your weight to see calories');
             await fixture.whenStable();
+            const box = summary()!.querySelector<HTMLInputElement>('#body-weight')!;
+            expect(document.activeElement).toBe(box);
+            expect(summaryText()).toContain('For calories burnt. Kept on this device only');
 
-            expect(store.activeWorkout()).toBeNull();
-            expect(entries()).toHaveLength(1);
-            expect(navigate).toHaveBeenCalledWith(['/account'], {
-                queryParams: { focus: 'body-weight' },
-            });
+            box.value = '300';
+            box.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            box.blur();
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            // Still on the summary, with the run going on to the history only on Done
+            expect(store.activeWorkout()).not.toBeNull();
+            expect(TestBed.inject(SettingsStore).bodyWeight()).toBe(300);
+            expect(stats().at(-1)).toContain('Calories: About 10 kcal');
+            expect(summary()!.querySelector('#body-weight')).toBeNull();
+            expect(summaryButton('Add your weight to see calories')).toBeUndefined();
+            expect(document.activeElement).toBe(summary()!.querySelector('.summary__stats'));
             fixture.destroy();
         });
 

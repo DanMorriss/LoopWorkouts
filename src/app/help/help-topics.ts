@@ -78,7 +78,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'no-sound',
                 question: 'Why is there no sound?',
                 answer: [
-                    "Browsers only play sound after you've tapped the page. Any tap turns it on. After a refresh mid-workout, the workout shows a Tap to turn on sound button.",
+                    "Browsers only play sound after you've tapped the page. Any tap turns it on. After a refresh mid-workout, the workout shows Sound off · tap to turn on, on the ring's top edge.",
                     "If it's still quiet, check that Sound is on in Settings, and your phone's volume, and that it isn't on silent.",
                 ],
                 link: { label: 'Open Settings', url: '/settings' },

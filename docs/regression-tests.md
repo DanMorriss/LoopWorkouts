@@ -37,7 +37,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Reduced motion by default.** `reducedMotion: 'reduce'` on the context except in the tests about motion. It makes wheels jump, pages cross-fade and the summary appear at once, which removes most waiting. CLAUDE.md's zoneless notes still apply: wait two `requestAnimationFrame`s before pressing a wheel that's just been shown.
 - **Server.** `ng serve` for speed in development; CI should also run the P1 tests against `ng build` served statically with an SPA fallback, as that's the build with the Content-Security-Policy (`security.autoCsp`), and fail on any CSP violation in the console.
 - **Device APIs stubbed** with `page.addInitScript` before the app loads:
-    - `AudioContext`: a recorder that logs each note's frequency and start time (`osc.frequency.value`, `osc.start(when)` against the stub's own `currentTime`, which follows `Date.now()` so `page.clock` moves it). Its `state` starts `'running'`; set it to `'suspended'` to test **Tap to turn on sound**.
+    - `AudioContext`: a recorder that logs each note's frequency and start time (`osc.frequency.value`, `osc.start(when)` against the stub's own `currentTime`, which follows `Date.now()` so `page.clock` moves it). Its `state` starts `'running'`; set it to `'suspended'` to test **Sound off · tap to turn on**.
     - `navigator.vibrate`: records each pattern; delete it to test "This device can't vibrate".
     - `navigator.wakeLock.request`: records requests and releases; delete it to test "This browser can't keep the screen on".
     - Clipboard: `context.grantPermissions(['clipboard-read', 'clipboard-write'])`.
@@ -745,7 +745,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     5. In a new run, reload mid-run (the reload's `pagehide` logs it as stopped), then let it run to its end.
 - **Expected:**
     1. It carries on from 4.5 s (00:06 left), not from the start; no alarm already past is replayed.
-    2. **Tap to turn on sound** shows, with its ? link ("Help: Why is there no sound?"); a tap anywhere makes it go.
+    2. **Sound off · tap to turn on** shows on the ring's top edge, in view, with its ? link ("Help: Why is there no sound?"); a tap anywhere makes it go.
     3. Still paused at the same point.
     4. The closed run is in the history as stopped (a new tab has its own `sessionStorage`, so there's no run bar).
     5. One entry for that run, now finished, not two.

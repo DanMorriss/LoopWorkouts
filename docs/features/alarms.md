@@ -37,7 +37,7 @@
 
 ### Turning sound on
 
-- The web only allows sound after the user has tapped or pressed a key. Any tap anywhere in the app turns sound on, so it's ready by the time a workout starts. After a reload, the workout page shows a **Tap to turn on sound** button until it is.
+- The web only allows sound after the user has tapped or pressed a key. Any tap anywhere in the app turns sound on, so it's ready by the time a workout starts. After a reload, the workout page shows **Sound off · tap to turn on** until it is: a solid pill with a speaker-off icon and a ? to Help, on the **ring's top edge**, over it, so it's seen from where the time is read (since 2026-11-23; until then it was under Pause and Skip, at the bottom edge of a phone or below it, so a workout propped up out of reach could run silently without anyone seeing why). The workout carries on meanwhile, as a reload always does.
 - The Sound, Vibration and Keep screen on settings apply at once, mid-workout too (see [settings](settings.md)).
 
 ### The screen locking

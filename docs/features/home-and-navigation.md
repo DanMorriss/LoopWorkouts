@@ -94,7 +94,7 @@
 - Top to bottom: the title **Help**, a **Search help** box ("e.g. sound, plan, backup"), then the questions in sections, most needed first: **Your data**, **Sound and the screen**, **Planning your week**, **Doing a workout**, **Making and finding workouts**, **Progress**, **Signing in**, and **Where is…?** (a line on each tab, the plan and Settings, for someone new to the app). Last: "Didn't find your answer? Email dan@loopworkouts.com, and we'll help.", the address a link.
 - Each question opens to its answer (a disclosure: tap, Enter or Space), a few short sentences using the app's own words for its buttons and pages, with a link to do it where there's a page for it, e.g. **Go to You**.
 - **Searching** shows only the questions whose question or answer has every word typed, in any order, ignoring case, opened to read at once, and screen readers hear how many ("3 answers"). With none: 'Nothing matches "…". Try other words, or email us below.' With anything typed, an **×** at the end of the box (Clear search) empties it, showing every question again, focus staying in the box.
-- **A ? link**: a small ? (44px to tap) beside **Tap to turn on sound** on the workout page opens Help on Why is there no sound?, opened, scrolled to and focused, so it's read out: screen readers hear the link as "Help: Why is there no sound?". It's the only one: the tours explain the rest of the app, so the ? links on Plan, beside Today's **Your plan starts next week** and on the welcome screen were taken out (2026-11-23). Sound after a reload isn't something a tour covers.
+- **A ? link**: a small ? (44px to tap) beside **Sound off · tap to turn on** on the workout page opens Help on Why is there no sound?, opened, scrolled to and focused, so it's read out: screen readers hear the link as "Help: Why is there no sound?". It's the only one: the tours explain the rest of the app, so the ? links on Plan, beside Today's **Your plan starts next week** and on the welcome screen were taken out (2026-11-23). Sound after a reload isn't something a tour covers.
 - The answers are kept true to the app: a change to what one explains changes it in the same PR.
 
 ### The tour (NAV-8)
@@ -150,7 +150,7 @@ Since 2026-11-06, from an interview with Dan.
 - Given Settings, opened from You, then You is chosen in the tab bar.
 - Given the weekly plan, opened from Today, then Today is chosen in the tab bar.
 - Given You, when I press Help, then Help slides in with every section closed, and You stays chosen; when I search "iphone", then only the three questions mentioning it show, opened, and screen readers hear "3 answers".
-- Given the workout page asking to Tap to turn on sound, when I press the ? beside it, then Help opens on "Why is there no sound?", opened and focused.
+- Given the workout page asking to turn on sound, when I press the ? beside it, then Help opens on "Why is there no sound?", opened and focused.
 - Given I'm making a workout, or browsing the ready-made workouts, then Workouts is chosen.
 - Given a workout going, when I press ⌄ on its page, then I'm back where I came from, with the bar above the tabs showing the step and its time; pressing the bar's Pause pauses it, and pressing the bar opens the workout again.
 - Given a workout finishes while I'm on Progress, then the bar says "Finished: see how it went" and opens the summary.

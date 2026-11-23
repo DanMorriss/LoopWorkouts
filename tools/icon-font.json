@@ -53,7 +53,8 @@
         "unfold_more",
         "view_list",
         "visibility",
-        "visibility_off"
+        "visibility_off",
+        "volume_off"
     ],
-    "sha256": "c9cd2b4b72b3db955f7d62c06d15649843c1d501276528147e39f70574e033e0"
+    "sha256": "51ea902c82cc0350872f514556046bdcf6cc11cd1c330ab13c77a4cc2b7438ce"
 }

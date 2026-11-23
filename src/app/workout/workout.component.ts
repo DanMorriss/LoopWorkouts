@@ -1,7 +1,6 @@
 import {
     afterNextRender,
     Component,
-    computed,
     DOCUMENT,
     effect,
     ElementRef,
@@ -12,14 +11,11 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
-import { AlarmService } from '../shared/alarms/alarm.service';
 import { ExerciseDetailsDialogComponent } from '../shared/components/exercise-details-dialog/exercise-details-dialog.component';
-import { HelpLinkComponent } from '../help/help-link/help-link.component';
 import { SwapExerciseDialogComponent } from '../shared/components/swap-exercise-dialog/swap-exercise-dialog.component';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { ActiveRunService } from '../shared/run/active-run.service';
 import { criticallyDampedSpring } from '../shared/spring';
-import { SettingsStore } from '../shared/state/settings-store.service';
 import { fitName } from './fit-name';
 import { WorkoutRolls } from './workout-rolls';
 import { WorkoutFaceSlideComponent } from './workout-face-slide/workout-face-slide.component';
@@ -30,6 +26,7 @@ import { WorkoutSummaryComponent } from './workout-summary/workout-summary.compo
 import { SummaryExits } from './summary-exits';
 import { LastSetDialogComponent } from './last-set-dialog/last-set-dialog.component';
 import { WorkoutSwap } from './workout-swap';
+import { SoundPromptComponent } from './sound-prompt/sound-prompt.component';
 import { UpNextCardComponent } from './up-next-card/up-next-card.component';
 import { LaterListComponent } from './later-list/later-list.component';
 import { FinishLaterDialogComponent } from './finish-later-dialog/finish-later-dialog.component';
@@ -55,7 +52,7 @@ const SPACE_HANDLED_BY =
     imports: [
         RouterLink,
         MatIconModule,
-        HelpLinkComponent,
+        SoundPromptComponent,
         WorkoutSummaryComponent,
         LastSetDialogComponent,
         ExerciseDetailsDialogComponent,
@@ -88,19 +85,12 @@ export class WorkoutComponent {
     private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
     private readonly injector = inject(Injector);
     protected readonly run = inject(ActiveRunService);
-    private readonly settings = inject(SettingsStore);
     protected readonly view = inject(WorkoutView);
     protected readonly swap = new WorkoutSwap(() => this.focusInfo());
     /** How the face's text and the round line roll between steps. */
     protected readonly rolls = new WorkoutRolls();
     /** Skip puts an exercise aside to do later (RUN-16). */
     private readonly later = new LaterPicks();
-
-    protected readonly alarms = inject(AlarmService);
-    /** Sound is on, but the browser is waiting for a tap before it will play any. */
-    protected readonly soundLocked = computed(
-        () => this.alarms.supported && this.settings.sound() && !this.alarms.unlocked()
-    );
 
     private readonly mainButton = viewChild<ElementRef<HTMLButtonElement>>('mainButton');
     private readonly upNextCard = viewChild(UpNextCardComponent);

@@ -1929,7 +1929,11 @@ describe('WorkoutComponent', () => {
 
         it('asks for a tap when the browser is blocking sound, and hides once it is on', () => {
             start(workout());
-            expect(prompt()?.textContent?.trim()).toBe('Tap to turn on sound');
+            expect(prompt()?.textContent?.replace('volume_off', '').trim()).toBe(
+                'Sound off · tap to turn on'
+            );
+            // On the ring's top edge, where it's seen, not under the controls
+            expect(prompt()!.closest('.workout-stage')).not.toBeNull();
             // With a ? beside it, to Help on why there's no sound
             const help = fixture.nativeElement.querySelector('.sound-prompt app-help-link a');
             expect(help.getAttribute('href')).toBe('/help?q=no-sound');

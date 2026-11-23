@@ -75,6 +75,18 @@ test.describe('signing in by email', () => {
         });
         await expect(page.getByRole('button', { name: 'Use another email' })).toBeVisible();
 
+        // Send another code waits the minute Supabase makes an address wait, counting down
+        const resend = page.getByRole('button', { name: /^Send another code/ });
+        await expect(resend).toBeDisabled();
+        await expect(resend).toHaveText('Send another code in 60s');
+        await page.clock.runFor(60_000);
+        await expect(resend).toHaveText('Send another code');
+        await resend.click();
+        await expect(page.getByText("We've sent another code to me@example.com.")).toBeVisible();
+        expect(supabase.callsTo('auth/v1/otp')).toHaveLength(2);
+        await expect(form.code).toBeFocused();
+        await expect(resend).toBeDisabled();
+
         await form.code.fill('12a');
         await form.submit.click();
         await expect(
@@ -89,7 +101,7 @@ test.describe('signing in by email', () => {
         // Sent as soon as the last digit's in, with nothing to press
         await expect(
             page.getByText(
-                "That code didn't work: it may be wrong, or expired. Check it, or send another email."
+                "That code didn't work: it may be wrong, or expired. Check it, or send another code."
             )
         ).toBeVisible();
         expect(supabase.callsTo('auth/v1/verify')).toHaveLength(1);

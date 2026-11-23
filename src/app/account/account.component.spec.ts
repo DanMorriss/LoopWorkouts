@@ -233,7 +233,7 @@ describe('AccountComponent', () => {
             client.auth.verifyOtp.mockResolvedValueOnce({ data: {}, error: { status: 403 } });
             await type('account-code', '654321');
             expect(status()).toBe(
-                "That code didn't work: it may be wrong, or expired. Check it, or send another email."
+                "That code didn't work: it may be wrong, or expired. Check it, or send another code."
             );
             expect(navigate).not.toHaveBeenCalled();
 
@@ -263,6 +263,86 @@ describe('AccountComponent', () => {
                 "The email couldn't be sent. Check your connection and try again."
             );
             expect(element.querySelector('#account-code')).toBeNull();
+        });
+
+        it('says how long to wait, when Supabase says', async () => {
+            await type('account-email', 'me@example.com');
+            client.auth.signInWithOtp.mockResolvedValueOnce({
+                data: {},
+                error: {
+                    status: 429,
+                    message: 'For security purposes, you can only request this after 42 seconds.',
+                },
+            });
+            await press('Email me a sign-in code');
+            expect(status()).toBe(
+                'Too many sign-in emails for now. Wait 42 seconds, then try again.'
+            );
+        });
+
+        describe('Send another code', () => {
+            beforeEach(() => {
+                vi.useFakeTimers({
+                    now: Date.UTC(2026, 10, 23, 12),
+                    toFake: ['Date', 'setInterval', 'clearInterval'],
+                });
+            });
+            afterEach(() => vi.useRealTimers());
+
+            const resend = () =>
+                [...element.querySelectorAll('button')].find((b) =>
+                    b.textContent!.includes('Send another code')
+                )!;
+            async function wait(seconds: number) {
+                vi.advanceTimersByTime(seconds * 1000);
+                await settle();
+            }
+
+            it('waits a minute after sending, counting down, then sends another', async () => {
+                await type('account-email', 'me@example.com');
+                await press('Email me a sign-in code');
+                expect(resend().disabled).toBe(true);
+                expect(resend().textContent!.trim()).toBe('Send another code in 60s');
+
+                await wait(18);
+                expect(resend().textContent!.trim()).toBe('Send another code in 42s');
+
+                await type('account-code', '12');
+                await wait(42);
+                expect(resend().disabled).toBe(false);
+                expect(resend().textContent!.trim()).toBe('Send another code');
+
+                resend().click();
+                await settle();
+                expect(client.auth.signInWithOtp).toHaveBeenCalledTimes(2);
+                expect(status()).toBe("We've sent another code to me@example.com.");
+                // The old code's digits go, and it's typed afresh
+                expect(element.querySelector<HTMLInputElement>('#account-code')!.value).toBe('');
+                expect(document.activeElement!.id).toBe('account-code');
+                expect(resend().disabled).toBe(true);
+            });
+
+            it('waits as long as Supabase says, when it sends no more yet', async () => {
+                await type('account-email', 'me@example.com');
+                await press('Email me a sign-in code');
+                await wait(60);
+                client.auth.signInWithOtp.mockResolvedValueOnce({
+                    data: {},
+                    error: {
+                        status: 429,
+                        message:
+                            'For security purposes, you can only request this after 90 seconds.',
+                    },
+                });
+
+                resend().click();
+                await settle();
+                expect(status()).toBe(
+                    'Too many sign-in emails for now. Wait 90 seconds, then try again.'
+                );
+                expect(resend().textContent!.trim()).toBe('Send another code in 01:30');
+                expect(document.activeElement!.id).toBe('account-code');
+            });
         });
     });
 

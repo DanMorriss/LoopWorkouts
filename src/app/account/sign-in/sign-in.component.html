@@ -27,6 +27,7 @@
                 Use another email
             </button>
         </div>
+        <app-resend-code [allowedAt]="resendAt()" [busy]="busy()" (resend)="resend()" />
     </form>
 } @else {
     @if (intro(); as why) {

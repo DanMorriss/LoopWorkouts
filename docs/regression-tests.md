@@ -1360,16 +1360,18 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Preconditions:** `guest()` with workout "Legs"; stubs answering `otp`, `verify` and an empty pull.
 - **Steps:**
     1. Type " me@example.com " and press Email me a sign-in code.
-    2. Type "12a" as the code; press **Sign in**.
-    3. With `verify` answering 403, press the first box and type 123456 a key at a time.
-    4. With `verify` answering 200, fill "123 456" into the first box (as a phone or a paste does).
-    5. Open You.
+    2. After a minute (`page.clock`), press **Send another code**.
+    3. Type "12a" as the code; press **Sign in**.
+    4. With `verify` answering 403, press the first box and type 123456 a key at a time.
+    5. With `verify` answering 200, fill "123 456" into the first box (as a phone or a paste does).
+    6. Open You.
 - **Expected:**
-    1. The request's email is trimmed; "We've sent a 6-digit code to me@example.com. Type it here to sign in." with focus on it; Code, Sign in, **Use another email**.
-    2. "The code is the 6 digits in the email, e.g. 123456."
-    3. Each digit moves on to the next box, ending on Digit 6 of 6, and the code is sent at once, without pressing Sign in (one `verify` call); "That code didn't work: it may be wrong, or expired. Check it, or send another email."
-    4. The code is sent as 123456; Today opens with "Signed in as me@example.com." in the bar; `pull_records` then `push_records` are called, and the push includes Legs.
-    5. "Signed in as me@example.com.", what syncs, and "Synced at <time>.", **Sign out** and **Delete account**.
+    1. The request's email is trimmed; "We've sent a 6-digit code to me@example.com. Type it here to sign in." with focus on it; Code, Sign in, **Use another email**, and "Didn't get it? Send another code in 60s" (off, counting down).
+    2. It's sent again (a second `otp` call); "We've sent another code to me@example.com."; focus on the code's first box; the button's off again.
+    3. "The code is the 6 digits in the email, e.g. 123456."
+    4. Each digit moves on to the next box, ending on Digit 6 of 6, and the code is sent at once, without pressing Sign in (one `verify` call); "That code didn't work: it may be wrong, or expired. Check it, or send another code."
+    5. The code is sent as 123456; Today opens with "Signed in as me@example.com." in the bar; `pull_records` then `push_records` are called, and the push includes Legs.
+    6. "Signed in as me@example.com.", what syncs, and "Synced at <time>.", **Sign out** and **Delete account**.
 
 ### REG-ACC-03 · Google, and links that come back with an error
 

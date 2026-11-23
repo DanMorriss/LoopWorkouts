@@ -14,7 +14,15 @@ export type AccountState =
     | { status: 'signed-out' }
     | { status: 'signed-in'; email: string };
 
-export type SendResult = 'sent' | 'too-many' | 'failed';
+/**
+ * Whether the sign-in email was sent. Too many: Supabase won't send another yet, and `wait` is
+ * how many seconds until it will, when it says (one address can have one a minute), or null
+ * (the project's emails for the hour are used up, say).
+ */
+export type SendResult =
+    | { status: 'sent' }
+    | { status: 'too-many'; wait: number | null }
+    | { status: 'failed' };
 
 export { SIGN_IN_PATH };
 
@@ -164,11 +172,16 @@ export class AccountService {
                 options: { shouldCreateUser: true },
             });
             if (!error) {
-                return 'sent';
+                return { status: 'sent' };
             }
-            return error.status === 429 ? 'too-many' : 'failed';
+            if (error.status !== 429) {
+                return { status: 'failed' };
+            }
+            // "For security purposes, you can only request this after 42 seconds."
+            const wait = /after (\d+) seconds?/.exec(error.message)?.[1];
+            return { status: 'too-many', wait: wait ? Number(wait) : null };
         } catch {
-            return 'failed';
+            return { status: 'failed' };
         }
     }
 

@@ -2,8 +2,7 @@
 
 // The big button, centred under the ring, with Skip to its right. Held on screen at its foot
 // where the page is taller than the screen (large text, a short phone), what's under it
-// softening into a blur, as under the app's bars.
-// The host: the row itself
+// softening into a blur, as under the app's bars. The host is the row itself.
 :host {
     position: sticky;
     bottom: 0;
@@ -29,9 +28,15 @@
         }
     }
 
-    // The workout page's wide layout: beside the ring, with room to spare, so not held
+    // The workout page's wide layout: beside the ring, with room to spare, so not held, and
+    // nothing scrolls under it to blur. Still positioned, as its blur is placed against it:
+    // static, the blur covered the whole page (fixed 2026-11-23).
     @media (min-width: 900px) and (orientation: landscape) {
-        position: static;
+        position: relative;
+
+        &::before {
+            display: none;
+        }
     }
 }
 

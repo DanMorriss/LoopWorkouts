@@ -939,6 +939,15 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Expected:** 1. "Do them before you finish?", and no summary. 2. Still asking, listing Push-up (10 reps) then Plank (00:30), focus on Do them all. 3. Plank, then Push-up; the sheet stays open. 4. The plank runs, focus on Pause, Up next Push-up; then the push-ups. 5. "Do Push-up before you finish?", focus on Do it now. 6. The summary: Workout finished, with Plank 0:30 and Squat 10 reps, and no push-ups.
 - **Left to Vitest:** the time spent deciding left out, Escape finishing, ↑ and what it says, picking one on its own, and a run ended while it asks logged as finished (`finish-later-dialog.component.spec.ts`, `later-pick.spec.ts`).
 
+### REG-RUN-21 · The workout page on a wide window
+
+- **Stories:** RUN-1 · **Priority:** P2 · **Desktop only**
+- **Preconditions:** workout "Short", as in REG-RUN-01.
+- **Steps:**
+    1. Start it in a 1280×720 window.
+- **Expected:** 1. The ring is on the left, over 400px across, with Up next and the controls beside it; the controls' blur is off (it covered the whole page once, 2026-11-23); the workout's title is in the header only.
+- **Left to looking:** the face's words growing with the ring, and a tablet upright's 30rem ring (see screenshots in the PR).
+
 ---
 
 ## 6. History, on the Progress tab (`history.md`)

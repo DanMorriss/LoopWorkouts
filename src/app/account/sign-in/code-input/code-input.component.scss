@@ -1,0 +1,21 @@
+:host {
+    display: block;
+}
+
+// Six boxes in a row, filling the width up to their size, so they fit a 320px phone
+.code-input {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.code-input__digit {
+    flex: 1;
+    min-width: 0;
+    max-width: 3rem;
+    height: 3.25rem;
+    padding: 0;
+    text-align: center;
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    caret-color: var(--accent);
+}

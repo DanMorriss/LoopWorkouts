@@ -11,7 +11,8 @@ const legs = workout('Legs', { steps: [timed(30, 'Squats')] });
 const signIn = (page: import('@playwright/test').Page) => ({
     email: page.getByRole('textbox', { name: 'Email' }),
     send: page.getByRole('button', { name: 'Email me a sign-in code' }),
-    code: page.getByRole('textbox', { name: 'Code' }),
+    /** The first of the code's six boxes, which takes a whole code typed or filled into it. */
+    code: page.getByRole('group', { name: 'Code' }).getByRole('textbox', { name: 'Digit 1 of 6' }),
     submit: page.getByRole('button', { name: 'Sign in', exact: true }),
 });
 
@@ -81,7 +82,10 @@ test.describe('signing in by email', () => {
         ).toBeVisible();
 
         supabase.verify = 403;
-        await form.code.fill('123456');
+        // A digit to a box, each moving on to the next
+        await form.code.click();
+        await page.keyboard.type('123456');
+        await expect(page.getByRole('textbox', { name: 'Digit 6 of 6' })).toBeFocused();
         await form.submit.click();
         await expect(
             page.getByText(

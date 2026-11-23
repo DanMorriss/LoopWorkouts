@@ -7,12 +7,14 @@ import {
     input,
     output,
     signal,
+    viewChild,
 } from '@angular/core';
 import { email, form, FormField, pattern, required } from '@angular/forms/signals';
 import { AccountService } from '../account.service';
 import { SIGN_IN_PROVIDERS, SignInProvider } from '../account-client';
 import { injectFocusAfterRender } from '../../shared/focus-after-render';
 import { IconComponent } from '../../shared/components/icon/icon.component';
+import { CodeInputComponent, CODE_LENGTH } from './code-input/code-input.component';
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple: 'Apple' };
 
@@ -25,7 +27,7 @@ const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple
  */
 @Component({
     selector: 'app-sign-in',
-    imports: [FormField, IconComponent],
+    imports: [CodeInputComponent, FormField, IconComponent],
     templateUrl: './sign-in.component.html',
     styleUrl: './sign-in.component.scss',
     // Supabase's code loads as soon as the form's used, so it's there by the time it's sent
@@ -69,14 +71,16 @@ export class SignInComponent {
     private readonly codeModel = signal({ code: '' });
     protected readonly codeForm = form(this.codeModel, (fields) => {
         required(fields.code, { message: 'Enter the code from the email.' });
-        // Six digits, with any spaces, as in "123 456"
-        pattern(fields.code, /^\s*(\d\s*){6}$/, {
+        // Every box filled (CodeInputComponent leaves a space for an empty one)
+        pattern(fields.code, new RegExp(`^\\d{${CODE_LENGTH}}$`), {
             message: 'The code is the 6 digits in the email, e.g. 123456.',
         });
     });
     protected readonly codeError = computed(() =>
         this.codeForm.code().touched() ? this.codeForm.code().errors().at(0)?.message : undefined
     );
+
+    private readonly codeInput = viewChild(CodeInputComponent);
 
     /** The provider being gone to, until the page has left for it. */
     private leavingFor: string | null = null;
@@ -148,12 +152,12 @@ export class SignInComponent {
         const address = this.sentTo();
         this.codeForm.code().markAsTouched();
         if (!address || this.codeForm().invalid()) {
-            this.focus('account-code');
+            // The first box left to fill
+            this.codeInput()?.focus();
             return;
         }
         this.busy.set(true);
-        const code = this.codeModel().code.replace(/\s/g, '');
-        const signedIn = await this.account.enterCode(address, code);
+        const signedIn = await this.account.enterCode(address, this.codeModel().code);
         this.busy.set(false);
         if (signedIn) {
             this.signedIn.emit();

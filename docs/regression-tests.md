@@ -1361,13 +1361,13 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Steps:**
     1. Type " me@example.com " and press Email me a sign-in code.
     2. Type "12a" as the code; press **Sign in**.
-    3. With `verify` answering 403, type 123456; Sign in.
-    4. With `verify` answering 200, type "123 456"; Sign in.
+    3. With `verify` answering 403, press the first box and type 123456 a key at a time; Sign in.
+    4. With `verify` answering 200, fill "123 456" into the first box (as a phone or a paste does); Sign in.
     5. Open You.
 - **Expected:**
     1. The request's email is trimmed; "We've sent a 6-digit code to me@example.com. Type it here to sign in." with focus on it; Code, Sign in, **Use another email**.
     2. "The code is the 6 digits in the email, e.g. 123456."
-    3. "That code didn't work: it may be wrong, or expired. Check it, or send another email."
+    3. Each digit moves on to the next box, ending on Digit 6 of 6; "That code didn't work: it may be wrong, or expired. Check it, or send another email."
     4. The code is sent as 123456; Today opens with "Signed in as me@example.com." in the bar; `pull_records` then `push_records` are called, and the push includes Legs.
     5. "Signed in as me@example.com.", what syncs, and "Synced at <time>.", **Sign out** and **Delete account**.
 

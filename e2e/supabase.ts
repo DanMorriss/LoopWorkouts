@@ -62,10 +62,15 @@ export class FakeSupabase {
 
     otp: Answer = 200;
     verify: Answer = 200;
-    /** The account's records, as pull_records gives them; or a status for an error. */
-    pull: PulledRecord[] | Answer = [];
+    /**
+     * The account's records, as pull_records gives them; or a status for an error, or `hang`
+     * for no answer ever.
+     */
+    pull: PulledRecord[] | Answer | 'hang' = [];
     push: Answer = 200;
     deleteAccount: Answer = 204;
+    /** POST /logout, which signing out asks for even for this device alone; `hang` never answers. */
+    logout: Answer | 'hang' = 204;
     /** GET /user, and refreshing the token: 401 for a session the server's ended. */
     user: Answer = 200;
     authorize: Answer = 'abort';
@@ -157,12 +162,21 @@ export class FakeSupabase {
                           }),
                       });
             case '/auth/v1/logout':
-                return route.fulfill({ status: 204, headers: cors });
+                if (this.logout === 'hang') {
+                    // A request the server, or the network, never answers
+                    return new Promise<void>(() => undefined);
+                }
+                return this.logout === 'abort'
+                    ? route.abort('internetdisconnected')
+                    : route.fulfill({ status: this.logout, headers: cors });
             case '/auth/v1/authorize':
                 return this.authorize === 'abort'
                     ? route.abort('internetdisconnected')
                     : route.fulfill({ status: this.authorize, headers: cors });
             case '/rest/v1/rpc/pull_records':
+                if (this.pull === 'hang') {
+                    return new Promise<void>(() => undefined);
+                }
                 return Array.isArray(this.pull)
                     ? json(200, { now, records: this.pull })
                     : json(this.pull, null);

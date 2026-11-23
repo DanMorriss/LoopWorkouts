@@ -75,6 +75,18 @@ test.describe('signing in by email', () => {
         });
         await expect(page.getByRole('button', { name: 'Use another email' })).toBeVisible();
 
+        // Send another code waits the minute Supabase makes an address wait, counting down
+        const resend = page.getByRole('button', { name: /^Send another code/ });
+        await expect(resend).toBeDisabled();
+        await expect(resend).toHaveText('Send another code in 60s');
+        await page.clock.runFor(60_000);
+        await expect(resend).toHaveText('Send another code');
+        await resend.click();
+        await expect(page.getByText("We've sent another code to me@example.com.")).toBeVisible();
+        expect(supabase.callsTo('auth/v1/otp')).toHaveLength(2);
+        await expect(form.code).toBeFocused();
+        await expect(resend).toBeDisabled();
+
         await form.code.fill('12a');
         await form.submit.click();
         await expect(
@@ -89,7 +101,7 @@ test.describe('signing in by email', () => {
         // Sent as soon as the last digit's in, with nothing to press
         await expect(
             page.getByText(
-                "That code didn't work: it may be wrong, or expired. Check it, or send another email."
+                "That code didn't work: it may be wrong, or expired. Check it, or send another code."
             )
         ).toBeVisible();
         expect(supabase.callsTo('auth/v1/verify')).toHaveLength(1);
@@ -213,6 +225,15 @@ test.describe('signing in from the welcome screen', () => {
                 } else {
                     await expect(page).toHaveURL('/welcome/setup');
                     await expect(page.getByText('Question 1 of 6')).toBeVisible();
+                    // "Signed in as…" shows under the setup's buttons, not over them
+                    await expect(app.undoBar).toContainText('Signed in as me@example.com');
+                    const bar = await app.undoBar.boundingBox();
+                    const skip = await page
+                        .getByRole('button', { name: 'Skip for now' })
+                        .boundingBox();
+                    expect(skip!.y + skip!.height).toBeLessThanOrEqual(bar!.y);
+                    await page.getByRole('button', { name: 'Next' }).click();
+                    await expect(page.getByText('Question 2 of 6')).toBeVisible();
                 }
             }
         );
@@ -273,6 +294,50 @@ test.describe('signed in', () => {
             await page.getByRole('button', { name: 'Sign out anyway' }).click();
             await expect(app.undoBar).toContainText('Signed out.');
             expect(await app.storageItem('workouts')).toBeNull();
+        }
+    );
+
+    test(
+        "REG-ACC-05 signing out when Supabase's server doesn't answer",
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            const supabase = new FakeSupabase(page);
+            supabase.logout = 'hang';
+            await supabase.install();
+            await app.goto('/account');
+            await page.getByRole('button', { name: 'Sign out' }).click();
+            await expect(page.getByText('Signing out…')).toBeVisible();
+            await expect.poll(() => supabase.callsTo('auth/v1/logout').length).toBe(1);
+
+            // It waits 5 seconds for the server, then clears the device without it
+            await page.clock.runFor(5_000);
+            await expect(app.undoBar).toContainText('Signed out.');
+            expect(await app.storageItem(AUTH_KEY)).toBeNull();
+            expect(await app.storageItem('workouts')).toBeNull();
+        }
+    );
+
+    test(
+        "REG-ACC-05 signing out when the sync before it doesn't finish",
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            const supabase = new FakeSupabase(page);
+            supabase.pull = 'hang';
+            await supabase.install();
+            await app.goto('/account');
+            await page.getByRole('button', { name: 'Sign out' }).click();
+            await expect(page.getByText('Syncing before signing out…')).toBeVisible();
+
+            // It waits 10 seconds for the sync, then asks, as when offline
+            await page.clock.runFor(10_000);
+            await expect(
+                page.getByRole('group', {
+                    name: /^Some changes on this device haven't synced, maybe because you're offline/,
+                })
+            ).toBeVisible();
+            await page.getByRole('button', { name: 'Sign out anyway' }).click();
+            await expect(app.undoBar).toContainText('Signed out.');
+            expect(await app.storageItem(AUTH_KEY)).toBeNull();
         }
     );
 

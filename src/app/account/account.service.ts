@@ -14,9 +14,37 @@ export type AccountState =
     | { status: 'signed-out' }
     | { status: 'signed-in'; email: string };
 
-export type SendResult = 'sent' | 'too-many' | 'failed';
+/**
+ * Whether the sign-in email was sent. Too many: Supabase won't send another yet, and `wait` is
+ * how many seconds until it will, when it says (one address can have one a minute), or null
+ * (the project's emails for the hour are used up, say).
+ */
+export type SendResult =
+    | { status: 'sent' }
+    | { status: 'too-many'; wait: number | null }
+    | { status: 'failed' };
 
 export { SIGN_IN_PATH };
+
+/**
+ * How long signing out waits for Supabase, which asks its server to end the sign-in first
+ * (`/logout`, even for this device alone) and would otherwise wait on it for ever.
+ */
+export const SIGN_OUT_WAIT_MS = 5000;
+
+/**
+ * How long the sync before signing out may take before it's taken as not done, so signing
+ * out asks before losing what's here rather than waiting on it for ever.
+ */
+export const SYNC_BEFORE_SIGN_OUT_MS = 10_000;
+
+/** What `promise` gives, or `otherwise` if it hasn't settled within `ms` or fails. */
+function within<T>(promise: Promise<T>, ms: number, otherwise: T): Promise<T> {
+    return Promise.race([
+        promise.catch(() => otherwise),
+        new Promise<T>((resolve) => setTimeout(() => resolve(otherwise), ms)),
+    ]);
+}
 
 /**
  * Signing in to an account (SYN-3), by a 6-digit code emailed and typed in the app, or with
@@ -164,11 +192,16 @@ export class AccountService {
                 options: { shouldCreateUser: true },
             });
             if (!error) {
-                return 'sent';
+                return { status: 'sent' };
             }
-            return error.status === 429 ? 'too-many' : 'failed';
+            if (error.status !== 429) {
+                return { status: 'failed' };
+            }
+            // "For security purposes, you can only request this after 42 seconds."
+            const wait = /after (\d+) seconds?/.exec(error.message)?.[1];
+            return { status: 'too-many', wait: wait ? Number(wait) : null };
         } catch {
-            return 'failed';
+            return { status: 'failed' };
         }
     }
 
@@ -204,10 +237,11 @@ export class AccountService {
 
     /**
      * Syncs, then gives whether everything on this device has been sent to the account:
-     * signing out removes it from the device, so anything unsent would be lost.
+     * signing out removes it from the device, so anything unsent would be lost. Not done if
+     * it takes over SYNC_BEFORE_SIGN_OUT_MS, so signing out asks rather than waits.
      */
     syncAll(): Promise<boolean> {
-        return this.sync.syncAll();
+        return within(this.sync.syncAll(), SYNC_BEFORE_SIGN_OUT_MS, false);
     }
 
     /**
@@ -233,12 +267,23 @@ export class AccountService {
         this.sync.leaving = true;
         this.forgetKeptBodyWeight();
         try {
-            const client = await this.connect();
-            const { error } = await client.auth.signOut({ scope: 'local' });
-            return !error;
+            return await this.endSignIn(await this.connect());
         } catch {
             return false;
         }
+    }
+
+    /**
+     * Ends this device's sign-in with Supabase, giving whether it did, but not waiting longer
+     * than SIGN_OUT_WAIT_MS for its server to answer: the device is cleared next, which takes
+     * the sign-in with it, so it's signed out here either way.
+     */
+    private endSignIn(client: AccountClient): Promise<boolean> {
+        return within(
+            client.auth.signOut({ scope: 'local' }).then(({ error }) => !error),
+            SIGN_OUT_WAIT_MS,
+            false
+        );
     }
 
     /**
@@ -255,7 +300,7 @@ export class AccountService {
                 return false;
             }
             this.forgetKeptBodyWeight();
-            await client.auth.signOut({ scope: 'local' });
+            await this.endSignIn(client);
             return true;
         } catch {
             return false;

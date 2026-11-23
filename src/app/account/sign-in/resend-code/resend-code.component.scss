@@ -1,0 +1,26 @@
+@use 'interaction' as *;
+
+:host {
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.resend {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+// A link's size beside the hint, its count in even-width digits so it doesn't wobble
+.resend__button {
+    @include link-button;
+
+    font-size: inherit;
+    font-variant-numeric: tabular-nums;
+
+    &:disabled {
+        color: var(--text-muted);
+        text-decoration: none;
+        cursor: default;
+    }
+}

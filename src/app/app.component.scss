@@ -28,6 +28,11 @@ main {
     pointer-events: none;
 }
 
+// A bar that isn't showing takes no room, nor a gap: --bars-height counts only those that are
+.bottom-bars > :not(:has(*)) {
+    display: none;
+}
+
 // Where the page scrolls under the bars, it softens into a blur that fades in towards the
 // screen's bottom edge, rather than running sharp up to the bars' edges: a scroll edge, as iOS
 // has under its floating bars. Behind the bars, and only while there are any.

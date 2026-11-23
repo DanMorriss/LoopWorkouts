@@ -1360,16 +1360,18 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Preconditions:** `guest()` with workout "Legs"; stubs answering `otp`, `verify` and an empty pull.
 - **Steps:**
     1. Type " me@example.com " and press Email me a sign-in code.
-    2. Type "12a" as the code; press **Sign in**.
-    3. With `verify` answering 403, press the first box and type 123456 a key at a time.
-    4. With `verify` answering 200, fill "123 456" into the first box (as a phone or a paste does).
-    5. Open You.
+    2. After a minute (`page.clock`), press **Send another code**.
+    3. Type "12a" as the code; press **Sign in**.
+    4. With `verify` answering 403, press the first box and type 123456 a key at a time.
+    5. With `verify` answering 200, fill "123 456" into the first box (as a phone or a paste does).
+    6. Open You.
 - **Expected:**
-    1. The request's email is trimmed; "We've sent a 6-digit code to me@example.com. Type it here to sign in." with focus on it; Code, Sign in, **Use another email**.
-    2. "The code is the 6 digits in the email, e.g. 123456."
-    3. Each digit moves on to the next box, ending on Digit 6 of 6, and the code is sent at once, without pressing Sign in (one `verify` call); "That code didn't work: it may be wrong, or expired. Check it, or send another email."
-    4. The code is sent as 123456; Today opens with "Signed in as me@example.com." in the bar; `pull_records` then `push_records` are called, and the push includes Legs.
-    5. "Signed in as me@example.com.", what syncs, and "Synced at <time>.", **Sign out** and **Delete account**.
+    1. The request's email is trimmed; "We've sent a 6-digit code to me@example.com. Type it here to sign in." with focus on it; Code, Sign in, **Use another email**, and "Didn't get it? Send another code in 60s" (off, counting down).
+    2. It's sent again (a second `otp` call); "We've sent another code to me@example.com."; focus on the code's first box; the button's off again.
+    3. "The code is the 6 digits in the email, e.g. 123456."
+    4. Each digit moves on to the next box, ending on Digit 6 of 6, and the code is sent at once, without pressing Sign in (one `verify` call); "That code didn't work: it may be wrong, or expired. Check it, or send another code."
+    5. The code is sent as 123456; Today opens with "Signed in as me@example.com." in the bar; `pull_records` then `push_records` are called, and the push includes Legs.
+    6. "Signed in as me@example.com.", what syncs, and "Synced at <time>.", **Sign out** and **Delete account**.
 
 ### REG-ACC-03 · Google, and links that come back with an error
 
@@ -1390,7 +1392,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Stories:** NAV-3, NAV-4, SET-7 · **Priority:** P1
 - **Preconditions:** empty storage; stubs for `otp`, `verify`. Case A: pull returns no profile record. Case B: pull returns a `profile` record (name "Sam", Fitness, lb).
 - **Steps:** On the welcome screen, sign in with the code.
-- **Expected:** "Getting your profile…" shows (a status). A: the setup asks its questions from question 1. B: Today opens with "Good morning, Sam", asking nothing, and You → Profile shows Fitness and Pounds. (A slow pull, over 8 s by `page.clock`, makes it ask anyway.)
+- **Expected:** "Getting your profile…" shows (a status). A: the setup asks its questions from question 1, with "Signed in as me@example.com." in the bar under its buttons, not over them (Next and Skip for now can be pressed). B: Today opens with "Good morning, Sam", asking nothing, and You → Profile shows Fitness and Pounds. (A slow pull, over 8 s by `page.clock`, makes it ask anyway.)
 - **In the pack:** the slow pull (over 8 s) isn't in the pack.
 
 ### REG-ACC-05 · Signing out
@@ -1402,11 +1404,15 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     2. Open Today.
     3. Case B: offline (`push_records` aborted) with a change not synced; press Sign out; **Cancel**; Sign out again; **Sign out anyway**.
     4. Case C: `GET /auth/v1/user` and the token refresh answer 401 on load.
+    5. Case D: `/auth/v1/logout` never answers; press Sign out, and move the clock on 5 seconds.
+    6. Case E: `pull_records` never answers; press Sign out, move the clock on 10 seconds, then **Sign out anyway**.
 - **Expected:**
     1. "Syncing before signing out…", then the app reloads on You with "Signed out. Your data was removed from this device; your account keeps it."; no workouts or history; the theme is still Light; the name is gone; the auth token, `sync` and `synced-at` keys are gone.
     2. The welcome screen opens.
     3. "Some changes on this device haven't synced, maybe because you're offline. …" with **Sign out anyway** and Cancel; Cancel leaves you signed in with focus back on Sign out; Sign out anyway signs out and removes the change.
     4. The device is cleared (settings kept) and says "You were signed out, so your data was removed from this device. Signing in again brings back what your account has."
+    5. "Signing out…" while it waits, then it's signed out as in 1, without the server's answer: no auth token, no workouts.
+    6. "Syncing before signing out…", then the warning as in 3; Sign out anyway signs out.
 - **In the pack:** "signed out by the server" is a session that's expired and whose refresh is turned down (GoTrue's 400), as the app doesn't check a saved session that's still in date.
 
 ### REG-ACC-06 · Deleting the account, and sync status

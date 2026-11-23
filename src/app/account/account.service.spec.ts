@@ -14,7 +14,7 @@ import {
     provideFakeSyncStarter,
 } from '../shared/testing/fake-sync';
 import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
-import { AccountService } from './account.service';
+import { AccountService, SIGN_OUT_WAIT_MS, SYNC_BEFORE_SIGN_OUT_MS } from './account.service';
 
 describe('AccountService', () => {
     let client: FakeAccountClient;
@@ -104,7 +104,7 @@ describe('AccountService', () => {
         await settled();
 
         expect(account.state()).toEqual({ status: 'signed-out' });
-        expect(await account.sendCode('me@example.com')).toBe('failed');
+        expect(await account.sendCode('me@example.com')).toEqual({ status: 'failed' });
     });
 
     it('goes Home once signed in, saying who in the bar there', async () => {
@@ -150,7 +150,7 @@ describe('AccountService', () => {
         it('emails a code, with no link, making the account if it is new', async () => {
             const account = start();
 
-            expect(await account.sendCode('me@example.com')).toBe('sent');
+            expect(await account.sendCode('me@example.com')).toEqual({ status: 'sent' });
 
             expect(client.auth.signInWithOtp).toHaveBeenCalledWith({
                 email: 'me@example.com',
@@ -158,15 +158,32 @@ describe('AccountService', () => {
             });
         });
 
-        it('says when too many have been sent, and when it failed', async () => {
+        it('says when too many have been sent, with how long to wait if told, and when it failed', async () => {
             const account = start();
-            client.auth.signInWithOtp.mockResolvedValueOnce({ data: {}, error: { status: 429 } });
+            client.auth.signInWithOtp.mockResolvedValueOnce({
+                data: {},
+                error: {
+                    status: 429,
+                    message: 'For security purposes, you can only request this after 42 seconds.',
+                },
+            });
+            client.auth.signInWithOtp.mockResolvedValueOnce({
+                data: {},
+                error: { status: 429, message: 'email rate limit exceeded' },
+            });
             client.auth.signInWithOtp.mockResolvedValueOnce({ data: {}, error: { status: 500 } });
             client.auth.signInWithOtp.mockRejectedValueOnce(new Error('network'));
 
-            expect(await account.sendCode('me@example.com')).toBe('too-many');
-            expect(await account.sendCode('me@example.com')).toBe('failed');
-            expect(await account.sendCode('me@example.com')).toBe('failed');
+            expect(await account.sendCode('me@example.com')).toEqual({
+                status: 'too-many',
+                wait: 42,
+            });
+            expect(await account.sendCode('me@example.com')).toEqual({
+                status: 'too-many',
+                wait: null,
+            });
+            expect(await account.sendCode('me@example.com')).toEqual({ status: 'failed' });
+            expect(await account.sendCode('me@example.com')).toEqual({ status: 'failed' });
         });
     });
 
@@ -193,6 +210,37 @@ describe('AccountService', () => {
 
         expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
         expect(account.state()).toEqual({ status: 'signed-out' });
+    });
+
+    it("takes a sync before signing out that doesn't finish as not done", async () => {
+        const account = start('me@example.com');
+        await settled();
+        sync.syncAll.mockReturnValueOnce(new Promise(() => undefined));
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        try {
+            const synced = account.syncAll();
+            await vi.advanceTimersByTimeAsync(SYNC_BEFORE_SIGN_OUT_MS);
+
+            expect(await synced).toBe(false);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it("doesn't wait for ever on Supabase's server to sign out", async () => {
+        const account = start('me@example.com');
+        await settled();
+        // Its /logout request never answered
+        client.auth.signOut.mockReturnValueOnce(new Promise(() => undefined));
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        try {
+            const signedOut = account.signOut();
+            await vi.advanceTimersByTimeAsync(SIGN_OUT_WAIT_MS);
+
+            expect(await signedOut).toBe(false);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     describe('deleteAccount', () => {

@@ -151,15 +151,10 @@ button.up-next {
 }
 
 // Each word whole, so a line breaks between words rather than at a hyphen (unless the word is
-// wider than the line), underlined as the name round it is
+// wider than the line)
 .up-next__word {
     display: inline-block;
     max-width: 100%;
-    text-decoration: inherit;
-}
-
-.up-next__words {
-    text-decoration: inherit;
 }
 
 .up-next__detail {
@@ -172,13 +167,21 @@ button.up-next {
     color: var(--text-muted);
 }
 
-// On a rep step the card is Done, a button laid over all of it, with the next exercise's
-// name, and an (i) by it, a button of its own above that (one can't go inside another)
+// On a rep step: the card, all of it Done, and the next exercise's (i) beside it, outside it,
+// so nothing on the card takes a tap meant for Done
+.up-next__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+// The card is Done, a button laid over all of it (the card holds text a button can't)
 .up-next--done-card {
+    flex: 1;
+    min-width: 0;
+
     @include hover {
-        &:not(:has(.up-next__about:hover)) {
-            background: color-mix(in srgb, var(--next-color) 22%, transparent);
-        }
+        background: color-mix(in srgb, var(--next-color) 22%, transparent);
     }
 
     &:has(> .up-next--done:active) {
@@ -203,53 +206,41 @@ button.up-next {
     }
 }
 
-// Above Done, so it takes its own taps. Its name and (i) run on as text, so the (i) goes onto
-// the next line where it doesn't fit after the name, rather than squeezing the name.
+// ✓ Done at the card's end, big enough to find from a step or two away: a disc in the card's
+// colour, as its kind's is at the start, with the word under it
+.up-next__done-mark {
+    display: grid;
+    justify-items: center;
+    gap: 0.15rem;
+    @include caps(0.75rem);
+    font-weight: 700;
+    color: var(--text-strong);
+
+    .mat-icon {
+        display: grid;
+        place-items: center;
+        width: min(2.5rem, 13cqi);
+        height: min(2.5rem, 13cqi);
+        border-radius: 50%;
+        background: var(--next-color);
+        color: var(--page-bg);
+        font-size: min(1.75rem, 9cqi);
+    }
+}
+
+// Beside Done, so it's always 44px whatever the card's height
 .up-next__about {
-    position: relative;
-    z-index: 1;
-    display: inline-block;
-    max-width: 100%;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    letter-spacing: inherit;
-    text-align: inherit;
-    text-decoration: underline dotted;
-    text-decoration-color: color-mix(in srgb, var(--text-muted) 60%, transparent);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.18em;
-    cursor: pointer;
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-        border-radius: 4px;
-    }
-
-    @include hover {
-        text-decoration-color: var(--text-muted);
-    }
-
-    @include pressed {
-        text-decoration-color: var(--text-muted);
-    }
-
-    @include hit-area(8px);
+    flex: none;
 }
 
-.up-next__about-icon {
-    margin-inline-start: 0.35rem;
-    vertical-align: -0.2em;
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--text-muted);
-    font-size: 1.25rem;
-}
+// At the largest text sizes (the card under 15rem across, in rem that grow with the text) the
+// name needs the room, so the ✓ says Done on its own, as it does to a screen reader's name
+@container (max-width: 15rem) {
+    .up-next--done-card {
+        gap: 0.5rem;
+    }
 
-// Done goes on, so its arrow is in the card's colour
-.up-next--done-card .up-next__end {
-    color: var(--next-color);
+    .up-next__done-word {
+        display: none;
+    }
 }

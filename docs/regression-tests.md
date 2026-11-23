@@ -680,7 +680,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Focus nothing in particular and press Space.
     4. `runFor` 10000; press Done (the Up next card) with the mouse.
 - **Expected:**
-    1. The face shows "10 reps" and "20 kg" (as wheels: spin buttons "reps" and "Weight, kg"), the ring full and violet; Done, the Up next card, reads "Done · up next", "Rest", "00:10" with →, and is named "Done. Next: Rest · 00:10". Pause and Skip are still under the ring.
+    1. The face shows "10 reps" and "20 kg" (as wheels: spin buttons "reps" and "Weight, kg"), the ring full and violet; Done, the Up next card, reads "Up next", "Rest", "00:10" with ✓ Done at its end, and is named "Done. Next: Rest · 00:10". Pause and Skip are still under the ring.
     2. Still waiting on Push-ups.
     3. Space presses Done: rest starts from its **full** 00:10.
     4. At Squats (the last step, a rep step) it waits; it finishes only after Done. The history entry has "Push-ups: 10 reps @ 20 kg" and "Squats: 5 reps"; time spent includes the hour on the push-ups.

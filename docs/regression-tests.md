@@ -70,7 +70,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     1. Open `/`.
     2. Press **Continue without an account**.
 - **Expected:**
-    1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, the heading "Keep your workouts on every device" over the sign-in (Continue with Google, Email, Email me a sign-in link) and **Continue without an account**, with no tab bar.
+    1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, the heading "Keep your workouts on every device" over the sign-in (Continue with Google, Email, Email me a sign-in code) and **Continue without an account**, with no tab bar.
     2. localStorage has `setup = "due"` once the welcome screen is shown.
     3. After Continue without an account: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 6" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
 - **Variants (same test file):**
@@ -149,7 +149,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     4. Open Today; press the ? beside **Your plan starts next week**.
 - **Expected:**
     1. Help slides in at `/help` with every section closed and ‹ You; You stays current in the tab bar.
-    2. Only the three questions mentioning iPhones show, opened, and a status says "3 answers".
+    2. Only the two questions mentioning iPhones show, opened, and a status says "2 answers".
     3. 'Nothing matches "zzzz". Try other words, or email us below.'
     4. Help opens on "Why does Today say my plan starts next week?", opened, scrolled to and focused. The link's accessible name starts "Help:".
 - **In the pack:** the topics are `<details>` (role group); the opened one is checked by its `open` attribute and its question's focus.
@@ -1344,7 +1344,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Stories:** SYN-3, SYN-10 · **Priority:** P1
 - **Preconditions:** `guest()`, stub as above.
 - **Steps:** 0. Open You.
-    1. Empty the field and press **Email me a sign-in link**.
+    1. Empty the field and press **Email me a sign-in code**.
     2. Type "nope"; press it.
     3. With `otp` answering 429, type "me@example.com"; press it.
     4. With `otp` aborted (offline), press it.
@@ -1359,16 +1359,16 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Stories:** SYN-3, SYN-4 · **Priority:** P1
 - **Preconditions:** `guest()` with workout "Legs"; stubs answering `otp`, `verify` and an empty pull.
 - **Steps:**
-    1. Type " me@example.com " and press Email me a sign-in link.
+    1. Type " me@example.com " and press Email me a sign-in code.
     2. Type "12a" as the code; press **Sign in**.
     3. With `verify` answering 403, type 123456; Sign in.
-    4. With `verify` answering 200, Sign in again.
+    4. With `verify` answering 200, type "123 456"; Sign in.
     5. Open You.
 - **Expected:**
-    1. The request's email is trimmed; "We've sent a sign-in link to me@example.com. Open it on this device, or type the code from the email here." with focus on it; Code, Sign in, **Use another email**.
-    2. "The code is the number in the email, e.g. 123456."
+    1. The request's email is trimmed; "We've sent a 6-digit code to me@example.com. Type it here to sign in." with focus on it; Code, Sign in, **Use another email**.
+    2. "The code is the 6 digits in the email, e.g. 123456."
     3. "That code didn't work: it may be wrong, or expired. Check it, or send another email."
-    4. Today opens with "Signed in as me@example.com." in the bar; `pull_records` then `push_records` are called, and the push includes Legs.
+    4. The code is sent as 123456; Today opens with "Signed in as me@example.com." in the bar; `pull_records` then `push_records` are called, and the push includes Legs.
     5. "Signed in as me@example.com.", what syncs, and "Synced at <time>.", **Sign out** and **Delete account**.
 
 ### REG-ACC-03 · Google, and links that come back with an error
@@ -1378,13 +1378,11 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Steps:**
     1. Press **Continue with Google** with the authorize request aborted.
     2. Open `/account#error=access_denied&error_description=cancelled`.
-    3. Open `/account#error=access_denied&error_code=otp_expired&error_description=expired`.
-    4. Open `/home#error=access_denied&error_code=otp_expired` (landing on the wrong page).
+    3. Open `/home#error=access_denied&error_code=otp_expired` (landing on the wrong page; an old email's link).
 - **Expected:**
     1. "Going to Google…", then the browser goes to the authorize URL; aborted, "Couldn't reach Google. Check your connection and try again."
     2. "Signing in didn't finish. Try again, or sign in another way." above the buttons; the error is taken out of the address.
-    3. "That sign-in link has expired or was used already. Send yourself another."; the address is cleaned.
-    4. It goes on to `/account` (`sendSignInToAccount()`) and shows the same message.
+    3. It goes on to `/account` (`sendSignInToAccount()`) and shows the same message.
 - **Manual:** a real Google sign-in on the Vercel preview (TODO: CSP check on an iPhone).
 
 ### REG-ACC-04 · Signing in from the welcome screen, with and without a profile

@@ -19,7 +19,7 @@ export type SendResult = 'sent' | 'too-many' | 'failed';
 export { SIGN_IN_PATH };
 
 /**
- * Signing in to an account (SYN-3), by an email link or the code in the same email, or with
+ * Signing in to an account (SYN-3), by a 6-digit code emailed and typed in the app, or with
  * Google or Apple (SYN-7); signing out and deleting the account (SYN-8). Signing out and deleting leave this device's data as
  * it is. Supabase's code loads only once it's needed: at once if there's an account on this
  * device, or a sign-in coming back in the address, and otherwise when signing in.
@@ -39,14 +39,11 @@ export class AccountService {
     private readonly _state = signal<AccountState>({ status: 'loading' });
     readonly state = this._state.asReadonly();
 
-    /**
-     * Why the sign-in link that opened the app didn't work (it's expired, or was used
-     * already), or null.
-     */
-    readonly linkProblem = signal<string | null>(null);
+    /** Why signing in with Google or Apple didn't finish, coming back to the app, or null. */
+    readonly signInProblem = signal<string | null>(null);
 
     constructor() {
-        this.linkProblem.set(this.takeLinkProblem());
+        this.signInProblem.set(this.takeSignInProblem());
         if (this.mightBeSignedIn()) {
             void this.connect().catch(() => undefined);
         } else {
@@ -59,7 +56,7 @@ export class AccountService {
 
     /**
      * Loads Supabase's code ahead of signing in, e.g. once the sign-in form's being filled in,
-     * so sending the link doesn't wait on it.
+     * so sending the code doesn't wait on it.
      */
     prepare() {
         void this.connect().catch(() => undefined);
@@ -155,16 +152,16 @@ export class AccountService {
         }
     }
 
-    /** Emails a link (and a code) to sign in with, making the account if it's new. */
-    async sendLink(email: string): Promise<SendResult> {
+    /**
+     * Emails a code to sign in with, making the account if it's new. The email carries only
+     * the code (`supabase/email-templates/`), so signing in never leaves the app.
+     */
+    async sendCode(email: string): Promise<SendResult> {
         try {
             const client = await this.connect();
             const { error } = await client.auth.signInWithOtp({
                 email,
-                options: {
-                    shouldCreateUser: true,
-                    emailRedirectTo: this.document.location.origin + SIGN_IN_PATH,
-                },
+                options: { shouldCreateUser: true },
             });
             if (!error) {
                 return 'sent';
@@ -177,7 +174,7 @@ export class AccountService {
 
     /**
      * Goes to Google or Apple to sign in, which come back to the You tab signed in (the
-     * account's tokens in the address, as an email link's are). An account with the same
+     * account's tokens in the address). An account with the same
      * email, made by email or the other, is the same account. Gives false if it couldn't
      * start (offline, say); otherwise the page is on its way there.
      */
@@ -288,20 +285,18 @@ export class AccountService {
     }
 
     /**
-     * A sign-in that didn't work comes back with why in the address: an email link that's
-     * expired or used, e.g. `#error=access_denied&error_code=otp_expired`, or Google or Apple
-     * turned down or cancelled. Takes it out of the address, so a refresh doesn't show it
-     * again, and says what to do.
+     * A sign-in that didn't work comes back with why in the address, e.g.
+     * `#error=access_denied`: Google or Apple turned down or cancelled (or an old email's
+     * link, from before the emails carried only a code). Takes it out of the address, so a
+     * refresh doesn't show it again, and says what to do.
      */
-    private takeLinkProblem(): string | null {
+    private takeSignInProblem(): string | null {
         const location = this.document.location;
         const params = new URLSearchParams(location.hash.slice(1) || location.search.slice(1));
         if (!params.has('error') && !params.has('error_code')) {
             return null;
         }
         this.document.defaultView?.history.replaceState(null, '', location.pathname);
-        return params.get('error_code') === 'otp_expired'
-            ? 'That sign-in link has expired or was used already. Send yourself another.'
-            : "Signing in didn't finish. Try again, or sign in another way.";
+        return "Signing in didn't finish. Try again, or sign in another way.";
     }
 }

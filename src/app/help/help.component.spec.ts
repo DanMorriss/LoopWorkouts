@@ -172,10 +172,9 @@ describe('HelpComponent (NAV-7)', () => {
         expect(questions()).toEqual([
             "Why doesn't my iPhone vibrate?",
             'Will the alarms play with my phone locked?',
-            'How do I sign in?',
         ]);
         expect(opened()).toEqual(questions());
-        expect(el().querySelector('[role="status"]')!.textContent!.trim()).toBe('3 answers');
+        expect(el().querySelector('[role="status"]')!.textContent!.trim()).toBe('2 answers');
     });
 
     it('says when nothing matches, with a way to ask', async () => {

@@ -20,7 +20,7 @@ test.describe('a device new to the app', () => {
             await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
             await expect(page.getByRole('textbox', { name: 'Email' })).toBeVisible();
             await expect(
-                page.getByRole('button', { name: 'Email me a sign-in link' })
+                page.getByRole('button', { name: 'Email me a sign-in code' })
             ).toBeVisible();
             await expect(app.tabBar).toBeHidden();
             expect(await app.storageItem('setup')).toBe('due');
@@ -332,10 +332,10 @@ test.describe('help', () => {
         const search = page.getByRole('searchbox', { name: 'Search help' });
         await search.fill('iphone');
         await expect(page.getByRole('status').filter({ hasText: /answers?$/ })).toHaveText(
-            '3 answers'
+            '2 answers'
         );
-        await expect(page.getByRole('group')).toHaveCount(3);
-        await expect(opened).toHaveCount(3);
+        await expect(page.getByRole('group')).toHaveCount(2);
+        await expect(opened).toHaveCount(2);
 
         await search.fill('zzzz');
         await expect(

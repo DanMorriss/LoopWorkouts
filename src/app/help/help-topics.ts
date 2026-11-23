@@ -359,8 +359,8 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'how-to-sign-in',
                 question: 'How do I sign in?',
                 answer: [
-                    'On You, press Continue with Google, or type your email for a sign-in link.',
-                    "The email has a code too: type it in the app if the link opens somewhere else, such as Safari when you use the app from your iPhone's Home Screen.",
+                    'On You, press Continue with Google, or type your email and press the arrow.',
+                    "We'll email you a 6-digit code: type it in the app to sign in. There's no link to follow, so you never leave the app.",
                 ],
                 link: { label: 'Go to You', url: '/account' },
             },

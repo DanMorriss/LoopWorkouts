@@ -67,7 +67,7 @@ export class AccountComponent {
     private readonly deviceData = inject(DeviceDataService);
     private readonly router = inject(Router);
     /**
-     * Back from Google or an email link with the account's tokens in the address, which
+     * Back from Google or Apple with the account's tokens in the address, which
      * Supabase's client is reading: once it's signed in, on to Home.
      */
     private readonly returning = hasSignInTokens(this.document.location);

@@ -10,7 +10,7 @@ import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
 export const SUPABASE_URL = 'https://cpgacyzlfyskifzhkotu.supabase.co';
 export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_YnL-skDr7iSBsqSqaIbWBg_vE-kGXQa';
 
-/** Where signing in (an email link, or Google) brings you back to: the You tab. */
+/** Where signing in with Google or Apple brings you back to: the You tab. */
 export const SIGN_IN_PATH = '/account';
 
 /** Who else can sign you in (SYN-7). */

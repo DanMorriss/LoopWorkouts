@@ -18,7 +18,7 @@ const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple
 
 /**
  * Signing in (SYN-3, SYN-7): with Google (and Apple, once it's set up), which go there and
- * come back signed in, or by an email link, then the code from the same email typed here.
+ * come back signed in, or by email: a 6-digit code is sent, and typed here, never leaving the app.
  * Whether to keep notes with the account is asked once signed in (SYN-10, NotesAskComponent).
  * Shown signed out on the You tab, with an `intro`, and in the welcome screen's card.
  * Says what it's doing under itself, read out as it changes.
@@ -34,7 +34,7 @@ const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple
 export class SignInComponent {
     /** Why sign in, over the buttons, and what the email field is described by, if given. */
     readonly intro = input<string>();
-    /** Signed in here, with the code; Google and email links come back to the You tab. */
+    /** Signed in here, with the code; Google and Apple come back to the You tab. */
     readonly signedIn = output<void>();
 
     protected readonly account = inject(AccountService);
@@ -69,8 +69,9 @@ export class SignInComponent {
     private readonly codeModel = signal({ code: '' });
     protected readonly codeForm = form(this.codeModel, (fields) => {
         required(fields.code, { message: 'Enter the code from the email.' });
-        pattern(fields.code, /^\s*\d{6,10}\s*$/, {
-            message: 'The code is the number in the email, e.g. 123456.',
+        // Six digits, with any spaces, as in "123 456"
+        pattern(fields.code, /^\s*(\d\s*){6}$/, {
+            message: 'The code is the 6 digits in the email, e.g. 123456.',
         });
     });
     protected readonly codeError = computed(() =>
@@ -117,7 +118,7 @@ export class SignInComponent {
      * Sends the sign-in email. Handled here rather than as a form submission, as the form
      * goes once it's sent, and a form taken away mid-submission stays "submitting".
      */
-    protected async sendLink(event: Event) {
+    protected async sendCode(event: Event) {
         event.preventDefault();
         this.emailForm.email().markAsTouched();
         if (this.emailForm().invalid()) {
@@ -126,11 +127,11 @@ export class SignInComponent {
         }
         const address = this.emailModel().email.trim();
         this.busy.set(true);
-        const result = await this.account.sendLink(address);
+        const result = await this.account.sendCode(address);
         this.busy.set(false);
         if (result === 'sent') {
             this.message.set('');
-            this.account.linkProblem.set(null);
+            this.account.signInProblem.set(null);
             this.sentTo.set(address);
             this.focus('account-sent');
         } else {
@@ -151,7 +152,8 @@ export class SignInComponent {
             return;
         }
         this.busy.set(true);
-        const signedIn = await this.account.enterCode(address, this.codeModel().code.trim());
+        const code = this.codeModel().code.replace(/\s/g, '');
+        const signedIn = await this.account.enterCode(address, code);
         this.busy.set(false);
         if (signedIn) {
             this.signedIn.emit();

@@ -233,6 +233,10 @@
 :root {
     --bubble-light: #ffffff;
     --bubble-shade: #020617;
+    // The face itself, light in both themes, its ink, and its pale blue once finished
+    --face: #ffffff;
+    --face-ink: #000000;
+    --face-done: rgb(240 249 255 / 0.5);
 }
 
 // Motion and the bars along the bottom, the same in both themes

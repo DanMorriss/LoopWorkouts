@@ -434,11 +434,38 @@ export class WorkoutView {
                 totalLeft: this.totalLeft(),
                 // The workout's last round, shown only when it has more than one
                 last: !set && this.repeats() === 1,
-                dots: set ? setDots(set) : this.totalRounds() > 1 ? this.roundDots() : [],
+                // The whole workout is this one superset or giant set: just "Round 2 of 3"
+                soleGroup: this.soleGroup(),
+                // Not with the strip, under a line that already says which round: the dots
+                // only said it again (2026-11-23)
+                dots: this.stepStrip().length
+                    ? []
+                    : set
+                      ? setDots(set)
+                      : this.totalRounds() > 1
+                        ? this.roundDots()
+                        : [],
                 strip: this.stepStrip(),
             },
         ];
     });
+    /**
+     * The workout is one superset or giant set and nothing else, as Bodyweight basics is, so
+     * its rounds are the workout's: "Round 2 of 3", not "Giant set round 2 of 3", a name it
+     * needs only to tell it from the rest of a workout.
+     */
+    private readonly soleGroup = computed(() => {
+        const workout = this.running();
+        if (!workout) {
+            return false;
+        }
+        const groups = workout.blocks.filter((block) => block.kind === 'group');
+        const first = runPlan(workout).sets.find(Boolean);
+        return (
+            groups.length === 1 && workout.repeats === 1 && !!first && first.group !== 'exercise'
+        );
+    });
+
     /** The step in progress began a new round, or a new set, so it slides in sideways. */
     readonly newRound = computed(() => {
         const state = this.state();

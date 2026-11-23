@@ -22,8 +22,8 @@
                         <span aria-hidden="true"> · </span><span class="sr-only">, </span>
                     }
                     @if (section.count; as count) {
-                        <span class="sr-only">exercise </span>{{ count.exercise }} of
-                        {{ count.of }}
+                        <!-- Said, rather than a bare "2 of 6" that could be anything -->
+                        Exercise {{ count.exercise }} of {{ count.of }}
                     }
                 }
             </p>
@@ -57,12 +57,12 @@
             >
                 <div class="workout-inner">
                     <div
-                        class="workout-face rounded-full text-center text-4xl text-black"
+                        class="workout-face rounded-full text-center text-4xl"
                         [class]="{
                             'flash-fade': view.isWorkActive(),
                             'flash-fade-blue': view.isRestActive(),
                             'workout-face--rest': view.isRestActive(),
-                            'bg-sky-50/50': view.isComplete(),
+                            'workout-face--done': view.isComplete(),
                             'workout-face--reps': view.isRepsActive(),
                             'workout-face--paused': view.isPaused(),
                             'workout-face--soon': view.nextSoon(),

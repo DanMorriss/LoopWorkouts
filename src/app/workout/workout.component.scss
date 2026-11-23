@@ -39,7 +39,7 @@
     width: calc(100% - 30px);
     height: calc(100% - 30px);
     border-radius: 50%;
-    background: white;
+    background: var(--face);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,6 +52,12 @@
     // The old step's text and the new one's share the middle while one slides past the other
     display: grid;
     place-items: center;
+    color: var(--face-ink);
+}
+
+// Finished: pale blue
+.workout-face--done {
+    background: var(--face-done);
 }
 
 .workout-face__content {
@@ -169,22 +175,22 @@
 // On the face, which is light in both themes
 .workout-paused__label {
     margin: 0;
-    color: black;
+    color: var(--face-ink);
     font-size: 1.25rem;
 }
 
 .workout-paused__end {
     border-color: $track-color;
-    color: black;
+    color: var(--face-ink);
 
     @include hover {
-        border-color: black;
-        background-color: rgb(0 0 0 / 0.06);
+        border-color: var(--face-ink);
+        background-color: color-mix(in srgb, var(--face-ink) 6%, transparent);
     }
 
     @include pressed {
-        border-color: black;
-        background-color: rgb(0 0 0 / 0.06);
+        border-color: var(--face-ink);
+        background-color: color-mix(in srgb, var(--face-ink) 6%, transparent);
     }
 }
 

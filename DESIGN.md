@@ -248,7 +248,7 @@ Tactile: each shrinks a little the moment it's pressed (`pressed-scale`), and sp
 On `--raised`, with 0.9rem corners and the dialog shadow over a blurred `--overlay`. On a phone, a dialog is a sheet from the bottom with a grab handle, which can be dragged away. Each closes by ‹ Back, Escape or a click outside.
 
 ### The workout ring (signature)
-A glassy bubble whose ring fills as each step goes by, clockwise in work pink and anticlockwise in rest blue, and full and still in reps violet. Its fill has rounded ends, and the bubble is lit from the top left (`--bubble-light`, `--bubble-shade`) in both themes. The step's kind and name are on its face, and the count is the big thing on a rep step. Each step rolls in like a drum, and a timed step's last 3 seconds pop.
+A glassy bubble whose ring fills as each step goes by, clockwise in work pink and anticlockwise in rest blue, and full and still in reps violet. Its fill has rounded ends, and the bubble is lit from the top left (`--bubble-light`, `--bubble-shade`) in both themes. The step's kind and name are on its face, and the big thing is the time on a timed step or a rest and the count on a rep step, each at `min(4rem, 17.4cqi)`, with the name a step smaller over a clock. Each step rolls in like a drum, and a timed step's last 3 seconds pop.
 
 ## Do's and Don'ts
 

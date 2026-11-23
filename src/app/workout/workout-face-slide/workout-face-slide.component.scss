@@ -78,9 +78,16 @@ app-wheel-picker:not(.wheel-picker--open) {
 // what fits on the face on a 320px-wide phone at the standard text size, so they only bite
 // past that.
 
-// A timed step's time, at the face's size (text-4xl)
+// A timed step's or a rest's time, as big as a rep count: it's what's read from the floor a
+// metre or two away (PRODUCT.md), so it's the big thing on the face, with the name under it in
+// size (--timed, below)
 app-clock-digits {
-    font-size: min(2.25rem, 14cqi);
+    font-size: min(4rem, 17.4cqi);
+}
+
+// The name over a clock, a step down, at the kind's icon's size
+.workout-face__label--timed {
+    font-size: min(1.75rem, 11cqi);
 }
 
 // The rep count, as big as the face has room for: its size on a 320px-wide phone, in the

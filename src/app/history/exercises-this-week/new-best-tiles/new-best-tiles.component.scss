@@ -15,7 +15,7 @@
 
 .bests__title {
     margin: 0;
-    color: var(--reps);
+    color: var(--glow-text);
     font-weight: 600;
     @include caps(0.72rem);
 }
@@ -26,7 +26,7 @@
     @include small-type(0.75rem);
 }
 
-// The record big, what it is over it and its exercise under it, tinted in the rep violet
+// The record big, what it is over it and its exercise under it, tinted in the brand cyan
 .bests__tile {
     display: grid;
     grid-template-areas:
@@ -37,18 +37,18 @@
     align-items: center;
     column-gap: 0.5rem;
     padding: 0.65rem 0.75rem;
-    border: 1px solid color-mix(in srgb, var(--reps) 55%, transparent);
+    border: 1px solid color-mix(in srgb, var(--glow) 55%, transparent);
     border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--reps) 9%, transparent);
+    background: color-mix(in srgb, var(--glow) 9%, transparent);
     color: var(--text);
     text-decoration: none;
 
     @include hover {
-        background: color-mix(in srgb, var(--reps) 15%, transparent);
+        background: color-mix(in srgb, var(--glow) 15%, transparent);
     }
 
     @include pressed {
-        background: color-mix(in srgb, var(--reps) 15%, transparent);
+        background: color-mix(in srgb, var(--glow) 15%, transparent);
     }
 
     &:focus-visible {
@@ -59,7 +59,7 @@
 
 .bests__label {
     grid-area: label;
-    color: var(--reps);
+    color: var(--glow-text);
     font-weight: 700;
     @include caps(0.7rem);
 }

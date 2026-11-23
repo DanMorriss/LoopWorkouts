@@ -21,7 +21,7 @@ interface WeekRow extends WeekLine {
     slug: string;
     path: string;
     sets: number;
-    /** A pip for each set, in the rep violet or, for a timed set, the rest blue. */
+    /** A pip for each set, in the brand cyan: solid, or hollow for a timed set. */
     pips: ('reps' | 'timed')[];
 }
 

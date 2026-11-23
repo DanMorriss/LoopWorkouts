@@ -25,10 +25,20 @@ describe('time per week (PRG-12)', () => {
         );
 
         expect(weeks).toEqual([
-            { start: new Date(2026, 9, 19).getTime(), seconds: 0, workouts: 0 },
-            { start: new Date(2026, 9, 26).getTime(), seconds: 1200, workouts: 2 },
-            { start: new Date(2026, 10, 2).getTime(), seconds: 1800, workouts: 2 },
+            { start: new Date(2026, 9, 19).getTime(), seconds: 0, workouts: 0, kcal: 0 },
+            { start: new Date(2026, 9, 26).getTime(), seconds: 1200, workouts: 2, kcal: 0 },
+            { start: new Date(2026, 10, 2).getTime(), seconds: 1800, workouts: 2, kcal: 0 },
         ]);
+    });
+
+    it("adds up each week's calories, given how to work out a run's (CAL-3)", () => {
+        const weeks = timePerWeek(
+            [entry(on(11, 6), 1200), entry(on(11, 3), 600), entry(on(10, 27), 300)],
+            now,
+            2,
+            (run) => run.activeSeconds / 10
+        );
+        expect(weeks.map((week) => week.kcal)).toEqual([30, 180]);
     });
 
     it('leaves out workouts before its first week', () => {
@@ -55,7 +65,7 @@ describe('time per week (PRG-12)', () => {
 
     it('has only this week with nothing done, or only workouts still to come', () => {
         expect(timePerWeek([], now, 12)).toEqual([
-            { start: new Date(2026, 10, 2).getTime(), seconds: 0, workouts: 0 },
+            { start: new Date(2026, 10, 2).getTime(), seconds: 0, workouts: 0, kcal: 0 },
         ]);
         expect(timePerWeek([entry(on(12, 1), 60)], now, 12)).toHaveLength(1);
     });

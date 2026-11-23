@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HistoryEntry } from '../../models/history';
 import { HistoryStore } from '../../shared/state/history-store.service';
+import { SettingsStore } from '../../shared/state/settings-store.service';
 import { TimePerWeekComponent } from './time-per-week.component';
 
 // Friday 6 November 2026, in the afternoon: this week began on Monday 2 November
@@ -63,6 +64,41 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         );
         // Its Monday, as at the left: "This week" on Progress means the last 7 days
         expect(text('.weeks__axis:last-of-type')).toBe('2 Nov');
+    });
+
+    it('has no calories without a body weight', () => {
+        create(entry(day(11, 3), 1800));
+
+        expect(text('.weeks__when')).toBe('2–8 Nov · 1 workout');
+        expect(el().textContent).not.toContain('kcal');
+        expect(el().querySelectorAll('.weeks__table th')).toHaveLength(3);
+    });
+
+    it("says each week's calories with a body weight given (CAL-3)", () => {
+        TestBed.inject(SettingsStore).update({ bodyWeight: 72 });
+        // No sets, so at 2.5 METs: 2.5 × 72 × 5190 ÷ 3600 = 259.5, about 260
+        create(entry(day(11, 3), 1800), entry(day(11, 5), 3390), entry(day(10, 27), 20));
+
+        expect(text('.weeks__when')).toBe('2–8 Nov · 2 workouts · about 260 kcal');
+        expect(text('#time-per-week-spoken')).toBe(
+            'Week of 2 November: 1 hour 27 minutes, 2 workouts, about 260 calories'
+        );
+        // Last week's 20 seconds come to under 5
+        press('ArrowLeft');
+        expect(text('.weeks__when')).toBe('26 Oct – 1 Nov · 1 workout · under 5 kcal');
+
+        const headers = Array.from(el().querySelectorAll('.weeks__table th'));
+        expect(headers.map((th) => th.textContent!.trim())).toEqual([
+            'Week of',
+            'Workouts',
+            'Time',
+            'Calories',
+        ]);
+        const rows = Array.from(el().querySelectorAll('.weeks__table tbody tr'));
+        expect(rows.map((row) => row.lastElementChild!.textContent!.trim())).toEqual([
+            'under 5 kcal',
+            'about 260 kcal',
+        ]);
     });
 
     it('steps through the weeks with the arrow keys, saying each one', () => {

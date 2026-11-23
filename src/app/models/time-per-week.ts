@@ -8,18 +8,22 @@ export interface WeekTotal {
     /** Time spent in its workouts, in whole seconds (pauses don't count). */
     seconds: number;
     workouts: number;
+    /** About how many kcal its workouts burnt, not rounded: 0 when not worked out (CAL-3). */
+    kcal: number;
 }
 
 /**
  * The time spent working out in each of the last `weeks` weeks, oldest first, ending with
- * the week `now` is in. A workout counts in the week it started, as the history groups it
- * by the day it started. The weeks start no earlier than the first workout's, so someone new
- * isn't shown weeks from before they began; with no workouts there's only this week.
+ * the week `now` is in, and with `burnt`, the calories (CAL-3). A workout counts in the week
+ * it started, as the history groups it by the day it started. The weeks start no earlier than
+ * the first workout's, so someone new isn't shown weeks from before they began; with no
+ * workouts there's only this week.
  */
-export function timePerWeek(
-    entries: readonly Pick<HistoryEntry, 'startedAt' | 'activeSeconds'>[],
+export function timePerWeek<E extends Pick<HistoryEntry, 'startedAt' | 'activeSeconds'>>(
+    entries: readonly E[],
     now: number,
-    weeks: number
+    weeks: number,
+    burnt?: (entry: E) => number
 ): WeekTotal[] {
     const thisWeek = new Date(startOfWeek(now));
     // The week of the first workout so far, or this week with none
@@ -34,13 +38,14 @@ export function timePerWeek(
         if (monday.getTime() < firstWeek) {
             continue;
         }
-        totals.set(monday.getTime(), { start: monday.getTime(), seconds: 0, workouts: 0 });
+        totals.set(monday.getTime(), { start: monday.getTime(), seconds: 0, workouts: 0, kcal: 0 });
     }
     for (const entry of entries) {
         const week = totals.get(startOfWeek(entry.startedAt));
         if (week && entry.startedAt <= now) {
             week.seconds += entry.activeSeconds;
             week.workouts += 1;
+            week.kcal += burnt?.(entry) ?? 0;
         }
     }
     return [...totals.values()];

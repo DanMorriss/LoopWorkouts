@@ -14,9 +14,8 @@ Promoting the app: a free web beta for home kettlebell and circuit trainers now,
 
 ### Design review (Impeccable)
 
-Going through the app a page or part at a time with the Impeccable skill (`.claude/skills/impeccable`), which reads `PRODUCT.md`. For each item: `/impeccable critique <target>` first, which only reports; then fix what's worth it, usually with a scoped command (`polish`, `layout`, `typeset`, `clarify`, `harden`, `distill` or `onboard`), one PR per item; then delete the item. Note anything left for later under Known issues. Look at each change at phone width in both themes. The ∞ logo, the ring's colours and Audiowide stay, as `PRODUCT.md` says.
+Going through the app a page or part at a time with the Impeccable skill (`.claude/skills/impeccable`), which reads `PRODUCT.md` and `DESIGN.md`. For each item: `/impeccable critique <target>` first, which only reports; then fix what's worth it, usually with a scoped command (`polish`, `layout`, `typeset`, `clarify`, `harden`, `distill` or `onboard`), one PR per item; then delete the item. Note anything left for later under Known issues. Look at each change at phone width in both themes. The ∞ logo, the ring's colours and Audiowide stay, as `PRODUCT.md` says.
 
-- [ ] **Write `DESIGN.md` first** (`/impeccable document`), so every later review knows the tokens, type and components the app already has.
 - [ ] **The workout page** (`workout/`): the ring and its face, Up next, Pause and Skip, the round line and dots, and the step strip. Judge it from a metre or two away, propped up, as `PRODUCT.md` describes. Then, separately: waiting for Start and Tap to turn on sound; the dialogs for a set cut short and finishing a skipped exercise later.
 - [ ] **The workout summary** (`workout/workout-summary/`): the stats, sets and new bests, what to step up, the swaps, the kettlebell, the stretches and the suggested next workout.
 - [ ] **The run bar** (`nav/run-bar`), the mini player above the tabs while a workout's going.

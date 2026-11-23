@@ -96,11 +96,13 @@
     min-width: 1px;
     height: 16px;
     border-radius: 3px;
-    background: var(--reps);
+    background: var(--glow);
 }
 
+// A timed set's pip is the same brand cyan, hollow, so the two differ in shape as well as name
 .exercises-week__pip--timed {
-    background: var(--rest);
+    border: 2px solid var(--glow);
+    background: none;
 }
 
 .exercises-week__total {

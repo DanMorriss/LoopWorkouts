@@ -66,6 +66,8 @@ export class FakeSupabase {
     pull: PulledRecord[] | Answer = [];
     push: Answer = 200;
     deleteAccount: Answer = 204;
+    /** POST /logout, which signing out asks for even for this device alone; `hang` never answers. */
+    logout: Answer | 'hang' = 204;
     /** GET /user, and refreshing the token: 401 for a session the server's ended. */
     user: Answer = 200;
     authorize: Answer = 'abort';
@@ -157,7 +159,13 @@ export class FakeSupabase {
                           }),
                       });
             case '/auth/v1/logout':
-                return route.fulfill({ status: 204, headers: cors });
+                if (this.logout === 'hang') {
+                    // A request the server, or the network, never answers
+                    return new Promise<void>(() => undefined);
+                }
+                return this.logout === 'abort'
+                    ? route.abort('internetdisconnected')
+                    : route.fulfill({ status: this.logout, headers: cors });
             case '/auth/v1/authorize':
                 return this.authorize === 'abort'
                     ? route.abort('internetdisconnected')

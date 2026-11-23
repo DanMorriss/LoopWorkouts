@@ -14,7 +14,7 @@ import {
     provideFakeSyncStarter,
 } from '../shared/testing/fake-sync';
 import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
-import { AccountService } from './account.service';
+import { AccountService, SIGN_OUT_WAIT_MS } from './account.service';
 
 describe('AccountService', () => {
     let client: FakeAccountClient;
@@ -210,6 +210,22 @@ describe('AccountService', () => {
 
         expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
         expect(account.state()).toEqual({ status: 'signed-out' });
+    });
+
+    it("doesn't wait for ever on Supabase's server to sign out", async () => {
+        const account = start('me@example.com');
+        await settled();
+        // Its /logout request never answered
+        client.auth.signOut.mockReturnValueOnce(new Promise(() => undefined));
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        try {
+            const signedOut = account.signOut();
+            await vi.advanceTimersByTimeAsync(SIGN_OUT_WAIT_MS);
+
+            expect(await signedOut).toBe(false);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     describe('deleteAccount', () => {

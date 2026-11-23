@@ -27,6 +27,12 @@ export type SendResult =
 export { SIGN_IN_PATH };
 
 /**
+ * How long signing out waits for Supabase, which asks its server to end the sign-in first
+ * (`/logout`, even for this device alone) and would otherwise wait on it for ever.
+ */
+export const SIGN_OUT_WAIT_MS = 5000;
+
+/**
  * Signing in to an account (SYN-3), by a 6-digit code emailed and typed in the app, or with
  * Google or Apple (SYN-7); signing out and deleting the account (SYN-8). Signing out and deleting leave this device's data as
  * it is. Supabase's code loads only once it's needed: at once if there's an account on this
@@ -246,12 +252,25 @@ export class AccountService {
         this.sync.leaving = true;
         this.forgetKeptBodyWeight();
         try {
-            const client = await this.connect();
-            const { error } = await client.auth.signOut({ scope: 'local' });
-            return !error;
+            return await this.endSignIn(await this.connect());
         } catch {
             return false;
         }
+    }
+
+    /**
+     * Ends this device's sign-in with Supabase, giving whether it did, but not waiting longer
+     * than SIGN_OUT_WAIT_MS for its server to answer: the device is cleared next, which takes
+     * the sign-in with it, so it's signed out here either way.
+     */
+    private endSignIn(client: AccountClient): Promise<boolean> {
+        return Promise.race([
+            client.auth.signOut({ scope: 'local' }).then(
+                ({ error }) => !error,
+                () => false
+            ),
+            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), SIGN_OUT_WAIT_MS)),
+        ]);
     }
 
     /**
@@ -268,7 +287,7 @@ export class AccountService {
                 return false;
             }
             this.forgetKeptBodyWeight();
-            await client.auth.signOut({ scope: 'local' });
+            await this.endSignIn(client);
             return true;
         } catch {
             return false;

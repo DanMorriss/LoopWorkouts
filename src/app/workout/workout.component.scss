@@ -72,7 +72,12 @@
 }
 
 // On a phone the header shows the workout's title instead (see the nav), so the ring has more room
+// (about 28rem above and below the ring there, and 31rem with the title: see workout-ring)
 @media (max-width: 639px) {
+    .workout-page {
+        --ring-room: 28rem;
+    }
+
     .workout-title {
         display: none;
     }

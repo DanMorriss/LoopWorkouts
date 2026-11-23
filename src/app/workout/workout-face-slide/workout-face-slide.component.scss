@@ -83,12 +83,13 @@ app-clock-digits {
     font-size: min(2.25rem, 14cqi);
 }
 
-// The rep count, as big as the face has room for on a narrow phone
+// The rep count, as big as the face has room for: its size on a 320px-wide phone, in the
+// face's width rather than the screen's, so it shrinks with a ring made smaller for a short screen
 .workout-face__count {
-    --wheel-row: min(4.4rem, 15.4vw);
-    --wheel-font: min(4rem, 14vw);
+    --wheel-row: min(4.4rem, 19cqi);
+    --wheel-font: min(4rem, 17.4cqi);
     width: 2.6ch;
-    font-size: min(4rem, 14vw);
+    font-size: min(4rem, 17.4cqi);
 }
 
 .workout-face__weight {

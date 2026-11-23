@@ -11,7 +11,8 @@ const legs = workout('Legs', { steps: [timed(30, 'Squats')] });
 const signIn = (page: import('@playwright/test').Page) => ({
     email: page.getByRole('textbox', { name: 'Email' }),
     send: page.getByRole('button', { name: 'Email me a sign-in code' }),
-    code: page.getByRole('textbox', { name: 'Code' }),
+    /** The first of the code's six boxes, which takes a whole code typed or filled into it. */
+    code: page.getByRole('group', { name: 'Code' }).getByRole('textbox', { name: 'Digit 1 of 6' }),
     submit: page.getByRole('button', { name: 'Sign in', exact: true }),
 });
 
@@ -81,17 +82,20 @@ test.describe('signing in by email', () => {
         ).toBeVisible();
 
         supabase.verify = 403;
-        await form.code.fill('123456');
-        await form.submit.click();
+        // A digit to a box, each moving on to the next
+        await form.code.click();
+        await page.keyboard.type('123456');
+        await expect(page.getByRole('textbox', { name: 'Digit 6 of 6' })).toBeFocused();
+        // Sent as soon as the last digit's in, with nothing to press
         await expect(
             page.getByText(
                 "That code didn't work: it may be wrong, or expired. Check it, or send another email."
             )
         ).toBeVisible();
+        expect(supabase.callsTo('auth/v1/verify')).toHaveLength(1);
 
         supabase.verify = 200;
         await form.code.fill('123 456');
-        await form.submit.click();
         await expect(page).toHaveURL('/home');
         await expect(app.undoBar).toContainText('Signed in as me@example.com');
         // The space typed in the code is left out
@@ -198,7 +202,6 @@ test.describe('signing in from the welcome screen', () => {
                 await form.email.fill('me@example.com');
                 await form.send.click();
                 await form.code.fill('123456');
-                await form.submit.click();
 
                 if (withProfile) {
                     // Its profile comes with it, so nothing's asked

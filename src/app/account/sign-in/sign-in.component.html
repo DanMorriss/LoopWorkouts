@@ -7,18 +7,17 @@
         >. Type it here to sign in.
     </p>
     <form class="sign-in__form" novalidate (submit)="enterCode($event)">
-        <label class="picker-field" for="account-code">
-            <span class="picker-field__label">Code</span>
-            <input
-                class="picker-field__input"
-                id="account-code"
-                inputmode="numeric"
-                autocomplete="one-time-code"
+        <div class="picker-field">
+            <span class="picker-field__label" id="account-code-label">Code</span>
+            <app-code-input
+                inputId="account-code"
+                labelledBy="account-code-label"
                 [formField]="codeForm.code"
-                [attr.aria-invalid]="!!codeError()"
-                [attr.aria-describedby]="codeError() ? 'account-code-error' : null"
+                [hasError]="!!codeError()"
+                [describedBy]="codeError() ? 'account-code-error' : null"
+                (complete)="enterCode()"
             />
-        </label>
+        </div>
         @if (codeError(); as error) {
             <p id="account-code-error" class="sign-in__error">{{ error }}</p>
         }

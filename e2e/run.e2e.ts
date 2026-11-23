@@ -1041,8 +1041,8 @@ test.describe('waiting for Start after a long rest', () => {
         { tag: '@p2' },
         async ({ app, page }) => {
             const run = new WorkoutPage(page);
-            // In the face, as the exercise hasn't begun
-            const start = run.face.getByRole('button', { name: 'Start', exact: true });
+            // The big button, in Pause's place, as the exercise hasn't begun
+            const start = run.main.getByRole('button', { name: 'Start', exact: true });
             await app.goto('/library');
             await run.startFromLibrary('Holds');
 
@@ -1052,7 +1052,7 @@ test.describe('waiting for Start after a long rest', () => {
             const fill = page.locator('.workout-ring__sweep');
             await expect(run.faceTime).toHaveText('00:30');
             await expect(start).toBeVisible();
-            await expect(run.pause).toBeDisabled();
+            await expect(run.pause).toBeHidden();
             await expect(fill).toHaveCount(0);
 
             await app.reload();

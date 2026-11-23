@@ -883,7 +883,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Reload.
     3. Press **Start**; `runFor` 5500.
 - **Expected:**
-    1. The second plank waits at 00:30, with Start in the face, Pause greyed out, and its ring empty.
+    1. The second plank waits at 00:30, with the big button Start (no Pause), and its ring empty.
     2. Still waiting at 00:30, the ring still empty.
     3. It counts down from 00:30, with Start gone, Pause back, and the ring fills from empty.
 - **Left to Vitest:** shorter rests not waiting, Skip, the setting off (and turned off mid-wait), Space, the alarms and the time spent (`workout.component.spec.ts`), and `nextWait()` (`wait-to-start.spec.ts`).

@@ -38,9 +38,10 @@
         opacity: 0.45;
     }
 
+    // Filled and taller, which is enough to find it: no glow, as DESIGN.md's Glass, Not Glow
+    // asks (2026-11-23)
     &--current {
         background: var(--step-color);
-        box-shadow: 0 0 6px var(--step-color);
         transform: scaleY(1.6);
     }
 }

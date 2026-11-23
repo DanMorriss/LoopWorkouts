@@ -28,7 +28,7 @@ import { LastSetDialogComponent } from './last-set-dialog/last-set-dialog.compon
 import { WorkoutSwap } from './workout-swap';
 import { SoundPromptComponent } from './sound-prompt/sound-prompt.component';
 import { UpNextCardComponent } from './up-next-card/up-next-card.component';
-import { LaterListComponent } from './later-list/later-list.component';
+import { WorkoutControlsComponent } from './workout-controls/workout-controls.component';
 import { FinishLaterDialogComponent } from './finish-later-dialog/finish-later-dialog.component';
 import { LaterPicks } from './later-picks';
 import { tourWorkoutPage } from './workout-tour';
@@ -62,7 +62,7 @@ const SPACE_HANDLED_BY =
         WorkoutRoundLineComponent,
         SwapExerciseDialogComponent,
         UpNextCardComponent,
-        LaterListComponent,
+        WorkoutControlsComponent,
         FinishLaterDialogComponent,
     ],
     providers: [WorkoutView],
@@ -92,7 +92,8 @@ export class WorkoutComponent {
     /** Skip puts an exercise aside to do later (RUN-16). */
     private readonly later = new LaterPicks();
 
-    private readonly mainButton = viewChild<ElementRef<HTMLButtonElement>>('mainButton');
+    private readonly controls = viewChild(WorkoutControlsComponent);
+    private readonly mainButton = () => this.controls()?.mainButton();
     private readonly upNextCard = viewChild(UpNextCardComponent);
     /** On a rep step, the Up next card is Done. */
     private doneButton() {
@@ -116,7 +117,7 @@ export class WorkoutComponent {
     });
     private readonly ring = viewChild(WorkoutRingComponent);
     private readonly stage = viewChild<ElementRef<HTMLElement>>('stage');
-    private readonly laterList = viewChild(LaterListComponent);
+    private readonly laterList = () => this.controls()?.laterList();
     private readonly reducedMotion = injectPrefersReducedMotion();
     /** Apple's spring for moving something about: no bounce, a 0.4s response. */
     private readonly glide = criticallyDampedSpring(0.4);
@@ -309,6 +310,15 @@ export class WorkoutComponent {
         if (this.view.isRepsActive()) {
             this.finishReps();
         } else if (this.view.isWaiting()) {
+            this.run.startExercise();
+        } else {
+            this.togglePause();
+        }
+    }
+
+    /** The big button: Start on a timed exercise waiting for it, otherwise Pause (or Resume). */
+    protected pressMain() {
+        if (this.view.isWaiting()) {
             this.run.startExercise();
         } else {
             this.togglePause();

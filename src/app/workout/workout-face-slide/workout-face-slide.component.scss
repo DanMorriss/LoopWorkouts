@@ -174,3 +174,29 @@ app-clock-digits {
         transform: scale(1.18);
     }
 }
+
+// The workout page's wide layout gives the ring up to 36rem: there the caps above, sized for a
+// phone, would leave the face's words small in it, so the face's width (cqi) sets them alone
+@media (min-width: 900px) and (orientation: landscape) {
+    .workout-face__kind {
+        font-size: 11cqi;
+    }
+
+    .workout-face__label {
+        font-size: 14cqi;
+    }
+
+    .workout-face__label--timed {
+        font-size: 11cqi;
+    }
+
+    app-clock-digits {
+        font-size: 17.4cqi;
+    }
+
+    .workout-face__count {
+        --wheel-row: 19cqi;
+        --wheel-font: 17.4cqi;
+        font-size: 17.4cqi;
+    }
+}

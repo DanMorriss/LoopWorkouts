@@ -186,7 +186,7 @@ The palette is cool and night-time: navy and slate neutrals, sky and cyan for wh
 
 ## Layout
 
-Phones come first, in one column with a 0.75rem gutter (or the safe area, if it's wider). The page reaches the screen's edges (`viewport-fit=cover`) and keeps clear of the notch and rounded corners. Below 640px, dialogs become sheets from the bottom; at 640px and up they sit in the middle of the page.
+Phones come first, in one column with a 0.75rem gutter (or the safe area, if it's wider). The page reaches the screen's edges (`viewport-fit=cover`) and keeps clear of the notch and rounded corners. Below 640px, dialogs become sheets from the bottom; at 640px and up they sit in the middle of the page. On a wide landscape window (900px and up), the workout page is two columns: the ring on the left, up to 36rem and as tall as the window allows, and the rows above it, Up next and the controls beside it.
 
 The bars float over the bottom of the page: the tab bar (3.75rem), the run bar above it while a workout's going (3.5rem), and Undo above that after a delete (3.25rem), each 0.5rem apart. `--bars-height` adds up what's showing, so pages leave room for them. A page's own top bar (`src/app/nav/top-bar/`) stays at the top, and focus scrolls clear of both.
 
@@ -205,7 +205,7 @@ Depth comes from layers of glass more than from shadows. Each surface (panel, ca
 - **Frosted bars** (`backdrop-filter: blur(20px) saturate(180%)` on `--chrome`, with a `--chrome-light` top edge): the page scrolls under them.
 
 ### Named Rules
-**The Glass, Not Glow Rule.** Depth is glass and a soft shadow, never a glow lighting up the page around a button. A glow under the main button was tried and was too much.
+**The Glass, Not Glow Rule.** Depth is glass and a soft shadow, never a glow lighting up the page around a button. A glow under the main button was tried and was too much. The one glow is the ring's own flash as Done is pressed, a cue of the workout's, not decoration; the step strip's current segment is told by being filled and taller, not by a glow.
 
 **The Honest Fallback Rule.** With reduced transparency, the glass goes solid in the colour it showed, and blurs drop. With more contrast, every surface gets a defined edge.
 

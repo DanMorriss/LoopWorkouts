@@ -3,10 +3,6 @@
     [class.workout-page--paused]="view.isPaused()"
 >
     @if (view.workout()) {
-        <!-- On a phone the header shows the title instead, leaving more room for the ring -->
-        <p class="workout-title text-center text-4xl text-(--text-strong)">
-            {{ view.workout()?.title }}
-        </p>
         <!-- Fixed-height slot, so the ring doesn't jump when this line changes -->
         <!-- Read out by screen readers when the phase changes; the countdown itself stays quiet -->
         <div class="sr-only" aria-live="polite" aria-atomic="true">{{ view.announcement() }}</div>
@@ -166,53 +162,12 @@
                  and Skip moves on without logging the set). Resume and End workout are over the ring while paused. The
                  captions repeat the buttons' names for sighted users, so screen readers skip
                  them. -->
-                <div class="workout-controls" data-tour="controls">
-                    <!-- Exercises skipped to do later, on Pause's left, as Skip's on its right (RUN-16) -->
-                    @if (!view.summaryOpen()) {
-                        <app-later-list [nextCard]="nextCard" (emptied)="focusControls()" />
-                    }
-                    <div class="workout-control workout-control--main">
-                        <!-- Greyed out while a timed exercise waits for Start after a long
-                             rest (RUN-14), whose Start is in the face, so it's plain the
-                             exercise hasn't begun; the same button after, where focus goes -->
-                        @let waiting = view.isWaiting();
-                        <button
-                            #mainButton
-                            id="workout-pause"
-                            type="button"
-                            class="btn-main btn-main--round"
-                            aria-label="Pause"
-                            [attr.aria-keyshortcuts]="
-                                view.isRepsActive() || waiting ? null : 'Space'
-                            "
-                            [disabled]="waiting"
-                            (click)="togglePause()"
-                        >
-                            <mat-icon aria-hidden="true">pause</mat-icon>
-                        </button>
-                        <span class="workout-control__caption" aria-hidden="true">Pause</span>
-                        <!-- Shown where there's likely a keyboard; screen readers get
-                             aria-keyshortcuts. On a rep step Space is Done, and waiting it's
-                             Start, so it's hidden, keeping its room so Pause doesn't move. -->
-                        <kbd
-                            class="workout-control__key"
-                            [style.visibility]="view.isRepsActive() || waiting ? 'hidden' : null"
-                            aria-hidden="true"
-                            >Space</kbd
-                        >
-                    </div>
-                    <div class="workout-control workout-control--skip">
-                        <button
-                            type="button"
-                            class="btn-icon workout-control__skip"
-                            [attr.aria-label]="view.isRestActive() ? 'Skip rest' : 'Skip step'"
-                            (click)="skip()"
-                        >
-                            <mat-icon aria-hidden="true">skip_next</mat-icon>
-                        </button>
-                        <span class="workout-control__caption" aria-hidden="true">Skip</span>
-                    </div>
-                </div>
+                <app-workout-controls
+                    [nextCard]="nextCard"
+                    (main)="pressMain()"
+                    (skipped)="skip()"
+                    (emptied)="focusControls()"
+                />
             }
         }
 

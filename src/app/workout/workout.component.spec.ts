@@ -352,7 +352,8 @@ describe('WorkoutComponent', () => {
         store.setActiveWorkout(makeWorkout({ id: 'workout-2', title: 'Second', workSeconds: 20 }));
         fixture.detectChanges();
 
-        expect(text()).toContain('Second');
+        // Its title is in the header (the nav), not on the page
+        expect(view().workout()?.title).toBe('Second');
         expect(text()).toContain('00:20');
         advance(1000);
         expect(text()).toContain('00:19');
@@ -396,7 +397,7 @@ describe('WorkoutComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        expect(text()).toContain('Saved');
+        expect(view().workout()?.title).toBe('Saved');
         expect(text()).toContain('00:30');
         advance(1000);
         expect(text()).toContain('00:29');
@@ -5259,11 +5260,9 @@ describe('WorkoutComponent', () => {
         const workout = () => makeWorkout({ steps: [plank, rest(30), plank], repeats: 1 });
         const mainButton = () =>
             fixture.nativeElement.querySelector('#workout-pause') as HTMLButtonElement;
-        /** Start, in the face under the time. */
+        /** Start: the big button, in Pause's place, while it waits. */
         const startButton = () =>
-            fixture.nativeElement.querySelector(
-                '.workout-face app-wait-start button'
-            ) as HTMLButtonElement | null;
+            mainButton()?.getAttribute('aria-label') === 'Start' ? mainButton() : null;
 
         /** As start(), as the run starts from a Start button, with the setting as it is. */
         function startFromSettings(workout: Workout) {
@@ -5273,7 +5272,7 @@ describe('WorkoutComponent', () => {
             fixture.detectChanges();
         }
 
-        it("holds a timed exercise at its full time, with Start in the face, till it's pressed", () => {
+        it("holds a timed exercise at its full time, with Start as the big button, till it's pressed", () => {
             startFromSettings(workout());
             expect(startButton()).toBeNull();
 
@@ -5281,12 +5280,12 @@ describe('WorkoutComponent', () => {
 
             expect(view().isWorkActive()).toBe(true);
             expect(text()).toContain('00:20');
-            expect(startButton()?.textContent).toContain('Start');
-            expect(startButton()?.getAttribute('aria-keyshortcuts')).toBe('Space');
-            // Pause is greyed out under it, as there's nothing yet to pause
-            expect(mainButton().getAttribute('aria-label')).toBe('Pause');
-            expect(mainButton().disabled).toBe(true);
-            expect(mainButton().getAttribute('aria-keyshortcuts')).toBeNull();
+            // The big button, in Pause's place, as there's nothing yet to pause
+            expect(startButton()).toBe(mainButton());
+            expect(startButton()!.disabled).toBe(false);
+            expect(startButton()!.textContent).toContain('play_arrow');
+            expect(startButton()!.getAttribute('aria-keyshortcuts')).toBe('Space');
+            expect(fixture.nativeElement.querySelector('.workout-face button')).toBeNull();
             expect(view().announcement()).toContain('press Start when you are ready');
 
             startButton()!.click();
@@ -5294,12 +5293,12 @@ describe('WorkoutComponent', () => {
 
             expect(text()).toContain('00:15');
             expect(startButton()).toBeNull();
-            expect(mainButton().disabled).toBe(false);
+            expect(mainButton().getAttribute('aria-label')).toBe('Pause');
             expect(mainButton().getAttribute('aria-keyshortcuts')).toBe('Space');
             fixture.destroy();
         });
 
-        it('moves focus from Pause to Start as the wait begins, and back to Pause on Start', async () => {
+        it('keeps focus on the big button, Pause, then Start as the wait begins, then Pause', async () => {
             startFromSettings(workout());
             mainButton().focus();
 

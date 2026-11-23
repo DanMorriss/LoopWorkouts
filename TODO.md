@@ -16,10 +16,7 @@ Promoting the app: a free web beta for home kettlebell and circuit trainers now,
 
 Going through the app a page or part at a time with the Impeccable skill (`.claude/skills/impeccable`), which reads `PRODUCT.md` and `DESIGN.md`. For each item: `/impeccable critique <target>` first, which only reports; then fix what's worth it, usually with a scoped command (`polish`, `layout`, `typeset`, `clarify`, `harden`, `distill` or `onboard`), one PR per item; then delete the item. Note anything left for later under Known issues. Look at each change at phone width in both themes. The ∞ logo, the ring's colours and Audiowide stay, as `PRODUCT.md` says.
 
-- [ ] **The workout page** (`workout/`), critiqued on 2026-11-23 (29/40). Its fixes, one PR each, in this order:
-    - [ ] **The ring on desktop:** it's limited by the window's height (`max(320px, 100svh - 31rem)` in `workout-ring.component.scss`), so at 1280×800 it's 320px with half the screen empty; a wide layout would put Up next and the controls beside it. A layout job.
-    - [ ] **The glows** on the step strip's current segment (`step-strip.component.scss`) and the ring's reps glow (`workout-ring.component.scss`), against `DESIGN.md`'s Glass, Not Glow: keep, soften or drop, in the polish pass. (Up next's pulse is one of the workout's own cues, which `DESIGN.md` allows.)
-    - [ ] **Then** waiting for Start (Pause is the biggest button but disabled, and Start is a small pill in the ring), the dialogs for a set cut short and finishing a skipped exercise later, and `/impeccable polish`, then critique it again.
+- [ ] **The workout page** (`workout/`): its critique's fixes are done (2026-11-23). `/impeccable polish` it, then critique it again (29/40 before).
 - [ ] **The workout summary** (`workout/workout-summary/`): the stats, sets and new bests, what to step up, the swaps, the kettlebell, the stretches and the suggested next workout.
 - [ ] **The run bar** (`nav/run-bar`), the mini player above the tabs while a workout's going.
 - [ ] **Welcome and the setup** (`welcome/`, `welcome/setup`): the first thing a beta user sees, with signing in or going on as a guest. Then the tour (`tour/`) and its offer on Today.

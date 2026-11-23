@@ -146,6 +146,8 @@ export function bodyWeightHint(keptWithAccount: boolean): string {
 
 /** Calories as they're shown, to the nearest 5, or null for under 5. */
 export interface CaloriesText {
+    /** e.g. "210", for after a total: "+ 25 afterburn" */
+    number: string;
     /** e.g. "210 kcal", after "About" or "about" */
     kcal: string;
     /** e.g. "about 210 calories" */
@@ -158,5 +160,5 @@ export function describeCalories(kcal: number, locale: string): CaloriesText | n
         return null;
     }
     const number = rounded.toLocaleString(locale);
-    return { kcal: `${number} kcal`, spoken: `about ${number} calories` };
+    return { number, kcal: `${number} kcal`, spoken: `about ${number} calories` };
 }

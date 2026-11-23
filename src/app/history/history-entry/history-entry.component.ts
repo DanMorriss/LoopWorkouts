@@ -108,6 +108,10 @@ export class HistoryEntryComponent {
     protected readonly rounds = computed(() => describeRounds(this.entry()));
     /** About how many calories it burnt (CAL-1), with a body weight given. */
     protected readonly burnt = computed(() => this.calories.describe(this.entry()));
+    /** About how many more it burns over the next day, after it (CAL-7); null under 5. */
+    protected readonly afterburn = computed(() =>
+        this.burnt() ? this.calories.describeAfterburn(this.entry()) : null
+    );
     /**
      * Its sets, one line per step, in the unit chosen in settings. Each is linked to its
      * exercise's page, where it has one.

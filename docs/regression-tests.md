@@ -1594,14 +1594,14 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 
 ### REG-CAL-01 · The summary and the history estimate the calories burnt
 
-- **Stories:** CAL-1, CAL-2 · **Priority:** P2
+- **Stories:** CAL-1, CAL-2, CAL-7 · **Priority:** P2
 - **Preconditions:** `guest()`; a workout "Planks" of one 10:00 timed step of the plank; `bodyWeight: 75` in the settings.
 - **Steps:**
     1. Start Planks from Workouts and let it run to the end.
     2. Press Done.
 - **Expected:**
     1. The summary has a third stat, **Calories**, "About 50 kcal" (4 METs × 75 kg × 10 minutes is 50), heard as "about 50 calories".
-    2. The run's line in the log ends "· about 50 kcal", heard as "… · 10:00 spent · about 50 calories".
+    2. The run's line in the log ends "· about 50 kcal + 5 afterburn", heard as "… · 10:00 spent · about 50 calories, plus about 5 calories as your body recovers".
 
 ### REG-CAL-02 · No calories without a body weight, and a way to add one
 

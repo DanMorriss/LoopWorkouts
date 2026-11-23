@@ -29,9 +29,11 @@ test.describe('with a body weight given', () => {
 
             const entry = new HistoryPage(page).entry('Planks');
             // Shown at the end of its line, and heard as calories
-            await expect(entry.getByText('· about 50 kcal')).toBeVisible();
+            await expect(entry.getByText('about 50 kcal', { exact: true })).toBeVisible();
             await expect(entry).toContainText('1 round · 10:00 spent');
             await expect(entry).toContainText('about 50 calories');
+            // Its afterburn after it: 15% of the 37.5 above resting, 5.6
+            await expect(entry.getByText('+ 5 afterburn')).toBeVisible();
         }
     );
 });

@@ -94,6 +94,7 @@ describe('calories (CAL-1)', () => {
 
     it('says it to the nearest 5, as an estimate, and nothing under 5', () => {
         expect(describeCalories(47.5, 'en-GB')).toEqual({
+            number: '50',
             kcal: '50 kcal',
             spoken: 'about 50 calories',
         });

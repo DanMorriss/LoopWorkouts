@@ -1,6 +1,6 @@
 # Calories
 
-Built: an estimate of the calories each workout burnt, on its summary and in the history (CAL-1), and each week's on Progress (CAL-3), and of the afterburn over the next day, on the summary (CAL-7), from a body weight given on You → Profile or on the summary itself (CAL-2), kept on the device unless you agree to keep it with your account (CAL-6). To come: how hard an exercise of your own is (CAL-4), and heart rate from a watch (CAL-5).
+Built: an estimate of the calories each workout burnt, on its summary and in the history (CAL-1), and each week's on Progress (CAL-3), and of the afterburn over the next day, on the summary and in the history (CAL-7), from a body weight given on You → Profile or on the summary itself (CAL-2), kept on the device unless you agree to keep it with your account (CAL-6). To come: how hard an exercise of your own is (CAL-4), and heart rate from a watch (CAL-5).
 
 ## Stories
 
@@ -65,7 +65,7 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 - **After a workout the body uses more than it would at rest for a while** as it recovers (excess post-exercise oxygen consumption, EPOC). After strength and circuit work, studies put it at about 6 to 15% of the workout's energy above resting, most of it in the first few hours, tailing off over about a day (Børsheim and Bahr, 2003, *Sports Medicine*). Other fitness apps quote the top of that or more; this takes the top, 15% (Dan, 2026-11-23), and no higher, as above it the studies don't back it.
 - **Afterburn = 15% × (the workout's calories − its resting share)**, where the resting share is 1 MET × body weight × its active hours. So 45 minutes of circuits at an average of 5 METs and 80 kg is 300 kcal, 60 of it resting, and an afterburn of 36, shown as "about 35 kcal".
 - **Said as over the next day**, not a number of hours, as how long it lasts varies with how hard the work was.
-- **Said as an estimate,** with the same rounding and "about" as the workout's calories. It's not added to the workout's own figure, nor to the history's, but it is to each week's on Progress (CAL-3).
+- **Said as an estimate,** with the same rounding and "about" as the workout's calories. It's shown apart from the workout's own figure, on the summary and in the history, and added into each week's on Progress (CAL-3).
 
 ### How it's shown (CAL-1, CAL-7)
 
@@ -73,7 +73,7 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 - **The workout summary** (RUN-7): a third stat beside Time and Rounds, **Calories**, "About 210 kcal", heard as "about 210 calories". Only with a body weight given and the run in the history.
 - **Under the summary's stats**, with Calories shown: "Plus about 25 kcal over the next day, as your body recovers", heard with "Plus about 25 calories". Under 5, nothing's shown, which is the case for most runs under about 10 minutes.
 - **Progress, each week** (CAL-3, since 2026-11-23): in the Time per week card (PRG-12), beside each week's time, with its workouts' calories and their afterburn (CAL-7) added up before rounding, each workout's afterburn counted in the week it started, even one late on a Sunday: over the bars, "2–8 Nov · 2 workouts · about 285 kcal" (heard "…, about 285 calories"), and the table has a **Calories** column, "about 285 kcal", "under 5 kcal" for a week whose total is under 5, or "0 kcal" with no workouts. The weeks are Monday to Sunday, as the bars are, not the last 7 days, so the two agree. Without a body weight, neither shows.
-- **The history** (HIS-1): each run's line under its title adds it last: "6:45 pm · 3 rounds · about 210 kcal", heard with "about 210 calories".
+- **The history** (HIS-1): each run's line under its title adds it last: "6:45 pm · 3 rounds · about 210 kcal", heard with "about 210 calories", and then its afterburn, when it comes to 5 or more (CAL-7, since 2026-11-23): "… · about 210 kcal + 25 afterburn", heard ", plus about 25 calories as your body recovers".
 
 ## Acceptance criteria
 

@@ -12,6 +12,25 @@ Promoting the app: a free web beta for home kettlebell and circuit trainers now,
 - [ ] **Soft launch, then communities,** with the beta invitation in docs/marketing.md, and short screen-recorded videos for Reels, TikTok and Shorts along the way. Collect testimonials, with permission, from the people who keep coming back (aim for 10 before the store launch).
 - [ ] **The store apps, paid:** the iPhone app with the Apple Developer account (which Sign in with Apple needs too), and Google Play. Before charging, change the terms of use (they say it's free), and decide whether the web version stays free, on a trial or free tier, and when the beta ends. Founding members (anyone who signed in during the beta) are to get their first year free: that's the plan, but not publicised yet in case it changes, so decide when to announce it (then add it to the terms) and how they'll claim their year. See To decide before charging in docs/marketing.md. The iPhone app is also the way to keep alarms sounding on a locked phone, which web audio can't do (ALM-2 in `docs/features/alarms.md`).
 
+### Design review (Impeccable)
+
+Going through the app a page or part at a time with the Impeccable skill (`.claude/skills/impeccable`), which reads `PRODUCT.md`. For each item: `/impeccable critique <target>` first, which only reports; then fix what's worth it, usually with a scoped command (`polish`, `layout`, `typeset`, `clarify`, `harden`, `distill` or `onboard`), one PR per item; then delete the item. Note anything left for later under Known issues. Look at each change at phone width in both themes. The ∞ logo, the ring's colours and Audiowide stay, as `PRODUCT.md` says.
+
+- [ ] **Write `DESIGN.md` first** (`/impeccable document`), so every later review knows the tokens, type and components the app already has.
+- [ ] **The workout page** (`workout/`): the ring and its face, Up next, Pause and Skip, the round line and dots, and the step strip. Judge it from a metre or two away, propped up, as `PRODUCT.md` describes. Then, separately: waiting for Start and Tap to turn on sound; the dialogs for a set cut short and finishing a skipped exercise later.
+- [ ] **The workout summary** (`workout/workout-summary/`): the stats, sets and new bests, what to step up, the swaps, the kettlebell, the stretches and the suggested next workout.
+- [ ] **The run bar** (`nav/run-bar`), the mini player above the tabs while a workout's going.
+- [ ] **Welcome and the setup** (`welcome/`, `welcome/setup`): the first thing a beta user sees, with signing in or going on as a guest. Then the tour (`tour/`) and its offer on Today.
+- [ ] **Today** (`home/`): the week strip and a day's panel, Get started, the plans for you, what to do next, the stretches after training, and the muscles worked this week.
+- [ ] **Workouts** (`workout-library/`): the list, its cards and the favourite heart, the search and filters, and the Ready-made badge. Then a workout's Details, and a ready-made workout's page.
+- [ ] **Create** (`workout-setup/`): the steps and their kinds, the wheels, a step's exercise and set rows, dragging steps into order, rounds and the ∞ switch, and saving. Then the exercise picker and Browse, and the unsaved changes dialog.
+- [ ] **Exercises** (`exercises/`): the list and its cards, the muscle chips and equipment filter. Then an exercise's page: the 3D demo, how it's done, the body map, and its progress (the chart, bests and recent sessions).
+- [ ] **Progress** (`history/`): the muscles this week, the exercises this week and new best tiles, time per week, the suggested workout, and the log and its entries, with notes and Undo.
+- [ ] **Plan** (`plan/`): the week, the muscles the plan leaves out, and adding a workout to a day. Then the ready-made plans and a plan's workout.
+- [ ] **You** (`account/`): signing in and the code, the profile and its consents, your data, and pasting a plan.
+- [ ] **Settings** (`settings/`), then **Help** (`help/`), **Privacy** and **Terms** (`legal/`).
+- [ ] **Across the app:** the top bar, tab bar, undo bar and moved banner (`nav/`), then the dialogs and sheets (`shared/components/dialog`) and the empty states of a new device with no history. Then `/impeccable audit` of the whole app, for what the page-by-page reviews missed.
+
 ### Speed (Lighthouse, 2026-11-07)
 
 Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on its test phone (slow 4G, CPU slowed 4×). Mobile performance: Welcome 89 (desktop 98), Today 81, Workouts 88, Exercises 97, Progress 88, an exercise's page (push-up) 59. Accessibility and best practices 100, SEO 92. To measure again, Lighthouse a production build or the live site, as a guest already welcomed (`welcomed` set to `guest`), and compare total blocking time, as it's what most of these change; the lab can't stand in for real phones, so for those, see Vercel Speed Insights below.

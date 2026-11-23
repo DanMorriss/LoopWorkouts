@@ -18,8 +18,11 @@ import { RoundSlide } from '../workout-view';
 })
 export class WorkoutRoundLineComponent {
     readonly slide = input.required<RoundSlide>();
-    /** Which set it is, starting the line: "Set 2 of 3", "Superset round 2 of 3". */
-    protected setLine(set: GroupSet): string {
-        return capitalise(setText(set));
+    /**
+     * Which set it is, starting the line: "Set 2 of 3", "Superset round 2 of 3", or "Round 2 of
+     * 3" where the workout is that one superset (`sole`).
+     */
+    protected setLine(set: GroupSet, sole: boolean): string {
+        return sole ? `Round ${set.set + 1} of ${set.of}` : capitalise(setText(set));
     }
 }

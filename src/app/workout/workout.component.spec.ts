@@ -4487,9 +4487,19 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it("shows a strip of the round's steps, with the rest after it", () => {
+        it('says just "Round" when the workout is that one giant set and nothing else', () => {
+            const giant = upperBody([reps(8, 'Press')]);
+            start({ ...giant, blocks: giant.blocks.slice(0, 1) });
+
+            expect(status()).toBe('Round 1 of 3');
+            fixture.destroy();
+        });
+
+        it("shows a strip of the round's steps, with the rest after it, and no dots", () => {
             start(upperBody());
 
+            // The line says which round: dots under it only said it again
+            expect(fixture.nativeElement.querySelector('.round-dots')).toBeNull();
             expect(strip()).toEqual(['current', 'left', 'left']);
             pressDone();
             expect(strip()).toEqual(['done', 'current', 'left']);
@@ -4789,22 +4799,22 @@ describe('WorkoutComponent', () => {
         it("says the part it's in and which exercise of how many, rests and supersets aside", () => {
             start(plan());
 
-            expect(shown()).toBe('Warmup · 1 of 3');
-            // Screen readers hear it as words
-            expect(line()).toContain('exercise 1 of 3');
+            expect(shown()).toBe('Warmup · Exercise 1 of 3');
+            // Screen readers hear a pause after the heading, then the words
+            expect(line()).toBe('Warmup · , Exercise 1 of 3');
 
             advance(3000);
-            expect(shown()).toBe('Legs · 2 of 3');
+            expect(shown()).toBe('Legs · Exercise 2 of 3');
             // The rest between sets, and the rest step after, are still part of leg press
             pressDone();
-            expect(shown()).toBe('Legs · 2 of 3');
+            expect(shown()).toBe('Legs · Exercise 2 of 3');
             advance(5000);
             pressDone();
             expect(view().isRestActive()).toBe(true);
-            expect(shown()).toBe('Legs · 2 of 3');
+            expect(shown()).toBe('Legs · Exercise 2 of 3');
 
             advance(2000);
-            expect(shown()).toBe('Legs · 3 of 3');
+            expect(shown()).toBe('Legs · Exercise 3 of 3');
             fixture.destroy();
         });
 
@@ -4829,10 +4839,10 @@ describe('WorkoutComponent', () => {
                 ])
             );
             // Two exercises, so a count; its heading comes once it's reached
-            expect(shown()).toBe('1 of 2');
+            expect(shown()).toBe('Exercise 1 of 2');
 
             advance(3000);
-            expect(shown()).toBe('Cool-down · 2 of 2');
+            expect(shown()).toBe('Cool-down · Exercise 2 of 2');
             fixture.destroy();
         });
 

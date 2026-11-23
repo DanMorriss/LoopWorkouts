@@ -226,7 +226,7 @@ $band: 15px;
     inset: 0;
     border-radius: 50%;
     background: $reps-color;
-    box-shadow: 0 0 24px 4px rgba($reps-color, 0.6);
+    box-shadow: 0 0 24px 4px color-mix(in srgb, #{$reps-color} 60%, transparent);
     opacity: 0;
     pointer-events: none;
 }

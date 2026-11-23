@@ -758,7 +758,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:** Start; go through, pressing Done on each leg press set and `runFor` through the rests.
 - **Expected:**
     1. On the bike: section line "Warmup · 1 of 3".
-    2. Leg press set 1: "Legs · 2 of 3", "set 1 of 3" with dots; "Legs, exercise 2 of 3" announced once.
+    2. Leg press set 1: "Legs · Exercise 2 of 3", "set 1 of 3" with dots; "Legs, exercise 2 of 3" announced once.
     3. Its rest: still "set 1 of 3", and the Up next card "Leg press", "Set 2 of 3 · 10 reps".
     4. Set 3: "set 3 of 3", with no "Last round!"; its rest says "set 3 of 3" too; then Plank, "Legs · 3 of 3". The announcement for exercise 2 isn't repeated on its sets.
 

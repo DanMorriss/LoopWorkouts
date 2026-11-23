@@ -3999,13 +3999,13 @@ describe('WorkoutComponent', () => {
 
         it('says about how many more it burns over the next day, as the body recovers', () => {
             TestBed.inject(SettingsStore).update({ bodyWeight: 300 });
-            // 20 minutes at 1.5 METs: 150 kcal, 50 of it above resting, a tenth of that after
+            // 20 minutes at 1.5 METs: 150 kcal, 50 of it above resting, 15% of that after: 7.5
             start(makeWorkout({ workSeconds: 1200, restSeconds: 0, repeats: 1 }));
             advance(1_200_000);
 
             const after = summary()!.querySelector('.summary__afterburn')!;
             expect(after.textContent!.replace(/\s+/g, ' ').trim()).toBe(
-                'Plus about 5 kcalPlus about 5 calories over the next day, as your body recovers'
+                'Plus about 10 kcalPlus about 10 calories over the next day, as your body recovers'
             );
             fixture.destroy();
         });

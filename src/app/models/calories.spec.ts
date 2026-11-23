@@ -94,13 +94,13 @@ describe('calories (CAL-1)', () => {
         expect(describeCalories(2.4, 'en-GB')).toBeNull();
     });
 
-    it('gives the afterburn as a tenth of what was burnt above resting', () => {
+    it('gives the afterburn as 15% of what was burnt above resting', () => {
         // 10 minutes of planks at 75 kg: 47.5 kcal, 12.5 of it resting
         const planks = { activeSeconds: 600, sets: [plank(600)] };
-        expect(afterburn(planks, 75)).toBeCloseTo(3.5);
+        expect(afterburn(planks, 75)).toBeCloseTo(5.25);
         // Only rests, at 1.5 METs: half a MET above resting
         expect(afterburn({ activeSeconds: 600, sets: [] }, 75)).toBeCloseTo(
-            (0.1 * 0.5 * 75 * 600) / 3600
+            (0.15 * 0.5 * 75 * 600) / 3600
         );
         expect(afterburn({ activeSeconds: 0 }, 75)).toBe(0);
     });

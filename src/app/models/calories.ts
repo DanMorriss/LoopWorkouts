@@ -59,9 +59,10 @@ const REST_MET = 1.5;
  * The afterburn (EPOC): after a workout the body uses more than it would at rest for a while,
  * as it recovers. After strength and circuit work that's about 6 to 15% of the workout's
  * calories above resting, mostly in the first few hours, tailing off over about a day
- * (Børsheim and Bahr, 2003). Taken at the middle of that, as shown "over the next day".
+ * (Børsheim and Bahr, 2003). Taken at the top of that, in line with other fitness apps, as
+ * shown "over the next day".
  */
-const AFTERBURN_SHARE = 0.1;
+const AFTERBURN_SHARE = 0.15;
 
 /** How hard an exercise is, in METs. */
 export function exerciseMet(exerciseId: string | undefined): number {

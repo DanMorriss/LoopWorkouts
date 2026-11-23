@@ -14,11 +14,14 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { AUTH_STORAGE_KEY } from '../../shared/state/auth-storage-key';
+import { ConsentService } from '../../account/consent.service';
+import { bodyWeightHint } from '../../models/calories';
 import { BodyFigure } from '../../models/exercise';
 import { DEFAULT_WEEKLY_SETS, TrainingGoal } from '../../models/muscle-balance';
 import { likelyWeightUnit, MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
+import { WeightFieldComponent } from '../../shared/components/weight-field/weight-field.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { SyncStarter } from '../../sync/sync-starter.service';
 import { SETUP_KEY } from '../welcome-first';
@@ -27,7 +30,7 @@ import { EquipmentChipsComponent } from '../../shared/components/equipment-chips
 import { WeeklySetsFieldComponent } from '../../shared/components/weekly-sets-field/weekly-sets-field.component';
 
 /** The questions, in the order they're asked. */
-const QUESTIONS = ['name', 'goal', 'sets', 'equipment', 'body', 'units'] as const;
+const QUESTIONS = ['name', 'goal', 'sets', 'equipment', 'body', 'units', 'weight'] as const;
 type Step = (typeof QUESTIONS)[number];
 
 /** How long to wait for the account's profile before asking anyway (offline, say). */
@@ -35,15 +38,20 @@ export const PROFILE_WAIT_MS = 8000;
 
 /**
  * The setup (NAV-4), once, after the welcome screen: your name, what you train for and the
- * sets a week each muscle aims at, the equipment you have, the body the muscle maps show and the units you lift in, one question
- * at a time, then on to Today, which says it's all set and starts you off with a workout to add
+ * sets a week each muscle aims at, the equipment you have, the body the muscle maps show, the units you lift in and,
+ * if you like, your body weight for calories (CAL-2), one question at a time, then on to Today, which says it's all set and starts you off with a workout to add
  * (until 2026-11-03, a last screen here offered one to start straight away). Each answer is
  * saved as it's picked, so leaving part way keeps them. Signed in, it first waits for the account's profile: one set
  * up on another device is taken, and nothing's asked.
  */
 @Component({
     selector: 'app-setup',
-    imports: [BodyMapComponent, EquipmentChipsComponent, WeeklySetsFieldComponent],
+    imports: [
+        BodyMapComponent,
+        EquipmentChipsComponent,
+        WeeklySetsFieldComponent,
+        WeightFieldComponent,
+    ],
     templateUrl: './setup.component.html',
     styleUrl: './setup.component.scss',
 })
@@ -54,6 +62,7 @@ export class SetupComponent {
     private readonly router = inject(Router);
     private readonly document = inject(DOCUMENT);
     private readonly injector = inject(Injector);
+    private readonly consent = inject(ConsentService);
 
     private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
 
@@ -97,6 +106,9 @@ export class SetupComponent {
         { value: 'male', label: 'Male' },
         { value: 'female', label: 'Female' },
     ];
+
+    /** Where the body weight's kept: on this device, unless the account has the consent. */
+    protected readonly weightHint = computed(() => bodyWeightHint(!!this.consent.weightGiven()));
 
     protected readonly units: { value: WeightUnit; label: string }[] = [
         { value: 'kg', label: 'Kilograms (kg)' },

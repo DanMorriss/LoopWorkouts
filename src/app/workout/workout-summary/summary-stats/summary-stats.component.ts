@@ -26,7 +26,7 @@ import { SettingsStore } from '../../../shared/state/settings-store.service';
  * given, about how many calories it burnt (CAL-1), and about how many more over the next day
  * as the body recovers. Without one, Add your weight to see calories (CAL-2) opens the Body
  * weight box here, kept on this device as Profile's is; once it's given, the calories show,
- * and focus goes to the figures. It's asked for only here and on Profile, not in the setup.
+ * and focus goes to the figures. It's also asked for, optionally, in the setup, and on Profile.
  */
 @Component({
     selector: 'app-summary-stats',

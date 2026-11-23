@@ -1,19 +1,37 @@
 @use 'type' as *;
 
-// Over the top right of the workout page, out of the way of the ring and its controls
+// Beside Pause on the left of the controls under the ring (WorkoutComponent's grid), as Skip
+// is on the right: in reach of a thumb, and clear of the round line it used to sit over, at the
+// top right. Positioned, for the copy that flies in (later-fly.ts).
 :host {
-    position: absolute;
-    top: 0.25rem;
-    right: 1rem;
-    z-index: 5;
+    position: relative;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    justify-self: end;
+    margin-right: 1.5rem;
 }
 
+// As Pause's and Skip's: the button in a row as tall as Pause, its caption under it
 .later {
     position: relative;
+    display: grid;
+    grid-template-rows: 80px auto;
+    align-items: center;
+    justify-items: center;
+    gap: 0.35rem;
 }
 
+// Skip's size, its twin across Pause
 .later__button {
     position: relative;
+    width: 56px;
+    height: 56px;
+}
+
+.later__caption {
+    color: var(--text-muted);
+    font-size: 0.8rem;
 }
 
 // The copy that flies in from the ring as an exercise is put aside, over the button
@@ -24,7 +42,8 @@
     pointer-events: none;
 }
 
-// A notification-style count on the button's corner, with two or more
+// How many exercises, on the button's corner, with two or more: in the page's own colours, as
+// it's a list to come back to, not something wrong
 .later__count {
     position: absolute;
     top: -4px;
@@ -32,21 +51,23 @@
     min-width: 1.25rem;
     height: 1.25rem;
     padding: 0 0.3rem;
+    border: 1px solid var(--border-strong);
     border-radius: 999px;
-    background: var(--danger-strong);
-    color: var(--on-danger-strong);
+    background: var(--raised);
+    color: var(--text-strong);
     @include small-type(0.75rem);
     font-weight: 700;
-    line-height: 1.25rem;
+    line-height: calc(1.25rem - 2px);
     text-align: center;
     font-variant-numeric: tabular-nums;
 }
 
 .later__menu {
     position: absolute;
-    top: calc(100% + 0.2rem);
-    right: 0;
-    width: min(18rem, calc(100vw - 2rem));
+    // Over the button, as it's at the foot of the screen, from its left edge across
+    bottom: calc(100% + 0.2rem);
+    left: 0;
+    width: min(18rem, calc(100vw - 4rem));
 }
 
 .later__heading {

@@ -51,10 +51,11 @@
         "undo",
         "unfold_less",
         "unfold_more",
+        "update",
         "view_list",
         "visibility",
         "visibility_off",
         "volume_off"
     ],
-    "sha256": "51ea902c82cc0350872f514556046bdcf6cc11cd1c330ab13c77a4cc2b7438ce"
+    "sha256": "6d8bc60db5260d363f2399f140e93063155a65a17b0a4f94ca15ab598cb13cb5"
 }

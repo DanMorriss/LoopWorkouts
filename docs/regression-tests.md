@@ -922,7 +922,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     4. Skip the rest; reload; Done.
     5. Press the button; **Not now**.
     6. Press the button; **Do it next**; Done; `runFor` 31000.
-- **Expected:** 1. "Skipped: Push-up" at the top, where there was nothing. 2. "2 skipped exercises", with a 2 on it. 3. Its menu lists Push-up (10 reps) and Plank (00:30); picked, the bar says "Push-up is up next", focus is back on the button ("Skipped: Plank") and Up next is Push-up. 4. The bar goes with the Skip; the face is Push-up, with "Skipped earlier"; after the reload Up next is Squat, and Done starts the squats. 5. "Do Plank next?"; it closes, focus on the button. 6. The button's gone, Up next is Plank; it runs its 0:30 (not finished at 15 s), then the summary: Workout finished, with Push-up 10 reps, Squat 10 reps and Plank 0:30.
+- **Expected:** 1. "Skipped: Push-up" beside Pause, on its left ("Later"), where there was nothing. 2. "2 skipped exercises", with a 2 on it. 3. Its menu lists Push-up (10 reps) and Plank (00:30); picked, the bar says "Push-up is up next", focus is back on the button ("Skipped: Plank") and Up next is Push-up. 4. The bar goes with the Skip; the face is Push-up, with "Skipped earlier"; after the reload Up next is Squat, and Done starts the squats. 5. "Do Plank next?"; it closes, focus on the button. 6. The button's gone, Up next is Plank; it runs its 0:30 (not finished at 15 s), then the summary: Workout finished, with Push-up 10 reps, Squat 10 reps and Plank 0:30.
 - **Left to Vitest:** the held clock, its alarms and what's saved (`later.spec.ts`).
 
 ### REG-RUN-20 · Asked about skipped exercises at the finish

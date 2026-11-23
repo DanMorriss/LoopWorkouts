@@ -61,7 +61,7 @@ export class WorkoutPage {
     }
 
     /**
-     * The exercises skipped to do later (RUN-16), at the top: "Skipped: Plank", or
+     * The exercises skipped to do later (RUN-16), Later, beside Pause: "Skipped: Plank", or
      * "2 skipped exercises".
      */
     get later(): Locator {

@@ -1,7 +1,7 @@
 import { SIGN_IN_PATH } from './account-client';
 
 /**
- * Whether the address carries a sign-in coming back (an email link's or Google's tokens, as
+ * Whether the address carries a sign-in coming back (Google's or Apple's tokens, as
  * `#access_token=…`) or why one didn't work (`error_code`, `error_description`).
  */
 export function isSignInReturn(location: Pick<Location, 'hash' | 'search'>): boolean {

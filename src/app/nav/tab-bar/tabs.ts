@@ -4,7 +4,7 @@
  * pages under it, and any pages it `holds`: the weekly plan and the ready-made plans belong to Today, where its week
  * shows; making a workout and the ready-made workouts to Workouts, where they're started from;
  * and Settings, Help and the legal pages to You, which they slide in over. The paths are the ones the
- * pages have always had (an email sign-in link comes back to /account, for one), so links and
+ * pages have always had (signing in with Google comes back to /account, for one), so links and
  * bookmarks keep working.
  */
 export const TABS = [

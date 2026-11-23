@@ -1,10 +1,10 @@
-<!-- Signing in (SYN-3, SYN-7): Google (and Apple, once it's set up), or an email link and its
-     code. On the You tab and the welcome screen. Keeping notes is asked after (SYN-10) -->
+<!-- Signing in (SYN-3, SYN-7): Google (and Apple, once it's set up), or a code sent by email
+     and typed here. On the You tab and the welcome screen. Keeping notes is asked after (SYN-10) -->
 @if (sentTo(); as address) {
     <p class="sign-in__text" id="account-sent" tabindex="-1">
-        We've sent a sign-in link to
+        We've sent a 6-digit code to
         <strong class="sign-in__email">{{ address }}</strong
-        >. Open it on this device, or type the code from the email here.
+        >. Type it here to sign in.
     </p>
     <form class="sign-in__form" novalidate (submit)="enterCode($event)">
         <label class="picker-field" for="account-code">
@@ -33,7 +33,7 @@
     @if (intro(); as why) {
         <p class="sign-in__hint" id="account-why">{{ why }}</p>
     }
-    @if (account.linkProblem(); as problem) {
+    @if (account.signInProblem(); as problem) {
         <p class="sign-in__error" role="alert">{{ problem }}</p>
     }
     <!-- Google and Apple (SYN-7), in their own colours and with their marks,
@@ -95,7 +95,7 @@
         }
     </div>
     <p class="sign-in__or" aria-hidden="true">or</p>
-    <form class="sign-in__form" novalidate (submit)="sendLink($event)">
+    <form class="sign-in__form" novalidate (submit)="sendCode($event)">
         <div class="picker-field">
             <label class="picker-field__label" for="account-email">Email</label>
             <div class="sign-in__email-row">
@@ -112,7 +112,7 @@
                 <button
                     type="submit"
                     class="btn-icon sign-in__send"
-                    aria-label="Email me a sign-in link"
+                    aria-label="Email me a sign-in code"
                     [disabled]="busy()"
                 >
                     <app-icon>arrow_forward</app-icon>

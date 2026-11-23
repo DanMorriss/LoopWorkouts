@@ -10,7 +10,7 @@ const legs = workout('Legs', { steps: [timed(30, 'Squats')] });
 /** The You tab's sign-in. */
 const signIn = (page: import('@playwright/test').Page) => ({
     email: page.getByRole('textbox', { name: 'Email' }),
-    send: page.getByRole('button', { name: 'Email me a sign-in link' }),
+    send: page.getByRole('button', { name: 'Email me a sign-in code' }),
     code: page.getByRole('textbox', { name: 'Code' }),
     submit: page.getByRole('button', { name: 'Sign in', exact: true }),
 });
@@ -66,8 +66,8 @@ test.describe('signing in by email', () => {
 
         await form.email.fill(' me@example.com ');
         await form.send.click();
-        await expect(page.getByText(/We've sent a sign-in link to/)).toContainText(
-            "We've sent a sign-in link to me@example.com. Open it on this device, or type the code from the email here."
+        await expect(page.getByText(/We've sent a 6-digit code to/)).toContainText(
+            "We've sent a 6-digit code to me@example.com. Type it here to sign in."
         );
         expect(supabase.callsTo('auth/v1/otp')[0].body).toMatchObject({
             email: 'me@example.com',
@@ -77,7 +77,7 @@ test.describe('signing in by email', () => {
         await form.code.fill('12a');
         await form.submit.click();
         await expect(
-            page.getByText('The code is the number in the email, e.g. 123456.')
+            page.getByText('The code is the 6 digits in the email, e.g. 123456.')
         ).toBeVisible();
 
         supabase.verify = 403;
@@ -90,9 +90,12 @@ test.describe('signing in by email', () => {
         ).toBeVisible();
 
         supabase.verify = 200;
+        await form.code.fill('123 456');
         await form.submit.click();
         await expect(page).toHaveURL('/home');
         await expect(app.undoBar).toContainText('Signed in as me@example.com');
+        // The space typed in the code is left out
+        expect(supabase.callsTo('auth/v1/verify').at(-1)?.body).toMatchObject({ token: '123456' });
         // Fetched, then this device's Legs sent
         await expect.poll(() => supabase.callsTo('rpc/push_records').length).toBeGreaterThan(0);
         expect(supabase.callsTo('rpc/pull_records').length).toBeGreaterThan(0);
@@ -132,13 +135,9 @@ test.describe('Google, and links that come back with an error', () => {
             "Signing in didn't finish. Try again, or sign in another way.",
         ],
         [
-            '/account#error=access_denied&error_code=otp_expired&error_description=expired',
-            'That sign-in link has expired or was used already. Send yourself another.',
-        ],
-        [
             // Landing on the wrong page, it goes on to You
             '/home#error=access_denied&error_code=otp_expired',
-            'That sign-in link has expired or was used already. Send yourself another.',
+            "Signing in didn't finish. Try again, or sign in another way.",
         ],
     ]) {
         test(

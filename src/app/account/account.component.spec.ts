@@ -80,7 +80,7 @@ describe('AccountComponent', () => {
         await settle();
     }
 
-    describe('back from Google or an email link', () => {
+    describe('back from Google', () => {
         afterEach(() => history.replaceState(null, '', location.pathname + location.search));
 
         it('goes Home once signed in', async () => {
@@ -117,18 +117,18 @@ describe('AccountComponent', () => {
     describe('signed out', () => {
         beforeEach(() => create());
 
-        it('asks for an email to send a sign-in link to, saying an account is optional', () => {
+        it('asks for an email to send a sign-in code to, saying an account is optional', () => {
             expect(text()).toContain('An account is optional');
             const input = element.querySelector<HTMLInputElement>('#account-email')!;
             expect(input.type).toBe('email');
             expect(input.autocomplete).toBe('email');
-            expect(button('Email me a sign-in link')).toBeTruthy();
+            expect(button('Email me a sign-in code')).toBeTruthy();
             // No error until something's been tried
             expect(element.querySelector('#account-email-error')).toBeNull();
         });
 
         it("says what's wrong with the email, on the field, and doesn't send", async () => {
-            await press('Email me a sign-in link');
+            await press('Email me a sign-in code');
 
             const input = element.querySelector<HTMLInputElement>('#account-email')!;
             expect(element.querySelector('#account-email-error')!.textContent).toBe(
@@ -170,7 +170,7 @@ describe('AccountComponent', () => {
         it('is ready again when come back to from Google without signing in', async () => {
             await press('Continue with Google');
             await type('account-email', 'me@example.com');
-            expect(button('Email me a sign-in link').disabled).toBe(true);
+            expect(button('Email me a sign-in code').disabled).toBe(true);
 
             // Back from Google: the browser shows the page as it was left
             window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
@@ -178,7 +178,7 @@ describe('AccountComponent', () => {
 
             expect(status()).toBe('');
             expect(button('Continue with Google').disabled).toBe(false);
-            expect(button('Email me a sign-in link').disabled).toBe(false);
+            expect(button('Email me a sign-in code').disabled).toBe(false);
         });
 
         it("says when Google can't be reached, and can be tried again", async () => {
@@ -190,14 +190,16 @@ describe('AccountComponent', () => {
             expect(button('Continue with Google').disabled).toBe(false);
         });
 
-        it('sends the link, then asks for the code from the email', async () => {
+        it('sends the code, then asks for it', async () => {
             await type('account-email', ' me@example.com ');
-            await press('Email me a sign-in link');
+            await press('Email me a sign-in code');
 
             expect(client.auth.signInWithOtp).toHaveBeenCalledWith(
                 expect.objectContaining({ email: 'me@example.com' })
             );
-            expect(text()).toContain("We've sent a sign-in link to me@example.com.");
+            expect(text()).toContain(
+                "We've sent a 6-digit code to me@example.com. Type it here to sign in."
+            );
             expect(document.activeElement!.id).toBe('account-sent');
             const code = element.querySelector<HTMLInputElement>('#account-code')!;
             expect(code.inputMode).toBe('numeric');
@@ -206,7 +208,7 @@ describe('AccountComponent', () => {
 
         it('signs in with the code, then goes Home', async () => {
             await type('account-email', 'me@example.com');
-            await press('Email me a sign-in link');
+            await press('Email me a sign-in code');
             await type('account-code', '123456');
             await press('Sign in');
 
@@ -220,11 +222,11 @@ describe('AccountComponent', () => {
 
         it("says when a code didn't work, or isn't one", async () => {
             await type('account-email', 'me@example.com');
-            await press('Email me a sign-in link');
+            await press('Email me a sign-in code');
             await type('account-code', '12');
             await press('Sign in');
             expect(element.querySelector('#account-code-error')!.textContent).toBe(
-                'The code is the number in the email, e.g. 123456.'
+                'The code is the 6 digits in the email, e.g. 123456.'
             );
             expect(client.auth.verifyOtp).not.toHaveBeenCalled();
 
@@ -238,7 +240,7 @@ describe('AccountComponent', () => {
 
         it('goes back to the email on Use another email', async () => {
             await type('account-email', 'me@example.com');
-            await press('Email me a sign-in link');
+            await press('Email me a sign-in code');
             await press('Use another email');
 
             expect(document.activeElement!.id).toBe('account-email');
@@ -247,11 +249,11 @@ describe('AccountComponent', () => {
         it("says when the email couldn't be sent, or too many have been", async () => {
             await type('account-email', 'me@example.com');
             client.auth.signInWithOtp.mockResolvedValueOnce({ data: {}, error: { status: 429 } });
-            await press('Email me a sign-in link');
+            await press('Email me a sign-in code');
             expect(status()).toBe('Too many sign-in emails for now. Wait a while, then try again.');
 
             client.auth.signInWithOtp.mockResolvedValueOnce({ data: {}, error: { status: 500 } });
-            await press('Email me a sign-in link');
+            await press('Email me a sign-in code');
             expect(status()).toBe(
                 "The email couldn't be sent. Check your connection and try again."
             );

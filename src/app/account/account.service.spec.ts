@@ -104,7 +104,7 @@ describe('AccountService', () => {
         await settled();
 
         expect(account.state()).toEqual({ status: 'signed-out' });
-        expect(await account.sendLink('me@example.com')).toBe('failed');
+        expect(await account.sendCode('me@example.com')).toBe('failed');
     });
 
     it('goes Home once signed in, saying who in the bar there', async () => {
@@ -146,18 +146,15 @@ describe('AccountService', () => {
         });
     });
 
-    describe('sendLink', () => {
-        it('emails a link back to the Account tab, making the account if it is new', async () => {
+    describe('sendCode', () => {
+        it('emails a code, with no link, making the account if it is new', async () => {
             const account = start();
 
-            expect(await account.sendLink('me@example.com')).toBe('sent');
+            expect(await account.sendCode('me@example.com')).toBe('sent');
 
             expect(client.auth.signInWithOtp).toHaveBeenCalledWith({
                 email: 'me@example.com',
-                options: {
-                    shouldCreateUser: true,
-                    emailRedirectTo: `${location.origin}/account`,
-                },
+                options: { shouldCreateUser: true },
             });
         });
 
@@ -167,9 +164,9 @@ describe('AccountService', () => {
             client.auth.signInWithOtp.mockResolvedValueOnce({ data: {}, error: { status: 500 } });
             client.auth.signInWithOtp.mockRejectedValueOnce(new Error('network'));
 
-            expect(await account.sendLink('me@example.com')).toBe('too-many');
-            expect(await account.sendLink('me@example.com')).toBe('failed');
-            expect(await account.sendLink('me@example.com')).toBe('failed');
+            expect(await account.sendCode('me@example.com')).toBe('too-many');
+            expect(await account.sendCode('me@example.com')).toBe('failed');
+            expect(await account.sendCode('me@example.com')).toBe('failed');
         });
     });
 
@@ -222,7 +219,7 @@ describe('AccountService', () => {
         });
     });
 
-    describe('a sign-in link that did not work', () => {
+    describe('a sign-in that came back with an error', () => {
         function startAt(hash: string, search = '') {
             const replaceState = vi.fn();
             client = fakeAccountClient();
@@ -247,8 +244,8 @@ describe('AccountService', () => {
                 '#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid'
             );
 
-            expect(account.linkProblem()).toBe(
-                'That sign-in link has expired or was used already. Send yourself another.'
+            expect(account.signInProblem()).toBe(
+                "Signing in didn't finish. Try again, or sign in another way."
             );
             expect(replaceState).toHaveBeenCalledWith(null, '', '/account');
         });
@@ -259,7 +256,7 @@ describe('AccountService', () => {
                 '?error=access_denied&error_description=The+user+cancelled'
             );
 
-            expect(account.linkProblem()).toBe(
+            expect(account.signInProblem()).toBe(
                 "Signing in didn't finish. Try again, or sign in another way."
             );
             expect(replaceState).toHaveBeenCalledWith(null, '', '/account');
@@ -268,7 +265,7 @@ describe('AccountService', () => {
         it('says nothing for an address without a problem', () => {
             const { account, replaceState } = startAt('#access_token=abc');
 
-            expect(account.linkProblem()).toBeNull();
+            expect(account.signInProblem()).toBeNull();
             expect(replaceState).not.toHaveBeenCalled();
         });
     });

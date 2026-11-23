@@ -30,11 +30,13 @@
 .workout-ring {
     position: relative;
     transition: filter 0.3s ease;
-    // 380px, or the screen width minus the page gutters on narrow phones; or smaller, down to
-    // 240px, where the screen isn't tall enough for it with the rest of the page (about 21rem,
-    // which grows with the text size), so Pause and Skip under it stay in view. svh, the
+    // 380px, or the screen width minus the page gutters on narrow phones; or smaller where the
+    // screen isn't tall enough for it with the rest of the page (about 28rem from the top bar to
+    // Pause, Up next between, which grows with the text size), so Pause and Skip under it stay
+    // clear of Up next. Not under 280px, which Resume and End workout need over it while paused;
+    // on a shorter screen Pause and Skip are held over the foot of the page instead. svh, the
     // screen's height with the browser's bars showing, so it doesn't change size on scrolling.
-    width: min(380px, calc(100vw - 2rem), max(240px, calc(100svh - 21rem)));
+    width: min(380px, calc(100vw - 2rem), max(280px, calc(100svh - 28rem)));
     aspect-ratio: 1;
     border-radius: 50%;
     display: flex;

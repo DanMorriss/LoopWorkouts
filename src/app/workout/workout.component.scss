@@ -67,7 +67,8 @@
     // For the exercises skipped to do later, in its top right corner
     position: relative;
     gap: 0.25rem;
-    padding: 0 1rem 2rem;
+    // No room kept at the foot: Pause and Skip have their own, and the ring is sized to fit
+    padding: 0 1rem 0.5rem;
 }
 
 // On a phone the header shows the workout's title instead (see the nav), so the ring has more room
@@ -214,7 +215,7 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 
     &::before {

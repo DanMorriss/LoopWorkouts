@@ -14,7 +14,7 @@ import {
     provideFakeSyncStarter,
 } from '../shared/testing/fake-sync';
 import { AUTH_STORAGE_KEY } from '../shared/state/auth-storage-key';
-import { AccountService, SIGN_OUT_WAIT_MS } from './account.service';
+import { AccountService, SIGN_OUT_WAIT_MS, SYNC_BEFORE_SIGN_OUT_MS } from './account.service';
 
 describe('AccountService', () => {
     let client: FakeAccountClient;
@@ -210,6 +210,21 @@ describe('AccountService', () => {
 
         expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
         expect(account.state()).toEqual({ status: 'signed-out' });
+    });
+
+    it("takes a sync before signing out that doesn't finish as not done", async () => {
+        const account = start('me@example.com');
+        await settled();
+        sync.syncAll.mockReturnValueOnce(new Promise(() => undefined));
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+        try {
+            const synced = account.syncAll();
+            await vi.advanceTimersByTimeAsync(SYNC_BEFORE_SIGN_OUT_MS);
+
+            expect(await synced).toBe(false);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it("doesn't wait for ever on Supabase's server to sign out", async () => {

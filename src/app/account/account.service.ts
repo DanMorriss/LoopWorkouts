@@ -33,6 +33,20 @@ export { SIGN_IN_PATH };
 export const SIGN_OUT_WAIT_MS = 5000;
 
 /**
+ * How long the sync before signing out may take before it's taken as not done, so signing
+ * out asks before losing what's here rather than waiting on it for ever.
+ */
+export const SYNC_BEFORE_SIGN_OUT_MS = 10_000;
+
+/** What `promise` gives, or `otherwise` if it hasn't settled within `ms` or fails. */
+function within<T>(promise: Promise<T>, ms: number, otherwise: T): Promise<T> {
+    return Promise.race([
+        promise.catch(() => otherwise),
+        new Promise<T>((resolve) => setTimeout(() => resolve(otherwise), ms)),
+    ]);
+}
+
+/**
  * Signing in to an account (SYN-3), by a 6-digit code emailed and typed in the app, or with
  * Google or Apple (SYN-7); signing out and deleting the account (SYN-8). Signing out and deleting leave this device's data as
  * it is. Supabase's code loads only once it's needed: at once if there's an account on this
@@ -223,10 +237,11 @@ export class AccountService {
 
     /**
      * Syncs, then gives whether everything on this device has been sent to the account:
-     * signing out removes it from the device, so anything unsent would be lost.
+     * signing out removes it from the device, so anything unsent would be lost. Not done if
+     * it takes over SYNC_BEFORE_SIGN_OUT_MS, so signing out asks rather than waits.
      */
     syncAll(): Promise<boolean> {
-        return this.sync.syncAll();
+        return within(this.sync.syncAll(), SYNC_BEFORE_SIGN_OUT_MS, false);
     }
 
     /**
@@ -264,13 +279,11 @@ export class AccountService {
      * the sign-in with it, so it's signed out here either way.
      */
     private endSignIn(client: AccountClient): Promise<boolean> {
-        return Promise.race([
-            client.auth.signOut({ scope: 'local' }).then(
-                ({ error }) => !error,
-                () => false
-            ),
-            new Promise<boolean>((resolve) => setTimeout(() => resolve(false), SIGN_OUT_WAIT_MS)),
-        ]);
+        return within(
+            client.auth.signOut({ scope: 'local' }).then(({ error }) => !error),
+            SIGN_OUT_WAIT_MS,
+            false
+        );
     }
 
     /**

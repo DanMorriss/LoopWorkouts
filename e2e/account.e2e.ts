@@ -317,6 +317,30 @@ test.describe('signed in', () => {
         }
     );
 
+    test(
+        "REG-ACC-05 signing out when the sync before it doesn't finish",
+        { tag: '@p1' },
+        async ({ app, page }) => {
+            const supabase = new FakeSupabase(page);
+            supabase.pull = 'hang';
+            await supabase.install();
+            await app.goto('/account');
+            await page.getByRole('button', { name: 'Sign out' }).click();
+            await expect(page.getByText('Syncing before signing out…')).toBeVisible();
+
+            // It waits 10 seconds for the sync, then asks, as when offline
+            await page.clock.runFor(10_000);
+            await expect(
+                page.getByRole('group', {
+                    name: /^Some changes on this device haven't synced, maybe because you're offline/,
+                })
+            ).toBeVisible();
+            await page.getByRole('button', { name: 'Sign out anyway' }).click();
+            await expect(app.undoBar).toContainText('Signed out.');
+            expect(await app.storageItem(AUTH_KEY)).toBeNull();
+        }
+    );
+
     test('REG-ACC-06 deleting the account', { tag: '@p2' }, async ({ app, page }) => {
         const supabase = new FakeSupabase(page);
         await supabase.install();

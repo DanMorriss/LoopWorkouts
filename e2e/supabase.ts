@@ -62,8 +62,11 @@ export class FakeSupabase {
 
     otp: Answer = 200;
     verify: Answer = 200;
-    /** The account's records, as pull_records gives them; or a status for an error. */
-    pull: PulledRecord[] | Answer = [];
+    /**
+     * The account's records, as pull_records gives them; or a status for an error, or `hang`
+     * for no answer ever.
+     */
+    pull: PulledRecord[] | Answer | 'hang' = [];
     push: Answer = 200;
     deleteAccount: Answer = 204;
     /** POST /logout, which signing out asks for even for this device alone; `hang` never answers. */
@@ -171,6 +174,9 @@ export class FakeSupabase {
                     ? route.abort('internetdisconnected')
                     : route.fulfill({ status: this.authorize, headers: cors });
             case '/rest/v1/rpc/pull_records':
+                if (this.pull === 'hang') {
+                    return new Promise<void>(() => undefined);
+                }
                 return Array.isArray(this.pull)
                     ? json(200, { now, records: this.pull })
                     : json(this.pull, null);

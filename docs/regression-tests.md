@@ -1405,12 +1405,14 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     3. Case B: offline (`push_records` aborted) with a change not synced; press Sign out; **Cancel**; Sign out again; **Sign out anyway**.
     4. Case C: `GET /auth/v1/user` and the token refresh answer 401 on load.
     5. Case D: `/auth/v1/logout` never answers; press Sign out, and move the clock on 5 seconds.
+    6. Case E: `pull_records` never answers; press Sign out, move the clock on 10 seconds, then **Sign out anyway**.
 - **Expected:**
     1. "Syncing before signing out…", then the app reloads on You with "Signed out. Your data was removed from this device; your account keeps it."; no workouts or history; the theme is still Light; the name is gone; the auth token, `sync` and `synced-at` keys are gone.
     2. The welcome screen opens.
     3. "Some changes on this device haven't synced, maybe because you're offline. …" with **Sign out anyway** and Cancel; Cancel leaves you signed in with focus back on Sign out; Sign out anyway signs out and removes the change.
     4. The device is cleared (settings kept) and says "You were signed out, so your data was removed from this device. Signing in again brings back what your account has."
     5. "Signing out…" while it waits, then it's signed out as in 1, without the server's answer: no auth token, no workouts.
+    6. "Syncing before signing out…", then the warning as in 3; Sign out anyway signs out.
 - **In the pack:** "signed out by the server" is a session that's expired and whose refresh is turned down (GoTrue's 400), as the app doesn't check a saved session that's still in date.
 
 ### REG-ACC-06 · Deleting the account, and sync status

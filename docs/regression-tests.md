@@ -139,20 +139,20 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     5. `/workout` with no run says "No workout selected." with "Choose one from your workouts" (to `/library`); `/timer` redirects to `/workout`.
 - **In the pack:** the link with no run reads **Choose a workout**.
 
-### REG-NAV-06 · Help, its search, and a ? link
+### REG-NAV-06 · Help, its search, and a link to an answer
 
 - **Stories:** NAV-7 · **Priority:** P2
-- **Preconditions:** `guest()`, clock Wednesday, one workout planned on Monday only, with its `plannedAt` set to today (`"0:<id>": <now>`), so Today says **Your plan starts next week** with its ? link.
+- **Preconditions:** `guest()`.
 - **Steps:**
     1. You → **Help**.
     2. Type "iphone" in **Search help**.
     3. Type "zzzz".
-    4. Open Today; press the ? beside **Your plan starts next week**.
+    4. Open `/help?q=starts-next-week`, as a ? link does.
 - **Expected:**
     1. Help slides in at `/help` with every section closed and ‹ You; You stays current in the tab bar.
     2. Only the two questions mentioning iPhones show, opened, and a status says "2 answers".
     3. 'Nothing matches "zzzz". Try other words, or email us below.'
-    4. Help opens on "Why does Today say my plan starts next week?", opened, scrolled to and focused. The link's accessible name starts "Help:".
+    4. Help opens on "Why does Today say my plan starts next week?", opened, scrolled to and focused.
 - **In the pack:** the topics are `<details>` (role group); the opened one is checked by its `open` attribute and its question's focus.
 
 ---
@@ -219,7 +219,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     1. The week: Mon a dumbbell in a ring with a tick, Tue one with an empty ring on it, Wed with its date underlined and picked, Fri a dumbbell, Thu, Sat and Sun a moon; Legs is the same colour on Mon and Wed; "1 of 4 done this week · Next: Pull on Friday". Screen readers get tabs, e.g. "Tuesday: Push, missed", "Wednesday, today: Legs, due today".
     2. Monday's Legs "✓ Done", Tuesday's Push "Missed" and dimmed, Wednesday's Legs "Due", Friday's Pull nothing; "1 of 3 done so far this week".
     3. Monday's Push says "From next week", dimmed, and the count doesn't change.
-- **Variant:** with only Monday's workout planned today (via the UI on a Wednesday), Today says "Your plan starts next week" with its ? link, and the days show as rest days.
+- **Variant:** with only Monday's workout planned today (via the UI on a Wednesday), Today says "Your plan starts next week", and the days show as rest days.
 
 ### REG-PLAN-05 · The ready-made plans page, and a plan's workouts
 
@@ -1508,7 +1508,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Preconditions:** `guest()` with seeded data. Viewports 320 × 640 and 390 × 844; Dark and Light.
 - **Steps:** Visit each main page (as REG-A11Y-01's list), including the workout page with a long name ("Single-leg Romanian deadlift").
 - **Expected:** No horizontal scroll (`scrollWidth <= innerWidth`); the last content scrolls clear of the tab bar and run bar; the long name fits in up to three lines, never below 70% size. Small controls (the (i), ? links, chips, step-kind pill) take a press 44px across: `document.elementFromPoint` 20px out from their centre still hits them. Optional: screenshot comparisons per page and theme, reviewed by eye, as CLAUDE.md asks for any visual change.
-- **In the pack:** on the phone project only. The long name's lines and its size aren't measured; the touch targets checked are a ? link, the step-kind pill and the step's (i).
+- **In the pack:** on the phone project only. The long name's lines and its size aren't measured; the touch targets checked are the step-kind pill and the step's (i).
 
 ---
 

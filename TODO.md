@@ -20,8 +20,8 @@ Measured on loopworkouts.com with Lighthouse 12.8, the middle of three runs, on 
 
 ### Progress
 
-- [ ] **Stretch what you worked, a setting:** for the hold's length, or to turn the card off, if wanted.
-- [ ] **More charts, if wanted:** e.g. workouts per week (the same chart could switch between time and workouts), or a range to look further back than 12 weeks.
+- [ ] **Stretch what you worked, a setting:** for the hold's length, or to turn the card off.
+- [ ] **More charts:** e.g. workouts per week (the same chart could switch between time and workouts), or a range to look further back than 12 weeks.
 
 ### Sync
 
@@ -46,13 +46,11 @@ Twenty-three ready-made workouts are listed on Workouts, under your own (see `do
 ### Help (NAV-7)
 
 - [ ] **Watch which questions people email about,** and add them to Help (`src/app/help/help-topics.ts`), most asked first.
-- [ ] **The ? links left:** the tours replaced the Plan page's, and the workout page's by Tap to turn on sound stays (it's about sound after a reload, which the tour doesn't cover). Still there: Today's week (beside From next week, which REG-NAV-06 uses) and the welcome screen (Why might I lose my workouts?). Decide whether they go; if so, update NAV-7 in `docs/features/home-and-navigation.md`.
 
 ### Calories (CAL)
 
 How the estimate works, and why the body weight stays on the device, is in `docs/features/calories.md`.
 
-- [ ] **How hard an exercise of your own is** (CAL-4): Light, Moderate or Hard on its page, for its MET, rather than 3.5 for all of them.
 - [ ] **Heart rate from a watch** (CAL-5): on iOS, HealthKit's active energy instead of the estimate.
 
 ### Setup and profile (NAV-4, SET-7)
@@ -60,14 +58,13 @@ How the estimate works, and why the body weight stays on the device, is in `docs
 The setup after the welcome screen and the synced profile are in `docs/features/home-and-navigation.md` and `docs/features/settings.md`.
 
 - [ ] **More goals, once there are more workouts:** Training for is only Muscle or Fitness (Dan, 2026-11-02). A goal such as "Get stronger" or "Lose weight" needs its own weekly aims (`WEEKLY_AIMS`) and its own ready-made plans (`goals` in `models/built-in-plans.ts`).
-- [ ] **Devices from before the setup:** they're never asked, so they have no name to greet by unless it's given on You → Profile. If that's wanted, a card on Today ("Add your name") that can be closed.
+- [ ] **Devices from before the setup:** they're never asked, so they have no name to greet by unless it's given on You → Profile. A card on Today ("Add your name") that can be closed.
 
 ### Code health
 
 How to keep the codebase from degrading is in `CLAUDE.md`.
 
 - [ ] **`WorkoutView` is still large** (636 lines, up from 518 with waiting for Start and doing a skipped exercise later): it's signals built on one another, so it'd split only into services handing those back and forth. (`WorkoutSetupForm`, 860 lines on 2026-11-19, is about 210 since 2026-11-20, its parts in `SetupRows`, `SetupSteps`, `SetupSave`, `SetupView`, `SetupText` and `setup-checks.ts`.)
-- [ ] **`help-link`, the last of `shared/`'s imports from a feature** (`help/help-topics`): it goes once the tours replace the ? links (see Help). `PageSlide` and the helpers it uses moved to `shared/navigation/`, and `AUTH_STORAGE_KEY` to `shared/state/auth-storage-key.ts` (2026-11-11). The test fakes in `shared/testing/` import what they fake, which is fine.
 
 ## 2. Known issues
 
@@ -75,5 +72,4 @@ How to keep the codebase from degrading is in `CLAUDE.md`.
 - [ ] **At the largest text sizes, Up next starts under Pause and Skip:** at 200% text on a phone the ring shrinks as far as it can (240px) and the controls stay in reach at the bottom, but the Up next card, which is also a rep step's Done, starts partly under them and has to be scrolled to. Shrinking the face further, or Up next joining the controls there, would fix it.
 - [ ] **A dialog closed with a button can't be caught as it goes:** on a phone, a sheet dragged away can be grabbed on its way down and brought back, but one closed with ‹ Back, Escape, a click outside or one of its own buttons can't. Angular takes it off the page as soon as it's closed; letting it be caught would mean saying it's closed only once it's gone, which changes when every dialog's `closed` fires and what its tests expect.
 - [ ] **Have the Privacy notice and Terms of use looked over:** written on 2026-10-26 from what the app does, and updated on 2026-10-28 for accounts and sync (Supabase and Resend in Europe; workouts, history and exercises kept with the account) and dan@loopworkouts.com to contact, and on 2026-10-30 for the weekly plan and signing in with Google, and on 2026-11-01 for Vercel Web Analytics, and on 2026-11-07 for Vercel Speed Insights, and on 2026-11-08 for what UK GDPR asks a notice to say (Dan Morriss as controller, the lawful bases, transfers to the US, retention, age 13, rights and the ICO) and England and Wales as the terms' law, and on 2026-11-10 to take out Google Fonts, now served from the app.
-- [ ] **No hip flexor muscle group:** the body map has no shape for the hip flexors, so the kneeling hip flexor stretch (and the back leg of the pigeon and world's greatest stretch) lists the quads, the closest group, at the front of the hip and thigh.
 - [ ] **Dumbbell row needs a bench:** so with only dumbbells (or kettlebells) picked as your equipment, Swap finds no other row for a chainsaw row, and offers ones needing other equipment (#214), though a dumbbell row can be done braced on a knee or a box. Making the bench optional for it is Dan's call, as it's the exercise's content.

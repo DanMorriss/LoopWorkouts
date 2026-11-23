@@ -20,6 +20,7 @@ function own(id: string, name: string, otherNames: string[] = []): OwnExercise {
         otherNames,
         equipment: [],
         measuredBy: 'reps',
+        effort: 'moderate',
         mainMuscles: [],
         supportingMuscles: [],
         description: '',

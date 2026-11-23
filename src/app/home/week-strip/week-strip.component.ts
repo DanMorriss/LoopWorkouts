@@ -5,7 +5,6 @@ import { PageSlide } from '../../shared/navigation/page-slide';
 import { injectFocusAfterRender } from '../../shared/focus-after-render';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
-import { HelpLinkComponent } from '../../shared/components/help-link/help-link.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { nextPlannedDay, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { SettingsStore } from '../../shared/state/settings-store.service';
@@ -26,13 +25,7 @@ import { WeekWorkout, weekDays } from './week-view';
  */
 @Component({
     selector: 'app-week-strip',
-    imports: [
-        DayPanelComponent,
-        HelpLinkComponent,
-        IconComponent,
-        PlansForYouComponent,
-        WeekDaysComponent,
-    ],
+    imports: [DayPanelComponent, IconComponent, PlansForYouComponent, WeekDaysComponent],
     template: `
         <section class="week" aria-labelledby="week-title">
             <div class="week__head">
@@ -60,12 +53,7 @@ import { WeekWorkout, weekDays } from './week-view';
                         (doToday)="doToday(day.day, $event)"
                     />
                 }
-                <p class="week__so-far">
-                    {{ soFar() }}
-                    @if (startsNextWeek()) {
-                        <app-help-link topic="starts-next-week" />
-                    }
-                </p>
+                <p class="week__so-far">{{ soFar() }}</p>
             } @else {
                 <!-- Weeks ready-made for your goal and equipment (PLN-6), used in one tap,
                      as the main way; or the other plans, or planning your own workouts -->
@@ -149,12 +137,6 @@ export class WeekStripComponent {
             dismissed: () => this.focusAfterRender(dayStartId(item.workoutId)),
         });
     }
-
-    /** Whether everything planned this week is from next week: the plan hasn't started. */
-    protected readonly startsNextWeek = computed(() => {
-        const all = this.week().flat();
-        return all.length > 0 && all.every((item) => item.status === 'next week');
-    });
 
     /**
      * "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". Workouts

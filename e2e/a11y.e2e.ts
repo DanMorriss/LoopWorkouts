@@ -479,12 +479,6 @@ test.describe('phone widths', () => {
                         });
                     }, offset);
 
-                await app.goto('/plan');
-                const help = page.getByRole('link', { name: /^Help: / }).first();
-                if (await help.count()) {
-                    await help.scrollIntoViewIfNeeded();
-                    expect(await hitAcross(help), 'a ? link').toBe(true);
-                }
                 await app.goto('/setup?editId=legs');
                 const pill = page.getByRole('button', { name: 'Reps, change type of step 1' });
                 expect(await hitAcross(pill), 'the step-kind pill').toBe(true);

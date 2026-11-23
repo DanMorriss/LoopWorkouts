@@ -180,6 +180,7 @@ export function listFinder(
                 otherNames: [],
                 equipment: [],
                 measuredBy,
+                effort: 'moderate',
                 mainMuscles: [],
                 supportingMuscles: [],
                 description: '',

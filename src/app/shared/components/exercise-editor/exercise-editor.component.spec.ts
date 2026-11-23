@@ -137,6 +137,7 @@ describe('ExerciseEditorComponent', () => {
 
             await fill('#exercise-editor-name', 'Sled drag');
             el<HTMLInputElement>('input[type="radio"][value="timed"]').click();
+            el<HTMLInputElement>('input[type="radio"][value="hard"]').click();
             await fill('#exercise-editor-description', 'Pulled backwards.');
             button('Machine').click();
             button('Quads').click();
@@ -150,6 +151,7 @@ describe('ExerciseEditorComponent', () => {
                 expect.objectContaining({
                     name: 'Sled drag',
                     measuredBy: 'timed',
+                    effort: 'hard',
                     description: 'Pulled backwards.',
                     equipment: ['machine'],
                     mainMuscles: ['quads'],
@@ -271,6 +273,13 @@ describe('ExerciseEditorComponent', () => {
         it('is made when saved, with its details and your note', async () => {
             await open(blankOwnExercise(), true);
             expect(el('#exercise-editor-title').textContent!.trim()).toBe('New exercise');
+            // How hard it is starts at Moderate, said to be for calories
+            const moderate = el<HTMLInputElement>('input[type="radio"][value="moderate"]');
+            expect(moderate.checked).toBe(true);
+            expect(moderate.closest('fieldset')!.getAttribute('aria-describedby')).toBe(
+                'exercise-editor-effort-hint'
+            );
+            expect(el('#exercise-editor-effort-hint').textContent).toContain('For calories burnt');
 
             await fill('#exercise-editor-name', 'Sled drag');
             button('Machine').click();
@@ -279,7 +288,11 @@ describe('ExerciseEditorComponent', () => {
 
             const made = exercises.own()[0];
             expect(made).toEqual(
-                expect.objectContaining({ name: 'Sled drag', equipment: ['machine'] })
+                expect.objectContaining({
+                    name: 'Sled drag',
+                    equipment: ['machine'],
+                    effort: 'moderate',
+                })
             );
             expect(exercises.noteFor(made.id)).toBe('Lane 2');
             expect(host.saved).toEqual([made]);

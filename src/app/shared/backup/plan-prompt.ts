@@ -102,6 +102,7 @@ export function planPrompt(): string {
             {
                 name: 'Wall sit hold',
                 measuredBy: 'timed',
+                effort: 'moderate',
                 equipment: [],
                 mainMuscles: ['quads'],
                 supportingMuscles: ['glutes'],
@@ -154,6 +155,7 @@ ${builtIn}
 For anything not on the list, use a short, plain name, and add it to "exercises":
 - "name": the same as on its steps
 - "measuredBy": "reps" or "timed"
+- "effort" (optional): how hard it is, for its calories: "light" (e.g. mobility work), "moderate" (most strength work) or "hard" (e.g. sprints, burpees)
 - "equipment": what it needs, any of: ${EQUIPMENT_CHOICES.join(', ')}; empty for nothing
 - "mainMuscles" and "supportingMuscles": any of: ${muscles}
 - "description" (optional): one or two sentences, up to ${MAX_EXERCISE_DESCRIPTION_LENGTH} characters

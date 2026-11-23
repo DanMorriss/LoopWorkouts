@@ -27,6 +27,7 @@ Built: exercises are in the data (#86), with the built-in list, your own exercis
     - how it's **measured**: reps (with an optional weight) or timed
     - **main muscles** and **supporting muscles** (either may be empty)
     - optional: other names (e.g. "Press-ups" for "Push-ups"), equipment, a one-line description, how-to steps, and tips
+    - your own only: **how hard it is**, Light, Moderate or Hard, for its calories (CAL-4); a built-in one's comes from how it moves
 - Rest isn't an exercise.
 - A step **doesn't need an exercise**: an unnamed timed or rep step is still allowed, as now. It just isn't tracked (no history or progress of its own).
 - An exercise has **no weight unit of its own**: weights always show in the unit chosen in You → Profile (SET-4).
@@ -178,11 +179,11 @@ The flat figure, which the 3D one is posed from:
 ### Your own exercises (EXR-3, EXR-9)
 
 - Names are unique among what you can see, ignoring case, spaces and a plural "s": typing "squats " finds "Squats", whether that's built-in or your own. A built-in exercise's other names count as a match too.
-- **Editing** one (the dialog from its step in setup, or from its exercise page) changes its **name**, how it's **measured** (Reps or Time), a **description** (up to 300 characters), its **equipment** (single pieces; a choice of pieces from a backup is kept as it is), its **main and supporting muscles**, **How to do it** and **Tips**.
+- **Editing** one (the dialog from its step in setup, or from its exercise page) changes its **name**, how it's **measured** (Reps or Time), **how hard it is** (Light, Moderate or Hard, for its calories: see CAL-4 in [calories](calories.md)), a **description** (up to 300 characters), its **equipment** (single pieces; a choice of pieces from a backup is kept as it is), its **main and supporting muscles**, **How to do it** and **Tips**.
     - Muscles are picked from two lists of chips, Main and Supporting, with the body map shading them as they're picked. A muscle is main or supporting, not both: picking it in one takes it out of the other. **Tapping a muscle on the body map** moves it along: not worked → main → supporting → not worked, and the chips follow. (The chips do the same for keyboards and screen readers, so the figure stays hidden from them.)
     - How-to steps and tips are written **one per line**: up to 8 steps and 4 tips, each up to 200 characters ("Up to 8 steps, one per line", "Keep each one to 200 characters"). Empty lines are dropped and each line trimmed.
     - The name is needed, up to 40 characters, and can't be another exercise's: "There's already an exercise called "Bench press"". Saving with a problem puts the cursor in the first box that's wrong.
-- **Making** one: by typing a name in the picker (see above), or with **New** on the Exercises list, which opens the same dialog, titled **New exercise**, empty and measured by reps. It's made when saved, with your note if one was written.
+- **Making** one: by typing a name in the picker (see above), or with **New** on the Exercises list, which opens the same dialog, titled **New exercise**, empty, measured by reps and Moderate. It's made when saved, with your note if one was written.
 - **Renaming** one (EXR-3) renames it everywhere: the steps linked to it in every saved workout (and the one running) take the new name, and the history shows it by its new name (see [history](history.md)).
 - Deleting one: see [Hiding and deleting](#hiding-and-deleting).
 

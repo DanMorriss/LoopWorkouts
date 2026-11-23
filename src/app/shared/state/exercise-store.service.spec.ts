@@ -47,6 +47,7 @@ describe('ExerciseStore', () => {
             otherNames: [],
             equipment: [],
             measuredBy: 'reps',
+            effort: 'moderate',
             mainMuscles: [],
             supportingMuscles: [],
             description: '',
@@ -86,6 +87,7 @@ describe('ExerciseStore', () => {
         const details = {
             name: 'Sled push',
             measuredBy: 'reps' as const,
+            effort: 'moderate' as const,
             equipment: [],
             mainMuscles: [],
             supportingMuscles: [],
@@ -102,6 +104,7 @@ describe('ExerciseStore', () => {
             const updated = store.updateOwn(mine.id, {
                 name: '  Sled   drag ',
                 measuredBy: 'timed',
+                effort: 'hard',
                 equipment: ['machine'],
                 mainMuscles: ['quads', 'glutes'],
                 // A muscle in both counts as main
@@ -115,6 +118,7 @@ describe('ExerciseStore', () => {
                 ...mine,
                 name: 'Sled drag',
                 measuredBy: 'timed',
+                effort: 'hard',
                 equipment: ['machine'],
                 mainMuscles: ['quads', 'glutes'],
                 supportingMuscles: ['calves'],
@@ -186,6 +190,7 @@ describe('ExerciseStore', () => {
             const made = store.createOwn({
                 name: ' Sled  drag ',
                 measuredBy: 'timed',
+                effort: 'light',
                 equipment: ['machine'],
                 mainMuscles: ['quads'],
                 supportingMuscles: ['quads', 'glutes'],
@@ -200,6 +205,7 @@ describe('ExerciseStore', () => {
                     updatedAt: NOW,
                     name: 'Sled drag',
                     otherNames: [],
+                    effort: 'light',
                     supportingMuscles: ['glutes'],
                     description: 'Pulled backwards.',
                     steps: ['Lean in.'],
@@ -212,6 +218,7 @@ describe('ExerciseStore', () => {
             const store = createStore();
             const blank = {
                 measuredBy: 'reps' as const,
+                effort: 'moderate' as const,
                 equipment: [],
                 mainMuscles: [],
                 supportingMuscles: [],
@@ -404,6 +411,15 @@ describe('reading saved exercises', () => {
         expect(read?.mainMuscles).toEqual(['quads']);
         expect(read?.otherNames).toEqual([]);
         expect(read?.steps).toEqual([]);
+    });
+
+    it('reads how hard it is, or moderate where it says nothing or something unknown', () => {
+        const saved = { id: 'a', name: 'Sled push', measuredBy: 'reps', updatedAt: 1 };
+
+        expect(readOwnExercise({ ...saved, effort: 'hard' })?.effort).toBe('hard');
+        expect(readOwnExercise({ ...saved, effort: 'light' })?.effort).toBe('light');
+        expect(readOwnExercise(saved)?.effort).toBe('moderate');
+        expect(readOwnExercise({ ...saved, effort: 'brutal' })?.effort).toBe('moderate');
     });
 
     it('reads the neck, since merged, as the traps, and drops the shins', () => {

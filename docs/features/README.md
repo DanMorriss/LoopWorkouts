@@ -87,9 +87,9 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | NAV-4  | Set up my name, goal, equipment, body and units once, as I start             | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-5  | Tabs named for what I come to them for: Today, Workouts, Progress, You       | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-6  | Land on Today after setting up, shown to add workouts, then plan my week     | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
-| NAV-7  | Find answers in the app, with ? links from the harder parts                  | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
+| NAV-7  | Find answers in the app, with a ? link where sound needs a tap               | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | NAV-8  | A short tour of the app, pointing at each tab and its main part              | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
-| NAV-9  | See which page I'm on and get back from it, however far down I've scrolled | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
+| NAV-9  | See which page I'm on and get back from it, however far down I've scrolled   | ✅  | —   | [home-and-navigation](home-and-navigation.md) |
 | A11Y-1 | Use every feature with a screen reader, keyboard or reduced motion           | ✅  | —   | [accessibility](accessibility.md)             |
 | EXR-1  | Exercises as things in their own right, used across workouts                 | ✅  | —   | [exercises](exercises.md)                     |
 | EXR-2  | Pick an exercise, built-in or my own, or make a new one                      | ✅  | —   | [exercises](exercises.md)                     |
@@ -129,7 +129,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | SYN-7  | Sign in with Google or Apple                                                 | ◐   | —   | [backup-and-sync](backup-and-sync.md)         |
 | SYN-8  | Delete my account and what the server keeps                                  | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
 | SYN-9  | Clear everything from this device                                            | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
-| SYN-10 | Agree to notes that may mention my health being kept with my account, or not  | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
+| SYN-10 | Agree to notes that may mention my health being kept with my account, or not | ✅  | —   | [backup-and-sync](backup-and-sync.md)         |
 | PLN-1  | Set which workouts I do on which days                                        | ✅  | —   | [planning](planning.md)                       |
 | PLN-2  | See what's due today on Today                                                | ✅  | —   | [planning](planning.md)                       |
 | PLN-3  | See whether I kept to the plan this week                                     | ✅  | —   | [planning](planning.md)                       |
@@ -141,7 +141,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | CAL-1  | See about how many calories a workout burnt                                  | ✅  | —   | [calories](calories.md)                       |
 | CAL-2  | Give my body weight once, for the calories                                   | ✅  | —   | [calories](calories.md)                       |
 | CAL-3  | See the calories I've burnt each week on Progress                            | ✅  | —   | [calories](calories.md)                       |
-| CAL-4  | Say how hard an exercise of my own is, for its calories                      | —   | —   | [calories](calories.md)                       |
+| CAL-4  | Say how hard an exercise of my own is, for its calories                      | ✅  | —   | [calories](calories.md)                       |
 | CAL-5  | Use my heart rate from a watch for calories                                  | —   | —   | [calories](calories.md)                       |
 | CAL-6  | Agree to keeping my body weight with my account                              | ✅  | —   | [calories](calories.md)                       |
 | CAL-7  | See about how much more I'll burn over the next day, as I recover            | ✅  | —   | [calories](calories.md)                       |

@@ -46,6 +46,40 @@
                 </div>
             </fieldset>
 
+            <fieldset
+                class="segmented editor__effort"
+                aria-describedby="exercise-editor-effort-hint"
+            >
+                <legend class="picker-field__label">How hard it is</legend>
+                <div
+                    class="segmented__options"
+                    [style.--count]="effortChoices.length"
+                    [style.--chosen]="chosenEffortIndex()"
+                >
+                    <!-- The highlight behind the chosen option, which slides between them -->
+                    <span class="segmented__thumb" aria-hidden="true"></span>
+                    @for (choice of effortChoices; track choice.value; let i = $index) {
+                        <label
+                            class="segmented__option"
+                            [class.segmented__option--chosen]="i === chosenEffortIndex()"
+                        >
+                            <input
+                                type="radio"
+                                name="exercise-editor-effort"
+                                class="segmented__input"
+                                [value]="choice.value"
+                                [checked]="i === chosenEffortIndex()"
+                                (change)="setEffort(choice.value)"
+                            />
+                            <span class="segmented__label">{{ choice.label }}</span>
+                        </label>
+                    }
+                </div>
+                <p id="exercise-editor-effort-hint" class="editor__hint">
+                    For calories burnt: light for mobility work, hard for sprints or burpees.
+                </p>
+            </fieldset>
+
             <label class="picker-field" for="exercise-editor-description">
                 <span class="picker-field__label">Description (optional)</span>
                 <textarea

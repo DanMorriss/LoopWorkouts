@@ -1,4 +1,5 @@
 import { BUILT_IN_EXERCISES } from './built-in-exercises';
+import { Effort } from './exercise';
 import { BUILT_IN_MOVEMENTS, Movement } from './built-in-exercise-movements';
 import { HistoryEntry, isTimedSet, RepSet } from './history';
 import { repSetSeconds } from './workout-estimate';
@@ -65,8 +66,19 @@ const KETTLEBELL_ONLY: ReadonlySet<string> = new Set(
     ).map((exercise) => exercise.id)
 );
 
-/** An exercise of your own, or none found: resistance training, between moderate and vigorous. */
+/** A set with no exercise found: resistance training, between moderate and vigorous. */
 const DEFAULT_MET = 5;
+
+/**
+ * An exercise of your own, by how hard you say it is (CAL-4), from the Compendium: light or
+ * moderate resistance training (3.5); between that and vigorous, as unsaid (5); and vigorous
+ * circuit training, as a jump or a burpee is here (8).
+ */
+const EFFORT_METS: Record<Effort, number> = { light: 3.5, moderate: DEFAULT_MET, hard: 8 };
+
+/** How hard each exercise of your own is, by id. */
+export type OwnEfforts = ReadonlyMap<string, Effort>;
+const NO_EFFORTS: OwnEfforts = new Map();
 
 /**
  * Rests, Switch sides and unnamed steps: well above sitting still, as breathing and heart rate
@@ -82,10 +94,14 @@ const REST_MET = 2.5;
  * shown "over the next day".
  */
 const AFTERBURN_SHARE = 0.15;
-/** How hard an exercise is, in METs. */
-export function exerciseMet(exerciseId: string | undefined): number {
+/** How hard an exercise is, in METs: a built-in one's, or one of your own from `efforts`. */
+export function exerciseMet(exerciseId: string | undefined, efforts = NO_EFFORTS): number {
     if (exerciseId === undefined) {
         return DEFAULT_MET;
+    }
+    const effort = efforts.get(exerciseId);
+    if (effort) {
+        return EFFORT_METS[effort];
     }
     const movement = BUILT_IN_MOVEMENTS[exerciseId];
     const met = MET_EXCEPTIONS[exerciseId] ?? (movement ? MOVEMENT_METS[movement] : DEFAULT_MET);
@@ -100,7 +116,7 @@ export type BurningRun = Pick<HistoryEntry, 'activeSeconds' | 'repSeconds' | 'se
  * rep steps (shared between its rep sets as the duration estimate guesses them), and the rest
  * of its active time at REST_MET. Not rounded.
  */
-export function caloriesBurnt(run: BurningRun, bodyWeightKg: number): number {
+export function caloriesBurnt(run: BurningRun, bodyWeightKg: number, efforts = NO_EFFORTS): number {
     const sets = run.sets ?? [];
     const active = Math.max(0, run.activeSeconds);
     let metSeconds = 0;
@@ -108,7 +124,7 @@ export function caloriesBurnt(run: BurningRun, bodyWeightKg: number): number {
     const repSets: RepSet[] = [];
     for (const set of sets) {
         if (isTimedSet(set)) {
-            metSeconds += set.seconds * exerciseMet(set.exerciseId);
+            metSeconds += set.seconds * exerciseMet(set.exerciseId, efforts);
             timedSeconds += set.seconds;
         } else {
             repSets.push(set);
@@ -120,7 +136,8 @@ export function caloriesBurnt(run: BurningRun, bodyWeightKg: number): number {
     const repSeconds = Math.min(run.repSeconds ?? guessed, Math.max(0, active - timedSeconds));
     if (guessed > 0) {
         repSets.forEach((set, i) => {
-            metSeconds += ((repSeconds * guesses[i]) / guessed) * exerciseMet(set.exerciseId);
+            metSeconds +=
+                ((repSeconds * guesses[i]) / guessed) * exerciseMet(set.exerciseId, efforts);
         });
     }
     const restSeconds = Math.max(0, active - timedSeconds - (guessed > 0 ? repSeconds : 0));
@@ -132,9 +149,9 @@ export function caloriesBurnt(run: BurningRun, bodyWeightKg: number): number {
  * About how many more kcal a run burns over the next day as the body recovers (the afterburn,
  * EPOC): a share of what it burnt above resting (1 MET). Not rounded.
  */
-export function afterburn(run: BurningRun, bodyWeightKg: number): number {
+export function afterburn(run: BurningRun, bodyWeightKg: number, efforts = NO_EFFORTS): number {
     const resting = (Math.max(0, run.activeSeconds) * bodyWeightKg) / 3600;
-    return AFTERBURN_SHARE * Math.max(0, caloriesBurnt(run, bodyWeightKg) - resting);
+    return AFTERBURN_SHARE * Math.max(0, caloriesBurnt(run, bodyWeightKg, efforts) - resting);
 }
 
 /** What's said under a body weight's box: what it's for, and where it's kept (CAL-2, CAL-6). */

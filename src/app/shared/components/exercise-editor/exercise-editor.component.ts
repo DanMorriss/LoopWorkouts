@@ -2,6 +2,8 @@ import { Component, computed, inject, input, linkedSignal, output } from '@angul
 import { form, FormField, maxLength, validate } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
 import {
+    Effort,
+    EFFORTS,
     Equipment,
     EQUIPMENT_CHOICES,
     equipmentLabel,
@@ -29,6 +31,7 @@ import { DialogComponent } from '../dialog/dialog.component';
 interface ExerciseEditorModel {
     name: string;
     measuredBy: MeasuredBy;
+    effort: Effort;
     description: string;
     equipment: Equipment[];
     mainMuscles: MuscleGroup[];
@@ -91,6 +94,10 @@ export class ExerciseEditorComponent {
         { value: 'reps', label: 'Reps' },
         { value: 'timed', label: 'Time' },
     ];
+    protected readonly effortChoices = EFFORTS.map((value) => ({
+        value,
+        label: value.charAt(0).toUpperCase() + value.slice(1),
+    }));
 
     /** A built-in exercise's description, shown above its note once it's loaded. */
     protected readonly description = computed(
@@ -105,6 +112,8 @@ export class ExerciseEditorComponent {
         return {
             name: exercise.name,
             measuredBy: exercise.measuredBy,
+            // Moderate, as it's taken, for a built-in one, which isn't saved from here
+            effort: isBuiltIn(exercise) ? 'moderate' : exercise.effort,
             description: text.description,
             // Only single pieces can be picked; a choice of them (from a backup) stays as it is
             equipment: exercise.equipment.filter(
@@ -148,11 +157,16 @@ export class ExerciseEditorComponent {
     protected readonly nameError = computed(() => this.editorForm.name().errors().at(0)?.message);
     protected readonly stepsError = computed(() => this.editorForm.steps().errors().at(0)?.message);
     protected readonly tipsError = computed(() => this.editorForm.tips().errors().at(0)?.message);
+    protected readonly chosenEffortIndex = computed(() => EFFORTS.indexOf(this.model().effort));
     protected readonly mainMuscles = computed(() => this.model().mainMuscles);
     protected readonly supportingMuscles = computed(() => this.model().supportingMuscles);
 
     protected setMeasuredBy(measuredBy: MeasuredBy) {
         this.model.update((editor) => ({ ...editor, measuredBy }));
+    }
+
+    protected setEffort(effort: Effort) {
+        this.model.update((editor) => ({ ...editor, effort }));
     }
 
     protected hasEquipment(equipment: Equipment): boolean {
@@ -234,6 +248,7 @@ export class ExerciseEditorComponent {
         const details: OwnExerciseDetails = {
             name: editor.name,
             measuredBy: editor.measuredBy,
+            effort: editor.effort,
             description: editor.description,
             mainMuscles: editor.mainMuscles,
             supportingMuscles: editor.supportingMuscles,

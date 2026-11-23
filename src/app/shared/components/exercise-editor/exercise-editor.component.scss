@@ -123,3 +123,8 @@
     gap: 0.6rem;
     margin-top: 0.25rem;
 }
+
+// Under the pills, rather than tucked up under a field as the other hints are
+.editor__effort > .editor__hint {
+    margin-top: 0.4rem;
+}

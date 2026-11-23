@@ -86,16 +86,16 @@ test.describe('signing in by email', () => {
         await form.code.click();
         await page.keyboard.type('123456');
         await expect(page.getByRole('textbox', { name: 'Digit 6 of 6' })).toBeFocused();
-        await form.submit.click();
+        // Sent as soon as the last digit's in, with nothing to press
         await expect(
             page.getByText(
                 "That code didn't work: it may be wrong, or expired. Check it, or send another email."
             )
         ).toBeVisible();
+        expect(supabase.callsTo('auth/v1/verify')).toHaveLength(1);
 
         supabase.verify = 200;
         await form.code.fill('123 456');
-        await form.submit.click();
         await expect(page).toHaveURL('/home');
         await expect(app.undoBar).toContainText('Signed in as me@example.com');
         // The space typed in the code is left out
@@ -202,7 +202,6 @@ test.describe('signing in from the welcome screen', () => {
                 await form.email.fill('me@example.com');
                 await form.send.click();
                 await form.code.fill('123456');
-                await form.submit.click();
 
                 if (withProfile) {
                     // Its profile comes with it, so nothing's asked

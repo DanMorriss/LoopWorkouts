@@ -206,12 +206,12 @@ describe('AccountComponent', () => {
             expect(code.autocomplete).toBe('one-time-code');
         });
 
-        it('signs in with the code, then goes Home', async () => {
+        it('signs in as soon as the whole code is entered, then goes Home', async () => {
             await type('account-email', 'me@example.com');
             await press('Email me a sign-in code');
             await type('account-code', '123456');
-            await press('Sign in');
 
+            expect(client.auth.verifyOtp).toHaveBeenCalledOnce();
             expect(client.auth.verifyOtp).toHaveBeenCalledWith({
                 email: 'me@example.com',
                 token: '123456',
@@ -232,10 +232,15 @@ describe('AccountComponent', () => {
 
             client.auth.verifyOtp.mockResolvedValueOnce({ data: {}, error: { status: 403 } });
             await type('account-code', '654321');
-            await press('Sign in');
             expect(status()).toBe(
                 "That code didn't work: it may be wrong, or expired. Check it, or send another email."
             );
+            expect(navigate).not.toHaveBeenCalled();
+
+            // Sign in tries the same code again
+            await press('Sign in');
+            expect(client.auth.verifyOtp).toHaveBeenCalledTimes(2);
+            expect(navigate).toHaveBeenCalledWith('/home', { replaceUrl: true });
         });
 
         it('goes back to the email on Use another email', async () => {

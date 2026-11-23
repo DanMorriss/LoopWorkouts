@@ -15,6 +15,7 @@
                 [formField]="codeForm.code"
                 [hasError]="!!codeError()"
                 [describedBy]="codeError() ? 'account-code-error' : null"
+                (complete)="enterCode()"
             />
         </div>
         @if (codeError(); as error) {

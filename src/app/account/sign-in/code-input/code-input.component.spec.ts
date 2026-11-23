@@ -8,13 +8,19 @@ import { CodeInputComponent } from './code-input.component';
     imports: [CodeInputComponent, FormField],
     template: `
         <span id="code-label">Code</span>
-        <app-code-input inputId="code" labelledBy="code-label" [formField]="codeForm.code" />
+        <app-code-input
+            inputId="code"
+            labelledBy="code-label"
+            [formField]="codeForm.code"
+            (complete)="completed = completed + 1"
+        />
         <button type="button">After</button>
     `,
 })
 class HostComponent {
     readonly model = signal({ code: '' });
     readonly codeForm = form(this.model);
+    completed = 0;
 }
 
 describe('CodeInputComponent', () => {
@@ -73,6 +79,30 @@ describe('CodeInputComponent', () => {
         expect(code()).toBe('123456');
         expect(shown()).toBe('123456');
         expect(focusedBox()).toBe(5);
+    });
+
+    it('says when the last box is filled, by typing or pasting, but not before', async () => {
+        await userEvent.click(boxes()[0]);
+        await userEvent.keyboard('12345');
+        expect(host.completed).toBe(0);
+        await userEvent.keyboard('6');
+        expect(host.completed).toBe(1);
+
+        // Fixing a digit of a whole code sends it again
+        await userEvent.click(boxes()[2]);
+        await userEvent.keyboard('9');
+        expect(host.completed).toBe(2);
+
+        await userEvent.keyboard('{Backspace}');
+        expect(host.completed).toBe(2);
+        paste(boxes()[0], '654321');
+        expect(host.completed).toBe(3);
+    });
+
+    it('says nothing when a whole code is set from outside', async () => {
+        host.model.set({ code: '123456' });
+        await fixture.whenStable();
+        expect(host.completed).toBe(0);
     });
 
     it('starts at the first empty box, wherever it is pressed', async () => {

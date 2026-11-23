@@ -147,8 +147,13 @@ export class SignInComponent {
         }
     }
 
-    protected async enterCode(event: Event) {
-        event.preventDefault();
+    /** Signs in with the code: on Sign in, or as soon as its last digit is entered. */
+    protected async enterCode(event?: Event) {
+        event?.preventDefault();
+        // Already being checked, e.g. filled in and then Sign in pressed
+        if (this.busy()) {
+            return;
+        }
         const address = this.sentTo();
         this.codeForm.code().markAsTouched();
         if (!address || this.codeForm().invalid()) {

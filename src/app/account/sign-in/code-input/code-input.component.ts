@@ -17,7 +17,8 @@ const LABELS = Array.from({ length: CODE_LENGTH }, (_, i) => `Digit ${i + 1} of 
 /**
  * The sign-in code (SYN-3), typed one digit to a box: each digit moves on to the next box,
  * and pasting the code, or a phone filling it in from the email, fills them all. Backspace
- * clears a box, or the one before when it's empty; the arrow keys move between them.
+ * clears a box, or the one before when it's empty; the arrow keys move between them. Says
+ * when the last box is filled (`complete`), so the code can be sent without pressing anything.
  *
  * Works with Signal Forms (`[formField]`): its value is the digits typed, with a space for a
  * box left empty between them (e.g. "12 456"), so a code with a gap isn't taken as whole.
@@ -62,6 +63,8 @@ export class CodeInputComponent implements FormValueControl<string> {
     readonly hasError = input(false);
     /** Focus has left the code, for Signal Forms' touched. */
     readonly touch = output<void>();
+    /** A digit typed, pasted or filled in has made every box full. */
+    readonly complete = output<void>();
 
     protected readonly labels = LABELS;
     private readonly boxes = viewChildren<ElementRef<HTMLInputElement>>('box');
@@ -164,6 +167,9 @@ export class CodeInputComponent implements FormValueControl<string> {
         [...typed.slice(0, CODE_LENGTH - start)].forEach((digit, i) => (digits[start + i] = digit));
         this.set(digits);
         this.box(Math.min(start + typed.length, LAST)).focus();
+        if (digits.every(Boolean)) {
+            this.complete.emit();
+        }
     }
 
     private clear(position: number) {

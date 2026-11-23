@@ -159,11 +159,11 @@ describe('HistoryComponent', () => {
 
     it('adds about how many calories it burnt, with a body weight given (CAL-1)', () => {
         TestBed.inject(SettingsStore).update({ bodyWeight: 80 });
-        // 754 seconds with no sets, at 1.5 METs: 1.5 × 80 × 754 ÷ 3600 = 25.1, about 25
+        // 754 seconds with no sets, at 2.5 METs: 2.5 × 80 × 754 ÷ 3600 = 41.9, about 40
         create(makeEntry({ activeSeconds: 754, roundsCompleted: 3, totalRounds: 3 }));
 
-        expect(text('.entry__detail [aria-hidden="true"]')).toEqual(['· about 25 kcal']);
-        expect(text('.entry__detail .sr-only')).toEqual(['· 12:34 spent', '· about 25 calories']);
+        expect(text('.entry__detail [aria-hidden="true"]')).toEqual(['· about 40 kcal']);
+        expect(text('.entry__detail .sr-only')).toEqual(['· 12:34 spent', '· about 40 calories']);
     });
 
     it('names the main muscles its sets worked, as a workout card does', () => {

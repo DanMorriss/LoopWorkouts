@@ -1600,7 +1600,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     1. Start Planks from Workouts and let it run to the end.
     2. Press Done.
 - **Expected:**
-    1. The summary has a third stat, **Calories**, "About 50 kcal" (3.8 METs × 75 kg × 10 minutes is 47.5), heard as "about 50 calories".
+    1. The summary has a third stat, **Calories**, "About 50 kcal" (4 METs × 75 kg × 10 minutes is 50), heard as "about 50 calories".
     2. The run's line in the log ends "· about 50 kcal", heard as "… · 10:00 spent · about 50 calories".
 
 ### REG-CAL-02 · No calories without a body weight, and a way to add one

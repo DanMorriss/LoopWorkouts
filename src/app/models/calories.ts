@@ -1,41 +1,44 @@
+import { BUILT_IN_EXERCISES } from './built-in-exercises';
 import { BUILT_IN_MOVEMENTS, Movement } from './built-in-exercise-movements';
 import { HistoryEntry, isTimedSet, RepSet } from './history';
 import { repSetSeconds } from './workout-estimate';
 
 /**
  * How hard each movement is, in METs (1 is sitting still, about 1 kcal per kg an hour), from
- * the Compendium of Physical Activities: compound lifts as vigorous resistance training, small
- * ones as moderate, and so on (CAL-1).
+ * the Compendium of Physical Activities, at the vigorous end, as workouts here are sets with
+ * short rests rather than a lift now and then, and in line with other fitness apps (CAL-1,
+ * since 2026-11-23): compound lifts as vigorous resistance training (6), small ones between
+ * moderate and vigorous (4), whole-body work and carries as vigorous circuit training (8).
  */
 const MOVEMENT_METS: Record<Movement, number> = {
-    squat: 5,
-    lunge: 5,
-    hinge: 5,
-    bridge: 5,
-    'horizontal push': 5,
-    'vertical push': 5,
-    dip: 5,
-    'horizontal pull': 5,
-    'vertical pull': 5,
-    'chest fly': 3.5,
-    'lateral raise': 3.5,
-    'rear delt': 3.5,
-    curl: 3.5,
-    'triceps extension': 3.5,
-    shrug: 3.5,
-    'leg extension': 3.5,
-    'leg curl': 3.5,
-    'calf raise': 3.5,
-    'hip abduction': 3.5,
-    'hip adduction': 3.5,
-    circle: 3.5,
-    'core brace': 3.8,
-    'side brace': 3.8,
-    'core curl': 3.8,
-    'core twist': 3.8,
+    squat: 6,
+    lunge: 6,
+    hinge: 6,
+    bridge: 6,
+    'horizontal push': 6,
+    'vertical push': 6,
+    dip: 6,
+    'horizontal pull': 6,
+    'vertical pull': 6,
+    'chest fly': 4,
+    'lateral raise': 4,
+    'rear delt': 4,
+    curl: 4,
+    'triceps extension': 4,
+    shrug: 4,
+    'leg extension': 4,
+    'leg curl': 4,
+    'calf raise': 4,
+    'hip abduction': 4,
+    'hip adduction': 4,
+    circle: 4,
+    'core brace': 4,
+    'side brace': 4,
+    'core curl': 4,
+    'core twist': 4,
     hang: 3,
-    carry: 6,
-    'whole body': 6,
+    carry: 8,
+    'whole body': 8,
     jump: 8,
     cardio: 8,
     stretch: 2.3,
@@ -46,14 +49,30 @@ const MET_EXCEPTIONS: Readonly<Record<string, number>> = {
     'builtin:kettlebell-swing': 9.8,
     'builtin:kettlebell-snatch': 9.8,
     'builtin:jumping-jack': 7.7,
-    'builtin:wall-sit': 3.5,
+    'builtin:wall-sit': 4,
 };
 
-/** An exercise of your own, or none found: general resistance training. */
-const DEFAULT_MET = 3.5;
+/**
+ * Exercises done only with a kettlebell: the Compendium's circuit training with kettlebells,
+ * vigorous, 8 METs, unless their movement or their own is more.
+ */
+const KETTLEBELL_MET = 8;
+const KETTLEBELL_ONLY: ReadonlySet<string> = new Set(
+    BUILT_IN_EXERCISES.filter(
+        (exercise) =>
+            exercise.equipment.length > 0 &&
+            exercise.equipment.every((need) => need === 'kettlebell')
+    ).map((exercise) => exercise.id)
+);
 
-/** Rests, Switch sides and unnamed steps: a little above sitting still. */
-const REST_MET = 1.5;
+/** An exercise of your own, or none found: resistance training, between moderate and vigorous. */
+const DEFAULT_MET = 5;
+
+/**
+ * Rests, Switch sides and unnamed steps: well above sitting still, as breathing and heart rate
+ * are still up between sets.
+ */
+const REST_MET = 2.5;
 
 /**
  * The afterburn (EPOC): after a workout the body uses more than it would at rest for a while,
@@ -63,14 +82,14 @@ const REST_MET = 1.5;
  * shown "over the next day".
  */
 const AFTERBURN_SHARE = 0.15;
-
 /** How hard an exercise is, in METs. */
 export function exerciseMet(exerciseId: string | undefined): number {
     if (exerciseId === undefined) {
         return DEFAULT_MET;
     }
     const movement = BUILT_IN_MOVEMENTS[exerciseId];
-    return MET_EXCEPTIONS[exerciseId] ?? (movement ? MOVEMENT_METS[movement] : DEFAULT_MET);
+    const met = MET_EXCEPTIONS[exerciseId] ?? (movement ? MOVEMENT_METS[movement] : DEFAULT_MET);
+    return KETTLEBELL_ONLY.has(exerciseId) ? Math.max(met, KETTLEBELL_MET) : met;
 }
 
 /** What a run's calories are worked out from. */

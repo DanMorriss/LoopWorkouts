@@ -36,34 +36,34 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 
 ### The estimate (CAL-1)
 
-- **Calories = MET × body weight in kg × hours**, added up over the parts of the run. A MET is how hard an activity is, against sitting still (1 MET is about 1 kcal per kg an hour), as listed by the Compendium of Physical Activities.
+- **Calories = MET × body weight in kg × hours**, added up over the parts of the run. A MET is how hard an activity is, against sitting still (1 MET is about 1 kcal per kg an hour), as listed by the Compendium of Physical Activities. The values are taken at the vigorous end of its ranges, as a workout here is sets with short rests rather than a lift now and then, and to be in line with other fitness apps (Dan, 2026-11-23; until then they were at the moderate end, and a 26-minute Kettlebell full body at 90 kg came to about 140 kcal rather than 195).
 - **Each part of the run** (from the history entry's sets, `activeSeconds` and `repSeconds`; pauses never count):
     - **A timed set** (e.g. a plank, or 40 seconds of swings): its seconds, at its exercise's MET.
     - **The time on rep steps** (`repSeconds`): shared between the rep sets as the duration estimate guesses them (3 seconds a rep and 5 a set, see LIB-9), each share at its exercise's MET. A run from before 2026-11-14 has no `repSeconds`, so the guess itself is used.
-    - **The rest of the time** (rests, Switch sides, unnamed steps, and anything else): at 1.5 METs, a little above sitting still, as breathing and heart rate are still up between sets.
+    - **The rest of the time** (rests, Switch sides, unnamed steps, and anything else): at 2.5 METs, well above sitting still, as breathing and heart rate are still up between sets.
     - Work time can't be more than the run's active time: if the sets' time adds up to more (a run from before `repSeconds`, guessed too long), the rep time is cut to fit.
 - **Each exercise's MET** comes from its movement (see Swap in [exercises](exercises.md)), as exercises that move the same way work about as hard:
 
     | Movement                                                                                                                                       | MET | e.g.                     |
     | ---------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------------ |
-    | Squat, lunge, hinge, bridge, horizontal and vertical push and pull, dip                                                                        | 5   | Back squat, push-up      |
-    | Chest fly, lateral raise, rear delt, curl, triceps extension, shrug, leg extension, leg curl, calf raise, hip abduction, hip adduction, circle | 3.5 | Dumbbell curl            |
-    | Core brace, side brace, core curl, core twist                                                                                                  | 3.8 | Plank, crunch            |
+    | Squat, lunge, hinge, bridge, horizontal and vertical push and pull, dip                                                                        | 6   | Back squat, push-up      |
+    | Chest fly, lateral raise, rear delt, curl, triceps extension, shrug, leg extension, leg curl, calf raise, hip abduction, hip adduction, circle | 4   | Dumbbell curl            |
+    | Core brace, side brace, core curl, core twist                                                                                                  | 4   | Plank, crunch            |
     | Hang                                                                                                                                           | 3   | Dead hang                |
-    | Carry, whole body                                                                                                                              | 6   | Farmer's carry, thruster |
+    | Carry, whole body                                                                                                                              | 8   | Farmer's carry, thruster |
     | Jump, cardio                                                                                                                                   | 8   | Burpee, box jump         |
     | Stretch                                                                                                                                        | 2.3 | Child's pose             |
 
-    With a few of their own, harder or easier than their movement: kettlebell swing and snatch 9.8, jumping jack 7.7, wall sit 3.5.
+    With a few of their own, harder or easier than their movement: kettlebell swing and snatch 9.8, jumping jack 7.7, wall sit 4. An exercise done only with a kettlebell (a floor press, a halo, a Turkish get-up) is at least 8, the Compendium's vigorous circuit training with kettlebells; one done with a dumbbell or a kettlebell, such as a goblet squat, is its movement's.
 
-- **An exercise of your own**, or a set with no exercise found, is taken as 3.5, general resistance training, until CAL-4 lets you say otherwise.
+- **An exercise of your own**, or a set with no exercise found, is taken as 5, resistance training between moderate and vigorous, until CAL-4 lets you say otherwise.
 - **The same run always gives the same number on a device**: it's worked out when shown, from the weight saved now, so a run done before the weight was given shows calories too, and changing the weight changes every run's.
-- **It's an estimate.** It can be out by a quarter either way, and strength work burns less than people expect (an hour of lifting is about 300 to 400 kcal for 75 kg). The words say "about", and nothing in the app ties calories to losing weight (see the voice in [marketing](../marketing.md)).
+- **It's an estimate.** It can be out by a quarter either way. The words say "about", and nothing in the app ties calories to losing weight (see the voice in [marketing](../marketing.md)).
 
 ### The afterburn (CAL-7)
 
 - **After a workout the body uses more than it would at rest for a while** as it recovers (excess post-exercise oxygen consumption, EPOC). After strength and circuit work, studies put it at about 6 to 15% of the workout's energy above resting, most of it in the first few hours, tailing off over about a day (Børsheim and Bahr, 2003, *Sports Medicine*). Other fitness apps quote the top of that or more; this takes the top, 15% (Dan, 2026-11-23), and no higher, as above it the studies don't back it.
-- **Afterburn = 15% × (the workout's calories − its resting share)**, where the resting share is 1 MET × body weight × its active hours. So 45 minutes of circuits at an average of 4 METs and 80 kg is 240 kcal, 60 of it resting, and an afterburn of 27, shown as "about 25 kcal".
+- **Afterburn = 15% × (the workout's calories − its resting share)**, where the resting share is 1 MET × body weight × its active hours. So 45 minutes of circuits at an average of 5 METs and 80 kg is 300 kcal, 60 of it resting, and an afterburn of 36, shown as "about 35 kcal".
 - **Said as over the next day**, not a number of hours, as how long it lasts varies with how hard the work was.
 - **Said as an estimate,** with the same rounding and "about" as the workout's calories. It's not added to the workout's own figure, nor to the history's.
 
@@ -86,16 +86,16 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 - Given I'm signed in, when I tick to keep it, then the consent is saved under the notice's date, Profile says "Agreed on …", the hint says "Kept with your account", and the weight is sent; when I untick it, the consent is withdrawn and the hint says "Kept on this device only".
 - Given the consent can't be saved, then the tick goes back, saying "That couldn't be saved."
 - Given the account kept the weight, when I sign out, then it's gone from the device; given it didn't, it stays.
-- Given 75 kg and a run of 10 minutes of planks (timed sets, 600 seconds at 3.8 METs), then it's about 3.8 × 75 × 600 ÷ 3600 = 47.5, shown as "About 50 kcal".
-- Given 80 kg and a run of 3 sets of 10 squats over 90 seconds of rep time, with 120 seconds of rest (210 active), then it's 5 × 80 × 90 ÷ 3600 + 1.5 × 80 × 120 ÷ 3600 = 10 + 4 = 14, "About 15 kcal".
+- Given 75 kg and a run of 10 minutes of planks (timed sets, 600 seconds at 4 METs), then it's 4 × 75 × 600 ÷ 3600 = 50, shown as "About 50 kcal".
+- Given 80 kg and a run of 3 sets of 10 squats over 90 seconds of rep time, with 120 seconds of rest (210 active), then it's 6 × 80 × 90 ÷ 3600 + 2.5 × 80 × 120 ÷ 3600 = 12 + 6.7 = 18.7, "About 20 kcal".
 - Given a run with no `repSeconds`, then its rep sets' time is guessed at 3 seconds a rep and 5 a set, cut to fit its active time.
-- Given an exercise of my own, then its sets count at 3.5 METs.
+- Given an exercise of my own, then its sets count at 5 METs; given a kettlebell floor press, at 8.
 - Given a body weight, when a workout finishes, then the summary shows Calories with "About … kcal"; given none, it shows only Time and Rounds.
-- Given 300 kg and a run of 20 minutes of unnamed steps (1.5 METs), then it's 150 kcal, 100 of it resting, and the afterburn is 7.5, "Plus about 10 kcal over the next day, as your body recovers". Given 5 minutes of planks at 75 kg (afterburn 2.6), then there's no afterburn line.
+- Given 300 kg and a run of 20 minutes of unnamed steps (2.5 METs), then it's 250 kcal, 100 of it resting, and the afterburn is 22.5, "Plus about 25 kcal over the next day, as your body recovers". Given 5 minutes of planks at 75 kg (afterburn 2.8), then there's no afterburn line.
 
 ## Platform notes
 
-- **Web:** the estimate is `caloriesBurnt()` and `describeCalories()` in `src/app/models/calories.ts`, with each exercise's MET from `exerciseMet()` (from `BUILT_IN_MOVEMENTS` in `built-in-exercise-movements.ts`, and the exceptions in `MET_EXCEPTIONS`), and the rep sets' time shared out by `repSetSeconds()` from `workout-estimate.ts`. The body weight is `bodyWeight` in `SettingsStore` (kg, or null), dated by `bodyWeightUpdatedAt` and given to sync as `bodyWeightRecord()`, not one of `PROFILE_FIELDS`; sync sends it only while `ConsentService.weightGiven()` (`SyncService.keptBodyWeight()`), and `mergeBodyWeight()` takes another device's. The consent is `ConsentService` (`giveWeight()`, `withdrawWeight()`), through `AccountService.keepBodyWeight()`, shown by `BodyWeightConsentComponent` (`src/app/account/profile/`), and kept in the `body_weight_consents` table (`supabase/schema.sql`), with the tick's look shared with notes' (`styles/_consent.scss`); the box is `WeightFieldComponent` (`kind="body"`). The summary and the history entry use `CaloriesService` (`src/app/shared/state/calories.service.ts`), which gives null with no weight; the summary's afterburn is its `describeAfterburn()`, from `afterburn()` in `calories.ts` (`AFTERBURN_SHARE`). The box is shared (`src/app/shared/components/weight-field/`), used by Profile, the setup (`SetupComponent`) and the summary's `SummaryStatsComponent`, which all take their hint from `bodyWeightHint()`.
+- **Web:** the estimate is `caloriesBurnt()` and `describeCalories()` in `src/app/models/calories.ts`, with each exercise's MET from `exerciseMet()` (from `BUILT_IN_MOVEMENTS` in `built-in-exercise-movements.ts`, the exceptions in `MET_EXCEPTIONS`, and kettlebell-only exercises at `KETTLEBELL_MET`), and the rep sets' time shared out by `repSetSeconds()` from `workout-estimate.ts`. The body weight is `bodyWeight` in `SettingsStore` (kg, or null), dated by `bodyWeightUpdatedAt` and given to sync as `bodyWeightRecord()`, not one of `PROFILE_FIELDS`; sync sends it only while `ConsentService.weightGiven()` (`SyncService.keptBodyWeight()`), and `mergeBodyWeight()` takes another device's. The consent is `ConsentService` (`giveWeight()`, `withdrawWeight()`), through `AccountService.keepBodyWeight()`, shown by `BodyWeightConsentComponent` (`src/app/account/profile/`), and kept in the `body_weight_consents` table (`supabase/schema.sql`), with the tick's look shared with notes' (`styles/_consent.scss`); the box is `WeightFieldComponent` (`kind="body"`). The summary and the history entry use `CaloriesService` (`src/app/shared/state/calories.service.ts`), which gives null with no weight; the summary's afterburn is its `describeAfterburn()`, from `afterburn()` in `calories.ts` (`AFTERBURN_SHARE`). The box is shared (`src/app/shared/components/weight-field/`), used by Profile, the setup (`SetupComponent`) and the summary's `SummaryStatsComponent`, which all take their hint from `bodyWeightHint()`.
 - **iOS:** the same estimate, until CAL-5: HealthKit's active energy for the workout, written by a watch, is closer, and the app could write its own estimate to HealthKit as a workout's energy, with permission.
 
 ## Open questions

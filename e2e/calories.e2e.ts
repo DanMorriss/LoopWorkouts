@@ -22,7 +22,7 @@ test.describe('with a body weight given', () => {
             await run.startFromLibrary('Planks');
             await run.wait(600_000);
 
-            // 10 minutes of planks at 3.8 METs and 75 kg: 47.5, to the nearest 5
+            // 10 minutes of planks at 4 METs and 75 kg: 50
             await expect(run.summary).toHaveAccessibleName('Workout finished');
             await expect(run.stat('Calories')).toHaveText('About 50 kcalabout 50 calories');
             await run.summaryDone.click();

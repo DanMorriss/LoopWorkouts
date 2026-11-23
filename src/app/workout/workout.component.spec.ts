@@ -3983,29 +3983,29 @@ describe('WorkoutComponent', () => {
 
         it('estimates the calories burnt, with a body weight given (CAL-1)', () => {
             TestBed.inject(SettingsStore).update({ bodyWeight: 300 });
-            // A minute of an unnamed step, at 1.5 METs: 1.5 × 300 × 60 ÷ 3600 = 7.5, about 10
+            // A minute of an unnamed step, at 2.5 METs: 2.5 × 300 × 60 ÷ 3600 = 12.5, about 15
             start(makeWorkout({ workSeconds: 60, restSeconds: 0, repeats: 1 }));
             advance(60_000);
 
             const calories = Array.from(summary()!.querySelectorAll('.summary__stat')).at(-1)!;
             expect(calories.querySelector('dt')!.textContent!.trim()).toBe('Calories');
             expect(calories.querySelector('[aria-hidden="true"]')!.textContent).toBe(
-                'About 10 kcal'
+                'About 15 kcal'
             );
-            expect(calories.querySelector('.sr-only')!.textContent).toBe('about 10 calories');
+            expect(calories.querySelector('.sr-only')!.textContent).toBe('about 15 calories');
             expect(summaryButton('Add your weight to see calories')).toBeUndefined();
             fixture.destroy();
         });
 
         it('says about how many more it burns over the next day, as the body recovers', () => {
             TestBed.inject(SettingsStore).update({ bodyWeight: 300 });
-            // 20 minutes at 1.5 METs: 150 kcal, 50 of it above resting, 15% of that after: 7.5
+            // 20 minutes at 2.5 METs: 250 kcal, 150 of it above resting, 15% of that after: 22.5
             start(makeWorkout({ workSeconds: 1200, restSeconds: 0, repeats: 1 }));
             advance(1_200_000);
 
             const after = summary()!.querySelector('.summary__afterburn')!;
             expect(after.textContent!.replace(/\s+/g, ' ').trim()).toBe(
-                'Plus about 10 kcalPlus about 10 calories over the next day, as your body recovers'
+                'Plus about 25 kcalPlus about 25 calories over the next day, as your body recovers'
             );
             fixture.destroy();
         });
@@ -4031,7 +4031,7 @@ describe('WorkoutComponent', () => {
             // Still on the summary, with the run going on to the history only on Done
             expect(store.activeWorkout()).not.toBeNull();
             expect(TestBed.inject(SettingsStore).bodyWeight()).toBe(300);
-            expect(stats().at(-1)).toContain('Calories: About 10 kcal');
+            expect(stats().at(-1)).toContain('Calories: About 15 kcal');
             expect(summary()!.querySelector('#body-weight')).toBeNull();
             expect(summaryButton('Add your weight to see calories')).toBeUndefined();
             expect(document.activeElement).toBe(summary()!.querySelector('.summary__stats'));

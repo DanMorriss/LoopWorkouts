@@ -46,3 +46,7 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Impeccable: per-machine settings and cache
+.impeccable/config.local.json
+.impeccable/hook.cache.json

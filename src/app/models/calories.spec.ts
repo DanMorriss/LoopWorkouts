@@ -46,6 +46,27 @@ describe('calories (CAL-1)', () => {
         expect(exerciseMet(undefined)).toBe(5);
     });
 
+    it('takes an exercise of your own as hard as you say it is (CAL-4)', () => {
+        const efforts = new Map([
+            ['mobility', 'light'],
+            ['sled-push', 'moderate'],
+            ['sprint', 'hard'],
+        ] as const);
+        expect(exerciseMet('mobility', efforts)).toBe(3.5);
+        expect(exerciseMet('sled-push', efforts)).toBe(5);
+        expect(exerciseMet('sprint', efforts)).toBe(8);
+        // A built-in one keeps its own
+        expect(exerciseMet('builtin:back-squat', efforts)).toBe(6);
+
+        // 10 minutes of sprints at 75 kg: 100 kcal, and 87.5 above resting
+        const run = {
+            activeSeconds: 600,
+            sets: [{ round: 0, step: 0, name: 'Sprint', seconds: 600, exerciseId: 'sprint' }],
+        };
+        expect(caloriesBurnt(run, 75, efforts)).toBeCloseTo(100);
+        expect(afterburn(run, 75, efforts)).toBeCloseTo(0.15 * 87.5);
+    });
+
     it('has a MET for every built-in exercise', () => {
         for (const id of Object.keys(BUILT_IN_MOVEMENTS)) {
             expect(exerciseMet(id)).toBeGreaterThan(1);

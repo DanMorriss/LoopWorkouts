@@ -50,6 +50,7 @@ describe('ExerciseDemoComponent', () => {
         await create({
             ...builtIn('builtin:deadlift'),
             id: 'my-deadlift',
+            effort: 'moderate',
             description: '',
             steps: [],
             tips: [],

@@ -76,6 +76,13 @@ export type EquipmentNeed = Equipment | readonly Equipment[];
 export type MeasuredBy = 'reps' | 'timed';
 
 /**
+ * How hard an exercise of your own is (CAL-4), for its calories: light, such as a mobility
+ * drill; moderate, most strength work; or hard, such as a sprint or a burpee.
+ */
+export type Effort = 'light' | 'moderate' | 'hard';
+export const EFFORTS: readonly Effort[] = ['light', 'moderate', 'hard'];
+
+/**
  * One of the exercises that comes with the app (EXR-6, EXR-7). Its description, steps and tips
  * are kept apart, in BUILT_IN_EXERCISE_TEXT, so they aren't in the first download.
  */
@@ -137,6 +144,8 @@ export interface OwnExercise extends Synced {
     otherNames: string[];
     equipment: EquipmentNeed[];
     measuredBy: MeasuredBy;
+    /** Moderate unless you say otherwise. */
+    effort: Effort;
     mainMuscles: MuscleGroup[];
     supportingMuscles: MuscleGroup[];
     /** Empty until you add one. */
@@ -152,6 +161,7 @@ export type OwnExerciseDetails = Pick<
     OwnExercise,
     | 'name'
     | 'measuredBy'
+    | 'effort'
     | 'equipment'
     | 'mainMuscles'
     | 'supportingMuscles'

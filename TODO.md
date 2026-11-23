@@ -51,7 +51,6 @@ Twenty-three ready-made workouts are listed on Workouts, under your own (see `do
 
 How the estimate works, and why the body weight stays on the device, is in `docs/features/calories.md`.
 
-- [ ] **How hard an exercise of your own is** (CAL-4): Light, Moderate or Hard on its page, for its MET, rather than 3.5 for all of them.
 - [ ] **Heart rate from a watch** (CAL-5): on iOS, HealthKit's active energy instead of the estimate.
 
 ### Setup and profile (NAV-4, SET-7)

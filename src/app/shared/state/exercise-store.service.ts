@@ -1,6 +1,7 @@
 import { computed, inject, Service, signal } from '@angular/core';
 import {
     BuiltInExercise,
+    EFFORTS,
     EquipmentNeed,
     Exercise,
     ExerciseNote,
@@ -368,6 +369,7 @@ export function blankOwnExercise(name = '', measuredBy: MeasuredBy = 'reps'): Ow
         otherNames: [],
         equipment: [],
         measuredBy,
+        effort: 'moderate',
         mainMuscles: [],
         supportingMuscles: [],
         description: '',
@@ -391,6 +393,7 @@ function tidied(details: OwnExerciseDetails): OwnExerciseDetails {
     return {
         name: tidyName(details.name),
         measuredBy: details.measuredBy,
+        effort: details.effort,
         equipment: [...details.equipment],
         mainMuscles: [...details.mainMuscles],
         supportingMuscles: details.supportingMuscles.filter(
@@ -440,7 +443,8 @@ const equipment = (value: unknown): EquipmentNeed[] =>
 /**
  * Reads one of your own exercises, from this device or a backup, or returns null if it isn't
  * usable: it needs an id (not a built-in one), a name, how it's measured and a date. Lists
- * that are missing or broken are read as empty, and unknown muscles are dropped.
+ * that are missing or broken are read as empty, unknown muscles are dropped, and how hard it
+ * is, missing (from before CAL-4) or unknown, is read as moderate.
  */
 export function readOwnExercise(value: unknown): OwnExercise | null {
     if (typeof value !== 'object' || value === null) {
@@ -467,6 +471,7 @@ export function readOwnExercise(value: unknown): OwnExercise | null {
         otherNames: textList(saved['otherNames']),
         equipment: equipment(saved['equipment']),
         measuredBy,
+        effort: EFFORTS.find((effort) => effort === saved['effort']) ?? 'moderate',
         mainMuscles: muscles(saved['mainMuscles']),
         supportingMuscles: muscles(saved['supportingMuscles']),
         description: isText(saved['description']) ? saved['description'] : '',

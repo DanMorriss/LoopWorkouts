@@ -19,8 +19,15 @@
         <span class="entry__detail"
             >{{ time }} · {{ rounds() }}<span class="sr-only"> · {{ duration() }} spent</span>
             @if (burnt(); as burnt) {
-                <span aria-hidden="true"> · about {{ burnt.kcal }}</span
-                ><span class="sr-only"> · {{ burnt.spoken }}</span>
+                <span aria-hidden="true"> · </span
+                ><span class="entry__burnt"
+                    ><span aria-hidden="true">about {{ burnt.kcal }}</span
+                    ><span class="sr-only"> · {{ burnt.spoken }}</span>
+                    @if (afterburn(); as more) {
+                        <span aria-hidden="true"> + {{ more.number }} afterburn</span
+                        ><span class="sr-only">, plus {{ more.spoken }} as your body recovers</span>
+                    }
+                </span>
             }
         </span>
     </div>

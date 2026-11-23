@@ -59,7 +59,7 @@
         }
 
         @if (entry()) {
-            <app-summary-stats [entry]="entry()!" (addWeight)="addWeight.emit()" />
+            <app-summary-stats [entry]="entry()!" />
 
             @if (personalBests().length) {
                 <div class="summary__bests" aria-live="polite">

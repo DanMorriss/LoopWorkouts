@@ -22,16 +22,18 @@ test.describe('with a body weight given', () => {
             await run.startFromLibrary('Planks');
             await run.wait(600_000);
 
-            // 10 minutes of planks at 3.8 METs and 75 kg: 47.5, to the nearest 5
+            // 10 minutes of planks at 4 METs and 75 kg: 50
             await expect(run.summary).toHaveAccessibleName('Workout finished');
             await expect(run.stat('Calories')).toHaveText('About 50 kcalabout 50 calories');
             await run.summaryDone.click();
 
             const entry = new HistoryPage(page).entry('Planks');
             // Shown at the end of its line, and heard as calories
-            await expect(entry.getByText('· about 50 kcal')).toBeVisible();
+            await expect(entry.getByText('about 50 kcal', { exact: true })).toBeVisible();
             await expect(entry).toContainText('1 round · 10:00 spent');
             await expect(entry).toContainText('about 50 calories');
+            // Its afterburn after it: 15% of the 37.5 above resting, 5.6
+            await expect(entry.getByText('+ 5 afterburn')).toBeVisible();
         }
     );
 });
@@ -51,14 +53,37 @@ test.describe('with no body weight', () => {
             await expect(run.summary).toHaveAccessibleName('Workout finished');
             await expect(run.stat('Time')).toHaveText('10:00');
             await expect(run.stat('Calories')).toHaveCount(0);
-            // Asked for here, not in the setup: the run ends, and You opens on Body weight
+            // Asked for here, not in the setup: the box opens on the summary, which stays
             await run.summary
                 .getByRole('button', { name: 'Add your weight to see calories' })
                 .click();
-            await expect(page).toHaveURL('/account?focus=body-weight');
-            await expect(
-                page.getByRole('textbox', { name: 'Body weight in kilograms' })
-            ).toBeFocused();
+            const box = run.summary.getByRole('textbox', { name: 'Body weight in kilograms' });
+            await expect(box).toBeFocused();
+            await expect(run.summary).toContainText('Kept on this device only');
+            await box.fill('75');
+            await box.press('Enter');
+            await expect(run.stat('Calories')).toHaveText('About 50 kcalabout 50 calories');
+            await expect(box).toHaveCount(0);
+            // Focus goes to the figures, now with the calories
+            await expect(run.summary.locator('.summary__stats')).toBeFocused();
+            await run.summaryDone.click();
+            await expect(new HistoryPage(page).entry('Planks')).toContainText('about 50 kcal');
+        }
+    );
+});
+
+test.describe('with no body weight, leaving the summary', () => {
+    test.use({ storage: seed.workouts([planks]) });
+
+    test(
+        'REG-CAL-04 no calories in the history without a body weight',
+        { tag: '@p2' },
+        async ({ app, page }) => {
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Planks');
+            await run.wait(600_000);
+            await run.summaryDone.click();
             await app.goto('/history');
             await expect(new HistoryPage(page).entry('Planks')).not.toContainText('kcal');
         }

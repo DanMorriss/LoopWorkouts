@@ -8,7 +8,7 @@
         @let week = shown();
         <p class="weeks__readout" aria-hidden="true">
             <span class="weeks__time">{{ week.time }}</span>
-            <span class="weeks__when">{{ week.label }} · {{ week.count }}</span>
+            <span class="weeks__when">{{ week.when }}</span>
         </p>
 
         <!-- The bars, and swiped to, a table of the same weeks; the chosen week stays over both -->
@@ -98,6 +98,9 @@
                             <th scope="col">Week of</th>
                             <th scope="col">Workouts</th>
                             <th scope="col">Time</th>
+                            @if (withCalories()) {
+                                <th scope="col">Calories</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -106,6 +109,9 @@
                                 <td>{{ bar.start | date: 'd MMM' }}</td>
                                 <td>{{ bar.workouts }}</td>
                                 <td>{{ bar.time }}</td>
+                                @if (withCalories()) {
+                                    <td>{{ bar.calories }}</td>
+                                }
                             </tr>
                         }
                     </tbody>

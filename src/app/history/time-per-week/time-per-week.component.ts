@@ -1,5 +1,6 @@
 import { DatePipe, formatDate } from '@angular/common';
 import { Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
+import { CaloriesText } from '../../models/calories';
 import { timePerWeek, WeekTotal } from '../../models/time-per-week';
 import { chartKeyMove } from '../../shared/chart-keys';
 import {
@@ -7,6 +8,7 @@ import {
     SlideDirective,
 } from '../../shared/components/carousel/carousel.component';
 import { counted } from '../../shared/format-count';
+import { CaloriesService } from '../../shared/state/calories.service';
 import { ShownHistory } from '../shown-history';
 import { formatDuration } from '../history-format';
 
@@ -37,6 +39,13 @@ interface WeekBar extends WeekTotal {
     spokenLabel: string;
     time: string;
     count: string;
+    /**
+     * About how many it burnt, e.g. "about 450 kcal", "under 5 kcal" or "0 kcal", with a body
+     * weight given (CAL-3).
+     */
+    calories: string | null;
+    /** Under its time over the bars: "2–8 Nov · 2 workouts · about 450 kcal". */
+    when: string;
     spoken: string;
     x: number;
     y: number;
@@ -48,7 +57,8 @@ interface WeekBar extends WeekTotal {
  * week of the first workout for someone newer. The chosen week's time and workouts sit over
  * the bars, starting on this week; a tap or the arrow keys choose another, which stays chosen,
  * and hovering shows one for as long as the pointer's over it. A table of the same weeks is
- * swiped to beside the bars.
+ * swiped to beside the bars. With a body weight given, each week also says about how many
+ * calories it burnt, its workouts' afterburn included (CAL-3).
  */
 @Component({
     selector: 'app-time-per-week',
@@ -59,6 +69,7 @@ interface WeekBar extends WeekTotal {
 export class TimePerWeekComponent {
     private readonly history = inject(ShownHistory);
     private readonly locale = inject(LOCALE_ID);
+    private readonly calories = inject(CaloriesService);
     private readonly now = Date.now();
 
     protected readonly id = 'time-per-week';
@@ -69,7 +80,12 @@ export class TimePerWeekComponent {
     protected readonly right = WIDTH - RIGHT;
     protected readonly bottom = HEIGHT - BOTTOM;
 
-    private readonly totals = computed(() => timePerWeek(this.history.entries(), this.now, WEEKS));
+    private readonly burning = computed(() => this.calories.burning());
+    /** With a body weight given, the table has a Calories column. */
+    protected readonly withCalories = computed(() => this.burning() !== null);
+    private readonly totals = computed(() =>
+        timePerWeek(this.history.entries(), this.now, WEEKS, this.burning() ?? undefined)
+    );
     /** The weeks shown: 12, or fewer from the first workout's. */
     private readonly count = computed(() => this.totals().length);
     private readonly slot = computed(() => (WIDTH - RIGHT - LEFT) / this.count());
@@ -102,13 +118,22 @@ export class TimePerWeekComponent {
             const time = formatDuration(week.seconds);
             const count = counted(week.workouts, 'workout');
             const y = this.yOf(week.seconds / 60);
+            const label = this.days(week.start);
+            const burnt = this.withCalories() ? this.calories.describeTotal(week.kcal) : null;
+            const calories = this.withCalories() ? weekCalories(burnt, week.workouts) : null;
             return {
                 ...week,
-                label: this.days(week.start),
+                label,
                 spokenLabel: `Week of ${formatDate(week.start, 'd MMMM', this.locale)}`,
                 time,
                 count,
-                spoken: `${spokenTime(week.seconds)}, ${count}`,
+                calories,
+                when: [label, count, week.workouts > 0 ? calories : null]
+                    .filter((part) => part !== null)
+                    .join(' · '),
+                spoken: [spokenTime(week.seconds), count, burnt?.spoken]
+                    .filter((part) => part !== undefined)
+                    .join(', '),
                 x: LEFT + i * this.slot() + (this.slot() - this.barWidth()) / 2,
                 y,
                 height: this.bottom - y,
@@ -179,6 +204,14 @@ export class TimePerWeekComponent {
     private yOf(minutes: number): number {
         return this.bottom - (minutes / this.scale().top) * (this.bottom - TOP);
     }
+}
+
+/** A week's calories in the table: "about 450 kcal", "under 5 kcal", or "0 kcal" with no workouts. */
+function weekCalories(burnt: CaloriesText | null, workouts: number): string {
+    if (burnt) {
+        return `about ${burnt.kcal}`;
+    }
+    return workouts > 0 ? 'under 5 kcal' : '0 kcal';
 }
 
 /** e.g. 0 → "0", 30 → "30m", 60 → "1h", 90 → "1.5h" */

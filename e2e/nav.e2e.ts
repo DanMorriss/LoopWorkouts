@@ -28,7 +28,7 @@ test.describe('a device new to the app', () => {
             await page.getByRole('button', { name: 'Continue without an account' }).click();
             await expect(page).toHaveURL('/welcome/setup');
             expect(await app.storageItem('welcomed')).toBe('guest');
-            await expect(page.getByText('Question 1 of 6')).toBeVisible();
+            await expect(page.getByText('Question 1 of 7')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What should we call you?' })
             ).toBeFocused();
@@ -64,7 +64,7 @@ test.describe('a device new to the app', () => {
             // Enter is Next
             await page.getByRole('textbox', { name: 'Your name' }).press('Enter');
 
-            await expect(page.getByText('Question 2 of 6')).toBeVisible();
+            await expect(page.getByText('Question 2 of 7')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What do you train for?' })
             ).toBeFocused();
@@ -73,7 +73,7 @@ test.describe('a device new to the app', () => {
             await page.getByRole('radio', { name: /^Fitness/ }).check();
             await next.click();
 
-            await expect(page.getByText('Question 3 of 6')).toBeVisible();
+            await expect(page.getByText('Question 3 of 7')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'How many sets a week for each muscle?' })
             ).toBeFocused();
@@ -83,23 +83,30 @@ test.describe('a device new to the app', () => {
             await setWheel(sets, 8);
             await next.click();
 
-            await expect(page.getByText('Question 4 of 6')).toBeVisible();
+            await expect(page.getByText('Question 4 of 7')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What equipment do you have?' })
             ).toBeFocused();
             await page.getByRole('button', { name: 'Kettlebell', exact: true }).click();
             await next.click();
 
-            await expect(page.getByText('Question 5 of 6')).toBeVisible();
+            await expect(page.getByText('Question 5 of 7')).toBeVisible();
             await page.getByRole('radio', { name: 'Female' }).check();
             await next.click();
 
-            await expect(page.getByText('Question 6 of 6')).toBeVisible();
+            await expect(page.getByText('Question 6 of 7')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'Do you lift in kilograms or pounds?' })
             ).toBeFocused();
             await expect(page.getByRole('radio', { name: /^Kilograms/ })).toBeChecked();
-            await page.getByRole('button', { name: 'Done' }).click();
+            await next.click();
+
+            // Optional, last, in the unit just picked; Enter saves it and goes on to Today
+            await expect(page.getByText('Question 7 of 7')).toBeVisible();
+            await expect(page.getByRole('heading', { name: 'What do you weigh?' })).toBeFocused();
+            const weight = page.getByRole('textbox', { name: 'Body weight in kilograms' });
+            await weight.fill('72.5');
+            await weight.press('Enter');
 
             await expect(page).toHaveURL('/home');
             await expect(app.heading('Good morning, Sam')).toBeVisible();
@@ -108,6 +115,7 @@ test.describe('a device new to the app', () => {
             );
             await expect(app.undo).toHaveCount(0);
             expect(await app.storageItem('setup')).toBeNull();
+            expect(JSON.parse((await app.storageItem('settings'))!).bodyWeight).toBe(72.5);
             // Get started offers a ready-made plan for the goal and the kit (M3)
             await expect(
                 page.getByRole('region', { name: 'Get started' }).getByRole('article').first()

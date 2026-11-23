@@ -157,13 +157,29 @@ describe('HistoryComponent', () => {
         expect(text('.entry__time')).toEqual(['12:34 time']);
     });
 
-    it('adds about how many calories it burnt, with a body weight given (CAL-1)', () => {
+    it('adds about how many calories it burnt, and its afterburn, with a body weight (CAL-1, CAL-7)', () => {
         TestBed.inject(SettingsStore).update({ bodyWeight: 80 });
-        // 754 seconds with no sets, at 1.5 METs: 1.5 × 80 × 754 ÷ 3600 = 25.1, about 25
+        // 754 seconds with no sets, at 2.5 METs: 2.5 × 80 × 754 ÷ 3600 = 41.9, about 40; 16.8
+        // of it resting, and 15% of the other 25.1 after: 3.8, about 5
         create(makeEntry({ activeSeconds: 754, roundsCompleted: 3, totalRounds: 3 }));
 
-        expect(text('.entry__detail [aria-hidden="true"]')).toEqual(['· about 25 kcal']);
-        expect(text('.entry__detail .sr-only')).toEqual(['· 12:34 spent', '· about 25 calories']);
+        expect(text('.entry__burnt [aria-hidden="true"]')).toEqual([
+            'about 40 kcal',
+            '+ 5 afterburn',
+        ]);
+        expect(text('.entry__detail .sr-only')).toEqual([
+            '· 12:34 spent',
+            '· about 40 calories',
+            ', plus about 5 calories as your body recovers',
+        ]);
+    });
+
+    it('leaves out an afterburn under 5', () => {
+        TestBed.inject(SettingsStore).update({ bodyWeight: 80 });
+        // 5 minutes at 2.5 METs: 16.7 kcal, about 15, and an afterburn of 1.5
+        create(makeEntry({ activeSeconds: 300, roundsCompleted: 3, totalRounds: 3 }));
+
+        expect(text('.entry__burnt [aria-hidden="true"]')).toEqual(['about 15 kcal']);
     });
 
     it('names the main muscles its sets worked, as a workout card does', () => {

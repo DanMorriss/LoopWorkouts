@@ -904,7 +904,7 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('the setup, its name, sets a week, equipment and body questions, then Today, all set and getting started', async () => {
+            it('the setup, its name, sets a week, equipment, body and weight questions, then Today, all set and getting started', async () => {
                 // Welcomed as a guest, as the welcome screen does before the setup
                 localStorage.setItem('welcomed', 'guest');
                 localStorage.setItem('setup', 'due');
@@ -929,9 +929,13 @@ for (const theme of ['dark', 'light'] as const) {
                 expect(fixture.nativeElement.querySelector('app-body-map')).not.toBeNull();
                 await expectNoViolations();
 
-                // Units, then Done: on to Today, with the notice and a workout to add
+                // Units, then body weight, then Done: on to Today, with the notice and a workout
                 click('.setup__actions .btn-main');
                 await settle();
+                click('.setup__actions .btn-main');
+                await settle();
+                expect(fixture.nativeElement.querySelector('app-weight-field')).not.toBeNull();
+                await expectNoViolations();
                 click('.setup__actions .btn-main');
                 await settle();
                 expect(fixture.nativeElement.querySelector('app-get-started')).not.toBeNull();

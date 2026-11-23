@@ -134,6 +134,22 @@
                         }
                     </div>
                 }
+
+                @case ('weight') {
+                    <!-- Optional, and asked last, in the unit just picked. Enter is Done, as the
+                         box saves first -->
+                    <form class="setup__form" (submit)="next($event)">
+                        <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
+                            What do you weigh?
+                        </h2>
+                        <p class="setup__hint" id="setup-weight-hint">
+                            {{ weightHint() }}. Leave it empty if you'd rather not say.
+                        </p>
+                        <app-weight-field kind="body" describedBy="setup-weight-hint">
+                            Body weight
+                        </app-weight-field>
+                    </form>
+                }
             }
 
             <!-- Fixed to the bottom of the screen, so they're in the same place on every question -->

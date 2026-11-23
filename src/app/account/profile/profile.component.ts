@@ -1,9 +1,10 @@
 import { Component, computed, inject } from '@angular/core';
+import { bodyWeightHint } from '../../models/calories';
 import { BodyFigure } from '../../models/exercise';
 import { DEFAULT_WEEKLY_SETS, TrainingGoal } from '../../models/muscle-balance';
 import { MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
-import { WeightFieldComponent } from './weight-field.component';
+import { WeightFieldComponent } from '../../shared/components/weight-field/weight-field.component';
 import { ConsentService } from '../consent.service';
 import { BodyWeightConsentComponent } from './body-weight-consent.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
@@ -216,11 +217,7 @@ export class ProfileComponent {
             this.settings.kettlebellWeight() !== null
     );
 
-    protected readonly weightHint = computed(() =>
-        this.consent.weightGiven()
-            ? 'For calories burnt. Kept with your account'
-            : 'For calories burnt. Kept on this device only'
-    );
+    protected readonly weightHint = computed(() => bodyWeightHint(!!this.consent.weightGiven()));
 
     protected readonly weightUnits: { value: WeightUnit; label: string }[] = [
         { value: 'kg', label: 'Kilograms (kg)' },

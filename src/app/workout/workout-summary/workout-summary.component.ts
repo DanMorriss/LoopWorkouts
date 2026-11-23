@@ -75,8 +75,6 @@ export class WorkoutSummaryComponent {
     readonly back = output<void>();
     /** Done: the run is over, on to it in the history. */
     readonly done = output<void>();
-    /** Add your weight to see calories: the run is over, on to Profile's Body weight. */
-    readonly addWeight = output<void>();
     /** Make a copy, of a ready-made workout: the copy, to open in Create. */
     readonly copied = output<Workout>();
     /** Start stretches: the stretches for this workout, to run in its place. */

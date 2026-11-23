@@ -94,7 +94,7 @@ describe('SetupComponent (NAV-4)', () => {
 
     it('asks one question at a time, saving each answer, then goes on to Today, all set', async () => {
         await create();
-        expect(element.textContent).toContain('Question 1 of 6');
+        expect(element.textContent).toContain('Question 1 of 7');
         expect(heading()).toBe('What should we call you?');
         expect(document.activeElement).toBe(element.querySelector('h2'));
 
@@ -139,6 +139,18 @@ describe('SetupComponent (NAV-4)', () => {
         expect(heading()).toBe('Do you lift in kilograms or pounds?');
         await choose('Pounds');
         expect(settings().weightUnit()).toBe('lb');
+        await press('Next');
+
+        // Optional, in the unit just picked, and kept on this device
+        expect(heading()).toBe('What do you weigh?');
+        expect(element.textContent).toContain(
+            "For calories burnt. Kept on this device only. Leave it empty if you'd rather not say."
+        );
+        const weight = element.querySelector<HTMLInputElement>('#body-weight')!;
+        expect(element.textContent).toContain('lb');
+        weight.value = '160';
+        weight.dispatchEvent(new Event('change'));
+        expect(settings().bodyWeight()).toBeCloseTo(72.6, 1);
         // The last question's Next is Done, which goes straight on to Today
         await press('Done');
 
@@ -171,6 +183,18 @@ describe('SetupComponent (NAV-4)', () => {
         expect(settings().hasProfile()).toBe(true);
         expect(navigate).toHaveBeenCalledWith('/home', { replaceUrl: true });
         expect(TestBed.inject(UndoService).offer()).toBeNull();
+    });
+
+    it('leaves the body weight unset when its question is left empty', async () => {
+        await create();
+        for (let i = 0; i < 6; i++) {
+            await press('Next');
+        }
+        expect(heading()).toBe('What do you weigh?');
+        await press('Done');
+
+        expect(settings().bodyWeight()).toBeNull();
+        expect(navigate).toHaveBeenCalledWith('/home', { replaceUrl: true });
     });
 
     it('signed in, takes the profile the account already has, asking nothing', async () => {

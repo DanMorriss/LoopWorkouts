@@ -95,6 +95,11 @@
     font-variant-numeric: tabular-nums;
 }
 
+// Its calories and afterburn, kept on one line, so a wrap comes before them
+.entry__burnt {
+    white-space: nowrap;
+}
+
 // The time it took, as the big number, in a size that fits "1:05:30"
 .entry__time {
     --showcase-count-size: 1.15rem;

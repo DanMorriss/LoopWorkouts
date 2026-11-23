@@ -8,7 +8,10 @@ export interface WeekTotal {
     /** Time spent in its workouts, in whole seconds (pauses don't count). */
     seconds: number;
     workouts: number;
-    /** About how many kcal its workouts burnt, not rounded: 0 when not worked out (CAL-3). */
+    /**
+     * About how many kcal its workouts burnt, with their afterburn, not rounded: 0 when not
+     * worked out (CAL-3).
+     */
     kcal: number;
 }
 

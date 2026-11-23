@@ -23,12 +23,12 @@ export class CaloriesService {
     }
 
     /**
-     * What works out a run's kcal, not rounded, for adding up (CAL-3); null with no body
-     * weight given, when no calories are shown.
+     * What works out a run's kcal with its afterburn, not rounded, for adding up each week's
+     * (CAL-3); null with no body weight given, when no calories are shown.
      */
     burning(): ((run: BurningRun) => number) | null {
         const kg = this.settings.bodyWeight();
-        return kg === null ? null : (run) => caloriesBurnt(run, kg);
+        return kg === null ? null : (run) => caloriesBurnt(run, kg) + afterburn(run, kg);
     }
 
     /** A total of kcal, as shown: to the nearest 5, or null under 5. */

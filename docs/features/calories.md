@@ -65,14 +65,14 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 - **After a workout the body uses more than it would at rest for a while** as it recovers (excess post-exercise oxygen consumption, EPOC). After strength and circuit work, studies put it at about 6 to 15% of the workout's energy above resting, most of it in the first few hours, tailing off over about a day (Børsheim and Bahr, 2003, *Sports Medicine*). Other fitness apps quote the top of that or more; this takes the top, 15% (Dan, 2026-11-23), and no higher, as above it the studies don't back it.
 - **Afterburn = 15% × (the workout's calories − its resting share)**, where the resting share is 1 MET × body weight × its active hours. So 45 minutes of circuits at an average of 5 METs and 80 kg is 300 kcal, 60 of it resting, and an afterburn of 36, shown as "about 35 kcal".
 - **Said as over the next day**, not a number of hours, as how long it lasts varies with how hard the work was.
-- **Said as an estimate,** with the same rounding and "about" as the workout's calories. It's not added to the workout's own figure, nor to the history's.
+- **Said as an estimate,** with the same rounding and "about" as the workout's calories. It's not added to the workout's own figure, nor to the history's, but it is to each week's on Progress (CAL-3).
 
 ### How it's shown (CAL-1, CAL-7)
 
 - **Rounded** to the nearest 5 kcal; under 5, nothing's shown.
 - **The workout summary** (RUN-7): a third stat beside Time and Rounds, **Calories**, "About 210 kcal", heard as "about 210 calories". Only with a body weight given and the run in the history.
 - **Under the summary's stats**, with Calories shown: "Plus about 25 kcal over the next day, as your body recovers", heard with "Plus about 25 calories". Under 5, nothing's shown, which is the case for most runs under about 10 minutes.
-- **Progress, each week** (CAL-3, since 2026-11-23): in the Time per week card (PRG-12), beside each week's time, with its workouts' calories added up before rounding: over the bars, "2–8 Nov · 2 workouts · about 260 kcal" (heard "…, about 260 calories"), and the table has a **Calories** column, "about 260 kcal", "under 5 kcal" for a week whose total is under 5, or "0 kcal" with no workouts. The weeks are Monday to Sunday, as the bars are, not the last 7 days, so the two agree. Without a body weight, neither shows. The afterburn isn't added.
+- **Progress, each week** (CAL-3, since 2026-11-23): in the Time per week card (PRG-12), beside each week's time, with its workouts' calories and their afterburn (CAL-7) added up before rounding, each workout's afterburn counted in the week it started, even one late on a Sunday: over the bars, "2–8 Nov · 2 workouts · about 285 kcal" (heard "…, about 285 calories"), and the table has a **Calories** column, "about 285 kcal", "under 5 kcal" for a week whose total is under 5, or "0 kcal" with no workouts. The weeks are Monday to Sunday, as the bars are, not the last 7 days, so the two agree. Without a body weight, neither shows.
 - **The history** (HIS-1): each run's line under its title adds it last: "6:45 pm · 3 rounds · about 210 kcal", heard with "about 210 calories".
 
 ## Acceptance criteria
@@ -92,7 +92,7 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 - Given a run with no `repSeconds`, then its rep sets' time is guessed at 3 seconds a rep and 5 a set, cut to fit its active time.
 - Given an exercise of my own, then its sets count at 5 METs; given a kettlebell floor press, at 8.
 - Given a body weight, when a workout finishes, then the summary shows Calories with "About … kcal"; given none, it shows only Time and Rounds.
-- Given 72 kg and two workouts this week with no sets, 30 and 56½ minutes (2.5 METs), then Time per week says "2–8 Nov · 2 workouts · about 260 kcal", and the table's Calories says "about 260 kcal"; given a week of 20 seconds, "under 5 kcal". Given no body weight, then neither says calories, and the table has no Calories column.
+- Given 72 kg and two workouts this week with no sets, 30 and 56½ minutes (2.5 METs), that's 259.5 kcal, and with an afterburn of 15% of the 155.7 above resting, 282.9, so Time per week says "2–8 Nov · 2 workouts · about 285 kcal", and the table's Calories says "about 285 kcal"; given a week of 20 seconds, "under 5 kcal". Given no body weight, then neither says calories, and the table has no Calories column.
 - Given 300 kg and a run of 20 minutes of unnamed steps (2.5 METs), then it's 250 kcal, 100 of it resting, and the afterburn is 22.5, "Plus about 25 kcal over the next day, as your body recovers". Given 5 minutes of planks at 75 kg (afterburn 2.8), then there's no afterburn line.
 
 ## Platform notes

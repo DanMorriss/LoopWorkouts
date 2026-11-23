@@ -76,12 +76,13 @@ describe('TimePerWeekComponent (PRG-12)', () => {
 
     it("says each week's calories with a body weight given (CAL-3)", () => {
         TestBed.inject(SettingsStore).update({ bodyWeight: 72 });
-        // No sets, so at 2.5 METs: 2.5 × 72 × 5190 ÷ 3600 = 259.5, about 260
+        // No sets, so at 2.5 METs: 2.5 × 72 × 5190 ÷ 3600 = 259.5, 103.8 of it resting, and an
+        // afterburn of 15% of the other 155.7, 23.4: 282.9 in all, about 285
         create(entry(day(11, 3), 1800), entry(day(11, 5), 3390), entry(day(10, 27), 20));
 
-        expect(text('.weeks__when')).toBe('2–8 Nov · 2 workouts · about 260 kcal');
+        expect(text('.weeks__when')).toBe('2–8 Nov · 2 workouts · about 285 kcal');
         expect(text('#time-per-week-spoken')).toBe(
-            'Week of 2 November: 1 hour 27 minutes, 2 workouts, about 260 calories'
+            'Week of 2 November: 1 hour 27 minutes, 2 workouts, about 285 calories'
         );
         // Last week's 20 seconds come to under 5
         press('ArrowLeft');
@@ -97,7 +98,7 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         const rows = Array.from(el().querySelectorAll('.weeks__table tbody tr'));
         expect(rows.map((row) => row.lastElementChild!.textContent!.trim())).toEqual([
             'under 5 kcal',
-            'about 260 kcal',
+            'about 285 kcal',
         ]);
     });
 

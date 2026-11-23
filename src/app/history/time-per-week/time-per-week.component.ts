@@ -58,7 +58,7 @@ interface WeekBar extends WeekTotal {
  * the bars, starting on this week; a tap or the arrow keys choose another, which stays chosen,
  * and hovering shows one for as long as the pointer's over it. A table of the same weeks is
  * swiped to beside the bars. With a body weight given, each week also says about how many
- * calories it burnt (CAL-3).
+ * calories it burnt, its workouts' afterburn included (CAL-3).
  */
 @Component({
     selector: 'app-time-per-week',

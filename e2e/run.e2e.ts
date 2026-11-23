@@ -456,8 +456,10 @@ test.describe('reloading', () => {
         expect((await device.notes()).filter((n) => n.frequency === ALARM.work)).toEqual([]);
 
         // After a reload the browser blocks sound until the page is tapped
-        const tap = page.getByRole('button', { name: 'Tap to turn on sound' });
+        const tap = page.getByRole('button', { name: 'Sound off · tap to turn on' });
         await expect(tap).toBeVisible();
+        // On the ring, in view without scrolling, as a phone propped up won't be scrolled
+        await expect(tap).toBeInViewport({ ratio: 1 });
         await expect(
             page.getByRole('link', { name: 'Help: Why is there no sound?' })
         ).toBeVisible();

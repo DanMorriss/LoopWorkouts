@@ -197,7 +197,7 @@
     - **With a workout going**, it opens the workout page on it with the tour, holding its clock the same way. As the tour ends, the run carries on as it was: running, or still paused, with focus on Resume. With End workout pressed and the summary open, it opens the summary, with no tour.
     - **With none**, it starts a **practice run of Bodyweight basics** (no kit, and a rep step first, so every stop has its part), whose first stop is **A practice run** ("just for the tour: the clock waits, and nothing's logged") and last **That's it** ("Done ends this practice run and goes back to Help"). As the tour ends, however it ends, the run's stopped, logging nothing (a run stopped before any step is done leaves no trace), and Help is back with focus on Running a workout.
     - Either way it counts as seen, so a first workout after it shows no tour.
-- The ? beside Tap to turn on sound stays: it's about sound after a reload, which the tour doesn't cover.
+- The ? beside Sound off · tap to turn on stays: it's about sound after a reload, which the tour doesn't cover.
 
 ### No workout
 

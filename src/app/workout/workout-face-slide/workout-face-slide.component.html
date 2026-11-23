@@ -7,7 +7,8 @@
         <div class="workout-face__name">
             <!-- An exercise's name is a button for how it's done, over the workout, which
                  carries on underneath (RUN-9) -->
-            <p class="workout-face__label">
+            <!-- Smaller over a clock, which is the big thing on a timed step or a rest -->
+            <p class="workout-face__label" [class.workout-face__label--timed]="face.reps === null">
                 @if (face.exercise; as exercise) {
                     <button
                         type="button"

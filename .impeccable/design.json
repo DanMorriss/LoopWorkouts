@@ -1,0 +1,451 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-23T18:46:25+00:00",
+  "title": "Design System: Loop Workouts",
+  "extensions": {
+    "colorMeta": {
+      "night-page": {
+        "role": "neutral",
+        "displayName": "Night Page",
+        "token": "--page-bg",
+        "light": "#eef3f9",
+        "tonalRamp": [
+          "#1c2430",
+          "#2c3a53",
+          "#395079",
+          "#4366a2",
+          "#5d7fbc",
+          "#91a6ca",
+          "#c5cede",
+          "#f0f2f5"
+        ]
+      },
+      "frost-text": {
+        "role": "neutral",
+        "displayName": "Frost Text",
+        "token": "--text",
+        "light": "#1e293b",
+        "tonalRamp": [
+          "#1c2430",
+          "#2c3b54",
+          "#39517a",
+          "#4367a3",
+          "#5c80bc",
+          "#91a6ca",
+          "#c5cede",
+          "#f0f2f5"
+        ]
+      },
+      "frost-text-strong": {
+        "role": "neutral",
+        "displayName": "Frost Text, Strong",
+        "token": "--text-strong",
+        "light": "#0f172a",
+        "tonalRamp": [
+          "#102b3c",
+          "#13496c",
+          "#1068a2",
+          "#0788df",
+          "#20a2f8",
+          "#6dbaed",
+          "#b5d7ed",
+          "#ecf3f8"
+        ]
+      },
+      "slate-muted": {
+        "role": "neutral",
+        "displayName": "Slate Muted",
+        "token": "--text-muted",
+        "light": "#475569",
+        "tonalRamp": [
+          "#1f252d",
+          "#323e4d",
+          "#435670",
+          "#526e94",
+          "#6b88ad",
+          "#9aabc1",
+          "#c8d0da",
+          "#f0f2f4"
+        ]
+      },
+      "panel-glass": {
+        "role": "neutral",
+        "displayName": "Panel Glass",
+        "token": "--panel",
+        "light": "rgba(255, 255, 255, 0.6)"
+      },
+      "card-glass": {
+        "role": "neutral",
+        "displayName": "Card Glass",
+        "token": "--card",
+        "light": "#fcfdfe"
+      },
+      "control-glass": {
+        "role": "neutral",
+        "displayName": "Control Glass",
+        "token": "--control",
+        "light": "rgba(255, 255, 255, 0.9)"
+      },
+      "raised-navy": {
+        "role": "neutral",
+        "displayName": "Raised",
+        "token": "--raised",
+        "light": "#ffffff"
+      },
+      "slate-line": {
+        "role": "neutral",
+        "displayName": "Slate Line",
+        "token": "--border",
+        "light": "rgba(71, 85, 105, 0.55)"
+      },
+      "sky-accent": {
+        "role": "primary",
+        "displayName": "Sky Accent",
+        "token": "--accent",
+        "light": "#0369a1",
+        "tonalRamp": [
+          "#122e3b",
+          "#165069",
+          "#15749d",
+          "#0e99d7",
+          "#28b3f1",
+          "#72c4e9",
+          "#b7dbeb",
+          "#edf4f8"
+        ]
+      },
+      "cyan-glow": {
+        "role": "primary",
+        "displayName": "Cyan Glow",
+        "token": "--glow",
+        "light": "#0891b2",
+        "tonalRamp": [
+          "#133439",
+          "#195c66",
+          "#1b8798",
+          "#16b7cf",
+          "#30d0e9",
+          "#77d6e4",
+          "#b9e3e9",
+          "#edf6f7"
+        ]
+      },
+      "cta-cyan-top": {
+        "role": "primary",
+        "displayName": "Start Cyan, Top",
+        "token": "--cta-top",
+        "light": "#0b809c",
+        "tonalRamp": [
+          "#12363b",
+          "#175f69",
+          "#168d9d",
+          "#0fbfd6",
+          "#29d9f0",
+          "#72dbe9",
+          "#b7e5eb",
+          "#edf6f8"
+        ]
+      },
+      "cta-cyan-bottom": {
+        "role": "primary",
+        "displayName": "Start Cyan, Bottom",
+        "token": "--cta-bottom",
+        "light": "#0e6377",
+        "tonalRamp": [
+          "#13333a",
+          "#195966",
+          "#1a8299",
+          "#15afd0",
+          "#2fc8ea",
+          "#76d1e5",
+          "#b9e1ea",
+          "#edf6f7"
+        ]
+      },
+      "cta-ink": {
+        "role": "primary",
+        "displayName": "Start Ink",
+        "token": "--cta-ink",
+        "light": "#ffffff",
+        "tonalRamp": [
+          "#133039",
+          "#195466",
+          "#1a7b98",
+          "#16a4d0",
+          "#2fbde9",
+          "#76cae5",
+          "#b9deea",
+          "#edf5f7"
+        ]
+      },
+      "work-pink": {
+        "role": "secondary",
+        "displayName": "Work Pink",
+        "token": "--work",
+        "light": "#be123c",
+        "tonalRamp": [
+          "#3b1116",
+          "#6a1520",
+          "#9f1325",
+          "#da0c25",
+          "#f3253f",
+          "#eb707f",
+          "#ecb6bd",
+          "#f8edee"
+        ]
+      },
+      "rest-blue": {
+        "role": "secondary",
+        "displayName": "Rest Blue",
+        "token": "--rest",
+        "light": "#0369a1",
+        "tonalRamp": [
+          "#122e3b",
+          "#165069",
+          "#15749d",
+          "#0e99d7",
+          "#28b3f1",
+          "#72c4e9",
+          "#b7dbeb",
+          "#edf4f8"
+        ]
+      },
+      "reps-violet": {
+        "role": "secondary",
+        "displayName": "Reps Violet",
+        "token": "--reps",
+        "light": "#6d28d9",
+        "tonalRamp": [
+          "#1c123b",
+          "#2b1769",
+          "#38169c",
+          "#4210d6",
+          "#5b29ef",
+          "#9073e8",
+          "#c4b7eb",
+          "#f0edf8"
+        ]
+      },
+      "danger-red": {
+        "role": "tertiary",
+        "displayName": "Danger Red",
+        "token": "--danger-strong",
+        "light": "#dc2626",
+        "tonalRamp": [
+          "#361616",
+          "#602020",
+          "#8e2424",
+          "#c12525",
+          "#da3e3e",
+          "#dc7f7f",
+          "#e6bdbd",
+          "#f6eeee"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page titles and the workout's big numbers, in Audiowide."
+      },
+      "dialog-title": {
+        "displayName": "Dialog title",
+        "purpose": "A dialog's title, in Audiowide."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "A page's main heading in the reading face."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "A section's heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Everything else, in rem so it follows the browser text size."
+      },
+      "hint": {
+        "displayName": "Hint",
+        "purpose": "The muted line under a title."
+      },
+      "label-caps": {
+        "displayName": "Caps label",
+        "purpose": "A label in capitals, such as a step's kind; tracked out."
+      }
+    },
+    "shadows": [
+      {
+        "name": "main-button",
+        "value": "inset 0 1px 0 var(--cta-edge), inset 0 -2px 0 var(--cta-shade), 0 2px 4px var(--cta-near), 0 8px 18px -6px var(--cta-far)",
+        "purpose": "Raises the main button."
+      },
+      {
+        "name": "dialog",
+        "value": "0 18px 40px var(--shadow)",
+        "purpose": "Lifts a dialog off its overlay."
+      },
+      {
+        "name": "frosted-bar",
+        "value": "backdrop-filter: blur(20px) saturate(180%)",
+        "purpose": "The bars the page scrolls under."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-spring",
+        "value": "linear(0, 0.114, 0.321, 0.517, 0.671, 0.783, 0.86, 0.911, 0.945, 0.966, 0.979, 0.987, 0.992, 0.995, 0.997, 0.998, 1) over 0.45s",
+        "purpose": "Apple's critically damped spring with no bounce, for most movement."
+      },
+      {
+        "name": "ease-spring-out",
+        "value": "cubic-bezier(0.64, 0, 0.78, 0)",
+        "purpose": "Going back the way something came."
+      },
+      {
+        "name": "theme-fade",
+        "value": "0.4s view transition",
+        "purpose": "Fading between themes."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sheet",
+        "value": "max-width: 639px",
+        "purpose": "Dialogs become bottom sheets."
+      },
+      {
+        "name": "wide",
+        "value": "min-width: 640px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Main Button",
+      "kind": "button",
+      "refersTo": "button-main",
+      "description": "The one main action on a screen: a raised cyan pill.",
+      "html": "<button class=\"ds-btn-main\">Start workout</button>",
+      "css": ".ds-btn-main{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 1.6rem;border:0;border-radius:999px;background:linear-gradient(to bottom,var(--cta-top,#67e8f9),var(--cta-bottom,#0ea5c6));color:var(--cta-ink,#032029);font:inherit;font-size:1.0625rem;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(3,32,41,.28),0 2px 4px rgba(1,12,18,.7),0 8px 18px -6px rgba(1,12,18,.55);cursor:pointer;transition:scale .2s ease-out,filter .2s ease}.ds-btn-main:hover{filter:brightness(1.06)}.ds-btn-main:active{scale:.96}.ds-btn-main:focus-visible{outline:2px solid var(--accent,#38bdf8);outline-offset:4px}"
+    },
+    {
+      "name": "Pill Button",
+      "kind": "button",
+      "refersTo": "button-pill",
+      "description": "Any smaller action: outlined, no fill.",
+      "html": "<button class=\"ds-btn-pill\">Cancel</button>",
+      "css": ".ds-btn-pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 1rem;border:1px solid var(--border,rgba(148,163,184,.45));border-radius:999px;background:transparent;color:var(--text,#e5ebf5);font:inherit;font-size:.9rem;cursor:pointer;transition:border-color .2s,background-color .2s,scale .2s ease-out}.ds-btn-pill:hover{border-color:var(--border-strong,rgba(148,163,184,.6));background:var(--control,rgba(15,23,42,.75))}.ds-btn-pill:active{scale:.96}.ds-btn-pill:focus-visible{outline:2px solid var(--accent,#38bdf8);outline-offset:3px}"
+    },
+    {
+      "name": "Icon Button",
+      "kind": "button",
+      "refersTo": "button-icon",
+      "description": "An icon on its own: a 44px outlined circle.",
+      "html": "<button class=\"ds-btn-icon\" aria-label=\"Back\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z\"/></svg></button>",
+      "css": ".ds-btn-icon{display:inline-grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid var(--border,rgba(148,163,184,.45));border-radius:999px;background:var(--control,rgba(15,23,42,.75));color:var(--text,#e5ebf5);cursor:pointer;transition:border-color .2s,background-color .2s,scale .2s ease-out}.ds-btn-icon:hover{border-color:var(--border-strong,rgba(148,163,184,.6));background:var(--control-hover,rgba(30,41,59,.78))}.ds-btn-icon:active{scale:.92}.ds-btn-icon:focus-visible{outline:2px solid var(--accent,#38bdf8);outline-offset:2px}"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "A chip to filter by, picked with aria-pressed.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"false\">Legs</button> <button class=\"ds-chip\" aria-pressed=\"true\">Kettlebell</button>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;min-height:36px;padding:0 .8rem;border:1px solid var(--border,rgba(148,163,184,.45));border-radius:999px;background:var(--control,rgba(15,23,42,.75));color:var(--text,#e5ebf5);font:inherit;font-size:.85rem;cursor:pointer}.ds-chip:hover{background:var(--control-hover,rgba(30,41,59,.78))}.ds-chip:focus-visible{outline:2px solid var(--accent,#38bdf8);outline-offset:2px}.ds-chip[aria-pressed=true]{border-color:var(--glow-text,#a5f3fc);background:var(--accent-soft,rgba(56,189,248,.08));color:var(--text-strong,#f0f9ff);box-shadow:inset 0 0 0 1px var(--glow-text,#a5f3fc)}"
+    },
+    {
+      "name": "Panel Card",
+      "kind": "card",
+      "refersTo": "panel-card",
+      "description": "A card on a page's panel, as on Today and Progress.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">This week</h3><p class=\"ds-card-hint\">3 workouts, 1h 12m</p></div>",
+      "css": ".ds-card{padding:1rem;border:1px solid var(--panel-border,rgba(51,65,85,.6));border-radius:.9rem;background:var(--card,rgba(15,23,42,.42));color:var(--text,#e5ebf5)}.ds-card-title{margin:0 0 .25rem;font-size:1rem;font-weight:600}.ds-card-hint{margin:0;color:var(--text-muted,#bfccdd);font-size:.85rem}"
+    },
+    {
+      "name": "Picker Field",
+      "kind": "input",
+      "refersTo": "picker-field",
+      "description": "A field on a control surface.",
+      "html": "<input class=\"ds-field\" placeholder=\"Search exercises\">",
+      "css": ".ds-field{min-height:44px;padding:0 .9rem;border:1px solid var(--border,rgba(148,163,184,.45));border-radius:.75rem;background:var(--control,rgba(15,23,42,.75));color:var(--text,#e5ebf5);font:inherit}.ds-field:focus-visible{outline:2px solid var(--accent,#38bdf8);outline-offset:2px}"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-bar",
+      "description": "The floating, frosted pill of five tabs along the bottom.",
+      "html": "<nav class=\"ds-tabs\"><a class=\"ds-tab ds-tab--on\">Today</a><a class=\"ds-tab\">Workouts</a><a class=\"ds-tab\">Exercises</a><a class=\"ds-tab\">Progress</a><a class=\"ds-tab\">You</a></nav>",
+      "css": ".ds-tabs{display:flex;gap:.25rem;height:3.75rem;padding:.35rem;border:1px solid var(--chrome-edge,rgba(148,163,184,.3));border-radius:999px;background:var(--chrome,rgba(15,23,42,.78));backdrop-filter:blur(20px) saturate(180%);box-shadow:inset 0 1px 0 var(--chrome-light,rgba(255,255,255,.08))}.ds-tab{flex:1;display:grid;place-items:center;border:1px solid transparent;border-radius:999px;color:var(--text-muted,#bfccdd);font-size:.75rem;cursor:pointer}.ds-tab:hover{color:var(--text,#e5ebf5)}.ds-tab--on{border-color:var(--glow,#22d3ee);background:var(--accent-soft,rgba(56,189,248,.08));color:var(--text-strong,#f0f9ff)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Training Partner",
+    "overview": "Loop Workouts should feel like someone who trains with you: it counts you through, tells you what's next, and remembers what you did last time. Warmth beats gadgetry. The look is a dark navy night with a soft sky-and-cyan glow, glassy panels the page shows through, and frosted bars floating over the bottom. At its centre is the workout's ring, whose pink, blue and violet tell you at a glance whether you're working, resting or on reps.\n\nThe system is tactile and physical, close to iOS. The main button is a raised, lit pill, every button shrinks a little as it's pressed, things move on a critically damped spring, and the bars are frosted glass. Physical doesn't mean busy: motion answers a touch or marks a change in the workout, and nothing moves just to be looked at. Hierarchy comes from size and weight in the system's own face. Audiowide, the display face, is kept for page titles and the workout's big numbers, and gives the app its character.\n\nDark is the default theme. Light is the same set of roles, each retuned for contrast on a pale page rather than inverted. Both meet WCAG AA, checked in tests.",
+    "keyCharacteristics": [
+      "A dark navy page with two soft glows, under see-through panels and cards.",
+      "The ring's phase colours carry meaning: work pink, rest blue and reps violet.",
+      "One raised cyan pill per screen for the main action.",
+      "Frosted, floating pill bars at the bottom (the tabs, the run bar and Undo).",
+      "Pills and soft rounded cards; nothing sharp-cornered.",
+      "Spring motion that settles without a bounce, and a still version for reduced motion."
+    ],
+    "rules": [
+      {
+        "name": "The Phase Colour Rule",
+        "body": "Pink, blue and violet mean work, rest and reps, everywhere. Don't use them for anything else (decoration, categories or brand accents), or the ring stops reading at a glance.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Main Button Rule",
+        "body": "A screen has at most one `.btn-main`. Everything else is a `.btn-pill`, `.btn-icon` or `.btn-add`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Token-Only Rule",
+        "body": "No raw hex or `rgba()` in a component's styles. A see-through version of a token is `color-mix(in srgb, var(--token) 30%, transparent)`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Display Is for Moments Rule",
+        "body": "Audiowide is for page titles, dialog titles and the workout's numbers, and nothing else. It has one weight, so never bold it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Steady Digits Rule",
+        "body": "Numbers that tick use `tabular-nums` in the system face. Audiowide has no such digits, so the workout's countdown gives each digit a fixed-width cell (`ClockDigitsComponent`).",
+        "section": "typography"
+      },
+      {
+        "name": "The Arm's-Length Rule",
+        "body": "On the workout page, the step, the time and what's next must read from a metre or two away, and the next action is one big tap target.",
+        "section": "layout"
+      },
+      {
+        "name": "The Glass, Not Glow Rule",
+        "body": "Depth is glass and a soft shadow, never a glow lighting up the page around a button. A glow under the main button was tried and was too much.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Honest Fallback Rule",
+        "body": "With reduced transparency, the glass goes solid in the colour it showed, and blurs drop. With more contrast, every surface gets a defined edge.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep pink, blue and violet for work, rest and reps only (The Phase Colour Rule).",
+      "Do use one `.btn-main` per screen, and the shared `.btn-pill`, `.btn-icon`, `chip` and `panel-card` styles from `src/styles/` rather than new ones.",
+      "Do take every colour from a token, set for both themes, with `color-mix` for a see-through version.",
+      "Do make every touch target at least 44px, with `hit-area` where it's drawn smaller.",
+      "Do move things on the spring (`--ease-spring`, 0.45s), with a still or faded version for reduced motion.",
+      "Do keep Audiowide for page titles, dialog titles and the workout's numbers, never bolded.",
+      "Do keep it warm and encouraging: progress is beating your last time."
+    ],
+    "donts": [
+      "Don't go gym-bro: no black and neon red, shouty capitals or \"beast mode\" energy.",
+      "Don't make it a clinical dashboard: no dense grey tables or walls of charts that turn training into admin. A chart has a job and a Show as a table.",
+      "Don't add glows that light up the page, or motion that asks for attention after it has it (the main button's band crosses once).",
+      "Don't add motion to the workout page beyond its own cues: the ring, the pulse before the next step and the drum roll.",
+      "Don't use raw hex or `rgba()` in a component, or a second meaning for one class name.",
+      "Don't change the ∞ logo, the ring's phase colours or Audiowide: `PRODUCT.md` keeps them."
+    ]
+  }
+}

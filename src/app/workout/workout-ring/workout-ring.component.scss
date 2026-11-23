@@ -30,14 +30,18 @@
 .workout-ring {
     position: relative;
     transition: filter 0.3s ease;
-    // 380px, or the screen width minus the page gutters on narrow phones; or smaller where the
+    // 380px (--ring-max, more in the workout page's wide layout), or the screen width minus the page gutters on narrow phones; or smaller where the
     // screen isn't tall enough for it with the rest of the page (--ring-room, from the top bar to
     // Pause, Up next between, which grows with the text size), so Pause and Skip under it stay
     // clear of Up next. Not under 320px, which a rep step's face needs (its name on one line, the
     // weight to try under it), and Resume and End workout while paused; on a shorter screen
     // Pause and Skip are held over the foot of the page instead. svh, the screen's height with
     // the browser's bars showing, so it doesn't change size on scrolling.
-    width: min(380px, calc(100vw - 2rem), max(320px, calc(100svh - var(--ring-room, 31rem))));
+    width: min(
+        var(--ring-max, 380px),
+        calc(100vw - 2rem),
+        max(320px, calc(100svh - var(--ring-room, 31rem)))
+    );
     aspect-ratio: 1;
     border-radius: 50%;
     display: flex;

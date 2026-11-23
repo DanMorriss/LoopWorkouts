@@ -91,10 +91,6 @@
     } @else {
         <p><app-clock-digits [time]="face.time" /></p>
     }
-    <!-- Waiting for Start after a long rest (RUN-14): Start is here, as it hasn't begun -->
-    @if (waiting()) {
-        <app-wait-start />
-    }
 } @else {
     <p>You're finished!</p>
 }

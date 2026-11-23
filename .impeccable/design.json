@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-23T20:04:31+00:00",
+  "generatedAt": "2026-11-23T22:34:57+00:00",
   "title": "Design System: Loop Workouts",
   "extensions": {
     "colorMeta": {
@@ -421,7 +421,7 @@
       },
       {
         "name": "The Glass, Not Glow Rule",
-        "body": "Depth is glass and a soft shadow, never a glow lighting up the page around a button. A glow under the main button was tried and was too much.",
+        "body": "Depth is glass and a soft shadow, never a glow lighting up the page around a button. A glow under the main button was tried and was too much. The one glow is the ring's own flash as Done is pressed, a cue of the workout's, not decoration; the step strip's current segment is told by being filled and taller, not by a glow.",
         "section": "elevation"
       },
       {

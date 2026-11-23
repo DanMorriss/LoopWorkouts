@@ -65,7 +65,7 @@ export class WorkoutView {
     readonly isRepsActive = computed(() => this.state()?.phase === 'reps');
     /**
      * A timed exercise after a long rest waiting for Start (see `ActiveRunService.waiting`):
-     * Start is in the face (`WaitStartComponent`), Pause is greyed out, and Space presses Start.
+     * the big button is Start, in Pause's place, and Space presses it.
      */
     readonly isWaiting = computed(() => this.run.waiting() && !this.isPaused());
     readonly isComplete = computed(() => this.state()?.phase === 'complete');

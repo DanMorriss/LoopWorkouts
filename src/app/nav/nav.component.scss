@@ -12,22 +12,17 @@
     grid-template-columns: 44px minmax(0, 1fr) 44px;
 }
 
-.site-title__workout {
-    display: none;
-}
+// On the workout page, the workout's title in place of the app's name, which the page doesn't
+// repeat (at every width since 2026-11-23; until then only on a phone)
+.site-title--workout {
+    .site-title__app {
+        display: none;
+    }
 
-// Matches the workout page, which hides its own title at this width
-@media (max-width: 639px) {
-    .site-title--workout {
-        .site-title__app {
-            display: none;
-        }
-
-        .site-title__workout {
-            display: block;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+    .site-title__workout {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }

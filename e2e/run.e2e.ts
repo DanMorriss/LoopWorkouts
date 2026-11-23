@@ -122,7 +122,7 @@ test.describe('rep steps', () => {
         await expect(run.wheel('reps')).toHaveAttribute('aria-valuenow', '10');
         await expect(run.wheel('Weight, kg')).toHaveAttribute('aria-valuenow', '20');
         await expect(run.done).toHaveAccessibleName('Done. Next: Rest · 00:10');
-        await expect(run.next).toHaveText('Done · up next: Rest, 00:10');
+        await expect(run.next).toHaveText('Up next: Rest, 00:10');
         await expect(run.pause).toBeVisible();
         await expect(run.skip).toBeVisible();
 

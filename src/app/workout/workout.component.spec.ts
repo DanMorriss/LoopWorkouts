@@ -2727,7 +2727,7 @@ describe('WorkoutComponent', () => {
 
             advance(3000);
 
-            expect(upNextCard()).toBe('Done · up next: Rest, 00:02');
+            expect(upNextCard()).toBe('Up next: Rest, 00:02');
             expect(doneButton()!.getAttribute('aria-label')).toBe('Done. Next: Rest · 00:02');
             expect(doneButton()!.getAttribute('aria-keyshortcuts')).toBe('Space');
             expect(doneButton()!.parentElement!.dataset['next']).toBe('rest');
@@ -2997,7 +2997,7 @@ describe('WorkoutComponent', () => {
 
             advance(3000);
 
-            expect(upNextCard()).toBe('Done · up next: Rest, 00:02');
+            expect(upNextCard()).toBe('Up next: Rest, 00:02');
             expect(said()).toBe('Push-ups, 20 reps, step 2 of 3');
             fixture.destroy();
         });
@@ -4347,7 +4347,7 @@ describe('WorkoutComponent', () => {
             await roll();
             await advanceAndRoll(5000);
 
-            expect(upNextCard()).toBe('Done · up next: Rest, 00:05');
+            expect(upNextCard()).toBe('Up next: Rest, 00:05');
             pressDone();
             await roll();
             expect(view().isRestActive()).toBe(true);
@@ -4442,7 +4442,7 @@ describe('WorkoutComponent', () => {
 
             expect(text()).toContain('Bench');
             expect(status()).toBe('Superset round 1 of 3');
-            expect(upNextCard()).toBe('Done · up next: Row, 10 reps');
+            expect(upNextCard()).toBe('Up next: Row, 10 reps');
             pressDone();
             await roll();
             expect(text()).toContain('Row');
@@ -4524,11 +4524,11 @@ describe('WorkoutComponent', () => {
 
             expect(face()).toContain('Left side');
             expect(said()).toContain('Step-up, left side, 10 reps');
-            expect(upNextCard()).toBe('Done · up next: Right side, 10 reps');
+            expect(upNextCard()).toBe('Up next: Right side, 10 reps');
 
             pressDone();
             expect(face()).toContain('Right side');
-            expect(upNextCard()).toBe('Done · up next: Rest, 00:05');
+            expect(upNextCard()).toBe('Up next: Rest, 00:05');
             fixture.destroy();
         });
 
@@ -5117,7 +5117,7 @@ describe('WorkoutComponent', () => {
                 expect(view().isWorkActive()).toBe(true);
             });
 
-            describe("the next exercise's name on Done, with its (i)", () => {
+            describe("the next exercise's (i), beside Done", () => {
                 const info = () => el('.up-next__about');
                 const plank: Step = {
                     kind: 'work',
@@ -5131,7 +5131,10 @@ describe('WorkoutComponent', () => {
                     start(makeWorkout({ steps: [backSquat, plank], repeats: 1 }));
 
                     expect(el('.up-next--done')).not.toBeNull();
-                    expect(info()!.textContent!.replace('info', '').trim()).toBe('Plank');
+                    // Outside the card, so all of the card is Done: no other button on it
+                    expect(el('.up-next--done-card')!.querySelectorAll('button').length).toBe(1);
+                    expect(el('.up-next--done-card')!.contains(info())).toBe(false);
+                    expect(info()!.getAttribute('aria-label')).toBe('Plank');
                     expect(info()!.querySelector('mat-icon')!.textContent!.trim()).toBe('info');
                     expect(info()!.getAttribute('aria-haspopup')).toBe('dialog');
                     info()!.click();

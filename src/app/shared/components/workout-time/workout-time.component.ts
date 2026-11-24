@@ -39,7 +39,7 @@ const HINTS: Record<EstimateBasis, string> = {
         .workout-time__hint {
             margin: 0;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-align: start;
         }
     `,

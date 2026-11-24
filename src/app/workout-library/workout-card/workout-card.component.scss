@@ -49,7 +49,7 @@
     @include showcase-card-solid;
     // Its link and its row of actions have the padding
     padding: 0;
-    box-shadow: 0 10px 30px var(--shadow);
+    // No shadow until it's held and lifted (below), as DESIGN.md's cards have none
     // Up and down scroll the page; left and right are the card's to swipe
     touch-action: pan-y;
     // A long press lifts the card, rather than starting the phone's text selection or link menu

@@ -20,7 +20,7 @@ Going through the app a page or part at a time with the Impeccable skill (`.clau
 - [ ] **The workout summary** (`workout/workout-summary/`): critiqued on 2026-11-24 (25/40) and its five issues fixed. Critique it again once it's been used for a week or two. Left from it: the face's "You're finished!" breaks the brand voice's one-exclamation rule (only "Last round!").
 - [ ] **The tour** (`tour/`) and its offer on Today. Welcome and the setup were critiqued on 2026-11-24 (28/40) and their P1s and P2s fixed, and Today straight after the setup with Today's critique (2026-11-24).
 - [ ] **Today** (`home/`): critiqued on 2026-11-24 (26/40) and its five issues fixed, with a polish pass. Critique it again once it's been used for a week or two, on a real phone: a new device's first Today, a planned week, a rest day and a missed one.
-- [ ] **Workouts** (`workout-library/`): the list, its cards and the favourite heart, the search and filters, and the Ready-made badge. Then a workout's Details, and a ready-made workout's page.
+- [ ] **Workouts** (`workout-library/`): critiqued on 2026-11-24 (25/40) and its six issues fixed, with a polish pass. Critique it again once it's been used for a week or two.
 - [ ] **Create** (`workout-setup/`): the steps and their kinds, the wheels, a step's exercise and set rows, dragging steps into order, rounds and the ∞ switch, and saving. Then the exercise picker and Browse, and the unsaved changes dialog.
 - [ ] **Exercises** (`exercises/`): the list and its cards, the muscle chips and equipment filter. Then an exercise's page: the 3D demo, how it's done, the body map, and its progress (the chart, bests and recent sessions).
 - [ ] **Progress** (`history/`): the muscles this week, the exercises this week and new best tiles, time per week, the suggested workout, and the log and its entries, with notes and Undo.
@@ -85,6 +85,9 @@ How to keep the codebase from degrading is in `CLAUDE.md`.
 
 ## 2. Known issues
 
+- [ ] **Workouts' muscle chips give no sign there are more:** under Filters, the row scrolls sideways and stops at Biceps on a phone, with no fade or arrow to say so (left from Workouts' critique, 2026-11-24).
+- [ ] **A ready-made workout's Details has three targets on each of its rows:** the exercise's name (a link, with › at the far right, which reads as belonging to the rest), and its sets' pill on top of the link, so a tap just beside the pill opens the exercise (left from Workouts' critique, 2026-11-24).
+- [ ] **In the light theme, a favourite's filled heart is close in colour to the card's ▶** (left from Workouts' critique, 2026-11-24).
 - [ ] **Today's suggested workouts can give the same reason word for word:** two slides can both say "It works your Calves, Chest and Quads, which you haven't trained in the last 7 days.", as each is judged on its own. Saying what each adds beside the others would tell them apart (left from Today's critique, 2026-11-24).
 - [ ] **A day of Today's week takes a 43px touch on a 360px phone:** it's drawn 42px wide on a 390px one, and reaches into the gaps beside it (`hit-area`) for 47px there, but on 360px only 43px. A narrower gap or card padding would give the rest (left from Today's critique, 2026-11-24).
 - [ ] **The run bar's End workout shows the page through it in the dark theme:** half-swiped, `--danger-soft` behind the bar is see-through, so the page's text shows through the red. A solid surface under it would read better (left from the run bar's critique, 2026-11-24).

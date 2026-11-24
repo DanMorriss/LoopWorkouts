@@ -110,7 +110,8 @@ export class LibraryFilters {
     readonly shown = computed(() => this.sections().flatMap((section) => section.workouts));
 
     /**
-     * How many show while any is hidden: "3 of 20 workouts" or "No workouts match". Null when
+     * How many show while any is hidden: "3 of 20 workouts", or with none, what wasn't found,
+     * 'No workouts with "zumba"', or "No workouts match" the filters alone. Null when
      * nothing's hidden.
      */
     readonly shownCount = computed(() => {
@@ -119,7 +120,11 @@ export class LibraryFilters {
         if (shown === all) {
             return null;
         }
-        return shown ? `${shown} of ${counted(all, 'workout')}` : 'No workouts match';
+        if (shown) {
+            return `${shown} of ${counted(all, 'workout')}`;
+        }
+        const query = this.query().trim();
+        return query ? `No workouts with "${query}"` : 'No workouts match';
     });
 
     /** Whether any search or filter is on, for Clear to take off. */

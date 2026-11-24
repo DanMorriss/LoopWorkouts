@@ -259,7 +259,11 @@ describe('WorkoutLibraryComponent', () => {
             it('says when none match, and clears the search to show them all again', () => {
                 search('rowing');
                 expect(all('.workout-card')).toHaveLength(0);
-                expect(el('.library__count')?.textContent).toContain('No workouts match');
+                expect(el('.library__count [role="status"]')?.textContent?.trim()).toBe(
+                    'No workouts with "rowing"'
+                );
+                // With somewhere to go from there
+                expect(el('.library__none')?.textContent).toContain('make your own with New');
 
                 click(el('.library__clear'));
 

@@ -23,6 +23,13 @@
     @if (filters.shownCount(); as count) {
         <div class="library__count">
             <p role="status">{{ count }}</p>
+            @if (!filters.shown().length) {
+                <!-- Somewhere to go from nothing found -->
+                <p class="library__none">
+                    Try an exercise's name, such as squat, or fewer filters. Or make your own with
+                    New.
+                </p>
+            }
             @if (filters.active()) {
                 <button
                     type="button"

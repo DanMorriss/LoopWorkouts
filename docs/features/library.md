@@ -35,13 +35,14 @@
 - Each card has the ready-made cards' look (since 2026-11-05), and shows:
     - The **title**, or "Untitled workout".
     - **How many**, in a badge at its top right: "3 exercises", counting the different named steps, or "4 steps" with none named.
-    - The **main muscles it works**, the first four, then "+2 more", and **what it needs** as tags ("Dumbbells", "Bench", or "No equipment"). Neither shows when no step is linked to an exercise.
+    - The **main muscles it works**, the first four, then "+2 more", those most of its exercises work first (since 2026-11-24; in the body's order until then, so Dumbbell lower led with Forearms, Abs, Obliques and Traps rather than its Glutes and Quads), and **what it needs** as tags ("Dumbbells", "Bench", or "No equipment"). Neither shows when no step is linked to an exercise.
     - A **summary of one round**:
         - Its **exercises** when any step is named: the work and rep steps' names in order, each once, e.g. "Squats, Bench press", or "Squats, Bench press + 1 more" with more than two. This replaces the times below, so the card says what's in it.
         - With no step named, "01:05 - 00:20" (timed - rest) for a workout of one timed step and at most one rest step. With no rest it shows "- 00:00".
         - "5 steps · 02:15" otherwise, with the length of one round.
         - "4 steps · 01:30 + reps" when a round has rep steps, since they take as long as they take, or "2 steps · reps" when there are no timed steps at all.
-    - The **rounds**: the number, or ∞; or the time limit, e.g. "Squats, Push-ups in 20:00", read as "as many rounds as possible in 20:00".
+    - The **rounds**: the number, e.g. "x 4", "repeated 4 times" to screen readers, or ∞; or the time limit, e.g. "Squats, Push-ups in 20:00", read as "as many rounds as possible in 20:00". A workout done once says its one group's rounds, so a superset of 5 rounds is "x 5", and nothing with more groups than one (since 2026-11-24; until then "x 1", "repeated 1 times", on nearly every card).
+- **When it was last done** (LIB-4, since 2026-11-24), after how long it takes: "About 11 min · Done yesterday" ("Done today", "Done Monday" within the week, else "Done 3 Nov"), and ", last done yesterday" to screen readers. Nothing for one never done.
 - **How long it takes** (LIB-9, since 2026-11-14), under the summary in quieter type: "About 25 min" ("About 1 hr 5 min", or "Under a minute"), to the nearest minute, and to screen readers ", takes about 25 minutes" after the rounds. Not on a card that runs until stopped (there's no end), or with a time limit (its rounds already say "in 20:00"). See **How long it takes** below for how it's worked out.
 - **Hovering** with a mouse or trackpad: the card under the pointer stays as it is and the other workout cards dim (since 2026-11-05), so it's clear which one you're on. Not while a card's options are open, and not on a touch screen.
 - **Opening**: **a tap on a card** slides in the workout's **details** (since 2026-11-05; until then it started the workout). The whole card is a link, "Details of Legs day", so keyboards reach it and screen readers hear its summary with it.

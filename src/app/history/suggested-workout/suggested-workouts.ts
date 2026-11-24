@@ -81,18 +81,11 @@ class SuggestedWorkouts {
 
     /** The workouts to suggest, best first, each with why. */
     readonly suggestions = computed((): WorkoutSuggestion[] => {
-        const lastDone = new Map<string, number>();
-        // Newest first, so the first of each workout is when it was last done
-        for (const entry of this.history.entries()) {
-            if (!lastDone.has(entry.workoutId)) {
-                lastDone.set(entry.workoutId, entry.startedAt);
-            }
-        }
         return suggestNextWorkouts(
             this.doable(),
             this.weekSets(),
             (id) => this.exercises.byId(id),
-            lastDone,
+            this.history.lastDone(),
             this.settings.weeklySets(),
             this.avoid(),
             this.options.most()

@@ -25,6 +25,8 @@ import { formatSeconds } from '../../shared/format-time';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { WorkoutEstimates } from '../../shared/state/workout-estimates.service';
+import { HistoryStore } from '../../shared/state/history-store.service';
+import { dayDone } from '../../shared/format-day';
 import { counted } from '../../shared/format-count';
 import { CardGestures } from './card-gestures';
 import { FavouriteButtonComponent } from '../favourite-button/favourite-button.component';
@@ -84,6 +86,7 @@ export class WorkoutCardComponent {
     private readonly exercises = inject(ExerciseStore);
     private readonly slide = inject(PageSlide);
     private readonly estimates = inject(WorkoutEstimates);
+    private readonly history = inject(HistoryStore);
 
     protected readonly detailsUrl = computed(() => `/library/${this.workout().id}`);
     /** A ready-made workout (LIB-6), which can't be changed or deleted, only copied. */
@@ -111,7 +114,7 @@ export class WorkoutCardComponent {
         musclesWorked([this.workout()], (id) => this.exercises.byId(id))
     );
     /** Its main muscles, the first few, then how many more; none with no exercise to go on. */
-    protected readonly muscles = computed(() => musclesOnACard(this.worked().main));
+    protected readonly muscles = computed(() => musclesOnACard(this.worked().mostWorked));
     /** What it needs: "Dumbbells", "Bench", or "No equipment"; none with no exercise to go on. */
     protected readonly equipment = computed(() =>
         this.worked().hasExercises
@@ -163,23 +166,51 @@ export class WorkoutCardComponent {
             ? { text: `${count} · ${round} + reps`, spoken: `${count}, ${round} a round plus reps` }
             : { text: `${count} · reps`, spoken: `${count}, all reps` };
     });
+    /**
+     * How many rounds it goes through: the workout's, or, done once, its one group's (a
+     * superset's rounds, or an exercise's sets); null when done once with no one group to go
+     * by, as "x 1" would only mislead.
+     */
+    private readonly roundCount = computed(() => {
+        const { repeats, blocks } = this.workout();
+        if (repeats !== 1) {
+            return repeats;
+        }
+        const groups = blocks.filter((block) => block.kind === 'group');
+        return groups.length === 1 && groups[0].rounds > 1 ? groups[0].rounds : null;
+    });
     /** How long it goes on: "x 4" rounds, "x ∞" until stopped, or "in 20:00" for a time limit. */
     protected readonly rounds = computed(() => {
-        const { repeats, timeLimitSeconds } = this.workout();
+        const { timeLimitSeconds } = this.workout();
         if (timeLimitSeconds !== undefined) {
             return `in ${formatSeconds(timeLimitSeconds)}`;
         }
-        return runsUntilStopped(this.workout()) ? 'x ∞' : `x ${repeats}`;
+        const count = this.roundCount();
+        return runsUntilStopped(this.workout()) ? 'x ∞' : count ? `x ${count}` : '';
     });
+    /** The same for screen readers, after its summary: ", repeated 4 times", or nothing. */
     protected readonly spokenRounds = computed(() => {
-        const { repeats, timeLimitSeconds } = this.workout();
+        const { timeLimitSeconds } = this.workout();
         if (timeLimitSeconds !== undefined) {
-            return `as many rounds as possible in ${formatSeconds(timeLimitSeconds)}`;
+            return `, as many rounds as possible in ${formatSeconds(timeLimitSeconds)}`;
         }
+        const count = this.roundCount();
         return runsUntilStopped(this.workout())
-            ? 'repeated until stopped'
-            : `repeated ${repeats} times`;
+            ? ', repeated until stopped'
+            : count
+              ? `, repeated ${counted(count, 'time')}`
+              : '';
     });
+
+    /** The day it was last done (LIB-4): "yesterday", "Monday", or '' if never. */
+    private readonly done = computed(() => {
+        const at = this.history.lastDone().get(this.workout().id);
+        return at === undefined ? '' : dayDone(at, Date.now());
+    });
+    /** Under its summary: how long it takes and when it was last done, "Done Monday". */
+    protected readonly timeLine = computed(() =>
+        [this.time()?.text, this.done() && `Done ${this.done()}`].filter(Boolean).join(' · ')
+    );
 
     /**
      * How long it takes, "About 25 min", from its steps or your pace; none for one that runs
@@ -189,10 +220,14 @@ export class WorkoutCardComponent {
         const time = this.estimates.of(this.workout());
         return time?.basis === 'limit' ? null : time;
     });
-    /** The same for screen readers, added to its summary: ", takes about 25 minutes". */
+    /**
+     * The same for screen readers, added to its summary: ", takes about 25 minutes", and
+     * ", last done yesterday".
+     */
     protected readonly spokenTime = computed(() => {
         const time = this.time();
-        return time ? `, takes ${time.spoken}` : '';
+        const done = this.done();
+        return (time ? `, takes ${time.spoken}` : '') + (done ? `, last done ${done}` : '');
     });
 
     private readonly face = viewChild.required<ElementRef<HTMLElement>>('face');

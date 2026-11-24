@@ -135,7 +135,9 @@ export class HistoryEntryComponent {
     );
     /** The main muscles its sets worked, as a workout's card names them. */
     protected readonly muscles = computed(() =>
-        musclesOnACard(musclesInSets(this.entry().sets ?? [], (id) => this.exercises.byId(id)).main)
+        musclesOnACard(
+            musclesInSets(this.entry().sets ?? [], (id) => this.exercises.byId(id)).mostWorked
+        )
     );
     protected readonly id = computed(() => this.entry().id);
     /** Whether it has rep sets, which can be corrected (timed ones ran as set). */

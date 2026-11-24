@@ -71,17 +71,6 @@ export class LibraryFilters {
         );
     });
 
-    /** When each workout was last done, by its id, from the history (newest first). */
-    private readonly lastDone = computed(() => {
-        const last = new Map<string, number>();
-        for (const entry of this.history.entries()) {
-            if (!last.has(entry.workoutId)) {
-                last.set(entry.workoutId, entry.startedAt);
-            }
-        }
-        return last;
-    });
-
     /**
      * The lists shown (LIB-11): Yours, your own workouts and your favourites, the last done
      * first, then those never done, A to Z; then the ready-made ones, those your equipment
@@ -95,7 +84,7 @@ export class LibraryFilters {
         const ownIds = new Set(this.workouts.workouts().map((workout) => workout.id));
         const training = found.filter((workout) => !isActiveRest(workout));
         const isYours = (workout: Workout) => ownIds.has(workout.id) || favourites.has(workout.id);
-        const last = this.lastDone();
+        const last = this.history.lastDone();
         const yours = training
             .filter(isYours)
             .sort((a, b) => (last.get(b.id) ?? 0) - (last.get(a.id) ?? 0));

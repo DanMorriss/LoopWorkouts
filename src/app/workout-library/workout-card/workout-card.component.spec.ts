@@ -1,7 +1,7 @@
 import { GestureClock } from '../../shared/testing/gesture-clock';
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { asOneGroup, UNTIL_STOPPED, Workout } from '../../models/workout';
+import { asOneGroup, Block, Step, UNTIL_STOPPED, Workout } from '../../models/workout';
 import { makeWorkout, reps, rest, work } from '../../shared/testing/make-workout';
 import { WorkoutCardComponent } from './workout-card.component';
 import { historyId } from '../../models/history';
@@ -168,8 +168,31 @@ describe('WorkoutCardComponent', () => {
             });
             fixture.detectChanges();
 
-            // Twice as long as the guess
-            expect(time()).toBe('About 22 min');
+            // Twice as long as the guess, and when it was last done (LIB-4)
+            expect(time()).toBe('About 22 min · Done 1 Jan');
+            expect(spoken()).toContain('takes about 22 minutes, last done 1 Jan');
+        });
+
+        it('says a superset done once by its rounds, and nothing for "x 1"', () => {
+            const group = (steps: Step[], rounds: number): Block => ({
+                kind: 'group',
+                rounds,
+                restSeconds: 0,
+                steps,
+            });
+            set({ workout: { ...sprints, blocks: [group([reps(10), reps(8)], 5)], repeats: 1 } });
+            expect(el('.workout-card__summary').textContent).toContain('x 5');
+            expect(spoken()).toContain('repeated 5 times');
+
+            set({
+                workout: {
+                    ...sprints,
+                    blocks: [group([reps(10)], 3), group([reps(8)], 2)],
+                    repeats: 1,
+                },
+            });
+            expect(el('.workout-card__summary').textContent).not.toContain('x ');
+            expect(spoken()).not.toContain('repeated');
         });
 
         it('says nothing for a workout until stopped, or one with a time limit, which its rounds say', () => {

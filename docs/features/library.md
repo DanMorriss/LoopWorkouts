@@ -4,7 +4,7 @@
 
 - **LIB-1** As a user I want to see the workouts I've made and start one, so I can reuse them.
 - **LIB-2** As a user I want to edit or delete a saved workout.
-- **LIB-3** As a user I want to find a workout in the list quickly (A to Z since 2026-11-06; until then in an order I dragged them into).
+- **LIB-3** As a user I want to find a workout in the list quickly (yours first, then A to Z, since 2026-11-24, LIB-11; all A to Z from 2026-11-06; until then in an order I dragged them into).
 - **LIB-4** As a user I want to see which muscles a workout works, when I last did it and what's in it, so I can choose what to do today without opening Edit.
 - **LIB-5** As a user I want to see which muscle groups none of the workouts in my plan work, so I can fill the gaps (on the Plan page, see [planning](planning.md)).
 - **LIB-6** As a user I want ready-made workouts to start and plan as they are, and to copy one to change it, so I don't have to make my own to get started.
@@ -12,12 +12,13 @@
 - **LIB-8** As a user I want to search and filter my workouts, and mark favourites, so I can find the one I want in a long list.
 - **LIB-9** As a user I want to see how long a workout will take, as long as it takes me, so I can pick one that fits the time I have.
 - **LIB-10** As a user I want to see only stretching workouts, or none, so the list shows what I've come to do.
+- **LIB-11** As a returning user I want my own workouts and my favourites first, the one I did last at the top, so the one I'm likely to do next is the first I see.
 
 ## Rules
 
 - The page, the **Workouts** tab (at `/library`; the Library until 2026-11-03), has a **title**, "Workouts", as Exercises and Progress do, with **New** at its top right (the filled main button, small enough to sit by the title), which makes a new workout. The weekly plan isn't here: it opens from the week on Today (PLN-4, see [planning](planning.md)). It was a **Plan** button beside New until 2026-11-03.
 - Arriving from **Save** in Create on a new workout (BLD-15, see [build-a-workout](build-a-workout.md); a workout being edited goes back to its Details instead, since 2026-11-06), the workout just saved is **highlighted**, tinted with a bar down its left as the history marks a workout just done, scrolled to the middle of the screen, with focus on it, and screen readers hear "Saved" and its name.
-- **One list** (since 2026-11-06): every workout of yours and every ready-made one (LIB-6, see below), together, **A to Z** by title, ignoring case ("Untitled workout" for one with none); on a tie, yours first. Until 2026-11-06 yours were in an order you dragged them into, with the ready-made ones on a page of their own.
+- **Yours first** (LIB-11, since 2026-11-24): under a **Yours** heading, your own workouts and your favourites (ready-made ones you've hearted), the one done last first, then those never done, A to Z. Then, under **Ready-made**, the rest of the ready-made ones, A to Z, but with equipment picked as yours (My equipment, from the setup or the Exercises list), those it allows first, so a kettlebell owner sees the kettlebell and no-equipment ones before the gym's. The headings show when both lists are there: with none of your own, the ready-made ones are listed with no heading, under "Start any of these…". From 2026-11-06 to 2026-11-24 it was **one list**, every workout of yours and every ready-made one together, A to Z (on a tie, yours first), so a returning user's own were about 14th of 25. Until 2026-11-06 yours were in an order you dragged them into, with the ready-made ones on a page of their own.
 - **Stretches last** (LIB-10, since 2026-11-19): a workout of only stretches (active rest, the same test as Today's and the plans', `isActiveRest()`), yours or ready-made, such as Mobility flow, is listed after the rest, A to Z, under a **Stretches** heading. A workout with a stretch or two among other exercises is training, and stays in the main list.
 - A ready-made workout has a **Ready-made** badge on its card and its Details; yours have none. It's started, planned and favourited as yours are, and keeps your reps and weights (since 2026-11-08), but its exercises can't be changed and it can't be deleted: **Make a copy** makes one of your own to change.
 - **With none of your own yet**: "Start any of these, or make your own with New." over the list.

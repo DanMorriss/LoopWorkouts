@@ -16,13 +16,14 @@
             <app-get-started class="home__card" data-tour="get-started" />
         }
         <!-- With a week planned, the plan says what's next, but a day with nothing planned
-             offers a workout that leaves the next one's muscles fresh; with no plan, the
+             offers a workout that leaves the next one's muscles fresh (unless the week offers
+             one missed, to do today instead); with no plan, the
              suggestions are for what's least worked. After training today, stretches for it
              come first, planned day or not, once nothing planned is left to do -->
         <app-suggested-workout
             class="home__card"
             [restDay]="restDay()"
-            [suggestWorkouts]="restDay() || (hasHistory() && !hasPlan())"
+            [suggestWorkouts]="(restDay() && !missedToDo()) || (hasHistory() && !hasPlan())"
             [stretchToday]="!trainingLeftToday()"
         />
         <!-- The muscles worked in the last 7 days, on the body map; with nothing done in them

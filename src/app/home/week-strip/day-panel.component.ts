@@ -17,7 +17,7 @@ import { colourVar, WeekDay, WeekWorkout } from './week-view';
  * 2026-11-19); active rest is offered, not pressed. Those not today say how they went, e.g.
  * Done or Missed, and one not done, nor planned today, has Do it today, this week only (PLN-3).
  * Each training not done says what to beat, from last time (PRG-17). A day with nothing
- * planned is a rest day.
+ * planned is a rest day; today, one missed this week is offered to do today instead.
  */
 @Component({
     selector: 'app-day-panel',
@@ -113,12 +113,31 @@ import { colourVar, WeekDay, WeekWorkout } from './week-view';
                 <app-icon class="icon-outline">bedtime</app-icon>
                 Rest day. Nothing planned.
             </p>
+            @if (missed(); as missed) {
+                <!-- Missed this week, to catch up today instead, if you'd like (PLN-3) -->
+                <div class="day-panel__missed">
+                    <p class="day-panel__missed-text">
+                        Missed {{ missed.day }}'s {{ missed.item.name }}?
+                    </p>
+                    <button
+                        type="button"
+                        class="btn-pill"
+                        [id]="doTodayId(missed.item.workoutId)"
+                        [attr.aria-label]="'Do it today: ' + missed.item.name"
+                        (click)="doToday.emit(missed.item)"
+                    >
+                        Do it today
+                    </button>
+                </div>
+            }
         }
     `,
     styleUrl: './day-panel.component.scss',
 })
 export class DayPanelComponent {
     readonly day = input.required<WeekDay>();
+    /** On today, a rest day: training missed this week to do today instead, and its day's name. */
+    readonly missed = input<{ day: string; item: WeekWorkout } | null>(null);
     /** Do it today pressed, for one on another day: the week moves it, this week only. */
     readonly doToday = output<WeekWorkout>();
 

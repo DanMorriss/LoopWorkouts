@@ -450,9 +450,10 @@ describe('HomeComponent', () => {
 
                 expect(text('.suggestion__label')).toEqual(['Fancy a workout today?']);
                 const said = text('.suggestion__reason');
-                expect(said[0]).toBe(
-                    "Nothing's planned today, so resting is fine too. If you'd like to train:"
-                );
+                expect(said[0]).toBe("Resting is fine too. If you'd like to train:");
+                // Offered, not pressed: its Start isn't the page's main button
+                expect(element().querySelector('.suggestion .btn-main')).toBeNull();
+                expect(element().querySelector('.suggestion .btn-pill')).not.toBeNull();
                 expect(said[1]).toMatch(/fresh for Legs on Thursday\.$/);
                 // Not the one planned next, which back squats are, among any to swipe to
                 expect(text('.suggestion__title').length).toBeGreaterThan(1);
@@ -796,6 +797,36 @@ describe('HomeComponent', () => {
 
             expect(text('.day-panel__rest')).toEqual(['bedtime Rest day. Nothing planned.']);
             expect(element().textContent).toContain('Fancy a workout today?');
+            // Monday's Legs counts from next week, as it was planned today: not missed
+            expect(element().querySelector('.day-panel__missed')).toBeNull();
+        });
+
+        it('offers one missed this week on a rest day, to do today instead, with Undo', async () => {
+            // Legs on Monday, planned last week, so missed; nothing today, a Sunday
+            const legs = TestBed.inject(WorkoutStore).addWorkout({
+                title: 'Legs',
+                repeats: 1,
+                blocks: asOneGroup([{ kind: 'reps', reps: 5, name: 'Back squat' }]),
+            });
+            vi.setSystemTime(NOW - 7 * 24 * HOUR);
+            TestBed.inject(PlanStore).add(0, legs.id);
+            vi.setSystemTime(NOW);
+            create();
+            document.body.appendChild(element());
+
+            expect(text('.day-panel__missed-text')).toEqual(["Missed Monday's Legs?"]);
+            const doToday = element().querySelector<HTMLButtonElement>(
+                '.day-panel__missed button'
+            )!;
+            expect(doToday.getAttribute('aria-label')).toBe('Do it today: Legs');
+            expect(element().querySelector('.suggestion')).toBeNull();
+            doToday.click();
+            await fixture.whenStable();
+
+            expect(text('.day-panel__name')).toEqual(['Legs']);
+            expect(text('.day-panel__note')).toEqual(['Moved from Monday']);
+            expect(element().querySelector('.day-panel__missed')).toBeNull();
+            expect(TestBed.inject(UndoService).offer()?.message).toBe('Legs moved to today');
         });
 
         it('puts active rest after training, marked as such, with a quieter Start', () => {

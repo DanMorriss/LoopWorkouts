@@ -3,6 +3,10 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
 import { PageSlide } from '../../shared/navigation/page-slide';
 import { injectStartWorkout } from '../../shared/run/start-workout';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { HistoryStore } from '../../shared/state/history-store.service';
+import { SettingsStore } from '../../shared/state/settings-store.service';
+import { lastTime, newBestIn } from '../../models/since-last-time';
+import { markText } from '../../history/history-format';
 import { WEEK_PANEL_ID } from './week-days.component';
 import { colourVar, WeekDay, WeekWorkout } from './week-view';
 
@@ -12,7 +16,8 @@ import { colourVar, WeekDay, WeekWorkout } from './week-view';
  * first training's the page's main button (PLN-2, which was a card of its own, Due today, until
  * 2026-11-19); active rest is offered, not pressed. Those not today say how they went, e.g.
  * Done or Missed, and one not done, nor planned today, has Do it today, this week only (PLN-3).
- * A day with nothing planned is a rest day.
+ * Each training not done says what to beat, from last time (PRG-17). A day with nothing
+ * planned is a rest day.
  */
 @Component({
     selector: 'app-day-panel',
@@ -50,6 +55,16 @@ import { colourVar, WeekDay, WeekWorkout } from './week-view';
                                 <span class="day-panel__name">{{ item.name }}</span>
                                 @if (note(item); as note) {
                                     <span class="day-panel__note">{{ note }}</span>
+                                }
+                                @if (lastTimes().get(item.workoutId); as last) {
+                                    <span
+                                        class="day-panel__last"
+                                        [class.day-panel__last--best]="last.best"
+                                    >
+                                        {{ last.best ? 'New best' : 'Last time' }}:
+                                        {{ last.name }}
+                                        <span class="day-panel__mark">{{ last.mark }}</span>
+                                    </span>
                                 }
                             </span>
                             @if (item.label && !item.canDoToday) {
@@ -109,6 +124,8 @@ export class DayPanelComponent {
 
     protected readonly slide = inject(PageSlide);
     private readonly workouts = inject(WorkoutStore);
+    private readonly history = inject(HistoryStore);
+    private readonly settings = inject(SettingsStore);
     private readonly startWorkout = injectStartWorkout();
     protected readonly panelId = WEEK_PANEL_ID;
     protected readonly colour = colourVar;
@@ -128,6 +145,37 @@ export class DayPanelComponent {
     protected readonly onlyRestDue = computed(
         () => this.due().length > 0 && this.due().every((item) => item.activeRest)
     );
+
+    /**
+     * What to beat, under each training still to do: its lead exercise's top set last time
+     * (PRG-17), e.g. "Last time: Kettlebell swing 16 kg × 15". Once done today, a new best it
+     * set, if it did, e.g. "New best: Kettlebell swing 16 kg × 16"; otherwise nothing.
+     */
+    protected readonly lastTimes = computed(() => {
+        const history = this.history.entries();
+        const unit = this.settings.weightUnit();
+        const day = this.day();
+        const lines = new Map<string, { best: boolean; name: string; mark: string }>();
+        for (const item of day.workouts) {
+            if (item.activeRest || item.status === 'rested') {
+                continue;
+            }
+            const done = item.status === 'done';
+            const today =
+                done && day.today ? history.find((e) => e.workoutId === item.workoutId) : undefined;
+            const line = done
+                ? today && newBestIn(today, history)
+                : lastTime(item.workoutId, history);
+            if (line) {
+                lines.set(item.workoutId, {
+                    best: done,
+                    name: line.name,
+                    mark: markText(line.mark, unit),
+                });
+            }
+        }
+        return lines;
+    });
 
     /**
      * Under its name: where it was moved from, or that it's active rest, and optional. Beside

@@ -849,6 +849,30 @@ describe('HomeComponent', () => {
             expect(element().querySelector('.suggestion')).toBeNull();
         });
 
+        it('says what to beat from last time, and a new best once done today (PRG-17)', () => {
+            const { legs } = planToday();
+            const history = TestBed.inject(HistoryStore);
+            const heavy = (reps: number, weight: number) => ({ ...squat, reps, weight });
+            // Legs last week, at its heaviest 60 kg × 5; Push never done
+            history.record({
+                ...yesterday,
+                id: 'run-0',
+                startedAt: NOW - 7 * 24 * HOUR,
+                workoutId: legs.id,
+                sets: [heavy(8, 50), heavy(5, 60)],
+            });
+            create();
+
+            expect(text('.day-panel__last')).toEqual(['Last time: Back squat 60 kg × 5']);
+            expect(text('.day-panel__mark')).toEqual(['60 kg × 5']);
+
+            // Done today, heavier: a new best, in its place
+            history.record({ ...entry, workoutId: legs.id, sets: [heavy(5, 62.5)] });
+            fixture.detectChanges();
+            expect(text('.day-panel__last')).toEqual(['New best: Back squat 62.5 kg × 5']);
+            expect(element().querySelector('.day-panel__last--best')).not.toBeNull();
+        });
+
         it('says all done once each has been run today, leaving what is next to the plan', () => {
             const { push, legs } = planToday();
             const history = TestBed.inject(HistoryStore);

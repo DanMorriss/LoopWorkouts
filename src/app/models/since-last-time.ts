@@ -60,6 +60,48 @@ export function sinceLastTime(
     return lines;
 }
 
+/** What Today says of a workout from the history (PRG-17): its lead exercise's top set. */
+export interface LastTime {
+    /** The exercise's name as it ran, e.g. "Kettlebell swing". */
+    name: string;
+    mark: Mark;
+}
+
+/**
+ * The last time a workout was done before `before` (history newest first): its first
+ * exercise's top set that time, by its name as it ran, or null if it's never been done with a
+ * set logged. The first exercise, as a workout leads with its main lift.
+ */
+export function lastTime(
+    workoutId: string,
+    history: readonly HistoryEntry[],
+    before = Infinity
+): LastTime | null {
+    const entry = history.find(
+        (one) => one.workoutId === workoutId && one.startedAt < before && one.sets?.length
+    );
+    const first = entry?.sets?.find((set) => set.name);
+    if (!entry || !first) {
+        return null;
+    }
+    const sets = entry.sets!.filter((set) =>
+        first.exerciseId !== undefined
+            ? set.exerciseId === first.exerciseId
+            : set.name === first.name
+    );
+    return { name: first.name, mark: topSet(sets) };
+}
+
+/**
+ * A run's new best, if it set one (PRG-2): its first exercise to beat every earlier session,
+ * by its name as it ran.
+ */
+export function newBestIn(entry: HistoryEntry, history: readonly HistoryEntry[]): LastTime | null {
+    const best = sinceLastTime(entry, history).find((line) => line.best);
+    const set = best && entry.sets?.find((one) => one.exerciseId === best.exerciseId);
+    return best && set?.name ? { name: set.name, mark: best.now } : null;
+}
+
 /**
  * A run's top set of an exercise: the heaviest (most reps at it) where any had a weight, then
  * the most reps, then the longest held.

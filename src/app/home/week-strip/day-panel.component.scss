@@ -131,9 +131,21 @@
     overflow-wrap: anywhere;
 }
 
-.day-panel__note {
+.day-panel__note,
+.day-panel__last {
     color: var(--text-muted);
     @include small-type(0.78rem);
+}
+
+// What to beat: last time's top set, its figures in the text colour, as they're the point
+.day-panel__mark {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.day-panel__last--best {
+    color: var(--accent);
 }
 
 // How it went: Done, Missed, Rested or From next week

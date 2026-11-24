@@ -241,7 +241,7 @@ Tactile: each shrinks a little the moment it's pressed (`pressed-scale`), and sp
 ### Chips
 
 - **Style:** a 36px pill on `--control` with a `--border` edge, 44px to a finger.
-- **State:** picked (`aria-pressed`) has a `--glow-text` edge, an `--accent-soft` fill and a ✓. Tags (`tag`) are smaller, unpressable and edged in `--reps`.
+- **State:** picked (`aria-pressed`) has a `--glow-text` edge, an `--accent-soft` fill and a ✓. Tags (`tag`) are smaller, unpressable and edged in `--reps`. The **Ready-made** badge is a neutral tag, `--control` on a `--border` edge with `--text-muted` words, as it's on most workouts (in the accent's picked tint until 2026-11-24).
 
 ### Cards / Containers
 

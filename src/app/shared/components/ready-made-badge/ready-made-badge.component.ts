@@ -15,11 +15,11 @@ import { Component } from '@angular/core';
             flex: none;
             align-items: center;
             padding: 0.1rem 0.5rem;
-            border: 1px solid var(--accent-line);
+            // A neutral tag, not the accent's tint, which says "picked": most cards have it
+            border: 1px solid var(--border);
             border-radius: 999px;
-            background: var(--accent-soft);
-            // As a picked chip's: the strong text keeps 4.5:1 on the tint in both themes
-            color: var(--text-strong);
+            background: var(--control);
+            color: var(--text-muted);
             @include small-type(0.72rem);
             font-weight: 600;
             white-space: nowrap;

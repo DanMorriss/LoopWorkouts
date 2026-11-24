@@ -1044,7 +1044,9 @@ for (const theme of ['dark', 'light'] as const) {
                     store.addWorkout(makeWorkout({ steps: [reps(20, 'Push-ups'), work(30)] }))
                 );
                 await open('/workout');
-                expect(fixture.nativeElement.querySelector('.up-next--done')).not.toBeNull();
+                expect(
+                    fixture.nativeElement.querySelector('#workout-pause[aria-label^="Done"]')
+                ).not.toBeNull();
                 await expectNoViolations();
             });
 
@@ -1158,9 +1160,10 @@ for (const theme of ['dark', 'light'] as const) {
                     )
                 );
                 await open('/workout');
-                click('.up-next--done');
+                click('#workout-pause[aria-label^="Done"]');
                 await settle();
-                click('.workout-control--main button'); // Pause
+                // The next is a rep step too, where Pause is the smaller button beside Done
+                click('app-workout-controls button[aria-label="Pause"]');
                 await settle();
                 click('.workout-paused__end');
                 await settle();
@@ -1207,9 +1210,9 @@ for (const theme of ['dark', 'light'] as const) {
 
                 click('.swap__option');
                 await settle();
-                click('.up-next--done');
+                click('#workout-pause[aria-label^="Done"]');
                 await settle();
-                click('.up-next--done');
+                click('#workout-pause[aria-label^="Done"]');
                 await settle();
                 expect(fixture.nativeElement.textContent).toContain('next time?');
                 await expectNoViolations();

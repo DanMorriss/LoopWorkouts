@@ -16,7 +16,7 @@ Promoting the app: a free web beta for home kettlebell and circuit trainers now,
 
 Going through the app a page or part at a time with the Impeccable skill (`.claude/skills/impeccable`), which reads `PRODUCT.md` and `DESIGN.md`. For each item: `/impeccable critique <target>` first, which only reports; then fix what's worth it, usually with a scoped command (`polish`, `layout`, `typeset`, `clarify`, `harden`, `distill` or `onboard`), one PR per item; then delete the item. Note anything left for later under Known issues. Look at each change at phone width in both themes. The ∞ logo, the ring's colours and Audiowide stay, as `PRODUCT.md` says.
 
-- [ ] **The workout page** (`workout/`): its critique's fixes are done and it's polished (2026-11-23). Critique it again (29/40 before) and act on what's new.
+- [ ] **The workout page** (`workout/`): re-critiqued on 2026-11-23 (29/40, the earlier fixes all done); its P0, P1s, P2 and P3s are fixed (2026-11-24). Critique it a third time once it's been used on a real phone.
 - [ ] **The workout summary** (`workout/workout-summary/`): the stats, sets and new bests, what to step up, the swaps, the kettlebell, the stretches and the suggested next workout.
 - [ ] **The run bar** (`nav/run-bar`), the mini player above the tabs while a workout's going.
 - [ ] **Welcome and the setup** (`welcome/`, `welcome/setup`): the first thing a beta user sees, with signing in or going on as a guest. Then the tour (`tour/`) and its offer on Today.

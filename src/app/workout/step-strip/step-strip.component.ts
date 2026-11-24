@@ -4,7 +4,8 @@ import { StepKind } from '../../models/workout';
 /** A step of the round as a segment of the strip: its kind, and done, in progress or to go. */
 export interface StripStep {
     kind: StepKind;
-    state: 'done' | 'current' | 'left';
+    /** `skipped`: put aside to do later, so behind it but not done. */
+    state: 'done' | 'current' | 'left' | 'skipped';
 }
 
 /**

@@ -95,20 +95,14 @@ export class WorkoutComponent {
     private readonly controls = viewChild(WorkoutControlsComponent);
     private readonly mainButton = () => this.controls()?.mainButton();
     private readonly upNextCard = viewChild(UpNextCardComponent);
-    /** On a rep step, the Up next card is Done. */
+    /** On a rep step, the big button is Done (until 2026-11-24 it was the Up next card). */
     private doneButton() {
-        const card = this.upNextCard();
-        return card?.done() ? card.button() : undefined;
+        return this.view.isRepsActive() && !this.view.isPaused() ? this.mainButton() : undefined;
     }
     /** The Up next card, which an exercise picked to do later flies down to (RUN-16). */
     private readonly upNextHost = viewChild(UpNextCardComponent, { read: ElementRef });
     protected readonly nextCard = (): HTMLElement | undefined =>
         this.upNextHost()?.nativeElement.querySelector('.up-next') ?? undefined;
-    /** The card Done is on, which swells as a rep step comes round. */
-    private doneCard() {
-        const card = this.upNextCard();
-        return card?.done() ? card.card() : undefined;
-    }
     private readonly resumeButton = viewChild<ElementRef<HTMLButtonElement>>('resumeButton');
     /** Where the summary's buttons go, and focus with them. */
     protected readonly exits = new SummaryExits({
@@ -132,7 +126,7 @@ export class WorkoutComponent {
             }
             afterNextRender(
                 () =>
-                    this.doneCard()?.nativeElement.animate(
+                    this.doneButton()?.nativeElement.animate(
                         [
                             { transform: 'none' },
                             { transform: 'scale(1.15)' },
@@ -316,10 +310,12 @@ export class WorkoutComponent {
         }
     }
 
-    /** The big button: Start on a timed exercise waiting for it, otherwise Pause (or Resume). */
+    /** The big button: Start on a timed exercise waiting for it, Done on a rep step, otherwise Pause. */
     protected pressMain() {
         if (this.view.isWaiting()) {
             this.run.startExercise();
+        } else if (this.view.isRepsActive()) {
+            this.finishReps();
         } else {
             this.togglePause();
         }
@@ -339,7 +335,7 @@ export class WorkoutComponent {
 
     /**
      * Focus back on what opened the details: the exercise's name, on the face or, while
-     * paused, over it, or the Up next card (or the name on Done). If the workout has moved on meanwhile, so that's
+     * paused, over it, or the Up next card. If the workout has moved on meanwhile, so that's
      * gone, on Done or Pause (or Resume), so it isn't lost.
      */
     private focusInfo() {
@@ -348,10 +344,9 @@ export class WorkoutComponent {
                 const name = this.view.isPaused()
                     ? '.workout-paused__link'
                     : `.workout-face [data-step="${this.view.stepKey()}"] .workout-face__link`;
-                const card = this.upNextCard();
                 const opener =
                     this.detailsFrom === 'card'
-                        ? (card?.done() ? card.info() : card?.button())?.nativeElement
+                        ? this.upNextCard()?.button()?.nativeElement
                         : this.host.nativeElement.querySelector<HTMLElement>(name);
                 (
                     opener ??

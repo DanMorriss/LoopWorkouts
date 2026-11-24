@@ -73,18 +73,14 @@ export class WorkoutPage {
         return this.main.getByRole('group', { name: /^(Do .+ next\?|Skipped · do one next)$/ });
     }
 
-    /** A rep step's Done, the Up next card (named "Done. Next: Rest · 00:10"). */
+    /** A rep step's Done, the big button (named "Done. Next: Rest · 00:10"; the Up next card until 2026-11-24). */
     get done(): Locator {
         return this.main.getByRole('button', { name: /^Done\. Next/ });
     }
 
-    /**
-     * Presses Done by its → at the card's end, as a thumb would. Its middle can be the next
-     * exercise's name, a button of its own for its details.
-     */
+    /** Presses Done. */
     async pressDone() {
-        const box = await this.done.boundingBox();
-        await this.done.click({ position: { x: box!.width - 24, y: box!.height / 2 } });
+        await this.done.click();
     }
 
     /** What's next, the text of the Up next card under the ring: "Up next: Rest, 00:10". */

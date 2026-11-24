@@ -680,7 +680,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Focus nothing in particular and press Space.
     4. `runFor` 10000; press Done (the Up next card) with the mouse.
 - **Expected:**
-    1. The face shows "10 reps" and "20 kg" (as wheels: spin buttons "reps" and "Weight, kg"), the ring full and violet; Done, the Up next card, reads "Up next", "Rest", "00:10" with ✓ Done at its end, and is named "Done. Next: Rest · 00:10". Pause and Skip are still under the ring.
+    1. The face shows "10 reps" and "20 kg" (as wheels: spin buttons "reps" and "Weight, kg"), the ring full and violet; Done is the big button under the ring, ✓ "Done", named "Done. Next: Rest · 00:10", with Pause beside it on its left and Skip on its right; the Up next card reads "Up next", "Rest", "00:10".
     2. Still waiting on Push-ups.
     3. Space presses Done: rest starts from its **full** 00:10.
     4. At Squats (the last step, a rep step) it waits; it finishes only after Done. The history entry has "Push-ups: 10 reps @ 20 kg" and "Squats: 5 reps"; time spent includes the hour on the push-ups.
@@ -947,6 +947,15 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     1. Start it in a 1280×720 window.
 - **Expected:** 1. The ring is on the left, over 400px across, with Up next and the controls beside it; the controls' blur is off (it covered the whole page once, 2026-11-23); the workout's title is in the header only.
 - **Left to looking:** the face's words growing with the ring, and a tablet upright's 30rem ring (see screenshots in the PR).
+
+### REG-RUN-22 · Done and Up next on a short phone
+
+- **Stories:** RUN-1, RUN-5 · **Priority:** P1 · **Phone only**
+- **Preconditions:** workout "Squats": 10 squats, then 0:30 rest, 3 rounds.
+- **Steps:**
+    1. Start it at 375×667 (an iPhone SE or 8).
+    2. Press Done.
+- **Expected:** 1. Done is the big button, and a tap at its middle lands on it; Up next ends above the controls (they once covered it, and Done with it). 2. The rest starts, Up next saying Squats.
 
 ---
 

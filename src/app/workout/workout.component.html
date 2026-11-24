@@ -140,17 +140,14 @@
             <app-workout-note [text]="view.exerciseNote()!" [muted]="view.isPaused()" />
         }
 
-        <!-- What's next, in a card: on a rep step it's Done, on to it (Space presses it too);
-             otherwise an (i) for the next exercise's details and Swap (RUN-11), to get ready -->
+        <!-- What's next, in a card, with an (i) for the next exercise's details and Swap (RUN-11),
+             to get ready. Done on a rep step is the big button under it (it was this card). -->
         @if (view.upNextCard(); as next) {
             <app-up-next-card
                 [next]="next"
-                [said]="view.upNext()"
-                [done]="view.isRepsActive() && !view.isPaused()"
                 [soon]="view.nextSoon()"
                 [pulseDelay]="view.pulseDelay()"
                 [muted]="view.isPaused()"
-                (pressed)="finishReps()"
                 (details)="openDetails($event, true, 'card')"
             />
         }
@@ -166,6 +163,7 @@
                     [nextCard]="nextCard"
                     (main)="pressMain()"
                     (skipped)="skip()"
+                    (paused)="togglePause()"
                     (emptied)="focusControls()"
                 />
             }

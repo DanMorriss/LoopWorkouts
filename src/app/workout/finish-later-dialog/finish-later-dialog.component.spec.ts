@@ -174,7 +174,7 @@ describe('FinishLaterDialogComponent', () => {
     }
     const names = () =>
         [...dialog()!.querySelectorAll('.later-option__name')].map((name) => name.textContent);
-    const done = () => press(page().querySelector('button.up-next--done'));
+    const done = () => press(page().querySelector('#workout-pause[aria-label^="Done"]'));
 
     it('lists several to pick one, asking again about the rest after it', () => {
         skipTwo();

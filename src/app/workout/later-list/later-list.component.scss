@@ -1,15 +1,10 @@
 @use 'type' as *;
 
-// Beside Pause on the left of the controls under the ring (WorkoutComponent's grid), as Skip
-// is on the right: in reach of a thumb, and clear of the round line it used to sit over, at the
+// On the left of the controls under the ring (WorkoutControlsComponent places it), as Skip is
+// on the right: in reach of a thumb, and clear of the round line it used to sit over, at the
 // top right. Positioned, for the copy that flies in (later-fly.ts).
 :host {
     position: relative;
-    grid-column: 1;
-    grid-row: 1;
-    align-self: start;
-    justify-self: end;
-    margin-right: 1.5rem;
 }
 
 // As Pause's and Skip's: the button in a row as tall as Pause, its caption under it
@@ -22,11 +17,11 @@
     gap: 0.35rem;
 }
 
-// Skip's size, its twin across Pause
+// Skip's size, its twin across the big button (--control-side, from the controls)
 .later__button {
     position: relative;
-    width: 56px;
-    height: 56px;
+    width: var(--control-side, 56px);
+    height: var(--control-side, 56px);
 }
 
 .later__caption {

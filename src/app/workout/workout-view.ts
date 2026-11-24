@@ -2,6 +2,7 @@ import { computed, inject, Injectable, untracked } from '@angular/core';
 import { formatWeight, weightIn } from '../models/weight';
 import {
     hasSets,
+    GroupSet,
     RepStep,
     repStepsPerRound,
     runPlan,
@@ -279,7 +280,7 @@ export class WorkoutView {
         const side = !next.later && workout && secondSide(workout, next.stepIndex);
         const name = side ? sideName(side) : step.name || stepKindName(step.kind);
         const amount = this.amountText(step);
-        const detail = side || !set ? amount : `${setText(set)} · ${amount}`;
+        const detail = side || !set ? amount : `${this.setWords(set)} · ${amount}`;
         return { name, detail, kind: step.kind };
     });
 
@@ -308,7 +309,7 @@ export class WorkoutView {
             const set = setOf(workout, later.stepIndex);
             const where = [
                 rounds ? `Round ${later.round + 1}` : '',
-                set ? setText(set) : '',
+                set ? this.setWords(set) : '',
                 place?.side ? sideName(place.side) : '',
             ].filter(Boolean);
             return {
@@ -466,6 +467,15 @@ export class WorkoutView {
         );
     });
 
+    /**
+     * Which set or round, in words: "set 2 of 3", "superset round 2 of 3", or just "round 2 of
+     * 3" where the workout is that one group (`soleGroup`), as the round line says it. For Up
+     * next, Later's list and what screen readers hear.
+     */
+    private setWords(set: GroupSet): string {
+        return this.soleGroup() ? `round ${set.set + 1} of ${set.of}` : setText(set);
+    }
+
     /** The step in progress began a new round, or a new set, so it slides in sideways. */
     readonly newRound = computed(() => {
         const state = this.state();
@@ -511,9 +521,23 @@ export class WorkoutView {
             : set && set.group !== 'exercise'
               ? plan.sets.flatMap((other, i) => (other === set ? [i] : []))
               : [];
+        // Put aside to do later (RUN-16): not done, so not drawn as done (2026-11-24)
+        const aside = new Set(
+            this.run
+                .aside()
+                .filter((later) => later.round === state.round)
+                .map((later) => later.stepIndex)
+        );
         return shown.map((i) => ({
             kind: plan.steps[i].kind,
-            state: i === state.stepIndex ? 'current' : i < state.stepIndex ? 'done' : 'left',
+            state:
+                i === state.stepIndex
+                    ? 'current'
+                    : aside.has(i)
+                      ? 'skipped'
+                      : i < state.stepIndex
+                        ? 'done'
+                        : 'left',
         }));
     });
 
@@ -633,8 +657,13 @@ export class WorkoutView {
         }
         const set = setOf(workout, state.stepIndex);
         if (set && state.step.kind !== 'rest') {
-            const last = set.group === 'exercise' ? 'last set' : `${set.group}, last round`;
-            parts.push(set.set === set.of - 1 ? last : setText(set));
+            const last =
+                set.group === 'exercise'
+                    ? 'last set'
+                    : this.soleGroup()
+                      ? 'last round'
+                      : `${set.group}, last round`;
+            parts.push(set.set === set.of - 1 ? last : this.setWords(set));
         }
         // The round is given as each round starts
         if (state.stepIndex === 0 && !state.later) {

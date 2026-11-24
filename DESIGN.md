@@ -186,7 +186,7 @@ The palette is cool and night-time: navy and slate neutrals, sky and cyan for wh
 
 ## Layout
 
-Phones come first, in one column with a 0.75rem gutter (or the safe area, if it's wider). The page reaches the screen's edges (`viewport-fit=cover`) and keeps clear of the notch and rounded corners. Below 640px, dialogs become sheets from the bottom; at 640px and up they sit in the middle of the page. From 640px wide the workout's ring grows to 30rem, its words with it. On a wide landscape window (900px and up), the workout page is two columns: the ring on the left, up to 36rem and as tall as the window allows, and the rows above it, Up next and the controls beside it.
+Phones come first, in one column with a 0.75rem gutter (or the safe area, if it's wider). The page reaches the screen's edges (`viewport-fit=cover`) and keeps clear of the notch and rounded corners. Below 640px, dialogs become sheets from the bottom; at 640px and up they sit in the middle of the page. On a short phone (740px tall or less) the workout's ring may go down to 15rem, so Up next and the controls always fit under it. From 640px wide the workout's ring grows to 30rem, its words with it. On a wide landscape window (900px and up), the workout page is two columns: the ring on the left, up to 36rem and as tall as the window allows, and the rows above it, Up next and the controls beside it.
 
 The bars float over the bottom of the page: the tab bar (3.75rem), the run bar above it while a workout's going (3.5rem), and Undo above that after a delete (3.25rem), each 0.5rem apart. `--bars-height` adds up what's showing, so pages leave room for them. A page's own top bar (`src/app/nav/top-bar/`) stays at the top, and focus scrolls clear of both.
 
@@ -217,7 +217,7 @@ Soft and friendly: pills for anything tappable and short, and gently rounded car
 
 ### Buttons
 Tactile: each shrinks a little the moment it's pressed (`pressed-scale`), and springs back.
-- **Main** (`.btn-main`): a raised pill with a cyan gradient, 52px tall, its label in `--cta-ink` at 1.0625rem and 600. A band of light crosses it once, soon after the screen opens, and then rests. `--small` is 44px, beside a page's title; `--round` is an 80px circle for the workout's Pause and Resume, with a deeper press and no band.
+- **Main** (`.btn-main`): a raised pill with a cyan gradient, 52px tall, its label in `--cta-ink` at 1.0625rem and 600. A band of light crosses it once, soon after the screen opens, and then rests. `--small` is 44px, beside a page's title; `--round` is an 80px circle for the workout's big button, whichever is the one to press now (Pause, ✓ Done on a rep step, ▶ Start while waiting), and Resume, with a deeper press and no band.
 - **Pill** (`.btn-pill`): any smaller action, outlined in `--border` on no fill, 44px tall. On hover or press, its edge strengthens and it fills with `--control`. `--danger` is for Delete.
 - **Icon** (`.btn-icon`): a 44px outlined circle on `--control`, for an icon on its own.
 - **Add** (`.btn-add`): a dashed 0.75rem box in the colour of what it adds (work, rest, reps or a heading).

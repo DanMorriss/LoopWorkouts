@@ -76,6 +76,15 @@
     }
 }
 
+// A card's label at its top, e.g. Today's "This week": muted capitals, not a title. Its
+// alignment follows the card's content.
+@mixin card-label {
+    margin: 0;
+    color: var(--text-muted);
+    @include caps(0.8rem);
+    font-weight: 600;
+}
+
 @mixin caps($size) {
     font-size: $size;
     text-transform: uppercase;

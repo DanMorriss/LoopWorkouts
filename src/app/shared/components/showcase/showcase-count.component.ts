@@ -22,7 +22,7 @@ import { Component, input } from '@angular/core';
             margin: 0;
             padding: 0.45rem 0.5rem 0.4rem;
             border: 1px solid var(--accent-line);
-            border-radius: 0.7rem;
+            border-radius: 0.75rem;
             background: var(--accent-soft);
             text-align: center;
         }

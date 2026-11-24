@@ -35,16 +35,13 @@
         padding-bottom: 0.4rem;
     }
 
-    .btn-main {
+    > button {
         margin-top: auto;
     }
 }
 
 .suggestion__label {
-    margin: 0;
-    color: var(--text-muted);
-    @include caps(0.8rem);
-    font-weight: 600;
+    @include card-label;
 }
 
 // A title in the reading face, as the page's display moment is its greeting

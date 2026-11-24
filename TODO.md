@@ -19,7 +19,7 @@ Going through the app a page or part at a time with the Impeccable skill (`.clau
 - [ ] **The workout page** (`workout/`): re-critiqued on 2026-11-23 (29/40, the earlier fixes all done); its P0, P1s, P2 and P3s are fixed (2026-11-24). Critique it a third time once it's been used on a real phone.
 - [ ] **The workout summary** (`workout/workout-summary/`): critiqued on 2026-11-24 (25/40) and its five issues fixed. Critique it again once it's been used for a week or two. Left from it: the face's "You're finished!" breaks the brand voice's one-exclamation rule (only "Last round!").
 - [ ] **The tour** (`tour/`) and its offer on Today. Welcome and the setup were critiqued on 2026-11-24 (28/40) and their P1s and P2s fixed, and Today straight after the setup with Today's critique (2026-11-24).
-- [ ] **Today** (`home/`): the week strip and a day's panel, Get started, the plans for you, what to do next, the stretches after training, and the muscles worked this week.
+- [ ] **Today** (`home/`): critiqued on 2026-11-24 (26/40) and its five issues fixed, with a polish pass. Critique it again once it's been used for a week or two, on a real phone: a new device's first Today, a planned week, a rest day and a missed one.
 - [ ] **Workouts** (`workout-library/`): the list, its cards and the favourite heart, the search and filters, and the Ready-made badge. Then a workout's Details, and a ready-made workout's page.
 - [ ] **Create** (`workout-setup/`): the steps and their kinds, the wheels, a step's exercise and set rows, dragging steps into order, rounds and the ∞ switch, and saving. Then the exercise picker and Browse, and the unsaved changes dialog.
 - [ ] **Exercises** (`exercises/`): the list and its cards, the muscle chips and equipment filter. Then an exercise's page: the 3D demo, how it's done, the body map, and its progress (the chart, bests and recent sessions).
@@ -85,6 +85,8 @@ How to keep the codebase from degrading is in `CLAUDE.md`.
 
 ## 2. Known issues
 
+- [ ] **Today's suggested workouts can give the same reason word for word:** two slides can both say "It works your Calves, Chest and Quads, which you haven't trained in the last 7 days.", as each is judged on its own. Saying what each adds beside the others would tell them apart (left from Today's critique, 2026-11-24).
+- [ ] **A day of Today's week takes a 43px touch on a 360px phone:** it's drawn 42px wide on a 390px one, and reaches into the gaps beside it (`hit-area`) for 47px there, but on 360px only 43px. A narrower gap or card padding would give the rest (left from Today's critique, 2026-11-24).
 - [ ] **The run bar's End workout shows the page through it in the dark theme:** half-swiped, `--danger-soft` behind the bar is see-through, so the page's text shows through the red. A solid surface under it would read better (left from the run bar's critique, 2026-11-24).
 - [ ] **Try a dialog sheet's drag from its content on an iPhone:** as with the summary's, it's only been tested with Chromium's touch, which isn't Safari's (REG-GES-06).
 - [ ] **At the largest text sizes, Up next starts under Pause and Skip:** at 200% text on a phone the ring shrinks as far as it can (240px) and the controls stay in reach at the bottom, but the Up next card, which is also a rep step's Done, starts partly under them and has to be scrolled to. Shrinking the face further, or Up next joining the controls there, would fix it.

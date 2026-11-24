@@ -143,6 +143,4 @@ export class SuggestedWorkoutComponent {
         }
         return this.restDay() ? 'Fancy a workout today?' : 'Suggested next workout';
     });
-
-    /** Whether anything's been done, for Progress to show: until then, no way there. */
 }

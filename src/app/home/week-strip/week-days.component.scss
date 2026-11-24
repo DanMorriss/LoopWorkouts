@@ -32,6 +32,8 @@
         background: color-mix(in srgb, var(--c, var(--text-muted)) 8%, transparent);
     }
     @include pressed-scale;
+    // At least 44px to press: each reaches half the gap to the next, on a 390px phone
+    @include hit-area(0px, 0.15rem);
 
     &:focus-visible {
         outline: 2px solid var(--accent);
@@ -56,7 +58,7 @@
 
 .week-day__date {
     color: var(--text-strong);
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1.2;

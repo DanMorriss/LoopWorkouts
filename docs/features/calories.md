@@ -77,7 +77,7 @@ Built: an estimate of the calories each workout burnt, on its summary and in the
 
 ## Acceptance criteria
 
-- Given a first visit, then the setup's last question (7 of 7) is What do you weigh?, in the unit picked before it; given 72.5 and Enter, then it's saved and Today opens; given nothing and Done, then none is saved, and the first summary offers Add your weight to see calories.
+- Given a first visit, then the setup's last question (6 of 6) is What do you weigh?, in the unit picked before it; given 72.5 and Enter, then it's saved and Today opens; given nothing and Done, then none is saved, and the first summary offers Add your weight to see calories.
 - Given no body weight, when a workout finishes, then the summary has no Calories, and has Add your weight to see calories; when I press it, then the Body weight box is there with focus in it, "Kept on this device only" under it; when I type 75 and press Enter, then the box goes, the summary shows Calories with focus on its stats, and the run's still on the summary. Given I leave the summary without one, then the history shows no calories.
 - Given I type 72.5 in Body weight, then it's saved, and the summary shows Calories, not Add your weight.
 - Given I type 160 in lb, then 72.6 kg is saved, and choosing Kilograms shows 72.6.

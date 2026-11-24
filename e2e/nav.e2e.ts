@@ -1,6 +1,6 @@
 import { expect, rest, seed, test, timed, workout } from './fixtures';
 import { HistoryPage } from './history-page';
-import { setWheel, WorkoutPage } from './workout-page';
+import { WorkoutPage } from './workout-page';
 
 // Onboarding and getting about the app (home-and-navigation.md): REG-NAV in
 // docs/regression-tests.md. welcome.e2e.ts has the smoke test of the same first steps.
@@ -25,10 +25,10 @@ test.describe('a device new to the app', () => {
             await expect(app.tabBar).toBeHidden();
             expect(await app.storageItem('setup')).toBe('due');
 
-            await page.getByRole('button', { name: 'Continue without an account' }).click();
+            await page.getByRole('button', { name: 'Start without an account' }).click();
             await expect(page).toHaveURL('/welcome/setup');
             expect(await app.storageItem('welcomed')).toBe('guest');
-            await expect(page.getByText('Question 1 of 7')).toBeVisible();
+            await expect(page.getByText('Question 1 of 6')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What should we call you?' })
             ).toBeFocused();
@@ -54,7 +54,7 @@ test.describe('a device new to the app', () => {
         { tag: '@p1' },
         async ({ app, page }) => {
             await app.goto('/');
-            await page.getByRole('button', { name: 'Continue without an account' }).click();
+            await page.getByRole('button', { name: 'Start without an account' }).click();
             const next = page.getByRole('button', { name: 'Next' });
             const skip = page.getByRole('button', { name: 'Skip for now' });
             const place = async () => [await next.boundingBox(), await skip.boundingBox()];
@@ -64,7 +64,7 @@ test.describe('a device new to the app', () => {
             // Enter is Next
             await page.getByRole('textbox', { name: 'Your name' }).press('Enter');
 
-            await expect(page.getByText('Question 2 of 7')).toBeVisible();
+            await expect(page.getByText('Question 2 of 6')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What do you train for?' })
             ).toBeFocused();
@@ -73,28 +73,18 @@ test.describe('a device new to the app', () => {
             await page.getByRole('radio', { name: /^Fitness/ }).check();
             await next.click();
 
-            await expect(page.getByText('Question 3 of 7')).toBeVisible();
-            await expect(
-                page.getByRole('heading', { name: 'How many sets a week for each muscle?' })
-            ).toBeFocused();
-            const sets = page.getByRole('spinbutton', { name: /^Sets a week per muscle/ });
-            // From the goal just picked; the arrow keys turn it
-            await expect(sets).toHaveAttribute('aria-valuenow', '6');
-            await setWheel(sets, 8);
-            await next.click();
-
-            await expect(page.getByText('Question 4 of 7')).toBeVisible();
+            await expect(page.getByText('Question 3 of 6')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'What equipment do you have?' })
             ).toBeFocused();
             await page.getByRole('button', { name: 'Kettlebell', exact: true }).click();
             await next.click();
 
-            await expect(page.getByText('Question 5 of 7')).toBeVisible();
+            await expect(page.getByText('Question 4 of 6')).toBeVisible();
             await page.getByRole('radio', { name: 'Female' }).check();
             await next.click();
 
-            await expect(page.getByText('Question 6 of 7')).toBeVisible();
+            await expect(page.getByText('Question 5 of 6')).toBeVisible();
             await expect(
                 page.getByRole('heading', { name: 'Do you lift in kilograms or pounds?' })
             ).toBeFocused();
@@ -102,7 +92,7 @@ test.describe('a device new to the app', () => {
             await next.click();
 
             // Optional, last, in the unit just picked; Enter saves it and goes on to Today
-            await expect(page.getByText('Question 7 of 7')).toBeVisible();
+            await expect(page.getByText('Question 6 of 6')).toBeVisible();
             await expect(page.getByRole('heading', { name: 'What do you weigh?' })).toBeFocused();
             const weight = page.getByRole('textbox', { name: 'Body weight in kilograms' });
             await weight.fill('72.5');
@@ -130,7 +120,7 @@ test.describe('a device new to the app', () => {
             await expect(profile.getByRole('radio', { name: 'Fitness' })).toBeChecked();
             await expect(
                 profile.getByRole('spinbutton', { name: /^Sets a week per muscle/ })
-            ).toHaveAttribute('aria-valuenow', '8');
+            ).toHaveAttribute('aria-valuenow', '6');
             await expect(profile.getByRole('radio', { name: 'Kilograms (kg)' })).toBeChecked();
 
             await app.tab('Exercises').click();
@@ -141,7 +131,7 @@ test.describe('a device new to the app', () => {
 
     test('REG-NAV-03 skipping the setup', { tag: '@p2' }, async ({ app, page }) => {
         await app.goto('/');
-        await page.getByRole('button', { name: 'Continue without an account' }).click();
+        await page.getByRole('button', { name: 'Start without an account' }).click();
         await page.getByRole('button', { name: 'Skip for now' }).click();
 
         await expect(page).toHaveURL('/home');

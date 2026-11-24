@@ -42,7 +42,10 @@
                     <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
                         What do you train for?
                     </h2>
-                    <p class="setup__hint">It sets how many sets a week each muscle aims at.</p>
+                    <p class="setup__hint">
+                        It sets how many sets a week each muscle aims at. Change it any time on You,
+                        under Profile.
+                    </p>
                     <div class="setup__choices" role="radiogroup" aria-labelledby="setup-question">
                         @for (option of goals; track option.value) {
                             <label class="setup__choice">
@@ -61,27 +64,19 @@
                     </div>
                 }
 
-                @case ('sets') {
-                    <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
-                        How many sets a week for each muscle?
-                    </h2>
-                    <p class="setup__hint">{{ setsHint() }}</p>
-                    <app-weekly-sets-field />
-                }
-
                 @case ('equipment') {
                     <h2 #heading class="setup__question" tabindex="-1" id="setup-question">
                         What equipment do you have?
                     </h2>
                     <p class="setup__hint" id="setup-equipment-hint">
-                        Pick all you can use, or No equipment. Exercises and workouts show what you
-                        can do with it, and those that need nothing always show. Pick none to see
-                        everything.
+                        Pick what you have, and the lists show what you can do with it. Exercises
+                        that need nothing always show.
                     </p>
                     <app-equipment-chips
                         role="group"
                         aria-labelledby="setup-question"
                         aria-describedby="setup-equipment-hint"
+                        [homeFirst]="true"
                     />
                 }
 

@@ -322,8 +322,9 @@ body {
     color: var(--text);
 }
 
-// The setup's buttons stay over the bottom of the screen, so what's focused stays clear of them
-html:has(.setup__footer) {
+// The setup's and the welcome screen's buttons stay over the bottom of the screen
+// (styles/_bottom-actions.scss), so what's focused stays clear of them
+html:has(.setup__footer, .welcome__footer) {
     scroll-padding-bottom: calc(8rem + var(--undo-bar-space));
 }
 

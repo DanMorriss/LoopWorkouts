@@ -27,31 +27,37 @@ import { SyncStarter } from '../../sync/sync-starter.service';
 import { SETUP_KEY } from '../welcome-first';
 import { UndoService } from '../../shared/undo/undo.service';
 import { EquipmentChipsComponent } from '../../shared/components/equipment-chips/equipment-chips.component';
-import { WeeklySetsFieldComponent } from '../../shared/components/weekly-sets-field/weekly-sets-field.component';
 
-/** The questions, in the order they're asked. */
-const QUESTIONS = ['name', 'goal', 'sets', 'equipment', 'body', 'units', 'weight'] as const;
+/**
+ * The questions, in the order they're asked. The sets a week each muscle aims at isn't one
+ * (until 2026-11-24 it was, third): the goal starts it at its usual number, and it's on You,
+ * under Profile, for anyone who wants another.
+ */
+const QUESTIONS = ['name', 'goal', 'equipment', 'body', 'units', 'weight'] as const;
 type Step = (typeof QUESTIONS)[number];
+
+/** The question being asked when the setup was left, kept in SETUP_KEY, or null for none. */
+function savedStep(): Step | null {
+    const saved = localStorage.getItem(SETUP_KEY);
+    return QUESTIONS.find((question) => question === saved) ?? null;
+}
 
 /** How long to wait for the account's profile before asking anyway (offline, say). */
 export const PROFILE_WAIT_MS = 8000;
 
 /**
- * The setup (NAV-4), once, after the welcome screen: your name, what you train for and the
- * sets a week each muscle aims at, the equipment you have, the body the muscle maps show, the units you lift in and,
- * if you like, your body weight for calories (CAL-2), one question at a time, then on to Today, which says it's all set and starts you off with a workout to add
- * (until 2026-11-03, a last screen here offered one to start straight away). Each answer is
- * saved as it's picked, so leaving part way keeps them. Signed in, it first waits for the account's profile: one set
- * up on another device is taken, and nothing's asked.
+ * The setup (NAV-4), once, after the welcome screen: your name, what you train for, the
+ * equipment you have, the body the muscle maps show, the units you lift in and, if you like,
+ * your body weight for calories (CAL-2), one question at a time, then on to Today, which says
+ * it's all set and starts you off with a workout to add (until 2026-11-03, a last screen here
+ * offered one to start straight away). Each answer is saved as it's picked, and so is the
+ * question it's on, so leaving part way keeps them and coming back picks up there. Signed in,
+ * it first waits for the account's profile: one set up on another device is taken, and
+ * nothing's asked.
  */
 @Component({
     selector: 'app-setup',
-    imports: [
-        BodyMapComponent,
-        EquipmentChipsComponent,
-        WeeklySetsFieldComponent,
-        WeightFieldComponent,
-    ],
+    imports: [BodyMapComponent, EquipmentChipsComponent, WeightFieldComponent],
     templateUrl: './setup.component.html',
     styleUrl: './setup.component.scss',
 })
@@ -66,12 +72,11 @@ export class SetupComponent {
 
     private readonly heading = viewChild<ElementRef<HTMLElement>>('heading');
 
-    /** Waiting for the account's profile, or asking. */
+    /** Waiting for the account's profile, or asking (already, if it's come back part way). */
     protected readonly checking = signal(
-        localStorage.getItem(AUTH_STORAGE_KEY) !== null &&
-            localStorage.getItem(SETUP_KEY) !== 'asking'
+        localStorage.getItem(AUTH_STORAGE_KEY) !== null && savedStep() === null
     );
-    protected readonly step = signal<Step>('name');
+    protected readonly step = signal<Step>(savedStep() ?? 'name');
     protected readonly questionCount = QUESTIONS.length;
     /** Which question it is, from 1. */
     protected readonly number = computed(() => QUESTIONS.indexOf(this.step()) + 1);
@@ -92,15 +97,6 @@ export class SetupComponent {
             hint: `Stay fit and active: ${aimText('fitness')}`,
         },
     ];
-
-    /** The sets a week's question starts from the goal just picked, which it says why. */
-    protected readonly setsHint = computed(() => {
-        const why =
-            this.settings.trainingGoal() === 'muscle'
-                ? `${DEFAULT_WEEKLY_SETS.muscle} is the usual advice for building muscle`
-                : `${DEFAULT_WEEKLY_SETS.fitness} suits staying fit and active`;
-        return `${why}. Start lower if you're new: you can change it any time on You, under Profile.`;
-    });
 
     protected readonly bodies: { value: BodyFigure; label: string }[] = [
         { value: 'male', label: 'Male' },
@@ -185,17 +181,18 @@ export class SetupComponent {
 
     private ask() {
         this.checking.set(false);
-        localStorage.setItem(SETUP_KEY, 'asking');
         // Never set: start from the units most people lift in where the device is set to
         if (!this.settings.hasProfile()) {
             const languages = this.document.defaultView?.navigator.languages ?? [];
             this.settings.update({ weightUnit: likelyWeightUnit(languages) });
         }
-        this.focusHeading();
+        this.go(this.step());
     }
 
+    /** On to a question, kept so that coming back part way (after a call, say) opens it again. */
     private go(step: Step) {
         this.step.set(step);
+        localStorage.setItem(SETUP_KEY, step);
         this.focusHeading();
     }
 

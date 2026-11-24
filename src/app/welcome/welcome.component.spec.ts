@@ -49,15 +49,39 @@ describe('WelcomeComponent (NAV-3)', () => {
         );
     });
 
-    it("goes Home as a guest, and isn't asked again on this device", async () => {
-        const element = await create();
-
+    const start = (element: HTMLElement) =>
         [...element.querySelectorAll('button')]
-            .find((button) => button.textContent!.trim() === 'Continue without an account')!
+            .find((button) => button.textContent!.trim() === 'Start without an account')!
             .click();
+
+    it("goes Home as a guest, the screen's main button, and isn't asked again on this device", async () => {
+        const element = await create();
+        expect(element.querySelector('.welcome__footer .btn-main')!.textContent!.trim()).toBe(
+            'Start without an account'
+        );
+
+        start(element);
 
         expect(localStorage.getItem('welcomed')).toBe('guest');
         expect(navigate).toHaveBeenCalledWith('/home', { replaceUrl: true });
+    });
+
+    it('opened straight from a link, still has the setup to come', async () => {
+        const element = await create();
+        expect(localStorage.getItem('setup')).toBeNull();
+
+        start(element);
+
+        expect(localStorage.getItem('setup')).toBe('due');
+    });
+
+    it('leaves a setup part way through where it was', async () => {
+        localStorage.setItem('setup', 'equipment');
+        const element = await create();
+
+        start(element);
+
+        expect(localStorage.getItem('setup')).toBe('equipment');
     });
 
     it('goes Home once signed in', async () => {

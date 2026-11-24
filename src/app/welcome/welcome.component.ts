@@ -3,13 +3,14 @@ import { Router } from '@angular/router';
 import { AccountService } from '../account/account.service';
 import { SignInComponent } from '../account/sign-in/sign-in.component';
 import { LoopLogoComponent } from '../shared/components/loop-logo/loop-logo.component';
-import { WELCOMED_KEY } from './welcome-first';
+import { SETUP_DUE, SETUP_KEY, WELCOMED_KEY } from './welcome-first';
 
 /**
  * The welcome screen (NAV-3), where a device new to the app starts: the name and what it is
- * in a line, then signing in (as on the You tab) in a card, or going on without an account,
- * with everything kept on this device, as a quieter link under it. Either way it's not asked
- * again here, and Home opens. No tab bar, so it's one choice.
+ * in a line, and signing in (as on the You tab) in a card; then, over the bottom of the screen
+ * in thumb reach, its main button, going on without an account, with everything kept on this
+ * device (since 2026-11-24: it was a quieter link under the card). Either way it's not asked
+ * again here, and Home opens, with the setup (NAV-4) to come. No tab bar, so it's one choice.
  */
 @Component({
     selector: 'app-welcome',
@@ -28,20 +29,23 @@ import { WELCOMED_KEY } from './welcome-first';
                     </h2>
                     <app-sign-in (signedIn)="goHome('signed-in')" />
                 </section>
+            </div>
+        </div>
 
-                <div class="welcome__guest">
-                    <button
-                        type="button"
-                        class="welcome__guest-button"
-                        aria-describedby="welcome-guest-hint"
-                        (click)="goHome('guest')"
-                    >
-                        Continue without an account
-                    </button>
-                    <p class="welcome__hint" id="welcome-guest-hint">
-                        Free while in beta. Without an account, everything stays on this device.
-                    </p>
-                </div>
+        <!-- Fixed to the bottom of the screen, as the setup's buttons that follow are -->
+        <div class="welcome__footer">
+            <div class="welcome__start w-full max-w-md">
+                <button
+                    type="button"
+                    class="btn-main"
+                    aria-describedby="welcome-guest-hint"
+                    (click)="goHome('guest')"
+                >
+                    Start without an account
+                </button>
+                <p class="welcome__hint" id="welcome-guest-hint">
+                    Free while in beta. Without an account, everything stays on this device.
+                </p>
             </div>
         </div>
     `,
@@ -60,10 +64,20 @@ export class WelcomeComponent {
         });
     }
 
-    /** Answered, so it isn't asked again on this device, and on to Home. */
+    /**
+     * Answered, so it isn't asked again on this device, and on to Home. Welcomed for the first
+     * time, the setup's due, even where a link opened this screen straight away rather than
+     * Home sending it here (which marks it due itself).
+     */
     protected goHome(answer: 'guest' | 'signed-in') {
         if (localStorage.getItem(WELCOMED_KEY) === answer) {
             return;
+        }
+        if (
+            localStorage.getItem(WELCOMED_KEY) === null &&
+            localStorage.getItem(SETUP_KEY) === null
+        ) {
+            localStorage.setItem(SETUP_KEY, SETUP_DUE);
         }
         localStorage.setItem(WELCOMED_KEY, answer);
         void (answer === 'signed-in'

@@ -904,20 +904,16 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
-            it('the setup, its name, sets a week, equipment, body and weight questions, then Today, all set and getting started', async () => {
+            it('the setup, its name, equipment, body and weight questions, then Today, all set and getting started', async () => {
                 // Welcomed as a guest, as the welcome screen does before the setup
                 localStorage.setItem('welcomed', 'guest');
                 localStorage.setItem('setup', 'due');
                 await open('/welcome/setup');
                 await expectNoViolations();
 
-                // Name, goal, the sets a week on a wheel, then equipment, with a chip picked
+                // Name, goal, then equipment, with a chip picked
                 click('.setup__actions .btn-main');
                 await settle();
-                click('.setup__actions .btn-main');
-                await settle();
-                expect(fixture.nativeElement.querySelector('app-weekly-sets-field')).not.toBeNull();
-                await expectNoViolations();
                 click('.setup__actions .btn-main');
                 await settle();
                 click('app-equipment-chips button');

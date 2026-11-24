@@ -80,7 +80,7 @@ test.describe('the log', () => {
             // Its run, for the page's ‹ to come back to
             /^\/exercises\/back-squat\?run=\d+-sprints$/
         );
-        await expect(history.entry('Legs')).toContainText('2 of 5 rounds · stopped');
+        await expect(history.entry('Legs')).toContainText('ended in round 3 of 5');
         await expect(history.entry('Legs')).toContainText('Back squat: 10 @ 60, 8 @ 62.5 kg');
         await expect(history.entry('AMRAP')).toContainText('7 rounds + 3 in 20:00');
 

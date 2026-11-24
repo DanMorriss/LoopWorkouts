@@ -18,6 +18,7 @@
         "close",
         "content_copy",
         "delete",
+        "done_all",
         "drag_indicator",
         "edit",
         "edit_note",
@@ -57,5 +58,5 @@
         "visibility_off",
         "volume_off"
     ],
-    "sha256": "6d8bc60db5260d363f2399f140e93063155a65a17b0a4f94ca15ab598cb13cb5"
+    "sha256": "969a0615a120b56bf4c7feaef59a168a9141bb6aafcf902e307c2ac45660912d"
 }

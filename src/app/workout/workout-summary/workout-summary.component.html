@@ -61,35 +61,16 @@
         @if (entry()) {
             <app-summary-stats [entry]="entry()!" />
 
-            @if (personalBests().length) {
-                <div class="summary__bests" aria-live="polite">
-                    <h3>Personal bests</h3>
-                    <ul>
-                        @for (best of personalBests(); track best) {
-                            <li>{{ best }}</li>
-                        }
-                    </ul>
-                </div>
-            }
-
-            <!-- A moment to mark, so up with the bests rather than among the step-ups -->
+            <!-- The result: each exercise against last time, new bests marked (PRG-2), and a
+                 new kettlebell when one's earned (PRG-14) -->
+            <app-summary-bests [entry]="entry()!" />
             <app-summary-kettlebell />
-            <app-summary-sets />
+            <!-- Then what to do next time, ahead of what was done (2026-11-24) -->
             <app-summary-step-ups />
             <app-summary-swaps />
-            <!-- After the swaps, as it says how to keep one of a ready-made workout -->
+            <!-- After the swaps, as it says how to keep them, on a ready-made workout -->
             <app-summary-copy (copied)="copied.emit($event)" />
-
-            @if (muscles().hasExercises) {
-                <section class="summary__section" aria-labelledby="summary-muscles">
-                    <h3 id="summary-muscles">Muscles worked</h3>
-                    <app-body-map
-                        class="summary__body-map"
-                        [main]="muscles().main"
-                        [supporting]="muscles().supporting"
-                    />
-                </section>
-            }
+            <app-summary-sets />
 
             <section class="summary__section">
                 <label class="picker-field" for="summary-note">
@@ -105,35 +86,31 @@
                 </label>
             </section>
 
-            <!-- Before the next workout, as it's what to do now -->
+            @if (muscles().hasExercises) {
+                <section class="summary__section" aria-labelledby="summary-muscles">
+                    <h3 id="summary-muscles">Muscles worked</h3>
+                    <app-body-map
+                        class="summary__body-map"
+                        [main]="muscles().main"
+                        [supporting]="muscles().supporting"
+                    />
+                </section>
+            }
+
+            <!-- Last, offered rather than pushed: Done is the main button (2026-11-24). The next
+                 workout to suggest is on Progress, where Done goes. -->
             @if (stretches(); as offer) {
                 <app-summary-stretch [offer]="offer" (start)="startStretches($event)" />
             }
-
-            <!-- As the history page suggests it; started from there or the library, not here -->
-            <app-suggested-workout class="summary__suggestion" [startable]="false" />
         } @else {
             <p class="summary__nothing">Nothing to log: no step was done before it ended.</p>
         }
     </div>
 
     <div class="summary__actions">
-        <!-- The stretches' Start, where it's seen without scrolling, over Done -->
-        @if (stretches(); as offer) {
-            <button
-                type="button"
-                class="btn-main summary__stretch"
-                [attr.aria-label]="'Stretch what you worked, ' + offer.time.spoken"
-                (click)="startStretches(offer.workout)"
-            >
-                Stretch what you worked
-            </button>
-        }
-        <button
-            type="button"
-            [class]="stretches() ? 'btn-pill summary__done' : 'btn-main summary__done'"
-            (click)="leave('done')"
-        >
+        <!-- The finish, so the main button: the stretches are offered above, not pushed
+             (until 2026-11-24 they were the main button here, and Done under them) -->
+        <button type="button" class="btn-main summary__done" (click)="leave('done')">
             <mat-icon aria-hidden="true">check</mat-icon>
             Done
         </button>

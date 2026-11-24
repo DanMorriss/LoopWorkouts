@@ -15,6 +15,7 @@ import {
 import { ConsentService } from '../../../account/consent.service';
 import { describeRounds, formatDuration } from '../../../history/history-format';
 import { bodyWeightHint } from '../../../models/calories';
+import { capitalise } from '../../../models/exercise';
 import { HistoryEntry } from '../../../models/history';
 import { WeightFieldComponent } from '../../../shared/components/weight-field/weight-field.component';
 import { injectFocusAfterRender } from '../../../shared/focus-after-render';
@@ -84,9 +85,10 @@ import { SettingsStore } from '../../../shared/state/settings-store.service';
 
         .summary__stats {
             display: grid;
-            // Two or three: Time, Rounds and, with a body weight, Calories
-            grid-auto-columns: 1fr;
-            grid-auto-flow: column;
+            // Two or three: Time, Rounds and, with a body weight, Calories. Side by side where
+            // they fit, and onto more rows where they don't (large text), rather than past the
+            // sheet's edge, which made it scroll sideways (until 2026-11-24)
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr));
             gap: 0.75rem;
             margin: 1.25rem 0 0;
             border-radius: 0.75rem;
@@ -146,7 +148,8 @@ export class SummaryStatsComponent {
     readonly entry = input.required<HistoryEntry>();
 
     protected readonly duration = computed(() => formatDuration(this.entry().activeSeconds));
-    protected readonly rounds = computed(() => describeRounds(this.entry()));
+    // Starting its tile: "Ended in round 2 of 3"
+    protected readonly rounds = computed(() => capitalise(describeRounds(this.entry())));
     protected readonly burnt = computed(() => this.calories.describe(this.entry()));
     protected readonly afterburn = computed(() =>
         this.burnt() ? this.calories.describeAfterburn(this.entry()) : null

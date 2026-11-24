@@ -159,32 +159,11 @@
     }
 }
 
-.summary__bests {
-    margin: 0.75rem 0 0;
-    padding-left: 1.25rem;
-    color: var(--text-strong);
-
-    h3 {
-        margin: 0 0 0.25rem;
-    }
-
-    ul {
-        margin: 0;
-        padding-left: 1.25rem;
-    }
-
-    li + li {
-        margin-top: 0.2rem;
-    }
-}
-
+// Smaller than on Progress, where it's the point: here it's a glance at what was worked
 .summary__body-map {
-    margin-top: 0.75rem;
-}
-
-// The card for the workout to do next, when there is one
-.summary__suggestion:not(:empty) {
-    margin-top: 1.5rem;
+    display: block;
+    max-width: 14rem;
+    margin: 0.75rem auto 0;
 }
 
 .summary__nothing {
@@ -202,7 +181,6 @@
     border-top: 1px solid var(--border-soft);
 }
 
-.summary__stretch,
 .summary__done {
     width: min(100%, 16rem);
 }

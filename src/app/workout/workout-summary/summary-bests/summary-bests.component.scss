@@ -1,0 +1,44 @@
+@use 'panel-card' as *;
+@use 'chip' as *;
+
+// A card straight under the figures: the result, ahead of the sets and what's next
+.bests {
+    @include panel-card;
+    margin-top: 1rem;
+
+    h3 {
+        margin: 0 0 0.5rem;
+        color: var(--text-strong);
+        font-size: 1.1rem;
+    }
+}
+
+.bests__list {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+// The exercise's name, the New best tag beside it, and how it went under them
+.bests__line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem 0.5rem;
+}
+
+.bests__name {
+    color: var(--text-strong);
+    font-weight: 600;
+}
+
+.bests__tag {
+    @include tag;
+}
+
+.bests__text {
+    flex-basis: 100%;
+    color: var(--text-muted);
+}

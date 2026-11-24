@@ -129,7 +129,16 @@
         align-self: center;
     }
 
-    .workout-page > :not(.workout-stage) {
+    // The parts beside the ring, by name: not "everything but the ring", which caught the
+    // summary and the dialogs over the page too, shrinking them to a band (fixed 2026-11-24)
+    .workout-page
+        > :is(
+            .workout-section,
+            .workout-status,
+            app-workout-note,
+            app-up-next-card,
+            app-workout-controls
+        ) {
         grid-column: 2;
         justify-self: center;
     }

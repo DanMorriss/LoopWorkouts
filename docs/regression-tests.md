@@ -715,9 +715,9 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     5. Start Rounds, `runFor` into round 2; ⌄ back; start Other from its card.
 - **Expected:**
     1. The summary says "Nothing to log: no step was done before it ended.", with no note box; Done opens Progress with nothing logged.
-    2. "Workout ended", "1 of 3 rounds · stopped" with Time less pauses.
+    2. "Workout ended", "Ended in round 2 of 3" with Time less pauses.
     3. The run is paused where it was ended, focus on Resume.
-    4. Progress has one entry (not two), "1 of 3 rounds · stopped", highlighted.
+    4. Progress has one entry (not two), "ended in round 2 of 3", highlighted.
     5. Rounds is logged as stopped and Other is running.
 
 ### REG-RUN-05 · Skip a step
@@ -847,7 +847,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Expected:**
     1. "Last time: 10, 10, 12 @ 60 kg" and a button "↑ Try 62.5 kg".
     2. The weight wheel is 62.5 kg and the button goes; the saved workout is 62.5 kg.
-    3. The summary lists Personal bests with "Heaviest: 62.5 kg × 10"; Next time "Back squat: try 65 kg, up from 62.5 kg"; Muscles worked shades Quads and Glutes as main.
+    3. The summary's Since last time has "Back squat", "New best", "62.5 kg × 10, up from 60 kg × 12"; Next time "Back squat: try 65 kg, up from 62.5 kg"; Muscles worked shades Quads and Glutes as main.
     4. The line says Applied, with focus on it; the saved step is 65 kg.
 
 ### REG-RUN-14 · One side at a time
@@ -973,7 +973,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Expected:**
     1. "Last 7 days: 3 workouts · 1:02:30" (AMRAP is outside the last 7 × 24 hours).
     2. Under Log: "Today", "Yesterday", "Monday 9 November", then "Tuesday 3 November", newest first.
-    3. Sprints: "8:00 AM · 12:30 · 3 rounds", "Back squat: 3 × 10 @ 60 kg", its name a link to `/exercises/back-squat?run=<its id>`, whose ‹ Progress comes back to it. Legs: "2 of 5 rounds · stopped", "Back squat: 10 @ 60, 8 @ 62.5 kg". AMRAP: "7 rounds + 3 in 20:00".
+    3. Sprints: "8:00 AM · 12:30 · 3 rounds", "Back squat: 3 × 10 @ 60 kg", its name a link to `/exercises/back-squat?run=<its id>`, whose ‹ Progress comes back to it. Legs: "ended in round 3 of 5", "Back squat: 10 @ 60, 8 @ 62.5 kg". AMRAP: "7 rounds + 3 in 20:00".
     4. Gym's lines sit under "Warmup", and its superset's under "Superset", as a list of their own.
     5. In pounds, 60 kg shows as 132.5 lb.
 - **Empty state (separate case):** with no history, "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to your workouts**.

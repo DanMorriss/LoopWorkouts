@@ -15,16 +15,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MAX_NOTE_LENGTH } from '../../models/history';
 import { isActiveRest } from '../../models/active-rest';
 import { stretchOffer } from '../../models/stretch-routine';
-import { isMostRounds, newBests, roundsScore, sessionsByExercise } from '../../models/progress';
 import { musclesInSets } from '../../models/workout-muscles';
 import { BodyMapComponent } from '../../shared/components/body-map/body-map.component';
 import { ActiveRunService } from '../../shared/run/active-run.service';
 import { ExerciseStore } from '../../shared/state/exercise-store.service';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
-import { describeScore, entryName } from '../../history/history-format';
-import { SuggestedWorkoutComponent } from '../../history/suggested-workout/suggested-workout.component';
-import { bestLines } from '../../exercises/progress-format';
+import { entryName } from '../../history/history-format';
 import { injectPrefersReducedMotion } from '../../shared/reduced-motion';
 import { SummarySetsComponent } from './summary-sets/summary-sets.component';
 import { SummaryCopyComponent } from './summary-copy/summary-copy.component';
@@ -34,6 +31,7 @@ import { SummaryStretchComponent } from './summary-stretch/summary-stretch.compo
 import { SummarySwapsComponent } from './summary-swaps/summary-swaps.component';
 import { SheetDrag } from '../../shared/sheet-drag';
 import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
+import { SummaryBestsComponent } from './summary-bests/summary-bests.component';
 
 /**
  * How the workout went, once it's finished or ended with End workout: the time, rounds and
@@ -51,10 +49,10 @@ import { SummaryStatsComponent } from './summary-stats/summary-stats.component';
         CdkTrapFocus,
         FormField,
         MatIconModule,
-        SuggestedWorkoutComponent,
         SummaryCopyComponent,
         SummarySetsComponent,
         SummaryStatsComponent,
+        SummaryBestsComponent,
         SummaryKettlebellComponent,
         SummaryStepUpsComponent,
         SummaryStretchComponent,
@@ -100,35 +98,6 @@ export class WorkoutSummaryComponent {
     });
 
     protected readonly weightUnit = this.settings.weightUnit;
-    /**
-     * The bests this run set (PRG-2), e.g. "Heaviest: 80 kg × 5", and "Most rounds" for a
-     * time limit (PRG-7). Equalling a best isn't one, and nor is doing it for the first time.
-     */
-    protected readonly personalBests = computed(() => {
-        const entry = this.entry();
-        if (!entry) {
-            return [];
-        }
-        const before = sessionsByExercise(
-            this.history.entries().filter((other) => other.id !== entry.id)
-        );
-        const lines: string[] = [];
-        const score = roundsScore(entry);
-        if (score && isMostRounds(entry, this.history.entries())) {
-            lines.push(`Most rounds: ${describeScore(score)}`);
-        }
-        for (const [exerciseId, [session]] of sessionsByExercise([entry])) {
-            // Newest first, as the history is, so on a tie the earlier best stands
-            const bests = newBests([session, ...(before.get(exerciseId) ?? [])]);
-            for (const line of bestLines(bests, this.weightUnit())) {
-                if (line.entryId === entry.id) {
-                    lines.push(`${line.label}: ${line.text}`);
-                }
-            }
-        }
-        return lines;
-    });
-
     /** The muscles this workout's sets worked, main and supporting, for the body map. */
     protected readonly muscles = computed(() =>
         musclesInSets(this.run.sets(), (id) => this.exercises.byId(id))

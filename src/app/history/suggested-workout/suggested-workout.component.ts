@@ -73,16 +73,14 @@ let nextId = 0;
                             <div class="suggestion__slide">
                                 <p class="suggestion__title">{{ suggested.workout.title }}</p>
                                 <p class="suggestion__reason">{{ suggested.reason }}</p>
-                                @if (startable()) {
-                                    <button
-                                        type="button"
-                                        class="btn-main"
-                                        [attr.aria-label]="'Start ' + suggested.workout.title"
-                                        (click)="start(suggested.workout)"
-                                    >
-                                        Start
-                                    </button>
-                                }
+                                <button
+                                    type="button"
+                                    class="btn-main"
+                                    [attr.aria-label]="'Start ' + suggested.workout.title"
+                                    (click)="start(suggested.workout)"
+                                >
+                                    Start
+                                </button>
                             </div>
                         </ng-template>
                     }
@@ -93,11 +91,6 @@ let nextId = 0;
     styleUrl: './suggested-workout.component.scss',
 })
 export class SuggestedWorkoutComponent {
-    /**
-     * With a Start button, as the library's Start. Without, only the best is shown, as
-     * there's nothing to do with the rest (and nothing in them to tab to).
-     */
-    readonly startable = input(true);
     /** On Today, on a day of a planned week with nothing planned (PLN-2). */
     readonly restDay = input(false);
     /** Whether to suggest workouts: on Today, not on a planned day, as the plan says what's next. */
@@ -114,7 +107,7 @@ export class SuggestedWorkoutComponent {
 
     private readonly suggested = injectSuggestedWorkouts({
         restDay: this.restDay,
-        most: computed(() => (this.startable() ? MOST_SUGGESTIONS : 1)),
+        most: computed(() => MOST_SUGGESTIONS),
         now: this.now,
     });
     /** The workouts to suggest, best first, each with why; none where the plan says. */

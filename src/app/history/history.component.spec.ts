@@ -150,9 +150,7 @@ describe('HistoryComponent', () => {
             })
         );
 
-        expect(text('.entry__detail')).toEqual([
-            '11:00 AM · 2 of 5 rounds · stopped · 12:34 spent',
-        ]);
+        expect(text('.entry__detail')).toEqual(['11:00 AM · ended in round 3 of 5 · 12:34 spent']);
         // The time is the card's big number, said in the line above for screen readers
         expect(text('.entry__time')).toEqual(['12:34 time']);
     });
@@ -876,7 +874,7 @@ describe('HistoryComponent', () => {
                 describeRounds(
                     makeEntry({ roundsCompleted: 2, totalRounds: 5, outcome: 'stopped' })
                 )
-            ).toBe('2 of 5 rounds · stopped');
+            ).toBe('ended in round 3 of 5');
             expect(
                 describeRounds(
                     makeEntry({ roundsCompleted: 12, totalRounds: 0, outcome: 'stopped' })

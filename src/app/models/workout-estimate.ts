@@ -126,14 +126,21 @@ export function estimateWorkout(
     };
 }
 
-/**
- * An estimate as it's shown, in whole minutes: "About 25 min", "About 1 hr 5 min", "Under a
- * minute", or a time limit's "20 min"; and as screen readers hear it, "about 25 minutes".
- */
-export function estimateText(estimate: Estimate): { text: string; spoken: string } {
+/** An estimate in words: shown, short for a button, and spoken. */
+export interface EstimateText {
+    /** "About 25 min", "About 1 hr 5 min", "Under a minute", or a time limit's "20 min". */
+    text: string;
+    /** Without the "About", for a button's label: "25 min", or "<1 min". */
+    short: string;
+    /** As screen readers hear it: "about 25 minutes". */
+    spoken: string;
+}
+
+/** An estimate as it's shown, in whole minutes, and as screen readers hear it. */
+export function estimateText(estimate: Estimate): EstimateText {
     const minutes = Math.round(estimate.seconds / 60);
     if (minutes === 0) {
-        return { text: 'Under a minute', spoken: 'under a minute' };
+        return { text: 'Under a minute', short: '<1 min', spoken: 'under a minute' };
     }
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -142,8 +149,8 @@ export function estimateText(estimate: Estimate): { text: string; spoken: string
         .filter(Boolean)
         .join(' ');
     return estimate.basis === 'limit'
-        ? { text: short, spoken: long }
-        : { text: `About ${short}`, spoken: `about ${long}` };
+        ? { text: short, short, spoken: long }
+        : { text: `About ${short}`, short, spoken: `about ${long}` };
 }
 
 /**

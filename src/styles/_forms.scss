@@ -29,6 +29,13 @@
     font-size: 1rem;
 }
 
+// The muted text colour, not the browser's own see-through one, which was 3:1 on a light
+// field (2026-11-24)
+.picker-field__input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+}
+
 .picker-field__input:focus {
     outline: 2px solid var(--accent);
     outline-offset: 2px;

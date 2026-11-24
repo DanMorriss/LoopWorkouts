@@ -1778,8 +1778,11 @@ describe('WorkoutComponent', () => {
             start(amrap());
             advance(64_000);
 
-            expect(summaryText()).toContain('Personal bests');
-            expect(summaryText()).toContain('Most rounds: 12 rounds + 1');
+            // In Since last time, as a new best
+            expect(summaryText()).toContain('Since last time');
+            expect(summary()!.querySelector('.bests__line')!.textContent).toMatch(
+                /Most rounds\s*New best\s*12 rounds \+ 1/
+            );
             fixture.destroy();
         });
     });
@@ -3414,8 +3417,13 @@ describe('WorkoutComponent', () => {
             fixture.detectChanges();
 
             expect(view().summaryOpen()).toBe(true);
-            expect(summaryText()).toContain('Personal bests');
-            expect(summaryText()).toContain('Heaviest: 100 kg × 5');
+            // Named, and against the best it beat (2026-11-24)
+            const line = summary()!.querySelector('.bests__line')!;
+            expect(line.querySelector('.bests__name')!.textContent).toBe('Bench press');
+            expect(line.querySelector('.bests__tag')!.textContent).toBe('New best');
+            expect(line.querySelector('.bests__text')!.textContent).toBe(
+                '100 kg × 5, up from 80 kg × 5'
+            );
             fixture.destroy();
         });
 
@@ -3506,7 +3514,7 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('offers stretches for the muscles worked, and Start stretches runs them in its place', async () => {
+        it('offers stretches for the muscles worked, and Stretch runs them in its place', async () => {
             const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
             start(
                 makeWorkout({
@@ -3525,8 +3533,10 @@ describe('WorkoutComponent', () => {
             const card = summary()!.querySelector('[aria-labelledby="summary-stretch"]')!;
             expect(card.textContent).toContain('Stretch what you worked');
             expect(card.textContent).toContain('Doorway chest stretch');
+            // Described there, and started by the Stretch button, not a second one
+            expect(card.querySelector('button')).toBeNull();
 
-            pressInSummary('Start stretches');
+            pressInSummary('Stretch ·');
             advance(0);
             // Its sinking away finishes after the next render
             await fixture.whenStable();
@@ -3547,7 +3557,7 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('has Stretch what you worked as the main button, over Done, which starts them', async () => {
+        it('has Stretch as the main button after a finished workout, Done under it', () => {
             const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
             start(
                 makeWorkout({
@@ -3563,24 +3573,48 @@ describe('WorkoutComponent', () => {
             ).click();
             fixture.detectChanges();
 
+            // Stretching what it worked is the nudge, and Done the way past it (2026-11-24)
             const actions = summary()!.querySelector('.summary__actions')!;
             const buttons = [...actions.querySelectorAll('button')];
             expect(buttons.map((button) => button.textContent!.trim())).toEqual([
-                'Stretch what you worked',
+                'self_improvement Stretch · 1 min',
                 'check Done',
             ]);
             expect(buttons[0].classList).toContain('btn-main');
-            expect(buttons[0].getAttribute('aria-label')).toMatch(
-                /^Stretch what you worked, about \d+ minutes?$/
+            expect(buttons[0].getAttribute('aria-label')).toBe(
+                'Stretch what you worked, about 1 minute'
             );
             expect(buttons[1].classList).toContain('btn-pill');
+            fixture.destroy();
+        });
 
-            buttons[0].click();
-            advance(0);
-            await fixture.whenStable();
-            expect(entries()[0].outcome).toBe('finished');
-            expect(summary()).toBeNull();
-            expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(STRETCH_ROUTINE_ID);
+        it('has Done as the main button on ending early, Stretch under it', () => {
+            const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
+            start(
+                makeWorkout({
+                    steps: [work(2), { kind: 'reps', reps: 12, ...pushUps } as const],
+                    repeats: 2,
+                })
+            );
+            advance(2000);
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
+            fixture.detectChanges();
+            endWorkout();
+            fixture.detectChanges();
+
+            const actions = summary()!.querySelector('.summary__actions')!;
+            const buttons = [...actions.querySelectorAll('button')];
+            expect(buttons.map((button) => button.textContent!.trim())).toEqual([
+                'check Done',
+                'self_improvement Stretch · 1 min',
+                'arrow_back Back to workout',
+            ]);
+            expect(buttons[0].classList).toContain('btn-main');
+            expect(buttons[1].classList).toContain('btn-pill');
             fixture.destroy();
         });
 
@@ -3634,6 +3668,27 @@ describe('WorkoutComponent', () => {
                 expect(savedSteps(saved.id)[2]).toEqual(expect.objectContaining({ reps: 13 }));
                 expect(summaryText()).toContain('Push-ups: try 13 reps, up from 12');
                 expect(apply('Push-ups: try 13 reps, up from 12')).toBeNull();
+                fixture.destroy();
+            });
+
+            it("isn't offered for a step a workout ended early didn't do every set of", () => {
+                start(
+                    makeWorkout({
+                        steps: [{ kind: 'reps', reps: 10, name: 'Squats', weight: 60 }],
+                        repeats: 3,
+                    })
+                );
+                (
+                    fixture.nativeElement.querySelector(
+                        '#workout-pause[aria-label^="Done"]'
+                    ) as HTMLElement
+                ).click();
+                fixture.detectChanges();
+                TestBed.inject(ActiveRunService).end();
+                fixture.detectChanges();
+
+                // 1 of its 3 sets: "Every set was done in full" wouldn't be true
+                expect(summary()!.querySelector('app-summary-step-ups section')).toBeNull();
                 fixture.destroy();
             });
 
@@ -3815,7 +3870,7 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('suggests the next workout as the history does, without starting it from here', () => {
+        it("doesn't suggest the next workout, which Progress does, where Done goes", () => {
             TestBed.inject(WorkoutStore).addWorkout({
                 title: 'Legs',
                 repeats: 3,
@@ -3825,9 +3880,7 @@ describe('WorkoutComponent', () => {
             });
             benchOnce(80, []);
 
-            expect(summary()!.querySelector('.suggestion__title')?.textContent).toBe('Legs');
-            expect(summaryText()).toContain('Suggested next workout');
-            expect(summary()!.querySelector('.suggestion button')).toBeNull();
+            expect(summary()!.querySelector('app-suggested-workout')).toBeNull();
             fixture.destroy();
         });
 
@@ -3838,7 +3891,7 @@ describe('WorkoutComponent', () => {
             const dialog = summary()!.querySelector('[role="dialog"]')!;
             expect(dialog.getAttribute('aria-modal')).toBe('true');
             expect(summaryText()).toContain('Workout ended');
-            expect(stats()).toEqual(['Time: 0:03', 'Rounds: 1 of 3 rounds · stopped']);
+            expect(stats()).toEqual(['Time: 0:03', 'Rounds: Ended in round 2 of 3']);
             expect(summaryText()).toContain('Push-ups: 20 reps @ 40 kg');
             expect(entries()).toEqual([expect.objectContaining({ outcome: 'stopped' })]);
             expect(document.activeElement?.id).toBe('summary-heading');

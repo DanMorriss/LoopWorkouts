@@ -85,7 +85,7 @@
 - Given workouts today, yesterday and last Tuesday, then they're grouped under Today, Yesterday and the date, newest first.
 - Given a finished 3-round workout of 12:30 started at 9:05 AM, then it shows "9:05 AM · 12:30 · 3 rounds".
 - Given a 20:00 time limit that ran out 3 steps into round 8, then it shows "7 rounds + 3 in 20:00"; ended after 4 rounds, "4 rounds · stopped before 20:00".
-- Given a workout stopped in round 3 of 5, then it shows "2 of 5 rounds · stopped".
+- Given a workout stopped in round 3 of 5, then it shows "ended in round 3 of 5" (until 2026-11-24, "2 of 5 rounds · stopped").
 - Given three workouts this week totalling 45 minutes and one 8 days ago, then the summary says "3 workouts · 45:00".
 - Given a note of 200 characters, then it's cut to 120.
 - Given an entry with a note, when I save it empty, then the note is removed.

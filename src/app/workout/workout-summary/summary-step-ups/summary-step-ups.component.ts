@@ -11,7 +11,7 @@ import {
 } from '../../../models/progress';
 import { kettlebellSteps } from '../../../models/kettlebell';
 import { weightToKg } from '../../../models/weight';
-import { allSteps, Step, withEachRepSet } from '../../../models/workout';
+import { allSteps, runPlan, Step, withEachRepSet } from '../../../models/workout';
 import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
@@ -64,6 +64,13 @@ import { injectFocusAfterRender } from '../../../shared/focus-after-render';
                         </li>
                     }
                 </ul>
+                <!-- Two or more to apply: all at once, rather than a tap each (2026-11-24) -->
+                @if (canApply() && toApply().length > 1) {
+                    <button type="button" class="btn-pill step-ups__all" (click)="applyAll()">
+                        <mat-icon aria-hidden="true">done_all</mat-icon>
+                        Apply all {{ toApply().length }}
+                    </button>
+                }
             </section>
         }
     `,
@@ -110,7 +117,9 @@ export class SummaryStepUpsComponent {
             ...[
                 ...progressionSuggestions(sets, steps, unit, kettlebell),
                 ...restSuggestions(sets, workout, kettlebell),
-            ].filter(({ step }) => !applied.has(step) && !swappedAway(step)),
+            ].filter(
+                ({ step }) => !applied.has(step) && !swappedAway(step) && !this.cutShort(step)
+            ),
         ]
             .sort((a, b) => a.step - b.step)
             .map((suggestion) => {
@@ -126,6 +135,21 @@ export class SummaryStepUpsComponent {
             });
     });
 
+    /**
+     * A step a workout ended early didn't do every set of: not stepped up, as the hint ("Every
+     * set was done in full") wouldn't be true of it (offered until 2026-11-24). One that ran
+     * until stopped, or to a time limit, has no set number of sets to fall short of.
+     */
+    private cutShort(step: number): boolean {
+        const workout = this.run.workout();
+        if (this.run.isComplete() || !workout || workout.repeats < 1) {
+            return false;
+        }
+        const perRound = runPlan(workout).places.filter((place) => place?.step === step).length;
+        const done = this.run.sets().filter((set) => set.step === step).length;
+        return done < perRound * workout.repeats;
+    }
+
     /** The same exercise in two steps, both stepping up alike, says so once. */
     protected readonly lines = computed(() => {
         const seen = new Set<string>();
@@ -139,9 +163,24 @@ export class SummaryStepUpsComponent {
      * its Applied.
      */
     protected apply(text: string, step: number) {
+        this.applyLines([text]);
+        this.focusAfterRender(`step-up-${step}`);
+    }
+
+    /** The lines still to apply. */
+    protected readonly toApply = computed(() => this.lines().filter((line) => !line.applied));
+
+    /** Every step-up still to apply, with focus on the first one's Applied. */
+    protected applyAll() {
+        const lines = this.toApply();
+        this.applyLines(lines.map((line) => line.text));
+        this.focusAfterRender(`step-up-${lines[0].step}`);
+    }
+
+    private applyLines(texts: readonly string[]) {
         const steps = allSteps(this.run.workout() ?? { blocks: [] });
         const next = new Map(this.applied());
-        for (const { suggestion } of this.items().filter((item) => item.text === text)) {
+        for (const { suggestion } of this.items().filter((item) => texts.includes(item.text))) {
             // A shorter rest is for next time only, as a longer time is (PRG-15)
             if (suggestion.kind === 'rest') {
                 this.store.updateSavedRest(suggestion.step, suggestion.to);
@@ -163,7 +202,6 @@ export class SummaryStepUpsComponent {
             this.run.keepStepUp(suggestion.step);
         }
         this.applied.set(next);
-        this.focusAfterRender(`step-up-${step}`);
     }
 
     /**

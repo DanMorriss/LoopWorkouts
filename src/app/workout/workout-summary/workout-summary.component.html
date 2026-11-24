@@ -61,35 +61,16 @@
         @if (entry()) {
             <app-summary-stats [entry]="entry()!" />
 
-            @if (personalBests().length) {
-                <div class="summary__bests" aria-live="polite">
-                    <h3>Personal bests</h3>
-                    <ul>
-                        @for (best of personalBests(); track best) {
-                            <li>{{ best }}</li>
-                        }
-                    </ul>
-                </div>
-            }
-
-            <!-- A moment to mark, so up with the bests rather than among the step-ups -->
+            <!-- The result: each exercise against last time, new bests marked (PRG-2), and a
+                 new kettlebell when one's earned (PRG-14) -->
+            <app-summary-bests [entry]="entry()!" />
             <app-summary-kettlebell />
-            <app-summary-sets />
+            <!-- Then what to do next time, ahead of what was done (2026-11-24) -->
             <app-summary-step-ups />
             <app-summary-swaps />
-            <!-- After the swaps, as it says how to keep one of a ready-made workout -->
+            <!-- After the swaps, as it says how to keep them, on a ready-made workout -->
             <app-summary-copy (copied)="copied.emit($event)" />
-
-            @if (muscles().hasExercises) {
-                <section class="summary__section" aria-labelledby="summary-muscles">
-                    <h3 id="summary-muscles">Muscles worked</h3>
-                    <app-body-map
-                        class="summary__body-map"
-                        [main]="muscles().main"
-                        [supporting]="muscles().supporting"
-                    />
-                </section>
-            }
+            <app-summary-sets />
 
             <section class="summary__section">
                 <label class="picker-field" for="summary-note">
@@ -105,38 +86,61 @@
                 </label>
             </section>
 
-            <!-- Before the next workout, as it's what to do now -->
-            @if (stretches(); as offer) {
-                <app-summary-stretch [offer]="offer" (start)="startStretches($event)" />
+            @if (muscles().hasExercises) {
+                <section class="summary__section" aria-labelledby="summary-muscles">
+                    <h3 id="summary-muscles">Muscles worked</h3>
+                    <app-body-map
+                        class="summary__body-map"
+                        [main]="muscles().main"
+                        [supporting]="muscles().supporting"
+                    />
+                </section>
             }
 
-            <!-- As the history page suggests it; started from there or the library, not here -->
-            <app-suggested-workout class="summary__suggestion" [startable]="false" />
+            <!-- Last: what the stretches are, which the Stretch button below starts. The next
+                 workout to suggest is on Progress, where Done goes. -->
+            @if (stretches(); as offer) {
+                <app-summary-stretch [offer]="offer" />
+            }
         } @else {
             <p class="summary__nothing">Nothing to log: no step was done before it ended.</p>
         }
     </div>
 
     <div class="summary__actions">
-        <!-- The stretches' Start, where it's seen without scrolling, over Done -->
+        <!-- After a finished workout, stretching what it worked is the main button, and Done
+             the way past it (2026-11-24); ended early, Done comes first and Stretch under it -->
         @if (stretches(); as offer) {
+            @if (!finished()) {
+                <ng-container [ngTemplateOutlet]="done" />
+            }
             <button
                 type="button"
-                class="btn-main summary__stretch"
+                [class]="finished() ? 'btn-main summary__stretch' : 'btn-pill summary__stretch'"
                 [attr.aria-label]="'Stretch what you worked, ' + offer.time.spoken"
                 (click)="startStretches(offer.workout)"
             >
-                Stretch what you worked
+                <mat-icon aria-hidden="true">self_improvement</mat-icon>
+                Stretch · {{ offer.time.short }}
             </button>
+            @if (finished()) {
+                <ng-container [ngTemplateOutlet]="done" />
+            }
+        } @else {
+            <ng-container [ngTemplateOutlet]="done" />
         }
-        <button
-            type="button"
-            [class]="stretches() ? 'btn-pill summary__done' : 'btn-main summary__done'"
-            (click)="leave('done')"
-        >
-            <mat-icon aria-hidden="true">check</mat-icon>
-            Done
-        </button>
+        <ng-template #done>
+            <button
+                type="button"
+                [class]="
+                    stretches() && finished() ? 'btn-pill summary__done' : 'btn-main summary__done'
+                "
+                (click)="leave('done')"
+            >
+                <mat-icon aria-hidden="true">check</mat-icon>
+                Done
+            </button>
+        </ng-template>
         @if (!finished()) {
             <button type="button" class="btn-pill summary__back" (click)="leave('back')">
                 <mat-icon aria-hidden="true">arrow_back</mat-icon>

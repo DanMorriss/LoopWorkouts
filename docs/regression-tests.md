@@ -715,9 +715,9 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     5. Start Rounds, `runFor` into round 2; ⌄ back; start Other from its card.
 - **Expected:**
     1. The summary says "Nothing to log: no step was done before it ended.", with no note box; Done opens Progress with nothing logged.
-    2. "Workout ended", "1 of 3 rounds · stopped" with Time less pauses.
+    2. "Workout ended", "Ended in round 2 of 3" with Time less pauses.
     3. The run is paused where it was ended, focus on Resume.
-    4. Progress has one entry (not two), "1 of 3 rounds · stopped", highlighted.
+    4. Progress has one entry (not two), "ended in round 2 of 3", highlighted.
     5. Rounds is logged as stopped and Other is running.
 
 ### REG-RUN-05 · Skip a step
@@ -847,7 +847,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Expected:**
     1. "Last time: 10, 10, 12 @ 60 kg" and a button "↑ Try 62.5 kg".
     2. The weight wheel is 62.5 kg and the button goes; the saved workout is 62.5 kg.
-    3. The summary lists Personal bests with "Heaviest: 62.5 kg × 10"; Next time "Back squat: try 65 kg, up from 62.5 kg"; Muscles worked shades Quads and Glutes as main.
+    3. The summary's Since last time has "Back squat", "New best", "62.5 kg × 10, up from 60 kg × 12"; Next time "Back squat: try 65 kg, up from 62.5 kg"; Muscles worked shades Quads and Glutes as main.
     4. The line says Applied, with focus on it; the saved step is 65 kg.
 
 ### REG-RUN-14 · One side at a time
@@ -905,7 +905,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Preconditions:** workout "Push": Push-up (`builtin:push-up`) 10, once.
 - **Steps:**
     1. Start; Done.
-    2. Press **Start stretches** in Stretch what you worked.
+    2. Press **Stretch**, the main button in the bottom bar.
     3. Reload.
 - **Expected:** 1. The summary's Stretch what you worked has the doorway chest stretch. 2. The summary goes and Doorway chest stretch is running, focus on Pause. 3. Still running; Workouts still has only Push.
 - **Left to Vitest:** which stretches are picked, and their order (`stretch-routine.spec.ts`); the push-ups logged as finished, and no stretches on the stretches' own summary (`workout.component.spec.ts`).
@@ -973,7 +973,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Expected:**
     1. "Last 7 days: 3 workouts · 1:02:30" (AMRAP is outside the last 7 × 24 hours).
     2. Under Log: "Today", "Yesterday", "Monday 9 November", then "Tuesday 3 November", newest first.
-    3. Sprints: "8:00 AM · 12:30 · 3 rounds", "Back squat: 3 × 10 @ 60 kg", its name a link to `/exercises/back-squat?run=<its id>`, whose ‹ Progress comes back to it. Legs: "2 of 5 rounds · stopped", "Back squat: 10 @ 60, 8 @ 62.5 kg". AMRAP: "7 rounds + 3 in 20:00".
+    3. Sprints: "8:00 AM · 12:30 · 3 rounds", "Back squat: 3 × 10 @ 60 kg", its name a link to `/exercises/back-squat?run=<its id>`, whose ‹ Progress comes back to it. Legs: "ended in round 3 of 5", "Back squat: 10 @ 60, 8 @ 62.5 kg". AMRAP: "7 rounds + 3 in 20:00".
     4. Gym's lines sit under "Warmup", and its superset's under "Superset", as a list of their own.
     5. In pounds, 60 kg shows as 132.5 lb.
 - **Empty state (separate case):** with no history, "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to your workouts**.
@@ -1118,7 +1118,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Preconditions:** `guest()`, workout "Push" (Push-up 10), a finished Push today at 07:00 with two sets of push-ups, nothing planned.
 - **Steps:** Open Today; press **Start stretches** on the card's first slide.
 - **Expected:** The card is headed "After today's training"; its first slide ("Suggestion 1 of …") is Stretch what you worked, then the suggested workouts follow; Start stretches opens `/workout` on Doorway chest stretch.
-- **Left to Vitest:** the stretches gone once done, and none while planned training is left today (`home.component.spec.ts`); which sets count (`setsToStretchToday()` in `stretch-routine.spec.ts`); the summary's bottom-bar Stretch what you worked (`workout.component.spec.ts`).
+- **Left to Vitest:** the stretches gone once done, and none while planned training is left today (`home.component.spec.ts`); which sets count (`setsToStretchToday()` in `stretch-routine.spec.ts`); the summary's bottom-bar Stretch, main after finishing and under Done after ending early (`workout.component.spec.ts`).
 
 ---
 

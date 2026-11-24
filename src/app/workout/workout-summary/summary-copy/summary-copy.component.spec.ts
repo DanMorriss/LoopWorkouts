@@ -29,19 +29,10 @@ describe('SummaryCopyComponent (LIB-6)', () => {
 
     const el = (selector: string) => fixture.nativeElement.querySelector(selector);
 
-    it('offers Make a copy after a ready-made workout, giving the copy to open', () => {
+    it("isn't there after a ready-made workout with no swap, as there's nothing to keep", () => {
         create(store.findAnyWorkout('builtin:gym-legs')!);
-        const copied: Workout[] = [];
-        fixture.componentInstance.copied.subscribe((copy) => copied.push(copy));
 
-        expect(el('.summary-copy p').textContent).toBe(
-            'Gym legs is ready-made: its reps and weights can change, but to change its exercises, make a copy.'
-        );
-        el('.summary-copy__make').click();
-
-        expect(copied.map((copy) => copy.title)).toEqual(['Gym legs (copy)']);
-        expect(store.workouts()).toEqual(copied);
-        expect(TestBed.inject(UndoService).offer()?.message).toBe('Made a copy of "Gym legs"');
+        expect(el('.summary-copy')).toBeNull();
     });
 
     it('says to make a copy to keep a swap, as its exercises stay as they are', () => {
@@ -58,6 +49,12 @@ describe('SummaryCopyComponent (LIB-6)', () => {
         expect(el('.summary-copy p').textContent).toBe(
             'Gym legs is ready-made, so its exercises stay as they are. To use your swap next time, make a copy.'
         );
+        const copied: Workout[] = [];
+        fixture.componentInstance.copied.subscribe((copy) => copied.push(copy));
+        el('.summary-copy__make').click();
+
+        expect(copied.map((copy) => copy.title)).toEqual(['Gym legs (copy)']);
+        expect(TestBed.inject(UndoService).offer()?.message).toBe('Made a copy of "Gym legs"');
     });
 
     it('offers nothing after one of your own', () => {

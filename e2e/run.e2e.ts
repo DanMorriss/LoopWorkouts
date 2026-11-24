@@ -226,7 +226,7 @@ test.describe('ending early', () => {
             await run.startFromLibrary('Rounds');
             await run.wait(17_000);
             await run.endWorkout();
-            await expect(run.stat('Rounds')).toHaveText('1 of 3 rounds · stopped');
+            await expect(run.stat('Rounds')).toHaveText('Ended in round 2 of 3');
 
             // Back to it, paused where it was ended
             await run.summary.getByRole('button', { name: 'Back to workout' }).click();
@@ -238,7 +238,7 @@ test.describe('ending early', () => {
             await run.summaryDone.click();
             await expect(page).toHaveURL(/\/history/);
             await expect(new HistoryPage(page).entries).toHaveCount(1);
-            await expect(new HistoryPage(page).entries).toContainText('1 of 3 rounds · stopped');
+            await expect(new HistoryPage(page).entries).toContainText('ended in round 2 of 3');
 
             // Starting another workout logs the one going as stopped
             await app.tab('Workouts').click();
@@ -483,7 +483,7 @@ test.describe('reloading', () => {
         const history = await context.newPage();
         await history.goto('/history');
         await expect(new HistoryPage(history).entries).toHaveCount(1);
-        await expect(new HistoryPage(history).entries).toContainText('stopped');
+        await expect(new HistoryPage(history).entries).toContainText('ended in round');
     });
 
     test(
@@ -499,7 +499,7 @@ test.describe('reloading', () => {
             await expect(run.summary).toHaveAccessibleName('Workout finished');
             await run.summaryDone.click();
             await expect(new HistoryPage(page).entries).toHaveCount(1);
-            await expect(new HistoryPage(page).entries).not.toContainText('stopped');
+            await expect(new HistoryPage(page).entries).not.toContainText('ended in round');
         }
     );
 });
@@ -906,10 +906,13 @@ test.describe('last time and step-ups', () => {
                 }
             }
             await expect(run.summary).toHaveAccessibleName('Workout finished');
+            // Since last time: the squats by name, a new best against the one it beat
             await expect(
-                run.summary.getByRole('heading', { name: 'Personal bests' })
+                run.summary.getByRole('heading', { name: 'Since last time' })
             ).toBeVisible();
-            await expect(run.summary).toContainText('Heaviest: 62.5 kg × 10');
+            await expect(
+                run.summary.getByRole('listitem').filter({ hasText: 'New best' })
+            ).toHaveText(/Back squat\s*New best\s*62\.5 kg × 10, up from 60 kg × 12/);
             await expect(run.summary).toContainText('Back squat: try 65 kg, up from 62.5 kg');
             await expect(
                 run.summary.getByRole('heading', { name: 'Muscles worked' })
@@ -1126,7 +1129,8 @@ test.describe('stretches after a workout', () => {
 
             const stretches = run.summary.getByRole('region', { name: 'Stretch what you worked' });
             await expect(stretches).toContainText('Doorway chest stretch');
-            await stretches.getByRole('button', { name: /^Start stretches/ }).click();
+            // The main button starts them
+            await run.summary.getByRole('button', { name: /^Stretch what you worked/ }).click();
 
             await expect(run.summary).toBeHidden();
             await expect(run.face).toContainText('Doorway chest stretch');

@@ -1,17 +1,15 @@
-import { Component, input, output } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, input } from '@angular/core';
 import { ROUTINE_HOLD_SECONDS, StretchOffer } from '../../../models/stretch-routine';
-import { Workout } from '../../../models/workout';
 import { WorkoutOutlineComponent } from '../../../shared/components/workout-outline/workout-outline.component';
 
 /**
  * A few stretches for the muscles this workout worked hardest, on its summary (the summary's
- * `stretchOffer()`): what they are, how long they take, and Start, which ends this run and
- * starts them. The summary's bottom bar has the same Start, as Stretch what you worked.
+ * `stretchOffer()`): what they are and how long they take. The summary's Stretch button, in
+ * its bottom bar, starts them; until 2026-11-24 this had a Start of its own too.
  */
 @Component({
     selector: 'app-summary-stretch',
-    imports: [MatIconModule, WorkoutOutlineComponent],
+    imports: [WorkoutOutlineComponent],
     template: `
         @let stretches = offer();
         <section class="stretch" aria-labelledby="summary-stretch">
@@ -21,23 +19,12 @@ import { WorkoutOutlineComponent } from '../../../shared/components/workout-outl
                 {{ holdSeconds }} seconds.
             </p>
             <app-workout-outline class="stretch__outline" [workout]="stretches.workout" />
-            <button
-                type="button"
-                class="btn-pill stretch__start"
-                [attr.aria-label]="'Start stretches, ' + stretches.time.spoken"
-                (click)="start.emit(stretches.workout)"
-            >
-                <mat-icon aria-hidden="true">play_arrow</mat-icon>
-                Start stretches
-            </button>
         </section>
     `,
     styleUrl: './summary-stretch.component.scss',
 })
 export class SummaryStretchComponent {
     readonly offer = input.required<StretchOffer>();
-    /** Start stretches: the routine, to run in this one's place. */
-    readonly start = output<Workout>();
 
     protected readonly holdSeconds = ROUTINE_HOLD_SECONDS;
 }

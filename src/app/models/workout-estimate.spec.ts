@@ -131,18 +131,22 @@ describe('estimateText', () => {
     it('says it to the minute', () => {
         expect(estimateText({ seconds: 25 * 60 + 20, basis: 'guess' })).toEqual({
             text: 'About 25 min',
+            short: '25 min',
             spoken: 'about 25 minutes',
         });
         expect(estimateText({ seconds: 65 * 60, basis: 'yours' })).toEqual({
             text: 'About 1 hr 5 min',
+            short: '1 hr 5 min',
             spoken: 'about 1 hour 5 minutes',
         });
         expect(estimateText({ seconds: 60 * 60, basis: 'clock' })).toEqual({
             text: 'About 1 hr',
+            short: '1 hr',
             spoken: 'about 1 hour',
         });
         expect(estimateText({ seconds: 20, basis: 'clock' })).toEqual({
             text: 'Under a minute',
+            short: '<1 min',
             spoken: 'under a minute',
         });
     });
@@ -150,6 +154,7 @@ describe('estimateText', () => {
     it("says a time limit as it is, as it's exact", () => {
         expect(estimateText({ seconds: 1200, basis: 'limit' })).toEqual({
             text: '20 min',
+            short: '20 min',
             spoken: '20 minutes',
         });
     });

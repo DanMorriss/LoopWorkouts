@@ -5,8 +5,8 @@ import { ActiveRunService } from '../../../shared/run/active-run.service';
 import { MakeCopy } from '../../../shared/state/make-copy.service';
 
 /**
- * On the summary of a ready-made workout (LIB-6), whose reps and weights can be changed but not
- * its exercises: Make a copy, to change those, or to keep a swap (RUN-11) for next time. The
+ * On the summary of a ready-made workout (LIB-6) with a swap made (RUN-11), whose exercises
+ * can't be changed: Make a copy, to keep the swap for next time. The
  * summary closes and the copy opens in Create.
  */
 @Component({
@@ -46,20 +46,21 @@ export class SummaryCopyComponent {
     /** The copy just made, for the workout page to open. */
     readonly copied = output<Workout>();
 
+    /**
+     * Only with a swap to keep: without one, its exercises are as wanted, so there's nothing to
+     * copy for (shown on every ready-made workout until 2026-11-24). Make a copy stays on its
+     * Details for that.
+     */
     protected readonly readyMade = computed(() => {
         const workout = this.run.workout();
-        return workout && isReadyMade(workout) ? workout : null;
+        return workout && isReadyMade(workout) && this.run.swaps().length > 0 ? workout : null;
     });
 
     /** Why to make a copy: its exercises stay as they are, so a swap is only for this time. */
     protected readonly message = computed(() => {
         const title = this.readyMade()?.title ?? '';
-        const swaps = this.run.swaps().length;
-        if (swaps > 0) {
-            const which = swaps === 1 ? 'your swap' : 'your swaps';
-            return `${title} is ready-made, so its exercises stay as they are. To use ${which} next time, make a copy.`;
-        }
-        return `${title} is ready-made: its reps and weights can change, but to change its exercises, make a copy.`;
+        const which = this.run.swaps().length === 1 ? 'your swap' : 'your swaps';
+        return `${title} is ready-made, so its exercises stay as they are. To use ${which} next time, make a copy.`;
     });
 
     protected copy(workout: Workout) {

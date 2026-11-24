@@ -13,7 +13,7 @@ export function formatDuration(seconds: number): string {
 }
 
 /**
- * e.g. "3 rounds", "2 of 5 rounds · stopped", "12 rounds · until stopped"; with a time limit,
+ * e.g. "3 rounds", "ended in round 3 of 5", "12 rounds · until stopped"; with a time limit,
  * "7 rounds + 3 in 20:00", or "4 rounds · stopped before 20:00"
  */
 export function describeRounds(entry: HistoryEntry): string {
@@ -28,8 +28,10 @@ export function describeRounds(entry: HistoryEntry): string {
     if (entry.totalRounds === 0) {
         return `${rounds(entry.roundsCompleted)} · until stopped`;
     }
+    // Ended early: the round it was in, rather than "0 of 2 rounds · stopped" (until 2026-11-24)
     if (entry.outcome === 'stopped') {
-        return `${entry.roundsCompleted} of ${rounds(entry.totalRounds)} · stopped`;
+        const round = Math.min(entry.roundsCompleted + 1, entry.totalRounds);
+        return `ended in round ${round} of ${entry.totalRounds}`;
     }
     return rounds(entry.roundsCompleted);
 }

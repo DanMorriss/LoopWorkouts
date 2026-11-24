@@ -18,7 +18,6 @@ Going through the app a page or part at a time with the Impeccable skill (`.clau
 
 - [ ] **The workout page** (`workout/`): re-critiqued on 2026-11-23 (29/40, the earlier fixes all done); its P0, P1s, P2 and P3s are fixed (2026-11-24). Critique it a third time once it's been used on a real phone.
 - [ ] **The workout summary** (`workout/workout-summary/`): critiqued on 2026-11-24 (25/40) and its five issues fixed. Critique it again once it's been used for a week or two. Left from it: the face's "You're finished!" breaks the brand voice's one-exclamation rule (only "Last round!").
-- [ ] **The run bar** (`nav/run-bar`), the mini player above the tabs while a workout's going.
 - [ ] **Welcome and the setup** (`welcome/`, `welcome/setup`): the first thing a beta user sees, with signing in or going on as a guest. Then the tour (`tour/`) and its offer on Today.
 - [ ] **Today** (`home/`): the week strip and a day's panel, Get started, the plans for you, what to do next, the stretches after training, and the muscles worked this week.
 - [ ] **Workouts** (`workout-library/`): the list, its cards and the favourite heart, the search and filters, and the Ready-made badge. Then a workout's Details, and a ready-made workout's page.
@@ -86,6 +85,7 @@ How to keep the codebase from degrading is in `CLAUDE.md`.
 
 ## 2. Known issues
 
+- [ ] **The run bar's End workout shows the page through it in the dark theme:** half-swiped, `--danger-soft` behind the bar is see-through, so the page's text shows through the red. A solid surface under it would read better (left from the run bar's critique, 2026-11-24).
 - [ ] **Try a dialog sheet's drag from its content on an iPhone:** as with the summary's, it's only been tested with Chromium's touch, which isn't Safari's (REG-GES-06).
 - [ ] **At the largest text sizes, Up next starts under Pause and Skip:** at 200% text on a phone the ring shrinks as far as it can (240px) and the controls stay in reach at the bottom, but the Up next card, which is also a rep step's Done, starts partly under them and has to be scrolled to. Shrinking the face further, or Up next joining the controls there, would fix it.
 - [ ] **A dialog closed with a button can't be caught as it goes:** on a phone, a sheet dragged away can be grabbed on its way down and brought back, but one closed with ‹ Back, Escape, a click outside or one of its own buttons can't. Angular takes it off the page as soon as it's closed; letting it be caught would mean saying it's closed only once it's gone, which changes when every dialog's `closed` fires and what its tests expect.

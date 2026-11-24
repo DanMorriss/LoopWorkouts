@@ -1,4 +1,14 @@
-import { Component, computed, ElementRef, inject, viewChild } from '@angular/core';
+import {
+    afterNextRender,
+    Component,
+    computed,
+    effect,
+    ElementRef,
+    inject,
+    Injector,
+    untracked,
+    viewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ActiveRunService } from '../../shared/run/active-run.service';
 import { formatSeconds } from '../../shared/format-time';
@@ -10,10 +20,21 @@ import { WorkoutMorph } from '../workout-morph';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { stepKindName } from '../../models/workout';
 
+/** The bar's one button: the one to press now, as the workout page's big button is. */
+type ButtonMode = 'pause' | 'resume' | 'start' | 'done';
+const BUTTONS: Record<ButtonMode, { label: string; icon: string }> = {
+    pause: { label: 'Pause', icon: 'pause' },
+    resume: { label: 'Resume', icon: 'play_arrow' },
+    start: { label: 'Start', icon: 'play_arrow' },
+    done: { label: 'Done', icon: 'check' },
+};
+
 /**
  * The workout in progress, in a bar above the tabs on every page but its own, like a music
- * app's mini player: its name, the step and its time, and Pause or Resume. The rest of the
- * bar opens the workout. Once it's finished, the bar says so and opens its summary.
+ * app's mini player, read like a stopwatch: the step, with the workout's name under it, its
+ * time (or reps) large at the right, and the one button to press now: Pause or Resume, Done
+ * on a rep step, or Start on a timed exercise waiting for it. The rest of the bar opens the
+ * workout. Once it's finished, the bar says so and opens its summary.
  *
  * Swiping the bar right ends the workout, as End workout does: "End workout" shows behind it
  * as it follows the finger, and let go past halfway (or flicked) it slides off and the
@@ -29,6 +50,7 @@ import { stepKindName } from '../../models/workout';
 export class RunBarComponent {
     private readonly run = inject(ActiveRunService);
     private readonly url = injectCurrentUrl();
+    private readonly injector = inject(Injector);
     protected readonly morph = inject(WorkoutMorph);
 
     protected readonly shown = computed(
@@ -40,7 +62,7 @@ export class RunBarComponent {
     /** Over, and waiting on its summary. */
     protected readonly finished = this.run.summaryOpen;
 
-    protected readonly title = computed(() => this.run.workout()?.title.trim() || 'Workout');
+    private readonly workoutTitle = computed(() => this.run.workout()?.title.trim() || 'Workout');
     /** Colours the dot: the step's kind, or paused, or finished. */
     protected readonly phase = computed(() => {
         if (this.finished()) {
@@ -48,34 +70,86 @@ export class RunBarComponent {
         }
         return this.isPaused() ? 'paused' : (this.run.state()?.phase ?? 'work');
     });
-    /**
-     * e.g. "Squats · 00:23", "Push-ups · 20 reps", "Paused · Rest · 00:12", or, waiting for
-     * Start, "Ready · Plank · 00:45".
-     */
-    protected readonly status = computed(() => {
+
+    /** The first line: the step, or once it's finished, where to go. */
+    protected readonly step = computed(() => {
         if (this.finished()) {
-            return this.run.isComplete() ? 'Finished: see how it went' : 'See how it went';
+            return 'See how it went';
         }
-        const state = this.run.state();
-        const step = state?.step;
-        if (!state || !step) {
-            return '';
-        }
-        const name = step.name || stepKindName(step.kind);
-        const amount =
-            step.kind === 'reps' ? `${step.reps} reps` : formatSeconds(state.remainingSeconds);
-        const before = this.isPaused() ? 'Paused · ' : this.waiting() ? 'Ready · ' : '';
-        return `${before}${name} · ${amount}`;
+        const step = this.run.state()?.step;
+        return step ? step.name || stepKindName(step.kind) : '';
     });
 
-    /** Pause or Resume, or Start on a timed exercise waiting for it. */
-    protected togglePause() {
+    /** The second line: the workout's name, after what it's doing if it isn't running. */
+    protected readonly context = computed(() => {
+        const before = this.finished()
+            ? this.run.isComplete()
+                ? 'Finished · '
+                : ''
+            : this.isPaused()
+              ? 'Paused · '
+              : this.waiting()
+                ? 'Ready · '
+                : '';
+        return `${before}${this.workoutTitle()}`;
+    });
+
+    /** At the right: the time left ("00:23"), or the reps ("20" and "reps"). */
+    protected readonly amount = computed((): { value: string; unit: string } | null => {
+        const state = this.run.state();
+        const step = state?.step;
+        if (this.finished() || !state || !step) {
+            return null;
+        }
+        return step.kind === 'reps'
+            ? { value: `${step.reps}`, unit: 'reps' }
+            : { value: formatSeconds(state.remainingSeconds), unit: '' };
+    });
+
+    protected readonly button = computed(() => {
+        const mode: ButtonMode = this.isPaused()
+            ? 'resume'
+            : this.waiting()
+              ? 'start'
+              : this.run.state()?.phase === 'reps'
+                ? 'done'
+                : 'pause';
+        return BUTTONS[mode];
+    });
+
+    /**
+     * What screen readers hear, off the workout page whose own announcements stop with it: a
+     * step as it starts, Paused and Finished. Not the time, so it doesn't speak every second.
+     */
+    protected readonly announcement = computed(() => {
+        if (this.finished()) {
+            return this.run.isComplete() ? 'Finished' : '';
+        }
+        if (this.isPaused()) {
+            return 'Paused';
+        }
+        const step = this.run.state()?.step;
+        if (!step) {
+            return '';
+        }
+        const reps = step.kind === 'reps' ? `, ${step.reps} reps` : '';
+        const ready = this.waiting() ? ', waiting: press Start when you are ready' : '';
+        return `${this.step()}${reps}${ready}`;
+    });
+
+    /** Pause or Resume, Done on a rep step, or Start on a timed exercise waiting for it. */
+    protected pressButton() {
         if (this.waiting()) {
             this.run.startExercise();
+        } else if (!this.isPaused() && this.run.state()?.phase === 'reps') {
+            this.run.finishReps();
         } else {
             this.run.togglePause();
         }
     }
+
+    private readonly openLink = viewChild<ElementRef<HTMLElement>>('open');
+    private readonly actionButton = viewChild<ElementRef<HTMLElement>>('action');
 
     // Swiping right to end the workout
 
@@ -108,6 +182,20 @@ export class RunBarComponent {
     });
 
     constructor() {
+        // The button goes as the workout finishes, so focus on it moves to the rest of the
+        // bar, which opens the summary, rather than being lost. Run before the view is
+        // updated, while the button is still there to have focus.
+        effect(() => {
+            if (!this.finished()) {
+                return;
+            }
+            const button = untracked(this.actionButton)?.nativeElement;
+            if (button && button === document.activeElement) {
+                afterNextRender(() => untracked(this.openLink)?.nativeElement.focus(), {
+                    injector: this.injector,
+                });
+            }
+        });
         // On the way down, so it's dropped before the link or button it would land on hears it
         this.host.addEventListener('click', (event) => this.swipe.swallowed(event), {
             capture: true,

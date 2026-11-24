@@ -169,6 +169,16 @@ describe('HomeComponent', () => {
             expect(first.querySelector('app-toggle-switch')).toBeNull();
         });
 
+        it('is planning your week, not getting started, once a workout has been done', () => {
+            TestBed.inject(HistoryStore).record(yesterday);
+            create();
+
+            expect(text('.start__label')).toEqual(['Plan your week']);
+            expect(text('.start__lead')).toEqual([
+                "A week of workouts, planned for you. Here's one that needs no equipment:",
+            ]);
+        });
+
         it('has a dot for each plan, which shows it, and marks the one shown', async () => {
             TestBed.inject(SettingsStore).update({
                 trainingGoal: 'fitness',
@@ -212,6 +222,10 @@ describe('HomeComponent', () => {
             create();
 
             expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
+            // Not "for your goal and equipment", with no equipment given
+            expect(text('.start__lead')).toEqual([
+                "Start with a week of workouts, planned for you. Here's one that needs no equipment:",
+            ]);
             // One alone: no dots
             expect(element().querySelector('app-get-started .carousel__dot')).toBeNull();
         });

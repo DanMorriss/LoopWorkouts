@@ -77,6 +77,11 @@
     // the ring (see workout-ring).
     padding: 0 1rem 0.5rem;
     --ring-room: 28rem;
+
+    // A tablet upright has the height for a bigger ring than a phone's 380px
+    @media (min-width: 640px) {
+        --ring-max: 30rem;
+    }
 }
 
 // A wide window, landscape: the ring on the left, as big as the height allows, and the rest

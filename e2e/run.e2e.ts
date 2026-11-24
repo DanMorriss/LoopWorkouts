@@ -1140,3 +1140,32 @@ test.describe('stretches after a workout', () => {
         }
     );
 });
+
+test.describe('on a wide window', () => {
+    test.use({ storage: seed.workouts([short]) });
+
+    test(
+        'REG-RUN-21 the ring is beside the rest of the page, as big as fits, with nothing blurred',
+        { tag: '@p2' },
+        async ({ app, page }, testInfo) => {
+            test.skip(testInfo.project.name !== 'desktop', 'The wide layout is for a wide window');
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Short');
+
+            const ring = (await page.locator('app-workout-ring').boundingBox())!;
+            const next = (await page.locator('app-up-next-card').boundingBox())!;
+            // Beside it, not under it, and bigger than a phone's
+            expect(ring.x + ring.width).toBeLessThan(next.x);
+            expect(ring.width).toBeGreaterThan(400);
+            // The controls' blur, for what scrolls under them on a phone, is off here: it once
+            // covered the whole page
+            const blur = await page
+                .locator('app-workout-controls')
+                .evaluate((controls) => getComputedStyle(controls, '::before').display);
+            expect(blur).toBe('none');
+            // One title, in the header
+            await expect(run.main.getByText('Short', { exact: true })).toHaveCount(0);
+        }
+    );
+});

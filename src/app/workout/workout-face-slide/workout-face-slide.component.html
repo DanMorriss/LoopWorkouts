@@ -82,8 +82,9 @@
             </button>
         }
     } @else if (face.pop) {
-        <!-- A fresh element each second, so it pops each time -->
-        @for (time of [face.time]; track time) {
+        <!-- A fresh element each second, so it pops each time: keyed by the second, which
+             says the re-creation is meant (tracking the time itself drew Angular's NG0956) -->
+        @for (time of [face.time]; track 'tick ' + time) {
             <p class="workout-face__pop">
                 <app-clock-digits [time]="time" />
             </p>

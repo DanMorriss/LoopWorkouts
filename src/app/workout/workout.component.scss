@@ -82,6 +82,31 @@
     @media (min-width: 640px) {
         --ring-max: 30rem;
     }
+
+    // A short phone (an iPhone SE or 8 is 667px): the ring can go under 320px, its words
+    // shrinking with it, so Up next and the controls fit under it rather than the controls,
+    // held at the foot, covering Up next (2026-11-24)
+    @media (max-height: 740px) and (max-width: 639px) {
+        --ring-min: 15rem;
+    }
+}
+
+// Past a phone the ring grows (30rem, 36rem wide): the paused words grow with it, by the ring
+@media (min-width: 640px) {
+    .workout-paused__label {
+        font-size: 6cqi;
+    }
+
+    .workout-paused__end {
+        font-size: 3.5cqi;
+    }
+}
+
+// There, the section line ("Exercise 2 of 6") goes too: the round line says where you are
+@media (max-height: 740px) and (max-width: 639px) {
+    .workout-section {
+        display: none;
+    }
 }
 
 // A wide window, landscape: the ring on the left, as big as the height allows, and the rest
@@ -198,14 +223,25 @@
     }
 }
 
+// Sized by the ring, not the text size, so at the largest text it stays inside the circle: its
+// words grow with the browser's text only as far as the ring has room (cqi), Resume stays
+// round, and End workout stays on the face (2026-11-24)
 .workout-paused {
     position: absolute;
     inset: 0;
+    container-type: inline-size;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: min(1rem, 4cqi);
+    padding-inline: 12cqi;
+    text-align: center;
+    text-wrap: balance;
+
+    #workout-resume {
+        flex-shrink: 0;
+    }
 }
 
 .workout-paused__label,
@@ -217,12 +253,20 @@
 .workout-paused__label {
     margin: 0;
     color: var(--face-ink);
-    font-size: 1.25rem;
+    font-size: min(1.25rem, 6.5cqi);
 }
 
 .workout-paused__end {
     border-color: $track-color;
     color: var(--face-ink);
+    font-size: min(0.9rem, 5cqi);
+
+    // Its icon by its words, not the text size, as they are
+    .mat-icon {
+        width: 1.3em;
+        height: 1.3em;
+        font-size: 1.3em;
+    }
 
     @include hover {
         border-color: var(--face-ink);

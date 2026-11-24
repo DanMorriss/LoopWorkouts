@@ -9,8 +9,8 @@
     width: min(16rem, 80vw);
 }
 
-// To go: an outline in the step's colour. Done: filled, but quieter. In progress: filled,
-// taller, with a glow, like the round's dot.
+// To go: an outline in the step's colour. Done: filled, but quieter. Skipped to do later: a
+// dashed outline. In progress: filled and taller.
 .step-strip__step {
     flex: 0 1 2.5rem;
     height: 0.4rem;
@@ -36,6 +36,11 @@
     &--done {
         background: var(--step-color);
         opacity: 0.45;
+    }
+
+    // Put aside to do later: an outline as still to come, dashed, as it's behind
+    &--skipped {
+        border-style: dashed;
     }
 
     // Filled and taller, which is enough to find it: no glow, as DESIGN.md's Glass, Not Glow

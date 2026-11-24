@@ -1169,3 +1169,34 @@ test.describe('on a wide window', () => {
         }
     );
 });
+
+test.describe('on a short phone', () => {
+    const squats = workout('Squats', { steps: [reps(10, 'Squats'), rest(30)], repeats: 3 });
+    test.use({ storage: seed.workouts([squats]), viewport: { width: 375, height: 667 } });
+
+    test(
+        'REG-RUN-22 Done, Up next and the controls all fit, none under another',
+        { tag: '@p1' },
+        async ({ app, page }, testInfo) => {
+            test.skip(testInfo.project.name !== 'phone', 'The size of an iPhone SE or 8');
+            const run = new WorkoutPage(page);
+            await app.goto('/library');
+            await run.startFromLibrary('Squats');
+
+            // Done is the big button, and a tap at its middle lands on it, not on Pause or Skip
+            await expect(run.done).toBeVisible();
+            const hit = await run.done.evaluate((done) => {
+                const box = done.getBoundingClientRect();
+                const at = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+                return at?.closest('button') === done;
+            });
+            expect(hit).toBe(true);
+            // Up next is clear of the controls held at the foot, so it can be read
+            const card = (await page.locator('app-up-next-card').boundingBox())!;
+            const controls = (await page.locator('app-workout-controls').boundingBox())!;
+            expect(card.y + card.height).toBeLessThanOrEqual(controls.y + 1);
+            await run.pressDone();
+            await expect(run.next).toContainText('Squats');
+        }
+    );
+});

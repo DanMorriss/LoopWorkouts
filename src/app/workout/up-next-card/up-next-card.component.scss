@@ -10,7 +10,7 @@
 }
 
 // A card in the next step's colour: its kind's icon in a disc, then "Up next", the name and
-// the set, and → when it's Done, or an (i) when it opens the next exercise's details
+// the set, and an (i) when it opens the next exercise's details
 .up-next {
     position: relative;
     display: grid;
@@ -165,82 +165,4 @@ button.up-next {
 
 .up-next__end {
     color: var(--text-muted);
-}
-
-// On a rep step: the card, all of it Done, and the next exercise's (i) beside it, outside it,
-// so nothing on the card takes a tap meant for Done
-.up-next__row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-// The card is Done, a button laid over all of it (the card holds text a button can't)
-.up-next--done-card {
-    flex: 1;
-    min-width: 0;
-
-    @include hover {
-        background: color-mix(in srgb, var(--next-color) 22%, transparent);
-    }
-
-    &:has(> .up-next--done:active) {
-        scale: 0.96;
-        transition-duration: 0.08s;
-    }
-}
-
-.up-next--done {
-    position: absolute;
-    inset: -2px;
-    padding: 0;
-    border: 0;
-    border-radius: inherit;
-    background: none;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 1px;
-    }
-}
-
-// ✓ Done at the card's end, big enough to find from a step or two away: a disc in the card's
-// colour, as its kind's is at the start, with the word under it
-.up-next__done-mark {
-    display: grid;
-    justify-items: center;
-    gap: 0.15rem;
-    @include caps(0.75rem);
-    font-weight: 700;
-    color: var(--text-strong);
-
-    .mat-icon {
-        display: grid;
-        place-items: center;
-        width: min(2.5rem, 13cqi);
-        height: min(2.5rem, 13cqi);
-        border-radius: 50%;
-        background: var(--next-color);
-        color: var(--page-bg);
-        font-size: min(1.75rem, 9cqi);
-    }
-}
-
-// Beside Done, so it's always 44px whatever the card's height
-.up-next__about {
-    flex: none;
-}
-
-// At the largest text sizes (the card under 15rem across, in rem that grow with the text) the
-// name needs the room, so the ✓ says Done on its own, as it does to a screen reader's name
-@container (max-width: 15rem) {
-    .up-next--done-card {
-        gap: 0.5rem;
-    }
-
-    .up-next__done-word {
-        display: none;
-    }
 }

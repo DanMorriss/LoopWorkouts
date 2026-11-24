@@ -718,8 +718,9 @@ describe('WorkoutComponent', () => {
 
         describe('the button gliding between its places', () => {
             /** Where a button's glide starts from, relative to its own place, or null if none. */
-            function glideStart(label: string): { x: number; y: number } | null {
-                const animation = button(label)!.getAnimations()[0];
+            function glideStart(label: string | Element): { x: number; y: number } | null {
+                const target = typeof label === 'string' ? button(label)! : label;
+                const animation = target.getAnimations()[0];
                 if (!animation) {
                     return null;
                 }
@@ -763,9 +764,10 @@ describe('WorkoutComponent', () => {
                 fixture.destroy();
             });
 
-            it('glides between Pause and Resume on a rep step too', () => {
+            it('glides between the big button and Resume on a rep step too, where it is Done', () => {
                 start(makeWorkout({ steps: [reps(10, 'Squats'), work(30)] }));
 
+                // Pause is the smaller button beside Done there
                 press('Pause');
                 TestBed.tick();
                 expect(glideStart('Resume')).not.toBeNull();
@@ -775,7 +777,9 @@ describe('WorkoutComponent', () => {
                     .forEach((animation) => animation.finish());
                 press('Resume');
                 TestBed.tick();
-                expect(glideStart('Pause')).not.toBeNull();
+                expect(
+                    glideStart(fixture.nativeElement.querySelector('#workout-pause'))
+                ).not.toBeNull();
                 fixture.destroy();
             });
 
@@ -1153,7 +1157,11 @@ describe('WorkoutComponent', () => {
             advance(1000);
             // 4 seconds on the reps, then Done
             advance(4000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
 
             expect(entries()[0].repSeconds).toBe(4);
@@ -1696,7 +1704,11 @@ describe('WorkoutComponent', () => {
             advance(3000);
             // 12s on the push-ups, then Done: 15s gone, so 5s are left
             advance(12_000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
             expect(text()).toContain('00:05 left');
 
@@ -2233,7 +2245,9 @@ describe('WorkoutComponent', () => {
                 '.workout-control--main button'
             ) as HTMLButtonElement;
         const doneButton = () =>
-            fixture.nativeElement.querySelector('.up-next--done') as HTMLButtonElement | null;
+            fixture.nativeElement.querySelector(
+                '#workout-pause[aria-label^="Done"]'
+            ) as HTMLButtonElement | null;
         /** What a face wheel is set to, as screen readers hear it. */
         const faceWheel = (which: 'count' | 'weight') =>
             fixture.nativeElement.querySelector(
@@ -2513,15 +2527,15 @@ describe('WorkoutComponent', () => {
 
             advance(3000);
             TestBed.tick();
-            // The whole card, Done's button laid over it
-            expect(doneButton()!.parentElement!.getAnimations().length).toBe(1);
+            // The big button, Done there
+            expect(doneButton()!.getAnimations().length).toBe(1);
             fixture.destroy();
 
             fakeReducedMotion(true);
             start(circuit());
             advance(3000);
             TestBed.tick();
-            expect(doneButton()!.parentElement!.getAnimations().length).toBe(0);
+            expect(doneButton()!.getAnimations().length).toBe(0);
             fixture.destroy();
         });
 
@@ -2725,31 +2739,49 @@ describe('WorkoutComponent', () => {
             });
         });
 
-        it('makes the Up next card the Done button, keeping Pause as the big one', () => {
+        it('makes the big button Done, with Pause beside it, and Up next only what is next', () => {
             start(circuit());
             expect(doneButton()).toBeNull();
-            expect(mainButton().getAttribute('aria-keyshortcuts')).toBe('Space');
+            expect(mainButton().getAttribute('aria-label')).toBe('Pause');
 
             advance(3000);
 
             expect(upNextCard()).toBe('Up next: Rest, 00:02');
+            // The big button, in Pause's place, as Start is while waiting (since 2026-11-24)
+            expect(doneButton()).toBe(mainButton());
             expect(doneButton()!.getAttribute('aria-label')).toBe('Done. Next: Rest · 00:02');
             expect(doneButton()!.getAttribute('aria-keyshortcuts')).toBe('Space');
-            expect(doneButton()!.parentElement!.dataset['next']).toBe('rest');
-            expect(mainButton().getAttribute('aria-label')).toBe('Pause');
-            expect(mainButton().getAttribute('aria-keyshortcuts')).toBeNull();
-
-            mainButton().click();
+            const pause = fixture.nativeElement.querySelector(
+                '.workout-controls__left button[aria-label="Pause"]'
+            ) as HTMLButtonElement;
+            pause.click();
             fixture.detectChanges();
 
             expect(view().isPaused()).toBe(true);
             expect(fixture.nativeElement.querySelector('.workout-paused').textContent).toContain(
                 'Paused · 20 reps'
             );
-            // Paused, it's only what's next, not Done (and a rest has no details to open)
+            // Paused, there's no Done, and the card is only what's next (a rest has no details)
             expect(doneButton()).toBeNull();
             expect(upNextCard()).toBe('Up next: Rest, 00:02');
             expect(fixture.nativeElement.querySelector('app-up-next-card button')).toBeNull();
+            fixture.destroy();
+        });
+
+        it('presses Done with Space after Resume, as focus is on the big button, Done', async () => {
+            start(circuit());
+            advance(3000);
+            (
+                fixture.nativeElement.querySelector(
+                    '.workout-controls__left button[aria-label="Pause"]'
+                ) as HTMLButtonElement
+            ).click();
+            fixture.detectChanges();
+            (fixture.nativeElement.querySelector('#workout-resume') as HTMLButtonElement).click();
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            expect(document.activeElement).toBe(doneButton());
             fixture.destroy();
         });
 
@@ -3319,7 +3351,11 @@ describe('WorkoutComponent', () => {
             const saved = store.addWorkout(circuit());
             start(saved);
             advance(2000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
             advance(1000);
             endWorkout();
@@ -3370,7 +3406,11 @@ describe('WorkoutComponent', () => {
                 })
             );
             advance(2000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
 
             expect(view().summaryOpen()).toBe(true);
@@ -3403,7 +3443,11 @@ describe('WorkoutComponent', () => {
                 })
             );
             advance(2000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
         }
 
@@ -3445,7 +3489,11 @@ describe('WorkoutComponent', () => {
                 })
             );
             advance(2000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
 
             expect(summaryText()).toContain('Push-ups: try 13 reps, up from 12');
@@ -3467,7 +3515,11 @@ describe('WorkoutComponent', () => {
                 })
             );
             advance(2000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
 
             const card = summary()!.querySelector('[aria-labelledby="summary-stretch"]')!;
@@ -3504,7 +3556,11 @@ describe('WorkoutComponent', () => {
                 })
             );
             advance(2000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
 
             const actions = summary()!.querySelector('.summary__actions')!;
@@ -3546,7 +3602,11 @@ describe('WorkoutComponent', () => {
                 start(saved);
                 advance(2000);
                 for (let i = 0; i < 2; i++) {
-                    (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                    (
+                        fixture.nativeElement.querySelector(
+                            '#workout-pause[aria-label^="Done"]'
+                        ) as HTMLElement
+                    ).click();
                     fixture.detectChanges();
                 }
                 return saved;
@@ -3582,7 +3642,11 @@ describe('WorkoutComponent', () => {
                 start(store.findAnyWorkout('builtin:gym-legs')!);
                 // Back squat's three sets, 12, 10 and 8 reps, resting 2:30 between
                 for (let i = 0; i < 3; i++) {
-                    (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                    (
+                        fixture.nativeElement.querySelector(
+                            '#workout-pause[aria-label^="Done"]'
+                        ) as HTMLElement
+                    ).click();
                     fixture.detectChanges();
                     advance(i < 2 ? 150_000 : 0);
                 }
@@ -3625,7 +3689,11 @@ describe('WorkoutComponent', () => {
                 });
                 start(saved);
                 for (let i = 0; i < 2; i++) {
-                    (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                    (
+                        fixture.nativeElement.querySelector(
+                            '#workout-pause[aria-label^="Done"]'
+                        ) as HTMLElement
+                    ).click();
                     fixture.detectChanges();
                 }
 
@@ -3727,7 +3795,11 @@ describe('WorkoutComponent', () => {
                 })
             );
             advance(2000);
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
 
             // Where it settles once it has risen in
@@ -4163,7 +4235,11 @@ describe('WorkoutComponent', () => {
                     ],
                 });
                 for (let i = 0; i < 3; i++) {
-                    (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                    (
+                        fixture.nativeElement.querySelector(
+                            '#workout-pause[aria-label^="Done"]'
+                        ) as HTMLElement
+                    ).click();
                     fixture.detectChanges();
                 }
                 pressInSummary('Change reps or weight');
@@ -4197,7 +4273,11 @@ describe('WorkoutComponent', () => {
                     ],
                 });
                 for (let i = 0; i < 6; i++) {
-                    (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                    (
+                        fixture.nativeElement.querySelector(
+                            '#workout-pause[aria-label^="Done"]'
+                        ) as HTMLElement
+                    ).click();
                     fixture.detectChanges();
                 }
                 pressInSummary('Change reps or weight');
@@ -4300,7 +4380,11 @@ describe('WorkoutComponent', () => {
         const said = () =>
             (fixture.nativeElement.querySelector('[aria-live]') as HTMLElement).textContent?.trim();
         function pressDone() {
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
         }
 
@@ -4435,7 +4519,11 @@ describe('WorkoutComponent', () => {
                 fixture.nativeElement.querySelectorAll('.step-strip__step') as NodeListOf<Element>
             ).map((step) => step.className.match(/step-strip__step--(done|current|left)\b/)![1]);
         function pressDone() {
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
         }
 
@@ -4527,7 +4615,11 @@ describe('WorkoutComponent', () => {
         const said = () =>
             (fixture.nativeElement.querySelector('[aria-live]') as HTMLElement).textContent?.trim();
         function pressDone() {
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
         }
 
@@ -4612,7 +4704,11 @@ describe('WorkoutComponent', () => {
                 fixture.nativeElement.querySelectorAll('button') as NodeListOf<Element>
             ).find((b) => b.textContent!.includes(name)) as HTMLButtonElement | undefined;
         function pressDone() {
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
         }
         /** Done, then the rest between sets. */
@@ -4793,7 +4889,11 @@ describe('WorkoutComponent', () => {
         const said = () =>
             (fixture.nativeElement.querySelector('[aria-live]') as HTMLElement).textContent?.trim();
         function pressDone() {
-            (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
             fixture.detectChanges();
         }
 
@@ -5132,8 +5232,7 @@ describe('WorkoutComponent', () => {
                 expect(view().isWorkActive()).toBe(true);
             });
 
-            describe("the next exercise's (i), beside Done", () => {
-                const info = () => el('.up-next__about');
+            describe('on a rep step, where Done is the big button', () => {
                 const plank: Step = {
                     kind: 'work',
                     seconds: 30,
@@ -5141,18 +5240,17 @@ describe('WorkoutComponent', () => {
                     exerciseId: 'builtin:plank',
                 };
 
-                it("opens the next timed exercise's details without starting it", async () => {
+                it("is the next timed exercise's (i), opening its details without starting it", async () => {
                     fixture.destroy();
                     start(makeWorkout({ steps: [backSquat, plank], repeats: 1 }));
 
-                    expect(el('.up-next--done')).not.toBeNull();
-                    // Outside the card, so all of the card is Done: no other button on it
-                    expect(el('.up-next--done-card')!.querySelectorAll('button').length).toBe(1);
-                    expect(el('.up-next--done-card')!.contains(info())).toBe(false);
-                    expect(info()!.getAttribute('aria-label')).toBe('Plank');
-                    expect(info()!.querySelector('mat-icon')!.textContent!.trim()).toBe('info');
-                    expect(info()!.getAttribute('aria-haspopup')).toBe('dialog');
-                    info()!.click();
+                    // Done is the big button, with Pause beside it; the card is only what's next
+                    const done = el('#workout-pause')!;
+                    expect(done.getAttribute('aria-label')).toBe('Done. Next: Plank · 00:30');
+                    expect(el('.workout-controls__left button[aria-label="Pause"]')).not.toBeNull();
+                    expect(card()!.getAttribute('aria-haspopup')).toBe('dialog');
+                    expect(cardText()).toBe('Up next: Plank, 00:30');
+                    card()!.click();
                     fixture.detectChanges();
 
                     expect(
@@ -5165,15 +5263,15 @@ describe('WorkoutComponent', () => {
                     fixture.detectChanges();
                     await fixture.whenStable();
 
-                    expect(document.activeElement).toBe(info());
+                    expect(document.activeElement).toBe(card());
                 });
 
-                it('is not there when what is next is not an exercise', () => {
+                it('is only words when what is next is not an exercise', () => {
                     fixture.destroy();
                     start(makeWorkout({ steps: [backSquat, rest(10), plank], repeats: 1 }));
 
-                    expect(el('.up-next--done')).not.toBeNull();
-                    expect(info()).toBeNull();
+                    expect(el('#workout-pause[aria-label^="Done"]')).not.toBeNull();
+                    expect(card()).toBeNull();
                 });
             });
 
@@ -5183,11 +5281,11 @@ describe('WorkoutComponent', () => {
                     makeWorkout({ steps: [{ ...backSquat, name: 'Front' }, backSquat], repeats: 1 })
                 );
 
-                expect(el('.up-next--done')).not.toBeNull();
+                expect(el('#workout-pause[aria-label^="Done"]')).not.toBeNull();
                 (el('.workout-controls button[aria-label="Pause"]') as HTMLElement).click();
                 fixture.detectChanges();
 
-                expect(el('.up-next--done')).toBeNull();
+                expect(el('#workout-pause[aria-label^="Done"]')).toBeNull();
                 expect(card()!.getAttribute('aria-haspopup')).toBe('dialog');
                 card()!.click();
                 fixture.detectChanges();
@@ -5521,7 +5619,11 @@ describe('WorkoutComponent', () => {
 
         function doneAll() {
             for (let i = 0; i < 2; i++) {
-                (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                (
+                    fixture.nativeElement.querySelector(
+                        '#workout-pause[aria-label^="Done"]'
+                    ) as HTMLElement
+                ).click();
                 fixture.detectChanges();
             }
         }
@@ -5549,7 +5651,11 @@ describe('WorkoutComponent', () => {
             start(store.findAnyWorkout(id)!);
             // 7 sets of swings, resting 45 seconds after each
             for (let set = 0; set < 7; set++) {
-                (fixture.nativeElement.querySelector('.up-next--done') as HTMLElement).click();
+                (
+                    fixture.nativeElement.querySelector(
+                        '#workout-pause[aria-label^="Done"]'
+                    ) as HTMLElement
+                ).click();
                 fixture.detectChanges();
                 advance(set < 6 ? 45_000 : 0);
             }

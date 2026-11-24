@@ -1,41 +1,47 @@
 <!-- data-tour: what the tour of the page (RUN-13) lights up, on the host -->
-<!-- Exercises skipped to do later, on Pause's left, as Skip's on its right (RUN-16) -->
-@if (!view.summaryOpen()) {
-    <app-later-list [nextCard]="nextCard()" (emptied)="emptied.emit()" />
-}
+<!-- Left of the big button: Pause on a rep step, where the big button is Done, and Later, the
+     exercises skipped to do later (RUN-16), further out -->
+<div class="workout-controls__left">
+    @if (!view.summaryOpen()) {
+        <app-later-list [nextCard]="nextCard()" (emptied)="emptied.emit()" />
+    }
+    @if (mode() === 'done') {
+        <div class="workout-control">
+            <button
+                type="button"
+                class="btn-icon workout-control__side"
+                aria-label="Pause"
+                (click)="paused.emit()"
+            >
+                <mat-icon aria-hidden="true">pause</mat-icon>
+            </button>
+            <span class="workout-control__caption" aria-hidden="true">Pause</span>
+        </div>
+    }
+</div>
 <div class="workout-control workout-control--main">
-    <!-- Start while a timed exercise waits for it after a long rest
-         (RUN-14), as it hasn't begun, so the biggest button is the one to
-         press; then Pause, the same button, so focus stays on it -->
-    @let waiting = view.isWaiting();
+    <!-- The one thing to press now, the biggest button in reach: Done on a rep step, Start on
+         a timed exercise waiting for it after a long rest (RUN-14), otherwise Pause. One button
+         all along, so focus stays on it as it changes. -->
     <button
         #mainButton
         id="workout-pause"
         type="button"
         class="btn-main btn-main--round"
-        [attr.aria-label]="waiting ? 'Start' : 'Pause'"
-        [attr.aria-keyshortcuts]="view.isRepsActive() ? null : 'Space'"
+        aria-keyshortcuts="Space"
+        [attr.aria-label]="name()"
         (click)="main.emit()"
     >
-        <mat-icon aria-hidden="true">{{ waiting ? 'play_arrow' : 'pause' }}</mat-icon>
+        <mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
     </button>
-    <span class="workout-control__caption" aria-hidden="true">{{
-        waiting ? 'Start' : 'Pause'
-    }}</span>
-    <!-- Shown where there's likely a keyboard; screen readers get
-         aria-keyshortcuts. On a rep step Space is Done, so it's hidden,
-         keeping its room so Pause doesn't move. -->
-    <kbd
-        class="workout-control__key"
-        [style.visibility]="view.isRepsActive() ? 'hidden' : null"
-        aria-hidden="true"
-        >Space</kbd
-    >
+    <span class="workout-control__caption" aria-hidden="true">{{ caption() }}</span>
+    <!-- Shown where there's likely a keyboard; screen readers get aria-keyshortcuts -->
+    <kbd class="workout-control__key" aria-hidden="true">Space</kbd>
 </div>
 <div class="workout-control workout-control--skip">
     <button
         type="button"
-        class="btn-icon workout-control__skip"
+        class="btn-icon workout-control__side"
         [attr.aria-label]="view.isRestActive() ? 'Skip rest' : 'Skip step'"
         (click)="skipped.emit()"
     >

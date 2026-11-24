@@ -47,12 +47,17 @@
 // the circle. Padded to a fingertip's height, as the line cuts off the button's own hit area.
 .workout-paused__step {
     min-width: 0;
-    max-width: 70%;
+    max-width: 100%;
     margin: -0.5rem 0 -1rem;
     padding-block: 0.5rem;
     overflow: hidden;
     color: $face-muted;
-    font-size: 1.125rem;
+    // As the label under it, by the ring (cqi of .workout-paused), so large text stays inside
+    font-size: min(1.125rem, 6cqi);
+
+    @media (min-width: 640px) {
+        font-size: 5cqi;
+    }
     text-overflow: ellipsis;
     white-space: nowrap;
     animation: paused-in 0.2s ease-out;

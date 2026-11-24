@@ -3514,7 +3514,7 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('offers stretches for the muscles worked, and Start stretches runs them in its place', async () => {
+        it('offers stretches for the muscles worked, and Stretch runs them in its place', async () => {
             const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
             start(
                 makeWorkout({
@@ -3533,8 +3533,10 @@ describe('WorkoutComponent', () => {
             const card = summary()!.querySelector('[aria-labelledby="summary-stretch"]')!;
             expect(card.textContent).toContain('Stretch what you worked');
             expect(card.textContent).toContain('Doorway chest stretch');
+            // Described there, and started by the Stretch button, not a second one
+            expect(card.querySelector('button')).toBeNull();
 
-            pressInSummary('Start stretches');
+            pressInSummary('Stretch ·');
             advance(0);
             // Its sinking away finishes after the next render
             await fixture.whenStable();
@@ -3555,7 +3557,7 @@ describe('WorkoutComponent', () => {
             fixture.destroy();
         });
 
-        it('has Done as the main button, the stretches offered above it, which start them', async () => {
+        it('has Stretch as the main button after a finished workout, Done under it', () => {
             const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
             start(
                 makeWorkout({
@@ -3571,18 +3573,48 @@ describe('WorkoutComponent', () => {
             ).click();
             fixture.detectChanges();
 
-            // Done is the finish, so the main button; the stretches aren't pushed (2026-11-24)
+            // Stretching what it worked is the nudge, and Done the way past it (2026-11-24)
             const actions = summary()!.querySelector('.summary__actions')!;
             const buttons = [...actions.querySelectorAll('button')];
-            expect(buttons.map((button) => button.textContent!.trim())).toEqual(['check Done']);
+            expect(buttons.map((button) => button.textContent!.trim())).toEqual([
+                'self_improvement Stretch · 1 min',
+                'check Done',
+            ]);
             expect(buttons[0].classList).toContain('btn-main');
+            expect(buttons[0].getAttribute('aria-label')).toBe(
+                'Stretch what you worked, about 1 minute'
+            );
+            expect(buttons[1].classList).toContain('btn-pill');
+            fixture.destroy();
+        });
 
-            (summary()!.querySelector('app-summary-stretch button') as HTMLElement).click();
-            advance(0);
-            await fixture.whenStable();
-            expect(entries()[0].outcome).toBe('finished');
-            expect(summary()).toBeNull();
-            expect(TestBed.inject(ActiveRunService).workout()?.id).toBe(STRETCH_ROUTINE_ID);
+        it('has Done as the main button on ending early, Stretch under it', () => {
+            const pushUps = { name: 'Push-ups', exerciseId: 'builtin:push-up' };
+            start(
+                makeWorkout({
+                    steps: [work(2), { kind: 'reps', reps: 12, ...pushUps } as const],
+                    repeats: 2,
+                })
+            );
+            advance(2000);
+            (
+                fixture.nativeElement.querySelector(
+                    '#workout-pause[aria-label^="Done"]'
+                ) as HTMLElement
+            ).click();
+            fixture.detectChanges();
+            endWorkout();
+            fixture.detectChanges();
+
+            const actions = summary()!.querySelector('.summary__actions')!;
+            const buttons = [...actions.querySelectorAll('button')];
+            expect(buttons.map((button) => button.textContent!.trim())).toEqual([
+                'check Done',
+                'self_improvement Stretch · 1 min',
+                'arrow_back Back to workout',
+            ]);
+            expect(buttons[0].classList).toContain('btn-main');
+            expect(buttons[1].classList).toContain('btn-pill');
             fixture.destroy();
         });
 

@@ -97,10 +97,10 @@
                 </section>
             }
 
-            <!-- Last, offered rather than pushed: Done is the main button (2026-11-24). The next
+            <!-- Last: what the stretches are, which the Stretch button below starts. The next
                  workout to suggest is on Progress, where Done goes. -->
             @if (stretches(); as offer) {
-                <app-summary-stretch [offer]="offer" (start)="startStretches($event)" />
+                <app-summary-stretch [offer]="offer" />
             }
         } @else {
             <p class="summary__nothing">Nothing to log: no step was done before it ended.</p>
@@ -108,12 +108,39 @@
     </div>
 
     <div class="summary__actions">
-        <!-- The finish, so the main button: the stretches are offered above, not pushed
-             (until 2026-11-24 they were the main button here, and Done under them) -->
-        <button type="button" class="btn-main summary__done" (click)="leave('done')">
-            <mat-icon aria-hidden="true">check</mat-icon>
-            Done
-        </button>
+        <!-- After a finished workout, stretching what it worked is the main button, and Done
+             the way past it (2026-11-24); ended early, Done comes first and Stretch under it -->
+        @if (stretches(); as offer) {
+            @if (!finished()) {
+                <ng-container [ngTemplateOutlet]="done" />
+            }
+            <button
+                type="button"
+                [class]="finished() ? 'btn-main summary__stretch' : 'btn-pill summary__stretch'"
+                [attr.aria-label]="'Stretch what you worked, ' + offer.time.spoken"
+                (click)="startStretches(offer.workout)"
+            >
+                <mat-icon aria-hidden="true">self_improvement</mat-icon>
+                Stretch · {{ offer.time.short }}
+            </button>
+            @if (finished()) {
+                <ng-container [ngTemplateOutlet]="done" />
+            }
+        } @else {
+            <ng-container [ngTemplateOutlet]="done" />
+        }
+        <ng-template #done>
+            <button
+                type="button"
+                [class]="
+                    stretches() && finished() ? 'btn-pill summary__done' : 'btn-main summary__done'
+                "
+                (click)="leave('done')"
+            >
+                <mat-icon aria-hidden="true">check</mat-icon>
+                Done
+            </button>
+        </ng-template>
         @if (!finished()) {
             <button type="button" class="btn-pill summary__back" (click)="leave('back')">
                 <mat-icon aria-hidden="true">arrow_back</mat-icon>

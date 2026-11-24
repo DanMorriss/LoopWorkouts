@@ -2,7 +2,7 @@ import { isStretch, STRETCH_ROUTINE_ID } from './built-in-stretches';
 import { Exercise, MUSCLE_LABELS, MuscleGroup } from './exercise';
 import { HistoryEntry, LoggedSet } from './history';
 import { startOfDay } from './plan';
-import { estimateText, estimateWorkout } from './workout-estimate';
+import { EstimateText, estimateText, estimateWorkout } from './workout-estimate';
 import { ALL_MUSCLES, musclesInSets } from './workout-muscles';
 import { Block, RunSides, Workout } from './workout';
 
@@ -173,7 +173,7 @@ export interface StretchOffer {
     /** The muscles it's for, as the app names them: "Chest, Upper back and Quads". */
     muscles: string;
     /** How long it takes, "About 4 min", with each side and the switch between them. */
-    time: { text: string; spoken: string };
+    time: EstimateText;
 }
 
 /**

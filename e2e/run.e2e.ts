@@ -1129,7 +1129,8 @@ test.describe('stretches after a workout', () => {
 
             const stretches = run.summary.getByRole('region', { name: 'Stretch what you worked' });
             await expect(stretches).toContainText('Doorway chest stretch');
-            await stretches.getByRole('button', { name: /^Start stretches/ }).click();
+            // The main button starts them
+            await run.summary.getByRole('button', { name: /^Stretch what you worked/ }).click();
 
             await expect(run.summary).toBeHidden();
             await expect(run.face).toContainText('Doorway chest stretch');

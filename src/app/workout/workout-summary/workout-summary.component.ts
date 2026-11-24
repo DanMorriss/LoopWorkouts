@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Workout } from '../../models/workout';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import {
@@ -36,11 +37,11 @@ import { SummaryBestsComponent } from './summary-bests/summary-bests.component';
 /**
  * How the workout went, once it's finished or ended with End workout: the time, rounds and
  * sets, which can be corrected, what to step up next time, the muscles worked, a note, and
- * the suggested next workout. A workout ended early (or one that runs until stopped) can be
- * taken up again with Back to workout; the run waits, paused, until then. Stretches for the
- * muscles it worked can be started from here, from its card or the bottom bar, where it's
- * the main button over Done. Focus starts on
- * the heading and is trapped inside while it's open.
+ * since last time. A workout ended early (or one that runs until stopped) can be taken up
+ * again with Back to workout; the run waits, paused, until then. Stretches for the muscles it
+ * worked are described in their card and started by Stretch in the bottom bar: the main
+ * button after a finished workout, over Done, and under Done after ending early. Focus starts
+ * on the heading and is trapped inside while it's open.
  */
 @Component({
     selector: 'app-workout-summary',
@@ -49,6 +50,7 @@ import { SummaryBestsComponent } from './summary-bests/summary-bests.component';
         CdkTrapFocus,
         FormField,
         MatIconModule,
+        NgTemplateOutlet,
         SummaryCopyComponent,
         SummarySetsComponent,
         SummaryStatsComponent,

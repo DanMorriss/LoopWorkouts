@@ -905,7 +905,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Preconditions:** workout "Push": Push-up (`builtin:push-up`) 10, once.
 - **Steps:**
     1. Start; Done.
-    2. Press **Start stretches** in Stretch what you worked.
+    2. Press **Stretch**, the main button in the bottom bar.
     3. Reload.
 - **Expected:** 1. The summary's Stretch what you worked has the doorway chest stretch. 2. The summary goes and Doorway chest stretch is running, focus on Pause. 3. Still running; Workouts still has only Push.
 - **Left to Vitest:** which stretches are picked, and their order (`stretch-routine.spec.ts`); the push-ups logged as finished, and no stretches on the stretches' own summary (`workout.component.spec.ts`).
@@ -1118,7 +1118,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Preconditions:** `guest()`, workout "Push" (Push-up 10), a finished Push today at 07:00 with two sets of push-ups, nothing planned.
 - **Steps:** Open Today; press **Start stretches** on the card's first slide.
 - **Expected:** The card is headed "After today's training"; its first slide ("Suggestion 1 of …") is Stretch what you worked, then the suggested workouts follow; Start stretches opens `/workout` on Doorway chest stretch.
-- **Left to Vitest:** the stretches gone once done, and none while planned training is left today (`home.component.spec.ts`); which sets count (`setsToStretchToday()` in `stretch-routine.spec.ts`); the summary's bottom-bar Stretch what you worked (`workout.component.spec.ts`).
+- **Left to Vitest:** the stretches gone once done, and none while planned training is left today (`home.component.spec.ts`); which sets count (`setsToStretchToday()` in `stretch-routine.spec.ts`); the summary's bottom-bar Stretch, main after finishing and under Done after ending early (`workout.component.spec.ts`).
 
 ---
 

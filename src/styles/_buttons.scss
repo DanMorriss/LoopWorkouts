@@ -12,7 +12,8 @@
 // .btn-pill   Any smaller action (Play, Collapse all, Cancel, links that act like buttons).
 //             Add .btn-pill--danger for Delete.
 // .btn-icon   An icon on its own: a 44px outlined circle. Add .btn-icon--danger for delete
-//             buttons.
+//             buttons, and .btn-icon--accent for one that starts something in a list of
+//             them (a workout card's ▶), where each being a .btn-main would be too many.
 // .btn-add    Adds a new thing to a list (setup's "+ Step"): dashed, in
 //             the colour of what it adds. Add .btn-add--rest, .btn-add--reps or
 //             .btn-add--heading for those colours.
@@ -269,6 +270,11 @@
 
     &--danger {
         color: var(--text-danger);
+    }
+
+    &--accent {
+        border-color: var(--accent);
+        color: var(--glow-text);
     }
 }
 

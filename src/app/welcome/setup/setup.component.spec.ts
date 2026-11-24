@@ -4,6 +4,7 @@ import { provideRouter, Router } from '@angular/router';
 import { AUTH_STORAGE_KEY } from '../../shared/state/auth-storage-key';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
+import { TourService } from '../../tour/tour.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import {
     FakeSyncStarter,
@@ -153,6 +154,8 @@ describe('SetupComponent (NAV-4)', () => {
         );
         // Nothing's added or started for you: Today offers a workout to add
         expect(TestBed.inject(WorkoutStore).workouts()).toEqual([]);
+        // and not the tour as well, this time (NAV-8)
+        expect(TestBed.inject(TourService).offered()).toBe(false);
     });
 
     it('goes back to the question before, as it was answered', async () => {
@@ -174,6 +177,7 @@ describe('SetupComponent (NAV-4)', () => {
         expect(settings().hasProfile()).toBe(true);
         expect(navigate).toHaveBeenCalledWith('/home', { replaceUrl: true });
         expect(TestBed.inject(UndoService).offer()).toBeNull();
+        expect(TestBed.inject(TourService).offered()).toBe(false);
     });
 
     it('leaves the body weight unset when its question is left empty', async () => {

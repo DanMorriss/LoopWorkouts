@@ -88,10 +88,13 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
             }
 
             <!-- The week, its days moved about by drag and drop, in its own chunk so Today's
-                 first load is no bigger; its space is kept till it comes -->
-            <div class="plan-card__week">
-                <ng-container #week />
-            </div>
+                 first load is no bigger; its space is kept till it comes. Not on Today, where
+                 the list under it says the days, and changing them is for All plans -->
+            @if (editable()) {
+                <div class="plan-card__week">
+                    <ng-container #week />
+                </div>
+            }
 
             <ul class="plan-card__workouts" aria-label="Its workouts">
                 @for (workout of training(); track workout.id) {
@@ -100,7 +103,8 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
                     </li>
                 }
             </ul>
-            @if (activeRest().length) {
+            <!-- On Today, "Plus 2 days of active rest" says it: the week shows them once used -->
+            @if (editable() && activeRest().length) {
                 <p class="plan-card__rest-label" [id]="headingId() + '-rest'">On rest days</p>
                 <ul class="plan-card__workouts" [attr.aria-labelledby]="headingId() + '-rest'">
                     @for (workout of activeRest(); track workout.id) {
@@ -133,7 +137,7 @@ export type PlanWorkoutFrom = 'today' | 'plans' | 'plan';
 
             <app-showcase-kit [needs]="needs()" />
 
-            @if (restOffered()) {
+            @if (editable() && restOffered()) {
                 <div class="plan-card__rest-choice">
                     <div class="plan-card__rest-text">
                         <span [id]="headingId() + '-rest-switch'">Include active rest days</span>
@@ -171,6 +175,12 @@ export class PlanCardComponent {
      * its own, so the two read as one surface rather than a card in a card.
      */
     readonly flat = input(false);
+    /**
+     * Whether its week can be changed on the card: its days moved about, and its active rest
+     * left out, so listed too. Not on Today, where a new user is asked one thing, to use it:
+     * the list of its training says their days, and All plans has the rest, to change.
+     */
+    readonly editable = input(true);
     /** Its title's heading level: 3 on its own page, 4 inside a card (Today's Get started). */
     readonly headingLevel = input<3 | 4>(4);
     /** Where its workouts' pages go back to: Today, or the Ready-made plans page. */
@@ -187,6 +197,7 @@ export class PlanCardComponent {
         lazyComponent({
             load: () => import('./plan-week.component').then((loaded) => loaded.PlanWeekComponent),
             slot: this.weekSlot,
+            when: () => this.editable(),
             inputs: () => ({
                 days: this.days(),
                 title: this.plan().title,

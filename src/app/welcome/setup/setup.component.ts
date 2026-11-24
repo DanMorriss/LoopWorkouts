@@ -26,6 +26,7 @@ import { SettingsStore } from '../../shared/state/settings-store.service';
 import { SyncStarter } from '../../sync/sync-starter.service';
 import { SETUP_KEY } from '../welcome-first';
 import { UndoService } from '../../shared/undo/undo.service';
+import { TourService } from '../../tour/tour.service';
 import { EquipmentChipsComponent } from '../../shared/components/equipment-chips/equipment-chips.component';
 
 /**
@@ -64,6 +65,7 @@ export const PROFILE_WAIT_MS = 8000;
 export class SetupComponent {
     protected readonly settings = inject(SettingsStore);
     private readonly undo = inject(UndoService);
+    private readonly tour = inject(TourService);
     private readonly starter = inject(SyncStarter);
     private readonly router = inject(Router);
     private readonly document = inject(DOCUMENT);
@@ -164,11 +166,13 @@ export class SetupComponent {
 
     /**
      * Done (or skipped): not asked again, by this device or, signed in, any other, and on to
-     * Today. Answered to the end, Today says so in the bar at the bottom, by name.
+     * Today. Answered to the end, Today says so in the bar at the bottom, by name. Today
+     * doesn't offer the tour as well this time (NAV-8): its first ask is a week to start with.
      */
     protected async finish({ allSet = false } = {}) {
         this.checking.set(false);
         this.settings.keepProfile();
+        this.tour.holdOffer();
         localStorage.removeItem(SETUP_KEY);
         await this.router.navigateByUrl('/home', { replaceUrl: true });
         if (allSet) {

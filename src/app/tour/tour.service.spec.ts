@@ -23,6 +23,15 @@ describe('TourService (NAV-8)', () => {
         expect(TestBed.inject(TourService).offered()).toBe(false);
     });
 
+    it('is held back on the Today the setup ends on, and offered the next time', () => {
+        TestBed.inject(TourService).holdOffer();
+        expect(TestBed.inject(TourService).offered()).toBe(false);
+        expect(localStorage.getItem(TOUR_KEY)).toBeNull();
+
+        TestBed.resetTestingModule();
+        expect(TestBed.inject(TourService).offered()).toBe(true);
+    });
+
     it('steps forwards and back between its stops, and ends', () => {
         const tour = TestBed.inject(TourService);
         tour.start();

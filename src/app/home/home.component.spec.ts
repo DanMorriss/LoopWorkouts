@@ -143,20 +143,12 @@ describe('HomeComponent', () => {
                 'Kettlebell AMRAP',
                 '20-minute AMRAP',
                 'Cardio intervals',
-                'Mobility flow',
-                'Full-body stretch',
             ]);
-            expect(inFirst('.plan-card__workout-days')).toEqual([
-                'Mon',
-                'Tue',
-                'Thu',
-                'Sat',
-                'Wed',
-                'Sun',
-            ]);
+            expect(inFirst('.plan-card__workout-days')).toEqual(['Mon', 'Tue', 'Thu', 'Sat']);
             expect(inFirst('.plan-card__count')).toEqual(['4 days a week']);
             expect(inFirst('.plan-card__rest-count')).toEqual(['Plus 2 days of active rest']);
-            expect(inFirst('.plan-card__rest-label')).toEqual(['On rest days']);
+            // which the week shows once it's used
+            expect(inFirst('.plan-card__rest-label')).toEqual([]);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
             for (const link of element().querySelectorAll('.plans__actions a')) {
                 expect(link.classList).toContain('btn-pill');
@@ -171,6 +163,10 @@ describe('HomeComponent', () => {
                 ['Make your own plan', '/plan'],
             ]);
             expect(element().querySelector('app-week-strip')).toBeNull();
+            // It asks one thing: its days to move about, and its active rest to leave out, are
+            // on All plans
+            expect(first.querySelector('.plan-card__week')).toBeNull();
+            expect(first.querySelector('app-toggle-switch')).toBeNull();
         });
 
         it('has a dot for each plan, which shows it, and marks the one shown', async () => {

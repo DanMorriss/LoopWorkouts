@@ -4,7 +4,8 @@ import { TourService } from '../../tour/tour.service';
 
 /**
  * Today's offer of the tour (NAV-8), until it's taken or turned down on this device: Take the
- * tour, or Not now, which puts focus on the greeting as the card goes.
+ * tour, or Not now, which puts focus on the greeting as the card goes. Both are outlined
+ * buttons, as Today's main button is what to do: use a plan, or start a workout.
  */
 @Component({
     selector: 'app-tour-offer',
@@ -15,11 +16,7 @@ import { TourService } from '../../tour/tour.service';
                 <p class="offer__text">A quick look at each tab, and what's where.</p>
                 <div class="offer__actions">
                     <button type="button" class="btn-pill" (click)="notNow()">Not now</button>
-                    <button
-                        type="button"
-                        class="btn-main btn-main--small offer__start"
-                        (click)="tour.start()"
-                    >
+                    <button type="button" class="btn-pill offer__start" (click)="tour.start()">
                         Take the tour
                     </button>
                 </div>

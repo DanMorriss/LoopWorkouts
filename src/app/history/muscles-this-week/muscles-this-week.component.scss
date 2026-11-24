@@ -1,3 +1,4 @@
+@use 'type' as *;
 @use 'panel-card' as *;
 
 :host {
@@ -14,6 +15,12 @@
     color: var(--text-strong);
     font-size: 1rem;
     text-align: center;
+
+    // On Today, labelled as Today's other cards are
+    &--label {
+        @include card-label;
+        margin-bottom: 0.75rem;
+    }
 }
 
 // Where the body map's figures will be while its code loads, the same size, so nothing moves

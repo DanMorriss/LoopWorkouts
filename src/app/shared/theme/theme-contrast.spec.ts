@@ -134,6 +134,19 @@ for (const theme of ['dark', 'light'] as const) {
             expect(contrastRatio(token('--apple-bg'), panel)).toBeGreaterThanOrEqual(3);
         });
 
+        // A plan's workouts (PLN-6): numbered marks and rings, never a phase colour
+        it("keeps a plan's colours apart from the phases, and its marks' numbers readable", () => {
+            const phases = ['--work', '--rest', '--reps'].map(token);
+            for (const n of [1, 2, 3, 4]) {
+                const colour = token(`--plan-${n}`);
+                expect(phases).not.toContain(colour);
+                expect(contrastRatio(token('--plan-ink'), colour)).toBeGreaterThanOrEqual(4.5);
+                expect(
+                    contrastRatio(colour, flatten(['--page-bg', '--card']))
+                ).toBeGreaterThanOrEqual(3);
+            }
+        });
+
         // The history's bars of sets per muscle, filled on an unworked-muscle track
         it('makes each muscle bar stand out on its track (at least 3:1)', () => {
             for (const fill of ['under', 'in']) {

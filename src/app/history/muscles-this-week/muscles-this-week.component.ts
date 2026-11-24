@@ -46,7 +46,13 @@ const loadBodyMap = () =>
     template: `
         @if (musclesWorked().hasData) {
             <section class="muscles-week" [attr.aria-labelledby]="id">
-                <h3 class="muscles-week__title" [id]="id">Muscles worked this week</h3>
+                <h3
+                    class="muscles-week__title"
+                    [class.muscles-week__title--label]="compact()"
+                    [id]="id"
+                >
+                    Muscles worked this week
+                </h3>
                 <app-carousel label="Muscles worked this week" itemName="View">
                     <ng-template appSlide="Body map">
                         <!-- Its drawings (58 KiB) load only once there's something to show on

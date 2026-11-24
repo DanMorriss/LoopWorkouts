@@ -44,9 +44,7 @@ let nextId = 0;
             <section class="suggestion" [attr.aria-labelledby]="id">
                 <h3 class="suggestion__label" [id]="id">{{ heading() }}</h3>
                 @if (restDay() && suggestions().length && !stretch()) {
-                    <p class="suggestion__reason">
-                        Nothing's planned today, so resting is fine too. If you'd like to train:
-                    </p>
+                    <p class="suggestion__reason">Resting is fine too. If you'd like to train:</p>
                 }
                 <app-carousel class="suggestion__slides" label="Suggestions" itemName="Suggestion">
                     @if (stretch(); as offer) {
@@ -75,7 +73,7 @@ let nextId = 0;
                                 <p class="suggestion__reason">{{ suggested.reason }}</p>
                                 <button
                                     type="button"
-                                    class="btn-main"
+                                    [class]="restDay() ? 'btn-pill' : 'btn-main'"
                                     [attr.aria-label]="'Start ' + suggested.workout.title"
                                     (click)="start(suggested.workout)"
                                 >
@@ -91,7 +89,10 @@ let nextId = 0;
     styleUrl: './suggested-workout.component.scss',
 })
 export class SuggestedWorkoutComponent {
-    /** On Today, on a day of a planned week with nothing planned (PLN-2). */
+    /**
+     * On Today, on a day of a planned week with nothing planned (PLN-2): offered, not pressed,
+     * so its Start isn't the page's main button.
+     */
     readonly restDay = input(false);
     /** Whether to suggest workouts: on Today, not on a planned day, as the plan says what's next. */
     readonly suggestWorkouts = input(true);
@@ -142,6 +143,4 @@ export class SuggestedWorkoutComponent {
         }
         return this.restDay() ? 'Fancy a workout today?' : 'Suggested next workout';
     });
-
-    /** Whether anything's been done, for Progress to show: until then, no way there. */
 }

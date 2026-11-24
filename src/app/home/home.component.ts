@@ -9,7 +9,7 @@ import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
-import { thisWeek, weekdayOf } from '../models/plan';
+import { missedToDoToday, thisWeek, weekdayOf } from '../models/plan';
 import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 
 /**
@@ -65,6 +65,14 @@ export class HomeComponent {
             (id) => this.workouts.findAnyWorkout(id) !== null
         );
         return this.hasPlan() && week[weekdayOf(now)].length === 0;
+    });
+    /**
+     * On a rest day, training missed this week that Today's week offers to do today: then
+     * that's the offer, rather than workouts suggested beside it.
+     */
+    protected readonly missedToDo = computed(() => {
+        const now = this.openedAt.getTime();
+        return missedToDoToday(this.thisWeek(now), weekdayOf(now)) !== null;
     });
     /**
      * Whether planned training is still to do today: stretches wait till it's done, rather

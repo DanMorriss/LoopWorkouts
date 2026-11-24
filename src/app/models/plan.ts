@@ -333,6 +333,29 @@ export function canDoToday(
     );
 }
 
+/**
+ * On a rest day (nothing planned today), the training missed this week that could be done
+ * today instead (`canDoToday`): the latest missed, as the one nearest to mind. Null on a day
+ * with something planned, or with none missed.
+ */
+export function missedToDoToday(
+    week: readonly (readonly PlannedWorkout[])[],
+    today: number
+): { day: number; workoutId: string } | null {
+    if (week[today].length) {
+        return null;
+    }
+    for (let day = today - 1; day >= 0; day--) {
+        const item = week[day].find(
+            (one) => one.status === 'missed' && !one.activeRest && canDoToday(week, day, one, today)
+        );
+        if (item) {
+            return { day, workoutId: item.workoutId };
+        }
+    }
+    return null;
+}
+
 /** The start of the day after `monday`'s `day` (from 0), on the device's calendar. */
 function dayAfter(monday: number, day: number): number {
     const date = new Date(monday);

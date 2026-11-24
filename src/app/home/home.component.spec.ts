@@ -143,20 +143,12 @@ describe('HomeComponent', () => {
                 'Kettlebell AMRAP',
                 '20-minute AMRAP',
                 'Cardio intervals',
-                'Mobility flow',
-                'Full-body stretch',
             ]);
-            expect(inFirst('.plan-card__workout-days')).toEqual([
-                'Mon',
-                'Tue',
-                'Thu',
-                'Sat',
-                'Wed',
-                'Sun',
-            ]);
+            expect(inFirst('.plan-card__workout-days')).toEqual(['Mon', 'Tue', 'Thu', 'Sat']);
             expect(inFirst('.plan-card__count')).toEqual(['4 days a week']);
             expect(inFirst('.plan-card__rest-count')).toEqual(['Plus 2 days of active rest']);
-            expect(inFirst('.plan-card__rest-label')).toEqual(['On rest days']);
+            // which the week shows once it's used
+            expect(inFirst('.plan-card__rest-label')).toEqual([]);
             expect(element().querySelector('.plan-card__use')!.classList).toContain('btn-main');
             for (const link of element().querySelectorAll('.plans__actions a')) {
                 expect(link.classList).toContain('btn-pill');
@@ -171,6 +163,20 @@ describe('HomeComponent', () => {
                 ['Make your own plan', '/plan'],
             ]);
             expect(element().querySelector('app-week-strip')).toBeNull();
+            // It asks one thing: its days to move about, and its active rest to leave out, are
+            // on All plans
+            expect(first.querySelector('.plan-card__week')).toBeNull();
+            expect(first.querySelector('app-toggle-switch')).toBeNull();
+        });
+
+        it('is planning your week, not getting started, once a workout has been done', () => {
+            TestBed.inject(HistoryStore).record(yesterday);
+            create();
+
+            expect(text('.start__label')).toEqual(['Plan your week']);
+            expect(text('.start__lead')).toEqual([
+                "A week of workouts, planned for you. Here's one that needs no equipment:",
+            ]);
         });
 
         it('has a dot for each plan, which shows it, and marks the one shown', async () => {
@@ -216,6 +222,10 @@ describe('HomeComponent', () => {
             create();
 
             expect(text('.plan-card__title')).toEqual(['No equipment, 3 days']);
+            // Not "for your goal and equipment", with no equipment given
+            expect(text('.start__lead')).toEqual([
+                "Start with a week of workouts, planned for you. Here's one that needs no equipment:",
+            ]);
             // One alone: no dots
             expect(element().querySelector('app-get-started .carousel__dot')).toBeNull();
         });
@@ -454,9 +464,10 @@ describe('HomeComponent', () => {
 
                 expect(text('.suggestion__label')).toEqual(['Fancy a workout today?']);
                 const said = text('.suggestion__reason');
-                expect(said[0]).toBe(
-                    "Nothing's planned today, so resting is fine too. If you'd like to train:"
-                );
+                expect(said[0]).toBe("Resting is fine too. If you'd like to train:");
+                // Offered, not pressed: its Start isn't the page's main button
+                expect(element().querySelector('.suggestion .btn-main')).toBeNull();
+                expect(element().querySelector('.suggestion .btn-pill')).not.toBeNull();
                 expect(said[1]).toMatch(/fresh for Legs on Thursday\.$/);
                 // Not the one planned next, which back squats are, among any to swipe to
                 expect(text('.suggestion__title').length).toBeGreaterThan(1);
@@ -800,6 +811,36 @@ describe('HomeComponent', () => {
 
             expect(text('.day-panel__rest')).toEqual(['bedtime Rest day. Nothing planned.']);
             expect(element().textContent).toContain('Fancy a workout today?');
+            // Monday's Legs counts from next week, as it was planned today: not missed
+            expect(element().querySelector('.day-panel__missed')).toBeNull();
+        });
+
+        it('offers one missed this week on a rest day, to do today instead, with Undo', async () => {
+            // Legs on Monday, planned last week, so missed; nothing today, a Sunday
+            const legs = TestBed.inject(WorkoutStore).addWorkout({
+                title: 'Legs',
+                repeats: 1,
+                blocks: asOneGroup([{ kind: 'reps', reps: 5, name: 'Back squat' }]),
+            });
+            vi.setSystemTime(NOW - 7 * 24 * HOUR);
+            TestBed.inject(PlanStore).add(0, legs.id);
+            vi.setSystemTime(NOW);
+            create();
+            document.body.appendChild(element());
+
+            expect(text('.day-panel__missed-text')).toEqual(["Missed Monday's Legs?"]);
+            const doToday = element().querySelector<HTMLButtonElement>(
+                '.day-panel__missed button'
+            )!;
+            expect(doToday.getAttribute('aria-label')).toBe('Do it today: Legs');
+            expect(element().querySelector('.suggestion')).toBeNull();
+            doToday.click();
+            await fixture.whenStable();
+
+            expect(text('.day-panel__name')).toEqual(['Legs']);
+            expect(text('.day-panel__note')).toEqual(['Moved from Monday']);
+            expect(element().querySelector('.day-panel__missed')).toBeNull();
+            expect(TestBed.inject(UndoService).offer()?.message).toBe('Legs moved to today');
         });
 
         it('puts active rest after training, marked as such, with a quieter Start', () => {
@@ -851,6 +892,30 @@ describe('HomeComponent', () => {
             ).toEqual(['Start Push']);
             expect(text('.day-panel__status')).toEqual(['check Done']);
             expect(element().querySelector('.suggestion')).toBeNull();
+        });
+
+        it('says what to beat from last time, and a new best once done today (PRG-17)', () => {
+            const { legs } = planToday();
+            const history = TestBed.inject(HistoryStore);
+            const heavy = (reps: number, weight: number) => ({ ...squat, reps, weight });
+            // Legs last week, at its heaviest 60 kg × 5; Push never done
+            history.record({
+                ...yesterday,
+                id: 'run-0',
+                startedAt: NOW - 7 * 24 * HOUR,
+                workoutId: legs.id,
+                sets: [heavy(8, 50), heavy(5, 60)],
+            });
+            create();
+
+            expect(text('.day-panel__last')).toEqual(['Last time: Back squat 60 kg × 5']);
+            expect(text('.day-panel__mark')).toEqual(['60 kg × 5']);
+
+            // Done today, heavier: a new best, in its place
+            history.record({ ...entry, workoutId: legs.id, sets: [heavy(5, 62.5)] });
+            fixture.detectChanges();
+            expect(text('.day-panel__last')).toEqual(['New best: Back squat 62.5 kg × 5']);
+            expect(element().querySelector('.day-panel__last--best')).not.toBeNull();
         });
 
         it('says all done once each has been run today, leaving what is next to the plan', () => {

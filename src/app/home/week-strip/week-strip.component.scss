@@ -19,10 +19,7 @@
 }
 
 .week__label {
-    margin: 0;
-    color: var(--text-muted);
-    @include caps(0.8rem);
-    font-weight: 600;
+    @include card-label;
 }
 
 // A text link with a pencil before it, tall enough to tap

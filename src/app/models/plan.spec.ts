@@ -4,6 +4,7 @@ import {
     daysPlannedOn,
     EMPTY_PLAN,
     isWeekPlan,
+    missedToDoToday,
     nextPlannedDay,
     planChangeText,
     plannedKey,
@@ -241,5 +242,48 @@ describe("the plan's colours (PLN-4)", () => {
             ['core', 4],
             ['run', 1],
         ]);
+    });
+});
+
+describe('a missed workout on a rest day (PLN-3)', () => {
+    const missed = (workoutId: string) => ({ workoutId, status: 'missed' as const });
+
+    it('offers the latest missed this week, not active rest, on a day with nothing planned', () => {
+        const week = [[missed('legs')], [missed('push')], [], [], [], [], []];
+        expect(missedToDoToday(week, 2)).toEqual({ day: 1, workoutId: 'push' });
+
+        const rest = [
+            [missed('legs')],
+            [{ workoutId: 'stretch', status: 'missed' as const, activeRest: true as const }],
+            [],
+            [],
+            [],
+            [],
+            [],
+        ];
+        expect(missedToDoToday(rest, 2)).toEqual({ day: 0, workoutId: 'legs' });
+    });
+
+    it('offers none with something planned today, or only done and moved ones', () => {
+        expect(
+            missedToDoToday(
+                [[missed('legs')], [], [{ workoutId: 'push', status: 'today' }], [], [], [], []],
+                2
+            )
+        ).toBeNull();
+        expect(
+            missedToDoToday(
+                [
+                    [{ workoutId: 'legs', status: 'done' }],
+                    [{ ...missed('push'), movedFrom: 3 }],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                ],
+                2
+            )
+        ).toBeNull();
     });
 });

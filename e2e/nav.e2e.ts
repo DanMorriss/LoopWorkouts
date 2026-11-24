@@ -106,13 +106,17 @@ test.describe('a device new to the app', () => {
             await expect(app.undo).toHaveCount(0);
             expect(await app.storageItem('setup')).toBeNull();
             expect(JSON.parse((await app.storageItem('settings'))!).bodyWeight).toBe(72.5);
-            // Get started offers a ready-made plan for the goal and the kit (M3)
+            // Get started offers a ready-made plan for the goal and the kit (M3), and it's all
+            // Today asks: the tour waits till the app's next opened (NAV-8)
             await expect(
                 page.getByRole('region', { name: 'Get started' }).getByRole('article').first()
             ).toHaveAccessibleName('Fitness, 4 days');
+            const tourOffer = page.getByRole('region', { name: 'New here? Take a 1-minute tour' });
+            await expect(tourOffer).toHaveCount(0);
 
             await app.reload();
             await expect(page).toHaveURL('/home');
+            await expect(tourOffer).toBeVisible();
             await app.tab('You').click();
             const profile = page.getByRole('region', { name: 'Profile' });
             await expect(profile.getByRole('textbox', { name: 'Name' })).toHaveValue('Sam');

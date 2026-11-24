@@ -6,7 +6,7 @@ import { injectFocusAfterRender } from '../../shared/focus-after-render';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import { nextPlannedDay, weekdayOf, WEEKDAYS } from '../../models/plan';
+import { missedToDoToday, nextPlannedDay, weekdayOf, WEEKDAYS } from '../../models/plan';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { WEEK_EDIT_ID } from '../use-plan-on-today';
@@ -49,6 +49,7 @@ import { WeekWorkout, weekDays } from './week-view';
                     <app-day-panel
                         class="week__panel"
                         [day]="day"
+                        [missed]="day.day === today ? missed() : null"
                         [animate.enter]="entering()"
                         (doToday)="doToday(day.day, $event)"
                     />
@@ -74,7 +75,7 @@ export class WeekStripComponent {
     private readonly thisWeek = injectThisWeek();
     protected readonly weekEditId = WEEK_EDIT_ID;
     private readonly now = Date.now();
-    private readonly today = weekdayOf(this.now);
+    protected readonly today = weekdayOf(this.now);
 
     private name(id: string): string {
         return this.workouts.findAnyWorkout(id)?.title.trim() || 'Untitled workout';
@@ -103,6 +104,17 @@ export class WeekStripComponent {
         weekDays(this.week(), this.now, (id) => this.name(id))
     );
 
+    /**
+     * On a rest day, the training missed this week to offer today instead, with the day it was
+     * on, e.g. "Monday's Legs" (PLN-3).
+     */
+    protected readonly missed = computed(() => {
+        const missed = missedToDoToday(this.week(), this.today);
+        const day = missed && this.days()[missed.day];
+        const item = day?.workouts.find((one) => one.workoutId === missed!.workoutId);
+        return day && item ? { day: day.name, from: day.day, item } : null;
+    });
+
     /** The day shown under the days: today, until another's picked. */
     protected readonly picked = signal(this.today);
     /** The picked day, as a list of one, so its panel is made afresh for each day. */
@@ -120,12 +132,15 @@ export class WeekStripComponent {
 
     /**
      * Done today instead, this week only (PLN-3), as the Plan page's menu does: today's picked,
-     * with it on, due. With Undo, which picks its day again, focus back on its Do it today;
-     * focus goes to the Undo bar, then its Start, today.
+     * with it on, due. With Undo, which picks the day it was pressed on again (its own, or
+     * today's for one offered on a rest day), focus back on its Do it today; focus goes to the
+     * Undo bar, then its Start, today.
      */
     protected doToday(day: number, item: WeekWorkout) {
         const before = this.planStore.plan();
-        this.planStore.moveThisWeek(item.workoutId, day, this.today);
+        const missed = this.missed();
+        const from = missed?.item.workoutId === item.workoutId ? missed.from : day;
+        this.planStore.moveThisWeek(item.workoutId, from, this.today);
         this.pick(this.today);
         this.undo.offerUndo({
             message: `${item.name} moved to today`,

@@ -1,4 +1,4 @@
-import { Service, signal } from '@angular/core';
+import { computed, Service, signal } from '@angular/core';
 
 /**
  * The tours: of the app (NAV-8), of making a workout on Create (BLD-17), of the workout page
@@ -47,6 +47,8 @@ const KEYS: Record<TourName, string> = {
 @Service()
 export class TourService {
     private readonly _offered = signal(!seen(TOUR_KEY));
+    /** Held back for now, straight after the setup, which is onboarding enough for one go. */
+    private readonly held = signal(false);
     private readonly _tour = signal<TourName>('app');
     private readonly _stop = signal<number | null>(null);
 
@@ -55,8 +57,11 @@ export class TourService {
      * showing it.
      */
     readonly sampleHistory = signal(false);
-    /** Whether Today offers the tour of the app: until it's taken or turned down here. */
-    readonly offered = this._offered.asReadonly();
+    /**
+     * Whether Today offers the tour of the app: until it's taken or turned down here, but not
+     * on the Today the setup ends on, only from the next time the app's opened.
+     */
+    readonly offered = computed(() => this._offered() && !this.held());
     /** The tour showing, or the last to have shown. */
     readonly tour = this._tour.asReadonly();
     /** The stop showing, from 0, or null with no tour on. */
@@ -92,6 +97,14 @@ export class TourService {
     end() {
         this._stop.set(null);
         this.sampleHistory.set(false);
+    }
+
+    /**
+     * The setup's just ended: Today doesn't offer the tour as well this time, so the first
+     * thing it asks is to plan the week. It's offered from the next time the app's opened.
+     */
+    holdOffer() {
+        this.held.set(true);
     }
 
     /** Not now: Today stops offering the tour of the app. */

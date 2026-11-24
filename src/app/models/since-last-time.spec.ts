@@ -1,5 +1,5 @@
 import { HistoryEntry, LoggedSet } from './history';
-import { sinceLastTime } from './since-last-time';
+import { lastTime, newBestIn, sinceLastTime } from './since-last-time';
 
 const squat = (reps: number, weight?: number): LoggedSet => ({
     round: 0,
@@ -116,5 +116,37 @@ describe('since last time, for the workout summary', () => {
         const later = entry(2000, [squat(10, 80)]);
 
         expect(sinceLastTime(today, [later, today])).toEqual([]);
+    });
+});
+
+describe('last time and new bests, for Today (PRG-17)', () => {
+    it("gives the last time's first exercise's top set, before a time if asked", () => {
+        const last = entry(2000, [squat(8, 50), squat(5, 60), pushUp(20)]);
+        const before = entry(1000, [pushUp(12), squat(5, 55)]);
+        const history = [last, before];
+
+        expect(lastTime('w', history)).toEqual({
+            name: 'Squats',
+            mark: { weight: 60, reps: 5 },
+        });
+        expect(lastTime('w', history, 2000)).toEqual({ name: 'Push-ups', mark: { reps: 12 } });
+        expect(lastTime('w', [entry(1000, [plank(45)])])).toEqual({
+            name: 'Plank',
+            mark: { seconds: 45 },
+        });
+    });
+
+    it('has nothing for a workout never done, or done with no set logged', () => {
+        expect(lastTime('other', [entry(1000, [squat(5)])])).toBeNull();
+        expect(lastTime('w', [entry(1000, [])])).toBeNull();
+    });
+
+    it('gives the first new best a run set, or none', () => {
+        const before = entry(1000, [squat(5, 60), pushUp(20)]);
+        const best = entry(2000, [squat(5, 60), pushUp(22)]);
+        const short = entry(2000, [squat(4, 60)]);
+
+        expect(newBestIn(best, [best, before])).toEqual({ name: 'Push-ups', mark: { reps: 22 } });
+        expect(newBestIn(short, [short, before])).toBeNull();
     });
 });

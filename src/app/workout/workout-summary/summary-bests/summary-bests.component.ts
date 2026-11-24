@@ -1,13 +1,11 @@
 import { Component, computed, inject, input } from '@angular/core';
-import { describeScore, formatDuration } from '../../../history/history-format';
+import { describeScore, markText } from '../../../history/history-format';
 import { HistoryEntry } from '../../../models/history';
 import { isMostRounds, roundsScore } from '../../../models/progress';
 import { Mark, sinceLastTime } from '../../../models/since-last-time';
-import { weightIn } from '../../../models/weight';
 import { HistoryStore } from '../../../shared/state/history-store.service';
 import { ExerciseStore } from '../../../shared/state/exercise-store.service';
 import { SettingsStore } from '../../../shared/state/settings-store.service';
-import { counted } from '../../../shared/format-count';
 import { ownExerciseName } from '../../own-exercise-name';
 
 /** One line of the card: what, how it went, and whether it's a new best. */
@@ -84,13 +82,8 @@ export class SummaryBestsComponent {
         return lines;
     });
 
-    /** "60 kg × 10", "24 reps" or "0:45". */
     private mark(mark: Mark): string {
-        if (mark.weight !== undefined) {
-            const unit = this.settings.weightUnit();
-            return `${weightIn(mark.weight, unit)} ${unit} × ${mark.reps}`;
-        }
-        return mark.reps !== undefined ? counted(mark.reps, 'rep') : formatDuration(mark.seconds!);
+        return markText(mark, this.settings.weightUnit());
     }
 }
 

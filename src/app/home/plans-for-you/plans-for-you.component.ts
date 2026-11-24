@@ -12,7 +12,8 @@ import { injectUsePlanOnToday } from '../use-plan-on-today';
  * Today's offer of a ready-made week (NAV-6, PLN-6, PLN-7), on Get started and on This week
  * with nothing planned: the plans for your goal and equipment (`plansForYou()`), swiped
  * between with their dots above them, so they're seen before the long cards; each used in one
- * tap, with Undo. Then All plans, on their page, or Make your own plan, on the Plan page.
+ * tap, with Undo, as it comes: changing its days, or leaving out its active rest, is on All plans,
+ * so the card asks only the one thing. Then All plans, or Make your own plan, on the Plan page.
  */
 @Component({
     selector: 'app-plans-for-you',
@@ -25,6 +26,7 @@ import { injectUsePlanOnToday } from '../use-plan-on-today';
                         [plan]="plan"
                         [main]="true"
                         [flat]="true"
+                        [editable]="false"
                         (used)="usePlan($event)"
                     />
                 </ng-template>

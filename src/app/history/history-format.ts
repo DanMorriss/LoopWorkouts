@@ -1,5 +1,6 @@
 import { HistoryEntry, isTimedSet, LoggedSet, RepSet, TimedSet } from '../models/history';
 import { roundsScore, RoundsScore } from '../models/progress';
+import { Mark } from '../models/since-last-time';
 import { WeightUnit, weightIn } from '../models/weight';
 import { PlacedHeading, PlacedSuperset } from '../models/workout';
 import { counted } from '../shared/format-count';
@@ -10,6 +11,14 @@ export function formatDuration(seconds: number): string {
     const m = Math.floor((seconds % 3600) / 60);
     const s = String(seconds % 60).padStart(2, '0');
     return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+}
+
+/** A top set (`Mark`): "60 kg × 10", "24 reps" or "0:45". */
+export function markText(mark: Mark, unit: WeightUnit): string {
+    if (mark.weight !== undefined) {
+        return `${weightIn(mark.weight, unit)} ${unit} × ${mark.reps}`;
+    }
+    return mark.reps !== undefined ? counted(mark.reps, 'rep') : formatDuration(mark.seconds!);
 }
 
 /**

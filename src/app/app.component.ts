@@ -3,7 +3,6 @@ import { Router, RouterOutlet } from '@angular/router';
 import { MovedBannerComponent } from './nav/moved-banner/moved-banner.component';
 import { NavComponent } from './nav/nav.component';
 import { openNewPagesAtTop } from './nav/open-at-top';
-import { RunBarComponent } from './nav/run-bar/run-bar.component';
 import { TabBarComponent } from './nav/tab-bar/tab-bar.component';
 import { UndoBarComponent } from './nav/undo-bar/undo-bar.component';
 import { isStaleCode, reloadForNewCode } from './nav/stale-code';
@@ -11,19 +10,13 @@ import { TOUR_LOADER } from './tour/tour-loader';
 import { TourService } from './tour/tour.service';
 import { lazyComponent } from './shared/lazy-component';
 import { SyncStarter } from './sync/sync-starter.service';
+import { WorkoutStore } from './shared/state/workout-store.service';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',
-    imports: [
-        RouterOutlet,
-        MovedBannerComponent,
-        NavComponent,
-        RunBarComponent,
-        TabBarComponent,
-        UndoBarComponent,
-    ],
+    imports: [RouterOutlet, MovedBannerComponent, NavComponent, TabBarComponent, UndoBarComponent],
 })
 export class AppComponent {
     title = 'loop-workouts';
@@ -33,6 +26,7 @@ export class AppComponent {
     private readonly window = inject(DOCUMENT).defaultView;
     private readonly tourSlot = viewChild('tour', { read: ViewContainerRef });
     private readonly notesAskSlot = viewChild('notesAsk', { read: ViewContainerRef });
+    private readonly runBarSlot = viewChild('runBar', { read: ViewContainerRef });
 
     constructor() {
         openNewPagesAtTop();
@@ -44,6 +38,16 @@ export class AppComponent {
             slot: this.notesAskSlot,
             inputs: () => ({}),
             when: sync.started,
+        });
+        // The workout going, in the bar above the tabs: loaded once there is one, as most
+        // visits start none, and kept from then on. One is started on its own page, which the
+        // bar isn't on, so it's there by the time the bar's wanted.
+        const workouts = inject(WorkoutStore);
+        lazyComponent({
+            load: () => import('./nav/run-bar/run-bar.component').then((m) => m.RunBarComponent),
+            slot: this.runBarSlot,
+            inputs: () => ({}),
+            when: () => !!workouts.activeWorkout(),
         });
         // The tour, loaded the first time it starts, over everything while it's on
         effect(() => {

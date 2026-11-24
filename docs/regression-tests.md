@@ -132,9 +132,9 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     4. Press the bar.
     5. Separately: open `/workout` with nothing running, and `/timer`.
 - **Expected:**
-    1. The workout page has no tab bar; ⌄ goes back to Workouts, where the bar above the tabs reads "Circuit" and "Squats · 00:2x", ticking down.
-    2. Pausing shows "Paused · Squats · …" and the button is named Resume; resuming carries on.
-    3. On Progress, the workout finishes without its page open: the bar says "Finished: see how it went" with no Pause, and Progress's log now has Circuit, "2 rounds" (logged while on another page).
+    1. The workout page has no tab bar; ⌄ goes back to Workouts, where the bar above the tabs reads "Squats" over "Circuit", with "00:2x" at its right, ticking down.
+    2. Pausing shows "Paused · Circuit" under the step and the button is named Resume; resuming carries on.
+    3. On Progress, the workout finishes without its page open: the bar says "See how it went" over "Finished · Circuit", with no Pause, and Progress's log now has Circuit, "2 rounds" (logged while on another page).
     4. The bar opens the workout page with its summary, "Workout finished".
     5. `/workout` with no run says "No workout selected." with "Choose one from your workouts" (to `/library`); `/timer` redirects to `/workout`.
 - **In the pack:** the link with no run reads **Choose a workout**.

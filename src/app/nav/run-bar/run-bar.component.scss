@@ -82,10 +82,6 @@
     &[data-phase='paused'] {
         --dot: var(--control-off);
     }
-
-    &[data-phase='finished'] {
-        --dot: var(--glow);
-    }
 }
 
 // Everything but the button: opens the workout
@@ -118,43 +114,77 @@
     }
 }
 
-// The step's colour, as on the ring
+// The step's colour, as on the ring. Flat: the bar is glass, not a light.
 .run-bar__dot {
     flex-shrink: 0;
-    width: 0.7rem;
-    height: 0.7rem;
+    width: 0.75rem;
+    height: 0.75rem;
     border-radius: 50%;
     background: var(--dot);
-    box-shadow: 0 0 8px var(--dot);
+}
+
+// Finished: a tick, so it isn't one more colour beside the phases'
+.run-bar__done {
+    flex-shrink: 0;
+    margin-inline: -0.2rem;
+    color: var(--glow);
+    font-size: 1.25rem;
 }
 
 .run-bar__text {
     display: flex;
+    flex: 1;
     flex-direction: column;
     min-width: 0;
     line-height: 1.25;
 }
 
-.run-bar__title,
-.run-bar__status {
+.run-bar__step,
+.run-bar__context {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.run-bar__title {
+// What's happening now, ahead of the workout it's in
+.run-bar__step {
     color: var(--text-strong);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 600;
 }
 
-.run-bar__status {
+.run-bar__context {
     color: var(--text-muted);
     @include small-type(0.75rem);
-    font-variant-numeric: tabular-nums;
 }
 
-.run-bar__pause {
+// The time left, or the reps: the bar's clock, read from the floor. Never cut short: the
+// names give way first.
+.run-bar__amount {
+    flex-shrink: 0;
+    color: var(--text-strong);
+    font-size: 1.3rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+.run-bar__unit {
+    margin-left: 0.15rem;
+    color: var(--text-muted);
+    @include small-type(0.75rem);
+}
+
+// Paused: the step and its time go quiet, as the ring greys out
+.run-bar[data-phase='paused'] {
+    .run-bar__step,
+    .run-bar__amount {
+        color: var(--text-muted);
+    }
+}
+
+.run-bar__button {
     flex-shrink: 0;
 }
 

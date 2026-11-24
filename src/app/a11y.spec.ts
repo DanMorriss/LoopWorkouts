@@ -173,7 +173,7 @@ for (const theme of ['dark', 'light'] as const) {
             it('with that workout paused', async () => {
                 store.setActiveWorkout(store.addWorkout(sprints));
                 await open('/history');
-                click('.run-bar__pause');
+                click('.run-bar__button');
                 await settle(600);
                 await expectNoViolations();
             });

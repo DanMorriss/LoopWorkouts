@@ -41,8 +41,16 @@ describe('RunBarComponent', () => {
     });
 
     const bar = () => element.querySelector<HTMLElement>('aside');
-    const status = () => element.querySelector('.run-bar__status')!.textContent!.trim();
-    const button = () => element.querySelector<HTMLButtonElement>('.run-bar__pause');
+    const text = (selector: string) =>
+        element.querySelector(selector)?.textContent!.replace(/\s+/g, ' ').trim() ?? null;
+    /** The step, the line under it and the time or reps at the right, e.g. "Plank | Sprints | 00:30". */
+    const shown = () =>
+        ['.run-bar__step', '.run-bar__context', '.run-bar__amount']
+            .map((selector) => text(selector) ?? '')
+            .join(' | ');
+    const announced = () => text('[aria-live]');
+    const button = () => element.querySelector<HTMLButtonElement>('.run-bar__button');
+    const run = () => TestBed.inject(ActiveRunService);
 
     async function go(url: string) {
         await TestBed.inject(Router).navigateByUrl(url);
@@ -65,7 +73,7 @@ describe('RunBarComponent', () => {
         start(makeWorkout({ title: 'Sprints' }));
 
         expect(bar()!.getAttribute('aria-label')).toBe('Workout in progress');
-        expect(element.querySelector('.run-bar__title')!.textContent!.trim()).toBe('Sprints');
+        expect(text('.run-bar__context')).toBe('Sprints');
     });
 
     it('is not on the workout page itself', async () => {
@@ -76,22 +84,54 @@ describe('RunBarComponent', () => {
         expect(bar()).toBeNull();
     });
 
-    it('shows the step and its time, ticking down, in the step colour', () => {
-        start(makeWorkout({ steps: [work(30, 'Plank')] }));
-        expect(status()).toBe('Plank · 00:30');
+    it('shows the step over the workout, and its time ticking down, in the step colour', () => {
+        start(makeWorkout({ title: 'Sprints', steps: [work(30, 'Plank')] }));
+        expect(shown()).toBe('Plank | Sprints | 00:30');
         expect(bar()!.dataset['phase']).toBe('work');
 
         advance(5000);
 
-        expect(status()).toBe('Plank · 00:25');
+        expect(shown()).toBe('Plank | Sprints | 00:25');
     });
 
     it('shows the reps on a rep step, and calls an unnamed step by its kind', () => {
-        start(makeWorkout({ steps: [reps(20, 'Push-ups')] }));
-        expect(status()).toBe('Push-ups · 20 reps');
+        start(makeWorkout({ title: 'Sprints', steps: [reps(20, 'Push-ups')] }));
+        expect(shown()).toBe('Push-ups | Sprints | 20 reps');
 
-        start(makeWorkout({ id: 'workout-2', steps: [work(10)] }));
-        expect(status()).toBe('Timed · 00:10');
+        start(makeWorkout({ id: 'workout-2', title: 'Sprints', steps: [work(10)] }));
+        expect(shown()).toBe('Timed | Sprints | 00:10');
+    });
+
+    it('offers Done on a rep step, which goes on to the next step', () => {
+        start(makeWorkout({ steps: [reps(20, 'Push-ups'), work(30, 'Plank')] }));
+        expect(button()!.getAttribute('aria-label')).toBe('Done');
+
+        button()!.click();
+        fixture.detectChanges();
+
+        expect(text('.run-bar__step')).toBe('Plank');
+        expect(button()!.getAttribute('aria-label')).toBe('Pause');
+        expect(
+            run()
+                .sets()
+                .map((set) => set.name)
+        ).toEqual(['Push-ups']);
+    });
+
+    it('announces each step as it starts, and pausing, but not the time ticking', () => {
+        start(makeWorkout({ steps: [work(3, 'Plank'), reps(10, 'Squats')], repeats: 1 }));
+        expect(announced()).toBe('Plank');
+
+        advance(1000);
+        expect(announced()).toBe('Plank');
+
+        advance(3000);
+        expect(announced()).toBe('Squats, 10 reps');
+
+        button()!.click();
+        fixture.detectChanges();
+        // Done on the last step: finished
+        expect(announced()).toBe('Finished');
     });
 
     it('opens the workout from the rest of the bar', () => {
@@ -108,8 +148,9 @@ describe('RunBarComponent', () => {
 
         expect(TestBed.inject(ActiveRunService).isPaused()).toBe(true);
         expect(button()!.getAttribute('aria-label')).toBe('Resume');
-        expect(status()).toBe('Paused · Plank · 00:30');
+        expect(shown()).toBe('Plank | Paused · Intervals | 00:30');
         expect(bar()!.dataset['phase']).toBe('paused');
+        expect(announced()).toBe('Paused');
 
         button()!.click();
         fixture.detectChanges();
@@ -262,8 +303,20 @@ describe('RunBarComponent', () => {
 
         advance(4000);
 
-        expect(status()).toBe('Finished: see how it went');
+        expect(shown()).toBe('See how it went | Finished · Intervals | ');
         expect(bar()!.dataset['phase']).toBe('finished');
         expect(button()).toBeNull();
+    });
+
+    it('moves focus from its button, as it goes, to the rest of the bar', async () => {
+        start(makeWorkout({ steps: [reps(5, 'Squats')], repeats: 1 }));
+        button()!.focus();
+
+        button()!.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(button()).toBeNull();
+        expect(document.activeElement).toBe(element.querySelector('.run-bar__open'));
     });
 });

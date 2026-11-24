@@ -241,7 +241,7 @@ Tactile: each shrinks a little the moment it's pressed (`pressed-scale`), and sp
 
 ### Navigation
 - **Tab bar:** a floating, frosted pill along the bottom with five tabs (Today, Workouts, Exercises, Progress and You). The selected tab sits on an `--accent-soft` pill edged in `--glow`, which slides between tabs on the spring.
-- **Run bar:** a workout that's going floats above the tabs, like a music app's mini player, with its step, time and Pause.
+- **Run bar:** a workout that's going floats above the tabs, like a music app's mini player but read like a stopwatch: the step over the workout's name, the time large at the right in `tabular-nums` (never cut short; the names give way), a flat dot in the phase colour (no glow), and the one button to press now (Pause, Resume, ✓ Done or Start). Paused, the step and time go muted, as the ring greys out.
 - **Top bar:** a page's ‹ and title, kept at the top.
 
 ### Dialogs

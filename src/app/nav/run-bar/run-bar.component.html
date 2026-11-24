@@ -17,22 +17,37 @@
         (pointercancel)="swipe.cancel()"
     >
         <!-- Grows into the workout page as it opens (WorkoutMorph) -->
-        <a class="run-bar__open" href="/workout" (click)="morph.follow($event, '/workout')">
-            <span class="run-bar__dot" aria-hidden="true"></span>
+        <a #open class="run-bar__open" href="/workout" (click)="morph.follow($event, '/workout')">
+            @if (finished()) {
+                <app-icon class="run-bar__done">check</app-icon>
+            } @else {
+                <span class="run-bar__dot" aria-hidden="true"></span>
+            }
             <span class="run-bar__text">
-                <span class="run-bar__title">{{ title() }}</span>
-                <span class="run-bar__status">{{ status() }}</span>
+                <span class="run-bar__step">{{ step() }}</span>
+                <span class="run-bar__context">{{ context() }}</span>
             </span>
+            @if (amount(); as amount) {
+                <span class="run-bar__amount">
+                    {{ amount.value }}
+                    @if (amount.unit) {
+                        <span class="run-bar__unit">{{ amount.unit }}</span>
+                    }
+                </span>
+            }
         </a>
         @if (!finished()) {
             <button
+                #action
                 type="button"
-                class="btn-icon run-bar__pause"
-                [attr.aria-label]="isPaused() ? 'Resume' : waiting() ? 'Start' : 'Pause'"
-                (click)="togglePause()"
+                class="btn-icon run-bar__button"
+                [attr.aria-label]="button().label"
+                (click)="pressButton()"
             >
-                <app-icon>{{ isPaused() || waiting() ? 'play_arrow' : 'pause' }}</app-icon>
+                <app-icon>{{ button().icon }}</app-icon>
             </button>
         }
+        <!-- The workout page's announcements, while it isn't there to make them -->
+        <span class="sr-only" aria-live="polite" aria-atomic="true">{{ announcement() }}</span>
     </aside>
 }

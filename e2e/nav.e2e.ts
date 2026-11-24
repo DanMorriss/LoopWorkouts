@@ -280,23 +280,24 @@ test.describe('the run bar', () => {
 
             await run.close.click();
             await expect(page).toHaveURL('/library');
-            await expect(app.runBar).toContainText('Circuit');
-            await expect(app.runBar).toContainText(/Squats · 00:[23]\d/);
+            // The step, the workout under it, and the time at the right
+            const open = app.runBar.getByRole('link');
+            await expect(open).toHaveAccessibleName(/^Squats Circuit 00:[23]\d$/);
 
             await app.runBar.getByRole('button', { name: 'Pause' }).click();
-            await expect(app.runBar).toContainText(/Paused · Squats · 00:[23]\d/);
+            await expect(open).toHaveAccessibleName(/^Squats Paused · Circuit 00:[23]\d$/);
             await app.runBar.getByRole('button', { name: 'Resume' }).click();
             await expect(app.runBar.getByRole('button', { name: 'Pause' })).toBeVisible();
 
             // It finishes, and is logged, while another page is open
             await app.tab('Progress').click();
             await page.clock.runFor(80_000);
-            await expect(app.runBar).toContainText('Finished: see how it went');
+            await expect(open).toHaveAccessibleName('See how it went Finished · Circuit');
             await expect(app.runBar.getByRole('button', { name: 'Pause' })).toHaveCount(0);
             const entry = new HistoryPage(page).entry('Circuit');
             await expect(entry).toContainText('2 rounds');
 
-            await app.runBar.getByRole('link').click();
+            await open.click();
             await expect(page).toHaveURL('/workout');
             await expect(run.summary).toHaveAccessibleName('Workout finished');
         }

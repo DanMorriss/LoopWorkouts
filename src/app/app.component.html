@@ -8,10 +8,10 @@
 </main>
 
 <!-- Floating over the bottom of every page: Undo after a delete, the workout going (if one
-     is), then the tabs -->
+     is, loaded only once there's one), then the tabs -->
 <div class="bottom-bars">
     <app-undo-bar />
-    <app-run-bar />
+    <ng-container #runBar />
     <app-tab-bar />
 </div>
 

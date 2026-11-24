@@ -4,7 +4,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, ActivatedRouteSnapshot, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { describeRounds, formatDuration } from '../../history/history-format';
+import { describeRounds, formatDuration, markText } from '../../history/history-format';
+import { HistoryEntry } from '../../models/history';
+import { lastTime } from '../../models/since-last-time';
+import { SettingsStore } from '../../shared/state/settings-store.service';
 import { exerciseSlug } from '../../models/exercise';
 import { isReadyMade, isReadyMadeId, Workout } from '../../models/workout';
 import { ReadyMadeBadgeComponent } from '../../shared/components/ready-made-badge/ready-made-badge.component';
@@ -68,6 +71,7 @@ const PLAN_BUTTON_ID = 'workout-details-plan';
 export class WorkoutDetailsComponent {
     private readonly exercises = inject(ExerciseStore);
     private readonly history = inject(HistoryStore);
+    private readonly settings = inject(SettingsStore);
     private readonly workouts = inject(WorkoutStore);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
@@ -166,9 +170,16 @@ export class WorkoutDetailsComponent {
                 id: entry.id,
                 startedAt: entry.startedAt,
                 text: `${describeRounds(entry)} · ${formatDuration(entry.activeSeconds)}`,
+                lift: this.liftIn(entry),
             }))
     );
     protected readonly moreRuns = computed(() => this.runs().length > RECENT_RUNS);
+
+    /** A run's first exercise's top set, e.g. "Kettlebell swing 16 kg × 15"; '' with none. */
+    private liftIn(entry: HistoryEntry): string {
+        const top = lastTime(entry.workoutId, [entry]);
+        return top ? `${top.name} ${markText(top.mark, this.settings.weightUnit())}` : '';
+    }
 
     /** An exercise's page, under this workout so it comes back here; none for one that's gone. */
     protected readonly exerciseUrl = (exerciseId: string) => {

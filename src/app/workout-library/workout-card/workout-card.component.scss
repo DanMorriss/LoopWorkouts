@@ -121,6 +121,8 @@
 .workout-card__start {
     // An outlined ▶, not the page's main button: there's one on every card, and New is that
     display: grid;
+    // Over the card's link, which covers the whole card (.btn-main was positioned; .btn-icon isn't)
+    position: relative;
     z-index: 1;
     width: 60px;
     height: 60px;

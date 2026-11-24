@@ -54,7 +54,7 @@ describe("ReadyMadeWorkoutComponent, a ready-made plan's workout (PLN-6)", () =>
         const watch = el().querySelector('app-workout-time [role="img"]')!;
         expect(watch.getAttribute('aria-label')).toMatch(/^Takes about \d+ minutes$/);
         expect(text(watch)).toMatch(/^\d+\s*mins$/);
-        expect(text(el().querySelector('app-workout-time p')!)).toContain('A first guess');
+        expect(text(el().querySelector('app-workout-time p')!)).toContain('Guessed for the rep steps');
     });
 
     it.each([

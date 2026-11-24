@@ -538,11 +538,11 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. Press ‹ Legs. Press **Edit**.
     4. Open `/library/not-a-workout`.
 - **Expected:**
-    1. The title; **Muscles it works** shading Quads and Glutes as Main and Hamstrings, Adductors and Lower back as Supporting; **History** "Done 2 times" and both runs, newest first, each linking to `/history?run=<id>`; **What's in it** last: "2 rounds of all of it", "Main", "Back squat 3 × 10, rest 1:00", "Work 0:30".
+    1. The title; **What's in it** first: "2 rounds of all of it", "Main", "Back squat 3 × 10, rest 1:00", "Work 0:30"; **History** "Done 2 times" and both runs, newest first, each linking to `/history?run=<id>`; **Muscles it works** last, shading Quads and Glutes as Main and Hamstrings, Adductors and Lower back as Supporting.
     2. The exercise page slides in at `/library/<id>/back-squat`, with ‹ Legs at its top; Workouts stays current.
     3. Back on the details; Edit opens Create on Legs.
     4. "Workout not found".
-- **In the pack:** the runs read e.g. "Tue 10 Nov …"; What's in it is the last region.
+- **In the pack:** the runs read e.g. "Tue 10 Nov …"; What's in it is the first region, and Muscles it works the last.
 
 ### REG-LIB-04 · Delete from the menu, and Undo
 

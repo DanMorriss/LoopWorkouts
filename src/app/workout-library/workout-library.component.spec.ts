@@ -1,5 +1,6 @@
 import type { Mock } from 'vitest';
 import { Favourites } from '../shared/state/favourites.service';
+import { HistoryStore } from '../shared/state/history-store.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { Workout } from '../models/workout';
@@ -133,13 +134,64 @@ describe('WorkoutLibraryComponent', () => {
             expect(card(0).querySelector('app-ready-made-badge')).toBeNull();
         });
 
-        it('lists them A to Z with the ready-made ones', () => {
+        it('lists them first, under Yours, then the ready-made ones, A to Z (LIB-11)', () => {
             const titles = all('.workout-card__title').map((t) => t.textContent!.trim());
             expect(titles).toHaveLength(2 + BUILT_IN_WORKOUTS.length);
-            const sprints = titles.indexOf('Sprints');
-            expect(titles[sprints - 1].localeCompare('Sprints')).toBeLessThan(0);
-            expect(titles[sprints + 1].localeCompare('Sprints')).toBeGreaterThan(0);
+            expect(titles.slice(0, 2)).toEqual(['Sprints', 'Untitled workout']);
+            expect(all('.library__section').map((h) => h.textContent!.trim())).toEqual([
+                'Yours',
+                'Ready-made',
+                'Stretches',
+            ]);
+            const readyMade = all('[data-section="training"] .workout-card__title').map((t) =>
+                t.textContent!.trim()
+            );
+            expect(readyMade).toEqual(
+                [...readyMade].sort((a, b) =>
+                    a.localeCompare(b, undefined, { sensitivity: 'base' })
+                )
+            );
             expect(el('.cdk-drop-list')).toBeNull();
+        });
+
+        it('puts the last done of yours first, and your favourites with them', async () => {
+            TestBed.inject(HistoryStore).record({
+                id: 'run',
+                workoutId: second.id,
+                title: '',
+                startedAt: 1000,
+                endedAt: 2000,
+                activeSeconds: 60,
+                roundsCompleted: 1,
+                totalRounds: 1,
+                outcome: 'finished',
+            });
+            TestBed.inject(Favourites).set('builtin:tabata', true);
+            fixture.detectChanges();
+
+            expect(
+                all('[data-section="yours"] .workout-card__title').map((t) => t.textContent!.trim())
+            ).toEqual(['Untitled workout', 'Sprints', 'Tabata']);
+            expect(
+                all('[data-section="training"] .workout-card__title').map((t) =>
+                    t.textContent!.trim()
+                )
+            ).not.toContain('Tabata');
+        });
+
+        it('lists the ready-made ones your equipment allows first', () => {
+            TestBed.inject(SettingsStore).update({ myEquipment: ['kettlebell'] });
+            fixture.detectChanges();
+
+            const readyMade = all('[data-section="training"] .workout-card__title').map((t) =>
+                t.textContent!.trim()
+            );
+            expect(readyMade.indexOf('Kettlebell AMRAP')).toBeLessThan(
+                readyMade.indexOf('Gym legs')
+            );
+            expect(readyMade.indexOf('20-minute AMRAP')).toBeLessThan(
+                readyMade.indexOf('Gym legs')
+            );
         });
 
         it('labels a workout with a blank title as "Untitled workout"', () => {
@@ -207,7 +259,11 @@ describe('WorkoutLibraryComponent', () => {
             it('says when none match, and clears the search to show them all again', () => {
                 search('rowing');
                 expect(all('.workout-card')).toHaveLength(0);
-                expect(el('.library__count')?.textContent).toContain('No workouts match');
+                expect(el('.library__count [role="status"]')?.textContent?.trim()).toBe(
+                    'No workouts with "rowing"'
+                );
+                // With somewhere to go from there
+                expect(el('.library__none')?.textContent).toContain('make your own with New');
 
                 click(el('.library__clear'));
 
@@ -589,7 +645,7 @@ describe('WorkoutLibraryComponent', () => {
             it('lists the workouts of only stretches after the rest, under Stretches', () => {
                 create();
 
-                expect(el('.library__section')?.textContent?.trim()).toBe('Stretches');
+                expect(all('.library__section').at(-1)?.textContent?.trim()).toBe('Stretches');
                 expect([...section('stretches')].sort()).toEqual([...stretchTitles].sort());
                 expect(section('training')).not.toContain('Mobility flow');
                 expect(titles().slice(-stretchTitles.length).sort()).toEqual(

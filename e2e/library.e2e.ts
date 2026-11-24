@@ -131,9 +131,12 @@ test.describe("a workout's details", () => {
             /Back squat.*3 × 10, rest 1:00/,
             /Work\s+0:30/,
         ]);
-        // What's in it comes last, after History
-        await expect(page.getByRole('main').getByRole('region').last()).toHaveAccessibleName(
+        // What's in it comes first, then History, and the muscles last
+        await expect(page.getByRole('main').getByRole('region').first()).toHaveAccessibleName(
             "What's in it"
+        );
+        await expect(page.getByRole('main').getByRole('region').last()).toHaveAccessibleName(
+            'Muscles it works'
         );
 
         await inIt.getByRole('link', { name: 'Back squat' }).click();

@@ -18,6 +18,8 @@ describe('musclesWorked', () => {
 
         expect(musclesWorked([legs, pull], byId)).toEqual({
             main: ['lower-back', 'glutes', 'quads', 'hamstrings'],
+            // Both work the glutes; then each of the others once, in the app's order
+            mostWorked: ['glutes', 'lower-back', 'quads', 'hamstrings'],
             supporting: ['forearms', 'traps', 'upper-back', 'adductors'],
             hasExercises: true,
         });
@@ -30,6 +32,7 @@ describe('musclesWorked', () => {
 
         expect(musclesWorked([workout], byId)).toEqual({
             main: [],
+            mostWorked: [],
             supporting: [],
             hasExercises: false,
         });
@@ -47,6 +50,7 @@ describe('musclesInSets', () => {
 
         expect(musclesInSets(sets, byId)).toEqual({
             main: ['chest'],
+            mostWorked: ['chest'],
             supporting: ['shoulders', 'triceps'],
             hasExercises: true,
         });

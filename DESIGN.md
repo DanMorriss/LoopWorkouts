@@ -234,14 +234,14 @@ Tactile: each shrinks a little the moment it's pressed (`pressed-scale`), and sp
 
 - **Main** (`.btn-main`): a raised pill with a cyan gradient, 52px tall, its label in `--cta-ink` at 1.0625rem and 600. A band of light crosses it once, soon after the screen opens, and then rests. `--small` is 44px, beside a page's title; `--round` is an 80px circle for the workout's big button, whichever is the one to press now (Pause, ✓ Done on a rep step, ▶ Start while waiting), and Resume, with a deeper press and no band.
 - **Pill** (`.btn-pill`): any smaller action, outlined in `--border` on no fill, 44px tall. On hover or press, its edge strengthens and it fills with `--control`. `--danger` is for Delete.
-- **Icon** (`.btn-icon`): a 44px outlined circle on `--control`, for an icon on its own.
+- **Icon** (`.btn-icon`): a 44px outlined circle on `--control`, for an icon on its own. `--accent` edges it in `--accent` with a `--glow-text` icon, for the one that starts something in a list of them: a workout card's ▶, 60px, which was a lit `.btn-main--round` on every card until 2026-11-24.
 - **Add** (`.btn-add`): a dashed 0.75rem box in the colour of what it adds (work, rest, reps or a heading).
 - **Focus:** a 2px `--accent` outline, offset 2 to 4px.
 
 ### Chips
 
 - **Style:** a 36px pill on `--control` with a `--border` edge, 44px to a finger.
-- **State:** picked (`aria-pressed`) has a `--glow-text` edge, an `--accent-soft` fill and a ✓. Tags (`tag`) are smaller, unpressable and edged in `--reps`.
+- **State:** picked (`aria-pressed`) has a `--glow-text` edge, an `--accent-soft` fill and a ✓. Tags (`tag`) are smaller, unpressable and edged in `--reps`. The **Ready-made** badge is a neutral tag, `--control` on a `--border` edge with `--text-muted` words, as it's on most workouts (in the accent's picked tint until 2026-11-24).
 
 ### Cards / Containers
 

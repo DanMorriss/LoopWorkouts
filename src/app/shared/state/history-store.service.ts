@@ -32,6 +32,18 @@ export class HistoryStore {
     /** Newest first. */
     readonly entries = computed(() => this._entries());
 
+    /** When each workout was last done (started), by its id. */
+    readonly lastDone = computed(() => {
+        const last = new Map<string, number>();
+        // Newest first, so the first of each workout is when it was last done
+        for (const entry of this._entries()) {
+            if (!last.has(entry.workoutId)) {
+                last.set(entry.workoutId, entry.startedAt);
+            }
+        }
+        return last;
+    });
+
     /** Settles once the saved history has loaded. Never fails: what can't be read is left out. */
     readonly ready: Promise<void>;
 

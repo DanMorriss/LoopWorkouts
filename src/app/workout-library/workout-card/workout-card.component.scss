@@ -49,7 +49,7 @@
     @include showcase-card-solid;
     // Its link and its row of actions have the padding
     padding: 0;
-    box-shadow: 0 10px 30px var(--shadow);
+    // No shadow until it's held and lifted (below), as DESIGN.md's cards have none
     // Up and down scroll the page; left and right are the card's to swipe
     touch-action: pan-y;
     // A long press lifts the card, rather than starting the phone's text selection or link menu
@@ -119,7 +119,10 @@
 
 // The way to start it: big, in the middle of the card's foot
 .workout-card__start {
-    display: flex;
+    // An outlined ▶, not the page's main button: there's one on every card, and New is that
+    display: grid;
+    // Over the card's link, which covers the whole card (.btn-main was positioned; .btn-icon isn't)
+    position: relative;
     z-index: 1;
     width: 60px;
     height: 60px;

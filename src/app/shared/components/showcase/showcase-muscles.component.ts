@@ -47,7 +47,6 @@ import { Component, input } from '@angular/core';
                 height: 0.45rem;
                 border-radius: 50%;
                 background: var(--muscle-main);
-                box-shadow: 0 0 0.4rem var(--glow-soft);
             }
         }
 

@@ -63,6 +63,12 @@
     }
 }
 
+// With nothing found, under the count, the whole width, before Clear
+.library__none {
+    flex-basis: 100%;
+    color: var(--text);
+}
+
 .library__clear {
     @include link-button;
 }

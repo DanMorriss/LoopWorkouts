@@ -50,7 +50,7 @@
 .details__own {
     margin: 0.35rem 0 0;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 // How long it takes, under its name
@@ -88,7 +88,7 @@
 .details__planned {
     margin: 0;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .details__heading {
@@ -118,7 +118,7 @@
     align-items: center;
     padding: 0.4rem 0.6rem;
     margin: 0 -0.6rem;
-    border-radius: 0.6rem;
+    border-radius: 0.5rem;
     color: inherit;
     text-decoration: none;
 
@@ -130,6 +130,13 @@
         outline: 2px solid var(--accent);
         outline-offset: -2px;
     }
+}
+
+.details__run-lift {
+    flex-basis: 100%;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
 }
 
 .details__run-date {

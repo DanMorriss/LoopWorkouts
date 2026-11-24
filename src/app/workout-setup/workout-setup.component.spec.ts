@@ -646,7 +646,7 @@ describe('WorkoutSetupComponent', () => {
             // And 20 reps a round, guessed at 65 seconds, so the last rest isn't skipped now
             expect(time()).toEqual([
                 'Takes about 10 minutes',
-                "A first guess at the rep steps. Once you've done them, it's from your own pace.",
+                "Guessed for the rep steps until you've done them, then it's from your own pace.",
             ]);
         });
 

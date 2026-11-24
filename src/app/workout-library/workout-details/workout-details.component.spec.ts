@@ -148,7 +148,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         expect(el().querySelector('.outline__change')).toBeNull();
     });
 
-    it("lists what's in it at the bottom, so it can be read without Edit", async () => {
+    it("lists what's in it first, then History, then the muscles last", async () => {
         const legs = store.addWorkout({
             title: 'Legs',
             repeats: 2,
@@ -171,7 +171,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         await open(legs.id);
 
         const headings = Array.from(el().querySelectorAll('h3'), (h) => text(h));
-        expect(headings).toEqual(['Muscles it works', 'History', "What's in it"]);
+        expect(headings).toEqual(["What's in it", 'History', 'Muscles it works']);
         expect(text(el().querySelector('.outline__repeats')!)).toBe('2 rounds of all of it');
         const lines = Array.from(el().querySelectorAll('.outline__part, .outline__line'), (line) =>
             text(line)
@@ -255,7 +255,7 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
             // 10 sets of 20 reps, at about 3 seconds a rep and 5 to get ready
             expect(said()).toEqual([
                 'Takes about 11 minutes',
-                "A first guess at the rep steps. Once you've done them, it's from your own pace.",
+                "Guessed for the rep steps until you've done them, then it's from your own pace.",
             ]);
 
             TestBed.inject(HistoryStore).record({
@@ -314,15 +314,29 @@ describe('WorkoutDetailsComponent (LIB-4)', () => {
         });
         const history = TestBed.inject(HistoryStore);
         history.record(run(Date.UTC(2026, 9, 20, 12)));
-        history.record(run(Date.UTC(2026, 9, 24, 12)));
+        history.record({
+            ...run(Date.UTC(2026, 9, 24, 12)),
+            sets: [
+                { round: 0, step: 0, name: 'Squats', reps: 8, weight: 60 },
+                { round: 1, step: 0, name: 'Squats', reps: 6, weight: 62.5 },
+            ],
+        });
         await open(sprints.id);
 
         expect(text()).toContain('Done 2 times');
         const runs = Array.from(el().querySelectorAll('.details__run'));
-        expect(runs.map((a) => text(a))).toEqual([
-            'Sat 24 Oct 4 rounds · 5:00',
-            'Tue 20 Oct 4 rounds · 5:00',
-        ]);
+        // With its top set, where it logged any (PRG-17's measure)
+        expect(
+            runs.map(
+                (a) =>
+                    text(a.querySelector('.details__run-date')!) +
+                    ' ' +
+                    text(a.querySelector('.details__run-text')!)
+            )
+        ).toEqual(['Sat 24 Oct 4 rounds · 5:00', 'Tue 20 Oct 4 rounds · 5:00']);
+        expect(runs.map((a) => a.querySelector('.details__run-lift')?.textContent?.trim())).toEqual(
+            ['Squats 62.5 kg × 6', undefined]
+        );
         expect(runs[0].getAttribute('href')).toBe(
             `/history?run=${Date.UTC(2026, 9, 24, 12)}-${sprints.id}`
         );

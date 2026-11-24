@@ -2,17 +2,18 @@ import { computed, inject, Service, signal } from '@angular/core';
 import { isActiveRest } from '../models/active-rest';
 import { MuscleGroup } from '../models/exercise';
 import { aToZ, Workout } from '../models/workout';
-import { filterWorkouts, WorkoutFilters } from '../models/workout-filter';
+import { canDoWorkoutWith, filterWorkouts, WorkoutFilters } from '../models/workout-filter';
 import { WorkoutKind } from '../models/workout-kind';
 import { counted } from '../shared/format-count';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { Favourites } from '../shared/state/favourites.service';
+import { HistoryStore } from '../shared/state/history-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 
 /** One list of cards on the Workouts page, with the heading over it, if any. */
 export interface LibrarySection {
-    id: 'training' | 'stretches';
+    id: 'yours' | 'training' | 'stretches';
     heading: string | null;
     workouts: Workout[];
 }
@@ -24,9 +25,9 @@ export const WORKOUT_KIND_CHOICES: readonly { value: WorkoutKind; label: string 
 ];
 
 /**
- * What the Workouts page is searched and filtered by, and the workouts it leaves: yours and
- * the ready-made ones (LIB-6), together, A to Z, with the workouts of only stretches after the
- * rest (LIB-10). Kept for as long as the app's open, so coming back from a workout's details
+ * What the Workouts page is searched and filtered by, and the workouts it leaves: yours, your
+ * own and your favourites, first, the last done first (LIB-11), then the ready-made ones
+ * (LIB-6), those your equipment allows first, then the workouts of only stretches (LIB-10). Kept for as long as the app's open, so coming back from a workout's details
  * finds the list as it was; the kind of workout and Only what I have are settings, so they're
  * kept for good, and Only what I have is shared with the Exercises list.
  */
@@ -36,6 +37,7 @@ export class LibraryFilters {
     private readonly exercises = inject(ExerciseStore);
     private readonly settings = inject(SettingsStore);
     private readonly favouriteIds = inject(Favourites).ids;
+    private readonly history = inject(HistoryStore);
 
     /** All, Training or Stretches (LIB-10), remembered with the settings. */
     readonly kind = this.settings.workoutKind;
@@ -70,17 +72,32 @@ export class LibraryFilters {
     });
 
     /**
-     * The lists shown, each A to Z: training first, then the workouts of only stretches, under
-     * their own heading when All's picked (LIB-10). A list with nothing in it isn't there.
+     * The lists shown (LIB-11): Yours, your own workouts and your favourites, the last done
+     * first, then those never done, A to Z; then the ready-made ones, those your equipment
+     * allows first (with any picked), else A to Z; then the workouts of only stretches, A to Z,
+     * under their own heading when All's picked (LIB-10). Yours and Ready-made have headings
+     * when both are there. A list with nothing in it isn't there.
      */
     readonly sections = computed((): LibrarySection[] => {
         const found = this.found();
+        const favourites = this.favouriteIds();
+        const ownIds = new Set(this.workouts.workouts().map((workout) => workout.id));
+        const training = found.filter((workout) => !isActiveRest(workout));
+        const isYours = (workout: Workout) => ownIds.has(workout.id) || favourites.has(workout.id);
+        const last = this.history.lastDone();
+        const yours = training
+            .filter(isYours)
+            .sort((a, b) => (last.get(b.id) ?? 0) - (last.get(a.id) ?? 0));
+        const kit = this.settings.myEquipment();
+        const fits = (workout: Workout) =>
+            !kit.length || canDoWorkoutWith(workout, kit, (id) => this.exercises.byId(id));
+        const readyMade = training
+            .filter((workout) => !isYours(workout))
+            .sort((a, b) => Number(fits(b)) - Number(fits(a)));
+        const both = yours.length > 0 && readyMade.length > 0;
         const sections: LibrarySection[] = [
-            {
-                id: 'training',
-                heading: null,
-                workouts: found.filter((workout) => !isActiveRest(workout)),
-            },
+            { id: 'yours', heading: both ? 'Yours' : null, workouts: yours },
+            { id: 'training', heading: both ? 'Ready-made' : null, workouts: readyMade },
             {
                 id: 'stretches',
                 heading: this.kind() === 'all' ? 'Stretches' : null,
@@ -93,7 +110,8 @@ export class LibraryFilters {
     readonly shown = computed(() => this.sections().flatMap((section) => section.workouts));
 
     /**
-     * How many show while any is hidden: "3 of 20 workouts" or "No workouts match". Null when
+     * How many show while any is hidden: "3 of 20 workouts", or with none, what wasn't found,
+     * 'No workouts with "zumba"', or "No workouts match" the filters alone. Null when
      * nothing's hidden.
      */
     readonly shownCount = computed(() => {
@@ -102,7 +120,11 @@ export class LibraryFilters {
         if (shown === all) {
             return null;
         }
-        return shown ? `${shown} of ${counted(all, 'workout')}` : 'No workouts match';
+        if (shown) {
+            return `${shown} of ${counted(all, 'workout')}`;
+        }
+        const query = this.query().trim();
+        return query ? `No workouts with "${query}"` : 'No workouts match';
     });
 
     /** Whether any search or filter is on, for Clear to take off. */

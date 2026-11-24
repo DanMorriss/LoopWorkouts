@@ -46,7 +46,8 @@ export const routes: Routes = [
     },
     {
         path: 'library',
-        canActivate: [exercisesLoaded, readyMadeLoaded],
+        // The history too, as yours are listed by when each was last done (LIB-11)
+        canActivate: [exercisesLoaded, historyLoaded, readyMadeLoaded],
         loadComponent: () =>
             import('./workout-library/workout-library.component').then(
                 (m) => m.WorkoutLibraryComponent

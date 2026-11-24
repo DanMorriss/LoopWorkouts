@@ -8,7 +8,7 @@ export const ALL_MUSCLES = Object.keys(MUSCLE_LABELS) as MuscleGroup[];
 /** How many of a workout's main muscles its card names, before "+2 more". */
 const MUSCLES_ON_A_CARD = 4;
 
-/** Main muscles as a card names them: the first few, and how many more there are. */
+/** Main muscles as a card names them (`mostWorked`): the first few, and how many more. */
 export function musclesOnACard(main: readonly MuscleGroup[]): { shown: string[]; more: number } {
     return {
         shown: main.slice(0, MUSCLES_ON_A_CARD).map((muscle) => MUSCLE_LABELS[muscle]),
@@ -19,6 +19,11 @@ export function musclesOnACard(main: readonly MuscleGroup[]): { shown: string[];
 /** Which muscles some workouts work: main ones, and the ones they only ever support. */
 export interface MusclesWorked {
     main: MuscleGroup[];
+    /**
+     * The main ones again, those most of the exercises work first (in the app's order on a
+     * tie), for a card that names only the first few, so a leg day leads with its legs.
+     */
+    mostWorked: MuscleGroup[];
     /** Supporting in some exercise, and main in none. */
     supporting: MuscleGroup[];
     /** Whether any step is linked to an exercise, so there's anything to go on. */
@@ -54,7 +59,7 @@ export function musclesInSets(
 }
 
 function musclesOf(exercises: readonly (Exercise | undefined)[]): MusclesWorked {
-    const main = new Set<MuscleGroup>();
+    const main = new Map<MuscleGroup, number>();
     const supporting = new Set<MuscleGroup>();
     let hasExercises = false;
     for (const exercise of exercises) {
@@ -62,11 +67,14 @@ function musclesOf(exercises: readonly (Exercise | undefined)[]): MusclesWorked 
             continue;
         }
         hasExercises = true;
-        exercise.mainMuscles.forEach((muscle) => main.add(muscle));
+        exercise.mainMuscles.forEach((muscle) => main.set(muscle, (main.get(muscle) ?? 0) + 1));
         exercise.supportingMuscles.forEach((muscle) => supporting.add(muscle));
     }
     return {
         main: ALL_MUSCLES.filter((muscle) => main.has(muscle)),
+        mostWorked: [...main.keys()].sort(
+            (a, b) => main.get(b)! - main.get(a)! || ALL_MUSCLES.indexOf(a) - ALL_MUSCLES.indexOf(b)
+        ),
         supporting: ALL_MUSCLES.filter((muscle) => supporting.has(muscle) && !main.has(muscle)),
         hasExercises,
     };

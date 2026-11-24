@@ -13,3 +13,13 @@
 .equipment-chip__icon {
     @include chip-icon;
 }
+
+// Gym equipment, which shows the rest: never pressed, so it's drawn as a chip that isn't,
+// with its arrow turned up while they show
+.equipment-chip--more {
+    color: var(--text-muted);
+
+    &[aria-expanded='true'] .equipment-chip__chevron {
+        transform: rotate(180deg);
+    }
+}

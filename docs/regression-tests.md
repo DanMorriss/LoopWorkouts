@@ -68,11 +68,11 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Preconditions:** empty storage (don't use `guest()`).
 - **Steps:**
     1. Open `/`.
-    2. Press **Continue without an account**.
+    2. Press **Start without an account**.
 - **Expected:**
-    1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, the heading "Keep your workouts on every device" over the sign-in (Continue with Google, Email, Email me a sign-in code) and **Continue without an account**, with no tab bar.
+    1. `/` redirects to `/home`, which redirects to `/welcome`: the ∞ logo, the heading "Keep your workouts on every device" over the sign-in (Continue with Google, Email, Email me a sign-in code) and **Start without an account**, with no tab bar.
     2. localStorage has `setup = "due"` once the welcome screen is shown.
-    3. After Continue without an account: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 7" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
+    3. After Start without an account: `welcomed = "guest"`, and Today's guard sends it on to `/welcome/setup`, showing "Question 1 of 6" and "What should we call you?" with that heading focused, no Back button, Next, and Skip for now. No tab bar.
 - **Variants (same test file):**
     - A device with a saved workout but no `welcomed` key (in use before the welcome screen) opens `/home` straight away, and `welcomed` becomes `"guest"`.
     - A new device opening `/exercises/back-squat` directly gets that page, not the welcome screen.
@@ -84,17 +84,16 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Steps:**
     1. Type "Sam" and press Enter (Enter is Next).
     2. Pick **Fitness**, Next.
-    3. Turn Sets a week per muscle up two, to **8**, with the arrow keys, Next.
-    4. Pick the **Kettlebell** chip, Next.
-    5. Pick **Female**, Next.
-    6. Leave **Kilograms**, Next.
-    7. Type **72.5** in Body weight and press Enter (Enter is Done).
-    8. Reload. Open You.
+    3. Pick the **Kettlebell** chip, Next.
+    4. Pick **Female**, Next.
+    5. Leave **Kilograms**, Next.
+    6. Type **72.5** in Body weight and press Enter (Enter is Done).
+    7. Reload. Open You.
 - **Expected:**
-    1. Each question's heading takes focus as it shows, and "Question N of 7" counts up. Sets a week per muscle starts at 6, from Fitness. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
+    1. Each question's heading takes focus as it shows, and "Question N of 6" counts up. Back, Next and Skip for now have the same bounding boxes on every question (they're fixed to the bottom).
     2. After Done, `/home` opens with "Good morning, Sam" and the Undo bar showing "You're all set, Sam. Change any of it on You, under Profile." with no Undo; the `setup` key is gone.
     3. Today shows **Get started** offering a ready-made plan. For Fitness with a kettlebell that's **Fitness, 4 days** (the first of `plansForYou()`), not a single workout: see mismatch M3.
-    4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Sets a week per muscle 8, Weight units kg, Body weight 72.5. The Exercises page has **Only what I have** on with "My equipment: 1 piece".
+    4. After reload, Today opens again (not the setup). You → Profile shows Name "Sam", Sex Female, Training for Fitness, Sets a week per muscle 6 (from Fitness), Weight units kg, Body weight 72.5. The Exercises page has **Only what I have** on with "My equipment: 1 piece".
 
 ### REG-NAV-03 · Skipping the setup
 

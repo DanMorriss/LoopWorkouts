@@ -1,10 +1,6 @@
-@use 'chip' as *;
+@use 'bottom-actions' as *;
 @use 'interaction' as *;
 @use 'type' as *;
-
-// How much of the screen the buttons cover, as far as the page scrolling under them goes;
-// html's scroll-padding-bottom (styles.scss) keeps what's focused clear of them too
-$footer-height: 8rem;
 
 :host {
     display: block;
@@ -14,7 +10,7 @@ $footer-height: 8rem;
     display: flex;
     flex-direction: column;
     // Room to scroll the last of a question clear of the buttons, and the bar under them
-    padding-bottom: calc($footer-height + var(--undo-bar-space));
+    @include bottom-actions-room;
 }
 
 .setup__checking {
@@ -30,7 +26,7 @@ $footer-height: 8rem;
 }
 
 .setup__progress {
-    height: 4px;
+    height: 6px;
     margin-bottom: 1.25rem;
     border-radius: 999px;
     background: var(--control);
@@ -55,10 +51,8 @@ $footer-height: 8rem;
 }
 
 .setup__question {
-    margin: 0 0 0.4rem;
-    @include display;
-    color: var(--text-strong);
-    font-size: 1.4rem;
+    @include page-title;
+    text-wrap: balance;
 
     // Focused from code, to be read out; it's not something to press
     &:focus {
@@ -67,10 +61,9 @@ $footer-height: 8rem;
 }
 
 .setup__hint {
-    margin: 0 0 1.25rem;
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    line-height: 1.45;
+    @include page-hint;
+    margin-bottom: 1.25rem;
+    text-wrap: pretty;
 }
 
 // A card per option: the radio button inside is hidden, but still the real, focusable one
@@ -142,20 +135,10 @@ $footer-height: 8rem;
     margin: 1rem auto 0;
 }
 
-// The page fades out under the buttons, rather than running sharp up to them. A bar at the
-// bottom (e.g. "Signed in as…", from signing in on the welcome screen) lifts them above it,
-// as --bars-height says how much of the screen it covers
+// The buttons, over the bottom of the screen (e.g. "Signed in as…", from signing in on the
+// welcome screen, lifts them above it)
 .setup__footer {
-    position: fixed;
-    z-index: 10;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    padding: 1.5rem max(1rem, env(safe-area-inset-right)) max(0.5rem, var(--bars-height))
-        max(1rem, env(safe-area-inset-left));
-    background: linear-gradient(to top, var(--page-bg) calc(100% - 1.5rem), transparent);
+    @include bottom-actions;
 }
 
 .setup__footer-buttons {
@@ -178,7 +161,7 @@ $footer-height: 8rem;
     background: none;
     color: var(--text-muted);
     font: inherit;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     text-decoration: underline;
     text-underline-offset: 3px;
     cursor: pointer;

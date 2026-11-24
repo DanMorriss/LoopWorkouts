@@ -11,12 +11,15 @@ import { WorkoutStore } from '../shared/state/workout-store.service';
 export const WELCOMED_KEY = 'welcomed';
 
 /**
- * Set to 'due' as a device new to the app is welcomed, and to 'asking' once the setup's
- * questions start: once the welcome screen's answered, Home opens the setup (NAV-4) instead,
- * until it's finished or skipped, which removes it. A device in use before the setup came in
- * never has it, so isn't asked.
+ * Set to 'due' as a device new to the app is welcomed, and once the setup's questions start, to
+ * the one it's on (e.g. 'equipment'), so coming back part way opens it again: once the welcome
+ * screen's answered, Home opens the setup (NAV-4) instead, until it's finished or skipped,
+ * which removes it. A device in use before the setup came in never has it, so isn't asked.
  */
 export const SETUP_KEY = 'setup';
+
+/** SETUP_KEY's value for a setup not started yet. */
+export const SETUP_DUE = 'due';
 
 /**
  * Home opens the welcome screen instead (NAV-3) on a device that's new to the app: not signed
@@ -40,6 +43,6 @@ export const welcomeFirst: CanActivateFn = async () => {
         localStorage.setItem(WELCOMED_KEY, 'guest');
         return true;
     }
-    localStorage.setItem(SETUP_KEY, 'due');
+    localStorage.setItem(SETUP_KEY, SETUP_DUE);
     return router.createUrlTree(['/welcome']);
 };

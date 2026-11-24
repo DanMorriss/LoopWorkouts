@@ -242,7 +242,7 @@ The email of the account that's answered, on this device, whether to keep notes 
 
 ### `setup`: the setup's still to do
 
-`due` once a device new to the app is sent to the welcome screen, and `asking` once the setup's questions (NAV-4) start: while it's there, Today opens the setup. Finishing or skipping it removes it. Missing on a device in use before the setup came in, which isn't asked. Signing out and Clear this device remove it.
+`due` once a device new to the app is sent to the welcome screen (or, opened straight from a link, once it's answered), and once the setup's questions (NAV-4) start, the one it's on (`name`, `goal`, `equipment`, `body`, `units` or `weight`; until 2026-11-24 it was `asking`, and a question it no longer knows starts from the first): while it's there, Today opens the setup, at that question. Finishing or skipping it removes it. Missing on a device in use before the setup came in, which isn't asked. Signing out and Clear this device remove it.
 
 ### `tour`: the tour's been taken or turned down
 

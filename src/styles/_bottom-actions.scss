@@ -1,0 +1,36 @@
+// Buttons kept over the bottom of the screen, in the same place whatever is above them, in
+// thumb reach: the setup's Next and Back, the welcome screen's Start without an account.
+//
+// The page scrolls under them and fades out rather than running sharp up to them. They're
+// painted as the page is at that spot (its glow sized to the screen and lined up with its
+// bottom, as body::before paints it), so there's no band of a different colour behind them.
+// A bar at the bottom (e.g. "Signed in as…") lifts them above it, as --bars-height says how
+// much of the screen it covers.
+//
+// The page leaves $bottom-actions-height (and the bars) free under its last line, and
+// html's scroll-padding-bottom (styles.scss) keeps what's focused clear of them too.
+
+$bottom-actions-height: 8rem;
+$bottom-actions-fade: 1.5rem;
+
+@mixin bottom-actions {
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    padding: $bottom-actions-fade max(1rem, env(safe-area-inset-right))
+        max(0.5rem, var(--bars-height)) max(1rem, env(safe-area-inset-left));
+    background-color: var(--page-bg);
+    background-image: var(--page-paint);
+    background-size: 100vw 100dvh;
+    background-position: bottom center;
+    mask-image: linear-gradient(to top, #000 calc(100% - #{$bottom-actions-fade}), transparent);
+}
+
+// The room a page leaves under its last line for them
+@mixin bottom-actions-room {
+    padding-bottom: calc(#{$bottom-actions-height} + var(--undo-bar-space));
+}

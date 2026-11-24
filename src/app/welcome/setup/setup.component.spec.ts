@@ -34,13 +34,13 @@ describe('SetupComponent (NAV-4)', () => {
 
     const settings = () => TestBed.inject(SettingsStore);
     const heading = () => element.querySelector('h2')?.textContent!.trim();
-    // By its words, less a picked chip's ✓ (an icon font's ligature, "check")
+    // By its words, less a picked chip's ✓ and Gym equipment's arrow (icon fonts' ligatures)
     const button = (name: string) =>
         [...element.querySelectorAll('button')].find(
             (b) =>
                 b
                     .textContent!.replace(/\s+/g, ' ')
-                    .replace(/^check /, '')
+                    .replace(/^check |expand_more/g, '')
                     .trim() === name
         )!;
     const choose = async (label: string) => {
@@ -94,7 +94,7 @@ describe('SetupComponent (NAV-4)', () => {
 
     it('asks one question at a time, saving each answer, then goes on to Today, all set', async () => {
         await create();
-        expect(element.textContent).toContain('Question 1 of 7');
+        expect(element.textContent).toContain('Question 1 of 6');
         expect(heading()).toBe('What should we call you?');
         expect(document.activeElement).toBe(element.querySelector('h2'));
 
@@ -109,18 +109,9 @@ describe('SetupComponent (NAV-4)', () => {
         expect(settings().trainingGoal()).toBe('fitness');
         await press('Next');
 
-        // Starting from the goal's, and saved as the wheel turns
-        expect(heading()).toBe('How many sets a week for each muscle?');
-        expect(element.textContent).toContain('6 suits staying fit and active');
-        const wheel = element.querySelector('app-weekly-sets-field [role="spinbutton"]')!;
-        expect(wheel.getAttribute('aria-valuenow')).toBe('6');
-        // A freshly shown wheel jumps to its value a frame later, which would undo a turn before it
-        await new Promise(requestAnimationFrame);
-        await new Promise(requestAnimationFrame);
-        (element.querySelector('app-weekly-sets-field [data-value="8"]') as HTMLElement).click();
-        await fixture.whenStable();
-        expect(settings().weeklySets()).toBe(8);
-        await press('Next');
+        // The goal starts the sets a week at its own, without asking
+        expect(settings().weeklySets()).toBe(6);
+        expect(element.textContent).not.toContain('sets a week for each muscle');
 
         expect(heading()).toBe('What equipment do you have?');
         await press('Kettlebell');
@@ -187,7 +178,7 @@ describe('SetupComponent (NAV-4)', () => {
 
     it('leaves the body weight unset when its question is left empty', async () => {
         await create();
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 5; i++) {
             await press('Next');
         }
         expect(heading()).toBe('What do you weigh?');
@@ -224,7 +215,7 @@ describe('SetupComponent (NAV-4)', () => {
         await fixture.whenStable();
 
         expect(heading()).toBe('What should we call you?');
-        expect(localStorage.getItem('setup')).toBe('asking');
+        expect(localStorage.getItem('setup')).toBe('name');
     });
 
     it("signed in, asks anyway if the account doesn't answer soon", async () => {
@@ -237,10 +228,43 @@ describe('SetupComponent (NAV-4)', () => {
         expect(heading()).toBe('What should we call you?');
     });
 
-    it('signed in and part way through, carries on without waiting', async () => {
-        localStorage.setItem('setup', 'asking');
+    it('signed in and part way through, carries on where it was, without waiting', async () => {
+        localStorage.setItem('setup', 'equipment');
         await create({ signedIn: true });
 
-        expect(heading()).toBe('What should we call you?');
+        expect(heading()).toBe('What equipment do you have?');
+    });
+
+    it('left part way, picks up at the question it was on', async () => {
+        await create();
+        await press('Next');
+        expect(localStorage.getItem('setup')).toBe('goal');
+        await press('Next');
+        expect(localStorage.getItem('setup')).toBe('equipment');
+
+        // Closed and opened again (after a call, say)
+        fixture.destroy();
+        fixture = TestBed.createComponent(SetupComponent);
+        element = fixture.nativeElement as HTMLElement;
+        await fixture.whenStable();
+        expect(element.textContent).toContain('Question 3 of 6');
+        expect(heading()).toBe('What equipment do you have?');
+        expect(document.activeElement).toBe(element.querySelector('h2'));
+    });
+
+    it("offers home kit first, and the gym's behind Gym equipment", async () => {
+        localStorage.setItem('setup', 'equipment');
+        await create();
+        expect(
+            element.querySelector('app-equipment-chips button:nth-child(2)')!.textContent
+        ).toContain('Kettlebell');
+        const gym = button('Gym equipment');
+        expect(gym.getAttribute('aria-expanded')).toBe('false');
+        expect(element.textContent).not.toContain('Barbell');
+
+        await press('Gym equipment');
+        expect(gym.getAttribute('aria-expanded')).toBe('true');
+        await press('Barbell');
+        expect(settings().myEquipment()).toEqual(['barbell']);
     });
 });

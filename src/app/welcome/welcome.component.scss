@@ -1,23 +1,29 @@
+@use 'bottom-actions' as *;
 @use 'type' as *;
-@use 'interaction' as *;
 @use 'panel-card' as *;
 
 :host {
     display: block;
 }
 
+// The name and the sign-in, centred in the screen over the main button, and scrolling under
+// it where there's no room (a small phone, or large text)
 .welcome {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 0.5rem;
+    min-height: calc(100dvh - var(--bars-height));
+    @include bottom-actions-room;
 }
 
 .welcome__logo {
     display: block;
     width: min(11rem, 60%);
-    margin: 1rem auto 0.25rem;
+    margin: 0 auto 0.25rem;
 }
 
+// The wordmark, larger than a page's title: it's the app's name, once, not a page's
 .welcome__title {
     margin: 0;
     @include display;
@@ -33,32 +39,31 @@
     text-wrap: balance;
 }
 
-// Signing in, set apart as the main thing to do here
+// Signing in, for keeping workouts on every device: there to take, but not the main thing
 .welcome__card {
     @include panel-card;
 }
 
+// Its own leading, not the 2rem Material's typography gives an h2, which leaves a gap
+// between the lines where it wraps (a small phone, or large text)
 .welcome__card-title {
     margin: 0;
     color: var(--text-strong);
     font-size: 1rem;
     font-weight: 600;
+    line-height: 1.3;
 }
 
-// Going on without an account, quieter, under the card
-.welcome__guest {
+// Going on without an account, the main thing to do here, over the bottom of the screen
+.welcome__footer {
+    @include bottom-actions;
+}
+
+.welcome__start {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 0.75rem;
-}
-
-.welcome__guest-button {
-    @include link-button;
-    font-size: 1rem;
-    font-weight: 500;
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+    align-items: stretch;
+    gap: 0.5rem;
 }
 
 .welcome__hint {
@@ -66,4 +71,5 @@
     color: var(--text-muted);
     font-size: 0.85rem;
     text-align: center;
+    text-wrap: balance;
 }

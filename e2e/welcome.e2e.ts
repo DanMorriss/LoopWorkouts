@@ -17,7 +17,7 @@ test('a new device is welcomed, goes on as a guest and can skip the setup', asyn
     // No tab bar on the welcome screen: it's one choice
     await expect(app.tabBar).toBeHidden();
 
-    await page.getByRole('button', { name: 'Continue without an account' }).click();
+    await page.getByRole('button', { name: 'Start without an account' }).click();
 
     await expect(page).toHaveURL('/welcome/setup');
     await expect(page.getByRole('heading', { name: 'What should we call you?' })).toBeVisible();

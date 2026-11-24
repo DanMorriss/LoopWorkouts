@@ -202,6 +202,21 @@ export const EQUIPMENT_CHOICES: readonly Exclude<Equipment, 'none'>[] = [
 ];
 
 /**
+ * What people usually have at home, most likely first: the setup offers these before the
+ * rest, which are mostly a gym's, so a kettlebell or a band is found without reading past a
+ * Smith machine.
+ */
+export const HOME_EQUIPMENT: readonly Exclude<Equipment, 'none'>[] = [
+    'kettlebell',
+    'dumbbells',
+    'band',
+    'pull-up bar',
+    'rings',
+    'step',
+    'ab wheel',
+];
+
+/**
  * The equipment you have, as saved: the pieces picked, in the order they're offered, or `['none']`
  * for **No equipment**, said outright (since 2026-11-06), or empty for none picked yet. Pieces
  * and No equipment don't go together: picked with any piece, it's left out.

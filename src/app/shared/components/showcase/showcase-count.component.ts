@@ -40,7 +40,7 @@ import { Component, input } from '@angular/core';
             margin-top: 0.2rem;
             max-width: 3.6rem;
             color: var(--text-muted);
-            @include small-type(0.65rem);
+            @include small-type(0.7rem);
             line-height: 1.15;
         }
     `,

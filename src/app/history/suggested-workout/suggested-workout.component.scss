@@ -47,10 +47,11 @@
     font-weight: 600;
 }
 
+// A title in the reading face, as the page's display moment is its greeting
 .suggestion__title {
-    @include display;
     color: var(--text-strong);
     font-size: 1.2rem;
+    font-weight: 600;
 }
 
 .suggestion__reason {

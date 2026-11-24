@@ -23,7 +23,6 @@ import { Component, input } from '@angular/core';
             height: 1.5rem;
             border-radius: 50%;
             background: var(--c);
-            box-shadow: 0 0 0.7rem color-mix(in srgb, var(--c) 45%, transparent);
             color: var(--plan-ink);
             font-size: 0.75rem;
             font-weight: 700;
@@ -40,7 +39,6 @@ import { Component, input } from '@angular/core';
         :host(.plan-mark--rest) {
             border: 2px solid var(--text-muted);
             background: transparent;
-            box-shadow: none;
         }
     `,
 })

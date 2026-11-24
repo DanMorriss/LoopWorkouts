@@ -151,7 +151,7 @@ The palette is cool and night-time: navy and slate neutrals, sky and cyan for wh
 
 ### Tertiary
 
-- **Plan colours** (`--plan-1` to `--plan-4`: cyan, violet, pink and amber): to tell a ready-made plan's workouts apart on its week.
+- **Plan colours** (`--plan-1` to `--plan-4`: cyan, amber, green and orange): to tell a ready-made plan's workouts apart on its week, each numbered too. Never a phase colour, which would say work, rest or reps (until 2026-11-24 the second and third were the reps violet and work pink); `theme-contrast.spec.ts` checks it.
 - **Danger Red** (`--danger`, `--danger-soft`, `--danger-strong`): deleting, and a swipe about to delete.
 
 ### Neutral
@@ -179,7 +179,7 @@ The palette is cool and night-time: navy and slate neutrals, sky and cyan for wh
 
 ### Hierarchy
 
-- **Display** (Audiowide, 400, 1.6rem for a page's title and 1.3rem for a dialog's): page titles, dialog titles and the workout's big numbers. Its tracking follows its size: none at 1.25rem, tighter as it grows (`display-tracking`). The one larger use is the name on the welcome screen, 1.75rem: the app's wordmark, once, rather than a page's title. Each of the setup's questions is its page's title (`page-title`).
+- **Display** (Audiowide, 400, 1.6rem for a page's title and 1.3rem for a dialog's): page titles, dialog titles and the workout's big numbers, and a showcase card's title (1.1rem) and count. Its tracking follows its size: none at 1.25rem, tighter as it grows (`display-tracking`). The one larger use is the name on the welcome screen, 1.75rem: the app's wordmark, once, rather than a page's title. Each of the setup's questions is its page's title (`page-title`).
 - **Headline** (system, 600, 1.5rem, 2rem leading): a page's main heading in the reading face.
 - **Title** (system, 600, 1.25rem, 2rem leading): a section's heading.
 - **Body** (system, 400, 1rem, 1.45 leading): everything else. Sizes are in rem, so they follow the browser's text size.
@@ -188,7 +188,7 @@ The palette is cool and night-time: navy and slate neutrals, sky and cyan for wh
 
 ### Named Rules
 
-**The Display Is for Moments Rule.** Audiowide is for page titles, dialog titles and the workout's numbers, and nothing else. It has one weight, so never bold it.
+**The Display Is for Moments Rule.** Audiowide is for page titles, dialog titles and the workout's numbers, and nothing else, but for a showcase card's title and count (`_showcase-card`, `showcase-count`: a workout's, a plan's or a workout done's card), each card's one moment. Any other card's title is in the system face, 600. It has one weight, so never bold it.
 
 **The Steady Digits Rule.** Numbers that tick use `tabular-nums` in the system face. Audiowide has no such digits, so the workout's countdown gives each digit a fixed-width cell (`ClockDigitsComponent`).
 
@@ -218,7 +218,7 @@ Depth comes from layers of glass more than from shadows. Each surface (panel, ca
 
 ### Named Rules
 
-**The Glass, Not Glow Rule.** Depth is glass and a soft shadow, never a glow lighting up the page around a button. A glow under the main button was tried and was too much. The one glow is the ring's own flash as Done is pressed, a cue of the workout's, not decoration; the step strip's current segment is told by being filled and taller, not by a glow.
+**The Glass, Not Glow Rule.** Depth is glass and a soft shadow, never a glow lighting up the page around a button. A glow under the main button was tried and was too much. The one glow is the ring's own flash as Done is pressed, a cue of the workout's, not decoration (a plan's marks and the switch's knob glowed until 2026-11-24); the step strip's current segment is told by being filled and taller, not by a glow.
 
 **The Honest Fallback Rule.** With reduced transparency, the glass goes solid in the colour it showed, and blurs drop. With more contrast, every surface gets a defined edge.
 

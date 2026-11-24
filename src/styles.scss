@@ -78,11 +78,12 @@
     --rest: #38bdf8; // the rest blue
     --reps: #a78bfa; // the rep step violet
 
-    // A ready-made plan's workouts, told apart on its week: first, second, third, fourth
+    // A ready-made plan's workouts, told apart on its week: first, second, third, fourth. None
+    // is a phase colour (pink, blue or violet), which mean work, rest and reps everywhere
     --plan-1: #22d3ee;
-    --plan-2: #a78bfa;
-    --plan-3: #fda4af;
-    --plan-4: #fcd34d;
+    --plan-2: #fcd34d;
+    --plan-3: #34d399;
+    --plan-4: #fb923c;
     --plan-ink: #04121a;
 
     // The main button (.btn-main): a gradient pill, its label, and the light and shadow on it
@@ -173,9 +174,9 @@
     --reps: #6d28d9;
 
     --plan-1: #0e7490;
-    --plan-2: #6d28d9;
-    --plan-3: #be123c;
-    --plan-4: #b45309;
+    --plan-2: #a16207;
+    --plan-3: #047857;
+    --plan-4: #c2410c;
     --plan-ink: #ffffff;
 
     --cta-top: #0b809c;

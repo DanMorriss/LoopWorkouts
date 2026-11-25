@@ -92,6 +92,8 @@ export class HistoryEntryComponent {
     readonly changingSets = input(false);
     /** The run just finished, when arriving from the workout summary. */
     readonly highlighted = input(false);
+    /** The exercises it set a new best in (PRG-2), whose lines say so. */
+    readonly bests = input<readonly string[]>([]);
 
     readonly menuToggled = output<void>();
     readonly menuClosed = output<void>();
@@ -163,6 +165,11 @@ export class HistoryEntryComponent {
     protected readonly noteForm = form(this.noteModel, (note) =>
         maxLength(note.note, MAX_NOTE_LENGTH)
     );
+    /** How much room is left in the note, said under its box, so it doesn't stop unannounced. */
+    protected readonly noteLeft = computed(() => {
+        const left = MAX_NOTE_LENGTH - this.noteModel().note.length;
+        return `${left} ${left === 1 ? 'character' : 'characters'} left`;
+    });
 
     constructor() {
         // Into the note box as it opens, from the menu or straight from the workout summary

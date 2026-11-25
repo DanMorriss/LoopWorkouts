@@ -975,7 +975,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Sprints: "8:00 AM · 12:30 · 3 rounds", "Back squat: 3 × 10 @ 60 kg", its name a link to `/exercises/back-squat?run=<its id>`, whose ‹ Progress comes back to it. Legs: "ended in round 3 of 5", "Back squat: 10 @ 60, 8 @ 62.5 kg". AMRAP: "7 rounds + 3 in 20:00".
     4. Gym's lines sit under "Warmup", and its superset's under "Superset", as a list of their own.
     5. In pounds, 60 kg shows as 132.5 lb.
-- **Empty state (separate case):** with no history, "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to your workouts**.
+- **Empty state (separate case):** with no history, "Nothing here yet. After your first workout, this is where you'll see what you did, and after the next, the bests you beat." with **Go to your workouts**.
 - **In the pack:** a run's line reads "8:00 AM · 3 rounds · 12:30 spent"; the empty state's link is **Go to workouts**.
 
 ### REG-HIS-02 · Notes
@@ -1082,9 +1082,9 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 
 - **Stories:** PRG-13 · **Priority:** P2
 - **Preconditions:** `guest()`, clock Wed 11 Nov. History on 10 Nov: Back squat 2 × 10 at 62.5 kg, a 1:00 Plank, and Dumbbell lunge 2 × 10 each side; on 2 Nov (9 days before): Back squat 10 at 60 kg and a 0:45 Plank.
-- **Steps:** Open Progress; read Exercises this week; press Back squat's row, then ‹ Progress; press Plank in the log, then ‹ Progress.
+- **Steps:** Open Progress; read New bests this week and Exercises this week; press Back squat's row, then ‹ Progress; press Plank in the log, then ‹ Progress.
 - **Expected:**
-    1. Over the list, New bests: two tiles, swiped between, heard as "New best, heaviest and most reps: 62.5 kg for 10 reps, Back squat" (one tile, as it's the same set) and "New best, longest: 1 minute, Plank"; none for Dumbbell lunge, as it's the first time.
+    1. First on the page, New bests this week: two tiles, swiped between, heard as "New best, heaviest and most reps: 62.5 kg for 10 reps, up from 60 kg for 10 reps, Back squat" (one tile, as it's the same set) and "New best, longest: 1 minute, up from 45 seconds, Plank"; none for Dumbbell lunge, as it's the first time.
     2. Three rows, most sets first, then A to Z: Back squat, "20 reps in 2 sets, 1,250 kg lifted" (3 violet pips shown); Dumbbell lunge, "20 reps each side in 2 sets"; Plank, "1 minute in 1 set" (one blue pip).
     3. Back squat goes to `/exercises/back-squat?from=progress`; its **‹ Progress** comes back to `/history?exercise=back-squat`, with Back squat's row focused.
     4. A set's exercise in the log goes to its page with `?run=<id>`, and ‹ Progress comes back to that run (`/history?run=<id>`).

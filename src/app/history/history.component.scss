@@ -15,7 +15,7 @@
     margin: 0 0 0.5rem;
     padding: 0.4rem 0.75rem;
     border: 1px dashed var(--accent-line);
-    border-radius: 0.6rem;
+    border-radius: 0.5rem;
     color: var(--text);
     font-size: 0.85rem;
 }
@@ -23,27 +23,26 @@
 .history__summary {
     margin: 0 0 1rem;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
-// The time per week, over the muscles
-.history__weeks {
+// The cards over the log, when there's something in them: new bests, the time per week, the
+// muscles worked and the exercises done
+.history__card:not(:empty) {
+    display: block;
     margin: 0 0 1rem;
 }
 
-// Where the cards for the muscles worked and the exercises done sit, when there are any
-.history__muscles:not(:empty),
-.history__exercises:not(:empty) {
-    display: block;
-    margin: 0 0 1.25rem;
+// The log's heading: a step over its days', as the most of the page is under it
+.history__log-title {
+    margin: 1.5rem 0 0.75rem;
+    color: var(--text-strong);
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
-// The log's heading, as the cards' labels are
-.history__log-title {
-    margin: 0 0 0.75rem;
-    color: var(--text-muted);
-    @include caps(0.8rem);
-    font-weight: 600;
+.history__older {
+    margin-top: 1.25rem;
 }
 
 .history__day + .history__day {

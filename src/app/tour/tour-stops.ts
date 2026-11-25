@@ -87,15 +87,15 @@ const APP_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'progress-sample',
-                text: "Once you've done a few workouts, this shows your time each week, the muscles you've worked and every workout. These are examples.",
+                text: "Once you've done a few workouts, this shows the bests you've beaten, your time each week, the muscles you've worked and every workout. These are examples.",
             },
             {
-                part: 'time-per-week',
-                text: "How you're getting on: your time each week, the muscles you've worked, and every workout you've done.",
+                part: 'week-bests',
+                text: "How you're getting on: the bests you've beaten this week, your time each week, the muscles you've worked, and every workout you've done.",
             },
             {
                 part: 'progress-empty',
-                text: "Once you've done a workout, your weeks, the muscles you've worked and every session show here.",
+                text: "Once you've done a workout, your new bests, your weeks, the muscles you've worked and every workout show here.",
             },
         ],
         text: "How you're getting on, and every workout you've done.",

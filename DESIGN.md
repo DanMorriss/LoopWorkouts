@@ -9,7 +9,7 @@ colors:
     panel-glass: 'rgba(15, 23, 42, 0.35)'
     card-glass: 'rgba(15, 23, 42, 0.42)'
     control-glass: 'rgba(15, 23, 42, 0.75)'
-    raised-navy: 'rgba(15, 23, 42, 0.97)'
+    raised-navy: '#0f172a'
     slate-line: 'rgba(148, 163, 184, 0.45)'
     sky-accent: '#38bdf8'
     cyan-glow: '#22d3ee'

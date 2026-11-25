@@ -31,7 +31,13 @@
             }
         </span>
     </div>
-    <app-showcase-count class="entry__time" aria-hidden="true" [number]="duration()" label="time" />
+    <app-showcase-count
+        class="entry__time"
+        aria-hidden="true"
+        [plain]="true"
+        [number]="duration()"
+        label="time"
+    />
     <div
         class="entry__menu-wrap"
         (click)="$event.stopPropagation()"
@@ -134,6 +140,9 @@
                             >{{ line.name }}</a
                         ><span aria-hidden="true">: {{ line.text }}</span>
                         <span class="sr-only">, {{ line.spoken }}</span>
+                        @if (line.exerciseId && bests().includes(line.exerciseId)) {
+                            <span class="entry__best">New best</span>
+                        }
                     } @else {
                         <span aria-hidden="true">{{ line.name }}: {{ line.text }}</span>
                         <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>
@@ -161,9 +170,10 @@
                 [formField]="noteForm.note"
                 placeholder="e.g. Felt strong"
                 autocomplete="off"
-                [attr.aria-describedby]="'entry-title-' + id()"
+                [attr.aria-describedby]="'entry-title-' + id() + ' note-left-' + id()"
             />
         </label>
+        <p class="entry__note-left" [id]="'note-left-' + id()">{{ noteLeft() }}</p>
         <div class="entry__note-actions">
             <button type="button" class="btn-pill" (click)="cancelEdit()">Cancel</button>
             <button type="submit" class="btn-pill entry__save-note">Save</button>

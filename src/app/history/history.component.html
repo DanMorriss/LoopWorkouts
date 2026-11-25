@@ -6,8 +6,8 @@
         @if (groups().length === 0) {
             <div class="history__empty" data-tour="progress-empty">
                 <p>
-                    Nothing here yet. Do a workout, and how your week is going and what you've done
-                    show up here.
+                    Nothing here yet. After your first workout, this is where you'll see what you
+                    did, and after the next, the bests you beat.
                 </p>
                 <a routerLink="/library" class="btn-pill history__button">Go to workouts</a>
             </div>
@@ -23,19 +23,22 @@
                 {{ lastWeek().workouts === 1 ? 'workout' : 'workouts' }} · {{ lastWeek().time }}
             </p>
 
-            <app-time-per-week
-                class="history__weeks"
-                [attr.data-tour]="shown.sample() ? 'progress-sample' : 'time-per-week'"
+            <!-- What's improved first: beating your last time is what the app is for -->
+            <app-week-bests
+                class="history__card"
+                [attr.data-tour]="shown.sample() ? 'progress-sample' : 'week-bests'"
             />
 
-            <app-muscles-this-week class="history__muscles" />
+            <app-time-per-week class="history__card" />
 
-            <app-exercises-this-week class="history__exercises" />
+            <app-muscles-this-week class="history__card" />
+
+            <app-exercises-this-week class="history__card" />
 
             <!-- Every workout done, newest first, under the muscles they worked -->
             <h3 class="history__log-title">Log</h3>
 
-            @for (group of groups(); track group.key) {
+            @for (group of shownGroups(); track group.key) {
                 <section class="history__day" [attr.aria-labelledby]="'day-' + group.key">
                     <h4 class="history__day-label" [id]="'day-' + group.key">
                         {{ group.label || (group.date | date: 'EEEE d MMMM') }}
@@ -49,6 +52,7 @@
                                 [editing]="editingId() === entry.id"
                                 [changingSets]="changingSetsId() === entry.id"
                                 [highlighted]="highlightedId() === entry.id"
+                                [bests]="bestsIn().get(entry.id) ?? []"
                                 (menuToggled)="toggleMenu(entry.id)"
                                 (menuClosed)="closeMenu(entry.id)"
                                 (editRequested)="editNote(entry.id)"
@@ -61,6 +65,12 @@
                         }
                     </ul>
                 </section>
+            }
+            @if (!olderOpen() && older().length > 0) {
+                <button type="button" class="btn-pill history__older" (click)="showOlder()">
+                    Show {{ older().length }} older
+                    {{ older().length === 1 ? 'workout' : 'workouts' }}
+                </button>
             }
         }
     </div>

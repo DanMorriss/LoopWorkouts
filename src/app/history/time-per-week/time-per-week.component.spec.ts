@@ -56,7 +56,7 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         create(entry(day(11, 3), 1800), entry(day(11, 5), 3390), entry(day(8, 20), 600));
 
         expect(text('.weeks__time')).toBe('1:26:30');
-        expect(text('.weeks__when')).toBe('2–8 Nov · 2 workouts');
+        expect(text('.weeks__when')).toBe('This week so far · 2 workouts');
         // Only the weeks with time in them have a bar, this week's lit
         expect(el().querySelectorAll('.weeks__bar')).toHaveLength(2);
         expect(el().querySelector('.weeks__bar--shown')).toBe(
@@ -69,7 +69,7 @@ describe('TimePerWeekComponent (PRG-12)', () => {
     it('has no calories without a body weight', () => {
         create(entry(day(11, 3), 1800));
 
-        expect(text('.weeks__when')).toBe('2–8 Nov · 1 workout');
+        expect(text('.weeks__when')).toBe('This week so far · 1 workout');
         expect(el().textContent).not.toContain('kcal');
         expect(el().querySelectorAll('.weeks__table th')).toHaveLength(3);
     });
@@ -80,7 +80,7 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         // afterburn of 15% of the other 155.7, 23.4: 282.9 in all, about 285
         create(entry(day(11, 3), 1800), entry(day(11, 5), 3390), entry(day(10, 27), 20));
 
-        expect(text('.weeks__when')).toBe('2–8 Nov · 2 workouts · about 285 kcal');
+        expect(text('.weeks__when')).toBe('This week so far · 2 workouts · about 285 kcal');
         expect(text('#time-per-week-spoken')).toBe(
             'Week of 2 November: 1 hour 27 minutes, 2 workouts, about 285 calories'
         );
@@ -178,7 +178,7 @@ describe('TimePerWeekComponent (PRG-12)', () => {
 
         // A mouse hovering over this week shows it, and leaving goes back to the tapped one
         at('pointermove', 0.97, { pointerType: 'mouse' });
-        expect(text('.weeks__when')).toBe('2–8 Nov · 1 workout');
+        expect(text('.weeks__when')).toBe('This week so far · 1 workout');
         at('pointerleave', 0.97, { pointerType: 'mouse' });
         expect(text('.weeks__when')).toBe('17–23 Aug · 1 workout');
         expect(lit()).toBe(0);
@@ -214,7 +214,7 @@ describe('TimePerWeekComponent (PRG-12)', () => {
         fixture.detectChanges();
         expect(dots[1].getAttribute('aria-current')).toBe('true');
         // The chosen week stays over the table
-        expect(text('.weeks__when')).toBe('2–8 Nov · 1 workout');
+        expect(text('.weeks__when')).toBe('This week so far · 1 workout');
     });
 
     it('starts at the week of the first workout for someone new', () => {

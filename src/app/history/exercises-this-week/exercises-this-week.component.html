@@ -1,9 +1,6 @@
 @if (rows().length) {
     <section class="exercises-week" aria-labelledby="exercises-week-title">
         <h3 class="exercises-week__title" id="exercises-week-title">Exercises this week</h3>
-        @if (bests().length) {
-            <app-new-best-tiles class="exercises-week__bests" [bests]="bests()" />
-        }
         <div class="exercises-week__head" aria-hidden="true">
             <span>All exercises</span>
             <span>Sets</span>

@@ -15,6 +15,8 @@ import { counted } from '../shared/format-count';
  * e.g. "Heaviest: 80 kg × 3", "Most reps: 60 kg × 12".
  */
 export interface BestLine {
+    /** Which best it is: the heaviest (and the most reps, where they're one set) or the rest. */
+    kind: keyof ExerciseBests;
     label: string;
     text: string;
     /** What screen readers hear in place of `text`, where it differs. */
@@ -24,40 +26,52 @@ export interface BestLine {
     entryId: string;
 }
 
+type Shown = { text: string; spoken: string };
+
+/** One best's figures, e.g. "80 kg × 3", heard as "80 kg for 3 reps". */
+function bestFigures(
+    kind: keyof ExerciseBests,
+    bests: ExerciseBests,
+    unit: WeightUnit
+): Shown | null {
+    if (kind === 'longest') {
+        const { longest } = bests;
+        return longest
+            ? { text: formatDuration(longest.seconds), spoken: spokenDuration(longest.seconds) }
+            : null;
+    }
+    const best = bests[kind];
+    if (!best) {
+        return null;
+    }
+    const weight = best.weight === undefined ? '' : `${weightIn(best.weight, unit)} ${unit}`;
+    return {
+        text: markText(best, unit),
+        spoken: !weight
+            ? reps(best.reps)
+            : kind === 'heaviest'
+              ? `${weight} for ${reps(best.reps)}`
+              : `${reps(best.reps)} at ${weight}`,
+    };
+}
+
 /** The bests there are, in the order the page lists them. */
 export function bestLines(bests: ExerciseBests, unit: WeightUnit): BestLine[] {
-    const lines: BestLine[] = [];
-    const { heaviest, mostReps, longest } = bests;
+    const { heaviest, mostReps } = bests;
     // One tile where they're the same set, as with one kettlebell, always the same
     const same = heaviest?.weight === mostReps?.weight && heaviest?.reps === mostReps?.reps;
-    if (heaviest) {
-        const weight = `${weightIn(heaviest.weight, unit)} ${unit}`;
-        lines.push({
-            label: same ? 'Heaviest and most reps' : 'Heaviest',
-            text: markText(heaviest, unit),
-            spoken: `${weight} for ${reps(heaviest.reps)}`,
-            ...heaviest,
-        });
-    }
-    if (mostReps && !same) {
-        const weight =
-            mostReps.weight === undefined ? '' : `${weightIn(mostReps.weight, unit)} ${unit}`;
-        lines.push({
-            label: 'Most reps',
-            text: markText(mostReps, unit),
-            spoken: weight ? `${reps(mostReps.reps)} at ${weight}` : reps(mostReps.reps),
-            ...mostReps,
-        });
-    }
-    if (longest) {
-        lines.push({
-            label: 'Longest',
-            text: formatDuration(longest.seconds),
-            spoken: spokenDuration(longest.seconds),
-            ...longest,
-        });
-    }
-    return lines;
+    const labels: [keyof ExerciseBests, string][] = [
+        ['heaviest', same ? 'Heaviest and most reps' : 'Heaviest'],
+        ...(same ? [] : [['mostReps', 'Most reps'] as [keyof ExerciseBests, string]]),
+        ['longest', 'Longest'],
+    ];
+    return labels.flatMap(([kind, label]) => {
+        const best = bests[kind];
+        const figures = bestFigures(kind, bests, unit);
+        return best && figures
+            ? [{ kind, label, ...figures, at: best.at, entryId: best.entryId }]
+            : [];
+    });
 }
 
 /**
@@ -73,10 +87,15 @@ export interface WeekLine {
     bests: WeekBest[];
 }
 
-/** A new best, e.g. "Heaviest" and "100 kg × 5", heard as "New best, heaviest: 100 kg for 5 reps". */
+/**
+ * A new best, e.g. "Heaviest" and "100 kg × 5", with what it beat, "up from 95 kg × 5", heard
+ * as "New best, heaviest: 100 kg for 5 reps, up from 95 kg for 5 reps".
+ */
 export interface WeekBest {
     label: string;
     text: string;
+    /** "up from 95 kg × 5", or empty where there was nothing to beat. */
+    was: string;
     spoken: string;
 }
 
@@ -98,11 +117,15 @@ export function describeWeek(week: ExerciseWeek, unit: WeightUnit, locale: strin
     return {
         text: [...shown, ...(volume ? [volume] : [])].join(' · '),
         spoken: `${heard.join(' and ')} in ${sets}${volume ? `, ${volume} lifted` : ''}`,
-        bests: bestLines(week.bests, unit).map((line) => ({
-            label: line.label,
-            text: line.text,
-            spoken: `New best, ${line.label.toLowerCase()}: ${line.spoken}`,
-        })),
+        bests: bestLines(week.bests, unit).map((line) => {
+            const was = bestFigures(line.kind, week.beaten, unit);
+            return {
+                label: line.label,
+                text: line.text,
+                was: was ? `up from ${was.text}` : '',
+                spoken: `New best, ${line.label.toLowerCase()}: ${line.spoken}${was ? `, up from ${was.spoken}` : ''}`,
+            };
+        }),
     };
 }
 

@@ -277,7 +277,7 @@ describe('HomeComponent', () => {
             expect(getComputedStyle(space).display).toBe('none');
             expect(card.querySelector('app-muscle-bars')).toBeNull();
             expect(card.querySelector('.muscles-week__more')!.getAttribute('href')).toBe(
-                '/history'
+                '/history?bars=open'
             );
         });
 

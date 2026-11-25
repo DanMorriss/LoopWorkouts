@@ -33,12 +33,14 @@
 
 - It's the **Progress** tab (at `/history`; the History tab until 2026-11-03), titled "Progress": at the top, "Last 7 days" (below), then the **time per week** (PRG-12), then the **muscles worked this week** (PRG-6, PRG-8), then the **exercises this week** (PRG-13, since 2026-11-14; all three in [progress](progress.md)), then the **log**, under the heading "Log": every workout done, as below. The suggested next workout was here too, under the muscles, until 2026-11-03; it's on Today now. Each day's label is a heading under Log.
 - Newest first, grouped by the day they started: "**Today**", "**Yesterday**", then the date, e.g. "Saturday 17 October".
+- **The last 4 weeks** show to start with (since 2026-11-25; until then every workout ever, one long page), then **Show 12 older workouts**, which shows the rest, focus going to the first of them. A run linked to from elsewhere (`?run=`) that's older shows them all.
+- **New best:** a line of sets whose exercise set a new best in that workout says so, with a **New best** tag after it, as the workout's summary did (PRG-2, since 2026-11-25): beating every earlier workout's best, so not the first time it was done, nor an equal.
 - At the top: "**Last 7 days:** 4 workouts · 1:15:30": the count and total time spent of workouts started in the last 7 × 24 hours.
-- Each entry is a **card** in the same family as the cards on Workouts and Plan (since 2026-11-06): its title (or "Untitled workout", greyed) in the display face, under it a line of start time · rounds, e.g. "9:05 AM · 3 rounds", and at its right the **time spent** as the card's big number, over "time", then its ⋮. Screen readers hear the time at the end of the line: "9:05 AM · 3 rounds · 12:30 spent". With a body weight given (CAL-2, since 2026-11-14), the line ends with the calories it burnt, "9:05 AM · 3 rounds · about 210 kcal", heard as "… · 12:30 spent · about 210 calories" (CAL-1), and with an afterburn of 5 or more, "+ 25 afterburn", heard ", plus about 25 calories as your body recovers" (CAL-7, since 2026-11-23; see [calories](calories.md)).
+- Each entry is a **card** in the same family as the cards on Workouts and Plan (since 2026-11-06): its title (or "Untitled workout", greyed) in the display face, under it a line of start time · rounds, e.g. "9:05 AM · 3 rounds", and at its right the **time spent** as the card's big number, over "time", plain, in the text colour rather than in the cyan box the other cards' numbers have, as the log is many cards and none its moment (since 2026-11-25), then its ⋮. Screen readers hear the time at the end of the line: "9:05 AM · 3 rounds · 12:30 spent". With a body weight given (CAL-2, since 2026-11-14), the line ends with the calories it burnt, "9:05 AM · 3 rounds · about 210 kcal", heard as "… · 12:30 spent · about 210 calories" (CAL-1), and with an afterburn of 5 or more, "+ 25 afterburn", heard ", plus about 25 calories as your body recovers" (CAL-7, since 2026-11-23; see [calories](calories.md)).
     - Under that, **Works** and the main muscles its sets worked, as a workout's card names them (up to four, in the app's order, then "+2 more"). Sets with no exercise, or of one since deleted, don't count; with none that do, there's no line.
     - Time spent is m:ss, or h:mm:ss over an hour.
     - Rounds: "3 rounds" when finished, "2 of 5 rounds · stopped" when stopped, "12 rounds · until stopped" for a workout that runs until stopped. With a time limit, "7 rounds + 3 in 20:00" (the steps done of the next round, if any), or "4 rounds · stopped before 20:00" when ended before time was up.
-- **Sets**, one line per step, under a faint rule, in the unit chosen in You → Profile, e.g.:
+- **Sets**, one line per step, under a faint rule, in the unit chosen in You → Profile, each line 44px tall with its exercise's name (a link to its page) the full height of it, so a finger that misses doesn't open the workout's details under it (since 2026-11-25; until then the names were 16px tall, stacked), e.g.:
     - "Squats: 3 × 10 @ 60 kg": the same every set
     - "Squats: 10, 10, 8 @ 60 kg": the reps changed
     - "Squats: 10 @ 60, 8 @ 62.5 kg": the weight changed
@@ -53,12 +55,12 @@
 - The note, if any, sits under the sets, in italics with a line down its left.
 - **Pressing a card** (since 2026-11-08) slides in its workout's **Details** (LIB-4, see [library](library.md)), to make it a favourite or make a copy to change, with **‹ Progress** at the top, or a swipe right, sliding back to the log with that run marked, in view and focused, as arriving from the workout summary does. The card is one link, "Details of Sprints", with its exercise links, ⋮ and note box over it, and it dips as it's pressed. A workout deleted since (or an example while the tour shows the page) has no link. Not while its note is being written, so a slip doesn't lose it.
 - The run arrived at from the workout summary is tinted, with a bar down its left, as Workouts marks a workout just saved.
-- With no workouts: "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to workouts** (until 2026-11-08 "Go to your workouts": Workouts has the ready-made ones too now).
+- With no workouts: "Nothing here yet. After your first workout, this is where you'll see what you did, and after the next, the bests you beat." with **Go to workouts** (until 2026-11-08 "Go to your workouts": Workouts has the ready-made ones too now).
 
 ### Notes
 
 - Each entry's **⋮ menu** offers **Add note** (or **Edit note** and **Remove note** once there is one), **Change reps or weight** (with rep sets, see below) and **Delete**. One menu open at a time. It opens above the ⋮ where the tab bar would cover it below, as on the last card (since 2026-11-08).
-- A note is up to **120 characters**, trimmed. Saving an empty note removes it. Cancel keeps the note as it was.
+- A note is up to **120 characters**, trimmed, with how many are left under its box, "98 characters left", which screen readers hear with the box (since 2026-11-25; until then typing just stopped at 120). Saving an empty note removes it. Cancel keeps the note as it was.
 - The workout summary's **Done** opens Progress with that workout highlighted in the log and in view. (`?note=<id>` does the same with its note box open and focused; nothing links there since the note box moved onto the summary.)
 
 ### Changing reps or weight (HIS-6)
@@ -83,6 +85,8 @@
 - Given a 45-second plank step in a workout of 3 rounds, when it finishes, then the entry shows "Plank: 3 × 0:45"; when it's ended 20 seconds into the third plank, then "Plank: 2 × 0:45".
 - Given an unnamed 30-second work step, then no set is logged for it.
 - Given workouts today, yesterday and last Tuesday, then they're grouped under Today, Yesterday and the date, newest first.
+- Given workouts today, 40 days ago and 60 days ago, then only today's shows, with Show 2 older workouts; pressing it shows all three, focus on the one 40 days ago.
+- Given 16 kg swings of 12, then 15, then 15 again, then only the second has New best.
 - Given a finished 3-round workout of 12:30 started at 9:05 AM, then it shows "9:05 AM · 12:30 · 3 rounds".
 - Given a 20:00 time limit that ran out 3 steps into round 8, then it shows "7 rounds + 3 in 20:00"; ended after 4 rounds, "4 rounds · stopped before 20:00".
 - Given a workout stopped in round 3 of 5, then it shows "ended in round 3 of 5" (until 2026-11-24, "2 of 5 rounds · stopped").

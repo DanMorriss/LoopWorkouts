@@ -102,7 +102,7 @@ test.describe('no history', () => {
         await app.goto('/history');
         await expect(
             page.getByText(
-                "Nothing here yet. Do a workout, and how your week is going and what you've done show up here."
+                "Nothing here yet. After your first workout, this is where you'll see what you did, and after the next, the bests you beat."
             )
         ).toBeVisible();
         await page.getByRole('link', { name: 'Go to workouts' }).click();

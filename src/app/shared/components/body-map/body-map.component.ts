@@ -58,6 +58,8 @@ export class BodyMapComponent {
     readonly selected = input<MuscleGroup | null>(null);
     /** Each listed muscle a toggle, pressed while it's `selected`, saying it was tapped. */
     readonly selectable = input(false);
+    /** What the two lists are headed, e.g. "Aim reached" and "Under aim" for a week's sets. */
+    readonly headings = input({ main: 'Main', supporting: 'Supporting' });
     protected readonly slide = inject(PageSlide);
 
     /** The Exercises list cut down to `muscle`, opened from `from`. */
@@ -108,8 +110,8 @@ export class BodyMapComponent {
             (muscle) => !main.includes(muscle)
         );
         return [
-            { kind: 'main', heading: 'Main', muscles: main },
-            { kind: 'supporting', heading: 'Supporting', muscles: supporting },
+            { kind: 'main', heading: this.headings().main, muscles: main },
+            { kind: 'supporting', heading: this.headings().supporting, muscles: supporting },
         ].filter(({ muscles }) => muscles.length > 0);
     });
 

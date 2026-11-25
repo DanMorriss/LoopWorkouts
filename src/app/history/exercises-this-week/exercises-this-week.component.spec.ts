@@ -116,34 +116,6 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
         );
     });
 
-    it('shows the new bests as tiles over the list, in its order', () => {
-        create(
-            entry(1, [squat(10, 60), squat(10, 60), squat(8, 60)]),
-            entry(2, [bench(8), bench(8)]),
-            entry(10, [bench(6, 70), squat(50)])
-        );
-
-        // Squats' first weight is its heaviest, but 50 reps 10 days ago stands; bench's 8 beat
-        // its 6, but 70 kg stands
-        expect(texts('.bests__label')).toEqual(['Heaviest', 'Most reps']);
-        expect(texts('.bests__value')).toEqual(['60 kg × 10', '60 kg × 8']);
-        expect(texts('.bests__name')).toEqual(['Back squat', 'Bench press']);
-        expect(texts('.bests__tile .sr-only')).toEqual([
-            'New best, heaviest: 60 kg for 10 reps, Back squat',
-            'New best, most reps: 8 reps at 60 kg, Bench press',
-        ]);
-        expect(texts('.bests__position')).toEqual(['1 of 2']);
-        expect(el().querySelector('.bests__tile')!.getAttribute('href')).toBe(
-            '/exercises/back-squat?from=progress'
-        );
-    });
-
-    it('has no tiles with no new bests', () => {
-        create(entry(1, [squat(10, 60)]));
-        expect(el().querySelector('app-new-best-tiles')).toBeNull();
-        expect(texts('.exercises-week__name')).toEqual(['Back squat']);
-    });
-
     it('shows the volume in pounds when they are chosen', () => {
         TestBed.inject(SettingsStore).update({ weightUnit: 'lb' });
         create(entry(1, [squat(10, weightToKg(135, 'lb')), squat(10, weightToKg(135, 'lb'))]));

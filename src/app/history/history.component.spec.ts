@@ -90,7 +90,7 @@ describe('HistoryComponent', () => {
 
         expect(fixture.nativeElement.querySelector('h2').textContent.trim()).toBe('Progress');
         expect(fixture.nativeElement.textContent).toContain(
-            "Nothing here yet. Do a workout, and how your week is going and what you've done show up here."
+            "Nothing here yet. After your first workout, this is where you'll see what you did, and after the next, the bests you beat."
         );
         const link = fixture.nativeElement.querySelector('a');
         expect(link.textContent.trim()).toBe('Go to workouts');
@@ -138,6 +138,43 @@ describe('HistoryComponent', () => {
 
         expect(text('.history__sample')).toEqual([]);
         expect(text('.entry__title')).toEqual(['Mine']);
+    });
+
+    it('marks a line that set a new best, as the summary said', () => {
+        const swing = (reps: number) => ({
+            round: 0,
+            step: 0,
+            name: 'Swings',
+            reps,
+            weight: 16,
+            exerciseId: 'builtin:kettlebell-swing',
+        });
+        create(
+            makeEntry({ startedAt: NOW - 3 * DAY, sets: [swing(12)] }),
+            makeEntry({ startedAt: NOW - 2 * DAY, sets: [swing(15)] }),
+            makeEntry({ startedAt: NOW - HOUR, sets: [swing(15)] })
+        );
+
+        // The first time has nothing to beat, and the same again doesn't beat it
+        expect(text('.entry__best')).toEqual(['New best']);
+        const entries = fixture.nativeElement.querySelectorAll('.entry');
+        expect(entries[1].querySelector('.entry__best')).not.toBeNull();
+    });
+
+    it('shows the last 4 weeks, with the rest behind Show older', async () => {
+        create(
+            makeEntry({ startedAt: NOW - HOUR, title: 'Recent' }),
+            makeEntry({ startedAt: NOW - 40 * DAY, title: 'Old' }),
+            makeEntry({ startedAt: NOW - 60 * DAY, title: 'Older' })
+        );
+        expect(text('.entry__title')).toEqual(['Recent']);
+
+        button('Show 2 older workouts')!.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(text('.entry__title')).toEqual(['Recent', 'Old', 'Older']);
+        expect(button('Show 2 older workouts')).toBeUndefined();
+        expect(document.activeElement!.id).toBe(`entry-${NOW - 40 * DAY}-1`);
     });
 
     it('shows when each one started, how long it ran, and the rounds', () => {
@@ -407,6 +444,17 @@ describe('HistoryComponent', () => {
             fixture.detectChanges();
             expect(fixture.nativeElement.querySelector('app-body-map')).not.toBeNull();
         });
+        // Shaded against their aims: two sets of 10 is short of it, so none has reached it
+        expect(text('.body-map__heading')).toEqual(['Under aim']);
+        // Folded away until asked for
+        expect(text('.bars__label')).toHaveLength(0);
+        const toggle = fixture.nativeElement.querySelector(
+            '.muscles-week__bars-toggle'
+        ) as HTMLButtonElement;
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        toggle.click();
+        fixture.detectChanges();
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
         // A bar per muscle group, most worked first; the plank is too long ago to count
         const labels = text('.bars__label');
         const rows = text('.bars__row .sr-only');
@@ -440,6 +488,8 @@ describe('HistoryComponent', () => {
             fixture.detectChanges();
             expect(card().querySelectorAll('app-body-map')).toHaveLength(2);
         });
+        card().querySelector<HTMLButtonElement>('.muscles-week__bars-toggle')!.click();
+        fixture.detectChanges();
         const bar = (name: string) =>
             Array.from(card().querySelectorAll<HTMLButtonElement>('.bars__pick')).find(
                 (pick) => pick.querySelector('.bars__label')!.textContent!.trim() === name
@@ -647,7 +697,12 @@ describe('HistoryComponent', () => {
             choose('Sprints at 11:00 AM', 'Edit note');
 
             expect(noteBox().value).toBe('Felt strong');
+            // How much room is left, said with the box
+            expect(text('.entry__note-left')).toEqual(['109 characters left']);
+            expect(noteBox().getAttribute('aria-describedby')).toContain('note-left-');
             type('Knee sore');
+            fixture.detectChanges();
+            expect(text('.entry__note-left')).toEqual(['111 characters left']);
             await save();
 
             expect(history.entries()[0].note).toBe('Knee sore');

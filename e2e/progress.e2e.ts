@@ -41,8 +41,13 @@ test.describe('muscles worked this week', () => {
     });
 
     test('REG-PRG-01 muscles worked this week', { tag: '@p2' }, async ({ app, page }) => {
+        // The bars are folded away, but for coming to them from Today
         await app.goto('/history');
         const muscles = page.getByRole('region', { name: 'Muscles worked this week' });
+        await expect(muscles.getByRole('list', { name: 'Sets per muscle this week' })).toHaveCount(
+            0
+        );
+        await muscles.getByRole('button', { name: 'Show sets per muscle' }).click();
         const bars = muscles
             .getByRole('list', { name: 'Sets per muscle this week' })
             .getByRole('listitem');
@@ -58,13 +63,13 @@ test.describe('muscles worked this week', () => {
         await page.getByRole('radio', { name: 'Fitness' }).check();
         const sets = page.getByRole('spinbutton', { name: /^Sets a week per muscle/ });
         await expect(sets).toHaveAttribute('aria-valuenow', '6');
-        await app.goto('/history');
+        await app.goto('/history?bars=open');
         await expect(bars.nth(0)).toContainText(/^Glutes.*2 sets, under 6$/);
         await app.goto('/account');
         await sets.focus();
         await page.keyboard.press('Home');
         await expect(sets).toHaveAttribute('aria-valuenow', '2');
-        await app.goto('/history');
+        await app.goto('/history?bars=open');
         await expect(bars.nth(0)).toContainText(/^Glutes.*2 sets, 2 reached$/);
         await expect(bars.nth(2)).toContainText(/^Adductors.*1 set, 1 reached$/);
     });
@@ -78,6 +83,7 @@ test.describe('muscles worked this week', () => {
             const quadsBar = muscles.getByRole('button', { name: /^Quads \d/ });
             const quadsPill = muscles.getByRole('button', { name: 'Quads', exact: true });
             await expect(muscles.getByText('Tap a muscle to find exercises for it')).toBeVisible();
+            await muscles.getByRole('button', { name: 'Show sets per muscle' }).click();
 
             // Picked on its bar, it's picked in the list on the second slide too
             await quadsBar.click();
@@ -203,7 +209,7 @@ test.describe('the suggested next workout', () => {
                 page
                     .getByRole('region', { name: 'Muscles worked this week' })
                     .getByRole('link', { name: "See this week's progress" })
-            ).toHaveAttribute('href', '/history');
+            ).toHaveAttribute('href', '/history?bars=open');
             await suggested.getByRole('button', { name: 'Start Push' }).click();
             await expect(page).toHaveURL('/workout');
             await expect(new WorkoutPage(page).title).toContainText('Push');
@@ -263,12 +269,14 @@ test.describe("the week's exercises", () => {
             await expect(rows.nth(2)).toContainText('Plank');
             await expect(rows.nth(2)).toContainText('1 minute in 1 set');
 
-            // The new bests over them, a tile each, one where the heaviest is the most reps; a
-            // first time sets none
-            const bests = week.getByRole('group', { name: 'New bests' });
+            // The new bests, the page's first card: a tile each, one where the heaviest is the
+            // most reps, each with what it beat; a first time sets none
+            const bests = page
+                .getByRole('region', { name: 'New bests this week' })
+                .getByRole('group', { name: 'New bests' });
             await expect(bests.getByRole('link')).toHaveText([
-                /New best, heaviest and most reps: 62.5 kg for 10 reps, Back squat/,
-                /New best, longest: 1 minute, Plank/,
+                /New best, heaviest and most reps: 62.5 kg for 10 reps, up from 60 kg for 10 reps, Back squat/,
+                /New best, longest: 1 minute, up from 45 seconds, Plank/,
             ]);
 
             // Its page's ‹ comes back to its row, focused

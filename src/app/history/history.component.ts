@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HistoryEntry, inLastSevenDays, withSetChanges } from '../models/history';
+import { sinceLastTime } from '../models/since-last-time';
 import { changeSmoothly } from '../shared/layout-change';
 import { injectPrefersReducedMotion } from '../shared/reduced-motion';
 import { HistoryStore } from '../shared/state/history-store.service';
@@ -18,6 +19,7 @@ import { provideShownHistoryWithSample } from './shown-history-with-sample';
 import { UndoService } from '../shared/undo/undo.service';
 import { HistoryEntryComponent } from './history-entry/history-entry.component';
 import { ExercisesThisWeekComponent } from './exercises-this-week/exercises-this-week.component';
+import { WeekBestsComponent } from './week-bests/week-bests.component';
 import { MusclesThisWeekComponent } from './muscles-this-week/muscles-this-week.component';
 import { TimePerWeekComponent } from './time-per-week/time-per-week.component';
 import { entryName, formatDuration } from './history-format';
@@ -37,6 +39,9 @@ interface DayGroup {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** How far back the log goes to start with; older workouts are behind Show older. */
+const RECENT_DAYS = 28;
+
 function dayKey(time: number): string {
     const date = new Date(time);
     const pad = (n: number) => String(n).padStart(2, '0');
@@ -55,6 +60,7 @@ function dayKey(time: number): string {
         TopBarComponent,
         DatePipe,
         ExercisesThisWeekComponent,
+        WeekBestsComponent,
         HistoryEntryComponent,
         MusclesThisWeekComponent,
         RouterLink,
@@ -95,6 +101,35 @@ export class HistoryComponent {
         return groups;
     });
 
+    /** Whether the log shows every workout, not only the last RECENT_DAYS days'. */
+    protected readonly olderOpen = signal(false);
+    private readonly recentFrom = this.now - RECENT_DAYS * DAY_MS;
+    /** The days the log shows: the last 4 weeks', or every one once older are shown. */
+    protected readonly shownGroups = computed(() =>
+        this.olderOpen()
+            ? this.groups()
+            : this.groups().filter((group) => group.entries[0].startedAt >= this.recentFrom)
+    );
+    /** The workouts before those, behind Show older. */
+    protected readonly older = computed(() =>
+        this.shown.entries().filter((entry) => entry.startedAt < this.recentFrom)
+    );
+
+    /** For each workout shown, the exercises it set a new best in (PRG-2), as the summary says. */
+    protected readonly bestsIn = computed(() => {
+        const all = this.shown.entries();
+        return new Map(
+            this.shownGroups()
+                .flatMap((group) => group.entries)
+                .map((entry) => [
+                    entry.id,
+                    sinceLastTime(entry, all)
+                        .filter((line) => line.best)
+                        .map((line) => line.exerciseId),
+                ])
+        );
+    });
+
     /** Workouts and time spent over the last seven days. */
     protected readonly lastWeek = computed(() => {
         const recent = inLastSevenDays(this.shown.entries(), this.now);
@@ -120,10 +155,22 @@ export class HistoryComponent {
         const params = inject(ActivatedRoute).snapshot.queryParamMap;
         const noteFor = params.get('note');
         const run = noteFor ?? params.get('run');
-        if (run && this.history.entries().some((entry) => entry.id === run)) {
+        const found = this.history.entries().find((entry) => entry.id === run);
+        if (run && found) {
+            // An older one's behind Show older, so all are shown
+            this.olderOpen.set(found.startedAt < this.recentFrom);
             this.highlightedId.set(run);
             this.editingId.set(noteFor);
             this.bringIntoView(run, !noteFor);
+        }
+    }
+
+    /** Shows the older workouts, focus going to the first of them, as the button goes. */
+    protected showOlder() {
+        const first = this.older()[0];
+        this.olderOpen.set(true);
+        if (first) {
+            this.focusAfterRender(`entry-${first.id}`);
         }
     }
 

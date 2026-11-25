@@ -65,6 +65,12 @@ import { SetsSection, SetsSummary } from '../history-format';
             list-style: none;
         }
 
+        // Room round each line, where its name is a link: the log's 44px to a finger
+        .set-lines__list > li:not(:has(ul)),
+        .set-lines__superset-lines > li {
+            padding-block: var(--set-line-padding, 0);
+        }
+
         // A superset's name, with its lines under it, set in a little and joined by a line
         .set-lines__superset-name {
             color: var(--text-muted);

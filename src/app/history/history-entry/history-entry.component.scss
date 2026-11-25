@@ -110,7 +110,10 @@
     --set-heading-size: 0.85rem;
     --set-heading-gap: 0.4rem;
     --set-superset-indent: 0.5rem;
-    padding-top: 0.75rem;
+    // Each line 44px tall, its exercise's name the whole height of it (.entry__exercise)
+    --set-line-padding: calc((44px - 1lh) / 2);
+    // Less over the first line, as it has its own room
+    padding-top: 0.25rem;
     border-top: 1px solid var(--border-soft);
     color: var(--text);
     font-size: 0.85rem;
@@ -125,10 +128,18 @@
     margin-top: 0.5rem;
 }
 
-// The exercise's name goes to its page, with its progress (PRG-4)
+// The exercise's name goes to its page, with its progress (PRG-4): 44px tall to a finger, the
+// height of its line, so a near miss doesn't open the workout's details under it
 .entry__exercise {
     position: relative;
     @include text-link;
+
+    // As hit-area does, but worked out from the line's own height
+    &::after {
+        content: '';
+        position: absolute;
+        inset: calc((1lh - 44px) / 2) -4px;
+    }
 }
 
 // The user's own words, set apart from the figures above with a quote line

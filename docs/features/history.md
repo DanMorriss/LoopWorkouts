@@ -38,7 +38,7 @@
     - Under that, **Works** and the main muscles its sets worked, as a workout's card names them (up to four, in the app's order, then "+2 more"). Sets with no exercise, or of one since deleted, don't count; with none that do, there's no line.
     - Time spent is m:ss, or h:mm:ss over an hour.
     - Rounds: "3 rounds" when finished, "2 of 5 rounds · stopped" when stopped, "12 rounds · until stopped" for a workout that runs until stopped. With a time limit, "7 rounds + 3 in 20:00" (the steps done of the next round, if any), or "4 rounds · stopped before 20:00" when ended before time was up.
-- **Sets**, one line per step, under a faint rule, in the unit chosen in You → Profile, e.g.:
+- **Sets**, one line per step, under a faint rule, in the unit chosen in You → Profile, each line 44px tall with its exercise's name (a link to its page) the full height of it, so a finger that misses doesn't open the workout's details under it (since 2026-11-25; until then the names were 16px tall, stacked), e.g.:
     - "Squats: 3 × 10 @ 60 kg": the same every set
     - "Squats: 10, 10, 8 @ 60 kg": the reps changed
     - "Squats: 10 @ 60, 8 @ 62.5 kg": the weight changed

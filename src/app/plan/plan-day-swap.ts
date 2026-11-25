@@ -3,15 +3,15 @@ import { WEEKDAYS } from '../models/plan';
 import { PlanStore } from '../shared/state/plan-store.service';
 import { UndoService } from '../shared/undo/undo.service';
 
-/** The id of a day's ⇄ on the Plan page, for focus. */
+/** The id of a day's Swap on the Plan page, for focus. */
 export function planSwapId(day: number): string {
     return `plan-swap-${day}`;
 }
 
 /**
- * Swapping two days on the Plan page (PLN-1): a day's ⇄ pressed picks it, and another's then
- * swaps everything on the two, with Undo. Pressed again, or Escape, puts it down. One for each
- * Plan page.
+ * Swapping two days on the Plan page (PLN-1): a day's Swap pressed picks it, and the next day
+ * picked in the week swaps everything on the two, with Undo. That day picked again, Cancel, or
+ * Escape puts it down. One for each Plan page.
  */
 export class PlanDaySwap {
     /** The day picked to swap, waiting for the other; null for none. */
@@ -23,13 +23,6 @@ export class PlanDaySwap {
         private readonly announce: (said: string) => void,
         private readonly focus: (id: string) => void
     ) {}
-
-    /** "Swap Monday with another day", or, with Wednesday picked, "Swap Monday with Wednesday". */
-    label(day: number): string {
-        const picked = this.picked();
-        const other = picked === null || picked === day ? 'another day' : WEEKDAYS[picked];
-        return `Swap ${WEEKDAYS[day]} with ${other}`;
-    }
 
     /** The first press picks a day; the next swaps it with this one, or, on itself, puts it down. */
     press(day: number) {

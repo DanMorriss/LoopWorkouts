@@ -11,6 +11,7 @@
 
 .plan__hint {
     @include page-hint;
+    text-wrap: pretty;
 }
 
 // How the week's going, as Today says it
@@ -137,35 +138,14 @@
     font-size: 0.85rem;
 }
 
-// Add, at the foot of the day's list: a quiet dashed row, not a button over every day
+// Add, at the foot of the day's list: Create's dashed + Step row (.btn-add), not a button over
+// every day
 .plan__add {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+    justify-content: flex-start;
     width: 100%;
-    min-height: 44px;
     margin-top: 0.5rem;
     padding: 0 0.75rem;
-    border: 1px dashed var(--border-strong);
-    border-radius: 0.75rem;
-    background: transparent;
-    color: var(--text);
-    font: inherit;
     font-size: 0.85rem;
-    cursor: pointer;
-
-    @include hover {
-        background: var(--control-hover);
-    }
-
-    @include pressed {
-        background: var(--control-hover);
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-    }
 }
 
 // Swap, under Add: picked, in the accent colour, waiting for the other day

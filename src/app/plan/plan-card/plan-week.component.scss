@@ -37,7 +37,7 @@
 .plan-week__day {
     display: grid;
     border: 1px solid color-mix(in srgb, var(--c, var(--border-soft)) 45%, transparent);
-    border-radius: 0.65rem;
+    border-radius: 0.75rem;
     background: linear-gradient(
         to bottom,
         color-mix(in srgb, var(--c, transparent) 16%, transparent),

@@ -17,7 +17,7 @@
 
 .train-on__label {
     color: var(--text-strong);
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
@@ -30,7 +30,8 @@
 .train-on__days {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0.3rem;
+    // Wide enough that each day's hit area (chip's) stops short of the next
+    gap: 0.5rem;
     margin-top: 0.2rem;
 }
 

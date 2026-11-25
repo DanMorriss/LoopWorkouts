@@ -41,7 +41,7 @@
     margin-top: 1rem;
     padding: 0.9rem 1rem;
     border: 1px solid var(--border);
-    border-radius: 0.8rem;
+    border-radius: 0.75rem;
     background: var(--card);
 
     p {
@@ -54,22 +54,25 @@
     font-size: 0.85rem;
 }
 
+// Its name in the reading face, semibold: Audiowide is for a showcase card's title
 .plan-muscles__filler-name {
-    @include display;
     color: var(--text-strong);
-    font-size: 1.05rem;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .plan-muscles__filler-description {
     color: var(--text);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     line-height: 1.45;
+    text-wrap: pretty;
 }
 
 .plan-muscles__filler-fills {
     color: var(--text-strong);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
+    text-wrap: pretty;
 }
 
 .plan-muscles__filler-add {

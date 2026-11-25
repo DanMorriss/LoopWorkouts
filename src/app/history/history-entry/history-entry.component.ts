@@ -92,6 +92,8 @@ export class HistoryEntryComponent {
     readonly changingSets = input(false);
     /** The run just finished, when arriving from the workout summary. */
     readonly highlighted = input(false);
+    /** The exercises it set a new best in (PRG-2), whose lines say so. */
+    readonly bests = input<readonly string[]>([]);
 
     readonly menuToggled = output<void>();
     readonly menuClosed = output<void>();

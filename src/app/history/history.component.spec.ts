@@ -140,6 +140,43 @@ describe('HistoryComponent', () => {
         expect(text('.entry__title')).toEqual(['Mine']);
     });
 
+    it('marks a line that set a new best, as the summary said', () => {
+        const swing = (reps: number) => ({
+            round: 0,
+            step: 0,
+            name: 'Swings',
+            reps,
+            weight: 16,
+            exerciseId: 'builtin:kettlebell-swing',
+        });
+        create(
+            makeEntry({ startedAt: NOW - 3 * DAY, sets: [swing(12)] }),
+            makeEntry({ startedAt: NOW - 2 * DAY, sets: [swing(15)] }),
+            makeEntry({ startedAt: NOW - HOUR, sets: [swing(15)] })
+        );
+
+        // The first time has nothing to beat, and the same again doesn't beat it
+        expect(text('.entry__best')).toEqual(['New best']);
+        const entries = fixture.nativeElement.querySelectorAll('.entry');
+        expect(entries[1].querySelector('.entry__best')).not.toBeNull();
+    });
+
+    it('shows the last 4 weeks, with the rest behind Show older', async () => {
+        create(
+            makeEntry({ startedAt: NOW - HOUR, title: 'Recent' }),
+            makeEntry({ startedAt: NOW - 40 * DAY, title: 'Old' }),
+            makeEntry({ startedAt: NOW - 60 * DAY, title: 'Older' })
+        );
+        expect(text('.entry__title')).toEqual(['Recent']);
+
+        button('Show 2 older workouts')!.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+        expect(text('.entry__title')).toEqual(['Recent', 'Old', 'Older']);
+        expect(button('Show 2 older workouts')).toBeUndefined();
+        expect(document.activeElement!.id).toBe(`entry-${NOW - 40 * DAY}-1`);
+    });
+
     it('shows when each one started, how long it ran, and the rounds', () => {
         create(
             makeEntry({

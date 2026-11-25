@@ -38,7 +38,7 @@
             <!-- Every workout done, newest first, under the muscles they worked -->
             <h3 class="history__log-title">Log</h3>
 
-            @for (group of groups(); track group.key) {
+            @for (group of shownGroups(); track group.key) {
                 <section class="history__day" [attr.aria-labelledby]="'day-' + group.key">
                     <h4 class="history__day-label" [id]="'day-' + group.key">
                         {{ group.label || (group.date | date: 'EEEE d MMMM') }}
@@ -52,6 +52,7 @@
                                 [editing]="editingId() === entry.id"
                                 [changingSets]="changingSetsId() === entry.id"
                                 [highlighted]="highlightedId() === entry.id"
+                                [bests]="bestsIn().get(entry.id) ?? []"
                                 (menuToggled)="toggleMenu(entry.id)"
                                 (menuClosed)="closeMenu(entry.id)"
                                 (editRequested)="editNote(entry.id)"
@@ -64,6 +65,12 @@
                         }
                     </ul>
                 </section>
+            }
+            @if (!olderOpen() && older().length > 0) {
+                <button type="button" class="btn-pill history__older" (click)="showOlder()">
+                    Show {{ older().length }} older
+                    {{ older().length === 1 ? 'workout' : 'workouts' }}
+                </button>
             }
         }
     </div>

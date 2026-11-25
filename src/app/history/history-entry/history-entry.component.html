@@ -140,6 +140,9 @@
                             >{{ line.name }}</a
                         ><span aria-hidden="true">: {{ line.text }}</span>
                         <span class="sr-only">, {{ line.spoken }}</span>
+                        @if (line.exerciseId && bests().includes(line.exerciseId)) {
+                            <span class="entry__best">New best</span>
+                        }
                     } @else {
                         <span aria-hidden="true">{{ line.name }}: {{ line.text }}</span>
                         <span class="sr-only">{{ line.name }}, {{ line.spoken }}</span>

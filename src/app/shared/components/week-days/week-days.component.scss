@@ -40,6 +40,12 @@
         outline-offset: 1px;
     }
 
+    // A workout dragged over it, on the Plan page, goes here
+    &--drop {
+        outline: 2px dashed var(--accent);
+        outline-offset: 1px;
+    }
+
     &[aria-selected='true'] {
         border-color: color-mix(in srgb, var(--c, var(--text-muted)) 60%, transparent);
         background: color-mix(in srgb, var(--c, var(--text-muted)) 16%, transparent);

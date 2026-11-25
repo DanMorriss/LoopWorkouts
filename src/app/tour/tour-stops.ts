@@ -308,17 +308,17 @@ const PLAN_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'plan-today',
-                text: 'Which workouts you do on which days, the same every week. Tap Add on a day to plan one, of yours or a ready-made one, × to take it off, and drag its handle to move it to another day. ⇄ swaps two days.',
+                text: "Your week, the same every week, as Today shows it. Pick a day to see what's on it, and Add a workout at its foot, of yours or a ready-made one. Swap swaps it with another day.",
             },
         ],
-        text: 'Which workouts you do on which days, the same every week. Tap Add on a day to plan one.',
+        text: 'Your week, the same every week. Pick a day, and Add a workout to plan one.',
     },
     {
         title: 'This week',
         parts: [
             {
                 part: 'plan-workout',
-                text: "Each planned workout says how it's going this week: Done, Missed if its day went by, or Due today. From next week means it was planned after its day had gone.",
+                text: "Each planned workout says how it's going this week: Done, Missed if its day went by, or Due today. Drag its handle onto another day in the week to move it, or × to take it off. Its name has more, like Do it today instead.",
             },
         ],
         text: "Once a workout's planned, it says how it's going this week: Done, Missed if its day went by, or Due today. From next week means it was planned after its day had gone.",

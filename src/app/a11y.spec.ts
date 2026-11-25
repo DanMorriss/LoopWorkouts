@@ -543,10 +543,16 @@ for (const theme of ['dark', 'light'] as const) {
                 await expectNoViolations();
             });
 
+            it('the empty week, with a ready-made one first', async () => {
+                await open('/plan');
+                expect(fixture.nativeElement.querySelector('app-plan-start')).not.toBeNull();
+                await expectNoViolations();
+            });
+
             it('picking a workout to plan', async () => {
                 planned();
                 await open('/plan');
-                click('#plan-add-0');
+                click('.plan__add');
                 await settle();
                 await expectNoViolations();
             });

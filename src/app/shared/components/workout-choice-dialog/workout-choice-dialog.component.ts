@@ -15,6 +15,11 @@ export interface WorkoutChoice {
     icon?: string;
     /** A line under its name, e.g. what's planned on a day already. */
     note?: string;
+    /**
+     * The heading it's listed under, e.g. "Your workouts" or "Ready-made": each new one, in the
+     * list's order, heads the choices after it. None for a list without headings.
+     */
+    group?: string;
 }
 
 let nextId = 0;
@@ -56,8 +61,13 @@ let nextId = 0;
                             </button>
                         </li>
                     }
-                    @for (choice of choices(); track choice.id; let first = $first) {
+                    @for (choice of choices(); track choice.id; let first = $first, i = $index) {
                         @let on = picks()?.has(choice.id) ?? false;
+                        @if (choice.group && choice.group !== choices()[i - 1]?.group) {
+                            <li>
+                                <h3 class="choice__group">{{ choice.group }}</h3>
+                            </li>
+                        }
                         <li>
                             <button
                                 type="button"

@@ -1,5 +1,6 @@
 import {
     canDoToday,
+    nextPlannedDay,
     planColours,
     PLANNED_STATUS_TEXT,
     PlannedStatus,
@@ -7,7 +8,7 @@ import {
     startOfWeek,
     weekdayOf,
     WEEKDAYS,
-} from '../../models/plan';
+} from '../../../models/plan';
 
 /**
  * How a day of the week looks: everything on it done, some missed, still to do, only active
@@ -175,4 +176,35 @@ export function markFor(all: readonly Pick<PlannedWorkout, 'status' | 'activeRes
         return 'missed';
     }
     return training.every((status) => status === 'done') ? 'done' : 'planned';
+}
+
+/**
+ * How the week's going, as Today and the Plan page both say it: "2 of 5 done this week · Next:
+ * Pull on Thursday", or "All 5 done this week". Workouts planned once their day had gone by
+ * aren't counted: they start next week; nor is active rest, which is optional.
+ */
+export function weekTally(
+    week: readonly (readonly PlannedWorkout[])[],
+    today: number,
+    name: (workoutId: string) => string
+): string {
+    const counted = week.flat().filter((item) => item.status !== 'next week');
+    if (counted.length === 0) {
+        return 'Your plan starts next week';
+    }
+    const all = counted.filter((item) => !item.activeRest);
+    if (all.length === 0) {
+        return 'Only active rest this week';
+    }
+    const done = all.filter((item) => item.status === 'done').length;
+    if (done === all.length) {
+        return all.length === 1 ? 'Done for the week' : `All ${all.length} done this week`;
+    }
+    const tally = `${done} of ${all.length} done this week`;
+    const nextDay = nextPlannedDay(week, today);
+    if (nextDay < 0) {
+        return tally;
+    }
+    const next = week[nextDay].find((item) => !item.activeRest)!;
+    return `${tally} · Next: ${name(next.workoutId)} on ${WEEKDAYS[nextDay]}`;
 }

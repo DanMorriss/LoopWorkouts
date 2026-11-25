@@ -2,13 +2,21 @@ import { computed, inject, Injectable } from '@angular/core';
 import {
     canDoToday,
     MAX_WORKOUTS_A_DAY,
+    planColours,
     PLANNED_STATUS_TEXT,
     PlannedWorkout,
     thisWeek,
     weekdayOf,
     WEEKDAYS,
 } from '../models/plan';
-import { aToZ, isReadyMade } from '../models/workout';
+import { weekDays, weekTally } from '../shared/components/week-days/week-view';
+import { workoutEquipment } from '../models/built-in-workouts';
+import { canDoWith, MUSCLE_LABELS } from '../models/exercise';
+import { listMuscles } from '../models/fill-gaps';
+import { aToZ, Workout } from '../models/workout';
+import { musclesWorked } from '../models/workout-muscles';
+import { ExerciseStore } from '../shared/state/exercise-store.service';
+import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutChoice } from '../shared/components/workout-choice-dialog/workout-choice-dialog.component';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { PlanStore } from '../shared/state/plan-store.service';
@@ -23,6 +31,11 @@ export interface PlanRow extends PlannedWorkout {
     label: string;
     /** Whether it can be done today instead, this week only (`canDoToday`). */
     canDoToday: boolean;
+    /** Its plan colour, 1 to 4, as Today's week shows it (`planColours`); 0 for active rest. */
+    colour: number;
+    /** Whether Move up and Move down are offered: not for one moved here this week only. */
+    canMoveUp: boolean;
+    canMoveDown: boolean;
 }
 
 /** What the Plan page shows, worked out from the plan and the history. One for each page. */
@@ -31,6 +44,8 @@ export class PlanPageView {
     private readonly planStore = inject(PlanStore);
     private readonly workouts = inject(WorkoutStore);
     private readonly history = inject(HistoryStore);
+    private readonly exercises = inject(ExerciseStore);
+    private readonly settings = inject(SettingsStore);
     private readonly now = Date.now();
     readonly today = weekdayOf(this.now);
 
@@ -43,64 +58,96 @@ export class PlanPageView {
             )
     );
 
-    /** Each day, Monday first, with its workouts and where each is this week. */
-    readonly days = computed(() => {
-        const week = thisWeek(
+    /** This week's plan, each day's workouts with where each is this week. */
+    private readonly week = computed(() =>
+        thisWeek(
             this.planStore.plan(),
             this.history.entries(),
             this.now,
             (id) => this.names().has(id),
             (id) => this.workouts.isActiveRest(id)
-        );
-        return week.map((planned, day) => ({
-            day,
-            name: WEEKDAYS[day],
-            workouts: planned.map(
-                (item): PlanRow => ({
-                    ...item,
-                    day,
-                    name: this.names().get(item.workoutId)!,
-                    label: statusLabel(item),
-                    canDoToday: canDoToday(week, day, item, this.today),
-                })
-            ),
-        }));
+        )
+    );
+
+    /** Each day, Monday first, with its workouts and where each is this week. */
+    readonly days = computed(() => {
+        const week = this.week();
+        const colours = planColours(week);
+        return week.map((planned, day) => {
+            // Those moved here this week only stay at the end, so the order is of the rest
+            const own = planned.filter((item) => item.movedFrom === undefined).length;
+            return {
+                day,
+                name: WEEKDAYS[day],
+                workouts: planned.map(
+                    (item, i): PlanRow => ({
+                        ...item,
+                        day,
+                        name: this.names().get(item.workoutId)!,
+                        label: statusLabel(item),
+                        canDoToday: canDoToday(week, day, item, this.today),
+                        colour: item.activeRest ? 0 : (colours.get(item.workoutId) ?? 0),
+                        canMoveUp: item.movedFrom === undefined && i > 0,
+                        canMoveDown: item.movedFrom === undefined && i < own - 1,
+                    })
+                ),
+            };
+        });
     });
 
-    /**
-     * "2 of 5 done this week", counting only days gone by and today, and not those planned once
-     * their day had gone by (from next week).
-     */
-    readonly weekSoFar = computed(() => {
-        const sofar = this.days()
-            .filter(({ day }) => day <= this.today)
-            .flatMap(({ workouts }) => workouts)
-            .filter((item) => item.status !== 'next week' && !item.activeRest);
-        const done = sofar.filter((item) => item.status === 'done').length;
-        return sofar.length ? `${done} of ${sofar.length} done so far this week` : '';
-    });
+    /** The days as Today's week shows them, for the Plan page's tabs (`WeekDaysComponent`). */
+    readonly weekDays = computed(() =>
+        weekDays(this.week(), this.now, (id) => this.names().get(id) ?? 'Untitled workout')
+    );
+
+    /** How the week's going, as Today says it: "2 of 5 done this week · Next: Pull on Thursday". */
+    readonly tally = computed(() =>
+        weekTally(this.week(), this.today, (id) => this.names().get(id) ?? 'Untitled workout')
+    );
 
     canAdd(day: number): boolean {
         return this.days()[day].workouts.length < MAX_WORKOUTS_A_DAY;
     }
 
     /**
-     * What a day's Add offers: yours A to Z, then the ready-made ones A to Z, each already
-     * planned that day saying so, and not to be picked.
+     * What a day's Add offers, under headings: yours A to Z, then the ready-made ones A to Z,
+     * those your equipment can do first (with any picked in You). Each says the muscles it
+     * mainly works, to choose by; one already planned that day says so, and can't be picked.
      */
     choicesFor(day: number | null): WorkoutChoice[] {
         const planned = day === null ? [] : this.planStore.plan().days[day];
-        return [...aToZ(this.workouts.workouts()), ...aToZ(this.workouts.readyMade())].map(
-            (workout) => {
+        const kit = this.settings.myEquipment();
+        const canDo = (workout: Workout) =>
+            canDoWith(
+                { equipment: workoutEquipment(workout, (id) => this.exercises.byId(id)) },
+                kit
+            );
+        const readyMade = aToZ(this.workouts.readyMade());
+        const groups: [string, readonly Workout[]][] = [
+            ['Your workouts', aToZ(this.workouts.workouts())],
+            ...(kit.length
+                ? ([
+                      ['Ready-made, for your equipment', readyMade.filter(canDo)],
+                      ['Ready-made, other equipment', readyMade.filter((w) => !canDo(w))],
+                  ] as [string, readonly Workout[]][])
+                : ([['Ready-made', readyMade]] as [string, readonly Workout[]][])),
+        ];
+        return groups.flatMap(([group, workouts]) =>
+            workouts.map((workout) => {
                 const already = planned.includes(workout.id);
+                const { main } = musclesWorked([workout], (id) => this.exercises.byId(id));
                 return {
                     id: workout.id,
                     name: this.names().get(workout.id)!,
                     detail: already ? 'Planned' : '',
                     disabled: already,
-                    readyMade: isReadyMade(workout),
+                    note: listMuscles(
+                        main.map((muscle) => MUSCLE_LABELS[muscle]),
+                        3
+                    ),
+                    group,
                 };
-            }
+            })
         );
     }
 }

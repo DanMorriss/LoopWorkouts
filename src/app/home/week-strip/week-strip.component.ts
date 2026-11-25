@@ -6,14 +6,14 @@ import { injectFocusAfterRender } from '../../shared/focus-after-render';
 import { PlanStore } from '../../shared/state/plan-store.service';
 import { UndoService } from '../../shared/undo/undo.service';
 import { IconComponent } from '../../shared/components/icon/icon.component';
-import { missedToDoToday, nextPlannedDay, weekdayOf, WEEKDAYS } from '../../models/plan';
+import { missedToDoToday, weekdayOf } from '../../models/plan';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
 import { WEEK_EDIT_ID } from '../use-plan-on-today';
 import { PlansForYouComponent } from '../plans-for-you/plans-for-you.component';
 import { DayPanelComponent, dayDoTodayId, dayStartId } from './day-panel.component';
-import { WeekDaysComponent } from './week-days.component';
-import { WeekWorkout, weekDays } from './week-view';
+import { WeekDaysComponent } from '../../shared/components/week-days/week-days.component';
+import { WeekWorkout, weekDays, weekTally } from '../../shared/components/week-days/week-view';
 
 /**
  * The week on Today (PLN-4): Monday to Sunday (`WeekDaysComponent`), each day's date, what's on
@@ -153,32 +153,8 @@ export class WeekStripComponent {
         });
     }
 
-    /**
-     * "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". Workouts
-     * planned once their day had gone by aren't counted: they start next week; nor is active
-     * rest, which is optional.
-     */
-    protected readonly soFar = computed(() => {
-        const counted = this.week()
-            .flat()
-            .filter((item) => item.status !== 'next week');
-        if (counted.length === 0) {
-            return 'Your plan starts next week';
-        }
-        const all = counted.filter((item) => !item.activeRest);
-        if (all.length === 0) {
-            return 'Only active rest this week';
-        }
-        const done = all.filter((item) => item.status === 'done').length;
-        if (done === all.length) {
-            return all.length === 1 ? 'Done for the week' : `All ${all.length} done this week`;
-        }
-        const tally = `${done} of ${all.length} done this week`;
-        const nextDay = nextPlannedDay(this.week(), this.today);
-        if (nextDay < 0) {
-            return tally;
-        }
-        const next = this.week()[nextDay].find((item) => !item.activeRest)!;
-        return `${tally} · Next: ${this.name(next.workoutId)} on ${WEEKDAYS[nextDay]}`;
-    });
+    /** "2 of 5 done this week · Next: Pull on Thursday", or "All 5 done this week". */
+    protected readonly soFar = computed(() =>
+        weekTally(this.week(), this.today, (id) => this.name(id))
+    );
 }

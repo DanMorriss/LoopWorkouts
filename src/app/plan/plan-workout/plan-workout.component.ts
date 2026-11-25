@@ -2,6 +2,7 @@ import { CdkDragHandle } from '@angular/cdk/drag-drop';
 import { Component, computed, input, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { WEEKDAYS } from '../../models/plan';
+import { colourVar } from '../../shared/components/week-days/week-view';
 import { MenuPlacementDirective } from '../../shared/menu-placement.directive';
 import { PlanRow } from '../plan-page-view';
 
@@ -10,13 +11,15 @@ import { PlanRow } from '../plan-page-view';
  * off its day, started, its details opened, done today instead this week, or put back on its
  * day.
  */
-export type PlanAction = 'days' | 'remove' | 'start' | 'details' | 'today' | 'back';
+export type PlanAction = 'days' | 'remove' | 'start' | 'details' | 'today' | 'back' | 'up' | 'down';
 
 /**
  * A planned workout's row on the Plan page (PLN-1): its handle, which drags it (the row is the
- * page's `cdkDrag`) or, pressed, opens its days; its name, which opens a menu (Start, Details,
- * Do it today instead, or Put back); where it is this week; and ✕ to take it off its day. One
- * moved here this week only says where from. The page decides which row's menu is open.
+ * page's `cdkDrag`) or, pressed, opens its days; a dot in its plan colour, as Today's week
+ * shows it; its name, which opens a menu (Start, Details, Do it today instead or Put back, and
+ * Move up or down, the way to change the order without dragging); where it is this week; and
+ * ✕ to take it off its day. One moved here this week only says where from. The page decides
+ * which row's menu is open.
  */
 @Component({
     selector: 'app-plan-workout',
@@ -54,7 +57,15 @@ export type PlanAction = 'days' | 'remove' | 'start' | 'details' | 'today' | 'ba
                 [attr.aria-controls]="nameId() + '-menu'"
                 (click)="menuToggled.emit()"
             >
-                <span class="row__title">{{ item.name }}</span>
+                <span class="row__title">
+                    <span
+                        class="row__dot"
+                        aria-hidden="true"
+                        [style.--c]="colour(item.colour)"
+                    ></span>
+                    <span class="row__text">{{ item.name }}</span>
+                    <mat-icon class="row__more" aria-hidden="true">expand_more</mat-icon>
+                </span>
                 @if (movedFrom(); as from) {
                     <span class="row__moved">From {{ from }}, this week</span>
                 }
@@ -80,6 +91,18 @@ export type PlanAction = 'days' | 'remove' | 'start' | 'details' | 'today' | 'ba
                         <button type="button" class="menu__item" (click)="acted.emit('today')">
                             <mat-icon aria-hidden="true">today</mat-icon>
                             Do it today instead
+                        </button>
+                    }
+                    @if (item.canMoveUp) {
+                        <button type="button" class="menu__item" (click)="acted.emit('up')">
+                            <mat-icon aria-hidden="true">arrow_upward</mat-icon>
+                            Move up
+                        </button>
+                    }
+                    @if (item.canMoveDown) {
+                        <button type="button" class="menu__item" (click)="acted.emit('down')">
+                            <mat-icon aria-hidden="true">arrow_downward</mat-icon>
+                            Move down
                         </button>
                     }
                     @if (movedFrom(); as from) {
@@ -116,6 +139,7 @@ export class PlanWorkoutComponent {
     readonly menuToggled = output<void>();
     readonly acted = output<PlanAction>();
 
+    protected readonly colour = colourVar;
     protected readonly nameId = computed(() => planNameId(this.row().day, this.row().workoutId));
     /** The day it's planned on, when it's moved here this week only: "Tuesday". */
     protected readonly movedFrom = computed(() => {

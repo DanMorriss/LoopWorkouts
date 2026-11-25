@@ -348,13 +348,13 @@ test.describe('dragging the plan (PLN-1, PLN-6)', () => {
             await drag(page, handle, page.getByRole('tab', { name: /^Monday/ }));
 
             // Monday's shown, with it there
-            const monday = page.getByRole('tabpanel', { name: 'Monday', exact: true });
+            const monday = page.getByRole('region', { name: 'Monday', exact: true });
             await expect(monday).toContainText('Legs');
             await expect(app.undoBar).toContainText('Legs moved to Monday');
             await page.getByRole('tab', { name: /^Tuesday/ }).click();
-            await expect(
-                page.getByRole('tabpanel', { name: 'Tuesday', exact: true })
-            ).toContainText('Nothing planned');
+            await expect(page.getByRole('region', { name: 'Tuesday', exact: true })).toContainText(
+                'Nothing planned'
+            );
             const plan = await app.stored<{ days: string[][] }>('week-plan');
             expect(plan?.days[0]).toEqual(['legs']);
             // Its day had gone by when it was moved there, so it starts next week (PLN-3)

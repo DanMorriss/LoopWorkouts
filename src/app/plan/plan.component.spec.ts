@@ -178,6 +178,27 @@ describe('PlanComponent', () => {
         expect(text(el().querySelector('.plan__so-far')!)).toBe('Your plan starts next week');
     });
 
+    it('lists every day under the week, the picked one open, and opens another pressed', async () => {
+        const plan = TestBed.inject(PlanStore);
+        plan.add(0, legs.id);
+        plan.add(3, push.id);
+        await open();
+
+        // Each day not picked reads at a glance: its workouts, or a rest day
+        const summaries = [...el().querySelectorAll('app-plan-day-summary')].map(text);
+        expect(summaries).toHaveLength(6);
+        expect(summaries[0]).toBe('Monday Legs, From next week');
+        expect(summaries[1]).toMatch(/^Tuesday .*Rest day$/);
+        expect(summaries[2]).toBe('Thursday Push');
+        expect(shown()).toBe('Wednesday · today: Nothing planned');
+
+        el().querySelectorAll<HTMLButtonElement>('.summary__pick')[2].click();
+        await render();
+        expect(shown()).toBe('Thursday: Push');
+        expect(tab(3).getAttribute('aria-selected')).toBe('true');
+        expect(document.activeElement?.id).toBe('plan-day-3');
+    });
+
     describe('the tour of the page (PLN-8)', () => {
         it('starts the first time the page opens', async () => {
             const tour = TestBed.inject(TourService);

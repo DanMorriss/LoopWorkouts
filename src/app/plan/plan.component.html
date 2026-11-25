@@ -38,84 +38,109 @@
             </p>
         }
 
-        @let day = view.days()[picked()];
-        <section
-            class="plan__day"
+        <!-- Every day under the week, so it reads at a glance; the picked one opened to change -->
+        <div
+            class="plan__days"
             role="tabpanel"
             [id]="panelId"
-            [attr.aria-labelledby]="'plan-day-' + day.day"
+            [attr.aria-labelledby]="'week-day-' + picked()"
         >
-            <h3 class="plan__day-name" [id]="'plan-day-' + day.day">
-                {{ day.name }}
-                @if (day.day === view.today) {
-                    <span class="plan__today">· today</span>
-                }
-            </h3>
-            <div
-                class="plan__drop"
-                cdkDropList
-                [cdkDropListData]="day.day"
-                (cdkDropListDropped)="dropped($event)"
-            >
-                @if (day.workouts.length) {
-                    <ul class="plan__workouts">
-                        @for (planned of day.workouts; track planned.workoutId) {
-                            <li
-                                class="plan__workout"
-                                data-tour="plan-workout"
-                                cdkDrag
-                                [cdkDragDisabled]="planned.movedFrom !== undefined"
-                                [cdkDragData]="{ day: day.day, workoutId: planned.workoutId }"
-                                (cdkDragStarted)="drag.started()"
-                                (cdkDragMoved)="draggedOver($event)"
-                                (cdkDragReleased)="drag.drop.released($event)"
-                                (cdkDragEnded)="dragEnded()"
-                                [class.plan__workout--saved]="isSaved(day.day, planned.workoutId)"
+            @for (day of view.days(); track day.day) {
+                @if (day.day === picked()) {
+                    <section
+                        class="plan__day"
+                        [attr.data-plan-day]="day.day"
+                        [attr.aria-labelledby]="'plan-day-' + day.day"
+                    >
+                        <!-- Focusable, for focus to land on as a day's opened from under the week -->
+                        <h3 class="plan__day-name" tabindex="-1" [id]="'plan-day-' + day.day">
+                            {{ day.name }}
+                            @if (day.day === view.today) {
+                                <span class="plan__today">· today</span>
+                            }
+                        </h3>
+                        <div
+                            class="plan__drop"
+                            cdkDropList
+                            [cdkDropListData]="day.day"
+                            (cdkDropListDropped)="dropped($event)"
+                        >
+                            @if (day.workouts.length) {
+                                <ul class="plan__workouts">
+                                    @for (planned of day.workouts; track planned.workoutId) {
+                                        <li
+                                            class="plan__workout"
+                                            data-tour="plan-workout"
+                                            cdkDrag
+                                            [cdkDragDisabled]="planned.movedFrom !== undefined"
+                                            [cdkDragData]="{
+                                                day: day.day,
+                                                workoutId: planned.workoutId,
+                                            }"
+                                            (cdkDragStarted)="drag.started()"
+                                            (cdkDragMoved)="draggedOver($event)"
+                                            (cdkDragReleased)="drag.drop.released($event)"
+                                            (cdkDragEnded)="dragEnded()"
+                                            [class.plan__workout--saved]="
+                                                isSaved(day.day, planned.workoutId)
+                                            "
+                                        >
+                                            <app-plan-workout
+                                                [row]="planned"
+                                                [menuOpen]="menuFor() === menuKey(planned)"
+                                                (menuToggled)="toggleMenu(planned)"
+                                                (acted)="act(planned, $event)"
+                                            />
+                                        </li>
+                                    }
+                                </ul>
+                            } @else {
+                                <p class="plan__rest">
+                                    <app-icon class="icon-outline">bedtime</app-icon>
+                                    Rest day. Nothing planned.
+                                </p>
+                            }
+                        </div>
+                        @if (view.canAdd(day.day)) {
+                            <button
+                                type="button"
+                                class="btn-add btn-add--heading plan__add"
+                                [id]="'plan-add-' + day.day"
+                                aria-haspopup="dialog"
+                                [attr.aria-label]="'Add a workout to ' + day.name"
+                                (click)="addingTo.set(day.day)"
                             >
-                                <app-plan-workout
-                                    [row]="planned"
-                                    [menuOpen]="menuFor() === menuKey(planned)"
-                                    (menuToggled)="toggleMenu(planned)"
-                                    (acted)="act(planned, $event)"
-                                />
-                            </li>
+                                <app-icon>add</app-icon>
+                                Add a workout
+                            </button>
                         }
-                    </ul>
+                        <!-- Swap picks this day, and the next day pressed swaps with it -->
+                        @if (hasPlan()) {
+                            <button
+                                type="button"
+                                class="plan__swap"
+                                [id]="swapId(day.day)"
+                                [attr.aria-pressed]="swap.picked() === day.day"
+                                (click)="swap.press(day.day)"
+                                (keydown.escape)="cancelSwap()"
+                            >
+                                <app-icon>swap_horiz</app-icon>
+                                Swap {{ day.name }} with another day
+                            </button>
+                        }
+                    </section>
                 } @else {
-                    <p class="plan__rest">
-                        <app-icon class="icon-outline">bedtime</app-icon>
-                        Rest day. Nothing planned.
-                    </p>
+                    <app-plan-day-summary
+                        role="region"
+                        [attr.aria-labelledby]="'plan-day-' + day.day"
+                        [day]="day"
+                        [today]="day.day === view.today"
+                        [dropOn]="dropOn() === day.day"
+                        (picked)="open(day.day)"
+                    />
                 }
-            </div>
-            @if (view.canAdd(day.day)) {
-                <button
-                    type="button"
-                    class="btn-add btn-add--heading plan__add"
-                    [id]="'plan-add-' + day.day"
-                    aria-haspopup="dialog"
-                    [attr.aria-label]="'Add a workout to ' + day.name"
-                    (click)="addingTo.set(day.day)"
-                >
-                    <app-icon>add</app-icon>
-                    Add a workout
-                </button>
             }
-            <!-- Swap picks this day, and the next day pressed swaps with it -->
-            @if (hasPlan()) {
-                <button
-                    type="button"
-                    class="plan__swap"
-                    [id]="swapId(day.day)"
-                    [attr.aria-pressed]="swap.picked() === day.day"
-                    (click)="swap.press(day.day)"
-                    (keydown.escape)="cancelSwap()"
-                >
-                    <app-icon>swap_horiz</app-icon>
-                    Swap {{ day.name }} with another day
-                </button>
-            }
-        </section>
+        </div>
 
         @if (hasPlan()) {
             <a

@@ -1,5 +1,5 @@
 import { CdkDrag, CdkDragDrop, CdkDragMove, CdkDropList } from '@angular/cdk/drag-drop';
-import { afterNextRender, Component, computed, inject, signal } from '@angular/core';
+import { afterNextRender, Component, computed, inject, Injector, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 import { PageSlide } from '../shared/navigation/page-slide';
@@ -14,6 +14,7 @@ import {
 import { PlanStore } from '../shared/state/plan-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { injectFocusAfterRender } from '../shared/focus-after-render';
+import { prefersReducedMotion } from '../shared/reduced-motion';
 import { TourService } from '../tour/tour.service';
 import { PlanMusclesComponent } from './plan-muscles/plan-muscles.component';
 import { AddToPlanDialogComponent } from '../shared/components/add-to-plan-dialog/add-to-plan-dialog.component';
@@ -26,6 +27,7 @@ import { PlanDrag, PlannedDrag } from './plan-drag';
 import { planMoveId, PlanMoves } from './plan-moves';
 import { PlanPageView, PlanRow } from './plan-page-view';
 import { PlanStartComponent } from './plan-start/plan-start.component';
+import { PlanDaySummaryComponent } from './plan-day-summary/plan-day-summary.component';
 import {
     PlanAction,
     planNameId,
@@ -34,7 +36,8 @@ import {
 
 /**
  * The weekly plan (PLN-1), as Today's week, made to change: Monday to Sunday as tabs
- * (`WeekDaysComponent`), and under them the picked day's workouts, the same every week, with
+ * (`WeekDaysComponent`), and under them every day, so the week reads at a glance
+ * (`PlanDaySummaryComponent`), the picked one opened to change: its workouts, the same every week, with
  * where each is this week (PLN-3): done, missed, due today or to come. A day adds a workout,
  * yours or ready-made, or takes one off; the dialog's **Make a new workout** opens Create, whose
  * Save plans it on that day and comes back here (PLN-5). A workout's handle drags it to another
@@ -54,6 +57,7 @@ import {
         CdkDropList,
         IconComponent,
         PlanMusclesComponent,
+        PlanDaySummaryComponent,
         PlanStartComponent,
         PlanWorkoutComponent,
         SwipeBackDirective,
@@ -114,10 +118,30 @@ export class PlanComponent {
         }
     }
 
-    /** A day picked in the week, by a tap or the arrow keys: its workouts show under it. */
+    private readonly injector = inject(Injector);
+
+    /** A day picked in the week, by a tap or the arrow keys: it opens under it, brought into view. */
     protected pick(day: number) {
         this.picked.set(day);
         this.menuFor.set(null);
+        afterNextRender(
+            () =>
+                document.querySelector(`[data-plan-day="${day}"]`)?.scrollIntoView({
+                    block: 'nearest',
+                    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+                }),
+            { injector: this.injector }
+        );
+    }
+
+    /** A day under the week pressed: it opens in its place, focus on its name; or, swapping, swaps. */
+    protected open(day: number) {
+        if (this.swap.picked() !== null) {
+            this.swap.press(day);
+            return;
+        }
+        this.pick(day);
+        this.focusAfterRender(`plan-day-${day}`);
     }
 
     /** A day pressed while another's picked to swap: the two swap (or, itself, it's put down). */
@@ -182,8 +206,15 @@ export class PlanComponent {
     protected draggedOver(event: CdkDragMove<PlannedDrag>) {
         this.drag.drop.moved(event);
         const { x, y } = event.pointerPosition;
-        const tab = document.elementFromPoint(x, y)?.closest<HTMLElement>('[role="tab"]');
-        const day = tab ? Number(tab.id.slice(tab.id.lastIndexOf('-') + 1)) : null;
+        // Over a day's tab in the week, or a day under it
+        const over = document
+            .elementFromPoint(x, y)
+            ?.closest<HTMLElement>('[role="tab"], [data-plan-day]');
+        const day = !over
+            ? null
+            : over.dataset['planDay'] !== undefined
+              ? Number(over.dataset['planDay'])
+              : Number(over.id.slice(over.id.lastIndexOf('-') + 1));
         const { day: from, workoutId } = event.source.data;
         this.dropOn.set(
             day !== null && day !== from && this.drag.canGo(workoutId, from, day) ? day : null

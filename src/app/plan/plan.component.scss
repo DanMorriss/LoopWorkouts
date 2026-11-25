@@ -45,10 +45,15 @@
     @include link-button;
 }
 
-// The picked day, under the week: its name over its workouts, then Add and Swap
+// The picked day, opened among the others under the week: a card, as it's the one being changed
 .plan__day {
-    padding: 0.75rem 0 0.25rem;
-    border-top: 1px solid var(--border-soft);
+    margin: 0.25rem -0.75rem;
+    padding: 0.25rem 0.75rem 0.5rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.9rem;
+    background: var(--card);
+    // Brought into view clear of the top bar and the tab bar
+    scroll-margin-block: 4.5rem 6.5rem;
 }
 
 .plan__day-name {

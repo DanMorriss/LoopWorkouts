@@ -15,8 +15,8 @@ type Page = import('@playwright/test').Page;
 /** A day's tab in the Plan page's week, by its name ("Thursday"). */
 const tab = (page: Page, name: string) => page.getByRole('tab', { name: new RegExp(`^${name}`) });
 
-/** The day shown under the Plan page's week, by its heading ("Wednesday · today" for today). */
-const day = (page: Page, name: string) => page.getByRole('tabpanel', { name, exact: true });
+/** A day under the Plan page's week, open or not, by its name ("Wednesday · today" for today). */
+const day = (page: Page, name: string) => page.getByRole('region', { name, exact: true });
 
 /** Shows a day under the Plan page's week, as a tap on its tab does, and gives it. */
 async function show(page: Page, name: string) {

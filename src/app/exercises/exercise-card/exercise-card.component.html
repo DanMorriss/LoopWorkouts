@@ -26,14 +26,20 @@
         @if (c.otherName) {
             <span class="exercise-card__also">Also called {{ c.otherName }}</span>
         }
-        <span class="exercise-card__details">
-            @for (label of c.mainMuscles; track label) {
-                <span class="exercise-card__muscle">{{ label }}</span>
-            }
-            @if (c.equipment) {
-                <span class="exercise-card__equipment">{{ c.equipment }}</span>
-            }
-        </span>
+        @if (c.mainMuscles.length > 0 || c.equipment) {
+            <!-- Plain text, so the name leads; the cyan is for muscles picked on the body map -->
+            <span class="exercise-card__details">
+                @if (c.mainMuscles.length > 0) {
+                    <span class="exercise-card__muscles">{{ c.mainMuscles.join(', ') }}</span>
+                }
+                @if (c.mainMuscles.length > 0 && c.equipment) {
+                    <span aria-hidden="true">·</span>
+                }
+                @if (c.equipment) {
+                    <span class="exercise-card__equipment">{{ c.equipment }}</span>
+                }
+            </span>
+        }
         @if (c.progress; as progress) {
             <span class="exercise-card__progress">
                 <span>

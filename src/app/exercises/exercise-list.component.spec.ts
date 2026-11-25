@@ -70,9 +70,7 @@ describe('ExerciseListComponent', () => {
             c.textContent!.includes('Back squat')
         ) as HTMLAnchorElement;
         expect(card.getAttribute('href')).toBe('/exercises/back-squat');
-        expect(
-            Array.from(card.querySelectorAll('.exercise-card__muscle')).map((m) => m.textContent)
-        ).toEqual(['Quads', 'Glutes']);
+        expect(card.querySelector('.exercise-card__muscles')!.textContent).toBe('Quads, Glutes');
         expect(card.querySelector('.exercise-card__equipment')!.textContent).toBe('Barbell, rack');
     });
 

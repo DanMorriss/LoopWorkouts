@@ -2,10 +2,12 @@ import { Component, input } from '@angular/core';
 
 /**
  * The big number by a card's title, over what it counts: "3 days a week", "5 exercises", or a
- * workout done's time.
+ * workout done's time. `plain` leaves out its box and the cyan, for a card it isn't the moment
+ * of, such as each workout in the log.
  */
 @Component({
     selector: 'app-showcase-count',
+    host: { '[class.plain]': 'plain()' },
     template: `
         <span class="number">{{ number() }}</span>
         {{ ' ' }}
@@ -27,6 +29,12 @@ import { Component, input } from '@angular/core';
             text-align: center;
         }
 
+        :host(.plain) {
+            padding: 0;
+            border: 0;
+            background: none;
+        }
+
         .number {
             @include display;
             color: var(--glow-text);
@@ -34,6 +42,10 @@ import { Component, input } from '@angular/core';
             font-size: var(--showcase-count-size, 1.6rem);
             font-variant-numeric: tabular-nums;
             line-height: 1;
+        }
+
+        :host(.plain) .number {
+            color: var(--text-strong);
         }
 
         .label {
@@ -48,4 +60,5 @@ import { Component, input } from '@angular/core';
 export class ShowcaseCountComponent {
     readonly number = input.required<number | string>();
     readonly label = input.required<string>();
+    readonly plain = input(false);
 }

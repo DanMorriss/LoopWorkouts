@@ -407,6 +407,8 @@ describe('HistoryComponent', () => {
             fixture.detectChanges();
             expect(fixture.nativeElement.querySelector('app-body-map')).not.toBeNull();
         });
+        // Shaded against their aims: two sets of 10 is short of it, so none has reached it
+        expect(text('.body-map__heading')).toEqual(['Under aim']);
         // Folded away until asked for
         expect(text('.bars__label')).toHaveLength(0);
         const toggle = fixture.nativeElement.querySelector(

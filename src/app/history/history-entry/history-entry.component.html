@@ -31,7 +31,13 @@
             }
         </span>
     </div>
-    <app-showcase-count class="entry__time" aria-hidden="true" [number]="duration()" label="time" />
+    <app-showcase-count
+        class="entry__time"
+        aria-hidden="true"
+        [plain]="true"
+        [number]="duration()"
+        label="time"
+    />
     <div
         class="entry__menu-wrap"
         (click)="$event.stopPropagation()"

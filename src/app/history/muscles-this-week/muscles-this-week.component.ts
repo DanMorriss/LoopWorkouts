@@ -144,16 +144,17 @@ export class MusclesThisWeekComponent {
     );
 
     /**
-     * A muscle with a set or more shades as main on the body map, under that as supporting;
-     * the bars go most worked first.
+     * Against each muscle's aim, as its bar is: one that's reached it shades strongest on the
+     * body map (as main), one worked but short of it softer (as supporting), and the rest not
+     * at all, so the map shows what's missing. The bars go most worked first.
      */
     protected readonly musclesWorked = computed(() => {
         const balance = muscleBalance(this.weekSets(), this.settings.weeklySets());
         return {
             hasData: this.weekSets().size > 0,
-            main: balance.filter(({ sets }) => sets >= 1).map(({ muscle }) => muscle),
+            main: balance.filter(({ status }) => status === 'reached').map(({ muscle }) => muscle),
             supporting: balance
-                .filter(({ sets }) => sets > 0 && sets < 1)
+                .filter(({ sets, status }) => sets > 0 && status === 'under')
                 .map(({ muscle }) => muscle),
             balance,
         };
@@ -203,6 +204,10 @@ export class MusclesThisWeekComponent {
                 made: (ref) => ref.instance.muscleTapped.subscribe((muscle) => this.pick(muscle)),
             });
         show(this.mapSlot, { figureOnly: true, tappable: true });
-        show(this.listSlot, { listOnly: true, selectable: true });
+        show(this.listSlot, {
+            listOnly: true,
+            selectable: true,
+            headings: { main: 'Aim reached', supporting: 'Under aim' },
+        });
     }
 }

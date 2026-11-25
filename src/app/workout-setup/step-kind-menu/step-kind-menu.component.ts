@@ -1,6 +1,7 @@
 import { Component, ElementRef, input, output, viewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { StepKind, stepKindName } from '../../models/workout';
+import { focusLeft } from '../../shared/focus-left';
 import { MenuPlacementDirective } from '../../shared/menu-placement.directive';
 
 /**
@@ -45,12 +46,7 @@ export class StepKindMenuComponent {
 
     /** Tabbing out of the menu closes it. */
     protected focusOut(event: FocusEvent) {
-        const wrap = event.currentTarget as HTMLElement;
-        if (
-            this.open() &&
-            event.relatedTarget instanceof Node &&
-            !wrap.contains(event.relatedTarget)
-        ) {
+        if (this.open() && focusLeft(event)) {
             this.closed.emit();
         }
     }

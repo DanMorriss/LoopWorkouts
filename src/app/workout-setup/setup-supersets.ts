@@ -11,6 +11,9 @@ import {
 } from './step-model';
 import { WorkoutSetupForm } from './workout-setup-form';
 
+/** The rounds a superset made from steps of one set starts at. */
+const FIRST_ROUNDS = 3;
+
 /**
  * Supersets in Create (BLD-12): joining an exercise with the next, taking a step out, and
  * adding a step to one. One for each Create page, working on its WorkoutSetupForm.
@@ -56,7 +59,9 @@ export class SetupSupersets {
                 : {
                       ...this.form.rows.newStep(),
                       kind: 'superset',
-                      sets: row.sets,
+                      // A superset of one round would run as the plain steps it was (and
+                      // be saved as them), so one made from single sets starts at three
+                      sets: row.sets > 1 ? row.sets : FIRST_ROUNDS,
                       restMinutes: row.restMinutes,
                       restSeconds: row.restSeconds,
                   };
@@ -67,7 +72,13 @@ export class SetupSupersets {
             this.form.updateSteps(() =>
                 row.kind === 'superset'
                     ? [...before, ...rows.slice(index, end), joined, ...after]
-                    : [...before, head, { ...row, group: head.key }, joined, ...after]
+                    : [
+                          ...before,
+                          head,
+                          { ...withSets(row, head.sets), group: head.key },
+                          joined,
+                          ...after,
+                      ]
             );
             this.form.view.expandedKeys.update((keys) => new Set([...keys, head.key]));
         });

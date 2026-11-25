@@ -1,7 +1,7 @@
 import { WeightUnit } from '../models/weight';
 import { StepKind, stepKindName, supersetName } from '../models/workout';
 import { counted } from '../shared/format-count';
-import { isStep, padded, rowTime, StepModel, varies } from './step-model';
+import { isSkipped, isStep, padded, rowTime, StepModel, varies } from './step-model';
 
 // What Create's rows say, as plain functions of the rows: their names to screen readers, and
 // what a collapsed row and a set's row show.
@@ -53,7 +53,8 @@ export function toggleLabel(
     unit: WeightUnit
 ): string {
     const step = rows[index];
-    const time = amountText(step, unit);
+    // One left at 0 reps or 00:00 says it's left out of the workout, as it shows
+    const time = `${amountText(step, unit)}${isSkipped(step) ? ', skipped' : ''}`;
     const head = rows.findIndex((row) => row.key === step.group);
     const inSuperset = head === -1 ? '' : `, in the ${supersetNameAt(rows, head).toLowerCase()}`;
     return `${stepTitle(rows, index, numbers)}${inSuperset}${time ? `, ${time}` : ''}`;

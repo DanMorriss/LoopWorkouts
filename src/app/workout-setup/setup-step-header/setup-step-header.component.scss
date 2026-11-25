@@ -1,13 +1,10 @@
 @use 'type' as *;
 @use 'interaction' as *;
 
-// The open/close chevron is always the rightmost thing in the header. Where everything fits
-// on one line the move and delete buttons sit before it; where it doesn't, they drop onto a
-// line of their own underneath, rather than push the chevron into the middle.
+// One line: the handle, kind and number, the summary (which opens it) with its chevron, and on
+// an open step its ⋮ menu
 :host {
-    container-type: inline-size;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     gap: 0.4rem;
 }
@@ -27,7 +24,6 @@
 // Fills the space between the step number and its buttons, so it's an easy target
 .step__toggle {
     display: flex;
-    order: 1;
     flex: 1 1 44px;
     align-items: center;
     gap: 0.4rem;
@@ -92,6 +88,15 @@
     font-variant-numeric: tabular-nums;
 }
 
+// A step left at 0 reps or 00:00, which the workout leaves out: said in words after its
+// amount, set apart by style rather than by a colour of its own
+.step__summary-skipped {
+    margin-left: 0.3em;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
 .step__chevron {
     flex-shrink: 0;
     margin-left: auto;
@@ -106,15 +111,6 @@
     @media (prefers-reduced-motion: reduce) {
         transition: none;
     }
-}
-
-// On a line of their own unless the header is wide enough (see .step__header)
-.step__actions {
-    display: flex;
-    order: 2;
-    flex-basis: 100%;
-    justify-content: flex-end;
-    gap: 0.25rem;
 }
 
 // A filled square with no border, so it reads as something to grab without looking like
@@ -141,17 +137,5 @@
 
     :host-context(.cdk-drop-list-dragging) & {
         cursor: grabbing;
-    }
-}
-
-// Wide enough for one line: buttons first, chevron last. (After the rules above, so it wins.)
-@container (min-width: 21rem) {
-    .step__toggle {
-        order: 2;
-    }
-
-    .step__actions {
-        order: 1;
-        flex-basis: auto;
     }
 }

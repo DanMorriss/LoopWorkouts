@@ -167,10 +167,13 @@ describe('ExercisePickerComponent', () => {
         expect(box().getAttribute('aria-activedescendant')).toBe(options().at(-1)!.id);
     });
 
-    it('lets Enter through to the form when no option is chosen', async () => {
+    it('keeps Enter from the form when no option is chosen, and is done typing', async () => {
         await type('push-up');
 
-        expect((await press('Enter')).defaultPrevented).toBe(false);
+        expect((await press('Enter')).defaultPrevented).toBe(true);
+        expect(box().getAttribute('aria-expanded')).toBe('false');
+        expect(document.activeElement).not.toBe(box());
+        expect(host.name()).toBe('push-up');
     });
 
     it('picks an exercise by clicking it', async () => {

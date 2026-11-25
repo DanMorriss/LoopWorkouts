@@ -1,0 +1,116 @@
+@let step = field();
+@let i = index();
+@let key = step().value().key;
+@let kind = step().value().kind;
+@let open = setup.view.stepMenuFor() === key;
+@let title = setup.text.stepTitle(i);
+@let exercise = kind === 'reps' || kind === 'work' ? exercises.exerciseFor(step().value()) : null;
+
+<button
+    #button
+    type="button"
+    class="btn-icon"
+    [id]="'step-' + key + '-menu'"
+    [attr.aria-label]="'Options for ' + title"
+    [attr.aria-expanded]="open"
+    [attr.aria-controls]="open ? 'step-' + key + '-options' : null"
+    (click)="setup.view.toggleStepMenu(key)"
+>
+    <mat-icon aria-hidden="true">more_vert</mat-icon>
+</button>
+@if (open) {
+    <div
+        class="menu step-menu"
+        appMenuPlacement
+        animate.leave="menu--leaving"
+        [id]="'step-' + key + '-options'"
+        role="group"
+        [attr.aria-label]="'Options for ' + title"
+    >
+        @if (exercise) {
+            <button
+                type="button"
+                class="menu__item"
+                [id]="'step-' + key + '-details'"
+                aria-haspopup="dialog"
+                [attr.aria-label]="'Details of ' + exercise.name"
+                (click)="closeAnd(() => exercises.showDetails(exercise, key))"
+            >
+                <mat-icon aria-hidden="true">info</mat-icon>
+                Details
+            </button>
+            <!-- Another exercise for the same muscles (BLD-14) -->
+            <button
+                type="button"
+                class="menu__item"
+                [id]="'step-' + key + '-swap'"
+                aria-haspopup="dialog"
+                [attr.aria-label]="'Swap ' + exercise.name"
+                (click)="closeAnd(() => exercises.startSwap(exercise, key, kind))"
+            >
+                <mat-icon aria-hidden="true">swap_horiz</mat-icon>
+                Swap
+            </button>
+            <button
+                type="button"
+                class="menu__item"
+                [id]="'step-' + key + '-exercise'"
+                aria-haspopup="dialog"
+                [attr.aria-label]="
+                    (isBuiltIn(exercise)
+                        ? exercises.noteFor(exercise)
+                            ? 'Edit your note on '
+                            : 'Add a note to '
+                        : 'Edit ') + exercise.name
+                "
+                (click)="closeAnd(() => exercises.openExercise(exercise, key))"
+            >
+                <mat-icon aria-hidden="true">{{
+                    isBuiltIn(exercise) ? 'edit_note' : 'edit'
+                }}</mat-icon>
+                {{
+                    isBuiltIn(exercise)
+                        ? exercises.noteFor(exercise)
+                            ? 'Edit your note'
+                            : 'Add a note'
+                        : 'Edit exercise'
+                }}
+            </button>
+        }
+        <!-- Only where it can move: a step on its own has nowhere to go -->
+        @if (steps.canMove(i, -1) || steps.canMove(i, 1)) {
+            <button
+                type="button"
+                class="menu__item"
+                [id]="'step-' + key + '-up'"
+                [attr.aria-label]="'Move ' + title + ' up'"
+                [disabled]="!steps.canMove(i, -1)"
+                (click)="steps.moveStep(i, -1)"
+            >
+                <mat-icon aria-hidden="true">arrow_upward</mat-icon>
+                Move up
+            </button>
+            <button
+                type="button"
+                class="menu__item"
+                [id]="'step-' + key + '-down'"
+                [attr.aria-label]="'Move ' + title + ' down'"
+                [disabled]="!steps.canMove(i, 1)"
+                (click)="steps.moveStep(i, 1)"
+            >
+                <mat-icon aria-hidden="true">arrow_downward</mat-icon>
+                Move down
+            </button>
+        }
+        <button
+            type="button"
+            class="menu__item menu__item--danger"
+            [id]="'step-' + key + '-delete'"
+            [attr.aria-label]="'Delete ' + title"
+            (click)="closeAnd(() => steps.deleteStep(i))"
+        >
+            <mat-icon aria-hidden="true">delete</mat-icon>
+            Delete
+        </button>
+    </div>
+}

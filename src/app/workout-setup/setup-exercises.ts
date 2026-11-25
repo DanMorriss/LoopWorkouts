@@ -9,7 +9,7 @@ import { injectFocusAfterRender } from '../shared/focus-after-render';
 import { ExerciseStore } from '../shared/state/exercise-store.service';
 import { HistoryStore } from '../shared/state/history-store.service';
 import { UndoService } from '../shared/undo/undo.service';
-import { isExercise, ItemKind, StepModel } from './step-model';
+import { isExercise, isSkipped, ItemKind, StepModel } from './step-model';
 import { WorkoutSetupForm } from './workout-setup-form';
 
 /**
@@ -87,7 +87,7 @@ export class SetupExercises {
         const opened = this.exerciseInDetails();
         this.exerciseInDetails.set(null);
         if (opened) {
-            this.focusAfterRender(`step-${opened.stepKey}-details`);
+            this.focusAfterRender(`step-${opened.stepKey}-menu`);
         }
     }
 
@@ -121,15 +121,24 @@ export class SetupExercises {
      * A step that's just become `exercise` becomes the kind it's measured by: timed for a timed
      * one, reps for one measured in reps, at the amounts adding it from its page gives (0:30,
      * or 10 reps), each set's too where they vary. Its sets, rest and sides stay, and its kind
-     * can be changed back from its menu. Says why, or gives null if its kind was right.
+     * can be changed back from its menu. Says why, or gives null if its kind was right; a step
+     * of the right kind at 0 reps or 00:00 gets those amounts too, so it isn't skipped.
      */
     private measureAs(stepKey: number, exercise: Exercise): string | null {
         const step = this.form.model().steps.find((each) => each.key === stepKey);
         const kind = exercise.measuredBy === 'timed' ? 'work' : 'reps';
-        if (!step || !isExercise(step) || step.kind === kind) {
+        if (!step || !isExercise(step)) {
             return null;
         }
         const amount = kind === 'work' ? { minutes: 0, seconds: 30 } : { reps: 10 };
+        if (step.kind === kind) {
+            // Its kind is right, but a new step's 0 reps or 00:00 would leave it out of the
+            // workout: it starts at the same amounts, which the wheels show
+            if (isSkipped(step)) {
+                this.form.replaceStep({ ...step, ...amount });
+            }
+            return null;
+        }
         this.form.replaceStep({
             ...step,
             ...amount,
@@ -234,17 +243,17 @@ export class SetupExercises {
             message: `Swapped to ${replacement.name}`,
             undo: () => {
                 this.form.replaceStep(before);
-                this.focusAfterRender(`step-${before.key}-swap`);
+                this.focusAfterRender(`step-${before.key}-menu`);
             },
         });
-        this.focusAfterRender(`step-${opened.stepKey}-swap`);
+        this.focusAfterRender(`step-${opened.stepKey}-menu`);
     }
 
     closeSwap() {
         const opened = this.swapping();
         this.swapping.set(null);
         if (opened) {
-            this.focusAfterRender(`step-${opened.stepKey}-swap`);
+            this.focusAfterRender(`step-${opened.stepKey}-menu`);
         }
     }
 
@@ -280,7 +289,7 @@ export class SetupExercises {
         const opened = this.exerciseInEditor();
         this.exerciseInEditor.set(null);
         if (opened) {
-            this.focusAfterRender(`step-${opened.stepKey}-exercise`);
+            this.focusAfterRender(`step-${opened.stepKey}-menu`);
         }
     }
 }

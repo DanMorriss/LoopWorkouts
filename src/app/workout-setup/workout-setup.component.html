@@ -2,14 +2,20 @@
     <div class="w-full max-w-md p-4">
         <app-top-bar [url]="back().url" [label]="back().label" />
         <h2 class="setup-title">{{ pageTitle() }}</h2>
-        <!-- Start is its submit, by its button or Enter in a box: checked, then saved -->
-        <form [formRoot]="setup.workoutForm" (submit)="save.saveAndStart()">
+        <!-- Start is its submit: checked, then saved. Only by its button, as Enter (a phone's
+             return key) in a box is done typing, rather than starting a half-built workout -->
+        <form
+            [formRoot]="setup.workoutForm"
+            (submit)="save.saveAndStart()"
+            (keydown.enter)="doneTyping($event)"
+        >
             <!-- data-tour: what the tour of Create (BLD-17) lights up -->
             <label class="picker-field" for="title" data-tour="workout-title">
                 <span class="picker-field__label">Workout Title</span>
                 <input
                     class="picker-field__input"
                     id="title"
+                    enterkeyhint="done"
                     [formField]="setup.workoutForm.title"
                 />
             </label>

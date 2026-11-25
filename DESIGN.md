@@ -146,7 +146,7 @@ The palette is cool and night-time: navy and slate neutrals, sky and cyan for wh
 ### Secondary
 
 - **Work Pink** (`--work`): timed steps, filling the ring clockwise, and their badges and edges.
-- **Rest Blue** (`--rest`): rest, filling the ring anticlockwise.
+- **Rest Blue** (`--rest`): rest, filling the ring anticlockwise. It's the accent's value too, so anything in Create that isn't a phase (a superset's edge and line, a heading's) is a neutral grey rather than the accent, or it would read as a rest.
 - **Reps Violet** (`--reps`): rep steps, with a full, still ring and the count on its face. It also edges tags such as "New best".
 
 ### Tertiary

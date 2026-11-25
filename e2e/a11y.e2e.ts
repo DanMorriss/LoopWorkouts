@@ -124,14 +124,26 @@ for (const theme of ['dark', 'light'] as const) {
 /**
  * Checks a dialog the keyboard opens from `opener`: focus starts on `first`, Tab stays inside it,
  * and Escape, ‹ Back and a tap outside (where there's an outside: a phone shows some full screen)
- * each close it with focus back on `opener`.
+ * each close it with focus back on `opener`. An opener in a ⋮ menu is given with its `menu`
+ * button, which opens it first and which focus comes back to, as the menu has closed.
  */
-async function checkDialog(page: Page, opener: Locator, dialog: Locator, first: Locator) {
+async function checkDialog(
+    page: Page,
+    opener: Locator,
+    dialog: Locator,
+    first: Locator,
+    menu?: Locator
+) {
     const open = async () => {
+        if (menu) {
+            await menu.focus();
+            await page.keyboard.press('Enter');
+        }
         await opener.focus();
         await page.keyboard.press('Enter');
         await expect(dialog).toBeVisible();
     };
+    const returnsTo = menu ?? opener;
     await open();
     await expect(first).toBeFocused();
     for (let i = 0; i < 12; i++) {
@@ -143,19 +155,19 @@ async function checkDialog(page: Page, opener: Locator, dialog: Locator, first: 
     }
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
-    await expect(opener).toBeFocused();
+    await expect(returnsTo).toBeFocused();
 
     await open();
     await dialog.getByRole('button', { name: 'Back', exact: true }).click();
     await expect(dialog).toBeHidden();
-    await expect(opener).toBeFocused();
+    await expect(returnsTo).toBeFocused();
 
     await open();
     const box = await dialog.boundingBox();
     if (box && box.y > 10) {
         await page.mouse.click(5, 5);
         await expect(dialog).toBeHidden();
-        await expect(opener).toBeFocused();
+        await expect(returnsTo).toBeFocused();
     }
 }
 
@@ -194,25 +206,29 @@ test.describe('dialogs', () => {
 
     test("REG-A11Y-02 dialogs: Create's Details", { tag: '@p1' }, async ({ app, page }) => {
         await app.goto('/setup?editId=legs');
-        await new CreatePage(page).open(1);
+        const create = new CreatePage(page);
+        await create.open(1);
         const details = page.getByRole('dialog', { name: 'Back squat' });
         await checkDialog(
             page,
             page.getByRole('button', { name: 'Details of Back squat' }),
             details,
-            details.getByRole('heading', { name: 'Back squat' })
+            details.getByRole('heading', { name: 'Back squat' }),
+            create.menu(1)
         );
     });
 
     test("REG-A11Y-02 dialogs: Create's Swap", { tag: '@p1' }, async ({ app, page }) => {
         await app.goto('/setup?editId=legs');
-        await new CreatePage(page).open(1);
+        const create = new CreatePage(page);
+        await create.open(1);
         const swap = page.getByRole('dialog', { name: 'Swap Back squat' });
         await checkDialog(
             page,
             page.getByRole('button', { name: 'Swap Back squat' }),
             swap,
-            swap.getByRole('searchbox', { name: 'Search exercises' })
+            swap.getByRole('searchbox', { name: 'Search exercises' }),
+            create.menu(1)
         );
     });
 

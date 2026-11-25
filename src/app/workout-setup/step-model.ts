@@ -267,6 +267,18 @@ export function hasAmount(step: StepModel): boolean {
     );
 }
 
+/**
+ * Whether a step will be left out of the workout as it's saved (see `toBlocks()`): a timed or
+ * rest step at 00:00, or a rep step at 0 reps, whatever its weight. One whose sets vary is
+ * checked set by set before saving instead.
+ */
+export function isSkipped(step: StepModel): boolean {
+    if (!isStep(step) || varies(step)) {
+        return false;
+    }
+    return step.kind === 'reps' ? step.reps === 0 : step.minutes === 0 && step.seconds === 0;
+}
+
 /** Whether a step's sets each have their own row (BLD-11): only with more than one set. */
 export function varies(step: StepModel): boolean {
     return step.vary && step.sets > 1 && (step.kind === 'reps' || step.kind === 'work');

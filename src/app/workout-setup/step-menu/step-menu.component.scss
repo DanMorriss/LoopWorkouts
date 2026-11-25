@@ -1,0 +1,15 @@
+// The menu opens under its ⋮, at the header's right
+:host {
+    position: relative;
+    flex-shrink: 0;
+}
+
+// A shared .menu (styles/_menu.scss), above the steps below it
+.step-menu {
+    position: absolute;
+    top: calc(100% + 0.2rem);
+    right: 0;
+    z-index: 10;
+    min-width: 13rem;
+    max-width: min(19rem, calc(100vw - 2rem));
+}

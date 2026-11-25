@@ -1,7 +1,9 @@
 // Supersets (BLD-12): the superset's own row heads its steps, which sit in from it on a line
-// down from it, so the lot reads as one thing. Its steps hide when it's collapsed.
+// down from it, so the lot reads as one thing. Its steps hide when it's collapsed. Its edge
+// and line are a neutral, as its badge is: the phase colours are for work, rest and reps, and
+// the accent is the rest blue.
 .step--superset {
-    --step-color: var(--accent);
+    --step-color: var(--text-muted);
 }
 
 .step--in-superset {
@@ -14,7 +16,7 @@
         top: calc(-0.75rem - 1px);
         bottom: 0.75rem;
         left: calc(-0.75rem - 2px);
-        border-left: 2px solid var(--accent);
+        border-left: 2px solid var(--text-muted);
         content: '';
     }
 }

@@ -95,7 +95,7 @@ describe('WorkoutSetupComponent', () => {
         if (!empty && !submitButton().textContent!.includes('Save')) {
             await changeKind(0, 'Timed');
             await addStep('Rest');
-            await press('Step 1, timed, 00:00');
+            await press('Step 1, timed, 00:00, skipped');
         }
     }
 
@@ -217,9 +217,42 @@ describe('WorkoutSetupComponent', () => {
                 .map((node) => node.textContent)
                 .join('')
                 .trim();
-        const found = all.find((b) => accessibleName(b) === name);
+        const found =
+            all.find((b) => accessibleName(b) === name) ?? inStepMenu(name, accessibleName);
         expect(found, `expected a "${name}" button`).toBeDefined();
         return found!;
+    }
+
+    /**
+     * A button in an open step's ⋮ menu (its exercise's details, swap and note, moving and
+     * deleting it), opened to find it as a user would. Menus that don't have it are closed.
+     */
+    function inStepMenu(
+        name: string,
+        accessibleName: (b: HTMLButtonElement) => string
+    ): HTMLButtonElement | undefined {
+        const menus = Array.from(
+            fixture.nativeElement.querySelectorAll('app-step-menu > button')
+        ) as HTMLButtonElement[];
+        for (const menu of menus) {
+            const wasOpen = menu.getAttribute('aria-expanded') === 'true';
+            if (!wasOpen) {
+                menu.click();
+                fixture.detectChanges();
+            }
+            const items = Array.from(
+                menu.parentElement!.querySelectorAll('.menu button')
+            ) as HTMLButtonElement[];
+            const found = items.find((b) => accessibleName(b) === name);
+            if (found) {
+                return found;
+            }
+            if (!wasOpen) {
+                menu.click();
+                fixture.detectChanges();
+            }
+        }
+        return undefined;
     }
 
     async function press(name: string) {
@@ -660,6 +693,25 @@ describe('WorkoutSetupComponent', () => {
             expect(event.defaultPrevented).toBe(true);
         });
 
+        it("doesn't start it on Enter in a box, which is done typing (a phone's return key)", async () => {
+            chooseTime(0, 'seconds', '5');
+            const title = el<HTMLInputElement>('#title');
+            title.focus();
+            const enter = new KeyboardEvent('keydown', {
+                key: 'Enter',
+                bubbles: true,
+                cancelable: true,
+            });
+
+            title.dispatchEvent(enter);
+            await fixture.whenStable();
+
+            expect(enter.defaultPrevented).toBe(true);
+            expect(document.activeElement).not.toBe(title);
+            expect(navigate).not.toHaveBeenCalled();
+            expect(store.workouts()).toEqual([]);
+        });
+
         it('saves the workout as steps, makes it active, and goes to the workout', async () => {
             typeTitle('Sprints');
             typeName(0, '  Hill sprint ');
@@ -849,7 +901,7 @@ describe('WorkoutSetupComponent', () => {
             });
 
             it('can change a collapsed step', async () => {
-                await press('Step 1, timed, 00:00');
+                await press('Step 1, timed, 00:00, skipped');
 
                 await changeKind(0, 'Rest');
 
@@ -987,7 +1039,7 @@ describe('WorkoutSetupComponent', () => {
             await addStep('Timed');
             typeName(2, 'Plank');
             chooseTime(2, 'seconds', '45');
-            await press('Step 2, rest, 00:00');
+            await press('Step 2, rest, 00:00, skipped');
             chooseTime(1, 'seconds', '15');
 
             await submit();
@@ -1049,22 +1101,22 @@ describe('WorkoutSetupComponent', () => {
         it('deletes a step, focusing the step that takes its place', async () => {
             await addStep('Timed');
             typeName(2, 'Plank');
-            await press('Step 2, rest, 00:00');
+            await press('Step 2, rest, 00:00, skipped');
 
             await press('Delete Step 2, rest');
 
             expect(shown().steps.map((s) => s.name || s.kind)).toEqual(['Timed', 'Plank']);
-            expect(document.activeElement).toBe(button('Delete Step 2, Plank'));
+            expect(document.activeElement).toBe(button('Options for Step 2, Plank'));
             expect(said()).toBe('Deleted step 2');
         });
 
         it('focuses the open button of a collapsed step that takes a deleted one’s place', async () => {
             await press('Collapse all');
-            await press('Step 1, timed, 00:00');
+            await press('Step 1, timed, 00:00, skipped');
 
             await press('Delete Step 1, timed');
 
-            expect(document.activeElement).toBe(button('Step 1, rest, 00:00'));
+            expect(document.activeElement).toBe(button('Step 1, rest, 00:00, skipped'));
         });
 
         describe('deleting a step with something in it', () => {
@@ -1116,7 +1168,7 @@ describe('WorkoutSetupComponent', () => {
 
                 expect(shown().steps[1]).toEqual({ kind: 'Rest', name: 'Breathe', time: '0:20' });
                 expect(said()).toBe('Step 2 is back');
-                expect(document.activeElement).toBe(button('Delete Step 2, Breathe'));
+                expect(document.activeElement).toBe(button('Options for Step 2, Breathe'));
             });
 
             it('moves focus to the step before when the offer for the last one is closed', async () => {
@@ -1126,7 +1178,7 @@ describe('WorkoutSetupComponent', () => {
                 fixture.detectChanges();
                 await fixture.whenStable();
 
-                expect(document.activeElement).toBe(button('Delete Step 1, timed'));
+                expect(document.activeElement).toBe(button('Options for Step 1, timed'));
             });
         });
 
@@ -1168,7 +1220,19 @@ describe('WorkoutSetupComponent', () => {
                 expect(steps()[0].querySelector('app-wheel-picker')).toBeNull();
                 expect(el('.step__summary', steps()[0]).textContent).toContain('Squats');
                 expect(el('.step__summary', steps()[0]).textContent).toContain('02:15');
+                expect(el('.step__summary', steps()[0]).textContent).not.toContain('skipped');
                 expect(shown().steps[0]).toEqual({ kind: 'Timed', name: 'Squats', time: '2:15' });
+            });
+
+            it('says a step left at 00:00 is skipped, as the workout leaves it out', async () => {
+                typeName(0, 'Squats');
+
+                await press('Step 1, Squats, 00:00, skipped');
+
+                expect(el('.step__summary', steps()[0]).textContent).toContain('00:00');
+                expect(el('.step__summary-skipped', steps()[0]).textContent!.trim()).toBe(
+                    '· skipped'
+                );
             });
 
             it('opens and closes a step with its button, which says whether it is open', async () => {
@@ -1178,14 +1242,14 @@ describe('WorkoutSetupComponent', () => {
                 expect(body()?.querySelector('app-wheel-picker')).not.toBeNull();
 
                 toggle(0).focus();
-                await press('Step 1, timed, 00:00');
+                await press('Step 1, timed, 00:00, skipped');
 
                 expect(toggle(0).getAttribute('aria-expanded')).toBe('false');
                 // Nothing to point at while closed
                 expect(toggle(0).hasAttribute('aria-controls')).toBe(false);
                 expect(document.activeElement).toBe(toggle(0));
 
-                await press('Step 1, timed, 00:00');
+                await press('Step 1, timed, 00:00, skipped');
 
                 expect(toggle(0).getAttribute('aria-expanded')).toBe('true');
                 expect(document.activeElement).toBe(toggle(0));
@@ -1202,7 +1266,7 @@ describe('WorkoutSetupComponent', () => {
             });
 
             it('keeps a step open or closed as it moves', async () => {
-                await press('Step 2, rest, 00:00');
+                await press('Step 2, rest, 00:00, skipped');
 
                 await press('Move Step 1, timed down');
 
@@ -1210,13 +1274,43 @@ describe('WorkoutSetupComponent', () => {
                 expect(collapsed()).toEqual([true, false]);
             });
 
+            it("opens an open step's ⋮ menu, which Escape or a click elsewhere closes", async () => {
+                const menu = () => el<HTMLButtonElement>('app-step-menu > button', steps()[0]);
+                await press('Options for Step 1, timed');
+                expect(menu().getAttribute('aria-expanded')).toBe('true');
+                expect(el('.step-menu', steps()[0]).getAttribute('aria-label')).toBe(
+                    'Options for Step 1, timed'
+                );
+
+                el('.step-menu', steps()[0]).dispatchEvent(
+                    new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+                );
+                fixture.detectChanges();
+                await fixture.whenStable();
+                expect(menu().getAttribute('aria-expanded')).toBe('false');
+                expect(document.activeElement).toBe(menu());
+
+                await press('Options for Step 1, timed');
+                el('#title').click();
+                fixture.detectChanges();
+                expect(menu().getAttribute('aria-expanded')).toBe('false');
+            });
+
+            it('keeps the ⋮ menu open on the step as it moves, so it can move again', async () => {
+                await press('Move Step 2, rest up');
+
+                expect(shown().steps.map((s) => s.kind)).toEqual(['Rest', 'Timed']);
+                expect(document.activeElement).toBe(button('Move Step 1, rest down'));
+                expect(el('.step-menu', steps()[0])).not.toBeNull();
+            });
+
             it('keeps a collapsed step to one line: its drag handle stays, its buttons wait until it is opened', async () => {
                 await press('Collapse all');
 
                 expect(el('.step__handle', steps()[0])).not.toBeNull();
-                expect(el('.step__actions', steps()[0])).toBeNull();
+                expect(el('app-step-menu', steps()[0])).toBeNull();
 
-                await press('Step 1, timed, 00:00');
+                await press('Step 1, timed, 00:00, skipped');
 
                 expect(button('Move Step 1, timed down').disabled).toBe(false);
                 expect(button('Delete Step 1, timed').disabled).toBe(false);
@@ -1825,6 +1919,23 @@ describe('WorkoutSetupComponent', () => {
             expect(blocks()).toEqual([group(3, 60, reps(10, 'Bench'), reps(10, 'Row'))]);
         });
 
+        it('starts one made from single sets at 3 rounds, as 1 would run as plain steps', async () => {
+            await setup();
+            await create({ empty: true });
+            typeName(0, 'Bench');
+            chooseReps(0, '10');
+            await addStep();
+            typeName(1, 'Row');
+            chooseReps(1, '10');
+            await press('Step 1, Bench, 10 reps');
+
+            await press('Join Step 1, Bench with the next step');
+
+            expect(wheel(0, 'sets')).toBe('3');
+            await submit();
+            expect(blocks()).toEqual([group(3, 60, reps(10, 'Bench'), reps(10, 'Row'))]);
+        });
+
         it('is a giant set with a third exercise, and a superset again when it goes', async () => {
             await setup();
             await benchAndRow();
@@ -2266,8 +2377,9 @@ describe('WorkoutSetupComponent', () => {
 
             expect(steps()[0].querySelector('[role="combobox"]')).not.toBeNull();
             expect(status(0)).toBeUndefined();
+            // A built-in one has nothing to say until there's a note on it
             typeName(0, 'Squats');
-            expect(status(0)).toBe('Built-in exercise');
+            expect(status(0)).toBeUndefined();
             typeName(0, 'Wall walk');
             expect(status(0)).toBe('A new exercise of your own, made when the workout is saved');
             // A rest isn't an exercise, so it has a plain name box
@@ -2287,8 +2399,9 @@ describe('WorkoutSetupComponent', () => {
             await fixture.whenStable();
 
             expect(el('app-exercise-editor')).toBeNull();
-            expect(status(0)).toBe('Built-in exercise Your note: Pause at the bottom');
-            expect(document.activeElement).toBe(button('Edit your note on Back squat'));
+            expect(status(0)).toBe('Your note: Pause at the bottom');
+            expect(document.activeElement).toBe(button('Options for Step 1, Back squat'));
+            expect(button('Edit your note on Back squat')).toBeDefined();
         });
 
         it('renames your own exercise from its step, in the form and in saved workouts', async () => {
@@ -2315,7 +2428,7 @@ describe('WorkoutSetupComponent', () => {
                 ...work(30, 'Sled drag'),
                 exerciseId: mine.id,
             });
-            expect(status(0)).toBe('Your own exercise');
+            expect(status(0)).toBeUndefined();
         });
 
         it("shows the exercise's details, as its page does, without leaving", async () => {
@@ -2343,7 +2456,7 @@ describe('WorkoutSetupComponent', () => {
             await fixture.whenStable();
 
             expect(el('app-exercise-details-dialog')).toBeNull();
-            expect(document.activeElement).toBe(button('Details of Front squat'));
+            expect(document.activeElement).toBe(button('Options for Step 1, Front squat'));
         });
 
         describe('swapping it for another (BLD-14)', () => {
@@ -2449,7 +2562,7 @@ describe('WorkoutSetupComponent', () => {
                 expect(TestBed.inject(UndoService).offer()?.message).toBe(
                     'Swapped to Goblet squat'
                 );
-                expect(document.activeElement).toBe(button('Swap Goblet squat'));
+                expect(document.activeElement).toBe(button('Options for Step 1, Goblet squat'));
 
                 // Let the weight wheel glide to its new weight: settling after saving has emptied the
                 // form would set a step that's gone (in the app, the page has gone by then)
@@ -2504,7 +2617,7 @@ describe('WorkoutSetupComponent', () => {
 
                 expect(el('app-swap-exercise-dialog')).toBeNull();
                 expect(shown().steps[0].name).toBe('Back squat');
-                expect(document.activeElement).toBe(button('Swap Back squat'));
+                expect(document.activeElement).toBe(button('Options for Step 1, Back squat'));
             });
         });
 
@@ -2562,6 +2675,22 @@ describe('WorkoutSetupComponent', () => {
                 expect(document.activeElement).toBe(el('#browse-search'));
             });
 
+            it("starts a new step at 10 reps, so it isn't skipped at 0", async () => {
+                await setup();
+                await create({ empty: true });
+                await press('Browse exercises for step 1');
+
+                typeInto(el('#browse-search'), 'back squat');
+                pickCard('Back squat');
+                await fixture.whenStable();
+
+                expect(
+                    el('[id$="-reps"] [role="spinbutton"]', steps()[0]).getAttribute(
+                        'aria-valuenow'
+                    )
+                ).toBe('10');
+            });
+
             it('fills in the step with the exercise picked, linked to it', async () => {
                 await setup();
                 await create();
@@ -2573,11 +2702,12 @@ describe('WorkoutSetupComponent', () => {
 
                 expect(el('app-browse-exercises-dialog')).toBeNull();
                 expect(shown().steps[0].name).toBe('Plank');
-                expect(status(0)).toContain('Built-in exercise');
                 expect(el('.sr-only[aria-live="polite"]').textContent!.trim()).toBe(
                     'Step 1 is now Plank'
                 );
                 expect(document.activeElement).toBe(button('Browse exercises for step 1'));
+                // Its details, swap and note are in its ⋮ menu
+                expect(button('Details of Plank')).toBeDefined();
 
                 chooseTime(0, 'seconds', '45');
                 await submit();

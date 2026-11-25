@@ -1093,8 +1093,7 @@ test.describe('changing the workout while it runs', () => {
             await run.pressDone();
 
             await app.goto('/setup?editId=push');
-            await create.open(3);
-            await page.getByRole('button', { name: 'Swap Diamond push-up' }).click();
+            await (await create.option(3, 'Swap Diamond push-up')).click();
             const swap = page.getByRole('dialog', { name: /^Swap / });
             await expect(swap.getByRole('searchbox', { name: 'Search exercises' })).toBeFocused();
             await page.keyboard.type('push-up');

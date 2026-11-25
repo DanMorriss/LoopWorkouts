@@ -140,10 +140,16 @@ export class ExercisePickerComponent implements FormValueControl<string> {
                 return;
             }
             case 'Enter':
-                // Picks the option the arrow keys are on, rather than submitting the form
+                // Never submits the form, which would start the workout from half a step.
+                // Picks the option the arrow keys are on; otherwise it's done typing, as a
+                // phone's return key is: the name typed stands, and the keyboard goes.
+                event.preventDefault();
                 if (this.activeOptionId()) {
-                    event.preventDefault();
                     this.choose(this.options()[this.active()]);
+                } else {
+                    this.close();
+                    this.settle();
+                    (event.target as HTMLElement).blur();
                 }
                 return;
             case 'Escape':

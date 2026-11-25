@@ -4,7 +4,7 @@ import { WorkoutSetupModel } from './step-model';
 
 /**
  * What's open in Create, rather than what's in the workout: which steps show their name box
- * and wheels, the set row open on its wheels, the kind menu and the tooltip, and the
+ * and wheels, the set row open on its wheels, the kind and ⋮ menus and the tooltip, and the
  * steps sliding to their places as they open and close. The form keeps one as `view`.
  */
 export class SetupView {
@@ -25,6 +25,9 @@ export class SetupView {
     /** The key of the step whose kind menu is open, if one is. */
     readonly kindMenuFor = signal<number | null>(null);
 
+    /** The key of the step whose ⋮ menu is open, if one is. */
+    readonly stepMenuFor = signal<number | null>(null);
+
     constructor(
         private readonly model: Signal<WorkoutSetupModel>,
         private readonly host: ElementRef<HTMLElement>,
@@ -39,6 +42,7 @@ export class SetupView {
      */
     reset(expanded: boolean) {
         this.kindMenuFor.set(null);
+        this.stepMenuFor.set(null);
         this.expandedKeys.set(expanded ? this.allKeys() : new Set());
     }
 
@@ -74,14 +78,23 @@ export class SetupView {
     }
 
     toggleKindMenu(key: number) {
+        this.stepMenuFor.set(null);
         this.kindMenuFor.update((open) => (open === key ? null : key));
     }
 
-    /** A click anywhere outside the open kind menu or the tooltip closes it. */
+    toggleStepMenu(key: number) {
+        this.kindMenuFor.set(null);
+        this.stepMenuFor.update((open) => (open === key ? null : key));
+    }
+
+    /** A click anywhere outside the open kind or ⋮ menu, or the tooltip, closes it. */
     closePopups(event: MouseEvent) {
         const target = event.target instanceof Element ? event.target : null;
         if (!target?.closest('app-step-kind-menu')) {
             this.kindMenuFor.set(null);
+        }
+        if (!target?.closest('app-step-menu')) {
+            this.stepMenuFor.set(null);
         }
         if (!target?.closest('.info')) {
             this.infoOpen.set(false);

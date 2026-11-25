@@ -223,7 +223,8 @@ for (const theme of ['dark', 'light'] as const) {
                 await settle();
                 click('.step__kind-option--work');
                 await settle();
-                click('.step:nth-child(3) .step__action');
+                // Its ⋮ menu open, over the steps below
+                click('.step:nth-child(3) app-step-menu > button');
                 await settle();
                 await expectNoViolations();
             });
@@ -268,7 +269,9 @@ for (const theme of ['dark', 'light'] as const) {
                 await open('/setup?editId=' + saved.id);
                 click('.step__toggle');
                 await settle();
-                click('.step__action--delete');
+                click('app-step-menu > button');
+                await settle();
+                click('[id$="-delete"]');
                 await settle();
                 expect(fixture.nativeElement.querySelector('.undo-bar')).not.toBeNull();
                 await expectNoViolations();
@@ -306,7 +309,9 @@ for (const theme of ['dark', 'light'] as const) {
                 await open('/setup?editId=' + saved.id);
                 click('.step__toggle');
                 await settle();
-                click('.step__exercise-details');
+                click('app-step-menu > button');
+                await settle();
+                click('[id$="-details"]');
                 await settle();
                 expect(
                     fixture.nativeElement.querySelector('app-exercise-details-dialog')
@@ -330,7 +335,9 @@ for (const theme of ['dark', 'light'] as const) {
                 await open('/setup?editId=' + saved.id);
                 click('.step__toggle');
                 await settle();
-                click('.step__exercise-swap');
+                click('app-step-menu > button');
+                await settle();
+                click('[id$="-swap"]');
                 await settle();
                 expect(
                     fixture.nativeElement.querySelector('app-swap-exercise-dialog')

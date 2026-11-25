@@ -90,7 +90,7 @@ describe('HistoryComponent', () => {
 
         expect(fixture.nativeElement.querySelector('h2').textContent.trim()).toBe('Progress');
         expect(fixture.nativeElement.textContent).toContain(
-            "Nothing here yet. Do a workout, and how your week is going and what you've done show up here."
+            "Nothing here yet. After your first workout, this is where you'll see what you did, and after the next, the bests you beat."
         );
         const link = fixture.nativeElement.querySelector('a');
         expect(link.textContent.trim()).toBe('Go to workouts');
@@ -697,7 +697,12 @@ describe('HistoryComponent', () => {
             choose('Sprints at 11:00 AM', 'Edit note');
 
             expect(noteBox().value).toBe('Felt strong');
+            // How much room is left, said with the box
+            expect(text('.entry__note-left')).toEqual(['109 characters left']);
+            expect(noteBox().getAttribute('aria-describedby')).toContain('note-left-');
             type('Knee sore');
+            fixture.detectChanges();
+            expect(text('.entry__note-left')).toEqual(['111 characters left']);
             await save();
 
             expect(history.entries()[0].note).toBe('Knee sore');

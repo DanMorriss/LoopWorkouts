@@ -165,6 +165,11 @@ export class HistoryEntryComponent {
     protected readonly noteForm = form(this.noteModel, (note) =>
         maxLength(note.note, MAX_NOTE_LENGTH)
     );
+    /** How much room is left in the note, said under its box, so it doesn't stop unannounced. */
+    protected readonly noteLeft = computed(() => {
+        const left = MAX_NOTE_LENGTH - this.noteModel().note.length;
+        return `${left} ${left === 1 ? 'character' : 'characters'} left`;
+    });
 
     constructor() {
         // Into the note box as it opens, from the menu or straight from the workout summary

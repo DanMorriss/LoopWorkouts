@@ -262,10 +262,7 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
 }
 
 /** The best each of `bests` beat: the bests of the sessions before the one it was set in. */
-function beatenBests(
-    sessions: readonly ExerciseSession[],
-    bests: ExerciseBests
-): ExerciseBests {
+function beatenBests(sessions: readonly ExerciseSession[], bests: ExerciseBests): ExerciseBests {
     const beaten: Record<string, unknown> = {};
     for (const [kind, best] of Object.entries(bests) as [keyof ExerciseBests, { at: number }][]) {
         const before = exerciseBests(sessions.filter((session) => session.startedAt < best.at));

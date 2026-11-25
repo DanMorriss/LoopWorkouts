@@ -55,12 +55,12 @@
 - The note, if any, sits under the sets, in italics with a line down its left.
 - **Pressing a card** (since 2026-11-08) slides in its workout's **Details** (LIB-4, see [library](library.md)), to make it a favourite or make a copy to change, with **‹ Progress** at the top, or a swipe right, sliding back to the log with that run marked, in view and focused, as arriving from the workout summary does. The card is one link, "Details of Sprints", with its exercise links, ⋮ and note box over it, and it dips as it's pressed. A workout deleted since (or an example while the tour shows the page) has no link. Not while its note is being written, so a slip doesn't lose it.
 - The run arrived at from the workout summary is tinted, with a bar down its left, as Workouts marks a workout just saved.
-- With no workouts: "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to workouts** (until 2026-11-08 "Go to your workouts": Workouts has the ready-made ones too now).
+- With no workouts: "Nothing here yet. After your first workout, this is where you'll see what you did, and after the next, the bests you beat." with **Go to workouts** (until 2026-11-08 "Go to your workouts": Workouts has the ready-made ones too now).
 
 ### Notes
 
 - Each entry's **⋮ menu** offers **Add note** (or **Edit note** and **Remove note** once there is one), **Change reps or weight** (with rep sets, see below) and **Delete**. One menu open at a time. It opens above the ⋮ where the tab bar would cover it below, as on the last card (since 2026-11-08).
-- A note is up to **120 characters**, trimmed. Saving an empty note removes it. Cancel keeps the note as it was.
+- A note is up to **120 characters**, trimmed, with how many are left under its box, "98 characters left", which screen readers hear with the box (since 2026-11-25; until then typing just stopped at 120). Saving an empty note removes it. Cancel keeps the note as it was.
 - The workout summary's **Done** opens Progress with that workout highlighted in the log and in view. (`?note=<id>` does the same with its note box open and focused; nothing links there since the note box moved onto the summary.)
 
 ### Changing reps or weight (HIS-6)

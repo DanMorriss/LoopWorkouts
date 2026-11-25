@@ -170,9 +170,10 @@
                 [formField]="noteForm.note"
                 placeholder="e.g. Felt strong"
                 autocomplete="off"
-                [attr.aria-describedby]="'entry-title-' + id()"
+                [attr.aria-describedby]="'entry-title-' + id() + ' note-left-' + id()"
             />
         </label>
+        <p class="entry__note-left" [id]="'note-left-' + id()">{{ noteLeft() }}</p>
         <div class="entry__note-actions">
             <button type="button" class="btn-pill" (click)="cancelEdit()">Cancel</button>
             <button type="submit" class="btn-pill entry__save-note">Save</button>

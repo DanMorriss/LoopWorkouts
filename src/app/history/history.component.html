@@ -6,8 +6,8 @@
         @if (groups().length === 0) {
             <div class="history__empty" data-tour="progress-empty">
                 <p>
-                    Nothing here yet. Do a workout, and how your week is going and what you've done
-                    show up here.
+                    Nothing here yet. After your first workout, this is where you'll see what you
+                    did, and after the next, the bests you beat.
                 </p>
                 <a routerLink="/library" class="btn-pill history__button">Go to workouts</a>
             </div>
@@ -24,12 +24,12 @@
             </p>
 
             <!-- What's improved first: beating your last time is what the app is for -->
-            <app-week-bests class="history__card" />
-
-            <app-time-per-week
+            <app-week-bests
                 class="history__card"
-                [attr.data-tour]="shown.sample() ? 'progress-sample' : 'time-per-week'"
+                [attr.data-tour]="shown.sample() ? 'progress-sample' : 'week-bests'"
             />
+
+            <app-time-per-week class="history__card" />
 
             <app-muscles-this-week class="history__card" />
 

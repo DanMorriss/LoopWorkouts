@@ -150,6 +150,14 @@
     white-space: nowrap;
 }
 
+// Under the note's box: how much room is left in it
+.entry__note-left {
+    margin: 0.25rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+
 // The user's own words, set apart from the figures above with a quote line
 .entry__note {
     margin: 0;

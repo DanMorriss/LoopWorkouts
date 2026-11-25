@@ -975,7 +975,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     3. Sprints: "8:00 AM · 12:30 · 3 rounds", "Back squat: 3 × 10 @ 60 kg", its name a link to `/exercises/back-squat?run=<its id>`, whose ‹ Progress comes back to it. Legs: "ended in round 3 of 5", "Back squat: 10 @ 60, 8 @ 62.5 kg". AMRAP: "7 rounds + 3 in 20:00".
     4. Gym's lines sit under "Warmup", and its superset's under "Superset", as a list of their own.
     5. In pounds, 60 kg shows as 132.5 lb.
-- **Empty state (separate case):** with no history, "Nothing here yet. Do a workout, and how your week is going and what you've done show up here." with **Go to your workouts**.
+- **Empty state (separate case):** with no history, "Nothing here yet. After your first workout, this is where you'll see what you did, and after the next, the bests you beat." with **Go to your workouts**.
 - **In the pack:** a run's line reads "8:00 AM · 3 rounds · 12:30 spent"; the empty state's link is **Go to workouts**.
 
 ### REG-HIS-02 · Notes

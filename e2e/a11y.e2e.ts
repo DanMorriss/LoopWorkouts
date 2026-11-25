@@ -70,6 +70,7 @@ for (const theme of ['dark', 'light'] as const) {
                 }
 
                 await app.goto('/plan');
+                await page.getByRole('tab', { name: /^Thursday/ }).click();
                 await page.getByRole('button', { name: 'Add a workout to Thursday' }).click();
                 await expect(page.getByRole('dialog', { name: 'Plan on Thursday' })).toBeVisible();
                 await noViolations(page, "Plan's Add dialog");
@@ -180,6 +181,7 @@ test.describe('dialogs', () => {
 
     test("REG-A11Y-02 dialogs: Plan's Add", { tag: '@p1' }, async ({ app, page }) => {
         await app.goto('/plan');
+        await page.getByRole('tab', { name: /^Thursday/ }).click();
         const plan = page.getByRole('dialog', { name: 'Plan on Thursday' });
         await checkDialog(
             page,

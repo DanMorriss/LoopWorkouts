@@ -1,7 +1,6 @@
 import { Component, inject, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { MatIconModule } from '@angular/material/icon';
-import { isBuiltIn } from '../../models/exercise';
 import { ExercisePickerComponent } from '../exercise-picker/exercise-picker.component';
 import { SetupExercises } from '../setup-exercises';
 import { StepModel } from '../step-model';
@@ -21,5 +20,4 @@ export class SetupStepExerciseComponent {
 
     protected readonly setup = inject(WorkoutSetupForm);
     protected readonly exercises = inject(SetupExercises);
-    protected readonly isBuiltIn = isBuiltIn;
 }

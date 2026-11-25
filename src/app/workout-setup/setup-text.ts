@@ -1,6 +1,6 @@
 import { computed, Signal } from '@angular/core';
 import { WeightUnit } from '../models/weight';
-import { StepModel, WorkoutSetupModel } from './step-model';
+import { isSkipped, StepModel, WorkoutSetupModel } from './step-model';
 import {
     amountText,
     setRowText,
@@ -47,6 +47,11 @@ export class SetupText {
 
     amountText(step: StepModel): string {
         return amountText(step, this.unit);
+    }
+
+    /** Whether a step is left out of the workout as it is: see `isSkipped()`. */
+    isSkipped(step: StepModel): boolean {
+        return isSkipped(step);
     }
 
     setRowText(step: StepModel, set: number): string {

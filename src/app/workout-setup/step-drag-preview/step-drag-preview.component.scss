@@ -42,10 +42,7 @@
     --step-color: var(--reps);
 }
 
-:host(.superset) {
-    --step-color: var(--accent);
-}
-
+:host(.superset),
 :host(.heading) {
     --step-color: var(--text-muted);
 }

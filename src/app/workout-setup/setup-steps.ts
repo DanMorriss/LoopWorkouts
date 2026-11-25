@@ -242,7 +242,7 @@ export class SetupSteps {
                         : `Step ${this.form.text.stepNumber(index)} is back`
                 );
                 this.focusAfterRender(
-                    `step-${step.key}-${this.form.view.isExpanded(step.key) ? 'delete' : 'toggle'}`
+                    `step-${step.key}-${this.form.view.isExpanded(step.key) ? 'menu' : 'toggle'}`
                 );
             },
             dismissed: () => this.focusAfterDelete(index),
@@ -268,8 +268,8 @@ export class SetupSteps {
 
     /**
      * After step `index` goes, focus the step that took its place, or the one before if it was
-     * last: its delete button, or its open button if it's collapsed (and so has no delete
-     * button). With none left, the Add button.
+     * last: its ⋮, or its open button if it's collapsed (and so has no ⋮). With none left,
+     * the Add button.
      */
     private focusAfterDelete(index: number) {
         const remaining = this.form.model().steps;
@@ -279,7 +279,7 @@ export class SetupSteps {
             return;
         }
         this.focusAfterRender(
-            `step-${next.key}-${this.form.view.isExpanded(next.key) ? 'delete' : 'toggle'}`
+            `step-${next.key}-${this.form.view.isExpanded(next.key) ? 'menu' : 'toggle'}`
         );
     }
 }

@@ -141,7 +141,7 @@ const CREATE_STOPS: readonly TourStop[] = [
         parts: [
             {
                 part: 'step-header',
-                text: 'A workout is steps, done in order. Tap Reps to make one timed or a rest, and drag its handle, or use the arrows, to move it.',
+                text: 'A workout is steps, done in order. Tap Reps to make one timed or a rest, and drag its handle, or use its ⋮ menu, to move it.',
             },
         ],
         text: 'A workout is steps, done in order: reps, a time or a rest.',

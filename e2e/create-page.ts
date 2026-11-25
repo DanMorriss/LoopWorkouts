@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
-import { setWheel } from './workout-page';
+import { frames, setWheel } from './workout-page';
 
 // Create (/setup): a workout's title, its steps (each a row that opens to its fields), its
 // rounds or time limit, and Save and Start. A step's fields are named for the step as its row
@@ -63,6 +63,25 @@ export class CreatePage {
         return this.page.getByRole('button', { name: new RegExp(`^Step ${n}, `) });
     }
 
+    /** Step `n`'s ⋮, on an open step: "Options for Step 1, Jog". */
+    menu(n: number): Locator {
+        return this.page.getByRole('button', { name: new RegExp(`^Options for Step ${n}, `) });
+    }
+
+    /**
+     * An item in step `n`'s ⋮ menu (its exercise's Details, Swap and note, Move up and down,
+     * Delete), with the step and the menu opened to show it.
+     */
+    async option(n: number, name: string | RegExp): Promise<Locator> {
+        await this.open(n);
+        if ((await this.menu(n).getAttribute('aria-expanded')) !== 'true') {
+            await this.menu(n).click();
+        }
+        return this.page
+            .getByRole('group', { name: new RegExp(`^Options for Step ${n}, `) })
+            .getByRole('button', { name });
+    }
+
     /** Opens step `n`, if it's closed (as a saved workout's are, opened to edit). */
     async open(n: number) {
         if ((await this.header(n).getAttribute('aria-expanded')) !== 'true') {
@@ -86,6 +105,10 @@ export class CreatePage {
         const box = this.exercise(n);
         await box.fill(name);
         await box.press('Escape');
+        // Left, it's the exercise named, which can set its amounts (10 reps or 0:30 for a new
+        // step): done now, and drawn, before a wheel's set, rather than as the wheel takes focus
+        await box.blur();
+        await frames(this.page, 2);
     }
 
     get addStep(): Locator {

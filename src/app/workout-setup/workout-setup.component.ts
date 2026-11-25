@@ -187,6 +187,17 @@ export class WorkoutSetupComponent {
         this.leaving?.give(leave);
         this.leaving = null;
     }
+    /**
+     * Enter in a box (a phone's return key) is done typing: the keyboard goes, and the form
+     * isn't submitted, which would start the workout. Buttons still press with Enter.
+     */
+    protected doneTyping(event: Event) {
+        if (event.target instanceof HTMLInputElement) {
+            event.preventDefault();
+            event.target.blur();
+        }
+    }
+
     /** Closing or reloading the tab: the browser's own question, if there are changes. */
     protected warnBeforeUnload(event: BeforeUnloadEvent) {
         if (this.setup.hasChanges()) {

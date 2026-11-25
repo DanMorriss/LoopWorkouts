@@ -174,7 +174,8 @@ test.describe('what Create stops', () => {
     test('REG-BLD-03 what cannot be saved or started', { tag: '@p2' }, async ({ app, page }) => {
         const create = new CreatePage(page);
         await app.goto('/setup');
-        await create.name(1, 'Squats');
+        // Not a built-in exercise, which would start it at 10 reps
+        await create.name(1, 'Wall walk');
         // 0 reps: Start stays disabled, saying why
         await expect(create.start).toBeDisabled();
         await expect(page.getByText('Workout needs a timed step or some reps')).toBeVisible();
@@ -190,8 +191,8 @@ test.describe('what Create stops', () => {
         await create.setKind(2, 'Rest');
         await create.start.click();
         await expect(page).toHaveURL('/workout');
-        const [squats] = await saved(app);
-        expect(stepsOf(squats)).toEqual([expect.objectContaining({ kind: 'work', seconds: 45 })]);
+        const [walks] = await saved(app);
+        expect(stepsOf(walks)).toEqual([expect.objectContaining({ kind: 'work', seconds: 45 })]);
     });
 
     test('REG-BLD-03 a time limit of 00:00 cannot start', { tag: '@p2' }, async ({ app, page }) => {
@@ -221,16 +222,14 @@ test.describe('steps', () => {
         async ({ app, page }) => {
             const create = new CreatePage(page);
             await app.goto(`/setup?editId=abc`);
-            await create.header(3).click();
-            await page.getByRole('button', { name: /^Move Step 3, C up$/ }).click();
+            await (await create.option(3, /^Move Step 3, C up$/)).click();
             await expect(create.header(2)).toHaveAccessibleName(/^Step 2, C, 00:30/);
             await expect(create.header(3)).toHaveAccessibleName(/^Step 3, B, 00:30/);
             await expect
                 .poll(() => app.announcements())
                 .toContainEqual(expect.stringMatching(/^Moved C/));
 
-            await create.header(3).click();
-            await page.getByRole('button', { name: /^Delete Step 3, B/ }).click();
+            await (await create.option(3, /^Delete Step 3, B/)).click();
             await expect(create.kindPill(3)).toHaveCount(0);
             await expect(app.undoBar).toContainText('Deleted Step 3, B, 00:30');
             await expect(app.undo).toBeFocused();
@@ -242,11 +241,7 @@ test.describe('steps', () => {
             await expect(create.header(1)).toHaveAccessibleName(/^Step 1, A, 00:30/);
 
             for (let n = 3; n >= 1; n--) {
-                const remove = page.getByRole('button', { name: new RegExp(`^Delete Step ${n},`) });
-                if ((await remove.count()) === 0) {
-                    await create.header(n).click();
-                }
-                await remove.click();
+                await (await create.option(n, new RegExp(`^Delete Step ${n},`))).click();
             }
             await expect(page.getByText('Add a step to start.')).toBeVisible();
 
@@ -311,7 +306,7 @@ test.describe('sets', () => {
         async ({ app, page }) => {
             const create = new CreatePage(page);
             await app.goto('/setup');
-            await page.getByRole('button', { name: /^Delete Step 1/ }).click();
+            await (await create.option(1, /^Delete Step 1/)).click();
             await expect(page.getByText('Add a step to start.')).toBeVisible();
             await expect(create.addStep).toBeFocused();
         }
@@ -414,18 +409,19 @@ test.describe('picking an exercise', () => {
             );
             await options.first().click();
             await expect(box).toHaveValue('Back squat');
-            await expect(create.stepRow(1).getByText('Built-in exercise')).toBeVisible();
+            // Picked, a new step starts at 10 reps rather than 0, which would be skipped
+            await expect(create.field(1, 'Reps')).toHaveAttribute('aria-valuenow', '10');
             await setWheel(create.field(1, 'Reps'), 10);
             await setWheel(create.field(1, 'Weight (kg)'), 60, 0.5);
 
-            const details = page.getByRole('button', { name: 'Details of Back squat' });
-            await details.click();
+            // Its details and swap are in the step's ⋮ menu, and focus comes back to the ⋮
+            await (await create.option(1, 'Details of Back squat')).click();
             const dialog = page.getByRole('dialog', { name: 'Back squat' });
             await expect(dialog).toBeVisible();
             await dialog.getByRole('button', { name: 'Back' }).click();
-            await expect(details).toBeFocused();
+            await expect(create.menu(1)).toBeFocused();
 
-            await page.getByRole('button', { name: 'Swap Back squat' }).click();
+            await (await create.option(1, 'Swap Back squat')).click();
             const swap = page.getByRole('dialog', { name: 'Swap Back squat' });
             await swap.getByRole('searchbox', { name: 'Search exercises' }).fill('goblet');
             await swap.getByRole('button', { name: /^Goblet squat/ }).click();

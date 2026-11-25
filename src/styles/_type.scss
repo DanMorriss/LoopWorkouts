@@ -46,6 +46,16 @@
     line-height: 1.5;
 }
 
+// A section's heading on a long page, as You's Sync and Profile: the Title role, in the
+// reading face, so it reads as a step above a field's label
+@mixin section-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-strong);
+}
+
 // A dialog's title
 @mixin dialog-title {
     margin: 0 0 0.5rem;

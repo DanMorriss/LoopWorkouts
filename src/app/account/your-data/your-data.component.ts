@@ -1,7 +1,5 @@
 import { Component, inject, input, signal } from '@angular/core';
 import { BackupService, ImportResult } from '../../shared/backup/backup.service';
-import { planPrompt } from '../../shared/backup/plan-prompt';
-import { ClearDeviceComponent } from '../../shared/components/clear-device/clear-device.component';
 import { UndoOffer, UndoService } from '../../shared/undo/undo.service';
 import { counted } from '../../shared/format-count';
 import { injectFocusAfterRender } from '../../shared/focus-after-render';
@@ -11,17 +9,17 @@ import {
 } from './paste-plan-dialog/paste-plan-dialog.component';
 
 /**
- * Account → Your data: Export backup and Import backup (SYN-1, SYN-2), Copy AI prompt and Paste
- * plan for bringing in a plan (SYN-6), and Clear this device (SYN-9).
+ * You → Your data: Export backup and Import backup (SYN-1, SYN-2), and Bring in a plan
+ * (SYN-6). Clear this device is under Leaving.
  */
 @Component({
     selector: 'app-your-data',
-    imports: [ClearDeviceComponent, PastePlanDialogComponent],
+    imports: [PastePlanDialogComponent],
     templateUrl: './your-data.component.html',
     styleUrl: './your-data.component.scss',
 })
 export class YourDataComponent {
-    /** Someone is signed in, so clearing the device signs it out too. */
+    /** Someone is signed in, so what's saved is with their account too. */
     readonly signedIn = input(false);
 
     private readonly backup = inject(BackupService);
@@ -64,16 +62,6 @@ export class YourDataComponent {
         this.status.set(message);
         // In the bar at the bottom too, where it's seen on a phone; the line above reads it out
         this.undo.notify(message, { quiet: true, link: importLink(result) });
-    }
-
-    /** Copies the prompt for turning a plan into a file to import (see `planPrompt()`). */
-    protected async copyPlanPrompt() {
-        try {
-            await navigator.clipboard.writeText(planPrompt());
-            this.status.set('Prompt copied. Paste it into an AI chat, then add your plan.');
-        } catch {
-            this.status.set("The prompt couldn't be copied. Try again, or another browser.");
-        }
     }
 }
 

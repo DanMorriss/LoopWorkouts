@@ -13,13 +13,13 @@
                 inputId="account-code"
                 labelledBy="account-code-label"
                 [formField]="codeForm.code"
-                [hasError]="!!codeError()"
-                [describedBy]="codeError() ? 'account-code-error' : null"
+                [hasError]="codeInvalid()"
+                [describedBy]="codeMessage() ? 'account-code-error' : null"
                 (complete)="enterCode()"
             />
         </div>
-        @if (codeError(); as error) {
-            <p id="account-code-error" class="sign-in__error">{{ error }}</p>
+        @if (codeMessage(); as error) {
+            <p id="account-code-error" class="sign-in__error" role="alert">{{ error }}</p>
         }
         <div class="sign-in__actions">
             <button type="submit" class="btn-pill" [disabled]="busy()">Sign in</button>
@@ -32,9 +32,6 @@
 } @else {
     @if (intro(); as why) {
         <p class="sign-in__hint" id="account-why">{{ why }}</p>
-    }
-    @if (account.signInProblem(); as problem) {
-        <p class="sign-in__error" role="alert">{{ problem }}</p>
     }
     <!-- Google and Apple (SYN-7), in their own colours and with their marks,
          as their guidelines ask -->
@@ -94,6 +91,9 @@
             </button>
         }
     </div>
+    @if (providerProblem(); as problem) {
+        <p class="sign-in__error" role="alert">{{ problem }}</p>
+    }
     <p class="sign-in__or" aria-hidden="true">or</p>
     <form class="sign-in__form" novalidate (submit)="sendCode($event)">
         <div class="picker-field">
@@ -119,10 +119,11 @@
                 </button>
             </div>
         </div>
-        @if (emailError(); as error) {
-            <p id="account-email-error" class="sign-in__error">{{ error }}</p>
+        @if (emailMessage(); as error) {
+            <p id="account-email-error" class="sign-in__error" role="alert">{{ error }}</p>
         }
     </form>
 }
 
+<!-- What it's doing, read out; what went wrong is in red under the part it's about -->
 <p class="sign-in__hint sign-in__status" role="status">{{ message() }}</p>

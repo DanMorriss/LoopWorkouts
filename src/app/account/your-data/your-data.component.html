@@ -1,6 +1,7 @@
 <p class="data__hint" id="data-hint">
-    Your workouts and history are saved on this device, and with your account if you sign in. Export
-    a backup to keep a copy of your own.
+    Your workouts and history are saved on this device{{
+        signedIn() ? ' and with your account' : ', and with your account if you sign in'
+    }}. Export a backup to keep a copy of your own.
 </p>
 <div class="data__actions">
     <button type="button" class="btn-pill" aria-describedby="data-hint" (click)="exportBackup()">
@@ -26,13 +27,9 @@
     />
 </div>
 <p class="data__hint data__gap" id="plan-hint">
-    Have a plan from a coach, a book or a spreadsheet? Copy this prompt into an AI chat and add your
-    plan, then paste what it writes with Paste plan.
+    Have a plan from a coach, a book or a spreadsheet? An AI chat can turn it into workouts here.
 </p>
 <div class="data__actions">
-    <button type="button" class="btn-pill" aria-describedby="plan-hint" (click)="copyPlanPrompt()">
-        Copy AI prompt
-    </button>
     <button
         type="button"
         id="paste-plan"
@@ -40,7 +37,7 @@
         aria-describedby="plan-hint"
         (click)="pasting.set(true)"
     >
-        Paste plan
+        Bring in a plan
     </button>
 </div>
 @if (pasting()) {
@@ -51,12 +48,3 @@
     />
 }
 <p class="data__hint data__status" role="status">{{ status() }}</p>
-
-<p class="data__hint data__gap">
-    Done with this device, on a shared computer say? Clear your workouts, history and settings from
-    it.
-    @if (signedIn()) {
-        That signs this device out too; your account keeps what's in it.
-    }
-</p>
-<app-clear-device class="data__clear" />

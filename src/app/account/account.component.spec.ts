@@ -64,6 +64,12 @@ describe('AccountComponent', () => {
             .map((region) => region.textContent!.trim())
             .filter(Boolean)
             .join(' ');
+    /** What's gone wrong, in red under what it's about, read out as it appears. */
+    const alert = () =>
+        [...element.querySelectorAll('[role="alert"]')]
+            .map((region) => region.textContent!.trim())
+            .filter(Boolean)
+            .join(' ');
     /** A button by its text, or its name when it's an icon. */
     const button = (label: string) =>
         [...element.querySelectorAll('button')].find(
@@ -127,6 +133,14 @@ describe('AccountComponent', () => {
             expect(element.querySelector('#account-email-error')).toBeNull();
         });
 
+        it('offers only Clear this device under Leaving, which signs nothing out', () => {
+            const leaving = element.querySelector('app-leaving')!;
+            expect(leaving.querySelector('app-clear-device')).not.toBeNull();
+            expect(leaving.textContent).not.toContain('That signs this device out too');
+            expect(button('Sign out')).toBeUndefined();
+            expect(button('Delete account')).toBeUndefined();
+        });
+
         it("says what's wrong with the email, on the field, and doesn't send", async () => {
             await press('Email me a sign-in code');
 
@@ -186,7 +200,8 @@ describe('AccountComponent', () => {
 
             await press('Continue with Google');
 
-            expect(status()).toBe("Couldn't reach Google. Check your connection and try again.");
+            expect(alert()).toBe("Couldn't reach Google. Check your connection and try again.");
+            expect(status()).toBe('');
             expect(button('Continue with Google').disabled).toBe(false);
         });
 
@@ -232,9 +247,14 @@ describe('AccountComponent', () => {
 
             client.auth.verifyOtp.mockResolvedValueOnce({ data: {}, error: { status: 403 } });
             await type('account-code', '654321');
-            expect(status()).toBe(
+            // Under the code, which is marked wrong
+            expect(element.querySelector('#account-code-error')!.textContent!.trim()).toBe(
                 "That code didn't work: it may be wrong, or expired. Check it, or send another code."
             );
+            expect(element.querySelector('#account-code')!.getAttribute('aria-invalid')).toBe(
+                'true'
+            );
+            expect(status()).toBe('');
             expect(navigate).not.toHaveBeenCalled();
 
             // Sign in tries the same code again
@@ -255,13 +275,17 @@ describe('AccountComponent', () => {
             await type('account-email', 'me@example.com');
             client.auth.signInWithOtp.mockResolvedValueOnce({ data: {}, error: { status: 429 } });
             await press('Email me a sign-in code');
-            expect(status()).toBe('Too many sign-in emails for now. Wait a while, then try again.');
+            // Under the email
+            expect(element.querySelector('#account-email-error')!.textContent!.trim()).toBe(
+                'Too many sign-in emails for now. Wait a while, then try again.'
+            );
 
             client.auth.signInWithOtp.mockResolvedValueOnce({ data: {}, error: { status: 500 } });
             await press('Email me a sign-in code');
-            expect(status()).toBe(
+            expect(alert()).toBe(
                 "The email couldn't be sent. Check your connection and try again."
             );
+            expect(status()).toBe('');
             expect(element.querySelector('#account-code')).toBeNull();
         });
 
@@ -275,7 +299,7 @@ describe('AccountComponent', () => {
                 },
             });
             await press('Email me a sign-in code');
-            expect(status()).toBe(
+            expect(alert()).toBe(
                 'Too many sign-in emails for now. Wait 42 seconds, then try again.'
             );
         });
@@ -337,8 +361,12 @@ describe('AccountComponent', () => {
 
                 resend().click();
                 await settle();
-                expect(status()).toBe(
+                expect(element.querySelector('#account-code-error')!.textContent!.trim()).toBe(
                     'Too many sign-in emails for now. Wait 90 seconds, then try again.'
+                );
+                // Not the code's fault, so it isn't marked wrong
+                expect(element.querySelector('#account-code')!.getAttribute('aria-invalid')).toBe(
+                    'false'
                 );
                 expect(resend().textContent!.trim()).toBe('Send another code in 01:30');
                 expect(document.activeElement!.id).toBe('account-code');
@@ -368,6 +396,10 @@ describe('AccountComponent', () => {
         });
 
         it('says who, what syncs, and that clearing the device signs it out', () => {
+            // Under Sync only what's kept; signing out and deleting are at the foot, in Leaving
+            const leaving = element.querySelector('app-leaving')!;
+            expect(leaving.contains(button('Sign out')!)).toBe(true);
+            expect(leaving.contains(button('Delete account')!)).toBe(true);
             expect(text()).toContain('Signed in as me@example.com.');
             expect(text()).toContain('Other settings stay a choice for each device.');
             expect(text()).toContain('That signs this device out too');
@@ -462,9 +494,11 @@ describe('AccountComponent', () => {
             await press('Delete my account');
 
             expect(clear).not.toHaveBeenCalled();
-            expect(status()).toBe(
+            expect(alert()).toBe(
                 "Your account couldn't be deleted. Check your connection and try again."
             );
+            // The warning closes, focus back on Delete account to try again
+            expect(document.activeElement!.id).toBe('account-delete');
         });
 
         it("says when the account couldn't be deleted", async () => {
@@ -472,7 +506,7 @@ describe('AccountComponent', () => {
             await press('Delete account');
             await press('Delete my account');
 
-            expect(status()).toBe(
+            expect(alert()).toBe(
                 "Your account couldn't be deleted. Check your connection and try again."
             );
             expect(text()).toContain('Signed in as me@example.com.');
@@ -505,55 +539,78 @@ describe('AccountComponent', () => {
             notesSwitch().click();
             await settle();
 
-            expect(status()).toContain("That couldn't be saved.");
+            expect(alert()).toContain("That couldn't be saved.");
             expect(notesSwitch().getAttribute('aria-checked')).toBe('false');
         });
     });
 
     describe('keeping the body weight with the account (CAL-6)', () => {
-        const box = () => element.querySelector<HTMLInputElement>('#body-weight-consent');
+        const weightSwitch = () =>
+            element.querySelector<HTMLButtonElement>('[aria-labelledby="keep-body-weight-label"]');
         const hint = () => element.querySelector('#body-weight-hint')!.textContent!.trim();
         async function toggle() {
-            box()!.click();
+            weightSwitch()!.click();
+            await settle();
+        }
+        /** Signed in, with a body weight given on Profile. */
+        async function withWeight() {
+            await create('me@example.com');
+            TestBed.inject(SettingsStore).update({ bodyWeight: 80 });
             await settle();
         }
 
         it("isn't offered signed out", async () => {
             await create();
-            expect(box()).toBeNull();
+            expect(weightSwitch()).toBeNull();
             expect(hint()).toBe('For calories burnt. Kept on this device only');
         });
 
-        it('signed in, asks for consent, saves it when ticked, and withdraws it unticked', async () => {
+        it("isn't offered until there's a weight to keep", async () => {
             await create('me@example.com');
             expect(client.rpc).toHaveBeenCalledWith('my_body_weight_consent');
-            expect(box()!.checked).toBe(false);
-            expect(box()!.closest('label')!.textContent).toContain(
-                'I agree that my body weight, which is health data, is kept with my account'
-            );
+            expect(weightSwitch()).toBeNull();
+        });
+
+        it('is under Sync, beside keeping notes, switched off until agreed', async () => {
+            await withWeight();
+            const sync = element.querySelector('section[aria-labelledby="sync-heading"]')!;
+            expect(sync.contains(weightSwitch())).toBe(true);
+            expect(weightSwitch()!.getAttribute('aria-checked')).toBe('false');
+            expect(text()).toContain("It's health data, so it stays on this device.");
+        });
+
+        it('saves consent when switched on, and withdraws it switched off', async () => {
+            await withWeight();
 
             await toggle();
             expect(client.rpc).toHaveBeenCalledWith('give_body_weight_consent', {
                 notice_date: '2026-11-21',
             });
-            expect(box()!.checked).toBe(true);
+            expect(weightSwitch()!.getAttribute('aria-checked')).toBe('true');
             expect(hint()).toBe('For calories burnt. Kept with your account');
-            expect(status()).toContain('Agreed on 14 November 2026.');
+            expect(text()).toContain('Agreed on 14 November 2026.');
 
             await toggle();
             expect(client.rpc).toHaveBeenCalledWith('withdraw_body_weight_consent');
-            expect(box()!.checked).toBe(false);
+            expect(weightSwitch()!.getAttribute('aria-checked')).toBe('false');
             expect(hint()).toBe('For calories burnt. Kept on this device only');
         });
 
-        it("says when it couldn't be saved, leaving the tick as it was", async () => {
-            await create('me@example.com');
+        it("says when it couldn't be saved, putting the switch back", async () => {
+            await withWeight();
             client.rpc.mockResolvedValueOnce({ data: null, error: { message: 'down' } });
 
             await toggle();
 
-            expect(box()!.checked).toBe(false);
-            expect(status()).toContain("That couldn't be saved.");
+            expect(weightSwitch()!.getAttribute('aria-checked')).toBe('false');
+            expect(alert()).toContain("That couldn't be saved.");
+        });
+
+        it('is still offered with no weight, while the account keeps one', async () => {
+            await create('me@example.com', {
+                weightConsent: { at: Date.UTC(2026, 10, 14), notice: '2026-11-14' },
+            });
+            expect(weightSwitch()!.getAttribute('aria-checked')).toBe('true');
         });
 
         it('signing out removes a body weight the account kept, as its name', async () => {

@@ -20,88 +20,7 @@
                         sign in on. Other settings stay a choice for each device.
                     </p>
                     <p class="account__text account__sync">{{ syncText() }}</p>
-                    <app-notes-consent />
-                    @if (confirmingDelete()) {
-                        <div
-                            class="account__ask"
-                            role="group"
-                            aria-labelledby="account-delete-warning"
-                        >
-                            <p class="account__warning" id="account-delete-warning" tabindex="-1">
-                                This deletes your account and everything of yours, on the server and
-                                on this device. It can't be undone. To keep a copy, export a backup
-                                first.
-                            </p>
-                            <div class="account__actions">
-                                <button
-                                    type="button"
-                                    class="btn-pill btn-pill--danger"
-                                    [disabled]="busy()"
-                                    (click)="deleteAccount()"
-                                >
-                                    Delete my account
-                                </button>
-                                <button type="button" class="btn-pill" (click)="cancelDelete()">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    } @else if (confirmingSignOut()) {
-                        <div
-                            class="account__ask"
-                            role="group"
-                            aria-labelledby="account-sign-out-warning"
-                        >
-                            <p class="account__warning" id="account-sign-out-warning" tabindex="-1">
-                                @if (notesKept()) {
-                                    Some changes on this device haven't synced, maybe because you're
-                                    offline. Signing out removes them from this device, so they'd be
-                                    lost.
-                                } @else {
-                                    Your notes aren't kept with your account, so signing out removes
-                                    them from this device. To keep them, turn on Keep notes with my
-                                    account first.
-                                }
-                            </p>
-                            <div class="account__actions">
-                                <button
-                                    type="button"
-                                    class="btn-pill btn-pill--danger"
-                                    [disabled]="busy()"
-                                    (click)="signOut(true)"
-                                >
-                                    Sign out anyway
-                                </button>
-                                <button type="button" class="btn-pill" (click)="cancelSignOut()">
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    } @else {
-                        <p class="account__hint account__sign-out-hint">
-                            Signing out removes your workouts and history from this device. Your
-                            account keeps them, ready for when you sign in again.
-                        </p>
-                        <div class="account__actions">
-                            <button
-                                type="button"
-                                class="btn-pill"
-                                id="account-sign-out"
-                                [disabled]="busy()"
-                                (click)="signOut()"
-                            >
-                                Sign out
-                            </button>
-                            <button
-                                type="button"
-                                class="btn-pill btn-pill--danger"
-                                id="account-delete"
-                                (click)="askToDelete()"
-                            >
-                                Delete account
-                            </button>
-                        </div>
-                    }
+                    <app-kept-with-account />
                 }
                 @case ('signed-out') {
                     <app-sign-in
@@ -110,7 +29,6 @@
                     />
                 }
             }
-            <p class="account__hint account__status" role="status">{{ message() }}</p>
         </section>
 
         <section class="account__section" aria-labelledby="profile-heading">
@@ -118,42 +36,50 @@
             <app-profile />
         </section>
 
-        <!-- This device's own choices, which don't sync: they slide in over Account -->
-        <a
-            href="/settings"
-            class="account__link"
-            aria-describedby="settings-link-hint"
-            (click)="slide.follow($event, '/settings', 'in')"
-        >
-            <mat-icon class="account__link-icon" aria-hidden="true">settings</mat-icon>
-            <span class="account__link-text">
-                <span class="account__link-name">Settings</span>
-                <span class="account__hint" id="settings-link-hint">
-                    Theme, alarms and sounds
+        <section class="account__section" aria-labelledby="more-heading">
+            <h3 class="account__heading" id="more-heading">Settings and help</h3>
+            <!-- This device's own choices, which don't sync: they slide in over Account -->
+            <a
+                href="/settings"
+                class="account__link"
+                aria-describedby="settings-link-hint"
+                (click)="slide.follow($event, '/settings', 'in')"
+            >
+                <mat-icon class="account__link-icon" aria-hidden="true">settings</mat-icon>
+                <span class="account__link-text">
+                    <span class="account__link-name">Settings</span>
+                    <span class="account__hint" id="settings-link-hint">
+                        Theme, alarms and sounds
+                    </span>
                 </span>
-            </span>
-            <mat-icon class="account__link-chevron" aria-hidden="true">chevron_right</mat-icon>
-        </a>
-        <!-- The questions people ask (NAV-7), sliding in as Settings does -->
-        <a
-            href="/help"
-            class="account__link account__link--next"
-            aria-describedby="help-link-hint"
-            (click)="slide.follow($event, '/help', 'in')"
-        >
-            <mat-icon class="account__link-icon icon-outline" aria-hidden="true">help</mat-icon>
-            <span class="account__link-text">
-                <span class="account__link-name">Help</span>
-                <span class="account__hint" id="help-link-hint">
-                    Questions and answers, from planning to sound
+                <mat-icon class="account__link-chevron" aria-hidden="true">chevron_right</mat-icon>
+            </a>
+            <!-- The questions people ask (NAV-7), sliding in as Settings does -->
+            <a
+                href="/help"
+                class="account__link account__link--next"
+                aria-describedby="help-link-hint"
+                (click)="slide.follow($event, '/help', 'in')"
+            >
+                <mat-icon class="account__link-icon icon-outline" aria-hidden="true">help</mat-icon>
+                <span class="account__link-text">
+                    <span class="account__link-name">Help</span>
+                    <span class="account__hint" id="help-link-hint">
+                        Questions and answers, from planning to sound
+                    </span>
                 </span>
-            </span>
-            <mat-icon class="account__link-chevron" aria-hidden="true">chevron_right</mat-icon>
-        </a>
+                <mat-icon class="account__link-chevron" aria-hidden="true">chevron_right</mat-icon>
+            </a>
+        </section>
 
         <section class="account__section" aria-labelledby="data-heading">
             <h3 class="account__heading" id="data-heading">Your data</h3>
             <app-your-data [signedIn]="account.state().status === 'signed-in'" />
+        </section>
+
+        <section class="account__section" aria-labelledby="leaving-heading">
+            <h3 class="account__heading" id="leaving-heading">Leaving</h3>
+            <app-leaving />
         </section>
 
         <!-- The ∞ logo lives here now the app opens on the library -->

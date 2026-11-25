@@ -6,7 +6,6 @@ import { MAX_NAME_LENGTH } from '../../models/profile';
 import { WeightUnit } from '../../models/weight';
 import { WeightFieldComponent } from '../../shared/components/weight-field/weight-field.component';
 import { ConsentService } from '../consent.service';
-import { BodyWeightConsentComponent } from './body-weight-consent.component';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WeeklySetsFieldComponent } from '../../shared/components/weekly-sets-field/weekly-sets-field.component';
 
@@ -21,7 +20,7 @@ import { WeeklySetsFieldComponent } from '../../shared/components/weekly-sets-fi
  */
 @Component({
     selector: 'app-profile',
-    imports: [BodyWeightConsentComponent, WeeklySetsFieldComponent, WeightFieldComponent],
+    imports: [WeeklySetsFieldComponent, WeightFieldComponent],
     template: `
         <!-- Saved as it's left, trimmed -->
         <label class="picker-field profile__field">
@@ -140,12 +139,11 @@ import { WeeklySetsFieldComponent } from '../../shared/components/weekly-sets-fi
             </p>
         }
 
-        <!-- Health data, so it syncs only with its own consent, given below -->
+        <!-- Health data, so it syncs only with its own consent, given under Sync -->
         <app-weight-field class="profile__weight" kind="body" describedBy="body-weight-hint">
             <span class="profile__name">Body weight</span>
         </app-weight-field>
         <p class="profile__hint" id="body-weight-hint">{{ weightHint() }}</p>
-        <app-body-weight-consent />
     `,
     styles: `
         :host {
@@ -208,7 +206,7 @@ export class ProfileComponent {
     protected readonly chosenGoalIndex = computed(() =>
         this.goals.findIndex((option) => option.value === this.settings.trainingGoal())
     );
-    protected readonly goalHint = `Choosing one sets the sets a week below to suit it: ${DEFAULT_WEEKLY_SETS.muscle} for Muscle, ${DEFAULT_WEEKLY_SETS.fitness} for Fitness`;
+    protected readonly goalHint = `Choosing one changes Sets a week per muscle to suit it: ${DEFAULT_WEEKLY_SETS.muscle} for Muscle, ${DEFAULT_WEEKLY_SETS.fitness} for Fitness`;
 
     /** A kettlebell among your equipment, or a weight for one already known. */
     protected readonly hasKettlebell = computed(

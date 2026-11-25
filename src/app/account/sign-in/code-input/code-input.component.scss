@@ -19,3 +19,8 @@
     font-variant-numeric: tabular-nums;
     caret-color: var(--accent);
 }
+
+// A code that's wrong, or turned down, edged in red as well as said in words under it
+.code-input__digit[aria-invalid='true'] {
+    border-color: var(--danger);
+}

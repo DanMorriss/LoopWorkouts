@@ -1280,7 +1280,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
 - **Steps:** You → **Export backup**; catch the download.
 - **Expected:** A file `loop-workouts-2026-11-11.json`; "Backup saved as loop-workouts-2026-11-11.json." under the buttons; the JSON has `app`, `version`, both workouts, all 5 history entries (the history is read from IndexedDB, so this proves the wait for it), the deletion, the note, the hidden exercise, the plan and the settings.
 
-### REG-DATA-02 · Import a backup, the AI prompt and Paste plan
+### REG-DATA-02 · Import a backup, and Bring in a plan
 
 - **Stories:** SYN-2, SYN-6 · **Priority:** P1
 - **Preconditions:** `guest()`, Dark theme, workout "Legs". Fixture files: (a) a backup with 2 workouts not here and `settings.theme: "light"`; (b) a text file; (c) `{"app":"something-else"}`; (d) a backup with `version` above the app's; (e) a hand-written file with workout "Legs 2" (8 reps "Back squat", 30 s "Sled push"), no ids, no history, and an exercise "Sled push".
@@ -1289,15 +1289,15 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     2. Press **View workouts** in the bar.
     3. Import (b), (c), (d).
     4. Import (e) twice.
-    5. Press **Copy AI prompt**; read the clipboard.
-    6. Press **Paste plan**; paste `{"app": "something-else"}` and press **Import**; then paste a whole reply (words, a code block with workout "Legs 3", "Notes:" after) and press **Import**.
+    5. Press **Bring in a plan**, then **Copy AI prompt**; read the clipboard.
+    6. In step 2, paste `{"app": "something-else"}` and press **Import**; then paste a whole reply (words, a code block with workout "Legs 3", "Notes:" after) and press **Import**.
 - **Expected:**
     1. "Added 2 workouts." under the buttons and in the bar at the bottom, with **View workouts**; the theme stays Dark.
     2. Workouts opens, with the two new ones; the bar goes.
     3. (b) "That file couldn't be read. Is it a Loop Workouts backup?"; (c) "That file isn't a Loop Workouts backup."; (d) "That backup is from a newer version of Loop Workouts. Update the app and try again." Nothing changes.
     4. "Legs 2" is added with step 1 linked to `builtin:back-squat` and step 2 to a new own exercise "Sled push"; the second import adds nothing.
-    5. "Prompt copied. Paste it into an AI chat, then add your plan."; the clipboard text ends with "MY PLAN" and names built-in exercises.
-    6. The box has focus; the first says "That isn't a plan for Loop Workouts." in the dialog, which stays; the second closes it, "Added 1 workout." shows, focus is on Paste plan and "Legs 3" is saved.
+    5. Copy AI prompt has focus as the dialog opens; "Copied. Paste it into an AI chat, then add your plan." in the dialog; the clipboard text ends with "MY PLAN" and names built-in exercises.
+    6. The first says "That isn't a plan for Loop Workouts." in the dialog, which stays; the second closes it, "Added 1 workout." shows, focus is on Bring in a plan and "Legs 3" is saved.
 - **In the pack:** files are picked through the Import backup's file chooser, made in the test.
 
 ### REG-DATA-03 · Clear this device
@@ -1370,7 +1370,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     1. The signed-out text, **Continue with Google** (no Apple button), "or", Email. "Enter your email address." on the field, focus on it; no request sent.
     2. "That isn't an email address. Check it and try again."; no request.
     3. "Too many sign-in emails for now. Wait a while, then try again."
-    4. "The email couldn't be sent. Check your connection and try again."
+    4. "The email couldn't be sent. Check your connection and try again.", an alert under the email
 
 ### REG-ACC-02 · Signing in with the code
 
@@ -1387,7 +1387,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     1. The request's email is trimmed; "We've sent a 6-digit code to me@example.com. Type it here to sign in." with focus on it; Code, Sign in, **Use another email**, and "Didn't get it? Send another code in 60s" (off, counting down).
     2. It's sent again (a second `otp` call); "We've sent another code to me@example.com."; focus on the code's first box; the button's off again.
     3. "The code is the 6 digits in the email, e.g. 123456."
-    4. Each digit moves on to the next box, ending on Digit 6 of 6, and the code is sent at once, without pressing Sign in (one `verify` call); "That code didn't work: it may be wrong, or expired. Check it, or send another code."
+    4. Each digit moves on to the next box, ending on Digit 6 of 6, and the code is sent at once, without pressing Sign in (one `verify` call); "That code didn't work: it may be wrong, or expired. Check it, or send another code.", an alert under the code, whose boxes are `aria-invalid`
     5. The code is sent as 123456; Today opens with "Signed in as me@example.com." in the bar; `pull_records` then `push_records` are called, and the push includes Legs.
     6. "Signed in as me@example.com.", what syncs, and "Synced at <time>.", **Sign out** and **Delete account**.
 
@@ -1445,7 +1445,7 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
     5. With `pull_records` answering 500, reload You.
 - **Expected:**
     1. The warning ("This deletes your account and everything of yours, …") with focus on it; Cancel puts focus back on Delete account and calls nothing.
-    2. "Your account couldn't be deleted. Check your connection and try again.", still signed in.
+    2. The warning closes, and "Your account couldn't be deleted. Check your connection and try again." is an alert, with focus back on Delete account, still signed in (Delete account then opens the warning again).
     3. `delete_my_account` is called; the app reloads saying "Your account has been deleted, and its data removed from this device."; settings kept.
     4. "You're offline: it'll sync when you're back online."; back online, a `push_records` call carries the edited workout.
     5. "It couldn't sync just now, and will try again in a minute."
@@ -1639,10 +1639,10 @@ How to stub: `page.route('https://cpgacyzlfyskifzhkotu.supabase.co/**', handler)
 - **Stories:** CAL-6 · **Priority:** P2
 - **Preconditions:** signed in (`signedIn()`), with FakeSupabase; a body weight of 80 kg, dated.
 - **Steps:**
-    1. Open You. Tick "I agree that my body weight, which is health data, is kept with my account".
-    2. Untick it.
+    1. Open You. Under Sync, switch on **Keep my body weight with my account**.
+    2. Switch it off.
 - **Expected:**
-    1. Unticked to begin with, with the hint "For calories burnt. Kept on this device only". Ticked, `give_body_weight_consent` is called with the notice's date, it says "Agreed on …", the hint says "Kept with your account", and a `body-weight` record is pushed.
+    1. Off to begin with, with Profile's hint "For calories burnt. Kept on this device only". On, `give_body_weight_consent` is called with the notice's date, it says "Agreed on …", the hint says "Kept with your account", and a `body-weight` record is pushed.
     2. `withdraw_body_weight_consent` is called, the hint is back to "Kept on this device only", and the box still has 80.
 
 ---

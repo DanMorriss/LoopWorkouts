@@ -33,27 +33,30 @@ describe('YourDataComponent', () => {
 
     const text = () => (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
 
-    it('says clearing the device signs it out, only while signed in', () => {
+    it('says where your data is saved, with the account only while signed in', () => {
         create();
-        expect(text()).toContain('Clear your workouts, history and settings from it.');
-        expect(text()).not.toContain('That signs this device out too');
+        expect(text()).toContain(
+            'saved on this device, and with your account if you sign in. Export a backup'
+        );
         fixture.destroy();
 
         create(true);
-        expect(text()).toContain('That signs this device out too');
-        expect(fixture.nativeElement.querySelector('app-clear-device')).not.toBeNull();
+        expect(text()).toContain('saved on this device and with your account. Export a backup');
     });
 
     describe('backup', () => {
         const button = (label: string) =>
             Array.from(
                 fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>
-            ).find((b) => b.textContent!.trim() === label)!;
+            ).find(
+                // Its words, after any icon's name
+                (b) => b.textContent!.replace(/^\s*[a-z_]+\s+(?=[A-Z])/, '').trim() === label
+            )!;
         const fileInput = () =>
             fixture.nativeElement.querySelector('input[type="file"]') as HTMLInputElement;
         const status = () =>
             (
-                fixture.nativeElement.querySelector('[role="status"]') as HTMLElement
+                fixture.nativeElement.querySelector('.data__status') as HTMLElement
             ).textContent!.trim();
 
         it('exports a backup and says what it was saved as', async () => {
@@ -117,25 +120,35 @@ describe('YourDataComponent', () => {
             });
         });
 
-        it('copies the prompt for bringing in a plan with AI, and says so', async () => {
+        /** What Bring in a plan's dialog has said, e.g. that the prompt was copied. */
+        const dialogStatus = () =>
+            (
+                fixture.nativeElement.querySelector(
+                    'app-paste-plan-dialog [role="status"]'
+                ) as HTMLElement
+            ).textContent!.trim();
+
+        it('copies the prompt for bringing in a plan with AI, as its first step', async () => {
             create();
             const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
 
+            button('Bring in a plan').click();
+            fixture.detectChanges();
             button('Copy AI prompt').click();
             await fixture.whenStable();
             fixture.detectChanges();
 
             expect(writeText).toHaveBeenCalledWith(planPrompt());
-            expect(status()).toBe('Prompt copied. Paste it into an AI chat, then add your plan.');
+            expect(dialogStatus()).toBe('Copied. Paste it into an AI chat, then add your plan.');
         });
 
-        it('imports a pasted plan, closes the dialog and puts focus back on Paste plan', async () => {
+        it('imports a pasted plan, closes the dialog and puts focus back on its button', async () => {
             create();
             const importSpy = vi
                 .spyOn(TestBed.inject(BackupService), 'import')
                 .mockResolvedValue({ ...NOTHING, ok: true, workoutsAdded: 3 });
 
-            button('Paste plan').click();
+            button('Bring in a plan').click();
             fixture.detectChanges();
             const box = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
             box.value = 'Here it is:\n```json\n{"app":"Loop Workouts"}\n```\nNotes: none';
@@ -155,7 +168,7 @@ describe('YourDataComponent', () => {
             await vi.waitFor(() =>
                 expect(fixture.nativeElement.querySelector('app-paste-plan-dialog')).toBeNull()
             );
-            expect(document.activeElement).toBe(button('Paste plan'));
+            expect(document.activeElement).toBe(button('Bring in a plan'));
         });
 
         it('keeps a pasted plan that was turned down, and says why', async () => {
@@ -165,7 +178,7 @@ describe('YourDataComponent', () => {
                 problem: 'unreadable',
             });
 
-            button('Paste plan').click();
+            button('Bring in a plan').click();
             fixture.detectChanges();
             const box = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
             box.value = 'not json';
@@ -176,7 +189,7 @@ describe('YourDataComponent', () => {
 
             const alert = fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement;
             expect(alert.textContent!.trim()).toBe(
-                "That isn't the JSON the AI wrote. Copy its code block, and paste it here."
+                "That doesn't look like what the AI wrote. Copy its whole reply, and paste it here."
             );
             expect(box.value).toBe('not json');
             expect(status()).toBe('');
@@ -186,7 +199,7 @@ describe('YourDataComponent', () => {
             create();
             const importSpy = vi.spyOn(TestBed.inject(BackupService), 'import');
 
-            button('Paste plan').click();
+            button('Bring in a plan').click();
             fixture.detectChanges();
             button('Import').click();
             await fixture.whenStable();
@@ -200,11 +213,15 @@ describe('YourDataComponent', () => {
             create();
             vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('denied'));
 
+            button('Bring in a plan').click();
+            fixture.detectChanges();
             button('Copy AI prompt').click();
             await fixture.whenStable();
             fixture.detectChanges();
 
-            expect(status()).toBe("The prompt couldn't be copied. Try again, or another browser.");
+            expect(dialogStatus()).toBe(
+                "The prompt couldn't be copied. Try again, or another browser."
+            );
         });
     });
 

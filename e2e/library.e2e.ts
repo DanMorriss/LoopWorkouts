@@ -294,8 +294,9 @@ test.describe('the plan page suggests a workout', () => {
                 'Band full body planned on Tuesday and Saturday'
             );
             for (const name of ['Tuesday', 'Saturday']) {
+                await page.getByRole('tab', { name: new RegExp(`^${name}`) }).click();
                 await expect(
-                    page.getByRole('region', { name, exact: true }).getByRole('listitem')
+                    page.getByRole('tabpanel', { name, exact: true }).getByRole('listitem')
                 ).toContainText(['Band full body']);
             }
             // Planned now, so another is suggested for what's left
@@ -306,13 +307,12 @@ test.describe('the plan page suggests a workout', () => {
 
             await app.undo.click();
             await expect(missing).toContainText('Band full body');
-            await expect(page.getByRole('region', { name: 'Tuesday', exact: true })).toContainText(
-                'Nothing planned'
-            );
-            // Back on the first of those days' Add
+            // Back on Add to a day
+            await expect(add).toBeFocused();
+            await page.getByRole('tab', { name: /^Tuesday/ }).click();
             await expect(
-                page.getByRole('button', { name: 'Add a workout to Tuesday' })
-            ).toBeFocused();
+                page.getByRole('tabpanel', { name: 'Tuesday', exact: true })
+            ).toContainText('Nothing planned');
             const undone = await app.stored<{ days: string[][] }>('week-plan');
             expect(undone?.days.flat()).toEqual(['squat-day', 'bench-day']);
         }

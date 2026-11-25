@@ -10,9 +10,19 @@ const legs = workout('Legs', { steps: [reps(10, 'Back squat', { exercise: 'back-
 const push = workout('Push', { steps: [reps(10, 'Bench press', { exercise: 'bench-press' })] });
 const pull = workout('Pull', { steps: [reps(10, 'Barbell row', { exercise: 'barbell-row' })] });
 
-/** What a day of the Plan page shows, by its name ("Wednesday · today" for today). */
-const day = (page: import('@playwright/test').Page, name: string) =>
-    page.getByRole('region', { name, exact: true });
+type Page = import('@playwright/test').Page;
+
+/** A day's tab in the Plan page's week, by its name ("Thursday"). */
+const tab = (page: Page, name: string) => page.getByRole('tab', { name: new RegExp(`^${name}`) });
+
+/** The day shown under the Plan page's week, by its heading ("Wednesday · today" for today). */
+const day = (page: Page, name: string) => page.getByRole('tabpanel', { name, exact: true });
+
+/** Shows a day under the Plan page's week, as a tap on its tab does, and gives it. */
+async function show(page: Page, name: string) {
+    await tab(page, name.split(' ')[0]).click();
+    return day(page, name);
+}
 
 test.describe('a new guest', () => {
     test(
@@ -99,11 +109,15 @@ test.describe('planning by hand', () => {
         await expect(app.heading('Plan')).toBeVisible();
         await expect(app.backLink('Today')).toBeVisible();
         await expect(app.tab('Today')).toHaveAttribute('aria-current', 'true');
+        // With nothing planned, a ready-made week first, then each day to fill
+        await expect(
+            page.getByRole('region', { name: 'Start with a ready-made week' })
+        ).toBeVisible();
         for (const name of ['Monday', 'Tuesday', 'Thursday', 'Sunday']) {
-            await expect(day(page, name)).toContainText('Nothing planned');
+            await expect(await show(page, name)).toContainText('Rest day. Nothing planned.');
         }
 
-        const thursday = day(page, 'Thursday');
+        const thursday = await show(page, 'Thursday');
         const add = thursday.getByRole('button', { name: 'Add a workout to Thursday' });
         await add.click();
         const dialog = page.getByRole('dialog', { name: 'Plan on Thursday' });
@@ -126,7 +140,7 @@ test.describe('planning by hand', () => {
         await add.click();
         await expect(dialog.getByRole('button', { name: /^Push/ })).toBeDisabled();
         await expect(dialog.getByRole('button', { name: /^Push/ })).toContainText('Planned');
-        await dialog.getByRole('button', { name: 'Back' }).click();
+        await dialog.getByRole('button', { name: 'Back', exact: true }).click();
         await thursday.getByRole('button', { name: 'Take Push off Thursday' }).click();
         await expect(thursday).toContainText('Nothing planned');
         // With Undo, which takes focus; closed, focus goes to the day's Add
@@ -147,7 +161,7 @@ test.describe('planning by hand', () => {
         { tag: '@p1' },
         async ({ app, page }) => {
             await app.goto('/plan');
-            const thursday = day(page, 'Thursday');
+            const thursday = await show(page, 'Thursday');
             await thursday.getByRole('button', { name: 'Add a workout to Thursday' }).click();
             await page
                 .getByRole('dialog', { name: 'Plan on Thursday' })
@@ -300,13 +314,16 @@ test.describe('how the week is going', () => {
             await expect(week).toContainText('1 of 4 done this week · Next: Pull on Friday');
 
             await week.getByRole('link', { name: 'Edit plan' }).click();
-            await expect(day(page, 'Monday')).toContainText('Done');
-            await expect(day(page, 'Tuesday')).toContainText('Missed');
-            await expect(day(page, 'Wednesday · today')).toContainText('Due');
-            await expect(page.getByText('1 of 3 done so far this week')).toBeVisible();
+            // The same week, said the same way
+            await expect(tab(page, 'Monday')).toHaveAccessibleName('Monday: Legs, done');
+            await expect(await show(page, 'Monday')).toContainText('Done');
+            await expect(await show(page, 'Tuesday')).toContainText('Missed');
+            await expect(await show(page, 'Wednesday · today')).toContainText('Due');
+            const tally = page.getByText('1 of 4 done this week · Next: Pull on Friday');
+            await expect(tally).toBeVisible();
 
             // Planned on a day already gone this week, it counts from next week
-            await day(page, 'Monday')
+            await (await show(page, 'Monday'))
                 .getByRole('button', { name: 'Add a workout to Monday' })
                 .click();
             await page
@@ -316,7 +333,7 @@ test.describe('how the week is going', () => {
             await expect(
                 day(page, 'Monday').getByRole('listitem').filter({ hasText: 'Push' })
             ).toContainText('From next week');
-            await expect(page.getByText('1 of 3 done so far this week')).toBeVisible();
+            await expect(tally).toBeVisible();
         }
     );
 
@@ -436,16 +453,16 @@ test.describe('a missed workout', () => {
         { tag: '@p2' },
         async ({ app, page }) => {
             await app.goto('/plan');
-            const tuesday = day(page, 'Tuesday');
-            const today = day(page, 'Wednesday · today');
+            const tuesday = await show(page, 'Tuesday');
             await expect(tuesday).toContainText('Missed');
 
             await tuesday.getByRole('button', { name: 'Legs', exact: true }).click();
             await page.getByRole('button', { name: 'Do it today instead' }).click();
-            await expect(today).toContainText('From Tuesday, this week');
-            await expect(today).toContainText('Due');
             await expect(tuesday).toContainText('Nothing planned');
             await expect(app.undoBar).toContainText('Legs moved to today');
+            const today = await show(page, 'Wednesday · today');
+            await expect(today).toContainText('From Tuesday, this week');
+            await expect(today).toContainText('Due');
 
             // Today has it due, saying where from
             await app.goto('/home');
@@ -455,6 +472,7 @@ test.describe('a missed workout', () => {
             await app.goto('/plan');
             await today.getByRole('button', { name: /^Legs/ }).click();
             await page.getByRole('button', { name: 'Put back on Tuesday' }).click();
+            // Tuesday's shown, with it back on it
             await expect(tuesday).toContainText('Missed');
         }
     );
@@ -490,20 +508,18 @@ test.describe('swapping two days', () => {
 
     test('REG-PLAN-10 swap two days, then Undo', { tag: '@p2' }, async ({ app, page }) => {
         await app.goto('/plan');
-        const thursday = day(page, 'Thursday');
-        const saturday = day(page, 'Saturday');
+        const thursday = await show(page, 'Thursday');
         const pick = thursday.getByRole('button', { name: 'Swap Thursday with another day' });
 
         await pick.click();
         await expect(pick).toHaveAttribute('aria-pressed', 'true');
-        await expect(thursday).toContainText('Now press ⇄ on the day to swap it with.');
+        await expect(page.getByText('Now pick the day to swap Thursday with.')).toBeVisible();
         await expect
             .poll(() => app.announcements())
             .toContain('Thursday picked. Now pick the day to swap it with.');
-        await saturday.getByRole('button', { name: 'Swap Saturday with Thursday' }).click();
+        await tab(page, 'Saturday').click();
 
-        await expect(thursday.getByRole('listitem')).toContainText('Push');
-        await expect(saturday.getByRole('listitem')).toContainText('Legs');
+        await expect(day(page, 'Saturday').getByRole('listitem')).toContainText('Legs');
         await expect(app.undoBar).toContainText('Thursday and Saturday swapped');
         await expect(app.undo).toBeFocused();
         const plan = await app.stored<{ days: string[][] }>('week-plan');
@@ -511,7 +527,7 @@ test.describe('swapping two days', () => {
 
         await app.undo.click();
         await expect(thursday.getByRole('listitem')).toContainText('Legs');
-        await expect(saturday.getByRole('listitem')).toContainText('Push');
         await expect(pick).toBeFocused();
+        await expect(await show(page, 'Saturday')).toContainText('Push');
     });
 });

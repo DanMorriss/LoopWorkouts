@@ -9,7 +9,7 @@ import { SettingsStore } from '../shared/state/settings-store.service';
 import { WorkoutStore } from '../shared/state/workout-store.service';
 import { greetingFor, HomeComponent } from './home.component';
 import { asOneGroup } from '../models/workout';
-import { markFor } from './week-strip/week-view';
+import { markFor } from '../shared/components/week-days/week-view';
 import { PlannedStatus } from '../models/plan';
 import { STRETCH_ROUTINE_ID } from '../models/built-in-stretches';
 

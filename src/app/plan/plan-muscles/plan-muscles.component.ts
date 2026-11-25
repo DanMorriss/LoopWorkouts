@@ -99,17 +99,13 @@ export class PlanMusclesComponent {
 
     /**
      * Plans the suggested ready-made workout, as it is, on the days chosen, with Undo; focus
-     * comes back to the first of those days' Add.
+     * comes back to Add to a day, as only one day's shown over it, and another's suggested.
      */
     protected planOn(days: number[]) {
         const suggestion = this.gapFiller();
         this.choosingDay.set(false);
         if (suggestion) {
-            this.planOnDays(
-                suggestion.workout,
-                days,
-                days.length ? `plan-add-${days[0]}` : 'plan-muscles-add'
-            );
+            this.planOnDays(suggestion.workout, days, 'plan-muscles-add');
         }
     }
 

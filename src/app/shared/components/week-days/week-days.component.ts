@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
-import { IconComponent } from '../../shared/components/icon/icon.component';
-import { injectFocusAfterRender } from '../../shared/focus-after-render';
+import { IconComponent } from '../icon/icon.component';
+import { injectFocusAfterRender } from '../../focus-after-render';
 import { colourVar, WeekDay } from './week-view';
 
 /** The id of a day's tab, from 0 for Monday; its panel is labelled by its heading. */
@@ -19,7 +19,10 @@ const ICONS = { training: 'fitness_center', 'active-rest': 'self_improvement', r
  * moon for a rest day) in a ring split into a segment for each workout in its colour, with a
  * tick once all's done or an empty ring if one was missed. Today's date is in the accent colour,
  * and the picked day is tinted in its first workout's colour. A tap, or the arrow keys, Home and
- * End, picks a day (`picked`), whose workouts show in the panel under them.
+ * End, picks a day (`picked`), whose workouts show in the panel under them; a tap (or Enter or
+ * Space) also says it was `pressed`, as the Plan page's swapping days wants. `dropOn` outlines
+ * the day a workout dragged on the Plan page would be let go on. Shared by Today (PLN-4) and
+ * the Plan page (PLN-1).
  */
 @Component({
     selector: 'app-week-days',
@@ -33,13 +36,14 @@ const ICONS = { training: 'fitness_center', 'active-rest': 'self_improvement', r
                     [id]="tabId(day.day)"
                     [class]="'week-day week-day--' + day.kind"
                     [class.week-day--today]="day.today"
+                    [class.week-day--drop]="day.day === dropOn()"
                     [style.--c]="day.kind === 'rest' ? null : colour(day.colour)"
                     [style.--ring]="day.ring || null"
                     [attr.aria-selected]="day.day === picked()"
                     [attr.aria-controls]="panelId"
                     [attr.aria-current]="day.today ? 'date' : null"
                     [tabIndex]="day.day === picked() ? 0 : -1"
-                    (click)="pick.emit(day.day)"
+                    (click)="pick.emit(day.day); pressed.emit(day.day)"
                     (keydown)="moveBy($event, day.day)"
                 >
                     <span class="week-day__name" aria-hidden="true">{{ day.short }}</span>
@@ -70,6 +74,9 @@ export class WeekDaysComponent {
     /** The day shown under them, from 0 for Monday. */
     readonly picked = input.required<number>();
     readonly pick = output<number>();
+    readonly pressed = output<number>();
+    /** The day a workout dragged over it would go to, outlined; null for none. */
+    readonly dropOn = input<number | null>(null);
 
     protected readonly icons = ICONS;
     protected readonly panelId = WEEK_PANEL_ID;

@@ -10,7 +10,9 @@
     </section>
 
     <section class="plan-muscles" aria-labelledby="plan-muscles-title">
-        <h3 id="plan-muscles-title" class="plan-muscles__title">Missing muscle groups</h3>
+        <h3 id="plan-muscles-title" class="plan-muscles__title">
+            {{ muscles.missed.length ? 'Missing muscle groups' : 'No muscle groups missing' }}
+        </h3>
         @if (muscles.missed.length === 0) {
             <p class="plan-muscles__text">Your plan works every muscle group.</p>
         } @else {

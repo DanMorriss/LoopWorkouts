@@ -178,7 +178,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Preconditions:** `guest()`, workouts Legs and Push, nothing planned.
 - **Steps:**
     1. Open Today. Press **Make your own plan**.
-    2. Press **Add** on Thursday. Press Escape.
+    2. Pick Thursday in the week, and press **Add a workout**. Press Escape.
     3. Press Add on Thursday again and pick **Push**.
     4. Press Add on Thursday again.
     5. Pick nothing: press ‹ Back. Then press the ✕ named "Take Push off Thursday".
@@ -216,7 +216,7 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
     3. On the Plan page, add Push to **Monday**.
 - **Expected:**
     1. The week: Mon a dumbbell in a ring with a tick, Tue one with an empty ring on it, Wed with its date underlined and picked, Fri a dumbbell, Thu, Sat and Sun a moon; Legs is the same colour on Mon and Wed; "1 of 4 done this week · Next: Pull on Friday". Screen readers get tabs, e.g. "Tuesday: Push, missed", "Wednesday, today: Legs, due today".
-    2. Monday's Legs "✓ Done", Tuesday's Push "Missed" and dimmed, Wednesday's Legs "Due", Friday's Pull nothing; "1 of 3 done so far this week".
+    2. Monday's Legs "✓ Done", Tuesday's Push "Missed" and dimmed, Wednesday's Legs "Due", Friday's Pull nothing; "1 of 4 done this week · Next: Pull on Friday", as Today says it.
     3. Monday's Push says "From next week", dimmed, and the count doesn't change.
 - **Variant:** with only Monday's workout planned today (via the UI on a Wednesday), Today says "Your plan starts next week", and the days show as rest days.
 
@@ -293,13 +293,13 @@ How the pack does it, in short (the bullets below were the plan, and mostly stil
 - **Stories:** PLN-1 · **Priority:** P2
 - **Preconditions:** `guest()`, workouts Legs and Push, Legs planned on Thursday and Push on Saturday, clock Wednesday.
 - **Steps:**
-    1. On the Plan page, press Thursday's ⇄ ("Swap Thursday with another day").
-    2. Press Saturday's ⇄ ("Swap Saturday with Thursday").
+    1. On the Plan page, pick Thursday in the week and press **Swap Thursday with another day**.
+    2. Pick Saturday in the week.
     3. Press **Undo**.
 - **Expected:**
-    1. Thursday's ⇄ is pressed, and under its name: "Now press ⇄ on the day to swap it with."; screen readers hear "Thursday picked. Now pick the day to swap it with."
+    1. Swap Thursday is pressed, and over the day: "Now pick the day to swap Thursday with." with Cancel; screen readers hear "Thursday picked. Now pick the day to swap it with."
     2. Thursday lists Push, Saturday Legs; the Undo bar says "Thursday and Saturday swapped", focus on Undo.
-    3. Thursday lists Legs again, Saturday Push, and focus is on Thursday's ⇄.
+    3. Thursday lists Legs again, Saturday Push, and focus is on Thursday's Swap, Thursday shown.
 
 ### REG-PLAN-11 · Pick a day of the week on Today
 

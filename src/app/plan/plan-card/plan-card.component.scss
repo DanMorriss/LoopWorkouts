@@ -59,6 +59,7 @@
 
 .plan-card__description {
     @include showcase-description;
+    text-wrap: pretty;
 }
 
 // Over the week: fitted to the days you can train, or why not
@@ -91,9 +92,9 @@
     width: 100%;
     min-height: 44px;
     padding: 0.25rem 0.1rem 0.25rem 0.5rem;
-    border-radius: 0.6rem;
+    border-radius: 0.5rem;
     color: inherit;
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-decoration: none;
     cursor: pointer;
     transition:

@@ -303,6 +303,7 @@ test.describe('offline', () => {
             await app.backLink('You').click();
             await app.tab('Today').click();
             await page.getByRole('link', { name: /Make your own plan|Edit plan/ }).click();
+            await page.getByRole('tab', { name: /^Thursday/ }).click();
             await page.getByRole('button', { name: 'Add a workout to Thursday' }).click();
             await page
                 .getByRole('dialog', { name: 'Plan on Thursday' })

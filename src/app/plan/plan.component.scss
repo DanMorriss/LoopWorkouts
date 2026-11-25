@@ -9,64 +9,57 @@
     @include page-title;
 }
 
-.plan__hint,
-.plan__so-far {
-    margin: 0 0 0.75rem;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    line-height: 1.5;
+.plan__hint {
+    @include page-hint;
+    text-wrap: pretty;
 }
 
+// How the week's going, as Today says it
 .plan__so-far {
+    margin: 0 0 1rem;
     color: var(--text-strong);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
 }
 
-// A day, its name and Add over its workouts, divided from the next by a line
-.plan__day {
-    padding: 0.85rem 0;
-    border-top: 1px solid var(--border-soft);
+.plan__start {
+    margin-bottom: 0.5rem;
 }
 
-// The day's name at the left, its buttons at the right; under it, still at the right, where
-// there isn't room beside it (the largest text sizes)
-.plan__day-head {
+// The week's days, as tabs, as Today shows them
+.plan__week {
+    margin-bottom: 0.75rem;
+}
+
+// Picked to swap: what to do next, and a way out
+.plan__swap-hint {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    min-height: 44px;
-}
-
-.plan__day-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-inline-start: auto;
-}
-
-// Picked to swap: in the accent colour; the other days' ⇄, which swap with it, outlined in it
-.plan__swap {
-    &[aria-pressed='true'] {
-        border-color: var(--accent);
-        background: var(--accent-soft);
-        color: var(--accent);
-        box-shadow: inset 0 0 0 1px var(--accent);
-    }
-
-    &--other {
-        border-color: var(--accent);
-    }
-}
-
-.plan__swap-hint {
-    margin: 0.25rem 0 0;
+    gap: 0 0.5rem;
+    margin: 0 0 0.5rem;
     color: var(--accent);
     font-size: 0.85rem;
 }
 
+.plan__swap-cancel {
+    @include link-button;
+}
+
+// The picked day, opened among the others under the week: a card, as it's the one being changed
+.plan__day {
+    margin: 0.25rem -0.75rem;
+    padding: 0.25rem 0.75rem 0.5rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.9rem;
+    background: var(--card);
+    // Brought into view clear of the top bar and the tab bar
+    scroll-margin-block: 4.5rem 6.5rem;
+}
+
 .plan__day-name {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
     margin: 0;
     color: var(--text-strong);
     font-size: 1rem;
@@ -74,12 +67,13 @@
 }
 
 .plan__today {
+    margin-left: 0.3rem;
     color: var(--accent);
     font-weight: 500;
 }
 
 .plan__workouts {
-    margin: 0.35rem 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
 }
@@ -94,13 +88,14 @@
     }
 }
 
-// Just made in Create for this day: pointed out, as Workouts points out a new workout
+// Just made in Create for this day: pointed out, as Workouts points out a new workout, with a
+// tint and an edge all round
 .plan__workout--saved {
     margin-inline: -0.5rem;
-    padding-left: 0.5rem;
+    padding-inline: 0.5rem;
+    border: 1px solid var(--accent-line);
     border-radius: 0.5rem;
     background: var(--accent-soft);
-    box-shadow: inset 3px 0 0 var(--accent);
 }
 
 // Drag and drop (Angular CDK). The copy following the finger, lifted off the list, as a dragged
@@ -131,38 +126,50 @@
     transition: transform var(--spring-duration) var(--ease-spring);
 }
 
-// A day with nothing on it, with one dragged over it, makes room for it there
-.cdk-drop-list-dragging .plan__rest {
-    display: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
     .cdk-drop-list-dragging .plan__workout:not(.cdk-drag-placeholder) {
         transition: none;
     }
 }
 
+// A rest day, as Today says it, with its moon
 .plan__rest {
-    margin: 0.25rem 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    margin: 0;
     color: var(--text-muted);
     font-size: 0.85rem;
 }
 
-// A whole week, ready-made (PLN-6), under the hint
+// Add, at the foot of the day's list: Create's dashed + Step row (.btn-add), not a button over
+// every day
+.plan__add {
+    justify-content: flex-start;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0 0.75rem;
+    font-size: 0.85rem;
+}
+
+// Swap, under Add: picked, in the accent colour, waiting for the other day
+.plan__swap {
+    @include link-button;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+    color: var(--text-muted);
+
+    &[aria-pressed='true'] {
+        color: var(--accent);
+    }
+}
+
+// A whole week, ready-made (PLN-6), under the day
 .plan__ready-made {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-    margin: -0.5rem 0 0.5rem;
-    color: var(--accent);
-    font-weight: 600;
-    text-decoration: none;
-
-    @include hover {
-        text-decoration: underline;
-    }
-
-    @include pressed {
-        text-decoration: underline;
-    }
+    margin: 0.5rem 0 0;
+    @include text-link;
 }

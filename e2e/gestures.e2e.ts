@@ -342,18 +342,23 @@ test.describe('dragging the plan (PLN-1, PLN-6)', () => {
         { tag: '@p2' },
         async ({ app, page }) => {
             await app.goto('/plan');
+            // On Tuesday, dragged onto Monday in the week over it
+            await page.getByRole('tab', { name: /^Tuesday/ }).click();
             const handle = page.getByRole('button', { name: 'Move Legs to other days' });
-            const monday = page.getByRole('region', { name: 'Monday', exact: true });
-            await drag(page, handle, monday.getByText('Nothing planned'));
+            await drag(page, handle, page.getByRole('tab', { name: /^Monday/ }));
 
+            // Monday's shown, with it there
+            const monday = page.getByRole('region', { name: 'Monday', exact: true });
             await expect(monday).toContainText('Legs');
+            await expect(app.undoBar).toContainText('Legs moved to Monday');
+            await page.getByRole('tab', { name: /^Tuesday/ }).click();
             await expect(page.getByRole('region', { name: 'Tuesday', exact: true })).toContainText(
                 'Nothing planned'
             );
-            await expect.poll(() => app.announcements()).toContainEqual('Legs moved to Monday');
             const plan = await app.stored<{ days: string[][] }>('week-plan');
             expect(plan?.days[0]).toEqual(['legs']);
             // Its day had gone by when it was moved there, so it starts next week (PLN-3)
+            await page.getByRole('tab', { name: /^Monday/ }).click();
             await expect(monday).toContainText('From next week');
             // Still on the Plan page: the drag didn't swipe it back
             await expect(page).toHaveURL('/plan');

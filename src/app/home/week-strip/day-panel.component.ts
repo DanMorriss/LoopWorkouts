@@ -7,8 +7,8 @@ import { HistoryStore } from '../../shared/state/history-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { lastTime, newBestIn } from '../../models/since-last-time';
 import { markText } from '../../history/history-format';
-import { WEEK_PANEL_ID } from './week-days.component';
-import { colourVar, WeekDay, WeekWorkout } from './week-view';
+import { WEEK_PANEL_ID } from '../../shared/components/week-days/week-days.component';
+import { colourVar, WeekDay, WeekWorkout } from '../../shared/components/week-days/week-view';
 
 /**
  * What's on the day picked in This week (PLN-4), under the days: its name and date, then each

@@ -1,0 +1,29 @@
+@use 'type' as *;
+@use 'panel-card' as *;
+
+:host {
+    display: block;
+}
+
+// A card, as Today's offer of the same weeks is, its plans flat inside it
+.start {
+    @include panel-card;
+}
+
+.start__title {
+    margin: 0 0 0.25rem;
+    color: var(--text-strong);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.start__lead {
+    @include page-hint;
+}
+
+// Under the plans, over the week, which is the other way in
+.start__own {
+    margin: 1.25rem 0 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}

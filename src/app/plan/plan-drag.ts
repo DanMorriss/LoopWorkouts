@@ -1,4 +1,3 @@
-import type { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { signal } from '@angular/core';
 import { DropSpring } from '../shared/drop-spring';
 import { MAX_WORKOUTS_A_DAY, WeekPlan } from '../models/plan';
@@ -10,8 +9,8 @@ export interface PlannedDrag {
 }
 
 /**
- * Dragging a planned workout by its handle, to another day or another place on its own (PLN-1).
- * One for each Plan page.
+ * Dragging a planned workout by its handle, to another place on its day, or onto another day
+ * in the week over it (PLN-1). One for each Plan page.
  */
 export class PlanDrag {
     /** While one's dragged, so the page doesn't swipe back under it. */
@@ -42,12 +41,11 @@ export class PlanDrag {
     }
 
     /**
-     * Which days it can go to: its own, in another place, and any other it isn't on yet that
-     * isn't full, as a workout's only once on a day.
+     * Whether it can go to `to` from `from`: its own day, in another place, or any other it
+     * isn't on yet that isn't full, as a workout's only once on a day.
      */
-    readonly canEnter = (drag: CdkDrag<PlannedDrag>, list: CdkDropList<number>): boolean => {
-        const { day, workoutId } = drag.data;
-        const ids = this.plan().days[list.data] ?? [];
-        return list.data === day || (!ids.includes(workoutId) && ids.length < MAX_WORKOUTS_A_DAY);
-    };
+    canGo(workoutId: string, from: number, to: number): boolean {
+        const ids = this.plan().days[to] ?? [];
+        return to === from || (!ids.includes(workoutId) && ids.length < MAX_WORKOUTS_A_DAY);
+    }
 }

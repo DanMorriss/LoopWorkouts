@@ -144,17 +144,26 @@ export class PlanComponent {
             .days()
             [to].workouts.map((planned) => planned.workoutId)
             .filter((id) => id !== workoutId);
+        const before = this.planStore.plan();
         this.planStore.move(workoutId, from, to, shown[event.currentIndex] ?? null);
         const ids = this.planStore.plan().days[to];
         if (!ids.includes(workoutId)) {
             return;
         }
         const name = this.name(workoutId);
-        this.announcement.set(
-            from === to
-                ? `${name} moved to ${ids.indexOf(workoutId) + 1} of ${ids.length} on ${WEEKDAYS[to]}`
-                : `${name} moved to ${WEEKDAYS[to]}`
-        );
+        // Focus stays on its handle, where it's gone; Undo puts the whole week back, so one
+        // dragged off a day gone by isn't left "From next week" when it's dragged back
+        this.undo.offerUndo({
+            message:
+                from === to
+                    ? `${name} moved to ${ids.indexOf(workoutId) + 1} of ${ids.length} on ${WEEKDAYS[to]}`
+                    : `${name} moved to ${WEEKDAYS[to]}`,
+            undo: () => {
+                this.planStore.restore(before);
+                this.focusAfterRender(`plan-move-${from}-${workoutId}`);
+            },
+            keepFocus: true,
+        });
         this.focusAfterRender(`plan-move-${to}-${workoutId}`);
     }
 
@@ -255,9 +264,17 @@ export class PlanComponent {
         );
     }
 
+    /** Takes it off the day, with Undo: focus to the Undo bar, then the day's Add. */
     private remove(day: number, workoutId: string) {
+        const before = this.planStore.plan();
         this.planStore.remove(day, workoutId);
-        this.announcement.set(`${this.name(workoutId)} taken off ${WEEKDAYS[day]}`);
-        this.focusAfterRender(`plan-add-${day}`);
+        this.undo.offerUndo({
+            message: `${this.name(workoutId)} taken off ${WEEKDAYS[day]}`,
+            undo: () => {
+                this.planStore.restore(before);
+                this.focusAfterRender(`plan-move-${day}-${workoutId}`);
+            },
+            dismissed: () => this.focusAfterRender(`plan-add-${day}`),
+        });
     }
 }

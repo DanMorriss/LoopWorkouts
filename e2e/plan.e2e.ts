@@ -129,8 +129,10 @@ test.describe('planning by hand', () => {
         await dialog.getByRole('button', { name: 'Back' }).click();
         await thursday.getByRole('button', { name: 'Take Push off Thursday' }).click();
         await expect(thursday).toContainText('Nothing planned');
+        // With Undo, which takes focus; closed, focus goes to the day's Add
+        await expect(app.undoBar).toContainText('Push taken off Thursday');
+        await page.keyboard.press('Escape');
         await expect(add).toBeFocused();
-        await expect.poll(() => app.announcements()).toContain('Push taken off Thursday');
 
         await add.click();
         await dialog.getByRole('button', { name: /Make a new workout/ }).click();

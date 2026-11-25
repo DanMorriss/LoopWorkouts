@@ -234,7 +234,12 @@ describe('PlanComponent', () => {
 
         expect(TestBed.inject(PlanStore).plan().days[5]).toEqual([]);
         expect(days()[5]).toBe('Saturday: Nothing planned');
-        expect(text(el().querySelector('[role="status"]')!)).toBe('Legs taken off Saturday');
+        // With Undo, which puts it back
+        const undo = TestBed.inject(UndoService);
+        expect(undo.offer()?.message).toBe('Legs taken off Saturday');
+        undo.undo();
+        await render();
+        expect(TestBed.inject(PlanStore).plan().days[5]).toEqual([legs.id]);
     });
 
     describe('moving a workout by its handle (PLN-1)', () => {
@@ -263,8 +268,21 @@ describe('PlanComponent', () => {
 
             expect(days()[1]).toBe('Tuesday: Nothing planned');
             expect(days()[3]).toBe('Thursday: Legs, Push');
-            expect(text(el().querySelector('[role="status"]')!)).toBe('Legs moved to Thursday');
+            expect(TestBed.inject(UndoService).offer()?.message).toBe('Legs moved to Thursday');
             expect(document.activeElement?.id).toBe(`plan-move-3-${legs.id}`);
+        });
+
+        it('puts the week back as it was on Undo', async () => {
+            TestBed.inject(PlanStore).add(1, legs.id);
+            await open();
+            const before = TestBed.inject(PlanStore).plan();
+
+            await drop(legs.id, 1, 3, 0);
+            TestBed.inject(UndoService).undo();
+            await render();
+
+            expect(TestBed.inject(PlanStore).plan().days).toEqual(before.days);
+            expect(document.activeElement?.id).toBe(`plan-move-1-${legs.id}`);
         });
 
         it('moves one dragged on its own day to its new place', async () => {
@@ -275,7 +293,7 @@ describe('PlanComponent', () => {
             await drop(legs.id, 4, 4, 1);
 
             expect(days()[4]).toBe('Friday: Push, Legs');
-            expect(text(el().querySelector('[role="status"]')!)).toBe(
+            expect(TestBed.inject(UndoService).offer()?.message).toBe(
                 'Legs moved to 2 of 2 on Friday'
             );
         });

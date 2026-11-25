@@ -1063,7 +1063,7 @@ All timer tests: `guest()`, `page.clock` installed, reduced motion, the AudioCon
     6. Switch to pounds.
 - **Expected:**
     1. The card says "Latest 10 @ 80, 12 @ 60 kg · 9 Nov" (the history's set wording) and "Best 100 kg".
-    2. Bests: Heaviest "100 kg × 5", Estimated one-rep max "116.5 kg" from 100 kg × 5, Most reps "12 @ 60 kg"; a chart "Estimated one-rep max".
+    2. Bests: Heaviest "100 kg × 5", Most reps "60 kg × 12"; a chart "Heaviest weight".
     3. Focus starts on the latest point, read out as value, date and workout; Home goes to the first.
     4. Two points (1 Nov and 9 Nov); the table lists date, workout and value.
     5. All seven sessions, each linking to `/history?run=<id>`.

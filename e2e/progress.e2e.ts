@@ -128,10 +128,8 @@ test.describe("an exercise's progress", () => {
             const best = (term: string) =>
                 progress.getByRole('term').filter({ hasText: term }).locator('+ dd');
             await expect(best('Heaviest')).toContainText('100 kg × 5');
-            await expect(best('Estimated one-rep max')).toContainText('116.5 kg');
-            await expect(best('Estimated one-rep max')).toContainText('from 100 kg × 5');
-            await expect(best('Most reps')).toContainText('12 @ 60 kg');
-            const chart = progress.getByRole('group', { name: 'Estimated one-rep max' });
+            await expect(best('Most reps')).toContainText('60 kg × 12');
+            const chart = progress.getByRole('group', { name: 'Heaviest weight' });
             await expect(chart).toContainText('7 workouts in all time');
 
             // The chart by keys: from the latest, Home to the first

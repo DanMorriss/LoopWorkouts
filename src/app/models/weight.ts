@@ -20,17 +20,8 @@ export const WEIGHT_STEP = 0.5;
  * the wheel goes up to.
  */
 export function weightIn(kg: number, unit: WeightUnit): number {
-    return Math.min(MAX_WEIGHT[unit], estimateIn(kg, unit));
-}
-
-/**
- * A weight worked out rather than lifted, e.g. an estimated one-rep max, as shown in
- * `unit`: to the nearest WEIGHT_STEP, with no top, since it can be more than the wheel goes
- * up to.
- */
-export function estimateIn(kg: number, unit: WeightUnit): number {
     const value = unit === 'kg' ? kg : kg / KG_PER_LB;
-    return Math.round(value / WEIGHT_STEP) * WEIGHT_STEP;
+    return Math.min(MAX_WEIGHT[unit], Math.round(value / WEIGHT_STEP) * WEIGHT_STEP);
 }
 
 /** A total of weight × reps (volume), as shown in `unit`: to the nearest whole kg or lb. */

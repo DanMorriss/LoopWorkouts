@@ -331,7 +331,8 @@ describe('ExerciseListComponent', () => {
             .querySelector('.exercise-card__progress')!
             .textContent!.replace(/\s+/g, ' ');
         expect(progress).toContain('Latest 2 × 5 @ 100 kg');
-        expect(progress).toContain('Best 100 kg');
+        // One weight, always the same, so its reps at it
+        expect(progress).toContain('Best 100 kg × 5');
         expect(el().querySelectorAll('.exercise-card__progress').length).toBe(1);
     });
 });

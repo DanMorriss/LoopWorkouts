@@ -3,7 +3,6 @@ import { MAX_STEP_SECONDS, RepStep, Step, TimedStep, withEachRepSet, withRepSet 
 import {
     canStepUpEachSet,
     compareScores,
-    estimatedOneRepMax,
     exerciseBests,
     ExerciseSession,
     exerciseWeeks,
@@ -109,20 +108,20 @@ describe('progress', () => {
         });
     });
 
-    it('measures by weight where any set had one, then reps, then time', () => {
-        expect(progressMeasure([session(1, [squat(10), squat(5, 20)])])).toBe('weight');
+    it('measures by weight where it was done at more than one, then reps, then time', () => {
+        expect(progressMeasure([session(1, [squat(10, 16), squat(5, 20)])])).toBe('weight');
+        // One kettlebell, always the same: its reps are what change
+        expect(progressMeasure([session(1, [squat(10), squat(5, 20)])])).toBe('reps');
+        expect(progressMeasure([session(2, [squat(15, 16)]), session(1, [squat(12, 16)])])).toBe(
+            'reps'
+        );
         expect(progressMeasure([session(1, [squat(10)])])).toBe('reps');
         expect(progressMeasure([session(1, [plank(30)])])).toBe('time');
         expect(progressMeasure([])).toBeNull();
     });
 
-    it('estimates a one-rep max by the Epley formula, with one rep as the weight itself', () => {
-        expect(estimatedOneRepMax(60, 10)).toBe(80);
-        expect(estimatedOneRepMax(100, 1)).toBe(100);
-    });
-
     describe('exerciseBests', () => {
-        it('finds the heaviest, the best estimate and the most reps', () => {
+        it('finds the heaviest and the most reps', () => {
             const bests = exerciseBests([
                 session(3000, [squat(3, 100)]),
                 session(2000, [squat(12, 60), squat(12, 40)]),
@@ -130,9 +129,6 @@ describe('progress', () => {
             ]);
 
             expect(bests.heaviest).toEqual({ at: 3000, entryId: '3000-w', weight: 100, reps: 3 });
-            // 90 × (1 + 8/30) = 114, more than 100 × 1.1 = 110
-            expect(bests.oneRepMax).toMatchObject({ at: 1000, weight: 90, reps: 8 });
-            expect(bests.oneRepMax!.estimate).toBeCloseTo(114);
             expect(bests.mostReps).toEqual({ at: 2000, entryId: '2000-w', reps: 12, weight: 60 });
             expect(bests.longest).toBeUndefined();
         });
@@ -163,10 +159,10 @@ describe('progress', () => {
         });
     });
 
-    it("gives a session's point by the measure: best estimate, most reps or longest", () => {
+    it("gives a session's point by the measure: heaviest, most reps or longest", () => {
         const sets = session(1000, [squat(10, 60), squat(3, 70), squat(15)]);
 
-        expect(sessionValue(sets, 'weight')).toBe(80);
+        expect(sessionValue(sets, 'weight')).toBe(70);
         expect(sessionValue(sets, 'reps')).toBe(15);
         expect(sessionValue(sets, 'time')).toBeNull();
         expect(sessionValue(session(1000, [squat(15)]), 'weight')).toBeNull();
@@ -446,7 +442,6 @@ describe("the week's exercises (PRG-13)", () => {
         expect(squats.bests.heaviest).toEqual(expect.objectContaining({ weight: 62.5, reps: 10 }));
         // As many reps, but heavier
         expect(squats.bests.mostReps).toEqual(expect.objectContaining({ reps: 10, weight: 62.5 }));
-        expect('oneRepMax' in squats.bests).toBe(false);
         expect(week(history, 'plank')!.bests.longest).toEqual(
             expect.objectContaining({ seconds: 90 })
         );

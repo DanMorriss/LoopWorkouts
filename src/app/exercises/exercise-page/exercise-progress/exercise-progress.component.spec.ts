@@ -90,9 +90,8 @@ describe('ExerciseProgressComponent', () => {
         logged(2, [squat(10, 80), squat(12, 60)]);
         await create();
 
-        expect(all('.best dt')).toEqual(['Heaviest', 'Estimated one-rep max', 'Most reps']);
-        expect(all('.best__value')).toEqual(['100 kg × 5', '116.5 kg', '12 @ 60 kg']);
-        expect(all('.best__when')[1]).toContain('from 100 kg × 5');
+        expect(all('.best dt')).toEqual(['Heaviest', 'Most reps']);
+        expect(all('.best__value')).toEqual(['100 kg × 5', '60 kg × 12']);
 
         TestBed.inject(SettingsStore).update({ weightUnit: 'lb' });
         await render();
@@ -106,28 +105,28 @@ describe('ExerciseProgressComponent', () => {
         await create();
 
         expect(el().querySelector('.progress__subheading')!.textContent).toContain(
-            'Estimated one-rep max'
+            'Heaviest weight'
         );
         expect(el().querySelectorAll('.progress__dot').length).toBe(3);
 
         chart().dispatchEvent(new FocusEvent('focus'));
         await render();
-        expect(readout()).toContain('105 kg');
+        expect(readout()).toContain('90 kg');
         expect(readout()).toContain('Legs');
 
         // The latest, at the right: its tooltip beside it, to its left, so it stays on the chart
         const tooltip = () => el().querySelector('app-progress-tooltip');
-        expect(tooltip()!.textContent).toContain('105 kg');
+        expect(tooltip()!.textContent).toContain('90 kg');
         expect(tooltip()!.classList).toContain('progress-tooltip--left');
 
         await key('Home');
-        expect(readout()).toContain('70 kg');
+        expect(readout()).toContain('60 kg');
         expect(readout()).toContain('Old legs');
         expect(tooltip()!.textContent).toContain('Old legs');
         expect(tooltip()!.classList).not.toContain('progress-tooltip--left');
         expect(tooltip()!.getAttribute('aria-hidden')).toBe('true');
         await key('ArrowRight');
-        expect(readout()).toContain('93.5 kg');
+        expect(readout()).toContain('80 kg');
     });
 
     it('narrows the chart to a range, and says when nothing falls in it', async () => {
@@ -147,6 +146,7 @@ describe('ExerciseProgressComponent', () => {
     });
 
     it('has a table of the same workouts beside the chart, a dot for each to go to it', async () => {
+        logged(20, [squat(5, 70)]);
         logged(10, [squat(5, 80)]);
         await create();
 
@@ -158,9 +158,9 @@ describe('ExerciseProgressComponent', () => {
         expect(slides[0].querySelector('.progress__chart')).not.toBeNull();
         expect(
             [...slides[1].querySelectorAll('.progress__table tbody td')]
-                .slice(1)
+                .slice(1, 3)
                 .map((cell) => cell.textContent!.trim())
-        ).toEqual(['Legs', '93.5 kg']);
+        ).toEqual(['Legs', '70 kg']);
 
         const dot = el().querySelector<HTMLButtonElement>(
             '.carousel__dot[aria-label="Table 2 of 2"]'
@@ -168,6 +168,22 @@ describe('ExerciseProgressComponent', () => {
         dot.click();
         await render();
         expect(dot.getAttribute('aria-current')).toBe('true');
+    });
+
+    it('charts the reps of one weight, always the same, as a kettlebell is', async () => {
+        logged(10, [squat(15, 16), squat(15, 16)]);
+        logged(2, [squat(18, 16)]);
+        await create();
+
+        expect(el().querySelector('.progress__subheading')!.textContent).toContain(
+            'Most reps in a set'
+        );
+        chart().dispatchEvent(new FocusEvent('focus'));
+        await render();
+        expect(readout()).toContain('18 reps');
+        // The heaviest set is the one with the most reps, so they share a tile
+        expect(all('.best dt')).toEqual(['Heaviest and most reps']);
+        expect(all('.best__value')).toEqual(['16 kg × 18']);
     });
 
     it('charts most reps for a bodyweight exercise, and the longest for a timed one', async () => {

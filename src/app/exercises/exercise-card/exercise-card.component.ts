@@ -11,6 +11,7 @@ import {
     MUSCLE_LABELS,
 } from '../../models/exercise';
 import { PageSlide } from '../../shared/navigation/page-slide';
+import { LatestAndBest } from '../progress-format';
 
 /** The Exercises list's search, muscles and `from`, as its address keeps them. */
 interface ListQueryParams {
@@ -32,17 +33,7 @@ export interface ExerciseCard {
     /** The other name a search found it by, if not its own. */
     otherName?: string;
     /** Its latest and best (PRG-3); missing until it's been done in a workout. */
-    progress?: CardProgress;
-}
-
-/** e.g. latest "3 × 10 @ 60 kg" on 18 October, best "80 kg". */
-export interface CardProgress {
-    latest: string;
-    latestSpoken: string;
-    latestAt: number;
-    /** The date with its year, unless it was this year. */
-    dateFormat: string;
-    best: string;
+    progress?: LatestAndBest;
 }
 
 /** `exercise` as its card shows it, without its latest and best. */

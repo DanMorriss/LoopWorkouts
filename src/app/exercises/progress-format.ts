@@ -1,5 +1,12 @@
-import { formatDuration, markText, spokenDuration } from '../history/history-format';
-import { ExerciseBests, ExerciseWeek, ProgressMeasure } from '../models/progress';
+import { describeSets, formatDuration, markText, spokenDuration } from '../history/history-format';
+import {
+    exerciseBests,
+    ExerciseBests,
+    ExerciseSession,
+    ExerciseWeek,
+    progressMeasure,
+    ProgressMeasure,
+} from '../models/progress';
 import { volumeIn, WeightUnit, weightIn } from '../models/weight';
 import { counted } from '../shared/format-count';
 
@@ -103,11 +110,7 @@ export function describeWeek(week: ExerciseWeek, unit: WeightUnit, locale: strin
  * The one best a card shows (PRG-3), by what the exercise is measured by: the heaviest
  * weight, the most reps (at its weight, if any), or the longest. Empty with none.
  */
-export function headlineBest(
-    bests: ExerciseBests,
-    measure: ProgressMeasure,
-    unit: WeightUnit
-): string {
+function headlineBest(bests: ExerciseBests, measure: ProgressMeasure, unit: WeightUnit): string {
     if (measure === 'weight' && bests.heaviest) {
         return `${weightIn(bests.heaviest.weight, unit)} ${unit}`;
     }
@@ -119,6 +122,36 @@ export function headlineBest(
         return formatDuration(bests.longest.seconds);
     }
     return '';
+}
+
+/** e.g. latest "3 × 10 @ 60 kg" on 18 October, best "80 kg". */
+export interface LatestAndBest {
+    latest: string;
+    latestSpoken: string;
+    latestAt: number;
+    /** The date with its year, unless it was this year. */
+    dateFormat: string;
+    best: string;
+}
+
+/**
+ * An exercise's latest session's sets, as in the history, and its headline best, as its card
+ * on the list (PRG-3) and the top of its page show them. `sessions` are newest first, at least
+ * one.
+ */
+export function latestAndBest(
+    sessions: readonly ExerciseSession[],
+    unit: WeightUnit
+): LatestAndBest {
+    const latest = sessions[0];
+    const lines = describeSets(latest.sets, unit);
+    return {
+        latest: lines.map((line) => line.text).join(' + '),
+        latestSpoken: lines.map((line) => line.spoken).join(', then '),
+        latestAt: latest.startedAt,
+        dateFormat: dateFormatFor(latest.startedAt),
+        best: headlineBest(exerciseBests(sessions), progressMeasure(sessions)!, unit),
+    };
 }
 
 /** What the chart is of, as its title says it. */

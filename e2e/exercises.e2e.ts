@@ -51,6 +51,7 @@ test.describe('the list', () => {
             await search.fill('');
             const chips = page.getByRole('group', { name: 'Main muscle' });
             await chips.getByRole('button', { name: 'Quads' }).click();
+            await page.getByRole('button', { name: 'Pick on the body map' }).click();
             // By its keys: a muscle's shape doesn't cover the middle of its box, so a click there
             // lands on the drawing around it
             await page

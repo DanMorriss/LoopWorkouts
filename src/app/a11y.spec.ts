@@ -673,13 +673,14 @@ for (const theme of ['dark', 'light'] as const) {
         });
 
         describe('exercises', () => {
-            it('the list, with the equipment open, one hidden and one of your own', async () => {
+            it('the list, with the equipment and body map open, one hidden and one of your own', async () => {
                 const exercises = TestBed.inject(ExerciseStore);
                 exercises.addOwn('Sled push', 'reps');
                 exercises.setHidden('builtin:plank', true);
                 await open('/exercises');
                 click('.kit__edit');
                 click('.exercises__hidden-toggle');
+                click('.exercises__map-toggle');
                 await settle();
                 await expectNoViolations();
             });

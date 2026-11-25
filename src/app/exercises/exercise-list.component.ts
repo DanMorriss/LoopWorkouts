@@ -76,6 +76,8 @@ export class ExerciseListComponent {
         };
     });
     protected readonly hiddenOpen = signal(false);
+    /** Whether the body map is open to pick muscles on; the chips do the same, folded or not. */
+    protected readonly mapOpen = signal(false);
     /** A blank exercise of your own in the editor, made when it's saved. */
     protected readonly drafting = signal(false);
     protected readonly draft = blankOwnExercise();

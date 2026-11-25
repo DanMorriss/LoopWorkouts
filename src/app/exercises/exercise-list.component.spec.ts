@@ -40,6 +40,12 @@ describe('ExerciseListComponent', () => {
             (b) => b.textContent!.replace(/check|expand_more|expand_less|add/g, '').trim() === text
         )!;
 
+    // The body map is folded away under the chips until opened
+    async function openMap() {
+        button('Pick on the body map').click();
+        await render();
+    }
+
     async function search(text: string) {
         const box = el().querySelector('#exercise-search') as HTMLInputElement;
         box.value = text;
@@ -125,8 +131,23 @@ describe('ExerciseListComponent', () => {
         expect(button('Forearms').getAttribute('aria-pressed')).toBe('false');
     });
 
+    it('folds the body map away until asked, with its toggle saying so', async () => {
+        await create();
+        expect(el().querySelector('app-body-map')).toBeNull();
+        expect(button('Pick on the body map').getAttribute('aria-expanded')).toBe('false');
+
+        await openMap();
+        expect(el().querySelector('#exercise-list-map app-body-map')).not.toBeNull();
+        expect(button('Hide the body map').getAttribute('aria-expanded')).toBe('true');
+
+        button('Hide the body map').click();
+        await render();
+        expect(el().querySelector('app-body-map')).toBeNull();
+    });
+
     it('picks muscles from the body map and keeps chips and URL in sync', async () => {
         await create();
+        await openMap();
 
         const shapeFor = (muscle: string) => {
             const label = `${muscle.charAt(0).toUpperCase()}${muscle.slice(1)}`;
@@ -150,6 +171,7 @@ describe('ExerciseListComponent', () => {
 
     it('picks abductors from the body map', async () => {
         await create();
+        await openMap();
 
         const abductors = el().querySelector('g[aria-label="Abductors"]') as SVGGElement;
         abductors.dispatchEvent(new MouseEvent('click'));
@@ -161,6 +183,7 @@ describe('ExerciseListComponent', () => {
 
     it('can de-select from the body-map selected-muscle list', async () => {
         await create();
+        await openMap();
 
         const shapeFor = (muscle: string) => {
             const label = `${muscle.charAt(0).toUpperCase()}${muscle.slice(1)}`;

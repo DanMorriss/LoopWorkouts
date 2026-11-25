@@ -5,13 +5,15 @@ import { HistoryEntry } from './models/history';
 import { routes } from './app.routes';
 import { AUTH_STORAGE_KEY } from './shared/state/auth-storage-key';
 
+// An hour ago, so it's in the log's last 4 weeks rather than behind Show older
+const startedAt = Date.now() - 60 * 60 * 1000;
 const entry: HistoryEntry = {
-    id: '1000000-1',
+    id: `${startedAt}-1`,
     workoutId: 'workout-1',
     title: 'Sprints',
-    startedAt: 1_000_000,
-    endedAt: 1_060_000,
-    updatedAt: 1_060_000,
+    startedAt,
+    endedAt: startedAt + 60_000,
+    updatedAt: startedAt + 60_000,
     activeSeconds: 60,
     roundsCompleted: 3,
     totalRounds: 3,

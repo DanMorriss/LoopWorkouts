@@ -407,6 +407,15 @@ describe('HistoryComponent', () => {
             fixture.detectChanges();
             expect(fixture.nativeElement.querySelector('app-body-map')).not.toBeNull();
         });
+        // Folded away until asked for
+        expect(text('.bars__label')).toHaveLength(0);
+        const toggle = fixture.nativeElement.querySelector(
+            '.muscles-week__bars-toggle'
+        ) as HTMLButtonElement;
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        toggle.click();
+        fixture.detectChanges();
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
         // A bar per muscle group, most worked first; the plank is too long ago to count
         const labels = text('.bars__label');
         const rows = text('.bars__row .sr-only');
@@ -440,6 +449,8 @@ describe('HistoryComponent', () => {
             fixture.detectChanges();
             expect(card().querySelectorAll('app-body-map')).toHaveLength(2);
         });
+        card().querySelector<HTMLButtonElement>('.muscles-week__bars-toggle')!.click();
+        fixture.detectChanges();
         const bar = (name: string) =>
             Array.from(card().querySelectorAll<HTMLButtonElement>('.bars__pick')).find(
                 (pick) => pick.querySelector('.bars__label')!.textContent!.trim() === name

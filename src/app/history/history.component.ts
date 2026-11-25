@@ -18,6 +18,7 @@ import { provideShownHistoryWithSample } from './shown-history-with-sample';
 import { UndoService } from '../shared/undo/undo.service';
 import { HistoryEntryComponent } from './history-entry/history-entry.component';
 import { ExercisesThisWeekComponent } from './exercises-this-week/exercises-this-week.component';
+import { WeekBestsComponent } from './week-bests/week-bests.component';
 import { MusclesThisWeekComponent } from './muscles-this-week/muscles-this-week.component';
 import { TimePerWeekComponent } from './time-per-week/time-per-week.component';
 import { entryName, formatDuration } from './history-format';
@@ -55,6 +56,7 @@ function dayKey(time: number): string {
         TopBarComponent,
         DatePipe,
         ExercisesThisWeekComponent,
+        WeekBestsComponent,
         HistoryEntryComponent,
         MusclesThisWeekComponent,
         RouterLink,

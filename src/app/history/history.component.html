@@ -23,14 +23,17 @@
                 {{ lastWeek().workouts === 1 ? 'workout' : 'workouts' }} · {{ lastWeek().time }}
             </p>
 
+            <!-- What's improved first: beating your last time is what the app is for -->
+            <app-week-bests class="history__card" />
+
             <app-time-per-week
-                class="history__weeks"
+                class="history__card"
                 [attr.data-tour]="shown.sample() ? 'progress-sample' : 'time-per-week'"
             />
 
-            <app-muscles-this-week class="history__muscles" />
+            <app-muscles-this-week class="history__card" />
 
-            <app-exercises-this-week class="history__exercises" />
+            <app-exercises-this-week class="history__card" />
 
             <!-- Every workout done, newest first, under the muscles they worked -->
             <h3 class="history__log-title">Log</h3>

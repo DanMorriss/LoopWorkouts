@@ -1,0 +1,25 @@
+@use 'interaction' as *;
+@use 'panel-card' as *;
+
+:host {
+    display: block;
+}
+
+.week-bests {
+    @include panel-card;
+}
+
+.week-bests__title {
+    @include panel-title;
+}
+
+.week-bests__none {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.week-bests__last {
+    @include text-link;
+}

@@ -128,7 +128,12 @@ export class TimePerWeekComponent {
                 time,
                 count,
                 calories,
-                when: [label, count, week.workouts > 0 ? calories : null]
+                // The week it is is still going, unlike "Last 7 days" over the page
+                when: [
+                    i === this.totals().length - 1 ? 'This week so far' : label,
+                    count,
+                    week.workouts > 0 ? calories : null,
+                ]
                     .filter((part) => part !== null)
                     .join(' · '),
                 spoken: [spokenTime(week.seconds), count, burnt?.spoken]

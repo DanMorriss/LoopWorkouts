@@ -209,6 +209,8 @@ export interface ExerciseWeek {
     eachSide: boolean;
     /** The heaviest, most reps and longest it set this week that beat an earlier session. */
     bests: ExerciseBests;
+    /** For each of `bests`, the best it beat: as it stood before that session. */
+    beaten: ExerciseBests;
 }
 
 /**
@@ -241,7 +243,9 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
         }
         const sided = (key: keyof Totals) =>
             tally.none[key] + Math.max(tally.left[key], tally.right[key]);
-        const bests = newBests(sessions);
+        const bests = Object.fromEntries(
+            Object.entries(newBests(sessions)).filter(([, best]) => best.at >= from)
+        ) as ExerciseBests;
         weeks.push({
             exerciseId,
             sets: sided('sets'),
@@ -250,10 +254,26 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
             seconds: sided('seconds'),
             volume,
             eachSide: tally.none.sets === 0,
-            bests: Object.fromEntries(Object.entries(bests).filter(([, best]) => best.at >= from)),
+            bests,
+            beaten: beatenBests(sessions, bests),
         });
     }
     return weeks;
+}
+
+/** The best each of `bests` beat: the bests of the sessions before the one it was set in. */
+function beatenBests(
+    sessions: readonly ExerciseSession[],
+    bests: ExerciseBests
+): ExerciseBests {
+    const beaten: Record<string, unknown> = {};
+    for (const [kind, best] of Object.entries(bests) as [keyof ExerciseBests, { at: number }][]) {
+        const before = exerciseBests(sessions.filter((session) => session.startedAt < best.at));
+        if (before[kind]) {
+            beaten[kind] = before[kind];
+        }
+    }
+    return beaten as ExerciseBests;
 }
 
 interface Totals {

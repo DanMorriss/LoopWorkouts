@@ -15,9 +15,8 @@
 }
 
 .weeks__title {
-    margin: 0;
-    color: var(--text-strong);
-    font-size: 1rem;
+    @include panel-title;
+    margin-bottom: 0;
 }
 
 .weeks__empty {

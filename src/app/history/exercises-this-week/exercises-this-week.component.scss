@@ -12,14 +12,7 @@
 }
 
 .exercises-week__title {
-    margin: 0 0 0.5rem;
-    color: var(--text-strong);
-    font-size: 1rem;
-    text-align: center;
-}
-
-.exercises-week__bests {
-    margin-bottom: 0.75rem;
+    @include panel-title;
 }
 
 // Over the list, saying what the pips are

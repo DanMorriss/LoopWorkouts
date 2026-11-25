@@ -5,33 +5,13 @@
     display: block;
 }
 
-// "New bests", and which is shown at the right
-.bests__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 0.25rem;
-}
-
-.bests__title {
-    margin: 0;
-    color: var(--glow-text);
-    font-weight: 600;
-    @include caps(0.72rem);
-}
-
-.bests__position {
-    color: var(--text-muted);
-    font-variant-numeric: tabular-nums;
-    @include small-type(0.75rem);
-}
-
 // The record big, what it is over it and its exercise under it, tinted in the brand cyan
 .bests__tile {
     display: grid;
     grid-template-areas:
         'label chevron'
         'value chevron'
+        'was chevron'
         'name chevron';
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -67,8 +47,15 @@
 .bests__value {
     grid-area: value;
     color: var(--text-strong);
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.bests__was {
+    grid-area: was;
+    color: var(--text);
+    font-size: 0.85rem;
     font-variant-numeric: tabular-nums;
 }
 

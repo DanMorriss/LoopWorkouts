@@ -7,7 +7,7 @@ import {
     viewChild,
     ViewContainerRef,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import {
     CarouselComponent,
@@ -35,7 +35,7 @@ const loadBodyMap = () =>
 /**
  * A card with the muscles used in the last seven days, on the Progress page and Today: a body
  * map shaded by sets (PRG-6), swiped to the list of muscles it shows, then a bar per muscle
- * group against the sets a week aimed for (PRG-8). Tapping a muscle on the map, the list or a
+ * group against the sets a week aimed for (PRG-8), folded away under Show sets per muscle. Tapping a muscle on the map, the list or a
  * bar picks it in all three, with a way to the exercises for it between the map and the bars.
  * Nothing shows with no sets in the week, so a blank map is never shown. `compact` (Today)
  * leaves the bars out, with See this week's progress, a button to them on Progress.
@@ -88,18 +88,37 @@ const loadBodyMap = () =>
                     }
                 </div>
                 @if (compact()) {
-                    <a class="btn-pill muscles-week__more" routerLink="/history">
+                    <a
+                        class="btn-pill muscles-week__more"
+                        routerLink="/history"
+                        [queryParams]="{ bars: 'open' }"
+                    >
                         <app-icon>insights</app-icon>
                         See this week's progress
                         <app-icon>chevron_right</app-icon>
                     </a>
                 } @else {
-                    <app-muscle-bars
-                        class="muscles-week__bars"
-                        [balance]="musclesWorked().balance"
-                        [selected]="selected()"
-                        (muscleTapped)="pick($event)"
-                    />
+                    <!-- The sets per muscle against their aims, folded away: the map says it at a
+                         glance, and the bars are for the detail -->
+                    <button
+                        type="button"
+                        class="muscles-week__bars-toggle"
+                        [attr.aria-controls]="id + '-bars'"
+                        [attr.aria-expanded]="barsOpen()"
+                        (click)="barsOpen.set(!barsOpen())"
+                    >
+                        {{ barsOpen() ? 'Hide sets per muscle' : 'Show sets per muscle' }}
+                        <app-icon>{{ barsOpen() ? 'expand_less' : 'expand_more' }}</app-icon>
+                    </button>
+                    @if (barsOpen()) {
+                        <app-muscle-bars
+                            class="muscles-week__bars"
+                            [id]="id + '-bars'"
+                            [balance]="musclesWorked().balance"
+                            [selected]="selected()"
+                            (muscleTapped)="pick($event)"
+                        />
+                    }
                 }
             </section>
         }
@@ -139,6 +158,14 @@ export class MusclesThisWeekComponent {
             balance,
         };
     });
+
+    /**
+     * Whether the bars are open, on Progress: folded to start with, unless come to for them
+     * (`?bars=open`, from Today's See this week's progress).
+     */
+    protected readonly barsOpen = signal(
+        inject(ActivatedRoute, { optional: true })?.snapshot.queryParamMap.get('bars') === 'open'
+    );
 
     /** The muscle picked on the map, the list or the bars, or null. */
     protected readonly selected = signal<MuscleGroup | null>(null);

@@ -56,7 +56,8 @@
     align-items: center;
     gap: 0.5rem;
     color: var(--text-strong);
-    font-size: 0.95rem;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .exercise-card__tag {
@@ -72,21 +73,14 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.35rem;
-}
-
-// The body map's main shade, so the card matches the exercise's page
-.exercise-card__muscle {
-    padding: 0.1rem 0.5rem;
-    border-radius: 999px;
-    background: var(--muscle-main);
-    color: var(--muscle-main-ink);
-    @include small-type(0.7rem);
-}
-
-.exercise-card__equipment {
+    gap: 0 0.35rem;
     color: var(--text-muted);
-    @include small-type(0.75rem);
+    @include small-type(0.8rem);
+}
+
+// What it works in the text colour, a step above the equipment
+.exercise-card__muscles {
+    color: var(--text);
 }
 
 // Latest and best (PRG-3), once it's been done in a workout

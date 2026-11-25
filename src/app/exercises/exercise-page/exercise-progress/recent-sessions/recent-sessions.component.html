@@ -1,4 +1,4 @@
-<h4 [id]="id() + '-recent'" class="sessions__heading">Recent sessions</h4>
+<h4 [id]="id() + '-recent'" class="sessions__heading">Recent workouts</h4>
 <ul class="sessions" [attr.aria-labelledby]="id() + '-recent'">
     @for (session of shown(); track session.entryId) {
         <li class="session">

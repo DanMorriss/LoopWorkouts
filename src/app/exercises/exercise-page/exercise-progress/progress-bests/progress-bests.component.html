@@ -5,12 +5,7 @@
             <dd>
                 <span class="best__value" aria-hidden="true">{{ best.text }}</span>
                 <span class="sr-only">{{ best.spoken }}</span>
-                <span class="best__when">
-                    @if (best.detail) {
-                        {{ best.detail }} ·
-                    }
-                    {{ best.at | date: dateFormat(best.at) }}
-                </span>
+                <span class="best__when">{{ best.at | date: dateFormat(best.at) }}</span>
             </dd>
         </div>
     }

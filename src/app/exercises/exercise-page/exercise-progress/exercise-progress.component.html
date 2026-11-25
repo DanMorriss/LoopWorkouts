@@ -1,5 +1,6 @@
 <section class="progress" [attr.aria-labelledby]="id + '-heading'">
-    <h3 [id]="id + '-heading'" class="progress__heading">Progress</h3>
+    <!-- Focusable, for Your progress at the top of the page to go to -->
+    <h3 [id]="id + '-heading'" class="progress__heading" tabindex="-1">Progress</h3>
 
     @if (sessions().length === 0) {
         <p class="progress__empty">

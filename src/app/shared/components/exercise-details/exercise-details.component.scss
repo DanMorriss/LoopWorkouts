@@ -45,10 +45,6 @@
     color: var(--text);
     font-size: 0.8rem;
 
-    &--measured {
-        border-color: var(--accent-line);
-    }
-
     &--own {
         border-color: var(--reps);
     }
@@ -59,6 +55,7 @@
     color: var(--text);
     font-size: 0.9rem;
     line-height: 1.6;
+    text-wrap: pretty;
 }
 
 // Yours, so it's set apart from the exercise's own text
@@ -99,6 +96,8 @@
     padding-left: 1.25rem;
     font-size: 0.85rem;
     line-height: 1.55;
+    // No word left alone on a step's or tip's last line
+    text-wrap: pretty;
 }
 
 // Tailwind's reset takes list markers away; the steps are numbered and the tips bulleted

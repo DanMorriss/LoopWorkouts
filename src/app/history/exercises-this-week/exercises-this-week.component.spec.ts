@@ -126,7 +126,7 @@ describe('ExercisesThisWeekComponent (PRG-13)', () => {
         // Squats' first weight is its heaviest, but 50 reps 10 days ago stands; bench's 8 beat
         // its 6, but 70 kg stands
         expect(texts('.bests__label')).toEqual(['Heaviest', 'Most reps']);
-        expect(texts('.bests__value')).toEqual(['60 kg × 10', '8 @ 60 kg']);
+        expect(texts('.bests__value')).toEqual(['60 kg × 10', '60 kg × 8']);
         expect(texts('.bests__name')).toEqual(['Back squat', 'Bench press']);
         expect(texts('.bests__tile .sr-only')).toEqual([
             'New best, heaviest: 60 kg for 10 reps, Back squat',

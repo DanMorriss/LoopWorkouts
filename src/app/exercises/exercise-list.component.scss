@@ -25,12 +25,17 @@
     margin-bottom: 0.9rem;
 }
 
-// A link-like disclosure: the hidden exercises
+.exercises__chips {
+    margin-bottom: 0.25rem;
+}
+
+// Link-like disclosures: the body map, and the hidden exercises
+.exercises__map-toggle,
 .exercises__hidden-toggle {
     @include link-button;
 }
 
-.exercises__chips {
+.exercises__map-toggle {
     margin-bottom: 0.5rem;
 }
 

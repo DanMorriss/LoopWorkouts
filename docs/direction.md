@@ -23,7 +23,7 @@ Agreed October 2026. This sets the direction; the stories are in [features](feat
 ### Progress, in the workout and after it
 
 1. **In the workout:** each rep step shows what you did last time ("Last time: 8 × 60 kg"), and the workout summary calls out new personal bests.
-2. **Progress pages:** a body map of the muscles worked this week, a list of exercises, and a page per exercise with a chart over time, its bests (heaviest weight, most reps at a weight, estimated one-rep max, and the longest hold for timed exercises), and recent sessions.
+2. **Progress pages:** a body map of the muscles worked this week, a list of exercises, and a page per exercise with a chart over time, its bests (heaviest weight, most reps at a weight, and the longest hold for timed exercises), and recent workouts.
 3. **Suggested next weight** comes later, once there's history to base it on.
 
 ### Data that doesn't get lost, on every device

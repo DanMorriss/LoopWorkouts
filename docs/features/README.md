@@ -108,7 +108,7 @@ Status: ✅ done, ◐ partly, — not started. The iOS column fills in as a port
 | PRG-1  | See what I did last time, mid-workout                                        | ✅  | —   | [progress](progress.md)                       |
 | PRG-2  | Be told about personal bests when I finish                                   | ✅  | —   | [progress](progress.md)                       |
 | PRG-3  | See a list of my exercises with their latest and best                        | ✅  | —   | [progress](progress.md)                       |
-| PRG-4  | See an exercise's chart, bests and recent sessions                           | ✅  | —   | [progress](progress.md)                       |
+| PRG-4  | See an exercise's chart, bests and recent workouts                           | ✅  | —   | [progress](progress.md)                       |
 | PRG-5  | Get a suggested next weight                                                  | ✅  | —   | [progress](progress.md)                       |
 | PRG-6  | See which muscles I've worked this week, on the body map                     | ✅  | —   | [progress](progress.md)                       |
 | PRG-7  | Be told when I've done the most rounds yet in a time limit                   | ✅  | —   | [progress](progress.md)                       |

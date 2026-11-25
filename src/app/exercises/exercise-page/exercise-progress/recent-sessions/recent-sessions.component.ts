@@ -10,7 +10,7 @@ import { dateFormatFor } from '../../../progress-format';
 const RECENT = 5;
 
 /**
- * An exercise's recent sessions (PRG-4), newest first, with their sets as in the history, each
+ * An exercise's recent workouts (PRG-4), newest first, with their sets as in the history, each
  * linking to its workout there. The last few show, and the rest on Show all.
  */
 @Component({

@@ -31,17 +31,34 @@
             (selectedChange)="setMuscles($event)"
         />
 
-        <section class="exercises__map" aria-label="Pick muscles on body map">
-            <app-body-map
-                [main]="selectedMuscles()"
-                [tappable]="true"
-                [toggles]="true"
-                [removableLabels]="true"
-                emptyText="Tap a muscle to find exercises for it."
-                (muscleTapped)="pickMuscle($event)"
-                (muscleCleared)="pickMuscle($event)"
-            />
-        </section>
+        <!-- The figure is a second way to pick muscles, folded away so the list starts high -->
+        <button
+            type="button"
+            class="exercises__map-toggle"
+            aria-controls="exercise-list-map"
+            [attr.aria-expanded]="mapOpen()"
+            (click)="mapOpen.set(!mapOpen())"
+        >
+            {{ mapOpen() ? 'Hide the body map' : 'Pick on the body map' }}
+            <mat-icon aria-hidden="true">{{ mapOpen() ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+        @if (mapOpen()) {
+            <section
+                id="exercise-list-map"
+                class="exercises__map"
+                aria-label="Pick muscles on body map"
+            >
+                <app-body-map
+                    [main]="selectedMuscles()"
+                    [tappable]="true"
+                    [toggles]="true"
+                    [removableLabels]="true"
+                    emptyText="Tap a muscle to find exercises for it."
+                    (muscleTapped)="pickMuscle($event)"
+                    (muscleCleared)="pickMuscle($event)"
+                />
+            </section>
+        }
 
         <app-exercise-cards [cards]="shown()" [clearable]="filtered()" (cleared)="clearFilters()" />
 

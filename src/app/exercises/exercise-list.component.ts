@@ -5,23 +5,16 @@ import { ExerciseEditorComponent } from '../shared/components/exercise-editor/ex
 import { EquipmentFilterComponent } from '../shared/components/equipment-filter/equipment-filter.component';
 import { BodyMapComponent } from '../shared/components/body-map/body-map.component';
 import { Exercise, exercisePath, MuscleGroup } from '../models/exercise';
-import {
-    exerciseBests,
-    ExerciseSession,
-    progressMeasure,
-    sessionsByExercise,
-} from '../models/progress';
-import { WeightUnit } from '../models/weight';
-import { describeSets } from '../history/history-format';
+import { sessionsByExercise } from '../models/progress';
 import { HistoryStore } from '../shared/state/history-store.service';
-import { dateFormatFor, headlineBest } from './progress-format';
+import { latestAndBest } from './progress-format';
 import { blankOwnExercise, ExerciseStore } from '../shared/state/exercise-store.service';
 import { SettingsStore } from '../shared/state/settings-store.service';
 import { parseMusclesParam, serialiseMusclesParam } from './muscle-filter-query';
 import { listBackLink } from './list-from';
 import { TopBarComponent } from '../nav/top-bar/top-bar.component';
 import { SwipeBackDirective } from '../nav/swipe-back.directive';
-import { CardProgress, exerciseCard } from './exercise-card/exercise-card.component';
+import { exerciseCard } from './exercise-card/exercise-card.component';
 import { ExerciseCardsComponent } from './exercise-cards/exercise-cards.component';
 import { filterExercises } from './exercise-filter';
 import { MuscleChipsComponent } from '../shared/components/muscle-chips/muscle-chips.component';
@@ -76,6 +69,8 @@ export class ExerciseListComponent {
         };
     });
     protected readonly hiddenOpen = signal(false);
+    /** Whether the body map is open to pick muscles on; the chips do the same, folded or not. */
+    protected readonly mapOpen = signal(false);
     /** A blank exercise of your own in the editor, made when it's saved. */
     protected readonly drafting = signal(false);
     protected readonly draft = blankOwnExercise();
@@ -99,7 +94,7 @@ export class ExerciseListComponent {
             const sessions = this.sessions().get(exercise.id);
             return {
                 ...exerciseCard(exercise, otherName, queryParams),
-                ...(sessions?.length ? { progress: cardProgress(sessions, unit) } : {}),
+                ...(sessions?.length ? { progress: latestAndBest(sessions, unit) } : {}),
             };
         });
     });
@@ -173,18 +168,4 @@ export class ExerciseListComponent {
         this.drafting.set(false);
         document.getElementById('exercise-list-new')?.focus();
     }
-}
-
-// Its latest session's sets, as in the history, and its headline best
-function cardProgress(sessions: readonly ExerciseSession[], unit: WeightUnit): CardProgress {
-    const latest = sessions[0];
-    const lines = describeSets(latest.sets, unit);
-    const measure = progressMeasure(sessions)!;
-    return {
-        latest: lines.map((line) => line.text).join(' + '),
-        latestSpoken: lines.map((line) => line.spoken).join(', then '),
-        latestAt: latest.startedAt,
-        dateFormat: dateFormatFor(latest.startedAt),
-        best: headlineBest(exerciseBests(sessions), measure, unit),
-    };
 }

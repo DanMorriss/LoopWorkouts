@@ -14,9 +14,11 @@
     margin-top: 1.5rem;
 }
 
-// Section headings: the reading face, semibold, as all headings are
+// Section headings: the reading face, semibold, as all headings are. Gone to from the top
+// of the page, it stops clear of the top bar.
 .progress__heading {
     margin: 0;
+    scroll-margin-top: 4.5rem;
     font-size: 1rem;
     color: var(--text-strong);
 }
@@ -25,7 +27,7 @@
     margin: 0.5rem 0 0;
     font-family: inherit;
     color: var(--text-strong);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
 }
 

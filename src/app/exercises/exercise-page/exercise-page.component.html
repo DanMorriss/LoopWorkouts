@@ -11,6 +11,11 @@
             <h2 class="exercise__name" id="exercise-page-title" tabindex="-1">
                 {{ exercise.name }}
             </h2>
+            <!-- At rest, what to beat comes first; the details mid-workout leave it out -->
+            <app-exercise-last-time
+                [exerciseId]="exercise.id"
+                progressId="exercise-progress-heading"
+            />
             <app-exercise-details
                 [exercise]="exercise"
                 [emptyHint]="builtIn() ? '' : 'No how-to steps or tips yet. Add them with Edit.'"

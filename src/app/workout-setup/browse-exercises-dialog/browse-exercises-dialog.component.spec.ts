@@ -65,9 +65,7 @@ describe('BrowseExercisesDialogComponent', () => {
         const squat = cards()[names().indexOf('Back squat')];
         expect(squat.tagName).toBe('BUTTON');
         expect(squat.querySelector('.exercise-card__equipment')!.textContent).toContain('Barbell');
-        expect(
-            Array.from(squat.querySelectorAll('.exercise-card__muscle')).map((m) => m.textContent)
-        ).toContain('Quads');
+        expect(squat.querySelector('.exercise-card__muscles')!.textContent).toContain('Quads');
     });
 
     it('picks the exercise clicked', async () => {

@@ -62,7 +62,7 @@ export function isMostRounds(entry: HistoryEntry, history: readonly HistoryEntry
     return earlier.length > 0 && earlier.every((other) => compareScores(score, other) > 0);
 }
 
-/** One workout's sets of one exercise (PRG-4's recent sessions, and a point on its chart). */
+/** One workout's sets of one exercise (PRG-4's recent workouts, and a point on its chart). */
 export interface ExerciseSession {
     /** The history entry it's from. */
     entryId: string;
@@ -102,28 +102,24 @@ export function sessionsByExercise(
 }
 
 /**
- * What an exercise's progress is measured by: the best estimated one-rep max where any set
- * had a weight, otherwise the most reps in a set, otherwise (only timed sets) the longest.
+ * What an exercise's progress is measured by: the heaviest weight where it's been done at more
+ * than one, otherwise the most reps in a set (so one kettlebell, always the same, is measured
+ * by its reps), otherwise (only timed sets) the longest.
  */
 export type ProgressMeasure = 'weight' | 'reps' | 'time';
 
 export function progressMeasure(sessions: readonly ExerciseSession[]): ProgressMeasure | null {
     const sets = sessions.flatMap((session) => session.sets);
-    if (sets.some((set) => !isTimedSet(set) && set.weight !== undefined)) {
+    const weights = new Set(
+        sets.flatMap((set) => (!isTimedSet(set) && set.weight !== undefined ? [set.weight] : []))
+    );
+    if (weights.size > 1) {
         return 'weight';
     }
     if (sets.some((set) => !isTimedSet(set))) {
         return 'reps';
     }
     return sets.length > 0 ? 'time' : null;
-}
-
-/**
- * The estimated one-rep max, in kg, by the Epley formula: weight × (1 + reps ÷ 30). One rep
- * is the weight itself.
- */
-export function estimatedOneRepMax(weight: number, reps: number): number {
-    return reps === 1 ? weight : weight * (1 + reps / 30);
 }
 
 /** A best, and when it was set. */
@@ -137,8 +133,6 @@ interface Best {
 export interface ExerciseBests {
     /** The heaviest weight lifted for at least 1 rep, and the most reps done at it. */
     heaviest?: Best & { weight: number; reps: number };
-    /** The best estimated one-rep max, in kg, and the set it came from. */
-    oneRepMax?: Best & { estimate: number; weight: number; reps: number };
     /** The most reps in a set; of equals, the heaviest. Its weight is missing for none. */
     mostReps?: Best & { reps: number; weight?: number };
     /** The longest timed set, in seconds. */
@@ -178,10 +172,6 @@ export function exerciseBests(sessions: readonly ExerciseSession[]): ExerciseBes
             ) {
                 bests.heaviest = { ...when, weight, reps };
             }
-            const estimate = estimatedOneRepMax(weight, reps);
-            if (estimate > (bests.oneRepMax?.estimate ?? 0)) {
-                bests.oneRepMax = { ...when, estimate, weight, reps };
-            }
         }
     }
     return bests;
@@ -218,7 +208,7 @@ export interface ExerciseWeek {
     /** Whether every set was one side of it, so the totals are each side's. */
     eachSide: boolean;
     /** The heaviest, most reps and longest it set this week that beat an earlier session. */
-    bests: Omit<ExerciseBests, 'oneRepMax'>;
+    bests: ExerciseBests;
 }
 
 /**
@@ -251,9 +241,7 @@ export function exerciseWeeks(history: readonly HistoryEntry[], from: number): E
         }
         const sided = (key: keyof Totals) =>
             tally.none[key] + Math.max(tally.left[key], tally.right[key]);
-        // Not the one-rep max: it's a guess, not something done
         const bests = newBests(sessions);
-        delete bests.oneRepMax;
         weeks.push({
             exerciseId,
             sets: sided('sets'),
@@ -280,8 +268,8 @@ function totals(): Totals {
 }
 
 /**
- * A session's point on the chart, as `measure` measures it: its best estimated one-rep max
- * in kg, its most reps in a set, or its longest set in seconds. Null if it has no set that
+ * A session's point on the chart, as `measure` measures it: its heaviest weight in kg, its
+ * most reps in a set, or its longest set in seconds. Null if it has no set that
  * counts, e.g. a bodyweight session on a chart of weights.
  */
 export function sessionValue(session: ExerciseSession, measure: ProgressMeasure): number | null {
@@ -293,9 +281,7 @@ export function sessionValue(session: ExerciseSession, measure: ProgressMeasure)
             : session.sets
                   .filter((set): set is RepSet => !isTimedSet(set))
                   .filter((set) => measure === 'reps' || set.weight !== undefined)
-                  .map((set) =>
-                      measure === 'reps' ? set.reps : estimatedOneRepMax(set.weight!, set.reps)
-                  );
+                  .map((set) => (measure === 'reps' ? set.reps : set.weight!));
     return values.length > 0 ? Math.max(...values) : null;
 }
 

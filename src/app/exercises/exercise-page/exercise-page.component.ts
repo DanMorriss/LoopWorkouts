@@ -6,6 +6,7 @@ import { map } from 'rxjs';
 import { ExerciseDetailsComponent } from '../../shared/components/exercise-details/exercise-details.component';
 import { ExerciseEditorComponent } from '../../shared/components/exercise-editor/exercise-editor.component';
 import { ExerciseProgressComponent } from './exercise-progress/exercise-progress.component';
+import { ExerciseLastTimeComponent } from './exercise-last-time/exercise-last-time.component';
 import {
     WorkoutChoice,
     WorkoutChoiceDialogComponent,
@@ -27,8 +28,9 @@ import { UndoService } from '../../shared/undo/undo.service';
 import { counted } from '../../shared/format-count';
 
 /**
- * One exercise (EXR-7, EXR-8): what it needs, its description and your note on it, the
- * muscles it works on the body map, then how to do it and tips. It can be added to a workout,
+ * One exercise (EXR-7, EXR-8): once done, its latest sets and best under its name (PRG-3),
+ * then what it needs, its description and your note on it, the muscles it works on the body
+ * map, how to do it and tips, and its progress at the end (PRG-4). It can be added to a workout,
  * new or in the library, which opens in Create with it at the end (EXR-12). A built-in one takes a note;
  * your own can be edited. Either can be hidden from the picker, and your own deleted unless a
  * workout uses it (one with history is hidden instead, so its history keeps its name).
@@ -47,6 +49,7 @@ import { counted } from '../../shared/format-count';
         ExerciseDetailsComponent,
         ExerciseEditorComponent,
         ExerciseProgressComponent,
+        ExerciseLastTimeComponent,
         SwipeBackDirective,
     ],
     templateUrl: './exercise-page.component.html',

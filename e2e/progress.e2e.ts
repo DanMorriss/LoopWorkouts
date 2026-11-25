@@ -128,10 +128,8 @@ test.describe("an exercise's progress", () => {
             const best = (term: string) =>
                 progress.getByRole('term').filter({ hasText: term }).locator('+ dd');
             await expect(best('Heaviest')).toContainText('100 kg × 5');
-            await expect(best('Estimated one-rep max')).toContainText('116.5 kg');
-            await expect(best('Estimated one-rep max')).toContainText('from 100 kg × 5');
-            await expect(best('Most reps')).toContainText('12 @ 60 kg');
-            const chart = progress.getByRole('group', { name: 'Estimated one-rep max' });
+            await expect(best('Most reps')).toContainText('60 kg × 12');
+            const chart = progress.getByRole('group', { name: 'Heaviest weight' });
             await expect(chart).toContainText('7 workouts in all time');
 
             // The chart by keys: from the latest, Home to the first
@@ -151,7 +149,7 @@ test.describe("an exercise's progress", () => {
             await expect(progress.getByRole('table').getByRole('row')).toHaveCount(3);
 
             const sessions = progress
-                .getByRole('list', { name: 'Recent sessions' })
+                .getByRole('list', { name: 'Recent workouts' })
                 .getByRole('link');
             await expect(sessions).toHaveCount(5);
             await progress.getByRole('button', { name: 'Show all 7' }).click();
@@ -265,11 +263,11 @@ test.describe("the week's exercises", () => {
             await expect(rows.nth(2)).toContainText('Plank');
             await expect(rows.nth(2)).toContainText('1 minute in 1 set');
 
-            // The new bests over them, a tile each; a first time sets none
+            // The new bests over them, a tile each, one where the heaviest is the most reps; a
+            // first time sets none
             const bests = week.getByRole('group', { name: 'New bests' });
             await expect(bests.getByRole('link')).toHaveText([
-                /New best, heaviest: 62.5 kg for 10 reps, Back squat/,
-                /New best, most reps: 10 reps at 62.5 kg, Back squat/,
+                /New best, heaviest and most reps: 62.5 kg for 10 reps, Back squat/,
                 /New best, longest: 1 minute, Plank/,
             ]);
 

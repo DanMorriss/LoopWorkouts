@@ -105,18 +105,20 @@ test.describe('signed in, keeping the body weight with the account', () => {
             const supabase = new FakeSupabase(page);
             await supabase.install();
             await app.goto('/account');
-            const tick = page.getByRole('checkbox', {
-                name: /my body weight, which is health data/,
-            });
+            // Under Sync, beside keeping notes
+            const keep = page
+                .getByRole('region', { name: 'Sync' })
+                .getByRole('switch', { name: 'Keep my body weight with my account' });
             const hint = page.getByText(/^For calories burnt\./);
-            await expect(tick).not.toBeChecked();
+            await expect(keep).not.toBeChecked();
             await expect(hint).toHaveText('For calories burnt. Kept on this device only');
 
-            await tick.check();
+            await keep.click();
+            await expect(keep).toBeChecked();
             await expect(hint).toHaveText('For calories burnt. Kept with your account');
-            await expect(
-                page.getByRole('status').filter({ hasText: 'Agreed on 11 November 2026.' })
-            ).toBeVisible();
+            await expect(keep).toHaveAccessibleDescription(
+                /^Agreed on 11 November 2026\. It's health data/
+            );
             expect(supabase.callsTo('rpc/give_body_weight_consent')[0].body).toEqual({
                 notice_date: '2026-11-21',
             });
@@ -125,7 +127,8 @@ test.describe('signed in, keeping the body weight with the account', () => {
                 .poll(() => JSON.stringify(supabase.callsTo('rpc/push_records')))
                 .toContain('"kind":"body-weight"');
 
-            await tick.uncheck();
+            await keep.click();
+            await expect(keep).not.toBeChecked();
             await expect(hint).toHaveText('For calories burnt. Kept on this device only');
             expect(supabase.callsTo('rpc/withdraw_body_weight_consent')).toHaveLength(1);
             // It stays on this device

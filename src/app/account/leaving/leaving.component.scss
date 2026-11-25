@@ -1,0 +1,43 @@
+:host {
+    display: block;
+}
+
+.leaving__hint {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+// The next way to leave, after the last one's button
+.leaving__gap {
+    margin-top: 1.25rem;
+}
+
+.leaving__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.leaving__ask {
+    margin-top: 0.75rem;
+}
+
+.leaving__warning {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-danger);
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.leaving__status:not(:empty) {
+    margin-top: 0.75rem;
+}
+
+.leaving__clear {
+    margin-top: 0.75rem;
+}

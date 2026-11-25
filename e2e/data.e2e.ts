@@ -83,7 +83,7 @@ test.describe('import', () => {
     test.use({ storage: seed.workouts([legs]) });
 
     test(
-        'REG-DATA-02 import a backup, and the AI prompt and Paste plan',
+        'REG-DATA-02 import a backup, and Bring in a plan',
         { tag: '@p1' },
         async ({ app, page, context }) => {
             await app.goto('/account');
@@ -161,21 +161,23 @@ test.describe('import', () => {
                 .poll(async () => (await app.stored<Workout[]>('workouts'))!.length)
                 .toBe(saved.length);
 
+            // Step 1 copies the prompt, which the dialog starts on
             await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-            await page.getByRole('button', { name: 'Copy AI prompt' }).click();
+            const paste = page.getByRole('button', { name: 'Bring in a plan' });
+            await paste.click();
+            const dialog = page.getByRole('dialog', { name: 'Bring in a plan' });
+            const copy = dialog.getByRole('button', { name: 'Copy AI prompt' });
+            await expect(copy).toBeFocused();
+            await copy.click();
             await expect(
-                page.getByText('Prompt copied. Paste it into an AI chat, then add your plan.')
+                dialog.getByText('Copied. Paste it into an AI chat, then add your plan.')
             ).toBeVisible();
             const prompt = await page.evaluate(() => navigator.clipboard.readText());
             expect(prompt.trimEnd()).toMatch(/MY PLAN:?$/);
             expect(prompt).toContain('Back squat');
 
-            // What the AI wrote, pasted whole: words, a code block and notes after it
-            const paste = page.getByRole('button', { name: 'Paste plan' });
-            await paste.click();
-            const dialog = page.getByRole('dialog', { name: 'Paste plan' });
-            const reply = dialog.getByRole('textbox', { name: "The AI's reply" });
-            await expect(reply).toBeFocused();
+            // Step 2, what the AI wrote, pasted whole: words, a code block and notes after it
+            const reply = dialog.getByRole('textbox', { name: "2. Paste the AI's reply" });
             await reply.fill('{"app": "something-else"}');
             await dialog.getByRole('button', { name: 'Import' }).click();
             await expect(dialog.getByRole('alert')).toContainText(

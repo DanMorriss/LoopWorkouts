@@ -53,9 +53,10 @@ test.describe('signing in by email', () => {
 
             supabase.otp = 'abort';
             await form.send.click();
-            await expect(
-                page.getByText("The email couldn't be sent. Check your connection and try again.")
-            ).toBeVisible();
+            // In red under the email, and read out
+            await expect(page.getByRole('alert')).toHaveText(
+                "The email couldn't be sent. Check your connection and try again."
+            );
         }
     );
 
@@ -99,11 +100,14 @@ test.describe('signing in by email', () => {
         await page.keyboard.type('123456');
         await expect(page.getByRole('textbox', { name: 'Digit 6 of 6' })).toBeFocused();
         // Sent as soon as the last digit's in, with nothing to press
-        await expect(
-            page.getByText(
-                "That code didn't work: it may be wrong, or expired. Check it, or send another code."
-            )
-        ).toBeVisible();
+        // Under the code, which is marked wrong until it's changed
+        await expect(page.getByRole('alert')).toHaveText(
+            "That code didn't work: it may be wrong, or expired. Check it, or send another code."
+        );
+        await expect(page.getByRole('textbox', { name: 'Digit 6 of 6' })).toHaveAttribute(
+            'aria-invalid',
+            'true'
+        );
         expect(supabase.callsTo('auth/v1/verify')).toHaveLength(1);
 
         supabase.verify = 200;
@@ -121,8 +125,11 @@ test.describe('signing in by email', () => {
         const sync = page.getByRole('region', { name: 'Sync' });
         await expect(sync.getByText('Signed in as me@example.com.')).toBeVisible();
         await expect(sync.getByText(/Synced at /)).toBeVisible();
-        await expect(sync.getByRole('button', { name: 'Sign out' })).toBeVisible();
-        await expect(sync.getByRole('button', { name: 'Delete account' })).toBeVisible();
+        // Signing out and deleting are at the foot of the page, under Leaving
+        const leaving = page.getByRole('region', { name: 'Leaving' });
+        await expect(leaving.getByRole('button', { name: 'Sign out' })).toBeVisible();
+        await expect(leaving.getByRole('button', { name: 'Delete account' })).toBeVisible();
+        await expect(sync.getByRole('button')).toHaveCount(0);
         // An account that keeps notes already isn't asked again
         await expect(
             page.getByRole('switch', { name: 'Keep notes with my account' })
@@ -359,12 +366,15 @@ test.describe('signed in', () => {
         supabase.deleteAccount = 500;
         await remove.click();
         await page.getByRole('button', { name: 'Delete my account' }).click();
-        await expect(
-            page.getByText("Your account couldn't be deleted. Check your connection and try again.")
-        ).toBeVisible();
+        await expect(page.getByRole('alert')).toHaveText(
+            "Your account couldn't be deleted. Check your connection and try again."
+        );
+        // The warning closes, to be tried again from Delete account
+        await expect(remove).toBeFocused();
         expect(await app.storageItem(AUTH_KEY)).not.toBeNull();
 
         supabase.deleteAccount = 204;
+        await remove.click();
         await page.getByRole('button', { name: 'Delete my account' }).click();
         await expect(app.undoBar).toContainText(
             'Your account has been deleted, and its data removed from this device.'

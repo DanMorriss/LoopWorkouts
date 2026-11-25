@@ -90,7 +90,7 @@ describe('ProfileComponent', () => {
                 fixture.nativeElement.querySelector(`#${group.getAttribute('aria-describedby')}`)
                     .textContent
             ).toBe(
-                'Choosing one sets the sets a week below to suit it: 10 for Muscle, 6 for Fitness'
+                'Choosing one changes Sets a week per muscle to suit it: 10 for Muscle, 6 for Fitness'
             );
         });
 

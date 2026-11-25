@@ -22,6 +22,32 @@
     color: var(--text-danger);
 }
 
+.paste__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.paste__step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.paste__step-name {
+    color: var(--text-strong);
+    font-weight: 600;
+}
+
+.paste__copy {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+}
+
+// Code the AI wrote, so in a monospace face to read as it was written
 .paste__text {
     resize: vertical;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

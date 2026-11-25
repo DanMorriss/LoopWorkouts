@@ -181,7 +181,8 @@ The palette is cool and night-time: navy and slate neutrals, sky and cyan for wh
 
 - **Display** (Audiowide, 400, 1.6rem for a page's title and 1.3rem for a dialog's): page titles, dialog titles and the workout's big numbers, and a showcase card's title (1.1rem) and count. Its tracking follows its size: none at 1.25rem, tighter as it grows (`display-tracking`). The one larger use is the name on the welcome screen, 1.75rem: the app's wordmark, once, rather than a page's title. Each of the setup's questions is its page's title (`page-title`).
 - **Headline** (system, 600, 1.5rem, 2rem leading): a page's main heading in the reading face.
-- **Title** (system, 600, 1.25rem, 2rem leading): a section's heading.
+- **Title** (system, 600, 1.25rem, 2rem leading): a section's heading, as on You (`section-title`, 1.3 leading there, so a two-line heading stays together).
+- **Code** (the system monospace, 0.85rem): only where text is code to be read as written, as the box Bring in a plan pastes an AI's reply into.
 - **Body** (system, 400, 1rem, 1.45 leading): everything else. Sizes are in rem, so they follow the browser's text size.
 - **Hint** (system, 0.85rem, 1.5 leading, muted): the line or two under a title saying what the page is for (`page-hint`).
 - **Small and caps** (`small-type`, `caps`): anything 0.75rem or under is tracked out a little, and capitals more (0.05 to 0.07em), as they read as a block when set close.

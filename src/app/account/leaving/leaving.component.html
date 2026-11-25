@@ -1,0 +1,98 @@
+<!-- Signed in: Sign out, then Clear this device, then Delete account, rarest last. Each that
+     can't be undone asks in place first, focus going to its warning, and back on Cancel -->
+@if (signedIn()) {
+    <p class="leaving__hint" id="sign-out-hint">
+        Signing out removes your workouts and history from this device. Your account keeps them,
+        ready for when you sign in again.
+    </p>
+    @if (confirmingSignOut()) {
+        <div class="leaving__ask" role="group" aria-labelledby="account-sign-out-warning">
+            <p class="leaving__warning" id="account-sign-out-warning" tabindex="-1">
+                @if (notesKept()) {
+                    Some changes on this device haven't synced, maybe because you're offline.
+                    Signing out removes them from this device, so they'd be lost.
+                } @else {
+                    Your notes aren't kept with your account, so signing out removes them from this
+                    device. To keep them, turn on Keep notes with my account first.
+                }
+            </p>
+            <div class="leaving__actions">
+                <button
+                    type="button"
+                    class="btn-pill btn-pill--danger"
+                    [disabled]="busy()"
+                    (click)="signOut(true)"
+                >
+                    Sign out anyway
+                </button>
+                <button type="button" class="btn-pill" (click)="cancelSignOut()">Cancel</button>
+            </div>
+        </div>
+    } @else {
+        <div class="leaving__actions">
+            <button
+                type="button"
+                class="btn-pill"
+                id="account-sign-out"
+                aria-describedby="sign-out-hint"
+                [disabled]="busy()"
+                (click)="signOut()"
+            >
+                Sign out
+            </button>
+        </div>
+    }
+    <p class="leaving__hint leaving__status" role="status">{{ message() }}</p>
+}
+
+<p class="leaving__hint" [class.leaving__gap]="signedIn()">
+    Done with this device, on a shared computer say? Clear your workouts, history and settings from
+    it.
+    @if (signedIn()) {
+        That signs this device out too; your account keeps what's in it.
+    }
+</p>
+<app-clear-device class="leaving__clear" />
+
+@if (signedIn()) {
+    <p class="leaving__hint leaving__gap" id="delete-hint">
+        Done with Loop Workouts? Delete your account and everything of yours, on the server and on
+        this device.
+    </p>
+    @if (confirmingDelete()) {
+        <div class="leaving__ask" role="group" aria-labelledby="account-delete-warning">
+            <p class="leaving__warning" id="account-delete-warning" tabindex="-1">
+                This deletes your account and everything of yours, on the server and on this device.
+                It can't be undone. To keep a copy, export a backup first.
+            </p>
+            <div class="leaving__actions">
+                <button
+                    type="button"
+                    class="btn-pill btn-pill--danger"
+                    [disabled]="busy()"
+                    (click)="deleteAccount()"
+                >
+                    Delete my account
+                </button>
+                <button type="button" class="btn-pill" (click)="cancelDelete()">Cancel</button>
+            </div>
+        </div>
+    } @else {
+        <div class="leaving__actions">
+            <button
+                type="button"
+                class="btn-pill btn-pill--danger"
+                id="account-delete"
+                aria-describedby="delete-hint"
+                (click)="askToDelete()"
+            >
+                Delete account
+            </button>
+        </div>
+    }
+    @if (deleteFailed()) {
+        <p class="leaving__warning" role="alert">
+            Your account couldn't be deleted. Check your connection and try again.
+        </p>
+    }
+}

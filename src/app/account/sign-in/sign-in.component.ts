@@ -22,6 +22,14 @@ const PROVIDER_NAMES: Record<SignInProvider, string> = { google: 'Google', apple
 /** How long Supabase makes an address wait between sign-in emails, by default. */
 const RESEND_AFTER_MS = 60_000;
 
+/** Something that went wrong, and the part of the form it's shown under. */
+interface Problem {
+    at: 'providers' | 'email' | 'code';
+    text: string;
+    /** The code the server turned down, for a problem with it. */
+    code?: string;
+}
+
 /** Too many sign-in emails, saying how long to wait when Supabase does. */
 function tooManyMessage(wait: number | null): string {
     return wait
@@ -60,8 +68,14 @@ export class SignInComponent {
     protected readonly resendAt = signal(0);
     /** Waiting on the server, so the buttons can't be pressed twice. */
     protected readonly busy = signal(false);
-    /** What the last thing done did, read out as it changes. */
+    /** What it's doing, e.g. "Going to Google…", read out as it changes. */
     protected readonly message = signal('');
+    /**
+     * What went wrong, shown in red under the part it's about: the Google and Apple buttons,
+     * the email, or the code. One about a code the server turned down keeps that `code`, and
+     * goes once it's changed.
+     */
+    private readonly problem = signal<Problem | null>(null);
 
     private readonly emailModel = signal({ email: '' });
     protected readonly emailForm = form(this.emailModel, (fields) => {
@@ -76,7 +90,7 @@ export class SignInComponent {
     /** The email field's error, then why sign in, of those there are. */
     protected readonly emailDescribedBy = computed(
         () =>
-            [this.emailError() && 'account-email-error', this.intro() && 'account-why']
+            [this.emailMessage() && 'account-email-error', this.intro() && 'account-why']
                 .filter(Boolean)
                 .join(' ') || null
     );
@@ -91,6 +105,19 @@ export class SignInComponent {
     });
     protected readonly codeError = computed(() =>
         this.codeForm.code().touched() ? this.codeForm.code().errors().at(0)?.message : undefined
+    );
+
+    /** Under the code: its own error, else why the server turned it down or no code came. */
+    protected readonly codeMessage = computed(() => this.codeError() ?? this.problemAt('code'));
+    /** The code's boxes are marked wrong: it isn't 6 digits, or it's the one turned down. */
+    protected readonly codeInvalid = computed(
+        () => !!this.codeError() || this.problem()?.code === this.codeModel().code
+    );
+    /** Under the email: its own error, else why the email couldn't be sent. */
+    protected readonly emailMessage = computed(() => this.emailError() ?? this.problemAt('email'));
+    /** Under Google and Apple: why going there failed, or why coming back didn't sign in. */
+    protected readonly providerProblem = computed(
+        () => this.account.signInProblem() ?? this.problemAt('providers')
     );
 
     private readonly codeInput = viewChild(CodeInputComponent);
@@ -113,6 +140,17 @@ export class SignInComponent {
         inject(DestroyRef).onDestroy(() => view?.removeEventListener('pageshow', shown));
     }
 
+    /** The problem shown at `at`, if there is one; one about a code goes once it's changed. */
+    private problemAt(at: Problem['at']): string | undefined {
+        const problem = this.problem();
+        if (problem?.at !== at) {
+            return undefined;
+        }
+        return problem.code === undefined || problem.code === this.codeModel().code
+            ? problem.text
+            : undefined;
+    }
+
     /** Whether `provider` is offered, being set up in Supabase (SIGN_IN_PROVIDERS). */
     protected offers(provider: SignInProvider): boolean {
         return SIGN_IN_PROVIDERS.includes(provider);
@@ -123,11 +161,17 @@ export class SignInComponent {
         const name = PROVIDER_NAMES[provider];
         this.busy.set(true);
         this.leavingFor = name;
+        this.problem.set(null);
+        this.account.signInProblem.set(null);
         this.message.set(`Going to ${name}…`);
         if (!(await this.account.signInWith(provider))) {
             this.leavingFor = null;
             this.busy.set(false);
-            this.message.set(`Couldn't reach ${name}. Check your connection and try again.`);
+            this.message.set('');
+            this.problem.set({
+                at: 'providers',
+                text: `Couldn't reach ${name}. Check your connection and try again.`,
+            });
         }
     }
 
@@ -144,6 +188,7 @@ export class SignInComponent {
         }
         const address = this.emailModel().email.trim();
         this.busy.set(true);
+        this.problem.set(null);
         const result = await this.account.sendCode(address);
         this.busy.set(false);
         if (result.status === 'sent') {
@@ -153,7 +198,7 @@ export class SignInComponent {
             this.resendAt.set(Date.now() + RESEND_AFTER_MS);
             this.focus('account-sent');
         } else {
-            this.showNotSent(result);
+            this.showNotSent(result, 'email');
         }
     }
 
@@ -164,6 +209,8 @@ export class SignInComponent {
             return;
         }
         this.busy.set(true);
+        this.problem.set(null);
+        this.message.set('');
         const result = await this.account.sendCode(address);
         this.busy.set(false);
         // Focus goes back to the code either way, as this button's off while it waits
@@ -174,21 +221,23 @@ export class SignInComponent {
             // The emptied code's first box, once it's shown empty
             this.focus('account-code');
         } else {
-            this.showNotSent(result);
+            this.showNotSent(result, 'code');
             this.codeInput()?.focus();
         }
     }
 
     /** Why the email wasn't sent; if Supabase says how long to wait, Send another code waits too. */
-    private showNotSent(result: Exclude<SendResult, { status: 'sent' }>) {
-        if (result.status === 'too-many') {
-            if (result.wait) {
-                this.resendAt.set(Date.now() + result.wait * 1000);
-            }
-            this.message.set(tooManyMessage(result.wait));
-        } else {
-            this.message.set("The email couldn't be sent. Check your connection and try again.");
+    private showNotSent(result: Exclude<SendResult, { status: 'sent' }>, at: Problem['at']) {
+        if (result.status === 'too-many' && result.wait) {
+            this.resendAt.set(Date.now() + result.wait * 1000);
         }
+        this.problem.set({
+            at,
+            text:
+                result.status === 'too-many'
+                    ? tooManyMessage(result.wait)
+                    : "The email couldn't be sent. Check your connection and try again.",
+        });
     }
 
     /** Signs in with the code: on Sign in, or as soon as its last digit is entered. */
@@ -205,15 +254,20 @@ export class SignInComponent {
             this.codeInput()?.focus();
             return;
         }
+        const code = this.codeModel().code;
         this.busy.set(true);
-        const signedIn = await this.account.enterCode(address, this.codeModel().code);
+        this.problem.set(null);
+        this.message.set('');
+        const signedIn = await this.account.enterCode(address, code);
         this.busy.set(false);
         if (signedIn) {
             this.signedIn.emit();
         } else {
-            this.message.set(
-                "That code didn't work: it may be wrong, or expired. Check it, or send another code."
-            );
+            this.problem.set({
+                at: 'code',
+                code,
+                text: "That code didn't work: it may be wrong, or expired. Check it, or send another code.",
+            });
         }
     }
 
@@ -221,6 +275,7 @@ export class SignInComponent {
     protected useAnotherEmail() {
         this.sentTo.set(null);
         this.message.set('');
+        this.problem.set(null);
         this.codeModel.set({ code: '' });
         this.focus('account-email');
     }

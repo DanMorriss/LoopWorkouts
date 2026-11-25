@@ -306,7 +306,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'ai-import',
                 question: 'Can I bring in a plan from a coach, a book or a spreadsheet?',
                 answer: [
-                    'Yes. On You, under Your data, press Copy AI prompt, and paste it into an AI chat with your plan. Copy what it writes, then press Paste plan and paste it there. A file it writes goes in with Import backup.',
+                    'Yes. On You, under Your data, press Bring in a plan. Copy the prompt it gives you, and paste it into an AI chat with your plan. Copy what it writes, and paste it in step 2. A file it writes goes in with Import backup.',
                 ],
                 link: { label: 'Go to You', url: '/account' },
             },

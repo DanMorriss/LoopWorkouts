@@ -9,8 +9,8 @@ import { IconComponent } from '../../shared/components/icon/icon.component';
 import { missedToDoToday, weekdayOf } from '../../models/plan';
 import { SettingsStore } from '../../shared/state/settings-store.service';
 import { WorkoutStore } from '../../shared/state/workout-store.service';
-import { WEEK_EDIT_ID } from '../use-plan-on-today';
-import { PlansForYouComponent } from '../plans-for-you/plans-for-you.component';
+import { PlansForYouComponent } from '../../plan/plans-for-you/plans-for-you.component';
+import { injectUsePlanOnToday, WEEK_EDIT_ID } from '../use-plan-on-today';
 import { DayPanelComponent, dayDoTodayId, dayStartId } from './day-panel.component';
 import { WeekDaysComponent } from '../../shared/components/week-days/week-days.component';
 import { WeekWorkout, weekDays, weekTally } from '../../shared/components/week-days/week-view';
@@ -59,13 +59,15 @@ import { WeekWorkout, weekDays, weekTally } from '../../shared/components/week-d
                 <!-- Weeks ready-made for your goal and equipment (PLN-6), used in one tap,
                      as the main way; or the other plans, or planning your own workouts -->
                 <p class="week__empty">{{ emptyLead() }}</p>
-                <app-plans-for-you [plans]="suggestedPlans()" />
+                <app-plans-for-you [plans]="suggestedPlans()" (used)="usePlan($event)" />
             }
         </section>
     `,
     styleUrl: './week-strip.component.scss',
 })
 export class WeekStripComponent {
+    /** Uses a plan offered with nothing planned, with Undo; the week then takes its place. */
+    protected readonly usePlan = injectUsePlanOnToday();
     private readonly workouts = inject(WorkoutStore);
     protected readonly slide = inject(PageSlide);
     private readonly settings = inject(SettingsStore);

@@ -2,7 +2,8 @@ import { Component, computed, inject } from '@angular/core';
 import { plansForYou } from '../../models/built-in-plans';
 import { HistoryStore } from '../../shared/state/history-store.service';
 import { SettingsStore } from '../../shared/state/settings-store.service';
-import { PlansForYouComponent } from '../plans-for-you/plans-for-you.component';
+import { PlansForYouComponent } from '../../plan/plans-for-you/plans-for-you.component';
+import { injectUsePlanOnToday } from '../use-plan-on-today';
 
 /**
  * Today with no workouts yet (NAV-6): a week to start with, planned for you (PLN-7); "Plan
@@ -19,12 +20,14 @@ import { PlansForYouComponent } from '../plans-for-you/plans-for-you.component';
         <section class="start" aria-labelledby="get-started-title">
             <h3 class="start__label" id="get-started-title">{{ title() }}</h3>
             <p class="start__lead">{{ lead() }}</p>
-            <app-plans-for-you [plans]="plans()" />
+            <app-plans-for-you [plans]="plans()" (used)="usePlan($event)" />
         </section>
     `,
     styleUrl: './get-started.component.scss',
 })
 export class GetStartedComponent {
+    /** Uses a plan offered, with Undo; the week then takes Get started's place. */
+    protected readonly usePlan = injectUsePlanOnToday();
     private readonly settings = inject(SettingsStore);
     private readonly history = inject(HistoryStore);
 

@@ -1,7 +1,13 @@
 @use 'type' as *;
+@use 'panel-card' as *;
 
 :host {
     display: block;
+}
+
+// A card, as Today's offer of the same weeks is, its plans flat inside it
+.start {
+    @include panel-card;
 }
 
 .start__title {
@@ -15,11 +21,7 @@
     @include page-hint;
 }
 
-.start__all {
-    margin-top: 0.75rem;
-}
-
-// Over the week, which is the other way in
+// Under the plans, over the week, which is the other way in
 .start__own {
     margin: 1.25rem 0 0.5rem;
     color: var(--text-muted);

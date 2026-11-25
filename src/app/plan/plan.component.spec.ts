@@ -622,9 +622,11 @@ describe('PlanComponent', () => {
         const start = el().querySelector('app-plan-start')!;
         expect(text(start.querySelector('.start__title')!)).toBe('Start with a ready-made week');
         expect(start.querySelector('app-plan-card')).not.toBeNull();
-        const all = start.querySelector('.start__all')!;
-        expect(text(all)).toBe('All ready-made plans');
+        // Swiped between, as on Today; All plans comes back here, and no Make your own plan
+        expect(start.querySelector('app-plans-for-you app-carousel')).not.toBeNull();
+        const all = [...start.querySelectorAll('a')].find((a) => text(a) === 'All plans')!;
         expect(all.getAttribute('href')).toBe('/ready-made-plans?from=plan');
+        expect([...start.querySelectorAll('a')].map(text)).not.toContain('Make your own plan');
         expect(el().querySelector('.plan__ready-made')).toBeNull();
 
         start.querySelector<HTMLButtonElement>('app-plan-card .btn-main')!.click();

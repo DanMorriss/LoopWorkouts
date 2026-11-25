@@ -62,7 +62,7 @@ interface ChartPoint {
 
 /**
  * An exercise's progress (PRG-4): its personal bests, a chart of one value per workout over
- * time, and its recent sessions, each linking to its workout in the history. The chart's
+ * time, and its recent workouts, each linking to its workout in the history. The chart's
  * values can be read by hovering, by stepping through them with the arrow keys, or in a
  * table swiped to beside it.
  */

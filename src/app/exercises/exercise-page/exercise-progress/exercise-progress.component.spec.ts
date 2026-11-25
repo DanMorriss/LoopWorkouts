@@ -200,7 +200,7 @@ describe('ExerciseProgressComponent', () => {
         expect(el().querySelector('.progress__subheading')!.textContent).toContain('Longest set');
     });
 
-    it('lists recent sessions, newest first, each linked to its workout in the history', async () => {
+    it('lists recent workouts, newest first, each linked to its workout in the history', async () => {
         for (let day = 1; day <= 7; day++) {
             logged(day, [squat(5, 60 + day)], `Day ${day}`);
         }

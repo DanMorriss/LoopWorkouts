@@ -7,7 +7,7 @@ Built: last time on each rep step (PRG-1), personal bests and last time on the w
 - **PRG-1** As a user, mid-workout, I want to see what I did last time on each rep step, so I know what to beat.
 - **PRG-2** As a user I want to be told when I've set a personal best, when the workout finishes.
 - **PRG-3** As a user I want a list of my exercises, each with its latest and best.
-- **PRG-4** As a user I want a page per exercise with a chart over time, its bests and its recent sessions.
+- **PRG-4** As a user I want a page per exercise with a chart over time, its bests and its recent workouts.
 - **PRG-5** As a user I want the app to suggest the next weight to try, based on how my last sessions went.
 - **PRG-6** As a user I want to see which muscles I've worked this week, on the body map, so I can spot what I'm missing.
 - **PRG-7** As a user I want to be told when I've done more rounds than ever in a workout with a time limit, so I know I'm getting fitter.
@@ -63,7 +63,7 @@ At the end of the page, after How to do it and Tips (since 2026-11-17; it was un
     - The value axis runs between round numbers (whole reps, halves of a kg or lb, round seconds) and never below 0. Dates at each end of the time axis.
     - **Reading it**: hovering snaps to the nearest workout and shows its value, date and workout. With the keyboard, the chart takes focus, starts on the latest workout, and the left and right arrows (and Home and End) step through them; screen readers hear each, e.g. "90 kg, 21 October 2026, Legs".
     - **The table**, swiped to from the chart (since 2026-11-19), as the time per week's is: the chart and a table of the same points in range (date, workout and value) are two slides, with a dot for each under them ("Chart 1 of 2", "Table 2 of 2", the one shown marked) that goes to it. The section is as tall as the slide in view. A finger dragged across the chart swipes to the table; a tap still shows the workout under it. From 2026-11-08 a **Show as a table** link by the chart's title swapped the table in place of the chart (and before that it was under the chart and added the table below it).
-- **Recent sessions**, newest first: the 5 latest, then "Show all N". Each has its date and workout, linking to it in the history (`/history?run=<id>`), and its sets as the history writes them.
+- **Recent workouts** ("Recent sessions" until 2026-11-25: PRODUCT.md keeps "session" out of what the app says), newest first: the 5 latest, then "Show all N". Each has its date and workout, linking to it in the history (`/history?run=<id>`), and its sets as the history writes them.
 - Weights are in the unit chosen in You → Profile.
 
 ### Mid-workout: last time (PRG-1)

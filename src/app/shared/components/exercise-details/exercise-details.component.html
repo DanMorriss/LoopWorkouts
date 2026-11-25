@@ -15,7 +15,7 @@
             @for (phrase of equipment(); track phrase) {
                 <li class="exercise__chip">{{ phrase }}</li>
             }
-            <li class="exercise__chip exercise__chip--measured">
+            <li class="exercise__chip">
                 {{ shown.measuredBy === 'reps' ? 'Reps' : 'Timed' }}
             </li>
             @if (!builtIn()) {

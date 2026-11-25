@@ -149,7 +149,7 @@ test.describe("an exercise's progress", () => {
             await expect(progress.getByRole('table').getByRole('row')).toHaveCount(3);
 
             const sessions = progress
-                .getByRole('list', { name: 'Recent sessions' })
+                .getByRole('list', { name: 'Recent workouts' })
                 .getByRole('link');
             await expect(sessions).toHaveCount(5);
             await progress.getByRole('button', { name: 'Show all 7' }).click();

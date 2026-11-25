@@ -1,5 +1,3 @@
-@use 'type' as *;
-
 :host {
     display: block;
 }
@@ -23,7 +21,7 @@
 
     dt {
         color: var(--text-muted);
-        @include small-type(0.72rem);
+        font-size: 0.8rem;
     }
 
     dd {
@@ -36,12 +34,12 @@
 
 .best__value {
     color: var(--text-strong);
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
 .best__when {
     color: var(--text-muted);
-    @include small-type(0.72rem);
+    font-size: 0.8rem;
 }

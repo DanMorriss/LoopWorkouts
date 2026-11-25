@@ -338,7 +338,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
                 id: 'bests',
                 question: 'Where can I see my best lifts?',
                 answer: [
-                    "Each exercise's page, in Exercises, shows your bests, a chart and your recent sessions. New personal bests show on the summary when you finish a workout.",
+                    "Each exercise's page, in Exercises, shows your bests, a chart and your recent workouts. New personal bests show on the summary when you finish a workout.",
                 ],
                 link: { label: 'Go to Exercises', url: '/exercises' },
             },

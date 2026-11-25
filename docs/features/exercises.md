@@ -95,7 +95,7 @@ At `/exercises/<name>` for a built-in exercise (e.g. `/exercises/back-squat`, it
 - **Add to workout** (EXR-12; see below), then **Add note** / **Edit note** (built-in) or **Edit** (your own), opening the exercise dialog. Focus goes back to it when the dialog closes.
 - **Muscles worked**: listed as Main and Supporting. The demo's figure shades them, so the body map's figure only shows when there's no demo (your own exercises; since 2026-11-17).
 - **How to do it**: the numbered steps, and **Tips**, each when it has any. Your own with neither says "No how-to steps or tips yet. Add them with Edit."
-- **Progress** (PRG-4): bests, a chart and recent sessions, at the end, after how to do it (since 2026-11-17; it was under the muscles), as the same details open mid-workout, where how to do it comes first; see [progress](progress.md).
+- **Progress** (PRG-4): bests, a chart and recent workouts, at the end, after how to do it (since 2026-11-17; it was under the muscles), as the same details open mid-workout, where how to do it comes first; see [progress](progress.md).
 - **Last time and best**, under the name once it's been done (since 2026-11-25): "Last time 8, 8, 7 @ 20 kg · 24 Nov" and "Best 20 kg", as its card on the list says them (PRG-3), with **Your progress**, which goes down to the Progress section and puts focus on its heading. So at rest, what to beat is the first thing on the page, while the details mid-workout (RUN-9) keep how to do it first. Nothing before it's been done.
 - **Hide from the picker** / **Show in the picker**, and **Delete** on your own (see below).
 

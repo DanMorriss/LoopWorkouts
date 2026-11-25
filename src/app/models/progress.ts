@@ -62,7 +62,7 @@ export function isMostRounds(entry: HistoryEntry, history: readonly HistoryEntry
     return earlier.length > 0 && earlier.every((other) => compareScores(score, other) > 0);
 }
 
-/** One workout's sets of one exercise (PRG-4's recent sessions, and a point on its chart). */
+/** One workout's sets of one exercise (PRG-4's recent workouts, and a point on its chart). */
 export interface ExerciseSession {
     /** The history entry it's from. */
     entryId: string;

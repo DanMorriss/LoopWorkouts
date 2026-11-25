@@ -263,11 +263,11 @@ test.describe("the week's exercises", () => {
             await expect(rows.nth(2)).toContainText('Plank');
             await expect(rows.nth(2)).toContainText('1 minute in 1 set');
 
-            // The new bests over them, a tile each; a first time sets none
+            // The new bests over them, a tile each, one where the heaviest is the most reps; a
+            // first time sets none
             const bests = week.getByRole('group', { name: 'New bests' });
             await expect(bests.getByRole('link')).toHaveText([
-                /New best, heaviest: 62.5 kg for 10 reps, Back squat/,
-                /New best, most reps: 10 reps at 62.5 kg, Back squat/,
+                /New best, heaviest and most reps: 62.5 kg for 10 reps, Back squat/,
                 /New best, longest: 1 minute, Plank/,
             ]);
 
